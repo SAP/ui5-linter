@@ -1,0 +1,8 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:dt="sap.ui.dt"
+	xmlns:build="sap.build">
+	<SomeControl dt:designtime="<path>/<name>.designtime" />
+	<SomeOtherControl build:metadata="#pattern:GenericCard;prop:text:Title" />
+</core:FragmentDefinition>

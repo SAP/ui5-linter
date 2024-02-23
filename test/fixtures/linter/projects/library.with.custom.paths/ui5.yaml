@@ -1,0 +1,14 @@
+specVersion: "3.2"
+type: library
+metadata:
+  name: library.with.custom.paths
+resources:
+  configuration:
+    paths:
+      src: "src/main/js"
+      test: "src/test/js"
+framework:
+  name: OpenUI5
+  version: "1.120.6"
+  libraries:
+    - name: sap.ui.core

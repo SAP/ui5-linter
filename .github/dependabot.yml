@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  commit-message:
+    prefix: "ci(github-actions)"
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: sunday
+    time: "10:00"
+    timezone: Etc/UCT
+  reviewers:
+  - "SAP/ui5-foundation"
+  versioning-strategy: increase
+  commit-message:
+    prefix: "deps"
+    prefix-development: "build(deps-dev)"

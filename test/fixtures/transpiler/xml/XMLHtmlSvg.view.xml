@@ -1,0 +1,13 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+>
+	<-- HTML in UI5 XML is deprecated -->
+	<html:button>I am native HTML Button.</html:button>
+	<-- SVG in UI5 XML is deprecated -->
+	<svg width="100px" height="100px"  xmlns="http://www.w3.org/2000/svg">
+		<g>
+			<text x="40" y="40">I am native SVG</text>
+		</g>
+	</svg>
+</mvc:View>

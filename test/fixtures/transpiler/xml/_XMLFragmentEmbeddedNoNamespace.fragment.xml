@@ -1,0 +1,5 @@
+<!-- This fragment is intended to be embedded in a Table control declaration -->
+<!-- TODO: Produce warning, stating analysis is not possible without namespace declarations -->
+<table:plugins> <!-- Aggregation "plugins" is deprecated -->
+		<tablePlugins:MultiSelectionPlugin />
+</table:plugins>

@@ -1,0 +1,5 @@
+<!-- This fragment is intended to be embedded in a Table control declaration -->
+<table:plugins xmlns:table="sap.ui.table" xmlns:tablePlugins="sap.ui.table.plugins"
+	> <!-- Aggregation "plugins" is deprecated -->
+		<tablePlugins:MultiSelectionPlugin />
+</table:plugins>

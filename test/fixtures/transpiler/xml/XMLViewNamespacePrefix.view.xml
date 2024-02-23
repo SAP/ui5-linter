@@ -1,0 +1,10 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns:ui="sap.ui"
+>
+	<ui:table.Table groupBy="some-column"> <!-- Association "groupBy" is deprecated -->
+			<ui:table.plugins> <!-- Aggregation "plugins" is deprecated -->
+					<ui:table.plugins.MultiSelectionPlugin />
+			</ui:table.plugins>
+	</ui:table.Table>
+
+</mvc:View>

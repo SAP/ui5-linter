@@ -1,0 +1,9 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.my.lib"
+>
+
+	<MyControl>
+		<MyOtherControl />
+	</MyControl>
+
+</mvc:View>

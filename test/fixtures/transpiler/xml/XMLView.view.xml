@@ -1,0 +1,21 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:table="sap.ui.table"
+	xmlns:tablePlugins="sap.ui.table.plugins"
+>
+
+	<DateTimeInput /> <!-- DateTimeInput is deprecated -->
+
+	<Button blocked="true" /> <!-- Property "blocked" is deprecated -->
+
+	<table:Table groupBy="some-column"> <!-- Association "groupBy" is deprecated -->
+			<table:plugins> <!-- Aggregation "plugins" is deprecated -->
+					<tablePlugins:MultiSelectionPlugin />
+			</table:plugins>
+	</table:Table>
+
+	<SegmentedButton> <!-- Default aggregation "buttons" is deprecated -->
+		<Button tap=".onButtonTap"/> <!-- Event "tap" is deprecated -->
+	</SegmentedButton>
+
+</mvc:View>

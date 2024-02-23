@@ -1,0 +1,12 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	core:require="{
+		Helper: 'sap/ui/demo/todo/util/Helper',
+		Box: 'sap/m/MessageBox',
+		Message: 'sap/ui/core/Message'
+	}"
+> <!-- sap/ui/core/Message is deprecated -->
+	<Label text="{path: 'badge>SecondaryInfo/Label', formatter: 'Helper.format'}"/>
+	<Button text="Press Me!" press="Box.show('Hello!', {verticalScrolling: true})"/> <!-- TODO detect: verticalScrolling property is deprecated -->
+</mvc:View>

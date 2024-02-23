@@ -1,0 +1,17 @@
+{
+  "licenses": {
+    "spdx": [
+      "CC-BY-3.0",
+      "CC-BY-4.0",
+      "BSD"
+    ],
+    "blueOak": "bronze"
+  },
+  "packages": {
+    "@sapui5/types": "^1.120.4",
+    "callsite": "1.0.0",
+    "yesno": "0.4.0",
+    "deep-freeze-strict": "1.1.1"
+  },
+  "corrections": true
+}

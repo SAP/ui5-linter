@@ -1,0 +1,121 @@
+import anyTest, { TestFn } from "ava";
+import sinon, { SinonStub } from "sinon";
+import yargs from "yargs";
+import esmock, { MockFunction } from "esmock";
+import {fileURLToPath} from "node:url";
+import {readFileSync} from "node:fs";
+
+const test = anyTest as TestFn<{
+	argvGetter: SinonStub,
+	yargsInstance: yargs.Argv & {
+		parserConfiguration: SinonStub,
+		version: SinonStub,
+		scriptName: SinonStub,
+		command: SinonStub,
+		terminalWidth: SinonStub,
+		wrap: SinonStub,
+		argv: () => unknown
+	},
+	yargs: SinonStub,
+	setVersion: SinonStub,
+	cliBase: SinonStub,
+	readdir: SinonStub,
+	cli: MockFunction
+}>;
+
+const pkgJsonPath = new URL("../../package.json", import.meta.url);
+const pkg = JSON.parse(<string><unknown>readFileSync(pkgJsonPath));
+
+test.beforeEach(async (t) => {
+	t.context.argvGetter = sinon.stub();
+	t.context.yargsInstance = {
+		parserConfiguration: sinon.stub(),
+		version: sinon.stub(),
+		scriptName: sinon.stub(),
+		command: sinon.stub(),
+		terminalWidth: sinon.stub().returns(123),
+		wrap: sinon.stub(),
+		get argv() {
+			t.context.argvGetter();
+			return undefined;
+		}
+	};
+
+	t.context.yargs = sinon.stub().returns(t.context.yargsInstance).named("yargs");
+
+	t.context.setVersion = sinon.stub().named("setVersion");
+	t.context.cliBase = sinon.stub().named("cliBase");
+
+	t.context.cli = await esmock.p("../../src/cli.js", {
+		"yargs": t.context.yargs,
+		"../../src/cli/version.js": {
+			setVersion: t.context.setVersion
+		},
+		"../../src/cli/base.js": t.context.cliBase,
+		"module": {
+			createRequire: sinon.stub().callsFake(() => sinon.stub().returns(pkg))
+		},
+	});
+});
+
+test.afterEach.always((t) => {
+	sinon.restore();
+	esmock.purge(t.context.cli);
+	// process.env.NODE_ENV = t.context.originalNodeEnv;
+});
+
+test.serial("CLI", async (t) => {
+	const {
+		cli, argvGetter, yargsInstance, yargs,
+		setVersion, cliBase
+	} = t.context;
+
+	await cli();
+
+	t.is(yargs.callCount, 1);
+	t.deepEqual(yargs.getCall(0).args, [[]]);
+
+	t.is(yargsInstance.parserConfiguration.callCount, 1);
+	t.deepEqual(yargsInstance.parserConfiguration.getCall(0).args, [{
+		"parse-numbers": false
+	}]);
+
+	t.is(setVersion.callCount, 1);
+	t.deepEqual(setVersion.getCall(0).args, [
+		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`
+	]);
+
+	t.is(yargsInstance.version.callCount, 1);
+	t.deepEqual(yargsInstance.version.getCall(0).args, [
+		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`
+	]);
+
+	t.is(yargsInstance.scriptName.callCount, 1);
+	t.deepEqual(yargsInstance.scriptName.getCall(0).args, ["ui5lint"]);
+
+	t.is(cliBase.callCount, 1);
+	t.deepEqual(cliBase.getCall(0).args, [yargsInstance]);
+
+	t.is(yargsInstance.command.callCount, 0);
+
+	t.is(yargsInstance.terminalWidth.callCount, 1);
+	t.deepEqual(yargsInstance.terminalWidth.getCall(0).args, []);
+
+	t.is(yargsInstance.wrap.callCount, 1);
+	t.deepEqual(yargsInstance.wrap.getCall(0).args, [123]);
+
+	t.is(argvGetter.callCount, 1);
+	t.deepEqual(argvGetter.getCall(0).args, []);
+
+	sinon.assert.callOrder(
+		yargs,
+		yargsInstance.parserConfiguration,
+		setVersion,
+		yargsInstance.version,
+		yargsInstance.scriptName,
+		cliBase,
+		yargsInstance.terminalWidth,
+		yargsInstance.wrap,
+		argvGetter
+	);
+});

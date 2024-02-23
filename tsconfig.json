@@ -1,0 +1,18 @@
+{
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"outDir": "./lib",
+		"moduleResolution": "node16",
+		"module": "node16",
+		"target": "es2022",
+		"lib": ["ES2022"],
+		"skipLibCheck": true,
+		"strict": true,
+		"sourceMap": true,
+		"allowJs": true, // required for JSTokenizer
+	},
+	"typeAcquisition": {
+		// Ignore UI5 types, they are only required for linting
+		"exclude": ["@sapui5/types"]
+	}
+}

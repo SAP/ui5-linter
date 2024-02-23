@@ -1,0 +1,15 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:macrodata="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+	<!-- Custom data attributes shall be treated correctly -->
+	<Button
+		icon="{contact>/teamsCollabOptions/0/icon}"
+		tooltip="{contact>/teamsCollabOptions/0/tooltip}"
+		macrodata:type="{contact>/teamsCollabOptions/0/key}"
+		macrodata:email="{contact>/email}"
+		press=".onTeamsCollabOptionPress"
+		class="sapUiSmallMarginEnd"
+		type="Transparent">
+	</Button>
+
+</mvc:View>

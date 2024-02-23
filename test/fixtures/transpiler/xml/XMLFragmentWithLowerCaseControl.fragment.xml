@@ -1,0 +1,5 @@
+<layout:HorizontalLayout xmlns:layout="sap.ui.layout" xmlns:m="sap.m" xmlns:ui="sap.ui" xmlns=".">
+	<m:button id="btnInXmlFragment" text="Press me" />
+	<ui:core.Icon src="sap-icon://search" /> <!-- Should not cause an issue -->
+	<sap.m.Button id="btnInXmlFragment2" text="Press me" />
+</layout:HorizontalLayout>

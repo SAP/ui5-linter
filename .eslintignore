@@ -1,0 +1,12 @@
+# /node_modules/* and /bower_components/* ignored by default
+
+# Exclude coverage folder
+coverage/
+
+# Exclude test files
+test/tmp/
+test/projects/
+test/fixtures/
+
+# Exclude generated code
+/lib/
