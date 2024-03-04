@@ -26,7 +26,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 
 			jQuery.ajax(); // ERROR: Global third-party variable "jQuery"
 			jQuery("#foo"); // ERROR: Global third-party variable "jQuery"
-			jQuery.sap.require(); // ERROR: Global variable "jQuery.sap"
+			jQuery.sap.require(); // ERROR: Global + deprecated variable "jQuery.sap"
 
 			QUnit.test(); // OK: Global third-party variable "QUnit"
 			sinon.stub(); // OK: Global third-party variable "sinon"
