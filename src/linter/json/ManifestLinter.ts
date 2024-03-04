@@ -17,7 +17,30 @@ interface locType {
 	pos: number;
 }
 
+const deprecatedLibraries: Array<string> = [
+	"sap.ca.scfld.md",
+	"sap.ca.ui",
+	"sap.dragonfly",
+	"sap.landviz",
+	"sap.makit",
+	"sap.me",
+	"sap.ui.commons",
+	"sap.ui.suite",
+	"sap.ui.ux3",
+	"sap.ui.vtm",
+	"sap.uiext.inbox",
+	"sap.webanalytics.core",
+	"sap.zen.dsh",
+	"sap.zen.commons",
+	"sap.zen.crosstab",
+];
+
+const deprecatedComponents: Array<string> = [
+	"sap.zen.dsh.fioriwrapper",
+];
+
 export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
+
 
 export interface jsonSourceMapType {
 	data: SAPJSONSchemaForWebApplicationManifestFile;
@@ -50,8 +73,34 @@ export default class ManifestLinter {
 	}
 
 	#analyzeManifest(manifest: SAPJSONSchemaForWebApplicationManifestFile) {
-		const {resources, models} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
+		const {resources, models, dependencies} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
 		const {dataSources} = (manifest["sap.app"] ?? {} as JSONSchemaForSAPAPPNamespace);
+		
+		// Detect deprecated libraries:
+		const libKeys: string[] = (dependencies?.libs && Object.keys(dependencies.libs)) || [];
+		libKeys.forEach((libKey: string) => {
+			if (deprecatedLibraries.includes(libKey)) {
+				this.#reporter?.addMessage({
+					node: `/sap.ui5/dependencies/libs/${libKey}`,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-deprecated-library",
+					message: `Use of deprecated library '${libKey}'`,
+				});
+			}
+		});
+
+		// Detect deprecated components:
+		const componentKeys: string[] = (dependencies?.components && Object.keys(dependencies.components)) || [];
+		componentKeys.forEach((componentKey: string) => {
+			if (deprecatedComponents.includes(componentKey)) {
+				this.#reporter?.addMessage({
+					node: `/sap.ui5/dependencies/components/${componentKey}`,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-deprecated-component",
+					message: `Use of deprecated component '${componentKey}'`,
+				});
+			}
+		});
 
 		if (resources?.js) {
 			this.#reporter?.addMessage({
