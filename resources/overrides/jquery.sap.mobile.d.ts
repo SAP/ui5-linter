@@ -11,7 +11,3 @@ interface JQueryStatic {
 	 */
 	device: object;
 }
-
-declare module "jquery.sap.mobile" {
-	export default jQuery;
-}

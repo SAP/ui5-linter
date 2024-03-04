@@ -229,15 +229,32 @@ export default class FileLinter {
 
 		const symbol = this.isDeprecatedAccess(node);
 		if (symbol) {
-			this.#reporter.addMessage({
-				node,
-				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-deprecated-property",
-				message:
-					`Access of deprecated property ` +
-					`'${symbol.escapedName as string}'`,
-				messageDetails: this.extractDeprecatedMessage(symbol),
-			});
+			const messageDetails = this.extractDeprecatedMessage(symbol);
+			if (this.isSymbolOfJquerySapType(symbol)) {
+				let namespace;
+				if (ts.isPropertyAccessExpression(node)) {
+					namespace = this.extractNamespace(node);
+				}
+				this.#reporter.addMessage({
+					node,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-deprecated-api",
+					message:
+						`Use of deprecated API ` +
+						`'${namespace ?? "jQuery.sap"}'`,
+					messageDetails,
+				});
+			} else {
+				this.#reporter.addMessage({
+					node,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-deprecated-property",
+					message:
+						`Access of deprecated property ` +
+						`'${symbol.escapedName as string}'`,
+					messageDetails,
+				});
+			}
 		}
 	}
 
@@ -370,6 +387,10 @@ export default class FileLinter {
 			}
 		}
 		return false;
+	}
+
+	isSymbolOfJquerySapType(symbol: ts.Symbol) {
+		return symbol.valueDeclaration?.getSourceFile().fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
 	}
 
 	findClassOrInterface(node: ts.Node): ts.Type | undefined {
