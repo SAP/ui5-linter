@@ -42,7 +42,6 @@ export class Text {
 			totalWarningCount += warningCount;
 			totalFatalErrorCount += fatalErrorCount;
 
-			// this.#writeln(chalk.inverse(filePath));
 			this.#writeln(chalk.inverse(path.resolve(process.cwd(), filePath)));
 
 			// Group messages by rule
@@ -76,13 +75,16 @@ export class Text {
 				if (messages) {
 					this.#writeln(chalk.bold(`  ${chalk.dim("0:0")} ${ruleId} (${messages.length})`));
 					messages.forEach((msg) => {
-						const messageDetails = (showDetails && msg.messageDetails) ?
-								(`\n      ${chalk.white.bold("Details:")}\n      ` +
-								`${chalk.italic(msg.messageDetails.replaceAll("\n", "\n      "))}`) :
+						const formattedLocation = 
+							formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength);
+
+						const messageDetails = (showDetails && msg.messageDetails) ? 
+							(`\n      ${formattedLocation} ${chalk.white.bold("Details:")} ` +
+							`${chalk.italic(msg.messageDetails.replaceAll("\n", `\n      ${formattedLocation} `))}`) : 
 							"";
 
 						this.#writeln(
-							`    ${formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength)} ` +
+							`    ${formattedLocation} ` +
 							`${formatSeverity(msg.severity)} ` +
 							`${msg.message}` +
 							`${messageDetails}`);
