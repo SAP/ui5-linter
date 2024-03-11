@@ -1,7 +1,7 @@
 {
-	"name": "@sap/ui5-linter",
+	"name": "@ui5/linter",
 	"version": "0.0.1",
-	"description": "Work in Progress",
+	"description": "A static code analysis tool for UI5",
 	"author": {
 		"name": "SAP SE",
 		"email": "openui5@sap.com",
