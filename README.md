@@ -15,7 +15,7 @@
 UI5 linter is a static code analysis tool for UI5 projects.
 It checks JavaScript, XML, JSON, and other files in your project and reports findings.
 
-Currently, it identifies deprecated API usage, global variables, and more to prepare your project for [UI5 2.0](https://community.sap.com/t5/open-source-blogs/introducing-openui5-2-x/ba-p/13580633).
+Currently, it identifies deprecated API usage, global variables, and more to prepare your project for [UI5 2.x](https://community.sap.com/t5/open-source-blogs/introducing-openui5-2-x/ba-p/13580633).
 
 ## Requirements
 
