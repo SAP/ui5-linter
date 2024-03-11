@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import path from "node:path";
 import {LintMessageSeverity, LintResult, LintMessage} from "../detectors/AbstractDetector.js";
 
 function formatSeverity(severity: LintMessageSeverity) {
@@ -14,8 +13,9 @@ function formatSeverity(severity: LintMessageSeverity) {
 
 function formatLocation(line: LintMessage["line"], column: LintMessage["column"],
 	lineInfoLength: number, columnInfoLength: number) {
-	const lineStr = (line === undefined ? "?" : line.toString()).padStart(lineInfoLength, " ");
-	const columnStr = (column === undefined ? "?" : column.toString()).padEnd(columnInfoLength, " ");
+
+	const lineStr = (line === undefined ? "0" : line.toString()).padStart(lineInfoLength, " ");
+	const columnStr = (column === undefined ? "0" : column.toString()).padEnd(columnInfoLength, " ");
 
 	return chalk.dim(`${lineStr}:${columnStr}`);
 }
@@ -42,7 +42,7 @@ export class Text {
 			totalWarningCount += warningCount;
 			totalFatalErrorCount += fatalErrorCount;
 
-			this.#writeln(chalk.inverse(path.resolve(process.cwd(), filePath)));
+			this.#writeln(chalk.inverse(filePath));
 
 			// Group messages by rule
 			const rules = new Map<string, LintMessage[]>();
@@ -66,48 +66,43 @@ export class Text {
 			const lineInfoLength = maxLine.toString().length;
 			const columnInfoLength = maxColumn.toString().length;
 
-			let addNewLineAfterModule = true;
-			// Sort rules alphabetically
-			Array.from(rules.keys()).sort((a, b) => {
-				return a.localeCompare(b);
-			}).forEach((ruleId) => {
-				const messages = rules.get(ruleId);
-				if (messages) {
-					this.#writeln(chalk.bold(`  ${chalk.dim("0:0")} ${ruleId} (${messages.length})`));
-					messages.forEach((msg) => {
-						const formattedLocation = 
-							formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength);
+			// Sort by line, then by column. Use 0 if not set.
+			messages.sort((a, b) =>  (a.line ?? 0) - (b.line ?? 0) || (a.column ?? 0) - (b.column ?? 0));
 
-						const messageDetails = (showDetails && msg.messageDetails) ? 
-							(`\n      ${formattedLocation} ${chalk.white.bold("Details:")} ` +
-							`${chalk.italic(msg.messageDetails.replaceAll("\n", `\n      ${formattedLocation} `))}`) : 
-							"";
+			messages.forEach((msg) => {
+				const formattedLocation =
+					formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength);
 
-						this.#writeln(
-							`    ${formattedLocation} ` +
-							`${formatSeverity(msg.severity)} ` +
-							`${msg.message}` +
-							`${messageDetails}`);
+				const messageDetails = (showDetails && msg.messageDetails) ?
+					(`\n  ${formattedLocation}   ${chalk.white.bold("Details:")} ` +
+					`${chalk.italic(msg.messageDetails.replaceAll("\n", " "))}`) :
+					"";
 
-						addNewLineAfterModule = true;
-						if (messageDetails) {
-							this.#writeln("");
-							addNewLineAfterModule = false;
-						}
-					});
-				}
+				this.#writeln(
+					`  ${formattedLocation} ` +
+					`${formatSeverity(msg.severity)} ` +
+					`${msg.message}` +
+					`${messageDetails}`);
 			});
 
-			if (addNewLineAfterModule) {
-				this.#writeln("");
-			}
+			this.#writeln("");
 		});
 
+		let summaryColor = chalk.green;
+		if (totalErrorCount > 0) {
+			summaryColor = chalk.red;
+		} else if (totalWarningCount > 0) {
+			summaryColor = chalk.yellow;
+		}
+
 		this.#writeln(
-			`${totalErrorCount + totalWarningCount} problems ` +
-			`(${totalErrorCount} errors, ${totalWarningCount} warnings)`);
+			summaryColor(
+				`${totalErrorCount + totalWarningCount} problems ` +
+				`(${totalErrorCount} errors, ${totalWarningCount} warnings)`
+			)
+		);
 		if (totalFatalErrorCount) {
-			this.#writeln(`${totalFatalErrorCount} fatal errors`);
+			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal errors`));
 		}
 
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {
