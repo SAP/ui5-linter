@@ -17,6 +17,9 @@ It checks JavaScript, XML, JSON, and other files in your project and reports fin
 
 Currently, it identifies deprecated API usage, global variables, and more to prepare your project for [UI5 2.x](https://community.sap.com/t5/open-source-blogs/introducing-openui5-2-x/ba-p/13580633).
 
+> [!NOTE]
+> This project is still in development. While the current version already provides good value, it is not yet covering all aspects and not all best practices for UI5 2.x. Stay tuned for updates!
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/) Version v20.11.0, v21.2.0 or higher
