@@ -40,12 +40,11 @@
 	},
 	"files": [
 		"CHANGELOG.md",
-		"CONTRIBUTING.md",
-		"bin/**",
-		"lib/**",
 		"LICENSES/**",
-		".reuse/**",
-		"resources/**"
+		"lib/**",
+		"npm-shrinkwrap.json",
+		"resources/**",
+		".reuse/**"
 	],
 	"engines": {
 		"node": "^18.14.2 || ^20.11.0 || >=21.2.0",
