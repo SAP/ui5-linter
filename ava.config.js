@@ -1,3 +1,14 @@
+import { satisfies } from "semver";
+// Calculate nodeArguments based on the Node version
+const nodeArguments = [];
+if (satisfies(process.versions.node, "< 18.19.0")) {
+	nodeArguments.push("--loader=tsx/esm");
+	nodeArguments.push("--loader=esmock");
+} else {
+	nodeArguments.push("--import=tsx/esm");
+}
+nodeArguments.push("--no-warnings=ExperimentalWarning");
+
 export default {
 	"extensions": {
 		"ts": "module"
@@ -5,15 +16,10 @@ export default {
 	"files": [
 		"test/lib/**/*.ts"
 	],
-	"watcher": {
-		"ignoreChanges": [
-			"test/tmp/**",
-			"lib/**"
-		]
-	},
-	"nodeArguments": [
-		"--import=tsx/esm",
-		"--no-warnings=ExperimentalWarning"
+	"ignoredByWatcher": [
+		"test/tmp/**",
+		"lib/**"
 	],
+	nodeArguments,
 	"workerThreads": false
 };

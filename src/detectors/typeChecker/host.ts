@@ -1,20 +1,21 @@
 import ts from "typescript";
 import path from "node:path";
 import posixPath from "node:path/posix";
-import {fileURLToPath} from "node:url";
 import fs from "node:fs/promises";
+import {createRequire} from "node:module";
+const require = createRequire(import.meta.url);
 
 function notImplemented(methodName: string) {
 	throw new Error(`Not implemented: ${methodName}`);
 }
 
 function addPathMappingForPackage(pkgName: string, pathMapping: Map<string, string>) {
-	const pkgDir = path.dirname(fileURLToPath(import.meta.resolve(`${pkgName}/package.json`)));
+	const pkgDir = path.dirname(require.resolve(`${pkgName}/package.json`));
 	pathMapping.set(pkgName, pkgDir);
 }
 
 async function collectTransitiveDependencies(pkgName: string, deps: Set<string>): Promise<Set<string>> {
-	const pkgJsonPath = fileURLToPath(import.meta.resolve(`${pkgName}/package.json`));
+	const pkgJsonPath = require.resolve(`${pkgName}/package.json`);
 	const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, "utf8"));
 	if (pkgJson.dependencies) {
 		await Promise.all(Object.keys(pkgJson.dependencies).map(async (depName) => {
@@ -41,7 +42,7 @@ export async function createVirtualCompilerHost(
 
 	typePackageDirs.push("/types/@ui5/linter/overrides");
 	typePathMappings.set("@ui5/linter/overrides", path.dirname(
-		fileURLToPath(import.meta.resolve("../../../resources/overrides/package.json"))
+		require.resolve("../../../resources/overrides/package.json")
 	));
 
 	options.typeRoots = ["/types"];
