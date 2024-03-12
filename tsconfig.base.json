@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"outDir": "./lib",
+		"moduleResolution": "node16",
+		"module": "node16",
+		"target": "es2022",
+
+		// DOM is required because the WebAssembly type required by sax-wasm
+		// is only provided in that library (https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/826)
+		"lib": ["ES2022", "DOM"],
+		"strict": true,
+		"sourceMap": true,
+
+		// Allow JS in order to check the JSTokenizer
+		"allowJs": true,
+
+		// Limit the set of types since we don't want to validate the UI5 types required for linting
+		// (i.e. @sapui5/types, jquery, three). For the lack of an exclude option, we use include.
+		"types": [
+			"he",
+			"node",
+			"sinon",
+			"yargs",
+			"@ui5-language-assistant/semantic-model-types",
+			"sax-wasm",
+		]
+	}
+}
