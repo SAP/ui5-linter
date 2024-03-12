@@ -2,11 +2,12 @@ import {SaxEventType, SAXParser, Tag as SaxTag} from "sax-wasm";
 import {ReadStream} from "node:fs";
 import fs from "node:fs/promises";
 import {finished} from "node:stream/promises";
-import {fileURLToPath} from "node:url";
 import {taskStart} from "../../util/perf.js";
 import {TranspileResult} from "../AbstractTranspiler.js";
 import Parser from "./Parser.js";
 import { getLogger } from "@ui5/logger";
+import {createRequire} from "node:module";
+const require = createRequire(import.meta.url);
 
 const log = getLogger("transpilers:xml:transpiler");
 
@@ -49,7 +50,7 @@ async function init() {
 		return initializing;
 	}
 	// Get the path to the WebAssembly binary and load it
-	const saxPath = fileURLToPath(import.meta.resolve(("sax-wasm/lib/sax-wasm.wasm")));
+	const saxPath = require.resolve("sax-wasm/lib/sax-wasm.wasm");
 	const taskEnd = taskStart("XML Transpiler initialization");
 
 	return initializing = Promise.all([

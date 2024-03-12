@@ -22,8 +22,8 @@ Currently, it identifies deprecated API usage, global variables, and more to pre
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) Version v20.11.0, v21.2.0 or higher
-- [npm](https://www.npmjs.com/) Version v10.0.0 or higher
+- [Node.js](https://nodejs.org/) Version v18.14.2, v20.11.0, v21.2.0 or higher
+- [npm](https://www.npmjs.com/) Version v9.5.0 or higher
 
 ## Installation
 
