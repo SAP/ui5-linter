@@ -17,7 +17,7 @@ function formatSeverity(severity: LintMessageSeverity) {
 	} else if (severity === LintMessageSeverity.Warning) {
 		return "warning";
 	} else {
-		throw new Error(`Unknown severity: ${severity}`);
+		throw new Error(`Unknown severity: ${LintMessageSeverity[severity]}`);
 	}
 }
 

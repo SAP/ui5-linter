@@ -1,12 +1,10 @@
-import anyTest, {TestFn} from "ava";
+import test from "ava";
 import ts from "typescript";
 import {ModuleDeclaration, DefineCallArgument, _matchArgumentsToParameters} from
 	"../../../../../src/detectors/transpilers/amd/parseModuleDeclaration.js";
 const {SyntaxKind} = ts;
 
-const test = anyTest;
-
-test("All parameters provided directly", async (t) => {
+test("All parameters provided directly", (t) => {
 	const args = [{
 		kind: SyntaxKind.StringLiteral,
 	}, {
@@ -33,7 +31,7 @@ test("All parameters provided directly", async (t) => {
 	}, "Matched parameters correctly");
 });
 
-test("Factory provided", async (t) => {
+test("Factory provided", (t) => {
 	const args = [{
 		kind: SyntaxKind.FunctionExpression,
 	}] as DefineCallArgument[];
@@ -45,7 +43,7 @@ test("Factory provided", async (t) => {
 	}, "Matched parameters correctly");
 });
 
-test("Dependencies and Factory provided", async (t) => {
+test("Dependencies and Factory provided", (t) => {
 	const args = [{
 		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
@@ -62,7 +60,7 @@ test("Dependencies and Factory provided", async (t) => {
 	}, "Matched parameters correctly");
 });
 
-test("Module Name, Dependencies and Factory provided", async (t) => {
+test("Module Name, Dependencies and Factory provided", (t) => {
 	const args = [{
 		kind: SyntaxKind.StringLiteral,
 	}, {
@@ -84,7 +82,7 @@ test("Module Name, Dependencies and Factory provided", async (t) => {
 	}, "Matched parameters correctly");
 });
 
-test("Dependencies, Factory and Export provided", async (t) => {
+test("Dependencies, Factory and Export provided", (t) => {
 	const args = [{
 		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
@@ -110,7 +108,8 @@ interface TestArguments {
 	args: DefineCallArgument[];
 	expected: ModuleDeclaration;
 }
-function generateArguments(possibleParameterTypes) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateArguments(possibleParameterTypes: any) {
 	const permutations: TestArguments[] = [];
 	for (const moduleNameKind of possibleParameterTypes.moduleName) {
 		for (const dependenciesKind of possibleParameterTypes.dependencies) {
@@ -169,8 +168,9 @@ function generateArguments(possibleParameterTypes) {
 function resolveSyntaxKind(decl: ModuleDeclaration) {
 	const res = Object.create(null);
 	for (const key in decl) {
-		if (decl[key]?.kind) {
-			res[key] = ts.SyntaxKind[decl[key].kind];
+		const prop = decl[key as keyof ModuleDeclaration];
+		if (prop?.kind) {
+			res[key] = ts.SyntaxKind[prop.kind];
 		}
 	}
 	return res;
@@ -190,7 +190,7 @@ function declToString(decl: ModuleDeclaration): string {
 	return argsToString(args);
 }
 
-test("All combinations", async (t) => {
+test("All combinations", (t) => {
 	const permutations = generateArguments({
 		moduleName: [SyntaxKind.StringLiteral, null],
 		dependencies: [SyntaxKind.ArrayLiteralExpression, null],

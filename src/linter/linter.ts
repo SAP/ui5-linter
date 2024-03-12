@@ -4,6 +4,7 @@ import {TsFileDetector, TsProjectDetector} from "../detectors/typeChecker/index.
 import {taskStart} from "../detectors/util/perf.js";
 import path from "node:path";
 import {stat} from "node:fs/promises";
+import {ProjectGraph} from "@ui5/project";
 
 interface LinterOptions {
 	rootDir: string;
@@ -16,6 +17,7 @@ async function fsStat(fsPath: string) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} catch (err: any) {
 		// "File or directory does not exist"
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		if (err.code === "ENOENT") {
 			return false;
 		} else {
@@ -34,7 +36,7 @@ async function fileExists(dirPath: string) {
 	return stats && stats.isFile();
 }
 
-async function getProjectGraph(rootDir: string) {
+async function getProjectGraph(rootDir: string): Promise<ProjectGraph> {
 	let rootConfigPath, rootConfiguration;
 	const ui5YamlPath = path.join(rootDir, "ui5.yaml");
 	if (await fileExists(ui5YamlPath)) {

@@ -23,7 +23,7 @@ function JSDocUtil():
 			/(<pre>)|(<\/pre>)|(<h[\d+]>)|(<\/h[\d+]>)|\{@link\s+([^}\s]+)(?:\s+([^}]*))?\}|((?:\r\n|\r|\n)[ \t]*(?:\r\n|\r|\n))/gi;
 		let inpre = false;
 		src = src || "";
-		src = src.replace(r, function (match, pre, endpre, header, endheader, linkTarget, linkText) {
+		src = src.replace(r, function (match, pre, endpre, header, endheader, linkTarget: string, linkText: string) {
 			if (pre) {
 				inpre = true;
 			} else if (endpre) {
@@ -252,7 +252,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 		const aTarget = sTarget.split(".");
 		if (aTarget.length >= 3) {
 			const constructorName = aTarget.find((el) => el.toLowerCase() !== el);
-			let index = aTarget.indexOf(constructorName || "");
+			let index = aTarget.indexOf(constructorName ?? "");
 			index = (index === -1) ? aTarget.length : (index + 1);
 			// Lacking of complimentary information for the type, then construct the
 			// link to the class name, so the user could find the information on their own.

@@ -1,13 +1,13 @@
 import anyTest, {TestFn} from "ava";
 import sinon, {SinonStub} from "sinon";
-import yargs from "yargs";
+import {Argv} from "yargs";
 import esmock, {MockFunction} from "esmock";
 import {fileURLToPath} from "node:url";
 import {readFileSync} from "node:fs";
 
 const test = anyTest as TestFn<{
 	argvGetter: SinonStub;
-	yargsInstance: yargs.Argv & {
+	yargsInstance: Argv & {
 		parserConfiguration: SinonStub;
 		version: SinonStub;
 		scriptName: SinonStub;
@@ -37,9 +37,10 @@ test.beforeEach(async (t) => {
 		wrap: sinon.stub(),
 		get argv() {
 			t.context.argvGetter();
-			return undefined;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			return {} as any;
 		},
-	};
+	} as typeof t.context.yargsInstance;
 
 	t.context.yargs = sinon.stub().returns(t.context.yargsInstance).named("yargs");
 
@@ -70,7 +71,7 @@ test.serial("CLI", async (t) => {
 		setVersion, cliBase,
 	} = t.context;
 
-	await cli();
+	await cli("module");
 
 	t.is(yargs.callCount, 1);
 	t.deepEqual(yargs.getCall(0).args, [[]]);

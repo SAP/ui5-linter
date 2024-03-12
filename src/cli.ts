@@ -34,5 +34,5 @@ export default async function () {
 	// await cli.parse();
 	// yargs registers a get method on the argv property.
 	// The property needs to be accessed to initialize everything.
-	cli.argv;
+	await cli.argv;
 }

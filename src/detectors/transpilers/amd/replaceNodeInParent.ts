@@ -368,7 +368,7 @@ function replaceInPropertyDeclaration(
 		node,
 		node.modifiers,
 		node.name,
-		node.questionToken || node.exclamationToken,
+		node.questionToken ?? node.exclamationToken,
 		node.type,
 		substitute);
 }

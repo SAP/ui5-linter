@@ -46,6 +46,7 @@ export async function xmlToJs(resourceName: string, contentStream: ReadStream): 
 
 let initializing: Promise<void>;
 async function init() {
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
 	if (initializing) {
 		return initializing;
 	}
@@ -56,9 +57,9 @@ async function init() {
 	return initializing = Promise.all([
 		fs.readFile(saxPath),
 		fs.readFile(new URL("../../../../resources/api-extract.json", import.meta.url), {encoding: "utf-8"}),
-	]).then(async (results) => {
+	]).then((results) => {
 		saxWasmBuffer = results[0];
-		apiExtract = JSON.parse(results[1]);
+		apiExtract = JSON.parse(results[1]) as ApiExtract;
 		taskEnd();
 	});
 }

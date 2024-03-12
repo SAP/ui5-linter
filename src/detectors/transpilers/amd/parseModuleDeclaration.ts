@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import ts from "typescript";
 import {getLogger} from "@ui5/logger";
 import {UnsupportedModuleError} from "./util.js";
@@ -109,7 +110,7 @@ function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): DefineC
 
 const enum Param {
 	ModuleName = 0,
-	Dependencies	= 1,
+	Dependencies = 1,
 	Factory = 2,
 	Export = 3,
 }
@@ -201,7 +202,7 @@ export function _matchArgumentsToParameters(args: DefineCallArgument[]): ModuleD
 // Compute which parameters the given argument could match with based on it's type
 // For example an ArrayLiteralExpression could only be the dependencies or the factory parameter
 function permute(arg: DefineCallArgument, startAt: Param): number[] {
-	const perm = Array(4).fill(0);
+	const perm = Array(4).fill(0) as number[];
 
 	if (startAt <= Param.ModuleName && canBeModuleName(arg)) {
 		perm[0] = 1;

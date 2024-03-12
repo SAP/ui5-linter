@@ -1,6 +1,6 @@
 import anyTest, {TestFn} from "ava";
-import {Json} from "../../../src/formatter/json.ts";
-import {LintResult} from "../../../src/detectors/AbstractDetector.ts";
+import {Json} from "../../../src/formatter/json.js";
+import {LintResult} from "../../../src/detectors/AbstractDetector.js";
 
 const test = anyTest as TestFn<{
 	lintResults: LintResult[];

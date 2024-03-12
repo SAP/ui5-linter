@@ -37,7 +37,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 		filePaths: [],
 	});
 
-	res = res.sort((a, b) => {
+	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
 		return a.filePath.localeCompare(b.filePath);
 	});
 
@@ -58,7 +58,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app", async (t) => {
 		filePaths,
 	});
 
-	res = res.sort((a, b) => {
+	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
 		return a.filePath.localeCompare(b.filePath);
 	});
 
@@ -79,7 +79,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 		filePaths: [],
 	});
 
-	res = res.sort((a, b) => {
+	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
 		return a.filePath.localeCompare(b.filePath);
 	});
 

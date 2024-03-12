@@ -1,6 +1,6 @@
 import anyTest, {TestFn} from "ava";
 import sinon, {SinonStub} from "sinon";
-import yargs from "yargs";
+import yargs, {Argv} from "yargs";
 import path from "node:path";
 import cliBase from "../../../src/cli/base.js";
 import {fileURLToPath} from "node:url";
@@ -13,10 +13,10 @@ const test = anyTest as TestFn<{
 	consoleLogStub: SinonStub;
 	processCwdStub: SinonStub;
 	processStdoutWriteStub: SinonStub;
-	cli: yargs.Argv;
+	cli: Argv;
 }>;
 
-test.beforeEach(async (t) => {
+test.beforeEach((t) => {
 	t.context.consoleLogStub = sinon.stub(console, "log");
 	t.context.processCwdStub = sinon.stub(process, "cwd").returns(sampleProjectPath);
 	t.context.processStdoutWriteStub = sinon.stub(process.stdout, "write").returns(true);

@@ -35,6 +35,7 @@ export default class ManifestLinter {
 		this.#path = path;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	async getReport(): Promise<LintResult> {
 		const source = this.#parseManifest(this.#content);
 		this.#reporter = new ManifestReporter(this.#path, source);
@@ -45,12 +46,12 @@ export default class ManifestLinter {
 	}
 
 	#parseManifest(manifest: string): jsonSourceMapType {
-		return jsonMap.parse(manifest);
+		return jsonMap.parse<jsonSourceMapType>(manifest);
 	}
 
 	#analyzeManifest(manifest: SAPJSONSchemaForWebApplicationManifestFile) {
-		const {resources, models} = manifest["sap.ui5"]! ?? {};
-		const {dataSources} = manifest["sap.app"] ?? {};
+		const {resources, models} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
+		const {dataSources} = (manifest["sap.app"] ?? {} as JSONSchemaForSAPAPPNamespace);
 
 		if (resources?.js) {
 			this.#reporter?.addMessage({
@@ -61,13 +62,13 @@ export default class ManifestLinter {
 			});
 		}
 
-		const modelKeys: string[] = (models && Object.keys(models)) || [];
+		const modelKeys: string[] = (models && Object.keys(models)) ?? [];
 		modelKeys.forEach((modelKey: string) => {
-			const curModel: ManifestModel = (models?.[modelKey])) || {};
+			const curModel: ManifestModel = (models?.[modelKey]) ?? {};
 
 			if (!curModel.type) {
 				const curDataSource = dataSources && curModel.dataSource &&
-					dataSources[curModel.dataSource];
+					dataSources[curModel.dataSource] as ManifestDataSource | undefined;
 
 				if (curDataSource &&
 					/* if not provided dataSource.type="OData" */

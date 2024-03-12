@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/require-await */
 import anyTest, {TestFn} from "ava";
 import sinon, {SinonStub} from "sinon";
 import esmock from "esmock";
 import chalk from "chalk";
-import yargs from "yargs";
+import yargs, {Argv} from "yargs";
 import path from "node:path";
 import type {LintResult} from "../../../src/detectors/AbstractDetector.js";
 import type Base from "../../../src/cli/base.js";
@@ -17,7 +18,7 @@ const test = anyTest as TestFn<{
 	processErrWrite: SinonStub;
 	formatText: SinonStub;
 	formatJson: SinonStub;
-	cli: yargs.Argv;
+	cli: Argv;
 	base: typeof Base;
 }>;
 
@@ -154,6 +155,7 @@ test.serial("Yargs error handling", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This is a task",
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		handler: async function () {},
 	});
 

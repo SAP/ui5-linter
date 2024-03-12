@@ -112,7 +112,7 @@ export default class Writer {
 
 	#addMapping(sourcePos: Position, targetPos?: Position) {
 		this.#mappings.add({
-			generated: targetPos || {
+			generated: targetPos ?? {
 				line: this.lineOffset,
 				column: this.columnOffset,
 			},

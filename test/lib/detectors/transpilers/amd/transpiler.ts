@@ -14,7 +14,7 @@ const test = anyTest as TestFn<{
 	createdFiles: object;
 }>;
 
-test.beforeEach(async (t) => {
+test.beforeEach((t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 	t.context.createdFiles = {};
 });

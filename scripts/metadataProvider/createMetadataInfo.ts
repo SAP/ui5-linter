@@ -1,5 +1,5 @@
 import {writeFile} from "node:fs/promises";
-import MetadataProvider from "./MetadataProvider";
+import MetadataProvider from "./MetadataProvider.js";
 
 import {
 	forEachSymbol,

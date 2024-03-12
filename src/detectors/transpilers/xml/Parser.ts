@@ -542,7 +542,7 @@ export default class Parser {
 				start: toPosition(tag.openStart),
 				end: toPosition(tag.openEnd),
 			};
-			if (customDataElements && customDataElements.length) {
+			if (customDataElements?.length) {
 				node.aggregations.set("customData", {
 					kind: NodeKind.Aggregation,
 					name: "customData",

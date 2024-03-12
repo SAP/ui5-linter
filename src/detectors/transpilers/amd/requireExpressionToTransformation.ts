@@ -56,7 +56,8 @@ export function transformAsyncRequireCall(
 			moduleSpecifier = nodeFactory.createStringLiteral(dep.text);
 			// Set pos to the original position to preserve source mapping capability
 			// (cast type to avoid TS error due to modifying a read only property)
-			(moduleSpecifier.pos) = dep.pos;
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+			(moduleSpecifier.pos as ts.Node["pos"]) = dep.pos;
 		} else {
 			moduleSpecifier = dep;
 		}

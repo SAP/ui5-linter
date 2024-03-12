@@ -1,18 +1,11 @@
-declare module "@ui5/to-esm" {
-	interface Result {
-		source: string;
-		map: string;
-	}
-	export default function ui5ToESM(content: string, options: object): Result;
-}
+// Note: Do not use import declarations in this file, otherwise the modules are no longer treated
+// as ambient (global) but local. Use inline import() instead.
 
 declare module "@ui5/project" {
-	import {AbstractReader} from "@ui5/fs";
-
 	type ProjectNamespace = string;
 	interface Project {
 		getNamespace: () => ProjectNamespace;
-		getReader: (options: ReaderOptions) => AbstractReader;
+		getReader: (options: import("@ui5/fs").ReaderOptions) => import("@ui5/fs").AbstractReader;
 		getRootPath: () => string;
 	}
 	interface ProjectGraph {
@@ -38,31 +31,30 @@ declare module "@ui5/project/ui5Framework/maven/CacheMode" {
 }
 
 declare module "@ui5/project/graph" {
-	import type CacheMode from "@ui5/project/ui5Framework/maven/CacheMode";
-
 	interface GraphFromObjectOptions {
-		dependencyTree: DependencyTreeNode;
+		dependencyTree: import("@ui5/project").DependencyTreeNode;
 		cwd?: string;
 		rootConfiguration?: object;
 		rootConfigPath?: string;
 		versionOverride?: string;
-		cacheMode?: CacheMode;
+		cacheMode?: import("@ui5/project/ui5Framework/maven/CacheMode").default;
 		resolveFrameworkDependencies?: boolean;
 	}
-	export function graphFromObject(options: GraphFromObjectOptions): Promise<ProjectGraph>;
+	export function graphFromObject(options: GraphFromObjectOptions): Promise<import("@ui5/project").ProjectGraph>;
 
 	interface GraphFromPackageDependenciesOptions {
 		cwd?: string;
 		rootConfiguration?: object;
 		rootConfigPath?: string;
 		versionOverride?: string;
-		cacheMode?: CacheMode;
+		cacheMode?: import("@ui5/project/ui5Framework/maven/CacheMode").default;
 		resolveFrameworkDependencies?: boolean;
 		workspaceName?: string;
 		workspaceConfiguration?: object;
 		workspaceConfigPath?: string;
 	}
-	export function graphFromPackageDependencies(options?: GraphFromPackageDependenciesOptions): Promise<ProjectGraph>;
+	export function graphFromPackageDependencies(options?: GraphFromPackageDependenciesOptions):
+	Promise<import("@ui5/project").ProjectGraph>;
 }
 
 declare module "@ui5/fs" {
@@ -73,34 +65,33 @@ declare module "@ui5/fs" {
 	interface Resource {
 		getBuffer: () => Promise<Buffer>;
 		getString: () => Promise<string>;
-		getStream: () => stream.Readable;
+		getStream: () => import("node:fs").ReadStream;
 		getName: () => string;
 		getPath: () => ResourcePath;
-		getProject: () => Project;
+		getProject: () => import("@ui5/project").Project;
 		getSourceMetadata: () => ResourceSourceMetadata;
 	}
-	enum ReaderStyles {
-		buildtime = "buildtime",
-		dist = "dist",
-		runtime = "runtime",
-		flat = "flat",
-	}
+	type ReaderStyles = "buildtime" | "dist" | "runtime" | "flat";
+
 	interface ReaderOptions {
 		style: ReaderStyles;
 	}
 	interface GlobOptions {
 		nodir?: boolean;
 	}
-	interface AbstractReader {
+	export interface AbstractReader {
 		byGlob: (virPattern: string | string[], options?: GlobOptions) => Promise<Resource[]>;
 	}
-	interface AbstractAdapter extends AbstractReader {
-
+	export interface AbstractAdapter extends AbstractReader {
+		write: (resource: Resource) => Promise<void>;
 	}
 }
+
 declare module "@ui5/fs/resourceFactory" {
-	export function createAdapter({fsBasePath: string, virBasePath: string}): AbstractAdapter;
-	export function createResource({path: string, string: string}): Resource;
+	export function createAdapter(parameters: {fsBasePath: string; virBasePath: string}):
+	import("@ui5/fs").AbstractAdapter;
+	export function createResource(parameters: {path: string; string: string}):
+	import("@ui5/fs").Resource;
 }
 
 declare module "@ui5/logger" {
@@ -126,4 +117,6 @@ declare module "@ui5/logger/writers/Console" {
 }
 
 // There are no TS Types for json-source-map
-declare module "json-source-map";
+declare module "json-source-map" {
+	export function parse<T>(content: string): T;
+}
