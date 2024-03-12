@@ -6,7 +6,7 @@
 
 <!-- [![Coverage Status](https://coveralls.io/repos/github/SAP/ui5-linter/badge.svg)](https://coveralls.io/github/SAP/ui5-linter) -->
 <!-- [![OpenUI5 Community Slack (#tooling channel)](https://img.shields.io/badge/slack-join-44cc11.svg)](https://ui5-slack-invite.cfapps.eu10.hana.ondemand.com/) -->
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg)](https://github.com/SAP/ui5-linter?tab=coc-ov-file#readme)
 <!-- [![Fosstars security rating](https://github.com/SAP/ui5-linter/blob/fosstars-report/fosstars_badge.svg)](https://github.com/SAP/ui5-linter/blob/fosstars-report/fosstars_report.md) -->
 <!-- [![REUSE status](https://api.reuse.software/badge/github.com/SAP/ui5-linter)](https://api.reuse.software/info/github.com/SAP/ui5-linter) -->
 
