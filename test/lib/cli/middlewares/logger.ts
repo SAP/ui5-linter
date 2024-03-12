@@ -1,16 +1,16 @@
-import anyTest, { TestFn } from "ava";
+import anyTest, {TestFn} from "ava";
 import sinon, {SinonStub} from "sinon";
-import esmock, { MockFunction } from "esmock";
+import esmock, {MockFunction} from "esmock";
 
 const test = anyTest as TestFn<{
-	verboseLogStub: SinonStub,
-	setLogLevelStub: SinonStub,
-	isLogLevelEnabledStub: SinonStub,
-	getVersionStub: SinonStub,
+	verboseLogStub: SinonStub;
+	setLogLevelStub: SinonStub;
+	isLogLevelEnabledStub: SinonStub;
+	getVersionStub: SinonStub;
 	logger: MockFunction & {
-		initLogger: (args: 
-			{ loglevel?: string, verbose?: boolean, perf?: boolean, silent?: boolean }) => Promise<void> | void
-	}
+		initLogger: (args:
+		{loglevel?: string; verbose?: boolean; perf?: boolean; silent?: boolean}) => Promise<void> | void;
+	};
 }>;
 
 test.beforeEach(async (t) => {
@@ -20,7 +20,7 @@ test.beforeEach(async (t) => {
 	t.context.getVersionStub = sinon.stub().returns("1.0.0");
 	t.context.logger = await esmock("../../../../src/cli/middlewares/logger.js", {
 		"../../../../src/cli/version.js": {
-			getVersion: t.context.getVersionStub
+			getVersion: t.context.getVersionStub,
 		},
 		"@ui5/logger": {
 			getLogger: () => ({
@@ -28,12 +28,12 @@ test.beforeEach(async (t) => {
 			}),
 			setLogLevel: t.context.setLogLevelStub,
 			isLogLevelEnabled: t.context.isLogLevelEnabledStub,
-		}
+		},
 	});
 });
 
 test.serial("init logger", async (t) => {
-	const { logger, setLogLevelStub, isLogLevelEnabledStub, verboseLogStub, getVersionStub } = t.context;
+	const {logger, setLogLevelStub, isLogLevelEnabledStub, verboseLogStub, getVersionStub} = t.context;
 	await logger.initLogger({});
 	t.is(setLogLevelStub.callCount, 0, "setLevel has not been called");
 	t.is(isLogLevelEnabledStub.callCount, 1, "isLogLevelEnabled has been called once");
@@ -48,50 +48,50 @@ test.serial("init logger", async (t) => {
 });
 
 test.serial("With log-level flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ loglevel: "silly" });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({loglevel: "silly"});
 	t.is(setLogLevelStub.callCount, 1, "setLevel has been called once");
 	t.is(setLogLevelStub.getCall(0).args[0], "silly", "sets log level to silly");
 });
 
 test.serial("With default log-level flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ loglevel: "info" });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({loglevel: "info"});
 	t.is(setLogLevelStub.callCount, 0, "setLevel has not been called");
 });
 
 test.serial("With verbose flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ verbose: true });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({verbose: true});
 	t.is(setLogLevelStub.callCount, 1, "setLevel has been called once");
 	t.is(setLogLevelStub.getCall(0).args[0], "verbose", "sets log level to verbose");
 });
 
 test.serial("With perf flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ perf: true });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({perf: true});
 	t.is(setLogLevelStub.callCount, 1, "setLevel has been called once");
 	t.is(setLogLevelStub.getCall(0).args[0], "perf", "sets log level to perf");
 });
 
 test.serial("With silent flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ silent: true });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({silent: true});
 	t.is(setLogLevelStub.callCount, 1, "setLevel has been called once");
 	t.is(setLogLevelStub.getCall(0).args[0], "silent", "sets log level to silent");
 });
 
 test.serial("With log-level and verbose flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ loglevel: "silly", verbose: true });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({loglevel: "silly", verbose: true});
 	t.is(setLogLevelStub.callCount, 2, "setLevel has been called twice");
 	t.is(setLogLevelStub.getCall(0).args[0], "verbose", "sets log level to verbose");
 	t.is(setLogLevelStub.getCall(1).args[0], "silly", "sets log level to verbose");
 });
 
 test.serial("With log-level, verbose, perf and silent flag", async (t) => {
-	const { logger, setLogLevelStub } = t.context;
-	await logger.initLogger({ loglevel: "silly", verbose: true, perf: true, silent: true });
+	const {logger, setLogLevelStub} = t.context;
+	await logger.initLogger({loglevel: "silly", verbose: true, perf: true, silent: true});
 	t.is(setLogLevelStub.callCount, 4, "setLevel has been called four times");
 	t.is(setLogLevelStub.getCall(0).args[0], "silent", "sets log level to silent");
 	t.is(setLogLevelStub.getCall(1).args[0], "perf", "sets log level to perf");

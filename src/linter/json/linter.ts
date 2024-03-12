@@ -1,4 +1,3 @@
-
 import ManifestLinter from "./ManifestLinter.js";
 import {taskStart} from "../../detectors/util/perf.js";
 

@@ -3,13 +3,13 @@ import {
 	LintResult,
 	LintMessageSeverity,
 	CoverageInfo,
-	CoverageCategory
+	CoverageCategory,
 } from "../detectors/AbstractDetector.js";
 import {readFile} from "fs/promises";
 
 const visualizedSpace = "\u00b7";
 const visualizedTab = "\u00bb";
-const visualizedTabs : string[] = [];
+const visualizedTabs: string[] = [];
 
 function formatSeverity(severity: LintMessageSeverity) {
 	if (severity === LintMessageSeverity.Error) {
@@ -24,9 +24,9 @@ function formatSeverity(severity: LintMessageSeverity) {
 function expandTabs(line: string, tabsize = 4) {
 	let last = 0;
 	let length = 0;
-	return line.replace(/[ \t]/g, function(tab, offset) {
+	return line.replace(/[ \t]/g, function (tab, offset) {
 		length += offset - last;
-		if ( tab === "\t" ) {
+		if (tab === "\t") {
 			const n = tabsize - length % tabsize;
 			length += n;
 			last++;
@@ -43,11 +43,9 @@ function escape(str: string) {
 }
 
 export class Coverage {
-	#buffer: string = "";
+	#buffer = "";
 
 	async format(lintResults: LintResult[]) {
-
-
 		this.#writeln(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,8 +149,8 @@ export class Coverage {
 	#write(str: string) {
 		this.#buffer += str;
 	}
+
 	#writeln(str: string) {
 		this.#buffer += str + "\n";
 	}
-
 }

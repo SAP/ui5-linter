@@ -6,22 +6,22 @@ import {
 	TypeNameFix,
 } from "@ui5-language-assistant/semantic-model";
 import {
-	UI5SemanticModel
+	UI5SemanticModel,
 } from "@ui5-language-assistant/semantic-model-types";
 
 interface ApiJson {
-	library: string
+	library: string;
 }
 
 function getTypeNameFix(): TypeNameFix {
 	// From https://github.com/SAP/ui5-language-assistant/blob/44114f34de59e8d415b06b470be6fa3697c7414c/packages/context/src/ui5-model.ts#L229
 	const fixes: TypeNameFix = {
-		Control: "sap.ui.core.Control",
-		Element: "sap.ui.core.Element",
-		array: "object[]",
-		Array: "object[]",
-		bloolean: "boolean",
-		any: "any",
+		"Control": "sap.ui.core.Control",
+		"Element": "sap.ui.core.Element",
+		"array": "object[]",
+		"Array": "object[]",
+		"bloolean": "boolean",
+		"any": "any",
 		"sap.m.PlanningCalendarHeader": undefined,
 		"sap.m.TimePickerSlider": undefined,
 		"sap.ui.layout.ResponsiveSplitterPage": undefined,

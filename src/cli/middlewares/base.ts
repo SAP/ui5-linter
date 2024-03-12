@@ -1,5 +1,5 @@
-import { initLogger } from "./logger.js";
-import type { ArgumentsCamelCase } from "yargs";
+import {initLogger} from "./logger.js";
+import type {ArgumentsCamelCase} from "yargs";
 /**
  * Base middleware for CLI commands.
  *

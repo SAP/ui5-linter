@@ -5,7 +5,7 @@ import {finished} from "node:stream/promises";
 import {taskStart} from "../../util/perf.js";
 import {TranspileResult} from "../AbstractTranspiler.js";
 import Parser from "./Parser.js";
-import { getLogger } from "@ui5/logger";
+import {getLogger} from "@ui5/logger";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
@@ -36,7 +36,7 @@ export async function xmlToJs(resourceName: string, contentStream: ReadStream): 
 	} catch (err) {
 		if (err instanceof Error) {
 			throw new Error(`Failed to transpile resource ${resourceName}: ${err.message}`, {
-				cause: err
+				cause: err,
 			});
 		} else {
 			throw err;
@@ -55,7 +55,7 @@ async function init() {
 
 	return initializing = Promise.all([
 		fs.readFile(saxPath),
-		fs.readFile(new URL("../../../../resources/api-extract.json", import.meta.url), {encoding: "utf-8"})
+		fs.readFile(new URL("../../../../resources/api-extract.json", import.meta.url), {encoding: "utf-8"}),
 	]).then(async (results) => {
 		saxWasmBuffer = results[0];
 		apiExtract = JSON.parse(results[1]);
@@ -91,7 +91,7 @@ async function transpileXmlToJs(resourceName: string, contentStream: ReadStream)
 	contentStream.on("data", (chunk: Uint8Array) => {
 		try {
 			saxParser.write(chunk);
-		} catch(err) {
+		} catch (err) {
 			if (err instanceof Error) {
 				// In case of an error, destroy the content stream to make the
 				// error bubble up to our callers

@@ -9,12 +9,12 @@ const {SyntaxKind} = ts;
 const log = getLogger("transpilers:amd:moduleDeclarationToDefinition");
 
 export interface ModuleDefinition {
-	name?: string,
-	body: ts.Statement[],
-	imports: ts.ImportDeclaration[]
+	name?: string;
+	body: ts.Statement[];
+	imports: ts.ImportDeclaration[];
 }
 
-export default function(
+export default function (
 	moduleDeclaration: ModuleDeclaration, sourceFile: ts.SourceFile, nodeFactory: ts.NodeFactory
 ): ModuleDefinition {
 	const {imports, identifiers: importIdentifiers} = collectImports(moduleDeclaration, nodeFactory);
@@ -35,8 +35,8 @@ export default function(
 */
 function collectImports(
 	moduleDeclaration: ModuleDeclaration,
-	nodeFactory: ts.NodeFactory,
-): {imports: ts.ImportDeclaration[], identifiers: ts.Identifier[]} {
+	nodeFactory: ts.NodeFactory
+): {imports: ts.ImportDeclaration[]; identifiers: ts.Identifier[]} {
 	const imports: ts.ImportDeclaration[] = [];
 	const identifiers: ts.Identifier[] = [];
 	if (!moduleDeclaration.dependencies) {
@@ -76,14 +76,14 @@ function collectImports(
 		let moduleSpecifier: ts.StringLiteral;
 		if (!ts.isStringLiteralLike(dep)) {
 			log.verbose(`Skipping non-string dependency entry of type ${ts.SyntaxKind[dep.kind]} at ` +
-				toPosStr(dep));
+			toPosStr(dep));
 			return;
 		}
 		if (ts.isNoSubstitutionTemplateLiteral(dep)) {
 			moduleSpecifier = nodeFactory.createStringLiteral(dep.text);
 			// Set pos to the original position to preserve source mapping capability
 			// (cast type to avoid TS error due to modifying a read only property)
-			(moduleSpecifier.pos as ts.Node["pos"]) = dep.pos;
+			(moduleSpecifier.pos) = dep.pos;
 		} else {
 			moduleSpecifier = dep;
 		}
@@ -92,7 +92,7 @@ function collectImports(
 			// Generate variable name based on import module
 			// Later this variable will be used to call the factory function
 			identifier = nodeFactory.createUniqueName(dep.text.replace(/[^a-zA-Z0-9]/g, "_"));
-		} else if (factoryParams && factoryParams[i]) {
+		} else if (factoryParams?.[i]) {
 			// Use factory parameter identifier as import identifier
 			identifier = factoryParams[i];
 		} // else: Side effect imports. No identifier needed
@@ -129,7 +129,7 @@ function getModuleBody(
 	moduleDeclaration: ModuleDeclaration,
 	sourceFile: ts.SourceFile,
 	nodeFactory: ts.NodeFactory,
-	importIdentifiers: ts.Identifier[],
+	importIdentifiers: ts.Identifier[]
 ): ts.Statement[] {
 	if (!moduleDeclaration.factory) {
 		return [];
@@ -138,7 +138,6 @@ function getModuleBody(
 	if ((ts.isFunctionExpression(moduleDeclaration.factory) ||
 		ts.isArrowFunction(moduleDeclaration.factory) ||
 		ts.isFunctionDeclaration(moduleDeclaration.factory))) {
-
 		if (!moduleDeclaration.factory.body) {
 			// Empty function body, no export
 			body = [];
@@ -180,10 +179,10 @@ function getModuleBody(
 								const classDeclaration = rewriteExtendCall(nodeFactory,
 									node.expression, [
 										nodeFactory.createToken(ts.SyntaxKind.ExportKeyword),
-										nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword)
+										nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 									]);
 								body.push(classDeclaration);
-							} catch(err) {
+							} catch (err) {
 								if (err instanceof UnsupportedExtendCall) {
 									log.verbose(`Failed to transform extend call: ${err.message}`);
 									body.push(createDefaultExport(nodeFactory, node.expression));
@@ -197,7 +196,7 @@ function getModuleBody(
 							// 	node.expression));
 						}
 					} else if (ts.isExpressionStatement(node) && ts.isStringLiteral(node.expression) &&
-						node.expression.text === "use strict") {
+					node.expression.text === "use strict") {
 						// Ignore "use strict" directive
 						continue;
 					} else {
@@ -213,10 +212,10 @@ function getModuleBody(
 				const classDeclaration = rewriteExtendCall(nodeFactory,
 					moduleDeclaration.factory.body, [
 						nodeFactory.createToken(ts.SyntaxKind.ExportKeyword),
-						nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword)
+						nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 					]);
 				body = [classDeclaration];
-			} catch(err) {
+			} catch (err) {
 				if (err instanceof UnsupportedExtendCall) {
 					log.verbose(`Failed to transform extend call: ${err.message}`);
 					body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
@@ -229,10 +228,10 @@ function getModuleBody(
 			body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
 		}
 	} else if (ts.isClassDeclaration(moduleDeclaration.factory) ||
-		ts.isLiteralExpression(moduleDeclaration.factory) ||
-		ts.isArrayLiteralExpression(moduleDeclaration.factory) ||
-		ts.isObjectLiteralExpression(moduleDeclaration.factory) ||
-		ts.isPropertyAccessExpression(moduleDeclaration.factory)) {
+	ts.isLiteralExpression(moduleDeclaration.factory) ||
+	ts.isArrayLiteralExpression(moduleDeclaration.factory) ||
+	ts.isObjectLiteralExpression(moduleDeclaration.factory) ||
+	ts.isPropertyAccessExpression(moduleDeclaration.factory)) {
 		// Use factory directly
 		body = [createDefaultExport(nodeFactory, moduleDeclaration.factory)];
 	} else { // Identifier
@@ -248,21 +247,21 @@ function getModuleBody(
 function collectReturnStatementsInScope(node: ts.Node, maxCount?: number): ts.ReturnStatement[] {
 	const returnStatements: ts.ReturnStatement[] = [];
 	function visitNode(node: ts.Node) {
-		switch(node.kind) {
-		case SyntaxKind.ReturnStatement:
-			returnStatements.push(node as ts.ReturnStatement);
-			return;
+		switch (node.kind) {
+			case SyntaxKind.ReturnStatement:
+				returnStatements.push(node as ts.ReturnStatement);
+				return;
 
-		// Do not traverse into nodes that declare a new function scope
-		case SyntaxKind.FunctionDeclaration:
-		case SyntaxKind.FunctionExpression:
-		case SyntaxKind.ArrowFunction:
-		case SyntaxKind.MethodDeclaration:
-		case SyntaxKind.ModuleDeclaration:
-		case SyntaxKind.Constructor:
-		case SyntaxKind.SetAccessor:
-		case SyntaxKind.GetAccessor:
-			return;
+				// Do not traverse into nodes that declare a new function scope
+			case SyntaxKind.FunctionDeclaration:
+			case SyntaxKind.FunctionExpression:
+			case SyntaxKind.ArrowFunction:
+			case SyntaxKind.MethodDeclaration:
+			case SyntaxKind.ModuleDeclaration:
+			case SyntaxKind.Constructor:
+			case SyntaxKind.SetAccessor:
+			case SyntaxKind.GetAccessor:
+				return;
 		}
 		if (maxCount && returnStatements.length >= maxCount) {
 			return;
@@ -281,45 +280,45 @@ function createDefaultExport(factory: ts.NodeFactory, node: ts.Node): ts.Stateme
 	}
 	const exportModifiers = [
 		factory.createToken(ts.SyntaxKind.ExportKeyword),
-		factory.createToken(ts.SyntaxKind.DefaultKeyword)
+		factory.createToken(ts.SyntaxKind.DefaultKeyword),
 	];
-	switch(node.kind) {
-	case SyntaxKind.CallExpression:
-	case SyntaxKind.ArrayLiteralExpression:
-	case SyntaxKind.ObjectLiteralExpression:
-	case SyntaxKind.ArrowFunction:
-	case SyntaxKind.Identifier:
-	case SyntaxKind.PropertyAccessExpression:
-		return factory.createExportAssignment(undefined, undefined, node as ts.Expression);
-	case SyntaxKind.ClassDeclaration:
-		return factory.updateClassDeclaration(
-			(node as ts.ClassDeclaration),
-			exportModifiers,
-			(node as ts.ClassDeclaration).name,
-			(node as ts.ClassDeclaration).typeParameters,
-			(node as ts.ClassDeclaration).heritageClauses,
-			(node as ts.ClassDeclaration).members);
-	case SyntaxKind.FunctionDeclaration:
-		return factory.updateFunctionDeclaration(
-			(node as ts.FunctionDeclaration),
-			exportModifiers,
-			(node as ts.FunctionDeclaration).asteriskToken,
-			(node as ts.FunctionDeclaration).name,
-			(node as ts.FunctionDeclaration).typeParameters,
-			(node as ts.FunctionDeclaration).parameters,
-			(node as ts.FunctionDeclaration).type,
-			(node as ts.FunctionDeclaration).body);
-	case SyntaxKind.FunctionExpression:
-		return factory.createFunctionDeclaration(
-			exportModifiers,
-			(node as ts.FunctionExpression).asteriskToken,
-			(node as ts.FunctionExpression).name,
-			(node as ts.FunctionExpression).typeParameters,
-			(node as ts.FunctionExpression).parameters,
-			(node as ts.FunctionExpression).type,
-			(node as ts.FunctionExpression).body);
-	default:
-		throw new UnsupportedModuleError(
+	switch (node.kind) {
+		case SyntaxKind.CallExpression:
+		case SyntaxKind.ArrayLiteralExpression:
+		case SyntaxKind.ObjectLiteralExpression:
+		case SyntaxKind.ArrowFunction:
+		case SyntaxKind.Identifier:
+		case SyntaxKind.PropertyAccessExpression:
+			return factory.createExportAssignment(undefined, undefined, node as ts.Expression);
+		case SyntaxKind.ClassDeclaration:
+			return factory.updateClassDeclaration(
+				(node as ts.ClassDeclaration),
+				exportModifiers,
+				(node as ts.ClassDeclaration).name,
+				(node as ts.ClassDeclaration).typeParameters,
+				(node as ts.ClassDeclaration).heritageClauses,
+				(node as ts.ClassDeclaration).members);
+		case SyntaxKind.FunctionDeclaration:
+			return factory.updateFunctionDeclaration(
+				(node as ts.FunctionDeclaration),
+				exportModifiers,
+				(node as ts.FunctionDeclaration).asteriskToken,
+				(node as ts.FunctionDeclaration).name,
+				(node as ts.FunctionDeclaration).typeParameters,
+				(node as ts.FunctionDeclaration).parameters,
+				(node as ts.FunctionDeclaration).type,
+				(node as ts.FunctionDeclaration).body);
+		case SyntaxKind.FunctionExpression:
+			return factory.createFunctionDeclaration(
+				exportModifiers,
+				(node as ts.FunctionExpression).asteriskToken,
+				(node as ts.FunctionExpression).name,
+				(node as ts.FunctionExpression).typeParameters,
+				(node as ts.FunctionExpression).parameters,
+				(node as ts.FunctionExpression).type,
+				(node as ts.FunctionExpression).body);
+		default:
+			throw new UnsupportedModuleError(
 			`Unable to create default export assignment for node of type ${SyntaxKind[node.kind]} at ` +
 			toPosStr(node));
 	}

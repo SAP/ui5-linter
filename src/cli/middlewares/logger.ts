@@ -1,7 +1,7 @@
 import {setLogLevel, isLogLevelEnabled, getLogger} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 import {getVersion} from "../version.js";
-import type { ArgumentsCamelCase } from "yargs";
+import type {ArgumentsCamelCase} from "yargs";
 /**
  * Logger middleware to enable logging capabilities
  *
@@ -21,7 +21,7 @@ export async function initLogger(argv: ArgumentsCamelCase) {
 		// argv.loglevel defaults to "info", which is anyways already the Logger's default
 		// Therefore do not explicitly set it again in order to allow overwriting the log level
 		// using the UI5_LOG_LVL environment variable
-		setLogLevel(<string>argv.loglevel);
+		setLogLevel((argv.loglevel as string));
 	}
 
 	// Initialize writer

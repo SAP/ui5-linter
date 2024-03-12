@@ -19,7 +19,7 @@ export class UnsafeNodeRemoval extends Error {
  *
  * This is checked recursively for all parents
  */
-export default function(node: ts.Node) {
+export default function (node: ts.Node) {
 	let nodeToRemove: ts.Node | undefined = node;
 	try {
 		while (nodeToRemove) {
@@ -30,7 +30,7 @@ export default function(node: ts.Node) {
 				nodeToRemove = undefined;
 			}
 		}
-	} catch(err) {
+	} catch (err) {
 		if ((err instanceof UnsafeNodeRemoval || err instanceof UnsupportedModuleError) &&
 			node !== nodeToRemove) {
 			// Ignore UnsafeNodeRemoval and UnsupportedModuleError exceptions produced by parent nodes
@@ -56,7 +56,7 @@ function pruneNode(node: ts.Node): boolean {
 			log.verbose(`Parent node ${SyntaxKind[parent.kind]} can be removed`);
 			return true;
 		}
-	} catch(err) {
+	} catch (err) {
 		if (err instanceof UnsafeNodeRemoval || err instanceof UnsupportedModuleError) {
 			// If an UnsafeNodeRemoval or UnsupporedModuleError is detected, revert the removal of the node as
 			// this would indicate that the parent can't exist without it
@@ -79,75 +79,75 @@ function pruneNode(node: ts.Node): boolean {
  * nodes after removing their children will cause errors during later AST processing
  */
 function isNodeRemovable(node: ts.Node): boolean {
-	switch(node.kind) {
-	case SyntaxKind.SourceFile:
+	switch (node.kind) {
+		case SyntaxKind.SourceFile:
 		// Never remove the source file
-		return false;
+			return false;
 
-	// Nodes with only one child
-	case SyntaxKind.Identifier:
-	case SyntaxKind.ExpressionStatement:
-	case SyntaxKind.VariableDeclaration:
-	case SyntaxKind.VariableStatement:
-	case SyntaxKind.ParenthesizedExpression:
-	case SyntaxKind.ReturnStatement:
-	case SyntaxKind.AwaitExpression:
-	case SyntaxKind.ComputedPropertyName:
-	case SyntaxKind.Parameter:
-	case SyntaxKind.PrefixUnaryExpression:
-	case SyntaxKind.PostfixUnaryExpression:
+			// Nodes with only one child
+		case SyntaxKind.Identifier:
+		case SyntaxKind.ExpressionStatement:
+		case SyntaxKind.VariableDeclaration:
+		case SyntaxKind.VariableStatement:
+		case SyntaxKind.ParenthesizedExpression:
+		case SyntaxKind.ReturnStatement:
+		case SyntaxKind.AwaitExpression:
+		case SyntaxKind.ComputedPropertyName:
+		case SyntaxKind.Parameter:
+		case SyntaxKind.PrefixUnaryExpression:
+		case SyntaxKind.PostfixUnaryExpression:
 		// These nodes can only have one child
 		// So if the child is removed, the parent must be removed as well
-		return true;
+			return true;
 
-	// Nodes with multiple children
-	case SyntaxKind.FunctionExpression:
-		return isRemovableFunctionExpression(node as ts.FunctionExpression);
-	case SyntaxKind.MethodDeclaration:
-		return isRemovableMethodDeclaration(node as ts.MethodDeclaration);
-	case SyntaxKind.NewExpression:
-		return isRemovableNewExpression(node as ts.NewExpression);
-	case SyntaxKind.ArrowFunction:
-		return isRemovableArrowFunction(node as ts.ArrowFunction);
-	case SyntaxKind.IfStatement:
-		return isRemovableIfStatement(node as ts.IfStatement);
-	case SyntaxKind.BinaryExpression:
-		return isRemovableBinaryExpression(node as ts.BinaryExpression);
-	case SyntaxKind.ConditionalExpression:
-		return isRemovableConditionalExpression(node as ts.ConditionalExpression);
-	case SyntaxKind.ForStatement:
-		return isRemovableForStatement(node as ts.ForStatement);
-	case SyntaxKind.WhileStatement:
-		return isRemovableWhileStatement(node as ts.WhileStatement);
-	case SyntaxKind.DoStatement:
-		return isRemovableDoStatement(node as ts.DoStatement);
-	case SyntaxKind.PropertyAccessExpression:
-		return isRemovablePropertyAccessExpression(node as ts.PropertyAccessExpression);
-	case SyntaxKind.ElementAccessExpression:
-		return isRemovableElementAccessExpression(node as ts.ElementAccessExpression);
-	case SyntaxKind.FunctionDeclaration:
-		return isRemovableFunctionDeclaration(node as ts.FunctionDeclaration);
-	case SyntaxKind.PropertyAssignment:
-		return isRemovablePropertyAssignment(node as ts.PropertyAssignment);
-	case SyntaxKind.PropertyDeclaration:
-		return isRemovablePropertyDeclaration(node as ts.PropertyDeclaration);
-	case SyntaxKind.YieldExpression:
-		return isRemovableYieldExpression(node as ts.YieldExpression);
-	case SyntaxKind.ArrayLiteralExpression:
-		return isRemovableArrayLiteralExpression(node as ts.ArrayLiteralExpression);
+			// Nodes with multiple children
+		case SyntaxKind.FunctionExpression:
+			return isRemovableFunctionExpression(node as ts.FunctionExpression);
+		case SyntaxKind.MethodDeclaration:
+			return isRemovableMethodDeclaration(node as ts.MethodDeclaration);
+		case SyntaxKind.NewExpression:
+			return isRemovableNewExpression(node as ts.NewExpression);
+		case SyntaxKind.ArrowFunction:
+			return isRemovableArrowFunction(node as ts.ArrowFunction);
+		case SyntaxKind.IfStatement:
+			return isRemovableIfStatement(node as ts.IfStatement);
+		case SyntaxKind.BinaryExpression:
+			return isRemovableBinaryExpression(node as ts.BinaryExpression);
+		case SyntaxKind.ConditionalExpression:
+			return isRemovableConditionalExpression(node as ts.ConditionalExpression);
+		case SyntaxKind.ForStatement:
+			return isRemovableForStatement(node as ts.ForStatement);
+		case SyntaxKind.WhileStatement:
+			return isRemovableWhileStatement(node as ts.WhileStatement);
+		case SyntaxKind.DoStatement:
+			return isRemovableDoStatement(node as ts.DoStatement);
+		case SyntaxKind.PropertyAccessExpression:
+			return isRemovablePropertyAccessExpression(node as ts.PropertyAccessExpression);
+		case SyntaxKind.ElementAccessExpression:
+			return isRemovableElementAccessExpression(node as ts.ElementAccessExpression);
+		case SyntaxKind.FunctionDeclaration:
+			return isRemovableFunctionDeclaration(node as ts.FunctionDeclaration);
+		case SyntaxKind.PropertyAssignment:
+			return isRemovablePropertyAssignment(node as ts.PropertyAssignment);
+		case SyntaxKind.PropertyDeclaration:
+			return isRemovablePropertyDeclaration(node as ts.PropertyDeclaration);
+		case SyntaxKind.YieldExpression:
+			return isRemovableYieldExpression(node as ts.YieldExpression);
+		case SyntaxKind.ArrayLiteralExpression:
+			return isRemovableArrayLiteralExpression(node as ts.ArrayLiteralExpression);
 
-	case SyntaxKind.VariableDeclarationList:
-		return isRemovableVariableDeclarationList(node as ts.VariableDeclarationList);
-	case SyntaxKind.Block:
-		return isRemovableBlock(node as ts.Block);
-	case SyntaxKind.ObjectLiteralExpression:
-		return isRemovableObjectLiteralExpression(node as ts.ObjectLiteralExpression);
-	case SyntaxKind.CallExpression:
-		return isRemovableCallExpression(node as ts.CallExpression);
-	case SyntaxKind.ClassDeclaration:
-		return isRemovableClassDeclaration(node as ts.ClassDeclaration);
-	default:
-		throw new UnsupportedModuleError(
+		case SyntaxKind.VariableDeclarationList:
+			return isRemovableVariableDeclarationList(node as ts.VariableDeclarationList);
+		case SyntaxKind.Block:
+			return isRemovableBlock(node as ts.Block);
+		case SyntaxKind.ObjectLiteralExpression:
+			return isRemovableObjectLiteralExpression(node as ts.ObjectLiteralExpression);
+		case SyntaxKind.CallExpression:
+			return isRemovableCallExpression(node as ts.CallExpression);
+		case SyntaxKind.ClassDeclaration:
+			return isRemovableClassDeclaration(node as ts.ClassDeclaration);
+		default:
+			throw new UnsupportedModuleError(
 			`Unsupported parent node type for prune operation: ${SyntaxKind[node.kind]} at ` +
 			`${toPosStr(node)}`);
 	}
@@ -174,7 +174,7 @@ function isRemovableMethodDeclaration(node: ts.MethodDeclaration): boolean {
 }
 
 function isRemovableNewExpression(node: ts.NewExpression): boolean {
-	return !!node.expression._remove && (!node.arguments|| hasAllNodesMarkedForRemoval(node.arguments));
+	return !!node.expression._remove && (!node.arguments || hasAllNodesMarkedForRemoval(node.arguments));
 }
 
 function isRemovableArrowFunction(node: ts.ArrowFunction): boolean {
@@ -191,7 +191,7 @@ function isRemovableIfStatement(node: ts.IfStatement): boolean {
 
 function isRemovableBinaryExpression(node: ts.BinaryExpression): boolean {
 	// Both sides of the binary expression are marked for removal => Remove the whole expression
-	if(node.left._remove && node.right._remove) {
+	if (node.left._remove && node.right._remove) {
 		return true;
 	}
 	throw new UnsafeNodeRemoval(
@@ -241,7 +241,6 @@ function isRemovableDoStatement(
 function isRemovablePropertyAccessExpression(
 	node: ts.PropertyAccessExpression
 ): boolean {
-
 	if (node.name._remove && node.expression._remove) {
 		return true;
 	}

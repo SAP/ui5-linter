@@ -1,7 +1,7 @@
 import {createSemanticModel} from "./model.js";
 
 import {
-	findSymbol
+	findSymbol,
 } from "@ui5-language-assistant/semantic-model";
 import {
 	BaseUI5Node,
@@ -46,4 +46,3 @@ export default class MetadataProvider {
 		return classMetadata.defaultAggregation?.name;
 	}
 }
-

@@ -1,8 +1,7 @@
-import type {BaseReporter, ReporterMessage, ReporterCoverageInfo, PositionInfo,} from "../../detectors/BaseReporter.js";
+import type {BaseReporter, ReporterMessage, ReporterCoverageInfo, PositionInfo} from "../../detectors/BaseReporter.js";
 import type {LintMessage} from "../../detectors/AbstractDetector.js";
 import type {jsonSourceMapType, jsonMapPointers} from "./ManifestLinter.js";
 import {LintMessageSeverity, CoverageInfo} from "../../detectors/AbstractDetector.js";
-
 
 export default class ManifestReporter implements BaseReporter {
 	#filePath: string;
@@ -20,7 +19,7 @@ export default class ManifestReporter implements BaseReporter {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
-		const {line, column} = this.#getPosition(<string>node);
+		const {line, column} = this.#getPosition((node as string));
 
 		this.#messages.push({
 			ruleId,
@@ -33,7 +32,7 @@ export default class ManifestReporter implements BaseReporter {
 	}
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
-		const location = this.#getPositionsForNode(<string>node);
+		const location = this.#getPositionsForNode((node as string));
 		this.#coverageInfo.push({
 			category,
 			// One-based to be aligned with most IDEs
@@ -64,7 +63,7 @@ export default class ManifestReporter implements BaseReporter {
 
 		return {
 			line,
-			column
+			column,
 		};
 	}
 

@@ -10,13 +10,13 @@ const fixturesGeneralPath = path.join(fixturesBasePath, "general");
 const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
-	sinon: sinonGlobal.SinonSandbox,
-	lintProject: SinonStub
+	sinon: sinonGlobal.SinonSandbox;
+	lintProject: SinonStub;
 }>;
 
 test.before(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
-	
+
 	const {lintModule: {lintProject}} = await esmockMessageDetails();
 	t.context.lintProject = lintProject;
 });
@@ -34,7 +34,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 
 	let res = await lintProject({
 		rootDir: projectPath,
-		filePaths: []
+		filePaths: [],
 	});
 
 	res = res.sort((a, b) => {
@@ -55,7 +55,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app", async (t) => {
 
 	let res = await lintProject({
 		rootDir: projectPath,
-		filePaths
+		filePaths,
 	});
 
 	res = res.sort((a, b) => {
@@ -64,7 +64,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app", async (t) => {
 
 	assertExpectedLintResults(t, res, projectPath, [
 		path.join("webapp", "model", "models.js"),
-		...filePaths
+		...filePaths,
 	]);
 
 	t.snapshot(res);
@@ -76,7 +76,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 
 	let res = await lintProject({
 		rootDir: projectPath,
-		filePaths: []
+		filePaths: [],
 	});
 
 	res = res.sort((a, b) => {

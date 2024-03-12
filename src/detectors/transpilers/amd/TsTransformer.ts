@@ -13,7 +13,7 @@ const log = getLogger("transpilers:amd:TsTransformer");
 // Augment typescript's Node interface to add a property for marking nodes for removal
 declare module "typescript" {
 	interface Node {
-		_remove?: boolean
+		_remove?: boolean;
 	}
 }
 
@@ -66,7 +66,7 @@ function transform(
 					const moduleDefinition = moduleDeclarationToDefinition(moduleDeclaration, sourceFile, nodeFactory);
 					moduleDefinitions.push(moduleDefinition);
 					pruneNode(node); // Mark the define call for removal
-				} catch(err) {
+				} catch (err) {
 					if (err instanceof UnsupportedModuleError) {
 						log.verbose(`Failed to transform sap.ui.define call in ${resourcePath}: ${err.message}`);
 					} else {
@@ -88,7 +88,7 @@ function transform(
 							// async sap.ui.require without a callback (import only)
 							try {
 								pruneNode(node);
-							} catch(err) {
+							} catch (err) {
 								if (err instanceof UnsafeNodeRemoval) {
 									// If removal is not possible, replace the CallExpression with "undefined"
 									// (i.e. the original return value)
@@ -103,7 +103,7 @@ function transform(
 						requireImports.push(res.import);
 						replaceNode(node, res.requireStatement);
 					}
-				} catch(err) {
+				} catch (err) {
 					if (err instanceof UnsupportedModuleError) {
 						log.verbose(`Failed to transform sap.ui.require call in ${resourcePath}: ${err.message}`);
 					} else {
@@ -152,7 +152,7 @@ function transform(
 
 // TODO PERF: Use a match array instead of string to be able to match individual parts of the property access chain
 // early (i.e. exist immediately if the last expression does not match the last match)
-function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string) : boolean {
+function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string): boolean {
 	const propAccessChain: string[] = [];
 	propAccessChain.push(node.expression.getText());
 

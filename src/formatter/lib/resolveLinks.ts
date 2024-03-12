@@ -1,9 +1,8 @@
 // This file is a modified copy of ui5-builder/lib/processors/jsdoc/lib/transformApiJson.cjs
 // Its purpose is to try to resolve links in lint messages, derived from JSDoc annotations.
 
-function JSDocUtil(): 
-	{formatTextBlock: (src: string, linkFormatter: (target: string, text: string) => string) => string} {
-
+function JSDocUtil():
+{formatTextBlock: (src: string, linkFormatter: (target: string, text: string) => string) => string} {
 	function format(src: string, linkFormatter: (target: string, text: string) => string): string {
 		/*
 		 * regexp to recognize important places in the text
@@ -16,8 +15,8 @@ function JSDocUtil():
 		 *   group 5: target portion of an inline @link tag
 		 *   group 6: (optional) text portion of an inline link tag
 		 *   group 7: an empty line which implicitly starts a new paragraph
-		 * 
-		 *      [-- <pre> block -] [---- some header ----] [---- an inline [@link ...} tag ----] 
+		 *
+		 *      [-- <pre> block -] [---- some header ----] [---- an inline [@link ...} tag ----]
 		 *      [---------- an empty line ---------]
 		 */
 		const r =
@@ -45,17 +44,17 @@ function JSDocUtil():
 	};
 }
 
-function formatUrlToLink (sTarget: string, sText: string): string {
+function formatUrlToLink(sTarget: string, sText: string): string {
 	return `${sText} (${sTarget})`;
 }
 
 function createLink({name, type, className, text = name, hrefAppend = "", ui5Url}:
-	Record<string, string>): string {
+Record<string, string>): string {
 	let sLink;
 	// handling module's
 	if (
 		className !== undefined &&
-		(/^module:/.test(name) || /^module:/.test(className))
+		(name.startsWith("module:") || className.startsWith("module:"))
 	) {
 		name = name.replace(/^module:/, "");
 	}
@@ -68,21 +67,21 @@ function createLink({name, type, className, text = name, hrefAppend = "", ui5Url
 	return `${text} (${ui5Url}/api/${sLink})`;
 }
 
-function _preProcessLinksInTextBlock (sText: string, ui5Url: string): string {
+function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 	const linkFormatter = function (sTarget: string, sText: string): string {
 		let aMatch;
 		// keep the full target in the fallback text
 		sText = sText || sTarget;
-		
+
 		if (sTarget === "module" && sText.startsWith(":")) {
 			const textChunks = sText.split(" ");
-			sTarget += textChunks[0]; 
+			sTarget += textChunks[0];
 			sText = textChunks[1] || textChunks[0].substring(1);
 		} else if (sTarget === "topic" && sText.startsWith(":")) {
 			sTarget += sText.split(" ")[0];
 			sText = sText.split(" ").slice(1).join(" ");
 		}
-		
+
 		// If the link has a protocol, do not modify, but open in a new window
 		if (/:\/\//.test(sTarget)) {
 			return formatUrlToLink(sTarget, sText);
@@ -271,7 +270,7 @@ function _preProcessLinksInTextBlock (sText: string, ui5Url: string): string {
 	return JSDocUtil().formatTextBlock(sText, linkFormatter);
 }
 
-export function resolveLinks (description?: string, ui5Url: string = "https://ui5.sap.com/1.120/#"): string {
+export function resolveLinks(description?: string, ui5Url = "https://ui5.sap.com/1.120/#"): string {
 	if (!description) {
 		return "";
 	}

@@ -4,12 +4,12 @@ import {Position} from "../Parser.js";
 const NL = "\n";
 
 interface Mapping {
-	generated: Position
-	original: Position
+	generated: Position;
+	original: Position;
 }
 
 export default class Writer {
-	#buf: string = "";
+	#buf = "";
 	// #map: GenMapping;
 	#mappings = new Set<Mapping>();
 	lineOffset = 0;
@@ -56,7 +56,7 @@ export default class Writer {
 
 		start && this.#addMapping(start, {
 			line: 0,
-			column: 0
+			column: 0,
 		});
 
 		this.lineOffset += lineOffset + 1; // Adding one for the additional new line
@@ -64,7 +64,7 @@ export default class Writer {
 
 		end && this.#addMapping(end, {
 			line: lineOffset,
-			column: columnOffset
+			column: columnOffset,
 		});
 	}
 
@@ -92,7 +92,7 @@ export default class Writer {
 				mapping.generated.column,
 				0,
 				mapping.original.line,
-				mapping.original.column
+				mapping.original.column,
 			];
 			mappings[mapping.generated.line].push(segment);
 		});
@@ -116,7 +116,7 @@ export default class Writer {
 				line: this.lineOffset,
 				column: this.columnOffset,
 			},
-			original: sourcePos
+			original: sourcePos,
 		});
 	}
 

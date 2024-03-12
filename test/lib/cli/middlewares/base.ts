@@ -1,18 +1,18 @@
 import anyTest, {TestFn} from "ava";
-import sinon, { SinonStub } from "sinon";
+import sinon, {SinonStub} from "sinon";
 import esmock from "esmock";
 
 const test = anyTest as TestFn<{
-	initLogger: SinonStub,
-	baseMiddleware: (args: { loglevel: number }) => void
+	initLogger: SinonStub;
+	baseMiddleware: (args: {loglevel: number}) => void;
 }>;
 
 test.beforeEach(async (t) => {
 	t.context.initLogger = sinon.stub();
 	t.context.baseMiddleware = await esmock("../../../../src/cli/middlewares/base.js", {
 		"../../../../src/cli/middlewares/logger.js": {
-			initLogger: t.context.initLogger
-		}
+			initLogger: t.context.initLogger,
+		},
 	});
 });
 

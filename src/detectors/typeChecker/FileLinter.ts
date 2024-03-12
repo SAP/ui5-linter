@@ -27,7 +27,7 @@ export default class FileLinter {
 		} catch (err) {
 			if (err instanceof Error) {
 				throw new Error(`Failed to produce report for ${this.#filePath}: ${err.message}`, {
-					cause: err
+					cause: err,
 				});
 			}
 			throw err;
@@ -45,7 +45,7 @@ export default class FileLinter {
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
-				node.kind === ts.SyntaxKind.ElementAccessExpression) {
+		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
@@ -58,7 +58,7 @@ export default class FileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isDeprecated(symbol: ts.Symbol) : boolean {
+	isDeprecated(symbol: ts.Symbol): boolean {
 		if (symbol && this.isSymbolOfUi5Type(symbol)) {
 			const jsdocTags = symbol.getJsDocTags(this.#checker);
 			for (const tag of jsdocTags) {
@@ -83,7 +83,7 @@ export default class FileLinter {
 				arg.properties.forEach((prop) => {
 					if (ts.isPropertyAssignment(prop)) { // TODO: Necessary?
 						const propNameIdentifier = prop.name as Identifier;
-						const propText = propNameIdentifier.escapedText! || propNameIdentifier.text;
+						const propText = propNameIdentifier.escapedText || propNameIdentifier.text;
 						const propertySymbol = argumentType.getProperty(propText);
 
 						// this.#checker.getContextualType(arg) // same as nodeType
@@ -97,8 +97,8 @@ export default class FileLinter {
 									severity: LintMessageSeverity.Error,
 									ruleId: "ui5-linter-no-deprecated-api",
 									message: `Use of deprecated property '${propertySymbol.escapedName}' ` +
-										`of class '${this.#checker.typeToString(nodeType)}'`,
-									messageDetails: this.extractDeprecatedMessage(propertySymbol)
+									`of class '${this.#checker.typeToString(nodeType)}'`,
+									messageDetails: this.extractDeprecatedMessage(propertySymbol),
 								});
 							}
 						}
@@ -108,7 +108,7 @@ export default class FileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression) : string {
+	extractNamespace(node: ts.PropertyAccessExpression): string {
 		const propAccessChain: string[] = [];
 		propAccessChain.push(node.expression.getText());
 
@@ -125,12 +125,12 @@ export default class FileLinter {
 		return propAccessChain.join(".");
 	}
 
-	extractDeprecatedMessage(symbol: ts.Symbol) : string {
+	extractDeprecatedMessage(symbol: ts.Symbol): string {
 		if (symbol && this.isSymbolOfUi5Type(symbol)) {
 			const jsdocTags = symbol.getJsDocTags(this.#checker);
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 
-			if (deprecatedTag && deprecatedTag.text) {
+			if (deprecatedTag?.text) {
 				// (Workaround) There's an issue in some UI5 TS definition versions and where the
 				// deprecation text gets merged with the description. Splitting on double
 				// new line could be considered as a clear separation between them.
@@ -160,7 +160,7 @@ export default class FileLinter {
 
 		if (!ts.isPropertyAccessExpression(exprNode) &&
 			!ts.isElementAccessExpression(exprNode) &&
-				!ts.isIdentifier(exprNode)) {
+			!ts.isIdentifier(exprNode)) {
 			// TODO: Transform into coverage message if it's really ok not to handle this
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
@@ -197,11 +197,11 @@ export default class FileLinter {
 			message:
 				`Call to deprecated function ` +
 				`'${symbol.escapedName}'${additionalMessage}`,
-			messageDetails: this.extractDeprecatedMessage(symbol)
+			messageDetails: this.extractDeprecatedMessage(symbol),
 		});
 	}
 
-	isDeprecatedAccess(node: ts.AccessExpression) : ts.Symbol | undefined{
+	isDeprecatedAccess(node: ts.AccessExpression): ts.Symbol | undefined {
 		let symbol;
 		if (ts.isPropertyAccessExpression(node)) {
 			symbol = this.#checker.getSymbolAtLocation(node.name);
@@ -213,7 +213,7 @@ export default class FileLinter {
 		}
 	}
 
-	isDeprecatedType(nodeType: ts.Type) : boolean {
+	isDeprecatedType(nodeType: ts.Type): boolean {
 		if (nodeType.symbol && this.isDeprecated(nodeType.symbol)) {
 			return true;
 		}
@@ -235,7 +235,7 @@ export default class FileLinter {
 				message:
 					`Access of deprecated property ` +
 					`'${symbol.escapedName}'`,
-				messageDetails: this.extractDeprecatedMessage(symbol)
+				messageDetails: this.extractDeprecatedMessage(symbol),
 			});
 		}
 	}
@@ -253,7 +253,7 @@ export default class FileLinter {
 				message:
 					`Unable to analyze this method call because the type of identifier` +
 					`${identifier ? " \"" + identifier.getText() + "\"" : ""} in "${node.getText()}"" ` +
-					`could not be determined`
+					`could not be determined`,
 			});
 		}
 	}
@@ -293,13 +293,12 @@ export default class FileLinter {
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-globals-js",
 					message:
-						`Access of global variable '${symbol.getName()}' `+
-							`(${this.extractNamespace(<ts.PropertyAccessExpression>node)})`
+						`Access of global variable '${symbol.getName()}' ` +
+						`(${this.extractNamespace((node as ts.PropertyAccessExpression))})`,
 				});
 			}
 		}
 	}
-
 
 	isAllowedPropertyAccess(node: ts.PropertyAccessExpression): boolean {
 		if (!ts.isIdentifier(node.expression)) {
@@ -316,7 +315,7 @@ export default class FileLinter {
 			"sap.ui.define",
 			"sap.ui.require",
 			"sap.ui.require.toUrl",
-			"sap.ui.loader.config"
+			"sap.ui.loader.config",
 		].some((allowedAccessString) => {
 			return propAccess == allowedAccessString || propAccess.startsWith(allowedAccessString + ".");
 		});
@@ -372,7 +371,7 @@ export default class FileLinter {
 		return false;
 	}
 
-	findClassOrInterface(node: ts.Node) : ts.Type | undefined {
+	findClassOrInterface(node: ts.Node): ts.Type | undefined {
 		let nodeType: ts.Type | undefined = this.#checker.getTypeAtLocation(node);
 		if (nodeType.isClassOrInterface()) {
 			return nodeType;

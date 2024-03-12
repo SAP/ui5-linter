@@ -10,7 +10,7 @@ import {amdToEsm} from "../transpilers/amd/transpiler.js";
 import {xmlToJs} from "../transpilers/xml/transpiler.js";
 import {lintManifest} from "../../linter/json/linter.js";
 import {
-	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector
+	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector,
 } from "../AbstractDetector.js";
 import {Project} from "@ui5/project";
 import {Resource} from "@ui5/fs";
@@ -44,7 +44,7 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	// During transpilation, for every library module (where no default export exists),
 	// an "import * as ABC" instead of a default import is created.
 	// This logic needs to be in sync with the generator for UI5 TypeScript definitions.
-	allowSyntheticDefaultImports: true
+	allowSyntheticDefaultImports: true,
 };
 
 export class TsProjectDetector extends ProjectBasedDetector {
@@ -53,12 +53,12 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 	constructor(project: Project) {
 		super(project);
-		this.compilerOptions = { ...DEFAULT_OPTIONS };
+		this.compilerOptions = {...DEFAULT_OPTIONS};
 
 		const namespace = project.getNamespace();
 		this.#projectBasePath = `/resources/${namespace}/`;
 		this.compilerOptions.paths = {
-			[`${namespace}/*`]: [`${this.#projectBasePath}*`]
+			[`${namespace}/*`]: [`${this.#projectBasePath}*`],
 		};
 	}
 
@@ -66,13 +66,13 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		source: string, map: string | undefined) {
 		const transformedWriter = createAdapter({
 			fsBasePath,
-			virBasePath: "/"
+			virBasePath: "/",
 		});
 
 		await transformedWriter.write(
 			createResource({
 				path: originalResourcePath + ".ui5lint.transformed.js",
-				string: source
+				string: source,
 			})
 		);
 
@@ -80,7 +80,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			await transformedWriter.write(
 				createResource({
 					path: originalResourcePath + ".ui5lint.transformed.js.map",
-					string: JSON.stringify(JSON.parse(map), null, "\t")
+					string: JSON.stringify(JSON.parse(map), null, "\t"),
 				})
 			);
 		}
@@ -106,16 +106,16 @@ export class TsProjectDetector extends ProjectBasedDetector {
 				if (resourcePath.endsWith(".xml")) {
 					resourcePath = resourcePath.replace(/\.xml$/, ".js");
 					const resourceContent = await resource.getStream();
-					({ source, map, messages } =
+					({source, map, messages} =
 						await xmlToJs(path.basename(originalResourcePath), resourceContent));
 				} else if (resourcePath.endsWith(".js")) {
 					const resourceContent = await resource.getString();
 					const id = this.getModuleId(resourcePath);
-					({ source, map } = amdToEsm(id, resourceContent));
+					({source, map} = amdToEsm(id, resourceContent));
 				} else if (resourcePath.endsWith(".json")) {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
-					({ source, messages } = await lintManifest(resourcePath, resourceContent));
+					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
@@ -126,7 +126,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					severity: LintMessageSeverity.Error,
 					message,
 					ruleId: "ui5-linter-parsing-error",
-					fatal: true
+					fatal: true,
 				});
 				result.push(errorLinterReporter.getReport());
 				return;
@@ -134,7 +134,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			vfsToFsPaths.set(resourcePath, fsPath);
 
 			resources.set(resourcePath, source);
-			if (messages && messages.length) {
+			if (messages?.length) {
 				resourceMessages.set(resourcePath, messages);
 			}
 			if (map) {
@@ -150,7 +150,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 	async createReports(filePaths: string[]) {
 		const result: LintResult[] = [];
 		const reader = this.project.getReader({
-			style: "buildtime"
+			style: "buildtime",
 		});
 
 		// Read all resources and test-resources and their content since tsc works completely synchronous
@@ -254,7 +254,7 @@ export class TsFileDetector extends FileBasedDetector {
 	async createReports(filePaths: string[]) {
 		const options: ts.CompilerOptions = {
 			...DEFAULT_OPTIONS,
-			rootDir: this.rootDir
+			rootDir: this.rootDir,
 		};
 
 		const resources = new Map<string, string>();
@@ -285,12 +285,12 @@ export class TsFileDetector extends FileBasedDetector {
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
-			const { source, map } = transformationResult;
+			const {source, map} = transformationResult;
 			resources.set(internalfilePath, source);
 			if (map) {
 				sourceMaps.set(internalfilePath, map);
 			}
-			if (transformationResult.messages && transformationResult.messages.length) {
+			if (transformationResult.messages?.length) {
 				resourceMessages.set(internalfilePath, transformationResult.messages);
 			}
 

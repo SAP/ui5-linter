@@ -4,7 +4,7 @@ import {
 	TraceMap,
 	originalPositionFor,
 	LEAST_UPPER_BOUND,
-	GREATEST_LOWER_BOUND
+	GREATEST_LOWER_BOUND,
 } from "@jridgewell/trace-mapping";
 
 import {LintMessageSeverity} from "./AbstractDetector.js";
@@ -16,7 +16,7 @@ import type {
 	ReporterMessage,
 	ReporterCoverageInfo,
 	PositionInfo,
-	PositionRange
+	PositionRange,
 } from "./BaseReporter.js";
 
 export default class Reporter implements BaseReporter {
@@ -43,14 +43,14 @@ export default class Reporter implements BaseReporter {
 
 		let line = 1, column = 1;
 		if (node) {
-			const {start} = this.#getPositionsForNode(<ts.Node>node);
+			const {start} = this.#getPositionsForNode((node as ts.Node));
 			// One-based to be aligned with most IDEs
 			line = start.line + 1;
 			column = start.column + 1;
 			// endLine = end.line + 1;
 			// endColumn = end.column + 1;
 		}
-		
+
 		const msg: LintMessage = {
 			ruleId,
 			severity,
@@ -59,16 +59,16 @@ export default class Reporter implements BaseReporter {
 			column,
 			message,
 		};
-		
+
 		if (messageDetails) {
-			msg["messageDetails"] = resolveLinks(messageDetails);
+			msg.messageDetails = resolveLinks(messageDetails);
 		}
 
 		this.#messages.push(msg);
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
-		const {start} = this.#getPositionsForNode(<ts.Node>node);
+		const {start} = this.#getPositionsForNode((node as ts.Node));
 		const coverageInfo: CoverageInfo = {
 			category,
 			// One-based to be aligned with most IDEs
@@ -76,13 +76,13 @@ export default class Reporter implements BaseReporter {
 			column: start.column + 1,
 			// endLine: end.line + 1,
 			// endColumn: end.column + 1,
-			message
+			message,
 		};
-		
+
 		if (messageDetails) {
-			coverageInfo["messageDetails"] = resolveLinks(messageDetails);
+			coverageInfo.messageDetails = resolveLinks(messageDetails);
 		}
-		
+
 		this.#coverageInfo.push(coverageInfo);
 	}
 
@@ -105,7 +105,7 @@ export default class Reporter implements BaseReporter {
 			let tracedPos = originalPositionFor(this.#traceMap, {
 				line: line + 1,
 				column,
-				bias: GREATEST_LOWER_BOUND
+				bias: GREATEST_LOWER_BOUND,
 			});
 
 			if (tracedPos.line === null) {
@@ -114,7 +114,7 @@ export default class Reporter implements BaseReporter {
 				tracedPos = originalPositionFor(this.#traceMap, {
 					line: line + 1,
 					column,
-					bias: LEAST_UPPER_BOUND
+					bias: LEAST_UPPER_BOUND,
 				});
 			}
 
@@ -125,12 +125,12 @@ export default class Reporter implements BaseReporter {
 			}
 			return {
 				line: tracedPos.line - 1, // Subtract 1 again to restore zero-based lines to match TypeScript output
-				column: tracedPos.column
+				column: tracedPos.column,
 			};
 		}
 		return {
 			line,
-			column
+			column,
 		};
 	}
 
