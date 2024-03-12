@@ -1,18 +1,16 @@
 {
-	"include": ["src/**/*"],
-	"compilerOptions": {
-		"outDir": "./lib",
-		"moduleResolution": "node16",
-		"module": "node16",
-		"target": "es2022",
-		"lib": ["ES2022"],
-		"skipLibCheck": true,
-		"strict": true,
-		"sourceMap": true,
-		"allowJs": true, // required for JSTokenizer
-	},
-	"typeAcquisition": {
-		// Ignore UI5 types, they are only required for linting
-		"exclude": ["@sapui5/types"]
-	}
+	// This is our configuration for development and linting,
+	// compared to "tsconfig.build.json" it also includes tests
+	// and other TypeScript sources in the project
+	"extends": "./tsconfig.base.json",
+	"include": [
+		"src/**/*",
+		"test/**/*",
+		"scripts/**/*"
+	],
+	"exclude": [
+		"test/tmp/**/*",
+		"test/projects/**/*",
+		"test/fixtures/**/*",
+	]
 }
