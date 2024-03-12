@@ -12,51 +12,51 @@ const log = getLogger("transpilers:xml:Parser");
 
 export type Namespace = string;
 export interface NamespaceDeclaration {
-	localName: string | null, // null for default namespace
-	namespace: Namespace
+	localName: string | null; // null for default namespace
+	namespace: Namespace;
 }
 
 // Parse the XML node by node. We only expect four types of node
 // Once parsed, render the nodes as JavaScript code, starting with the leaves
 export const enum NodeKind {
-	Unknown 			= 0,
-	Control 			= 1 << 0,
-	Aggregation 		= 1 << 1,
-	FragmentDefinition 	= 1 << 2,
-	Template 			= 1 << 3,
-	Xhtml 				= 1 << 4, // Should generally be ignored
-	Svg 				= 1 << 5, // Should generally be ignored
+	Unknown = 0,
+	Control = 1 << 0,
+	Aggregation = 1 << 1,
+	FragmentDefinition = 1 << 2,
+	Template = 1 << 3,
+	Xhtml = 1 << 4, // Should generally be ignored
+	Svg = 1 << 5, // Should generally be ignored
 }
 
 export interface Position {
-	line: number,
-	column: number,
+	line: number;
+	column: number;
 }
 
 export interface NodeDeclaration {
-	kind: NodeKind,
-	name: string,
-	namespace: Namespace,
-	start: Position,
-	end: Position,
+	kind: NodeKind;
+	name: string;
+	namespace: Namespace;
+	start: Position;
+	end: Position;
 }
 
 export interface ControlDeclaration extends NodeDeclaration {
-	kind: NodeKind.Control,
-	properties: Set<PropertyDeclaration>,
-	aggregations: Map<string, AggregationDeclaration>,
-	variableName?: string, // Will be populated during generation phase
+	kind: NodeKind.Control;
+	properties: Set<PropertyDeclaration>;
+	aggregations: Map<string, AggregationDeclaration>;
+	variableName?: string; // Will be populated during generation phase
 }
 
 export interface AggregationDeclaration extends NodeDeclaration {
-	kind: NodeKind.Aggregation,
-	owner: ControlDeclaration,
-	controls: ControlDeclaration[],
+	kind: NodeKind.Aggregation;
+	owner: ControlDeclaration;
+	controls: ControlDeclaration[];
 }
 
 export interface FragmentDefinitionDeclaration extends NodeDeclaration {
-	kind: NodeKind.FragmentDefinition,
-	controls: Set<ControlDeclaration>,
+	kind: NodeKind.FragmentDefinition;
+	controls: Set<ControlDeclaration>;
 }
 
 // interface TemplateDeclaration extends NodeDeclaration {
@@ -64,50 +64,50 @@ export interface FragmentDefinitionDeclaration extends NodeDeclaration {
 // }
 
 interface AttributeDeclaration {
-	name: string,
-	value: string,
-	localNamespace?: string,
-	start: Position,
-	end: Position,
+	name: string;
+	value: string;
+	localNamespace?: string;
+	start: Position;
+	end: Position;
 }
 
-interface PropertyDeclaration extends AttributeDeclaration {}
+type PropertyDeclaration = AttributeDeclaration;
 
 export interface RequireExpression extends AttributeDeclaration {
-	declarations: RequireDeclaration[]
+	declarations: RequireDeclaration[];
 }
 
 export interface RequireDeclaration {
-	moduleName: string,
-	variableName?: string,
+	moduleName: string;
+	variableName?: string;
 }
 
 interface NamespaceStackEntry {
-	namespace: NamespaceDeclaration,
-	level: number
+	namespace: NamespaceDeclaration;
+	level: number;
 }
 
 const XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const TEMPLATING_NAMESPACE = "http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1";
-const FESR_NAMESPACE ="http://schemas.sap.com/sapui5/extension/sap.ui.core.FESR/1";
-const SAP_BUILD_NAMESPACE ="sap.build";
-const SAP_UI_DT_NAMESPACE ="sap.ui.dt";
-const CUSTOM_DATA_NAMESPACE ="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1";
+const FESR_NAMESPACE = "http://schemas.sap.com/sapui5/extension/sap.ui.core.FESR/1";
+const SAP_BUILD_NAMESPACE = "sap.build";
+const SAP_UI_DT_NAMESPACE = "sap.ui.dt";
+const CUSTOM_DATA_NAMESPACE = "http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1";
 const CORE_NAMESPACE = "sap.ui.core";
 const PATTERN_LIBRARY_NAMESPACES = /^([a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)$/;
 
 const enum DocumentKind {
 	View,
-	Fragment
+	Fragment,
 }
 
 function determineDocumentKind(resourceName: string): DocumentKind | null {
-	if ( /\.view.xml$/.test(resourceName) ) {
+	if (/\.view.xml$/.test(resourceName)) {
 		return DocumentKind.View;
-	} else if ( /\.fragment.xml$/.test(resourceName) ) {
+	} else if (/\.fragment.xml$/.test(resourceName)) {
 		return DocumentKind.Fragment;
-	} else if ( /\.control.xml$/.test(resourceName) ) {
+	} else if (/\.control.xml$/.test(resourceName)) {
 		throw new Error(`Control XML analysis is currently not supported for resource ${resourceName}`);
 	} else {
 		return null;
@@ -117,7 +117,7 @@ function determineDocumentKind(resourceName: string): DocumentKind | null {
 function toPosition(saxPos: SaxPosition): Position {
 	return {
 		line: saxPos.line,
-		column: saxPos.character
+		column: saxPos.character,
 	};
 }
 
@@ -140,7 +140,8 @@ export default class Parser {
 		this.#resourceName = resourceName;
 		this.#xmlDocumentKind = xmlDocumentKind;
 		this.#generator = xmlDocumentKind === DocumentKind.View ?
-			new ViewGenerator(resourceName) : new FragmentGenerator(resourceName);
+			new ViewGenerator(resourceName) :
+			new FragmentGenerator(resourceName);
 
 		this.#apiExtract = apiExtract;
 	}
@@ -187,14 +188,14 @@ export default class Parser {
 		return null;
 	}
 
-	_addNamespace(namespace: NamespaceDeclaration, level: number,) {
+	_addNamespace(namespace: NamespaceDeclaration, level: number) {
 		this.#namespaceStack.push({
 			namespace,
-			level
+			level,
 		});
 	}
 
-	_resolveNamespace(localName: string | null,): Namespace | undefined {
+	_resolveNamespace(localName: string | null): Namespace | undefined {
 		// Search this.#namespaceStack in reverse order
 		for (let i = this.#namespaceStack.length - 1; i >= 0; i--) {
 			const ns = this.#namespaceStack[i];
@@ -204,7 +205,7 @@ export default class Parser {
 		}
 	}
 
-	_removeNamespacesForLevel(level: number,) {
+	_removeNamespacesForLevel(level: number) {
 		// Remove all namespaces for the given level
 		let i = this.#namespaceStack.length - 1;
 		while (i >= 0 && this.#namespaceStack[i].level >= level) {
@@ -220,14 +221,14 @@ export default class Parser {
 
 		if (!aggregationName) {
 			log.verbose(`Failed to determine default aggregation for control ${owner.name} used in ` +
-				`resource ${this.#resourceName}. Falling back to 'dependents'`);
+			`resource ${this.#resourceName}. Falling back to 'dependents'`);
 			// In case the default aggregation is unknown (e.g. in case of custom controls),
 			// fallback to use the generic "dependents" aggregation
 			// This is not correct at runtime, but it's the best we can do for linting purposes
 			aggregationName = "dependents";
 		}
 		if (!owner.aggregations.has(aggregationName)) {
-			const aggregation = <AggregationDeclaration>{
+			const aggregation = {
 				kind: NodeKind.Aggregation,
 				name: aggregationName,
 				owner,
@@ -235,7 +236,7 @@ export default class Parser {
 				namespace: owner.namespace,
 				start: control.start,
 				end: control.end,
-			};
+			} as AggregationDeclaration;
 			owner.aggregations.set(aggregationName, aggregation);
 		} else {
 			owner.aggregations.get(aggregationName)!.controls.push(control);
@@ -249,7 +250,7 @@ export default class Parser {
 			return Object.keys(requireMap).map((variableName) => {
 				return {
 					moduleName: requireMap[variableName],
-					variableName
+					variableName,
 				};
 			});
 		} catch (err) {
@@ -275,13 +276,13 @@ export default class Parser {
 				// Declares the default namespace
 				this._addNamespace({
 					localName: null,
-					namespace: attrValue
+					namespace: attrValue,
 				}, this.#nodeStack.length);
 			} else if (attrName.startsWith("xmlns:")) {
 				// Named namespace
 				this._addNamespace({
 					localName: attrName.slice(6), // Remove "xmlns:"
-					namespace: attrValue
+					namespace: attrValue,
 				}, this.#nodeStack.length);
 			} else if (attrName.includes(":")) {
 				// Namespaced attribute
@@ -293,8 +294,8 @@ export default class Parser {
 					start: toPosition(attr.name.start),
 					end: toPosition({
 						line: attr.value.end.line,
-						character: attr.value.end.character + 1 // Add 1 to include the closing quote
-					})
+						character: attr.value.end.character + 1, // Add 1 to include the closing quote
+					}),
 				});
 			} else {
 				attributes.add({
@@ -303,8 +304,8 @@ export default class Parser {
 					start: toPosition(attr.name.start),
 					end: toPosition({
 						line: attr.value.end.line,
-						character: attr.value.end.character + 1 // Add 1 to include the closing quote
-					})
+						character: attr.value.end.character + 1, // Add 1 to include the closing quote
+					}),
 				});
 			}
 		});
@@ -339,7 +340,7 @@ export default class Parser {
 				column: tag.openStart.character,
 				message: `Usage of native HTML in XML Views/Fragments is deprecated`,
 				messageDetails:
-					`{@link topic:be54950cae1041f59d4aa97a6bade2d8 Using Native HTML in XML Views (deprecated)}`
+					`{@link topic:be54950cae1041f59d4aa97a6bade2d8 Using Native HTML in XML Views (deprecated)}`,
 			});
 			return {
 				kind: NodeKind.Xhtml,
@@ -357,7 +358,6 @@ export default class Parser {
 				end: toPosition(tag.openEnd),
 			};
 		} else if (PATTERN_LIBRARY_NAMESPACES.test(namespace)) {
-
 			const lastIdx = tagName.lastIndexOf(".");
 			if (lastIdx !== -1) {
 				// Resolve namespace prefix, e.g. "sap:m.Button"
@@ -411,7 +411,7 @@ export default class Parser {
 							const variableName = requiredModuleName.replaceAll("/", "_");
 							requireDeclarations.push({
 								moduleName: requiredModuleName,
-								variableName
+								variableName,
 							});
 						});
 					} else {
@@ -423,32 +423,32 @@ export default class Parser {
 						value: attr.value,
 						declarations: requireDeclarations,
 						start: attr.start,
-						end: attr.end
+						end: attr.end,
 					} as RequireExpression;
 
 					this.#generator.writeRequire(requireExpression);
 				} else if (resolvedNamespace === FESR_NAMESPACE ||
-					resolvedNamespace === SAP_BUILD_NAMESPACE || resolvedNamespace === SAP_UI_DT_NAMESPACE) {
+				resolvedNamespace === SAP_BUILD_NAMESPACE || resolvedNamespace === SAP_UI_DT_NAMESPACE) {
 					// Silently ignore FESR, sap.build and sap.ui.dt attributes
 				} else if (resolvedNamespace === CUSTOM_DATA_NAMESPACE) {
 					// Add custom data element and add it as an aggregation
-					const customData: ControlDeclaration ={
+					const customData: ControlDeclaration = {
 						kind: NodeKind.Control,
 						name: "CustomData",
 						namespace: CORE_NAMESPACE,
 						properties: new Set([
-							<PropertyDeclaration>{
+							{
 								name: "key",
 								value: attr.name,
 								start: attr.start,
 								end: attr.end,
-							},
-							<PropertyDeclaration>{
+							} as PropertyDeclaration,
+							{
 								name: "value",
 								value: attr.value,
 								start: attr.start,
 								end: attr.end,
-							}
+							} as PropertyDeclaration,
 						]),
 						aggregations: new Map(),
 						start: attr.start,
@@ -460,10 +460,10 @@ export default class Parser {
 					this.#generator.writeControl(customData);
 				} else {
 					log.warn(`Ignoring unknown namespaced attribute ${attr.localNamespace}:${attr.name} ` +
-						`for ${moduleName} in resource ${this.#resourceName}`);
+					`for ${moduleName} in resource ${this.#resourceName}`);
 				}
 			} else {
-				controlProperties.add(attr as PropertyDeclaration);
+				controlProperties.add(attr);
 			}
 		});
 
@@ -515,7 +515,7 @@ export default class Parser {
 			}
 			return ownerAggregation;
 		} else if (this.#xmlDocumentKind === DocumentKind.Fragment && moduleName === "FragmentDefinition" &&
-			namespace === CORE_NAMESPACE) {
+		namespace === CORE_NAMESPACE) {
 			// This node declares a fragment definition
 			const node: FragmentDefinitionDeclaration = {
 				kind: NodeKind.FragmentDefinition,
@@ -533,7 +533,7 @@ export default class Parser {
 		} else {
 			// This node declares a control
 			// Or a fragment definition in case of a fragment
-			const node: ControlDeclaration ={
+			const node: ControlDeclaration = {
 				kind: NodeKind.Control,
 				name: moduleName,
 				namespace,
@@ -557,13 +557,13 @@ export default class Parser {
 			if (parentNode) {
 				if (parentNode.kind === NodeKind.Control) {
 					// Insert the current control in the default aggregation of the last control
-					this._addDefaultAggregation(parentNode as ControlDeclaration, node as ControlDeclaration);
+					this._addDefaultAggregation(parentNode as ControlDeclaration, node);
 				} else if (parentNode.kind === NodeKind.Aggregation) {
 					const aggregationNode = parentNode as AggregationDeclaration;
 					aggregationNode.controls.push(node);
 				} else if (parentNode.kind === NodeKind.FragmentDefinition) {
 					// Add the control to the fragment definition
-					(parentNode as FragmentDefinitionDeclaration).controls.add(node as ControlDeclaration);
+					(parentNode as FragmentDefinitionDeclaration).controls.add(node);
 				} else {
 					throw new Error(`Unexpected node kind ${parentNode.kind} in resource ${this.#resourceName}`);
 				}

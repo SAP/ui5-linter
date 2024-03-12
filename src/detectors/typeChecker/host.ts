@@ -38,7 +38,7 @@ export async function createVirtualCompilerHost(
 	typePackages.forEach((pkgName) => {
 		addPathMappingForPackage(pkgName, typePathMappings);
 	});
-	const typePackageDirs = Array.from(typePackages.keys()).map(pkgName => `/types/${pkgName}/`);
+	const typePackageDirs = Array.from(typePackages.keys()).map((pkgName) => `/types/${pkgName}/`);
 
 	typePackageDirs.push("/types/@ui5/linter/overrides");
 	typePathMappings.set("@ui5/linter/overrides", path.dirname(
@@ -67,7 +67,7 @@ export async function createVirtualCompilerHost(
 		}
 	}
 
-	function getFile(fileName: string) : string | undefined {
+	function getFile(fileName: string): string | undefined {
 		// NOTE: This function should be kept in sync with "fileExists"
 
 		if (files.has(fileName)) {
@@ -185,7 +185,7 @@ export async function createVirtualCompilerHost(
 			notImplemented("write");
 			// files.set(fileName, contents);
 		},
-		getCanonicalFileName: fileName => fileName,
+		getCanonicalFileName: (fileName) => fileName,
 		getDefaultLibFileName: (defaultLibOptions: ts.CompilerOptions) => {
 			return ts.getDefaultLibFileName(defaultLibOptions);
 		},

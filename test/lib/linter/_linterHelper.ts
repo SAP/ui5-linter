@@ -6,14 +6,14 @@ import esmock from "esmock";
 import {LintResult} from "../../../src/detectors/AbstractDetector.js";
 import FileLinter from "../../../src/detectors/typeChecker/FileLinter.ts";
 
-util.inspect.defaultOptions.depth = 4;  // Increase AVA's printing depth since coverageInfo objects are on level 4
+util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
-	sinon: sinonGlobal.SinonSandbox,
-	lintFile: SinonStub
+	sinon: sinonGlobal.SinonSandbox;
+	lintFile: SinonStub;
 }>;
 
-test.before(async (t) => {	
+test.before(async (t) => {
 	const {lintModule: {lintFile}} = await esmockMessageDetails();
 	t.context.lintFile = lintFile;
 });
@@ -28,13 +28,13 @@ export async function esmockMessageDetails() {
 			const linter = new FileLinter(rootDir, filePath, sourceFile, sourceMap, checker);
 			linter.extractDeprecatedMessage = () => "Deprecated test message";
 			return linter;
-		}
+		},
 	});
-	
-	const lintModule =  await esmock("../../../src/linter/linter.js", {
-		"../../../src/detectors/typeChecker/index.js": checkerModule
+
+	const lintModule = await esmock("../../../src/linter/linter.js", {
+		"../../../src/detectors/typeChecker/index.js": checkerModule,
 	});
-	
+
 	return {lintModule, checkerModule};
 }
 
@@ -80,7 +80,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 
 				const res = await lintFile({
 					rootDir: fixturesPath,
-					filePaths
+					filePaths,
 				});
 				assertExpectedLintResults(t, res, fixturesPath, filePaths);
 				res.forEach((results) => {

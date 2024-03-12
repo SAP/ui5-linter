@@ -1,30 +1,30 @@
-import anyTest, { TestFn } from "ava";
-import sinon, { SinonStub } from "sinon";
+import anyTest, {TestFn} from "ava";
+import sinon, {SinonStub} from "sinon";
 import yargs from "yargs";
-import esmock, { MockFunction } from "esmock";
+import esmock, {MockFunction} from "esmock";
 import {fileURLToPath} from "node:url";
 import {readFileSync} from "node:fs";
 
 const test = anyTest as TestFn<{
-	argvGetter: SinonStub,
+	argvGetter: SinonStub;
 	yargsInstance: yargs.Argv & {
-		parserConfiguration: SinonStub,
-		version: SinonStub,
-		scriptName: SinonStub,
-		command: SinonStub,
-		terminalWidth: SinonStub,
-		wrap: SinonStub,
-		argv: () => unknown
-	},
-	yargs: SinonStub,
-	setVersion: SinonStub,
-	cliBase: SinonStub,
-	readdir: SinonStub,
-	cli: MockFunction
+		parserConfiguration: SinonStub;
+		version: SinonStub;
+		scriptName: SinonStub;
+		command: SinonStub;
+		terminalWidth: SinonStub;
+		wrap: SinonStub;
+		argv: () => unknown;
+	};
+	yargs: SinonStub;
+	setVersion: SinonStub;
+	cliBase: SinonStub;
+	readdir: SinonStub;
+	cli: MockFunction;
 }>;
 
 const pkgJsonPath = new URL("../../package.json", import.meta.url);
-const pkg = JSON.parse(<string><unknown>readFileSync(pkgJsonPath));
+const pkg = JSON.parse(((readFileSync(pkgJsonPath) as unknown) as string));
 
 test.beforeEach(async (t) => {
 	t.context.argvGetter = sinon.stub();
@@ -38,7 +38,7 @@ test.beforeEach(async (t) => {
 		get argv() {
 			t.context.argvGetter();
 			return undefined;
-		}
+		},
 	};
 
 	t.context.yargs = sinon.stub().returns(t.context.yargsInstance).named("yargs");
@@ -49,11 +49,11 @@ test.beforeEach(async (t) => {
 	t.context.cli = await esmock.p("../../src/cli.js", {
 		"yargs": t.context.yargs,
 		"../../src/cli/version.js": {
-			setVersion: t.context.setVersion
+			setVersion: t.context.setVersion,
 		},
 		"../../src/cli/base.js": t.context.cliBase,
 		"module": {
-			createRequire: sinon.stub().callsFake(() => sinon.stub().returns(pkg))
+			createRequire: sinon.stub().callsFake(() => sinon.stub().returns(pkg)),
 		},
 	});
 });
@@ -67,7 +67,7 @@ test.afterEach.always((t) => {
 test.serial("CLI", async (t) => {
 	const {
 		cli, argvGetter, yargsInstance, yargs,
-		setVersion, cliBase
+		setVersion, cliBase,
 	} = t.context;
 
 	await cli();
@@ -77,17 +77,17 @@ test.serial("CLI", async (t) => {
 
 	t.is(yargsInstance.parserConfiguration.callCount, 1);
 	t.deepEqual(yargsInstance.parserConfiguration.getCall(0).args, [{
-		"parse-numbers": false
+		"parse-numbers": false,
 	}]);
 
 	t.is(setVersion.callCount, 1);
 	t.deepEqual(setVersion.getCall(0).args, [
-		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`
+		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`,
 	]);
 
 	t.is(yargsInstance.version.callCount, 1);
 	t.deepEqual(yargsInstance.version.getCall(0).args, [
-		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`
+		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`,
 	]);
 
 	t.is(yargsInstance.scriptName.callCount, 1);

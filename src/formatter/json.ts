@@ -1,4 +1,4 @@
-import { LintMessage, LintResult } from "../detectors/AbstractDetector.js";
+import {LintMessage, LintResult} from "../detectors/AbstractDetector.js";
 
 export class Json {
 	format(lintResults: LintResult[], showDetails: boolean) {
@@ -9,11 +9,11 @@ export class Json {
 			| "errorCount"
 			| "warningCount"
 			| "fatalErrorCount"
-			//excluded by default: "coverageInfo"
+			// excluded by default: "coverageInfo"
 		>[] = [];
 		lintResults.forEach((oLintedFile) => {
 			let aFileMessages: LintMessage[] = oLintedFile.messages;
-			
+
 			// Ignore files without findings (empty messages)
 			if (aFileMessages && aFileMessages.length > 0) {
 				// Exclude messageDetails property if CLI option "details" was not provided

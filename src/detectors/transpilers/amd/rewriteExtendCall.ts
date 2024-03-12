@@ -75,7 +75,7 @@ function getClassBodyFromArguments(
 					undefined,
 					prop.initializer.body);
 			} else if (ts.isObjectLiteralExpression(prop.initializer) &&
-					ts.isIdentifier(prop.name) && prop.name.text === "metadata") {
+			ts.isIdentifier(prop.name) && prop.name.text === "metadata") {
 				// Transform to *static* property declaration?
 				// This would align it with how UI5 projects should declare metadata in TypeScript,
 				// however it's unclear whether this helps our static analysis
@@ -109,6 +109,5 @@ function getClassBodyFromArguments(
 				`While generating class body: Unexpected property type ${ts.SyntaxKind[prop.kind]} at ` +
 				toPosStr(prop));
 		}
-
-	}).filter(_ => _) as ts.ClassElement[];
+	}).filter((_) => _) as ts.ClassElement[];
 }

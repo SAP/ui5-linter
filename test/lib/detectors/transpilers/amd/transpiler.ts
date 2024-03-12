@@ -10,8 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtures = path.join(__dirname, "..", "..", "..", "..", "fixtures", "transpiler", "amd");
 
 const test = anyTest as TestFn<{
-	sinon: sinonGlobal.SinonSandbox,
-	createdFiles: object,
+	sinon: sinonGlobal.SinonSandbox;
+	createdFiles: object;
 }>;
 
 test.beforeEach(async (t) => {

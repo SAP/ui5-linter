@@ -1,13 +1,13 @@
 import {Argv, ArgumentsCamelCase} from "yargs";
 import path from "node:path";
-import { lintProject } from "../linter/linter.js";
-import { Text } from "../formatter/text.js";
-import { Json } from "../formatter/json.js";
-import { Coverage } from "../formatter/coverage.js";
-import { writeFile } from "node:fs/promises";
+import {lintProject} from "../linter/linter.js";
+import {Text} from "../formatter/text.js";
+import {Json} from "../formatter/json.js";
+import {Coverage} from "../formatter/coverage.js";
+import {writeFile} from "node:fs/promises";
 import baseMiddleware from "./middlewares/base.js";
 import chalk from "chalk";
-import { isLogLevelEnabled } from "@ui5/logger";
+import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 
 const lintCommand = {
@@ -19,49 +19,49 @@ const lintCommand = {
 		cli.usage("Usage: $0 [options]")
 			.option("file-paths", {
 				describe: "",
-				type: "string"
+				type: "string",
 			})
 			.array("file-paths")
 			.option("coverage", {
 				describe: "Whether to provide a coverage report",
-				type: "boolean"
+				type: "boolean",
 			})
 			.option("details", {
 				describe: "Print complementary information for each finding, if available",
-				type: "boolean"
+				type: "boolean",
 			})
 			.option("loglevel", {
 				alias: "log-level",
 				describe: "Set the logging level",
 				default: "info",
 				type: "string",
-				choices: ["silent", "error", "warn", "info", "perf", "verbose", "silly"]
+				choices: ["silent", "error", "warn", "info", "perf", "verbose", "silly"],
 			})
 			.option("verbose", {
 				describe: "Enable verbose logging.",
 				default: false,
-				type: "boolean"
+				type: "boolean",
 			})
 			.option("perf", {
 				describe: "Enable performance measurements and related logging.",
 				default: false,
-				type: "boolean"
+				type: "boolean",
 			})
 			.option("silent", {
 				describe: "Disable all log output.",
 				default: false,
-				type: "boolean"
+				type: "boolean",
 			})
 			.option("format", {
 				alias: "f",
 				describe: "Set the output format for the linter result",
 				default: "stylish",
 				type: "string",
-				choices: ["stylish", "json"]
+				choices: ["stylish", "json"],
 			})
 			.coerce([
 				// base.js
-				"log-level"
+				"log-level",
 			], (arg) => {
 				// If an option is specified multiple times, yargs creates an array for all the values,
 				// independently of whether the option is of type "array" or "string".
@@ -84,7 +84,7 @@ const lintCommand = {
 				"Execute command with scope of file-paths");
 
 		return cli;
-	}
+	},
 };
 
 async function handleLint(argv: ArgumentsCamelCase) {
@@ -92,8 +92,8 @@ async function handleLint(argv: ArgumentsCamelCase) {
 		coverage,
 		filePaths,
 		details,
-		format
-	} = <{ coverage: boolean, filePaths: string[], details: boolean, format: string }><unknown>argv;
+		format,
+	} = (argv as unknown) as {coverage: boolean; filePaths: string[]; details: boolean; format: string};
 
 	let profile;
 	if (process.env.UI5LINT_PROFILE) {
@@ -114,7 +114,6 @@ async function handleLint(argv: ArgumentsCamelCase) {
 	if (format === "json") {
 		const jsonFormatter = new Json();
 		process.stdout.write(jsonFormatter.format(res, details));
-
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text();
 		process.stderr.write(textFormatter.format(res, details));
@@ -159,11 +158,11 @@ export default function base(cli: Argv) {
 							chalk.dim(
 								`If you think this is an issue of the ui5-linter, you might report it using the ` +
 								`following URL: `) +
-							chalk.dim.bold.underline(`https://github.com/SAP/ui5-linter/issues/new/choose`)+"\n");
+								chalk.dim.bold.underline(`https://github.com/SAP/ui5-linter/issues/new/choose`) + "\n");
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +
-							` additional '--verbose' parameter`) + "\n");
+						` additional '--verbose' parameter`) + "\n");
 					}
 				}
 			} else {
@@ -171,7 +170,7 @@ export default function base(cli: Argv) {
 				process.stderr.write(chalk.bold.yellow("Command Failed:\n"));
 				process.stderr.write(`${msg}\n`);
 				process.stderr.write("\n");
-				process.stderr.write(chalk.dim(`See 'ui5lint --help'`)+"\n");
+				process.stderr.write(chalk.dim(`See 'ui5lint --help'`) + "\n");
 			}
 			process.exit(1);
 		});

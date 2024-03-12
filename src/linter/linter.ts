@@ -6,8 +6,8 @@ import path from "node:path";
 import {stat} from "node:fs/promises";
 
 interface LinterOptions {
-	rootDir: string,
-	filePaths: string[]
+	rootDir: string;
+	filePaths: string[];
 }
 
 async function fsStat(fsPath: string) {
@@ -46,8 +46,8 @@ async function getProjectGraph(rootDir: string) {
 				specVersion: "3.0",
 				type: "application",
 				metadata: {
-					name: "ui5-linter-target"
-				}
+					name: "ui5-linter-target",
+				},
 			};
 		} else {
 			const isLibrary = await dirExists(path.join(rootDir, "src"));
@@ -56,8 +56,8 @@ async function getProjectGraph(rootDir: string) {
 					specVersion: "3.0",
 					type: "library",
 					metadata: {
-						name: "ui5-linter-target"
-					}
+						name: "ui5-linter-target",
+					},
 				};
 			}
 		}
@@ -75,15 +75,15 @@ async function getProjectGraph(rootDir: string) {
 			id: "ui5-linter-target",
 			version: "1.0.0",
 			path: rootDir,
-			dependencies: []
+			dependencies: [],
 		},
 		rootConfigPath,
 		rootConfiguration,
-		resolveFrameworkDependencies: false
+		resolveFrameworkDependencies: false,
 	});
 }
 
-export async function lintProject({rootDir, filePaths}: LinterOptions) : Promise<LintResult[]> {
+export async function lintProject({rootDir, filePaths}: LinterOptions): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting Project");
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir);
@@ -95,7 +95,7 @@ export async function lintProject({rootDir, filePaths}: LinterOptions) : Promise
 	return res;
 }
 
-export async function lintFile({rootDir, filePaths}: LinterOptions) : Promise<LintResult[]> {
+export async function lintFile({rootDir, filePaths}: LinterOptions): Promise<LintResult[]> {
 	const tsDetector = new TsFileDetector(rootDir);
 	return await tsDetector.createReports(filePaths);
 }

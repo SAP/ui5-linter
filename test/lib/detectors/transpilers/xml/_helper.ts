@@ -5,10 +5,10 @@ import util from "util";
 import fs from "node:fs";
 import {xmlToJs} from "../../../../../src/detectors/transpilers/xml/transpiler.js";
 
-util.inspect.defaultOptions.depth = 4;  // Increase AVA's printing depth since coverageInfo objects are on level 4
+util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
-	sinon: sinonGlobal.SinonSandbox,
+	sinon: sinonGlobal.SinonSandbox;
 }>;
 
 // Helper function to create linting tests for all files in a directory
@@ -41,7 +41,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const fileStream = fs.createReadStream(filePath);
 				const {source, map, messages} = await xmlToJs(testName, fileStream);
 				t.snapshot(source);
-				t.snapshot(map && JSON.parse(<string>map));
+				t.snapshot(map && JSON.parse(map));
 				t.snapshot(messages);
 			});
 		}

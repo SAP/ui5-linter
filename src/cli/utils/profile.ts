@@ -4,7 +4,7 @@ import {getLogger} from "@ui5/logger";
 const log = getLogger("cli:utils:profile");
 
 let session: Session | null;
-type ProcessSignals = Record<string, (exitCode: number) => void>
+type ProcessSignals = Record<string, (exitCode: number) => void>;
 let processSignals: ProcessSignals | null;
 
 export async function start() {
@@ -70,7 +70,7 @@ export async function stop() {
 
 function registerSigHooks() {
 	function createListener(exitCode: number) {
-		return function() {
+		return function () {
 			// Gracefully end profiling, then exit
 			stop().then(() => {
 				process.exit(exitCode);
@@ -79,10 +79,10 @@ function registerSigHooks() {
 	}
 
 	const processSignals: ProcessSignals = {
-		"SIGHUP": createListener(128 + 1),
-		"SIGINT": createListener(128 + 2),
-		"SIGTERM": createListener(128 + 15),
-		"SIGBREAK": createListener(128 + 21)
+		SIGHUP: createListener(128 + 1),
+		SIGINT: createListener(128 + 2),
+		SIGTERM: createListener(128 + 15),
+		SIGBREAK: createListener(128 + 21),
 	};
 
 	for (const signal of Object.keys(processSignals)) {

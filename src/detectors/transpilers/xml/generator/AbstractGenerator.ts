@@ -1,13 +1,13 @@
 import {
-	ControlDeclaration, RequireExpression, Position
+	ControlDeclaration, RequireExpression, Position,
 } from "../Parser.js";
 import Writer from "./Writer.js";
 
 interface ImportStatement {
-	moduleName: string
-	variableName: string,
-	start?: Position,
-	end?: Position,
+	moduleName: string;
+	variableName: string;
+	start?: Position;
+	end?: Position;
 }
 
 // TODO: Generate type information to make View#byId() access typed?
@@ -80,7 +80,7 @@ export default abstract class AbstractGenerator {
 				moduleName: declaration.moduleName,
 				variableName: variableName,
 				start: requireExpression.start,
-				end: requireExpression.end
+				end: requireExpression.end,
 			});
 		});
 	}

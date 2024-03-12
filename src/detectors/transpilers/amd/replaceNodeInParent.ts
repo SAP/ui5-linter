@@ -5,14 +5,14 @@ import {toPosStr, UnsupportedModuleError} from "./util.js";
 const log = getLogger("transpilers:amd:replaceNodeInParent");
 
 export interface NodeReplacement {
-	original: ts.Node,
-	substitute: ts.Node,
+	original: ts.Node;
+	substitute: ts.Node;
 }
 
 /**
  * Replaces a node in its parent with another node
  */
-export default function(
+export default function (
 	parent: ts.Node, replacement: NodeReplacement, nodeFactory: ts.NodeFactory
 ): ts.Node {
 	const {original, substitute} = replacement;
@@ -21,75 +21,75 @@ export default function(
 		`  Old: ${ts.SyntaxKind[original.kind]}\n` +
 		`  New: ${ts.SyntaxKind[substitute.kind]}`);
 
-	switch(parent.kind) {
-	case SyntaxKind.ExpressionStatement:
-		return replaceInExpressionStatement(parent as ts.ExpressionStatement, replacement, nodeFactory);
-	case SyntaxKind.ParenthesizedExpression:
-		return replaceInParenthesizedExpression(parent as ts.ParenthesizedExpression, replacement, nodeFactory);
-	case SyntaxKind.CallExpression:
-		return replaceInCallExpression(parent as ts.CallExpression, replacement, nodeFactory);
-	case SyntaxKind.NewExpression:
-		return replaceInNewExpression(parent as ts.NewExpression, replacement, nodeFactory);
-	case SyntaxKind.BinaryExpression:
-		return replaceInBinaryExpression(parent as ts.BinaryExpression, replacement, nodeFactory);
-	case SyntaxKind.ConditionalExpression:
-		return replaceInConditionalExpression(parent as ts.ConditionalExpression, replacement, nodeFactory);
-	case SyntaxKind.PrefixUnaryExpression:
-		return replaceInPrefixUnaryExpression(parent as ts.PrefixUnaryExpression, replacement, nodeFactory);
-	case SyntaxKind.PostfixUnaryExpression:
-		return replaceInPostfixUnaryExpression(parent as ts.PostfixUnaryExpression, replacement, nodeFactory);
-	case SyntaxKind.YieldExpression:
-		return replaceInYieldExpression(parent as ts.YieldExpression, replacement, nodeFactory);
-	case SyntaxKind.AwaitExpression:
-		return replaceInAwaitExpression(parent as ts.AwaitExpression, replacement, nodeFactory);
-	case SyntaxKind.VariableStatement:
-		return replaceInVariableStatement(parent as ts.VariableStatement, replacement, nodeFactory);
-	case SyntaxKind.VariableDeclaration:
-		return replaceInVariableDeclaration(parent as ts.VariableDeclaration, replacement, nodeFactory);
-	case SyntaxKind.VariableDeclarationList:
-		return replaceInVariableDeclarationList(parent as ts.VariableDeclarationList, replacement, nodeFactory);
-	case SyntaxKind.PropertyAssignment:
-		return replaceInPropertyAssignment(parent as ts.PropertyAssignment, replacement, nodeFactory);
-	case SyntaxKind.PropertyDeclaration:
-		return replaceInPropertyDeclaration(parent as ts.PropertyDeclaration, replacement, nodeFactory);
-	case SyntaxKind.IfStatement:
-		return replaceInIfStatement(parent as ts.IfStatement, replacement, nodeFactory);
-	case SyntaxKind.WhileStatement:
-		return replaceInWhileStatement(parent as ts.WhileStatement, replacement, nodeFactory);
-	case SyntaxKind.DoStatement:
-		return replaceInDoStatement(parent as ts.DoStatement, replacement, nodeFactory);
-	case SyntaxKind.ForStatement:
-		return replaceInForStatement(parent as ts.ForStatement, replacement, nodeFactory);
-	case SyntaxKind.ReturnStatement:
-		return replaceInReturnStatement(parent as ts.ReturnStatement, replacement, nodeFactory);
-	case SyntaxKind.ArrayLiteralExpression:
-		return replaceInArrayLiteralExpression(parent as ts.ArrayLiteralExpression, replacement, nodeFactory);
-	case SyntaxKind.ObjectLiteralExpression:
-		return replaceInObjectLiteralExpression(parent as ts.ObjectLiteralExpression, replacement, nodeFactory);
-	case SyntaxKind.PropertyAccessExpression:
-		return replaceInPropertyAccessExpression(parent as ts.PropertyAccessExpression, replacement, nodeFactory);
-	case SyntaxKind.ElementAccessExpression:
-		return replaceInElementAccessExpression(parent as ts.ElementAccessExpression, replacement, nodeFactory);
-	case SyntaxKind.Block:
-		return replaceInBlock(parent as ts.Block, replacement, nodeFactory);
-	case SyntaxKind.ArrowFunction:
-		return replaceInArrowFunction(parent as ts.ArrowFunction, replacement, nodeFactory);
-	case SyntaxKind.FunctionExpression:
-		return replaceInFunctionExpression(parent as ts.FunctionExpression, replacement, nodeFactory);
-	case SyntaxKind.FunctionDeclaration:
-		return replaceInFunctionDeclaration(parent as ts.FunctionDeclaration, replacement, nodeFactory);
-	case SyntaxKind.MethodDeclaration:
-		return replaceInMethodDeclaration(parent as ts.MethodDeclaration, replacement, nodeFactory);
-	case SyntaxKind.ClassDeclaration:
-		return replaceInClassDeclaration(parent as ts.ClassDeclaration, replacement, nodeFactory);
-	case SyntaxKind.ComputedPropertyName:
-		return replaceInComputedPropertyName(parent as ts.ComputedPropertyName, replacement, nodeFactory);
-	case SyntaxKind.Parameter:
-		return replaceInParameterDeclaration(parent as ts.ParameterDeclaration, replacement, nodeFactory);
-	case SyntaxKind.SourceFile:
-		return replaceInSourceFile(parent as ts.SourceFile, replacement, nodeFactory);
-	default:
-		throw new UnsupportedModuleError(
+	switch (parent.kind) {
+		case SyntaxKind.ExpressionStatement:
+			return replaceInExpressionStatement(parent as ts.ExpressionStatement, replacement, nodeFactory);
+		case SyntaxKind.ParenthesizedExpression:
+			return replaceInParenthesizedExpression(parent as ts.ParenthesizedExpression, replacement, nodeFactory);
+		case SyntaxKind.CallExpression:
+			return replaceInCallExpression(parent as ts.CallExpression, replacement, nodeFactory);
+		case SyntaxKind.NewExpression:
+			return replaceInNewExpression(parent as ts.NewExpression, replacement, nodeFactory);
+		case SyntaxKind.BinaryExpression:
+			return replaceInBinaryExpression(parent as ts.BinaryExpression, replacement, nodeFactory);
+		case SyntaxKind.ConditionalExpression:
+			return replaceInConditionalExpression(parent as ts.ConditionalExpression, replacement, nodeFactory);
+		case SyntaxKind.PrefixUnaryExpression:
+			return replaceInPrefixUnaryExpression(parent as ts.PrefixUnaryExpression, replacement, nodeFactory);
+		case SyntaxKind.PostfixUnaryExpression:
+			return replaceInPostfixUnaryExpression(parent as ts.PostfixUnaryExpression, replacement, nodeFactory);
+		case SyntaxKind.YieldExpression:
+			return replaceInYieldExpression(parent as ts.YieldExpression, replacement, nodeFactory);
+		case SyntaxKind.AwaitExpression:
+			return replaceInAwaitExpression(parent as ts.AwaitExpression, replacement, nodeFactory);
+		case SyntaxKind.VariableStatement:
+			return replaceInVariableStatement(parent as ts.VariableStatement, replacement, nodeFactory);
+		case SyntaxKind.VariableDeclaration:
+			return replaceInVariableDeclaration(parent as ts.VariableDeclaration, replacement, nodeFactory);
+		case SyntaxKind.VariableDeclarationList:
+			return replaceInVariableDeclarationList(parent as ts.VariableDeclarationList, replacement, nodeFactory);
+		case SyntaxKind.PropertyAssignment:
+			return replaceInPropertyAssignment(parent as ts.PropertyAssignment, replacement, nodeFactory);
+		case SyntaxKind.PropertyDeclaration:
+			return replaceInPropertyDeclaration(parent as ts.PropertyDeclaration, replacement, nodeFactory);
+		case SyntaxKind.IfStatement:
+			return replaceInIfStatement(parent as ts.IfStatement, replacement, nodeFactory);
+		case SyntaxKind.WhileStatement:
+			return replaceInWhileStatement(parent as ts.WhileStatement, replacement, nodeFactory);
+		case SyntaxKind.DoStatement:
+			return replaceInDoStatement(parent as ts.DoStatement, replacement, nodeFactory);
+		case SyntaxKind.ForStatement:
+			return replaceInForStatement(parent as ts.ForStatement, replacement, nodeFactory);
+		case SyntaxKind.ReturnStatement:
+			return replaceInReturnStatement(parent as ts.ReturnStatement, replacement, nodeFactory);
+		case SyntaxKind.ArrayLiteralExpression:
+			return replaceInArrayLiteralExpression(parent as ts.ArrayLiteralExpression, replacement, nodeFactory);
+		case SyntaxKind.ObjectLiteralExpression:
+			return replaceInObjectLiteralExpression(parent as ts.ObjectLiteralExpression, replacement, nodeFactory);
+		case SyntaxKind.PropertyAccessExpression:
+			return replaceInPropertyAccessExpression(parent as ts.PropertyAccessExpression, replacement, nodeFactory);
+		case SyntaxKind.ElementAccessExpression:
+			return replaceInElementAccessExpression(parent as ts.ElementAccessExpression, replacement, nodeFactory);
+		case SyntaxKind.Block:
+			return replaceInBlock(parent as ts.Block, replacement, nodeFactory);
+		case SyntaxKind.ArrowFunction:
+			return replaceInArrowFunction(parent as ts.ArrowFunction, replacement, nodeFactory);
+		case SyntaxKind.FunctionExpression:
+			return replaceInFunctionExpression(parent as ts.FunctionExpression, replacement, nodeFactory);
+		case SyntaxKind.FunctionDeclaration:
+			return replaceInFunctionDeclaration(parent as ts.FunctionDeclaration, replacement, nodeFactory);
+		case SyntaxKind.MethodDeclaration:
+			return replaceInMethodDeclaration(parent as ts.MethodDeclaration, replacement, nodeFactory);
+		case SyntaxKind.ClassDeclaration:
+			return replaceInClassDeclaration(parent as ts.ClassDeclaration, replacement, nodeFactory);
+		case SyntaxKind.ComputedPropertyName:
+			return replaceInComputedPropertyName(parent as ts.ComputedPropertyName, replacement, nodeFactory);
+		case SyntaxKind.Parameter:
+			return replaceInParameterDeclaration(parent as ts.ParameterDeclaration, replacement, nodeFactory);
+		case SyntaxKind.SourceFile:
+			return replaceInSourceFile(parent as ts.SourceFile, replacement, nodeFactory);
+		default:
+			throw new UnsupportedModuleError(
 			`Unsupported parent node type for replacement operation: ${ts.SyntaxKind[parent.kind]} at ` +
 			`${toPosStr(parent)}`);
 	}

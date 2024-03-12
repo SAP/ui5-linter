@@ -13,7 +13,6 @@ function formatSeverity(severity: LintMessageSeverity) {
 
 function formatLocation(line: LintMessage["line"], column: LintMessage["column"],
 	lineInfoLength: number, columnInfoLength: number) {
-
 	const lineStr = (line === undefined ? "?" : line.toString()).padStart(lineInfoLength, " ");
 	const columnStr = (column === undefined ? "?" : column.toString()).padEnd(columnInfoLength, " ");
 
@@ -21,7 +20,7 @@ function formatLocation(line: LintMessage["line"], column: LintMessage["column"]
 }
 
 export class Text {
-	#buffer: string = "";
+	#buffer = "";
 
 	format(lintResults: LintResult[], showDetails: boolean) {
 		this.#writeln("");
@@ -75,15 +74,15 @@ export class Text {
 				if (messages) {
 					this.#writeln(chalk.bold(`  ${ruleId} (${messages.length})`));
 					messages.forEach((msg) => {
-						const messageDetails = (showDetails && msg.messageDetails) ? 
-							(`\n      ${chalk.white.bold("Details:")}\n      ` +
-							`${chalk.italic(msg.messageDetails.replaceAll("\n", "\n      "))}`) : 
+						const messageDetails = (showDetails && msg.messageDetails) ?
+								(`\n      ${chalk.white.bold("Details:")}\n      ` +
+								`${chalk.italic(msg.messageDetails.replaceAll("\n", "\n      "))}`) :
 							"";
 
 						this.#writeln(
 							`    ${formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength)} ` +
 							`${formatSeverity(msg.severity)} ` +
-							`${msg.message}` + 
+							`${msg.message}` +
 							`${messageDetails}`);
 
 						addNewLineAfterModule = true;
@@ -110,15 +109,16 @@ export class Text {
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {
 			this.#writeln("");
 			this.#writeln(chalk.dim.bold("Note: ") +
-				chalk.dim(`Use "ui5lint --details" to show more information about the findings`));
+			chalk.dim(`Use "ui5lint --details" to show more information about the findings`));
 		}
-		
+
 		return this.#buffer;
 	}
 
 	#write(str: string) {
 		this.#buffer += str;
 	}
+
 	#writeln(str: string) {
 		this.#buffer += str + "\n";
 	}

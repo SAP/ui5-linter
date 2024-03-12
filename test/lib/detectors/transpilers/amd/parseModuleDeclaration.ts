@@ -4,17 +4,17 @@ import {ModuleDeclaration, DefineCallArgument, _matchArgumentsToParameters} from
 	"../../../../../src/detectors/transpilers/amd/parseModuleDeclaration.js";
 const {SyntaxKind} = ts;
 
-const test = anyTest as TestFn;
+const test = anyTest;
 
 test("All parameters provided directly", async (t) => {
 	const args = [{
-		kind: SyntaxKind.StringLiteral
+		kind: SyntaxKind.StringLiteral,
 	}, {
-		kind: SyntaxKind.ArrayLiteralExpression
+		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
-		kind: SyntaxKind.FunctionExpression
+		kind: SyntaxKind.FunctionExpression,
 	}, {
-		kind: SyntaxKind.TrueKeyword
+		kind: SyntaxKind.TrueKeyword,
 	}] as DefineCallArgument[];
 
 	t.deepEqual(_matchArgumentsToParameters(args), {
@@ -35,9 +35,8 @@ test("All parameters provided directly", async (t) => {
 
 test("Factory provided", async (t) => {
 	const args = [{
-		kind: SyntaxKind.FunctionExpression
+		kind: SyntaxKind.FunctionExpression,
 	}] as DefineCallArgument[];
-
 
 	t.deepEqual(_matchArgumentsToParameters(args), {
 		factory: {
@@ -48,11 +47,10 @@ test("Factory provided", async (t) => {
 
 test("Dependencies and Factory provided", async (t) => {
 	const args = [{
-		kind: SyntaxKind.ArrayLiteralExpression
+		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
-		kind: SyntaxKind.FunctionExpression
+		kind: SyntaxKind.FunctionExpression,
 	}] as DefineCallArgument[];
-
 
 	t.deepEqual(_matchArgumentsToParameters(args), {
 		dependencies: {
@@ -66,13 +64,12 @@ test("Dependencies and Factory provided", async (t) => {
 
 test("Module Name, Dependencies and Factory provided", async (t) => {
 	const args = [{
-		kind: SyntaxKind.StringLiteral
+		kind: SyntaxKind.StringLiteral,
 	}, {
-		kind: SyntaxKind.ArrayLiteralExpression
+		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
-		kind: SyntaxKind.FunctionExpression
+		kind: SyntaxKind.FunctionExpression,
 	}] as DefineCallArgument[];
-
 
 	t.deepEqual(_matchArgumentsToParameters(args), {
 		moduleName: {
@@ -89,11 +86,11 @@ test("Module Name, Dependencies and Factory provided", async (t) => {
 
 test("Dependencies, Factory and Export provided", async (t) => {
 	const args = [{
-		kind: SyntaxKind.ArrayLiteralExpression
+		kind: SyntaxKind.ArrayLiteralExpression,
 	}, {
-		kind: SyntaxKind.FunctionExpression
+		kind: SyntaxKind.FunctionExpression,
 	}, {
-		kind: SyntaxKind.TrueKeyword
+		kind: SyntaxKind.TrueKeyword,
 	}] as DefineCallArgument[];
 
 	t.deepEqual(_matchArgumentsToParameters(args), {
@@ -110,11 +107,11 @@ test("Dependencies, Factory and Export provided", async (t) => {
 });
 
 interface TestArguments {
-	args: DefineCallArgument[],
-	expected: ModuleDeclaration,
+	args: DefineCallArgument[];
+	expected: ModuleDeclaration;
 }
 function generateArguments(possibleParameterTypes) {
-	const permutations: Array<TestArguments> = [];
+	const permutations: TestArguments[] = [];
 	for (const moduleNameKind of possibleParameterTypes.moduleName) {
 		for (const dependenciesKind of possibleParameterTypes.dependencies) {
 			for (const factoryKind of possibleParameterTypes.factory) {
@@ -148,7 +145,6 @@ function generateArguments(possibleParameterTypes) {
 						expected.dependencies = factory as ModuleDeclaration["dependencies"];
 					}
 
-
 					if (factoryKind && expected.dependencies !== factory && expected.moduleName !== factory) {
 						expected.factory = factory;
 					} else if (exportKind) {
@@ -161,7 +157,7 @@ function generateArguments(possibleParameterTypes) {
 					const args = [moduleName, dependencies, factory, exp] as DefineCallArgument[];
 					permutations.push({
 						args,
-						expected: expected as ModuleDeclaration
+						expected: expected as ModuleDeclaration,
 					});
 				}
 			}
@@ -181,7 +177,7 @@ function resolveSyntaxKind(decl: ModuleDeclaration) {
 }
 
 function argsToString(args: DefineCallArgument[]): string {
-	return args.map(param => {
+	return args.map((param) => {
 		if (!param?.kind) {
 			return "<omitted>";
 		}
@@ -196,20 +192,20 @@ function declToString(decl: ModuleDeclaration): string {
 
 test("All combinations", async (t) => {
 	const permutations = generateArguments({
-		moduleName: [SyntaxKind.StringLiteral, null /*implies omitted*/],
-		dependencies: [SyntaxKind.ArrayLiteralExpression, null /*implies omitted*/],
+		moduleName: [SyntaxKind.StringLiteral, null],
+		dependencies: [SyntaxKind.ArrayLiteralExpression, null],
 		factory: [
 			SyntaxKind.FunctionExpression, SyntaxKind.ArrowFunction,
 			SyntaxKind.StringLiteral, SyntaxKind.ArrayLiteralExpression,
-			SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword
+			SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword,
 		],
-		export: [SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword, null /*implies omitted*/],
+		export: [SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword, null],
 	});
 
 	t.true(permutations.length > 0, `Generated ${permutations.length} permutations`);
 	permutations.forEach(({args, expected}) => {
 		// Omit any parameters with "kind" set to null
-		const res = _matchArgumentsToParameters(args.filter(_ => _?.kind));
+		const res = _matchArgumentsToParameters(args.filter((_) => _?.kind));
 		t.deepEqual(
 			resolveSyntaxKind(res),
 			resolveSyntaxKind(expected),

@@ -6,14 +6,14 @@ const log = getLogger("amd:parseRequire");
 const {SyntaxKind} = ts;
 
 export interface ProbingRequireExpression {
-	async: false,
-	dependency: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral,
+	async: false;
+	dependency: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral;
 }
 export interface RequireExpression {
-	async: true,
-	dependencies: ts.ArrayLiteralExpression,
-	callback?: ts.ArrowFunction | ts.FunctionExpression | ts.FunctionDeclaration,
-	errback?: ts.ArrowFunction | ts.FunctionExpression | ts.FunctionDeclaration
+	async: true;
+	dependencies: ts.ArrayLiteralExpression;
+	callback?: ts.ArrowFunction | ts.FunctionExpression | ts.FunctionDeclaration;
+	errback?: ts.ArrowFunction | ts.FunctionExpression | ts.FunctionDeclaration;
 }
 
 /**
@@ -51,7 +51,7 @@ export default function parseRequire(
 		if (ts.isIdentifier(arg)) {
 			// Try and resolve the identifier to a more concrete node
 			const sym = checker.getSymbolAtLocation(arg);
-			if (sym && sym.declarations) {
+			if (sym?.declarations) {
 				for (const decl of sym.declarations) {
 					if (ts.isVariableDeclaration(decl)) {
 						if (decl.initializer) {
@@ -95,21 +95,21 @@ function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): Require
 	args.forEach((arg, idx) => {
 		// We only support a certain set of types. Abort if we encounter anything else
 		switch (arg.kind) {
-		case SyntaxKind.StringLiteral:
-		case SyntaxKind.NumericLiteral:
-		case SyntaxKind.ArrayLiteralExpression:
-		case SyntaxKind.ObjectLiteralExpression:
-		case SyntaxKind.ArrowFunction:
-		case SyntaxKind.FunctionExpression:
-		case SyntaxKind.TrueKeyword:
-		case SyntaxKind.FalseKeyword:
-		case SyntaxKind.FunctionDeclaration:
-		case SyntaxKind.ClassDeclaration:
-		case SyntaxKind.NoSubstitutionTemplateLiteral:
-		case SyntaxKind.PropertyAccessExpression:
-			return;
-		default:
-			throw new UnsupportedModuleError(
+			case SyntaxKind.StringLiteral:
+			case SyntaxKind.NumericLiteral:
+			case SyntaxKind.ArrayLiteralExpression:
+			case SyntaxKind.ObjectLiteralExpression:
+			case SyntaxKind.ArrowFunction:
+			case SyntaxKind.FunctionExpression:
+			case SyntaxKind.TrueKeyword:
+			case SyntaxKind.FalseKeyword:
+			case SyntaxKind.FunctionDeclaration:
+			case SyntaxKind.ClassDeclaration:
+			case SyntaxKind.NoSubstitutionTemplateLiteral:
+			case SyntaxKind.PropertyAccessExpression:
+				return;
+			default:
+				throw new UnsupportedModuleError(
 				`Unsupported type for argument in sap.ui.define call at index ${idx}: ${SyntaxKind[arg.kind]}`);
 		}
 	});

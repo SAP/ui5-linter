@@ -1,24 +1,24 @@
-import anyTest, { TestFn } from "ava";
-import sinon, { SinonStub } from "sinon";
+import anyTest, {TestFn} from "ava";
+import sinon, {SinonStub} from "sinon";
 import esmock from "esmock";
 import chalk from "chalk";
 import yargs from "yargs";
 import path from "node:path";
-import type { LintResult } from "../../../src/detectors/AbstractDetector.js";
+import type {LintResult} from "../../../src/detectors/AbstractDetector.js";
 import type Base from "../../../src/cli/base.js";
 
 const test = anyTest as TestFn<{
-	lintProject: SinonStub,
-	writeFile: SinonStub,
-	consoleLogStub: SinonStub,
-	processStdErrWriteStub: SinonStub,
-	isLogLevelEnabledStub: SinonStub,
-	consoleWriterStopStub: SinonStub,
-	processErrWrite: SinonStub,
-	formatText: SinonStub,
-	formatJson: SinonStub,
-	cli: yargs.Argv,
-	base: typeof Base
+	lintProject: SinonStub;
+	writeFile: SinonStub;
+	consoleLogStub: SinonStub;
+	processStdErrWriteStub: SinonStub;
+	isLogLevelEnabledStub: SinonStub;
+	consoleWriterStopStub: SinonStub;
+	processErrWrite: SinonStub;
+	formatText: SinonStub;
+	formatJson: SinonStub;
+	cli: yargs.Argv;
+	base: typeof Base;
 }>;
 
 test.beforeEach(async (t) => {
@@ -48,32 +48,32 @@ test.beforeEach(async (t) => {
 
 	t.context.base = await esmock.p("../../../src/cli/base.js", {
 		"../../../src/linter/linter.js": {
-			lintProject: t.context.lintProject
+			lintProject: t.context.lintProject,
 		},
 		"../../../src/formatter/coverage.js": {
 			Coverage: sinon.stub().callsFake(() => {
-				return { format: sinon.stub().returns(null) };
-			})
+				return {format: sinon.stub().returns(null)};
+			}),
 		},
 		"../../../src/formatter/text.js": {
 			Text: sinon.stub().callsFake(() => {
-				return { format: t.context.formatText };
-			})
+				return {format: t.context.formatText};
+			}),
 		},
 		"../../../src/formatter/json.js": {
 			Json: sinon.stub().callsFake(() => {
-				return { format: t.context.formatJson };
-			})
+				return {format: t.context.formatJson};
+			}),
 		},
 		"node:fs/promises": {
-			writeFile: t.context.writeFile
+			writeFile: t.context.writeFile,
 		},
 		"@ui5/logger": {
-			isLogLevelEnabled: t.context.isLogLevelEnabledStub
+			isLogLevelEnabled: t.context.isLogLevelEnabledStub,
 		},
 		"@ui5/logger/writers/Console": {
-			stop: t.context.consoleWriterStopStub
-		}
+			stop: t.context.consoleWriterStopStub,
+		},
 	});
 
 	t.context.base(t.context.cli);
@@ -85,43 +85,43 @@ test.afterEach.always((t) => {
 });
 
 test.serial("ui5lint (default) ", async (t) => {
-	const { cli, lintProject, writeFile } = t.context;
+	const {cli, lintProject, writeFile} = t.context;
 
 	await cli.parseAsync([]);
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
-	t.deepEqual(lintProject.getCall(0).args[0], { rootDir: path.join(process.cwd()), filePaths: undefined });
+	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths: undefined});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --file-paths ", async (t) => {
-	const { cli, lintProject } = t.context;
+	const {cli, lintProject} = t.context;
 	const filePaths = [
 		path.resolve(process.cwd(), "path/to/resource"),
-		path.resolve(process.cwd(), "another/path/to/resource")
+		path.resolve(process.cwd(), "another/path/to/resource"),
 	];
 
 	await cli.parseAsync(["--file-paths", filePaths[0], "--file-paths", filePaths[1]]);
 
 	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], { rootDir: path.join(process.cwd()), filePaths });
+	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --coverage ", async (t) => {
-	const { cli, lintProject, writeFile } = t.context;
+	const {cli, lintProject, writeFile} = t.context;
 
 	await cli.parseAsync(["--coverage"]);
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
-	t.deepEqual(lintProject.getCall(0).args[0], { rootDir: path.join(process.cwd()), filePaths: undefined });
+	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths: undefined});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --details ", async (t) => {
-	const { cli, lintProject, formatText } = t.context;
+	const {cli, lintProject, formatText} = t.context;
 
 	await cli.parseAsync(["--details"]);
 
@@ -131,7 +131,7 @@ test.serial("ui5lint --details ", async (t) => {
 });
 
 test.serial("ui5lint --format json ", async (t) => {
-	const { cli, lintProject, formatJson } = t.context;
+	const {cli, lintProject, formatJson} = t.context;
 
 	await cli.parseAsync(["--format", "json"]);
 
@@ -154,7 +154,7 @@ test.serial("Yargs error handling", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This is a task",
-		handler: async function() {}
+		handler: async function () {},
 	});
 
 	await cli.parseAsync(["invalid"]);
@@ -165,12 +165,12 @@ test.serial("Yargs error handling", async (t) => {
 	t.is(consoleWriterStopStub.callCount, 0, "ConsoleWriter.stop did not get called");
 	t.is(processStdErrWriteStub.callCount, 5);
 	t.deepEqual(processStdErrWriteStub.getCall(0).args, [
-		chalk.bold.yellow("Command Failed:") + "\n"
+		chalk.bold.yellow("Command Failed:") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, ["Unknown argument: invalid\n"], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(2).args, ["\n"], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(3).args, [
-		chalk.dim(`See 'ui5lint --help'`) + "\n"
+		chalk.dim(`See 'ui5lint --help'`) + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(4).args, [""],
 		"Note: This is a call from handleLint as yargs doesn't really stop when process.exit is stubbed. " +
@@ -195,13 +195,13 @@ test.serial("Exception error handling", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This task fails with an error",
-		handler: async function() {
+		handler: async function () {
 			throw error;
-		}
+		},
 	});
 
 	await t.throwsAsync(cli.parseAsync(["foo"]), {
-		is: error
+		is: error,
 	});
 
 	const errorCode = await processExit;
@@ -210,16 +210,16 @@ test.serial("Exception error handling", async (t) => {
 	t.is(consoleWriterStopStub.callCount, 1, "ConsoleWriter.stop got called once");
 	t.is(processStdErrWriteStub.callCount, 7);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
-		chalk.bold.red("⚠️  Process Failed With Error") + "\n"
+		chalk.bold.red("⚠️  Process Failed With Error") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(3).args, [
-		chalk.underline("Error Message:") + "\n"
+		chalk.underline("Error Message:") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(4).args,
 		["Some error from foo command\n"], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(6).args, [chalk.dim(
 		`For details, execute the same command again with an additional '--verbose' parameter`) +
-		"\n"
+		"\n",
 	], "Correct error log");
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -243,13 +243,13 @@ test.serial("Exception error handling without logging (silent)", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This task fails with an error",
-		handler: async function() {
+		handler: async function () {
 			throw error;
-		}
+		},
 	});
 
 	await t.throwsAsync(cli.parseAsync(["foo"]), {
-		is: error
+		is: error,
 	});
 
 	const errorCode = await processExit;
@@ -279,13 +279,13 @@ test.serial("Exception error handling with verbose logging", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This task fails with an error",
-		handler: async function() {
+		handler: async function () {
 			throw error;
-		}
+		},
 	});
 
 	await t.throwsAsync(cli.parseAsync(["foo"]), {
-		is: error
+		is: error,
 	});
 
 	const errorCode = await processExit;
@@ -293,10 +293,10 @@ test.serial("Exception error handling with verbose logging", async (t) => {
 	t.is(errorCode, 1, "Should exit with error code 1");
 	t.is(processStdErrWriteStub.callCount, 10);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
-		chalk.bold.red("⚠️  Process Failed With Error") + "\n"
+		chalk.bold.red("⚠️  Process Failed With Error") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(3).args, [
-		chalk.underline("Error Message:") + "\n"
+		chalk.underline("Error Message:") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(4).args,
 		["Some error from foo command\n"], "Correct error log");
@@ -331,13 +331,13 @@ test.serial("Unexpected error handling", async (t) => {
 	cli.command({
 		command: "foo",
 		describe: "This task fails with a TypeError",
-		handler: async function() {
+		handler: async function () {
 			throw typeError;
-		}
+		},
 	});
 
 	await t.throwsAsync(cli.parseAsync(["foo"]), {
-		is: typeError
+		is: typeError,
 	});
 
 	const errorCode = await processExit;
@@ -346,10 +346,10 @@ test.serial("Unexpected error handling", async (t) => {
 	t.is(consoleWriterStopStub.callCount, 1, "ConsoleWriter.stop got called once");
 	t.is(processStdErrWriteStub.callCount, 10);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
-		chalk.bold.red("⚠️  Process Failed With Error") + "\n"
+		chalk.bold.red("⚠️  Process Failed With Error") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(3).args, [
-		chalk.underline("Error Message:") + "\n"
+		chalk.underline("Error Message:") + "\n",
 	], "Correct error log");
 	t.deepEqual(processStdErrWriteStub.getCall(4).args,
 		["Cannot do this\n"], "Correct error log");

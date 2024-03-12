@@ -6,10 +6,10 @@ const log = getLogger("transpilers:amd:parseModuleDeclaration");
 const {SyntaxKind} = ts;
 
 export interface ModuleDeclaration {
-	moduleName?: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral,
-	dependencies?: ts.ArrayLiteralExpression,
-	factory: DefineCallArgument,
-	export?: ts.BooleanLiteral,
+	moduleName?: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral;
+	dependencies?: ts.ArrayLiteralExpression;
+	factory: DefineCallArgument;
+	export?: ts.BooleanLiteral;
 }
 
 /**
@@ -77,30 +77,30 @@ export default function parseModuleDeclaration(
 }
 
 // Keep this type in sync with the "assertSupportedTypes" function
-export type DefineCallArgument = ts.StringLiteral |ts.NoSubstitutionTemplateLiteral | ts.NumericLiteral |
+export type DefineCallArgument = ts.StringLiteral | ts.NoSubstitutionTemplateLiteral | ts.NumericLiteral |
 	ts.ArrayLiteralExpression | ts.BooleanLiteral | ts.PropertyAccessExpression |
 	ts.ObjectLiteralExpression | ts.ArrowFunction | ts.FunctionExpression |
-	ts.FunctionDeclaration | ts.ClassDeclaration | ts.NoSubstitutionTemplateLiteral;
+	ts.FunctionDeclaration | ts.ClassDeclaration;
 
 function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): DefineCallArgument[] {
 	args.forEach((arg, idx) => {
 		// We only support a certain set of types. Abort if we encounter anything else
 		switch (arg.kind) {
-		case SyntaxKind.StringLiteral:
-		case SyntaxKind.NumericLiteral:
-		case SyntaxKind.ArrayLiteralExpression:
-		case SyntaxKind.ObjectLiteralExpression:
-		case SyntaxKind.ArrowFunction:
-		case SyntaxKind.FunctionExpression:
-		case SyntaxKind.TrueKeyword:
-		case SyntaxKind.FalseKeyword:
-		case SyntaxKind.FunctionDeclaration:
-		case SyntaxKind.ClassDeclaration:
-		case SyntaxKind.NoSubstitutionTemplateLiteral:
-		case SyntaxKind.PropertyAccessExpression:
-			return;
-		default:
-			throw new UnsupportedModuleError(
+			case SyntaxKind.StringLiteral:
+			case SyntaxKind.NumericLiteral:
+			case SyntaxKind.ArrayLiteralExpression:
+			case SyntaxKind.ObjectLiteralExpression:
+			case SyntaxKind.ArrowFunction:
+			case SyntaxKind.FunctionExpression:
+			case SyntaxKind.TrueKeyword:
+			case SyntaxKind.FalseKeyword:
+			case SyntaxKind.FunctionDeclaration:
+			case SyntaxKind.ClassDeclaration:
+			case SyntaxKind.NoSubstitutionTemplateLiteral:
+			case SyntaxKind.PropertyAccessExpression:
+				return;
+			default:
+				throw new UnsupportedModuleError(
 				`Unsupported type for argument in sap.ui.define call at index ${idx}: ${SyntaxKind[arg.kind]}`);
 		}
 	});
@@ -108,10 +108,10 @@ function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): DefineC
 }
 
 const enum Param {
-	ModuleName		= 0,
+	ModuleName = 0,
 	Dependencies	= 1,
-	Factory			= 2,
-	Export			= 3,
+	Factory = 2,
+	Export = 3,
 }
 
 export function _matchArgumentsToParameters(args: DefineCallArgument[]): ModuleDeclaration {
@@ -188,7 +188,7 @@ export function _matchArgumentsToParameters(args: DefineCallArgument[]): ModuleD
 				} else if (j === Param.Dependencies) {
 					result.dependencies = args[i] as ModuleDeclaration["dependencies"];
 				} else if (j === Param.Factory) {
-					result.factory = args[i] as ModuleDeclaration["factory"];
+					result.factory = args[i];
 				} else if (j === Param.Export) {
 					result.export = args[i] as ModuleDeclaration["export"];
 				}
@@ -210,11 +210,11 @@ function permute(arg: DefineCallArgument, startAt: Param): number[] {
 	if (startAt <= Param.Dependencies && canBeDependencies(arg)) {
 		perm[1] = 1;
 	}
-	if(startAt <= Param.Factory && canBeFactory(arg)) {
+	if (startAt <= Param.Factory && canBeFactory(arg)) {
 		perm[2] = 1;
 	}
 
-	if(startAt <= Param.Export && canBeExport(arg)) {
+	if (startAt <= Param.Export && canBeExport(arg)) {
 		perm[3] = 1;
 	}
 	return perm;

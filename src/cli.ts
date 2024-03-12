@@ -1,21 +1,21 @@
 import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
+import {hideBin} from "yargs/helpers";
 import base from "./cli/base.js";
-import { fileURLToPath } from "node:url";
-import { setVersion } from "./cli/version.js";
-import { createRequire } from "module";
+import {fileURLToPath} from "node:url";
+import {setVersion} from "./cli/version.js";
+import {createRequire} from "module";
 
 export default async function () {
 	const cli = yargs(hideBin(process.argv));
 	cli.parserConfiguration({
-		"parse-numbers": false
+		"parse-numbers": false,
 	});
 
 	// Explicitly set CLI version as the yargs default might
 	// be wrong in case a local CLI installation is used
 	// Also add CLI location
 	const require = createRequire(import.meta.url);
-	const pkg = require("../package.json") as { version: string };
+	const pkg = require("../package.json") as {version: string};
 	const ui5LintJsPath = fileURLToPath(new URL("../bin/ui5lint.js", import.meta.url));
 	const pkgVersion = `${pkg.version} (from ${ui5LintJsPath})`;
 

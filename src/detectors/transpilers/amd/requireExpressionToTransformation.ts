@@ -5,14 +5,14 @@ import {ProbingRequireExpression, RequireExpression} from "./parseRequire.js";
 const log = getLogger("transpilers:amd:transformRequireCall");
 
 export interface RequireTransformationAsync {
-	imports: ts.ImportDeclaration[],
-	callback?: ts.CallExpression,
-	errback?: ts.FunctionDeclaration,
+	imports: ts.ImportDeclaration[];
+	callback?: ts.CallExpression;
+	errback?: ts.FunctionDeclaration;
 }
 
 export interface RequireTransformationSync {
-	import: ts.ImportDeclaration,
-	requireStatement: ts.Identifier | ts.AsExpression // Identifier for JS transpilation, AsExpression for TS
+	import: ts.ImportDeclaration;
+	requireStatement: ts.Identifier | ts.AsExpression; // Identifier for JS transpilation, AsExpression for TS
 }
 
 export function transformAsyncRequireCall(
@@ -49,14 +49,14 @@ export function transformAsyncRequireCall(
 		let moduleSpecifier: ts.StringLiteral;
 		if (!ts.isStringLiteralLike(dep)) {
 			log.verbose(`Skipping non-string dependency entry of type ${ts.SyntaxKind[dep.kind]} at ` +
-				toPosStr(dep));
+			toPosStr(dep));
 			return;
 		}
 		if (ts.isNoSubstitutionTemplateLiteral(dep)) {
 			moduleSpecifier = nodeFactory.createStringLiteral(dep.text);
 			// Set pos to the original position to preserve source mapping capability
 			// (cast type to avoid TS error due to modifying a read only property)
-			(moduleSpecifier.pos as ts.Node["pos"]) = dep.pos;
+			(moduleSpecifier.pos) = dep.pos;
 		} else {
 			moduleSpecifier = dep;
 		}
@@ -65,7 +65,7 @@ export function transformAsyncRequireCall(
 			// Generate variable name based on import module
 			// Later this variable will be used to call the factory function
 			identifier = nodeFactory.createUniqueName(dep.text.replace(/[^a-zA-Z0-9]/g, "_"));
-		} else if (callbackParams && callbackParams[i]) {
+		} else if (callbackParams?.[i]) {
 			// Use factory parameter identifier as import identifier
 			identifier = callbackParams[i];
 		} // else: Side effect imports. No identifier needed
@@ -156,6 +156,6 @@ export function transformSyncRequireCall(
 	const requireStatement = identifier;
 	return {
 		import: importDeclaration,
-		requireStatement
+		requireStatement,
 	};
 }

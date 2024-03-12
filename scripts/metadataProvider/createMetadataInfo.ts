@@ -2,7 +2,7 @@ import {writeFile} from "node:fs/promises";
 import MetadataProvider from "./MetadataProvider";
 
 import {
-	forEachSymbol
+	forEachSymbol,
 } from "@ui5-language-assistant/semantic-model";
 
 async function main(apiJsonsRoot: string, sapui5Version: string) {
@@ -22,9 +22,9 @@ async function main(apiJsonsRoot: string, sapui5Version: string) {
 	const apiExtract = {
 		framework: {
 			name: "SAPUI5",
-			version: sapui5Version
+			version: sapui5Version,
 		},
-		defaultAggregations
+		defaultAggregations,
 	};
 
 	await writeFile(

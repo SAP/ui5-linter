@@ -3,7 +3,7 @@ import type {
 	JSONSchemaForSAPUI5Namespace,
 	JSONSchemaForSAPAPPNamespace,
 	Model as ManifestModel,
-	DataSource as ManifestDataSource
+	DataSource as ManifestDataSource,
 } from "../../manifest.d.ts";
 import type {LintResult} from "../../detectors/AbstractDetector.js";
 
@@ -11,23 +11,23 @@ import ManifestReporter from "./ManifestReporter.js";
 import {LintMessageSeverity} from "../../detectors/AbstractDetector.js";
 import jsonMap from "json-source-map";
 
-type locType = {
-	line: number,
-	column: number,
-	pos: number,
+interface locType {
+	line: number;
+	column: number;
+	pos: number;
 }
 
-export type jsonMapPointers = Record<string, {key: locType, keyEnd: locType, value: locType, valueEnd: locType}>;
+export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
 
-export type jsonSourceMapType = {
-	data: SAPJSONSchemaForWebApplicationManifestFile,
-	pointers: jsonMapPointers
+export interface jsonSourceMapType {
+	data: SAPJSONSchemaForWebApplicationManifestFile;
+	pointers: jsonMapPointers;
 }
 
 export default class ManifestLinter {
 	#reporter: ManifestReporter | null;
-	#content: string = "";
-	#path: string = "";
+	#content = "";
+	#path = "";
 
 	constructor(content: string, path: string) {
 		this.#reporter = null;
@@ -49,10 +49,10 @@ export default class ManifestLinter {
 	}
 
 	#analyzeManifest(manifest: SAPJSONSchemaForWebApplicationManifestFile) {
-		const {resources, models} = <JSONSchemaForSAPUI5Namespace>manifest["sap.ui5"] ?? {};
-		const {dataSources} = <JSONSchemaForSAPAPPNamespace>manifest["sap.app"] ?? {};
+		const {resources, models} = manifest["sap.ui5"]! ?? {};
+		const {dataSources} = manifest["sap.app"] ?? {};
 
-		if (resources && resources.js) {
+		if (resources?.js) {
 			this.#reporter?.addMessage({
 				node: "/sap.ui5/resources/js",
 				severity: LintMessageSeverity.Error,
@@ -63,11 +63,11 @@ export default class ManifestLinter {
 
 		const modelKeys: string[] = (models && Object.keys(models)) || [];
 		modelKeys.forEach((modelKey: string) => {
-			const curModel: ManifestModel = (models && <ManifestModel>(models[modelKey])) || {};
+			const curModel: ManifestModel = (models?.[modelKey])) || {};
 
 			if (!curModel.type) {
 				const curDataSource = dataSources && curModel.dataSource &&
-					<ManifestDataSource>dataSources[curModel.dataSource];
+					dataSources[curModel.dataSource];
 
 				if (curDataSource &&
 					/* if not provided dataSource.type="OData" */
@@ -82,26 +82,25 @@ export default class ManifestLinter {
 
 			if (curModel.type && [
 				"sap.ui.model.odata.ODataModel",
-				"sap.zen.dsh.widgets.SDKModel"
+				"sap.zen.dsh.widgets.SDKModel",
 			].includes(curModel.type)) {
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/models/${modelKey}/type`,
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-deprecated-api",
 					message: `Use of deprecated model type ` +
-						`'sap.ui5/models/${modelKey}/type="${curModel.type}"'`
+					`'sap.ui5/models/${modelKey}/type="${curModel.type}"'`,
 				});
 			}
 
 			if (curModel.type === "sap.ui.model.odata.v4.ODataModel" &&
 				curModel.settings && "synchronizationMode" in curModel.settings) {
-
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/models/${modelKey}/settings/synchronizationMode`,
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-deprecated-api",
 					message: `Use of deprecated property ` +
-						`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`
+					`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`,
 				});
 			}
 		});

@@ -21,7 +21,7 @@ export function amdToEsm(moduleId: string, content: string, strict?: boolean): T
 	} catch (err) {
 		if (err instanceof Error) {
 			throw new Error(`Failed to transpile module ${moduleId}: ${err.message}`, {
-				cause: err
+				cause: err,
 			});
 		} else {
 			throw err;
@@ -41,7 +41,7 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 		{
 			languageVersion: ts.ScriptTarget.ES2022,
 			jsDocParsingMode: ts.JSDocParsingMode.ParseNone,
-		},
+		}
 	);
 
 	// Output
@@ -62,13 +62,13 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 		suppressOutputPathCheck: true,
 		noLib: true,
 		noResolve: true,
-		allowNonTsExtensions: true
+		allowNonTsExtensions: true,
 	};
 
 	// TODO: Investigate whether it would be faster to create one host + program to transpile many files in
 	// one batch
 	const compilerHost: ts.CompilerHost = {
-		getSourceFile: fileName => fileName === inputFileName ? sourceFile : undefined,
+		getSourceFile: (fileName) => fileName === inputFileName ? sourceFile : undefined,
 		writeFile: (name, text) => {
 			if (name.endsWith(".map")) {
 				if (sourceMapText) {
@@ -85,7 +85,7 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 		},
 		getDefaultLibFileName: () => "lib.d.ts",
 		useCaseSensitiveFileNames: () => false,
-		getCanonicalFileName: fileName => fileName,
+		getCanonicalFileName: (fileName) => fileName,
 		getCurrentDirectory: () => "",
 		getNewLine: () => "\n",
 		fileExists: (fileName): boolean => fileName === inputFileName,
@@ -96,15 +96,15 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 	const program = ts.createProgram([inputFileName], compilerOptions, compilerHost);
 
 	const transformers: ts.CustomTransformers = {
-		before: [createTransformer(resourcePath, program)]
+		before: [createTransformer(resourcePath, program)],
 	};
 
 	try {
 		// ts.setEmitFlags(sourceFile, ts.EmitFlags.NoTrailingSourceMap);
 		// TODO: Investigate whether we can retrieve a source file that can be fed directly into the typeChecker
 		program.emit(
-			/*targetSourceFile*/ undefined, /*writeFile*/ undefined,
-			/*cancellationToken*/ undefined, /*emitOnlyDtsFiles*/ undefined,
+			/* targetSourceFile */ undefined, /* writeFile */ undefined,
+			/* cancellationToken */ undefined, /* emitOnlyDtsFiles */ undefined,
 			transformers);
 
 		/*	tsc currently does not provide an API to emit TypeScript *with* a source map
@@ -121,7 +121,7 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 			const printed = printer.printFile(result.transformed[0]);
 			outputText = printed;
 		*/
-	} catch(err) {
+	} catch (err) {
 		if (strict) {
 			throw err;
 		}
@@ -131,7 +131,7 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);
 			}
-			return { source: content, map: "" };
+			return {source: content, map: ""};
 		} else if (err instanceof Error && err.message.startsWith("Debug Failure")) {
 			// We probably failed to create a valid AST
 			log.verbose(`AST transformation failed for module ${resourcePath}: ${err.message}`);
@@ -139,7 +139,7 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);
 			}
-			return { source: content, map: "" };
+			return {source: content, map: ""};
 		}
 		throw err;
 	}
@@ -149,5 +149,5 @@ function transpile(resourcePath: string, content: string, strict?: boolean): Tra
 	// Convert sourceMappingURL ending with ".js" to ".ts"
 	outputText = outputText
 		.replace(`//# sourceMappingURL=${sourceMapName}`, `//# sourceMappingURL=${outputFileName}.map`);
-	return { source: outputText, map: sourceMapText as string };
+	return {source: outputText, map: sourceMapText!};
 }

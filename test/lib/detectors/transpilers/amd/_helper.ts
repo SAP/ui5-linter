@@ -6,10 +6,10 @@ import {readdirSync} from "node:fs";
 import fs from "node:fs/promises";
 import {amdToEsm} from "../../../../../src/detectors/transpilers/amd/transpiler.js";
 
-util.inspect.defaultOptions.depth = 4;  // Increase AVA's printing depth since coverageInfo objects are on level 4
+util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
-	sinon: sinonGlobal.SinonSandbox,
+	sinon: sinonGlobal.SinonSandbox;
 }>;
 
 // Helper function to create linting tests for all files in a directory
@@ -43,7 +43,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const fileContent = await fs.readFile(filePath);
 				const {source, map} = amdToEsm(testName, fileContent.toString(), true);
 				t.snapshot(source);
-				t.snapshot(map && JSON.parse(<string>map));
+				t.snapshot(map && JSON.parse(map));
 			});
 		}
 	} catch (err) {
