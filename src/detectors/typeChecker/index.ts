@@ -105,7 +105,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			try {
 				if (resourcePath.endsWith(".xml")) {
 					resourcePath = resourcePath.replace(/\.xml$/, ".js");
-					const resourceContent = await resource.getStream();
+					const resourceContent = resource.getStream();
 					({source, map, messages} =
 						await xmlToJs(path.basename(originalResourcePath), resourceContent));
 				} else if (resourcePath.endsWith(".js")) {
@@ -193,7 +193,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 				(and check the resulting path is within the projectPath)
 		*/
 		let resourcePaths: (string | undefined)[];
-		if (filePaths && filePaths.length) {
+		if (filePaths?.length) {
 			const absoluteFilePaths = filePaths.map((filePath) => {
 				if (!path.isAbsolute(filePath)) {
 					// Resolve relative filePaths

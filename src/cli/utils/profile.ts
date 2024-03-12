@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import {writeFile} from "node:fs/promises";
 import {Session, Profiler} from "node:inspector";
 import {getLogger} from "@ui5/logger";
@@ -72,7 +73,7 @@ function registerSigHooks() {
 	function createListener(exitCode: number) {
 		return function () {
 			// Gracefully end profiling, then exit
-			stop().then(() => {
+			void stop().then(() => {
 				process.exit(exitCode);
 			});
 		};

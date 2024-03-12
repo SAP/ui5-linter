@@ -5,6 +5,10 @@ import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
+interface PackageJson {
+	dependencies: Record<string, string>;
+}
+
 function notImplemented(methodName: string) {
 	throw new Error(`Not implemented: ${methodName}`);
 }
@@ -16,7 +20,7 @@ function addPathMappingForPackage(pkgName: string, pathMapping: Map<string, stri
 
 async function collectTransitiveDependencies(pkgName: string, deps: Set<string>): Promise<Set<string>> {
 	const pkgJsonPath = require.resolve(`${pkgName}/package.json`);
-	const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, "utf8"));
+	const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, "utf8")) as PackageJson;
 	if (pkgJson.dependencies) {
 		await Promise.all(Object.keys(pkgJson.dependencies).map(async (depName) => {
 			deps.add(depName);
@@ -138,7 +142,7 @@ export async function createVirtualCompilerHost(
 			}
 			return false;
 		},
-		getCurrentDirectory: () => options.rootDir || "/",
+		getCurrentDirectory: () => options.rootDir ?? "/",
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		getDirectories: (directory: string) => {
 			// This function seems to be called only if the "types" option is not set
@@ -153,7 +157,7 @@ export async function createVirtualCompilerHost(
 			// This function doesn't seem to be called during normal operations
 			// console.log(`readDirectory: ${dirPath}`);
 			return Array.from(files.keys()).filter((filePath) => {
-				if (include || exclude || depth || extensions) {
+				if (include ?? exclude ?? depth ?? extensions) {
 					notImplemented("readDirectory: Optional parameters");
 				}
 				return posixPath.dirname(filePath) === dirPath;

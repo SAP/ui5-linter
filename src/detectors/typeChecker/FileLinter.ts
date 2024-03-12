@@ -20,6 +20,7 @@ export default class FileLinter {
 		this.#boundVisitNode = this.visitNode.bind(this);
 	}
 
+	// eslint-disable-next-line @typescript-eslint/require-await
 	async getReport(): Promise<LintResult> {
 		try {
 			this.visitNode(this.#sourceFile);
@@ -96,7 +97,7 @@ export default class FileLinter {
 									node: prop,
 									severity: LintMessageSeverity.Error,
 									ruleId: "ui5-linter-no-deprecated-api",
-									message: `Use of deprecated property '${propertySymbol.escapedName}' ` +
+									message: `Use of deprecated property '${propertySymbol.escapedName as string}' ` +
 									`of class '${this.#checker.typeToString(nodeType)}'`,
 									messageDetails: this.extractDeprecatedMessage(propertySymbol),
 								});
@@ -196,7 +197,7 @@ export default class FileLinter {
 			ruleId: "ui5-linter-no-deprecated-api",
 			message:
 				`Call to deprecated function ` +
-				`'${symbol.escapedName}'${additionalMessage}`,
+				`'${symbol.escapedName as string}'${additionalMessage}`,
 			messageDetails: this.extractDeprecatedMessage(symbol),
 		});
 	}
@@ -234,7 +235,7 @@ export default class FileLinter {
 				ruleId: "ui5-linter-no-deprecated-property",
 				message:
 					`Access of deprecated property ` +
-					`'${symbol.escapedName}'`,
+					`'${symbol.escapedName as string}'`,
 				messageDetails: this.extractDeprecatedMessage(symbol),
 			});
 		}

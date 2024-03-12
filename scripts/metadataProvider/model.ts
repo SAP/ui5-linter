@@ -67,6 +67,7 @@ export async function createSemanticModel(apiJsonsRoot: string): Promise<UI5Sema
 		// Overwrite console.error with a noop since #generate produces a lot of messages error messages
 		// that we don't want to deal with right now
 		originalConsoleError = console.error;
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		console.error = () => {};
 	}
 	model = generate({

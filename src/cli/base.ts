@@ -1,4 +1,4 @@
-import {Argv, ArgumentsCamelCase} from "yargs";
+import {Argv, ArgumentsCamelCase, CommandModule, MiddlewareFunction} from "yargs";
 import path from "node:path";
 import {lintProject} from "../linter/linter.js";
 import {Text} from "../formatter/text.js";
@@ -10,13 +10,25 @@ import chalk from "chalk";
 import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 
-const lintCommand = {
+export interface LinterArg {
+	coverage: boolean;
+	filePaths: string[];
+	details: boolean;
+	format: string;
+}
+
+// yargs type defition is missing the "middelwares" property for the CommandModule type
+interface FixedCommandModule<T, U> extends CommandModule<T, U> {
+	middlewares: MiddlewareFunction<U>[];
+}
+
+const lintCommand: FixedCommandModule<object, LinterArg> = {
 	command: "$0",
 	describe: "Runs linter",
 	handler: handleLint,
 	middlewares: [baseMiddleware],
-	builder: function (cli: Argv) {
-		cli.usage("Usage: $0 [options]")
+	builder: function (args: Argv<object>): Argv<LinterArg> {
+		args.usage("Usage: $0 [options]")
 			.option("file-paths", {
 				describe: "",
 				type: "string",
@@ -62,7 +74,7 @@ const lintCommand = {
 			.coerce([
 				// base.js
 				"log-level",
-			], (arg) => {
+			], (arg: LinterArg[]) => {
 				// If an option is specified multiple times, yargs creates an array for all the values,
 				// independently of whether the option is of type "array" or "string".
 				// This is unexpected for options listed above, which should all only have only one
@@ -74,6 +86,7 @@ const lintCommand = {
 				// Note: This is not necessary for options of type "boolean"
 				if (Array.isArray(arg)) {
 					// If the option is specified multiple times, use the value of the last option
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					return arg[arg.length - 1];
 				}
 				return arg;
@@ -83,17 +96,17 @@ const lintCommand = {
 			.example("ui5lint --file-paths /path/to/resources",
 				"Execute command with scope of file-paths");
 
-		return cli;
+		return args as Argv<LinterArg>;
 	},
 };
 
-async function handleLint(argv: ArgumentsCamelCase) {
+async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		coverage,
 		filePaths,
 		details,
 		format,
-	} = (argv as unknown) as {coverage: boolean; filePaths: string[]; details: boolean; format: string};
+	} = argv;
 
 	let profile;
 	if (process.env.UI5LINT_PROFILE) {
@@ -103,10 +116,10 @@ async function handleLint(argv: ArgumentsCamelCase) {
 
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
-		filePaths: filePaths && filePaths.map((filePath) => path.resolve(process.cwd(), filePath)),
+		filePaths: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
 	});
 
-	if (process.env.UI5LINT_COVERAGE_REPORT || coverage) {
+	if (process.env.UI5LINT_COVERAGE_REPORT ?? coverage) {
 		const coverageFormatter = new Coverage();
 		await writeFile("ui5lint-report.html", await coverageFormatter.format(res));
 	}

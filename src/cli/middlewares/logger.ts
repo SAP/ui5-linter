@@ -5,8 +5,8 @@ import type {ArgumentsCamelCase} from "yargs";
 /**
  * Logger middleware to enable logging capabilities
  *
- * @param {object} argv logger arguments
  */
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function initLogger(argv: ArgumentsCamelCase) {
 	if (argv.silent) {
 		setLogLevel("silent");

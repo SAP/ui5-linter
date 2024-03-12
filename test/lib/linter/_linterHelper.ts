@@ -4,7 +4,8 @@ import util from "util";
 import {readdirSync} from "node:fs";
 import esmock from "esmock";
 import {LintResult} from "../../../src/detectors/AbstractDetector.js";
-import FileLinter from "../../../src/detectors/typeChecker/FileLinter.ts";
+import FileLinter from "../../../src/detectors/typeChecker/FileLinter.js";
+import {SourceFile, TypeChecker} from "typescript";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -23,7 +24,10 @@ test.before(async (t) => {
 export async function esmockMessageDetails() {
 	const checkerModule = await esmock("../../../src/detectors/typeChecker/index.js", {
 		"../../../src/detectors/typeChecker/FileLinter.js":
-		function (rootDir, filePath, sourceFile, sourceMap, checker) {
+		function (
+			rootDir: string, filePath: string, sourceFile: SourceFile,
+			sourceMap: string | undefined, checker: TypeChecker
+		) {
 			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 			const linter = new FileLinter(rootDir, filePath, sourceFile, sourceMap, checker);
 			linter.extractDeprecatedMessage = () => "Deprecated test message";
@@ -83,7 +87,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					filePaths,
 				});
 				assertExpectedLintResults(t, res, fixturesPath, filePaths);
-				res.forEach((results) => {
+				res.forEach((results: {filePath: string}) => {
 					results.filePath = testName;
 				});
 				t.snapshot(res);

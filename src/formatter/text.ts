@@ -7,7 +7,7 @@ function formatSeverity(severity: LintMessageSeverity) {
 	} else if (severity === LintMessageSeverity.Warning) {
 		return chalk.yellow("warning");
 	} else {
-		throw new Error(`Unknown severity: ${severity}`);
+		throw new Error(`Unknown severity: ${LintMessageSeverity[severity]}`);
 	}
 }
 

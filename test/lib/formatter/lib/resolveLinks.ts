@@ -1,4 +1,4 @@
-import anyTest, {TestFn} from "ava";
+import anyTest from "ava";
 import {resolveLinks} from "../../../../src/formatter/lib/resolveLinks.js";
 
 const test = anyTest;
