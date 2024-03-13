@@ -14,7 +14,6 @@ function formatSeverity(severity: LintMessageSeverity) {
 
 function formatLocation(line: LintMessage["line"], column: LintMessage["column"],
 	lineInfoLength: number, columnInfoLength: number) {
-
 	const lineStr = (line === undefined ? "0" : line.toString()).padStart(lineInfoLength, " ");
 	const columnStr = (column === undefined ? "0" : column.toString()).padEnd(columnInfoLength, " ");
 
@@ -68,15 +67,15 @@ export class Text {
 			const columnInfoLength = maxColumn.toString().length;
 
 			// Sort by line, then by column. Use 0 if not set.
-			messages.sort((a, b) =>  (a.line ?? 0) - (b.line ?? 0) || (a.column ?? 0) - (b.column ?? 0));
+			messages.sort((a, b) => (a.line ?? 0) - (b.line ?? 0) || (a.column ?? 0) - (b.column ?? 0));
 
 			messages.forEach((msg) => {
 				const formattedLocation =
 					formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength);
 
 				const messageDetails = (showDetails && msg.messageDetails) ?
-					(`\n  ${formattedLocation}   ${chalk.white.bold("Details:")} ` +
-					`${chalk.italic(msg.messageDetails.replaceAll("\n", " "))}`) :
+						(`\n  ${formattedLocation}   ${chalk.white.bold("Details:")} ` +
+						`${chalk.italic(msg.messageDetails.replaceAll("\n", " "))}`) :
 					"";
 
 				this.#writeln(
