@@ -15,13 +15,13 @@ const test = anyTest as TestFn<{
 }>;
 
 test.before(async (t) => {
-	const {lintModule: {lintFile}} = await esmockMessageDetails();
+	const {lintModule: {lintFile}} = await esmockDeprecationText();
 	t.context.lintFile = lintFile;
 });
 
-// Mock messageDetails as we do not have control over the deprecated texts and they could
+// Mock getDeprecationText as we do not have control over the deprecated texts and they could
 // change anytime creating false positive failing tests. That way is ensured consistent and testable behavior.
-export async function esmockMessageDetails() {
+export async function esmockDeprecationText() {
 	const checkerModule = await esmock("../../../src/detectors/typeChecker/index.js", {
 		"../../../src/detectors/typeChecker/FileLinter.js":
 		function (
@@ -30,7 +30,7 @@ export async function esmockMessageDetails() {
 		) {
 			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 			const linter = new FileLinter(rootDir, filePath, sourceFile, sourceMap, checker);
-			linter.extractDeprecatedMessage = () => "Deprecated test message";
+			linter.getDeprecationText = () => "Deprecated test message";
 			return linter;
 		},
 	});
