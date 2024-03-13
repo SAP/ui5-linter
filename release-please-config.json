@@ -3,6 +3,7 @@
 		".": {
 			"pull-request-header": ":tractor: New release prepared",
 			"pull-request-title-pattern": "release: v${version}",
+			"include-component-in-tag": false,
 			"bump-minor-pre-major": true,
 			"bump-patch-for-minor-pre-major": true,
 			"prerelease": true,
