@@ -23,7 +23,7 @@
 		"url": "https://github.com/SAP/ui5-linter/issues"
 	},
 	"bin": {
-		"ui5lint": "./bin/ui5lint.js"
+		"ui5lint": "bin/ui5lint.js"
 	},
 	"type": "module",
 	"scripts": {
