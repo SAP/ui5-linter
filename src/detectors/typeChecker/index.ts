@@ -147,7 +147,11 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		}));
 	}
 
-	async createReports(filePaths: string[]) {
+	async createReports(
+		filePaths: string[],
+		reportCoverage: boolean | undefined = false,
+		messageDetails: boolean | undefined = false
+	) {
 		const result: LintResult[] = [];
 		const reader = this.project.getReader({
 			style: "buildtime",
@@ -231,7 +235,9 @@ export class TsProjectDetector extends ProjectBasedDetector {
 				}
 				const linterDone = taskStart("Lint resource", filePath, true);
 				const linter = new FileLinter(
-					this.project.getRootPath(), filePath, sourceFile, sourceMaps.get(sourceFile.fileName), checker);
+					this.project.getRootPath(),
+					filePath, sourceFile, sourceMaps.get(sourceFile.fileName), checker, reportCoverage, messageDetails
+				);
 				const report = await linter.getReport();
 				if (resourceMessages.has(sourceFile.fileName)) {
 					report.messages.push(...resourceMessages.get(sourceFile.fileName)!);
@@ -251,7 +257,9 @@ export class TsProjectDetector extends ProjectBasedDetector {
 }
 
 export class TsFileDetector extends FileBasedDetector {
-	async createReports(filePaths: string[]) {
+	async createReports(
+		filePaths: string[], reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false
+	) {
 		const options: ts.CompilerOptions = {
 			...DEFAULT_OPTIONS,
 			rootDir: this.rootDir,
@@ -311,7 +319,9 @@ export class TsFileDetector extends FileBasedDetector {
 					throw new Error(`Failed to get FS path for ${sourceFile.fileName}`);
 				}
 				const linter = new FileLinter(
-					this.rootDir, filePath, sourceFile, sourceMaps.get(sourceFile.fileName), checker);
+					this.rootDir, filePath, sourceFile,
+					sourceMaps.get(sourceFile.fileName), checker, reportCoverage, messageDetails
+				);
 				const report = await linter.getReport();
 				if (resourceMessages.has(sourceFile.fileName)) {
 					report.messages.push(...resourceMessages.get(sourceFile.fileName)!);

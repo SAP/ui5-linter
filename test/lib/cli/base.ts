@@ -92,7 +92,10 @@ test.serial("ui5lint (default) ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
-	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths: undefined});
+	t.deepEqual(lintProject.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePaths: undefined,
+		messageDetails: false, reportCoverage: false,
+	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
@@ -106,7 +109,10 @@ test.serial("ui5lint --file-paths ", async (t) => {
 	await cli.parseAsync(["--file-paths", filePaths[0], "--file-paths", filePaths[1]]);
 
 	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths});
+	t.deepEqual(lintProject.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePaths,
+		messageDetails: false, reportCoverage: false,
+	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
@@ -117,7 +123,10 @@ test.serial("ui5lint --coverage ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
-	t.deepEqual(lintProject.getCall(0).args[0], {rootDir: path.join(process.cwd()), filePaths: undefined});
+	t.deepEqual(lintProject.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePaths: undefined,
+		messageDetails: false, reportCoverage: true,
+	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 

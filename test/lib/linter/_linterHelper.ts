@@ -26,10 +26,14 @@ export async function esmockDeprecationText() {
 		"../../../src/detectors/typeChecker/FileLinter.js":
 		function (
 			rootDir: string, filePath: string, sourceFile: SourceFile,
-			sourceMap: string | undefined, checker: TypeChecker
+			sourceMap: string | undefined, checker: TypeChecker,
+			reportCoverage: boolean | undefined = false,
+			messageDetails: boolean | undefined = false
 		) {
 			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
-			const linter = new FileLinter(rootDir, filePath, sourceFile, sourceMap, checker);
+			const linter = new FileLinter(
+				rootDir, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails
+			);
 			linter.getDeprecationText = () => "Deprecated test message";
 			return linter;
 		},
@@ -85,6 +89,8 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const res = await lintFile({
 					rootDir: fixturesPath,
 					filePaths,
+					reportCoverage: true,
+					messageDetails: true,
 				});
 				assertExpectedLintResults(t, res, fixturesPath, filePaths);
 				res.forEach((results: {filePath: string}) => {
