@@ -148,19 +148,52 @@ export default class Reporter implements BaseReporter {
 		let errorCount = 0;
 		let warningCount = 0;
 		let fatalErrorCount = 0;
-		for (const {severity, fatal} of this.#messages) {
-			if (severity === LintMessageSeverity.Error) {
-				errorCount++;
-				if (fatal) {
-					fatalErrorCount++;
-				}
-			} else {
-				warningCount++;
+		const lineColumnMessagesMap = new Map<string, LintMessage[]>();
+		const messages: LintMessage[] = [];
+		for (const message of this.#messages) {
+			// Group messages by line/column so that we can deduplicate them
+			if (!message.line || !message.column) {
+				// If there is no line or column, we cannot group/deduplicate
+				messages.push(message);
+				continue;
 			}
+			const lineColumnKey = `${message.line}:${message.column}`;
+			let lineColumnMessages = lineColumnMessagesMap.get(lineColumnKey);
+			if (!lineColumnMessages) {
+				lineColumnMessages = [];
+				lineColumnMessagesMap.set(lineColumnKey, lineColumnMessages);
+			}
+			lineColumnMessages.push(message);
 		}
+
+		// Add deduplicated messages to the result
+		for (const lineColumnMessages of lineColumnMessagesMap.values()) {
+			// If there are multiple messages for the same line/column,
+			// and at least one of them is NOT a "no-globals-js" message,
+			// we can deduplicate the "no-globals-js" messages.
+			const deduplicateGlobalMessages = lineColumnMessages.length > 1 &&
+				lineColumnMessages.some((message) => message.ruleId !== "ui5-linter-no-globals-js");
+
+			lineColumnMessages.forEach((message) => {
+				if (deduplicateGlobalMessages && message.ruleId === "ui5-linter-no-globals-js") {
+					// Skip global messages if there are other messages for the same line/column
+					return;
+				}
+				if (message.severity === LintMessageSeverity.Error) {
+					errorCount++;
+					if (message.fatal) {
+						fatalErrorCount++;
+					}
+				} else {
+					warningCount++;
+				}
+				messages.push(message);
+			});
+		}
+
 		return {
 			filePath: this.#getFileName(),
-			messages: this.#messages,
+			messages,
 			coverageInfo: this.#coverageInfo,
 			errorCount,
 			warningCount,
