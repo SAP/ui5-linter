@@ -192,14 +192,14 @@ function declToString(decl: ModuleDeclaration): string {
 
 test("All combinations", (t) => {
 	const permutations = generateArguments({
-		moduleName: [SyntaxKind.StringLiteral, null],
-		dependencies: [SyntaxKind.ArrayLiteralExpression, null],
+		moduleName: [SyntaxKind.StringLiteral, null], // null means to omit the argument
+		dependencies: [SyntaxKind.ArrayLiteralExpression, null], // null means to omit the argument
 		factory: [
 			SyntaxKind.FunctionExpression, SyntaxKind.ArrowFunction,
 			SyntaxKind.StringLiteral, SyntaxKind.ArrayLiteralExpression,
 			SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword,
 		],
-		export: [SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword, null],
+		export: [SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword, null], // null means to omit the argument
 	});
 
 	t.true(permutations.length > 0, `Generated ${permutations.length} permutations`);
