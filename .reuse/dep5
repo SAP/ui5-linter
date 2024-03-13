@@ -27,3 +27,28 @@ Disclaimer: The code in this project may include calls to APIs (“API Calls”)
 Files: *
 Copyright: 2024 SAP SE or an SAP affiliate company and UI5 linter contributors
 License: Apache-2.0
+
+Files: src/detectors/transpilers/xml/lib/JSTokenizer.js
+Copyright: 2009-2024 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/base/util/JSTokenizer.js from the OpenUI5 project.
+
+Files: src/formatter/lib/resolveLinks.ts
+Copyright: 2009-2024 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file contains parts of the https://github.com/SAP/ui5-builder file lib/processors/jsdoc/lib/transformApiJson.cjs which itself is a copy from the OpenUI5 file lib/jsdoc/transformApiJson.js.
+
+Files: src/manifest.d.ts
+Copyright: 2009-2020 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: TypeScript definitions created from https://github.com/SAP/ui5-manifest/tree/v1.60.0
+
+Files: test/fixtures/transpiler/amd/sapUiTestGenericUtils.js
+Copyright: 2009-2024 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/ui/test/generic/Utils.js from the OpenUI5 project.
+
+Files: scripts/metadataProvider/model.ts
+Copyright: 2020-2021 SAP SE or an SAP affiliate company and UI5 Language Assistant contributors
+License: Apache-2.0
+Comment: This file contains a part from the https://github.com/SAP/ui5-language-assistant project (getTypeNameFix).

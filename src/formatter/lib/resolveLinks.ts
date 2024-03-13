@@ -1,4 +1,4 @@
-// This file is a modified copy of ui5-builder/lib/processors/jsdoc/lib/transformApiJson.cjs
+// This file is a modified copy of parts of ui5-builder/lib/processors/jsdoc/lib/transformApiJson.cjs
 // Its purpose is to try to resolve links in lint messages, derived from JSDoc annotations.
 
 function JSDocUtil():
