@@ -2,7 +2,7 @@ import anyTest, {TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {createTestsForFixtures, assertExpectedLintResults, esmockMessageDetails} from "./_linterHelper.js";
+import {createTestsForFixtures, assertExpectedLintResults, esmockDeprecationText} from "./_linterHelper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "..", "fixtures", "linter");
@@ -17,7 +17,7 @@ const test = anyTest as TestFn<{
 test.before(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
-	const {lintModule: {lintProject}} = await esmockMessageDetails();
+	const {lintModule: {lintProject}} = await esmockDeprecationText();
 	t.context.lintProject = lintProject;
 });
 test.after.always((t) => {

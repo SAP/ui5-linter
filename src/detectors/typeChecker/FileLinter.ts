@@ -2,6 +2,11 @@ import ts, {Identifier} from "typescript";
 import Reporter from "../Reporter.js";
 import {CoverageCategory, LintMessageSeverity, LintResult} from "../AbstractDetector.js";
 
+interface DeprecationInfo {
+	symbol: ts.Symbol;
+	messageDetails: string;
+}
+
 export default class FileLinter {
 	#filePath: string;
 	#sourceFile: ts.SourceFile;
@@ -59,19 +64,6 @@ export default class FileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isDeprecated(symbol: ts.Symbol): boolean {
-		if (symbol && this.isSymbolOfUi5Type(symbol)) {
-			const jsdocTags = symbol.getJsDocTags(this.#checker);
-			for (const tag of jsdocTags) {
-				if (tag.name === "deprecated") {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 	analyzeNewExpression(nodeType: ts.Type, node: ts.NewExpression) {
 		const classType = this.#checker.getTypeAtLocation(node.expression);
 
@@ -92,14 +84,15 @@ export default class FileLinter {
 						// 	return symbol.escapedName === propNameIdentifier;
 						// });
 						if (propertySymbol) {
-							if (this.isDeprecated(propertySymbol)) {
+							const deprecationInfo = this.getDeprecationInfo(propertySymbol);
+							if (deprecationInfo) {
 								this.#reporter.addMessage({
 									node: prop,
 									severity: LintMessageSeverity.Error,
 									ruleId: "ui5-linter-no-deprecated-api",
 									message: `Use of deprecated property '${propertySymbol.escapedName as string}' ` +
 									`of class '${this.#checker.typeToString(nodeType)}'`,
-									messageDetails: this.extractDeprecatedMessage(propertySymbol),
+									messageDetails: deprecationInfo.messageDetails,
 								});
 							}
 						}
@@ -126,17 +119,22 @@ export default class FileLinter {
 		return propAccessChain.join(".");
 	}
 
-	extractDeprecatedMessage(symbol: ts.Symbol): string {
+	getDeprecationText(deprecatedTag: ts.JSDocTagInfo): string {
+		return deprecatedTag.text?.reduce((acc, text) => acc + text.text, "") ?? "";
+	}
+
+	getDeprecationInfo(symbol: ts.Symbol | undefined): DeprecationInfo | null {
 		if (symbol && this.isSymbolOfUi5Type(symbol)) {
 			const jsdocTags = symbol.getJsDocTags(this.#checker);
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
-
-			if (deprecatedTag?.text) {
-				return deprecatedTag.text.map((text) => text.text).join("");
+			if (deprecatedTag) {
+				return {
+					symbol,
+					messageDetails: this.getDeprecationText(deprecatedTag),
+				};
 			}
 		}
-
-		return "";
+		return null;
 	}
 
 	analyzeCallExpression(node: ts.CallExpression) {
@@ -162,7 +160,8 @@ export default class FileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		if (!this.isDeprecatedType(exprType)) {
+		const deprecationInfo = this.getDeprecationInfo(exprType?.symbol);
+		if (!deprecationInfo) {
 			return;
 		}
 
@@ -194,27 +193,18 @@ export default class FileLinter {
 			message:
 				`Call to deprecated function ` +
 				`'${symbol.escapedName as string}'${additionalMessage}`,
-			messageDetails: this.extractDeprecatedMessage(symbol),
+			messageDetails: deprecationInfo.messageDetails,
 		});
 	}
 
-	isDeprecatedAccess(node: ts.AccessExpression): ts.Symbol | undefined {
+	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
 		let symbol;
 		if (ts.isPropertyAccessExpression(node)) {
 			symbol = this.#checker.getSymbolAtLocation(node.name);
 		} else { // ElementAccessExpression
 			symbol = this.#checker.getSymbolAtLocation(node.argumentExpression);
 		}
-		if (symbol && this.isDeprecated(symbol)) {
-			return symbol;
-		}
-	}
-
-	isDeprecatedType(nodeType: ts.Type): boolean {
-		if (nodeType.symbol && this.isDeprecated(nodeType.symbol)) {
-			return true;
-		}
-		return false;
+		return this.getDeprecationInfo(symbol);
 	}
 
 	analyzePropertyAccessExpressionForDeprecation(node: ts.AccessExpression) {
@@ -223,10 +213,9 @@ export default class FileLinter {
 			return; // Already analyzed in context of call expression
 		}
 
-		const symbol = this.isDeprecatedAccess(node);
-		if (symbol) {
-			const messageDetails = this.extractDeprecatedMessage(symbol);
-			if (this.isSymbolOfJquerySapType(symbol)) {
+		const deprecationInfo = this.getDeprecationInfoForAccess(node);
+		if (deprecationInfo) {
+			if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
 				let namespace;
 				if (ts.isPropertyAccessExpression(node)) {
 					namespace = this.extractNamespace(node);
@@ -238,7 +227,7 @@ export default class FileLinter {
 					message:
 						`Use of deprecated API ` +
 						`'${namespace ?? "jQuery.sap"}'`,
-					messageDetails,
+					messageDetails: deprecationInfo.messageDetails,
 				});
 			} else {
 				this.#reporter.addMessage({
@@ -247,8 +236,8 @@ export default class FileLinter {
 					ruleId: "ui5-linter-no-deprecated-property",
 					message:
 						`Access of deprecated property ` +
-						`'${symbol.escapedName as string}'`,
-					messageDetails,
+						`'${deprecationInfo.symbol.escapedName as string}'`,
+					messageDetails: deprecationInfo.messageDetails,
 				});
 			}
 		}
@@ -348,7 +337,8 @@ export default class FileLinter {
 		// as UI5 / AMD only supports importing the default anyways.
 		// TODO: This needs to be enhanced in future
 		const defaultExportSymbol = symbol?.exports?.get("default" as ts.__String);
-		if (defaultExportSymbol && this.isDeprecated(defaultExportSymbol)) {
+		const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
+		if (deprecationInfo) {
 			this.#reporter.addMessage({
 				node: moduleSpecifierNode,
 				severity: LintMessageSeverity.Error,
@@ -356,7 +346,7 @@ export default class FileLinter {
 				message:
 					`Import of deprecated module ` +
 					`'${moduleSpecifierNode.text}'`,
-				messageDetails: this.extractDeprecatedMessage(defaultExportSymbol),
+				messageDetails: deprecationInfo.messageDetails,
 			});
 		}
 	}
