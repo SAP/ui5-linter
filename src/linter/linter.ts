@@ -9,6 +9,8 @@ import {ProjectGraph} from "@ui5/project";
 interface LinterOptions {
 	rootDir: string;
 	filePaths: string[];
+	reportCoverage?: boolean;
+	messageDetails?: boolean;
 }
 
 async function fsStat(fsPath: string) {
@@ -85,19 +87,23 @@ async function getProjectGraph(rootDir: string): Promise<ProjectGraph> {
 	});
 }
 
-export async function lintProject({rootDir, filePaths}: LinterOptions): Promise<LintResult[]> {
+export async function lintProject({
+	rootDir, filePaths, reportCoverage, messageDetails,
+}: LinterOptions): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting Project");
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir);
 	const project = graph.getRoot();
 	projectGraphDone();
 	const tsDetector = new TsProjectDetector(project);
-	const res = await tsDetector.createReports(filePaths);
+	const res = await tsDetector.createReports(filePaths, reportCoverage, messageDetails);
 	lintEnd();
 	return res;
 }
 
-export async function lintFile({rootDir, filePaths}: LinterOptions): Promise<LintResult[]> {
+export async function lintFile({
+	rootDir, filePaths, reportCoverage, messageDetails,
+}: LinterOptions): Promise<LintResult[]> {
 	const tsDetector = new TsFileDetector(rootDir);
-	return await tsDetector.createReports(filePaths);
+	return await tsDetector.createReports(filePaths, reportCoverage, messageDetails);
 }

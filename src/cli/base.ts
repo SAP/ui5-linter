@@ -37,10 +37,12 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 			.option("coverage", {
 				describe: "Whether to provide a coverage report",
 				type: "boolean",
+				default: false,
 			})
 			.option("details", {
 				describe: "Print complementary information for each finding, if available",
 				type: "boolean",
+				default: false,
 			})
 			.option("loglevel", {
 				alias: "log-level",
@@ -114,12 +116,16 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		await profile.start();
 	}
 
+	const reportCoverage = !!(process.env.UI5LINT_COVERAGE_REPORT ?? coverage);
+
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
 		filePaths: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
+		reportCoverage,
+		messageDetails: details,
 	});
 
-	if (process.env.UI5LINT_COVERAGE_REPORT ?? coverage) {
+	if (reportCoverage) {
 		const coverageFormatter = new Coverage();
 		await writeFile("ui5lint-report.html", await coverageFormatter.format(res));
 	}

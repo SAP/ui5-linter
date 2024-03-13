@@ -4,7 +4,7 @@ import {CoverageCategory, LintMessageSeverity, LintResult} from "../AbstractDete
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
-	messageDetails: string;
+	messageDetails?: string;
 }
 
 export default class FileLinter {
@@ -13,16 +13,21 @@ export default class FileLinter {
 	#checker: ts.TypeChecker;
 	#reporter: Reporter;
 	#boundVisitNode: (node: ts.Node) => void;
+	#reportCoverage: boolean;
+	#messageDetails: boolean;
 
 	constructor(
 		rootDir: string, filePath: string, sourceFile: ts.SourceFile, sourceMap: string | undefined,
-		checker: ts.TypeChecker
+		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
+		messageDetails: boolean | undefined = false
 	) {
 		this.#filePath = filePath;
 		this.#sourceFile = sourceFile;
 		this.#checker = checker;
 		this.#reporter = new Reporter(rootDir, filePath, sourceFile, sourceMap);
 		this.#boundVisitNode = this.visitNode.bind(this);
+		this.#reportCoverage = reportCoverage;
+		this.#messageDetails = messageDetails;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -128,10 +133,13 @@ export default class FileLinter {
 			const jsdocTags = symbol.getJsDocTags(this.#checker);
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 			if (deprecatedTag) {
-				return {
+				const deprecationInfo: DeprecationInfo = {
 					symbol,
-					messageDetails: this.getDeprecationText(deprecatedTag),
 				};
+				if (this.#messageDetails) {
+					deprecationInfo.messageDetails = this.getDeprecationText(deprecatedTag);
+				}
+				return deprecationInfo;
 			}
 		}
 		return null;
@@ -141,7 +149,9 @@ export default class FileLinter {
 		const exprNode = node.expression;
 		const exprType = this.#checker.getTypeAtLocation(exprNode);
 		if (!(exprType?.symbol && this.isSymbolOfUi5OrThirdPartyType(exprType.symbol))) {
-			this.handleCallExpressionUnknownType(exprType, node);
+			if (this.#reportCoverage) {
+				this.handleCallExpressionUnknownType(exprType, node);
+			}
 			return;
 		}
 

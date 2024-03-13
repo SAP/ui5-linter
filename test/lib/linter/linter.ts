@@ -35,6 +35,8 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 	let res = await lintProject({
 		rootDir: projectPath,
 		filePaths: [],
+		reportCoverage: true,
+		messageDetails: true,
 	});
 
 	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
@@ -44,7 +46,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 	t.snapshot(res);
 });
 
-test.serial("lint: Some files of com.ui5.troublesome.app", async (t) => {
+test.serial("lint: Some files of com.ui5.troublesome.app (without details / coverage)", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const filePaths = [
 		path.join("webapp", "controller", "BaseController.js"),
@@ -77,6 +79,8 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	let res = await lintProject({
 		rootDir: projectPath,
 		filePaths: [],
+		reportCoverage: true,
+		messageDetails: true,
 	});
 
 	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
