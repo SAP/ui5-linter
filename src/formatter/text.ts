@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import path from "node:path";
 import {LintMessageSeverity, LintResult, LintMessage} from "../detectors/AbstractDetector.js";
 
 function formatSeverity(severity: LintMessageSeverity) {
@@ -42,7 +43,7 @@ export class Text {
 			totalWarningCount += warningCount;
 			totalFatalErrorCount += fatalErrorCount;
 
-			this.#writeln(chalk.inverse(filePath));
+			this.#writeln(chalk.inverse(path.resolve(process.cwd(), filePath)));
 
 			// Group messages by rule
 			const rules = new Map<string, LintMessage[]>();
