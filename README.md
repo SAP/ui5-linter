@@ -46,25 +46,20 @@ ui5lint
 
 ## UI5Lint Report ##
 
-webapp/controller/App.controller.js
-  ui5-linter-no-deprecated-api (1)
-    10:4 error Call to deprecated function 'attachTap' of class 'Button'
+/application/webapp/controller/App.controller.js
+  10:4 error Call to deprecated function 'attachTap' of class 'Button'
 
-webapp/manifest.json
-  ui5-linter-no-deprecated-api (1)
-    81:17 error Use of deprecated model type 'sap.ui5/models/odata/type="sap.ui.model.odata.ODataModel"'
+/application/webapp/manifest.json
+  81:17 error Use of deprecated model type 'sap.ui5/models/odata/type="sap.ui.model.odata.ODataModel"'
 
-webapp/test/unit/unitTests.qunit.js
-  ui5-linter-no-deprecated-api (2)
-    6:1 error Call to deprecated function 'attachInit' of class 'Core'
-    6:1 error Call to deprecated function 'getCore' (sap.ui.getCore)
-  ui5-linter-no-globals-js (1)
-    6:1 error Access of global variable 'sap' (sap.ui.getCore)
+/application/webapp/test/unit/unitTests.qunit.js
+  6:1 error Call to deprecated function 'attachInit' of class 'Core'
+  6:1 error Call to deprecated function 'getCore' (sap.ui.getCore)
+  6:1 error Access of global variable 'sap' (sap.ui.getCore)
 
-webapp/view/Main.view.xml
-  ui5-linter-no-deprecated-api (2)
-    16:39 error Import of deprecated module 'sap/m/MessagePage'
-    22:5  error Use of deprecated property 'blocked' of class 'Button'
+/application/webapp/view/Main.view.xml
+  16:39 error Import of deprecated module 'sap/m/MessagePage'
+  22:5  error Use of deprecated property 'blocked' of class 'Button'
 
 7 problems (7 errors, 0 warnings)
 
