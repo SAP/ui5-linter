@@ -15,6 +15,13 @@
 		"development",
 		"linter"
 	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SAP/ui5-linter.git"
+	},
+	"bugs": {
+		"url": "https://github.com/SAP/ui5-linter/issues"
+	},
 	"bin": {
 		"ui5lint": "./bin/ui5lint.js"
 	},
