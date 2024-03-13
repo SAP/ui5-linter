@@ -132,11 +132,7 @@ export default class FileLinter {
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 
 			if (deprecatedTag?.text) {
-				// (Workaround) There's an issue in some UI5 TS definition versions and where the
-				// deprecation text gets merged with the description. Splitting on double
-				// new line could be considered as a clear separation between them.
-				// https://github.com/SAP/ui5-typescript/issues/429
-				return deprecatedTag.text.map((text) => text.text).join("").split("\n\n")[0];
+				return deprecatedTag.text.map((text) => text.text).join("");
 			}
 		}
 
