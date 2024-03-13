@@ -1,3 +1,5 @@
+// Copied from OpenUI5 1.120.9 sap/ui/test/generic/Utils.js for testing purposes
+
 /*!
  * ${copyright}
  */
