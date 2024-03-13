@@ -37,6 +37,10 @@ jobs:
       run: npm ci
     - name: Run build
       run: npm run build
+    - name: Pruning devDependencies
+      run: npm prune --production
+    - name: Updating npm-shrinkwrap.json
+      run: npm shrinkwrap
     - name: Publish to NPM
       env:
         NPM_TOKEN: ${{secrets.NPM_UI5BOT}}
