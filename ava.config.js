@@ -18,10 +18,12 @@ export default {
 	files: [
 		"test/lib/**/*.ts",
 	],
-	ignoredByWatcher: [
-		"test/tmp/**",
-		"lib/**",
-	],
+	watchMode: {
+		ignoreChanges: [
+			"test/tmp/**",
+			"lib/**",
+		]
+	},
 	nodeArguments,
 	workerThreads: false,
 };
