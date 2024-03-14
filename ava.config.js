@@ -22,7 +22,7 @@ export default {
 		ignoreChanges: [
 			"test/tmp/**",
 			"lib/**",
-		]
+		],
 	},
 	nodeArguments,
 	workerThreads: false,
