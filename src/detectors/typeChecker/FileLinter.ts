@@ -55,6 +55,7 @@ export default class FileLinter {
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
+			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap.ui.coreLib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -209,6 +210,35 @@ export default class FileLinter {
 				`'${symbol.escapedName as string}'${additionalMessage}`,
 			messageDetails: deprecationInfo.messageDetails,
 		});
+	}
+	
+	analyzeLibInitCall(node: ts.CallExpression) {
+		const nodeExp = node.expression as ts.PropertyAccessExpression;
+		if (nodeExp?.name?.text !== "init" ||
+			!ts.isPropertyAccessExpression(nodeExp) || 
+			!ts.isIdentifier(nodeExp.expression) ||
+			nodeExp?.expression?.text !== "Library") { // TODO: Check more reliably the import var of sap.ui.core.Lib
+			// Library.init() -> init() is already identified as CallExpression, so
+			// Library needs to be a propertyAccessExpression
+			return;
+		}
+		
+		const libVersion = (node.arguments[0] as ts.ObjectLiteralExpression)
+			.properties.find((prop: ts.ObjectLiteralElementLike) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) && prop.name.text === "version" && 
+					ts.isLiteralExpression(prop.initializer) && prop.initializer.text !== "2";
+			}) as ts.PropertyAssignment | undefined;
+		
+		if (libVersion) {
+			this.#reporter.addMessage({
+				node: libVersion,
+				severity: LintMessageSeverity.Error,
+				ruleId: "ui5-linter-no-partially-deprecated-api",
+				message:
+					`Call to ${nodeExp.expression.text}.init() must be declared with property {version: 2}`
+			});
+		}
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
