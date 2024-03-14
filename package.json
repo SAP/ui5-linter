@@ -1,6 +1,6 @@
 {
 	"name": "@ui5/linter",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "A static code analysis tool for UI5",
 	"author": {
 		"name": "SAP SE",
