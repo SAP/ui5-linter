@@ -211,32 +211,32 @@ export default class FileLinter {
 			messageDetails: deprecationInfo.messageDetails,
 		});
 	}
-	
+
 	analyzeLibInitCall(node: ts.CallExpression) {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		if (nodeExp?.name?.text !== "init" ||
-			!ts.isPropertyAccessExpression(nodeExp) || 
+			!ts.isPropertyAccessExpression(nodeExp) ||
 			!ts.isIdentifier(nodeExp.expression) ||
 			nodeExp?.expression?.text !== "Library") { // TODO: Check more reliably the import var of sap.ui.core.Lib
 			// Library.init() -> init() is already identified as CallExpression, so
 			// Library needs to be a propertyAccessExpression
 			return;
 		}
-		
+
 		const libVersion = (node.arguments[0] as ts.ObjectLiteralExpression)
 			.properties.find((prop: ts.ObjectLiteralElementLike) => {
 				return ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) && prop.name.text === "version" && 
+					ts.isIdentifier(prop.name) && prop.name.text === "version" &&
 					ts.isLiteralExpression(prop.initializer) && prop.initializer.text !== "2";
 			}) as ts.PropertyAssignment | undefined;
-		
+
 		if (libVersion) {
 			this.#reporter.addMessage({
 				node: libVersion,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-no-partially-deprecated-api",
 				message:
-					`Call to ${nodeExp.expression.text}.init() must be declared with property {version: 2}`
+					`Call to ${nodeExp.expression.text}.init() must be declared with property {version: 2}`,
 			});
 		}
 	}
