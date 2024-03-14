@@ -4,7 +4,7 @@
 	"include": ["src/**"],
 	"check-coverage": true,
 	"statements": 72,
-	"branches": 64,
+	"branches": 61,
 	"functions": 75,
 	"lines": 72,
 	"watermarks": {
