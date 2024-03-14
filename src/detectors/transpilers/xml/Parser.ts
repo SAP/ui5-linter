@@ -459,7 +459,7 @@ export default class Parser {
 					// in the control aggregation
 					this.#generator.writeControl(customData);
 				} else {
-					log.warn(`Ignoring unknown namespaced attribute ${attr.localNamespace}:${attr.name} ` +
+					log.verbose(`Ignoring unknown namespaced attribute ${attr.localNamespace}:${attr.name} ` +
 					`for ${moduleName} in resource ${this.#resourceName}`);
 				}
 			} else {
