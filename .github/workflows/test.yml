@@ -1,0 +1,35 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Unit and Integration
+    strategy:
+      matrix:
+        version: [18, 20, 21]
+        os: [ubuntu-22.04, windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.version }}
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Perform build
+      run: npm run build-test
+
+    - name: Run unit tests
+      run: npm run unit
