@@ -6,9 +6,27 @@
  * Initialization Code and shared classes of library library.with.custom.paths.
  */
 sap.ui.define([
-	"sap/ui/core/library"
-], function () {
+	"sap/ui/core/library",
+	"sap/ui/core/Lib",
+], function (coreLib, Library) {
 	"use strict";
+
+	Library.init();
+	Library.init("a");
+	Library.init({});
+	Library.init({
+		test: 12
+	});
+	Library.init({
+		apiVersion: "23"
+	});
+	Library.init({
+		apiVersion: 11
+	});
+	Library.init({
+		apiVersion: 2
+	});
+
 
 	// delegate further initialization of this library to the Core
 	// Hint: sap.ui.getCore() must still be used to support preload with sync bootstrap!
