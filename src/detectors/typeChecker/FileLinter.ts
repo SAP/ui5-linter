@@ -125,7 +125,11 @@ export default class FileLinter {
 	}
 
 	getDeprecationText(deprecatedTag: ts.JSDocTagInfo): string {
-		return deprecatedTag.text?.reduce((acc, text) => acc + text.text, "") ?? "";
+		// (Workaround) There's an issue in some UI5 TS definition versions and where the
+		// deprecation text gets merged with the description. Splitting on double
+		// new line could be considered as a clear separation between them.
+		// https://github.com/SAP/ui5-typescript/issues/429
+		return deprecatedTag.text?.reduce((acc, text) => acc + text.text, "").split("\n\n")[0] ?? "";
 	}
 
 	getDeprecationInfo(symbol: ts.Symbol | undefined): DeprecationInfo | null {
