@@ -237,7 +237,7 @@ export default class FileLinter {
 			!ts.isIdentifier(nodeExp.expression) ||
 			nodeExp?.expression?.text !== settings.callExpressionPropName) {
 			// Didn't match Instance.call(), so we're not interested anymore of analyzing it.
-			return "zzzz";
+			return;
 		}
 
 		let fnArgumentNode;
@@ -249,7 +249,7 @@ export default class FileLinter {
 			fnArgumentNode = node.arguments.find((arg: ts.Expression) =>
 				arg.kind === ts.SyntaxKind.Identifier && arg.getText() === settings.fnArgument);
 		}
-		return fnArgumentNode;
+		return fnArgumentNode || null;
 	}
 
 	checkLibInitCall(node: ts.CallExpression) {
@@ -271,9 +271,9 @@ export default class FileLinter {
 
 		let libVersion;
 
-		if (!fnArg) {
+		if (fnArg === null) { // The method is init, but nor argument has been found
 			libVersion = node;
-		} else {
+		} else if (fnArg) {
 			const apiKeyProp = (fnArg as ts.ObjectLiteralExpression)
 				.properties?.find((prop: ts.ObjectLiteralElementLike) => {
 					return ts.isPropertyAssignment(prop) &&

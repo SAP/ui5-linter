@@ -27,8 +27,8 @@ sap.ui.define([
 		apiVersion: 2
 	});
 
-	// Should ignore
-	Library.anotherLibMethod({
+	// Should be ignored
+	Library.load({
 		apiVersion: 23
 	})
 
