@@ -217,7 +217,8 @@ export default class FileLinter {
 	 *
 	 * It could be the N-th argument from the call or it could
 	 * find a named argument within argument's list.
-	 * The callable function should have the following
+	 * The callable function should be a method of an instance i.e.
+	 * Instance.fnInvoke();
 	 *
 	 * @param {ts.CallExpression} node
 	 * @param {object} settings
