@@ -212,6 +212,20 @@ export default class FileLinter {
 		});
 	}
 
+	/**
+	 * Gets arguments from a CallExpression.
+	 *
+	 * It could be the N-th argument from the call or it could
+	 * find a named argument within argument's list.
+	 * The callable function should have the following
+	 *
+	 * @param {ts.CallExpression} node
+	 * @param {object} settings
+	 * @param {string} settings.callExpressionName Method's name
+	 * @param {string} settings.callExpressionPropName Object's instance name
+	 * @param {string|number} settings.fnArgument The N-th argument or argument's name
+	 * @returns
+	 */
 	getFnArgument(node: ts.CallExpression, settings: {
 		callExpressionName: string;
 		callExpressionPropName: string;
@@ -223,7 +237,7 @@ export default class FileLinter {
 			!ts.isIdentifier(nodeExp.expression) ||
 			nodeExp?.expression?.text !== settings.callExpressionPropName) {
 			// Didn't match Instance.call(), so we're not interested anymore of analyzing it.
-			return;
+			return "zzzz";
 		}
 
 		let fnArgumentNode;

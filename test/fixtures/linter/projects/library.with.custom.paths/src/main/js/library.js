@@ -27,6 +27,11 @@ sap.ui.define([
 		apiVersion: 2
 	});
 
+	// Should ignore
+	Library.anotherLibMethod({
+		apiVersion: 23
+	})
+
 
 	// delegate further initialization of this library to the Core
 	// Hint: sap.ui.getCore() must still be used to support preload with sync bootstrap!
