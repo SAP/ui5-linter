@@ -257,7 +257,7 @@ export default class FileLinter {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
 		// TS parser uses some intermediate types that are not available as definitions.
-		// In this case SymbolObject which is a ts.Symbol + ts.Node and that's 
+		// In this case SymbolObject which is a ts.Symbol + ts.Node and that's
 		// why we need these ugly type castings
 		const importDeclaration =
 			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getEscapedName() as string;
