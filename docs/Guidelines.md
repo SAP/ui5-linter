@@ -19,22 +19,21 @@ Please use [rebase instead of merge](https://www.atlassian.com/git/tutorials/mer
 
 ### Commit Message Style
 
-#### Commit Summary
+This project uses the [Conventional Commits specification](https://www.conventionalcommits.org/) to ensure a consistent way of dealing with commit messages.
 
-To be decided.
+````
+fix(xml-transpiler): Log unknown namespaces as verbose instead of warning
 
-#### Commit Body
+Ignoring them seems safe, so no warning should be produced. There's
+typically also nothing a developer can do to resolve the warning.
+````
 
-To be decided.
+#### Structure
 
-#### Example
+````
+type(scope): Description
+````
 
-To be decided.
-
-## Work on Release Branches
-
-To be decided.
-
-### Implementing Changes in Multiple Code Lines
-
-To be decided.
+- required: every commit message has to start with a lowercase `type`. The project has defined a set of [valid types](../.commitlintrc.js#L6).
+- optional: the `scope` is typically the affected module. If multiple modules are affected by the commit, skip it or define a meaningful abstract scope.
+- required: the `description` has to follow the Sentence Case style. Only the first word and proper nonce are written in uppercase.
