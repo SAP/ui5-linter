@@ -241,12 +241,14 @@ export default class FileLinter {
 	checkLibInitCall(node: ts.CallExpression) {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
+		const importDeclaration =
+			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getEscapedName() as string;
 
-		if (symbol?.parent?.parent?.getEscapedName() !== "\"sap/ui/core/Lib\"") {
+		if (importDeclaration !== "\"sap/ui/core/Lib\"") {
 			return;
 		}
 
-		const importedVarName = nodeExp.name.parent.expression.getText()!;
+		const importedVarName = ((nodeExp.name.parent as unknown) as ts.CallExpression).expression.getText();
 		const fnArg = this.getFnArgument(node, {
 			callExpressionName: "init", // Method's name
 			callExpressionPropName: importedVarName,
