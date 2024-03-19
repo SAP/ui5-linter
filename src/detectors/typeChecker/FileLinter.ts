@@ -55,7 +55,7 @@ export default class FileLinter {
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
-			this.checkLibInitCall(node as ts.CallExpression); // Check for sap.ui.coreLib.init usages
+			this.checkLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
