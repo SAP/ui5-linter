@@ -275,7 +275,7 @@ export default class FileLinter {
 
 		let libVersion;
 
-		if (fnArg === null) { // The method is init, but nor argument has been found
+		if (fnArg === null) { // The method is init, but no argument has been found
 			libVersion = node;
 		} else if (fnArg) {
 			const apiKeyProp = (fnArg as ts.ObjectLiteralExpression)
