@@ -273,10 +273,10 @@ export default class FileLinter {
 			fnArgument: 0, // Lib.init() we're interested only in the first arg
 		});
 
-		let libVersion;
+		let nodeToHighlight;
 
 		if (fnArg === null) { // The method is init, but no argument has been found
-			libVersion = node;
+			nodeToHighlight = node;
 		} else if (fnArg) {
 			const apiKeyProp = (fnArg as ts.ObjectLiteralExpression)
 				.properties?.find((prop: ts.ObjectLiteralElementLike) => {
@@ -285,16 +285,16 @@ export default class FileLinter {
 				}) as ts.PropertyAssignment | undefined;
 
 			if (!apiKeyProp) { // no apiVersion key at all
-				libVersion = node;
+				nodeToHighlight = node;
 			} else if (ts.isLiteralExpression(apiKeyProp.initializer) && apiKeyProp.initializer.text !== "2") {
 				// Checks the value itself
-				libVersion = apiKeyProp;
+				nodeToHighlight = apiKeyProp;
 			}
 		}
 
-		if (libVersion) {
+		if (nodeToHighlight) {
 			this.#reporter.addMessage({
-				node: libVersion,
+				node: nodeToHighlight,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-no-partially-deprecated-api",
 				message:
