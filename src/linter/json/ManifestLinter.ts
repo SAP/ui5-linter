@@ -17,7 +17,7 @@ interface locType {
 	pos: number;
 }
 
-const deprecatedLibraries: Array<string> = [
+const deprecatedLibraries: string[] = [
 	"sap.ca.scfld.md",
 	"sap.ca.ui",
 	"sap.dragonfly",
@@ -35,12 +35,11 @@ const deprecatedLibraries: Array<string> = [
 	"sap.zen.crosstab",
 ];
 
-const deprecatedComponents: Array<string> = [
+const deprecatedComponents: string[] = [
 	"sap.zen.dsh.fioriwrapper",
 ];
 
 export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
-
 
 export interface jsonSourceMapType {
 	data: SAPJSONSchemaForWebApplicationManifestFile;
@@ -75,9 +74,9 @@ export default class ManifestLinter {
 	#analyzeManifest(manifest: SAPJSONSchemaForWebApplicationManifestFile) {
 		const {resources, models, dependencies} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
 		const {dataSources} = (manifest["sap.app"] ?? {} as JSONSchemaForSAPAPPNamespace);
-		
+
 		// Detect deprecated libraries:
-		const libKeys: string[] = (dependencies?.libs && Object.keys(dependencies.libs)) || [];
+		const libKeys: string[] = (dependencies?.libs && Object.keys(dependencies.libs)) ?? [];
 		libKeys.forEach((libKey: string) => {
 			if (deprecatedLibraries.includes(libKey)) {
 				this.#reporter?.addMessage({
@@ -90,7 +89,7 @@ export default class ManifestLinter {
 		});
 
 		// Detect deprecated components:
-		const componentKeys: string[] = (dependencies?.components && Object.keys(dependencies.components)) || [];
+		const componentKeys: string[] = (dependencies?.components && Object.keys(dependencies.components)) ?? [];
 		componentKeys.forEach((componentKey: string) => {
 			if (deprecatedComponents.includes(componentKey)) {
 				this.#reporter?.addMessage({
