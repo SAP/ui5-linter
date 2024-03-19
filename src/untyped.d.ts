@@ -6,6 +6,7 @@ declare module "@ui5/project" {
 	interface Project {
 		getNamespace: () => ProjectNamespace;
 		getReader: (options: import("@ui5/fs").ReaderOptions) => import("@ui5/fs").AbstractReader;
+		getRootReader: () => import("@ui5/fs").AbstractReader;
 		getRootPath: () => string;
 	}
 	interface ProjectGraph {
