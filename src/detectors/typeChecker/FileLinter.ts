@@ -55,7 +55,7 @@ export default class FileLinter {
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
-			this.checkLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
+			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -211,88 +211,74 @@ export default class FileLinter {
 			messageDetails: deprecationInfo.messageDetails,
 		});
 	}
-
+	
 	/**
-	 * Gets arguments from a CallExpression.
+	 * Extracts & builds object literal
 	 *
-	 * It could be the N-th argument from the call or it could
-	 * find a named argument within argument's list.
-	 * The callable function should be a method of an instance i.e.
-	 * Instance.fnInvoke();
-	 *
-	 * @param {ts.CallExpression} node
-	 * @param {object} settings
-	 * @param {string} settings.callExpressionName Method's name
-	 * @param {string} settings.callExpressionPropName Object's instance name
-	 * @param {string|number} settings.fnArgument The N-th argument or argument's name
-	 * @returns
+	 * @param node 
+	 * @returns {object}
 	 */
-	getFnArgument(node: ts.CallExpression, settings: {
-		callExpressionName: string;
-		callExpressionPropName: string;
-		fnArgument: string | number; // Get N-th argument or argument by its name
-	}) {
-		const nodeExp = node.expression as ts.PropertyAccessExpression;
-		if (nodeExp?.name?.text !== settings.callExpressionName ||
-			!ts.isPropertyAccessExpression(nodeExp) ||
-			!ts.isIdentifier(nodeExp.expression) ||
-			nodeExp?.expression?.text !== settings.callExpressionPropName) {
-			// Didn't match Instance.call(), so we're not interested anymore of analyzing it.
-			return;
-		}
+	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
+		const properties: Record<string,any> = Object.create(null);
 
-		let fnArgumentNode;
+		node.properties?.forEach((prop) => {
+			if (!ts.isPropertyAssignment(prop) || !prop.name) {
+				return;
+			}
 
-		if (typeof settings.fnArgument === "number") { // Get N-th arg
-			fnArgumentNode = node.arguments[settings.fnArgument];
-		} else {
-			// Arg by name
-			fnArgumentNode = node.arguments.find((arg: ts.Expression) =>
-				arg.kind === ts.SyntaxKind.Identifier && arg.getText() === settings.fnArgument);
-		}
-		return fnArgumentNode ?? null;
+			const key = prop.name.getText();
+			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+				properties[key] = {value: false, node: prop.initializer};
+			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
+				properties[key] = {value: null, node: prop.initializer};
+			} if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
+				properties[key] = { value: this.extractPropsRecursive(prop.initializer), node: prop.initializer };
+			} else if (
+				(ts.isIdentifier(prop.initializer) || 
+				ts.isNumericLiteral(prop.initializer) ||
+				ts.isStringLiteral(prop.initializer))
+				
+				&& prop.initializer.text) {
+				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
+			}
+		});
+		return properties;
 	}
 
-	checkLibInitCall(node: ts.CallExpression) {
+	analyzeLibInitCall(node: ts.CallExpression) {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
+		const methodName = symbol && symbol.getName();
+		
 		// TS parser uses some intermediate types that are not available as definitions.
 		// In this case SymbolObject which is a ts.Symbol + ts.Node and that's
 		// why we need these ugly type castings
 		const importDeclaration =
-			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getEscapedName() as string;
+			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getName() as string;
 
-		if (importDeclaration !== "\"sap/ui/core/Lib\"") {
+		if (importDeclaration !== "\"sap/ui/core/Lib\"" || methodName !== "init") {
 			return;
 		}
 
-		const importedVarName = ((nodeExp.name.parent as unknown) as ts.CallExpression).expression.getText();
-		const fnArg = this.getFnArgument(node, {
-			callExpressionName: "init", // Method's name
-			callExpressionPropName: importedVarName,
-			fnArgument: 0, // Lib.init() we're interested only in the first arg
-		});
+		const initArg = node.arguments[0] as ts.ObjectLiteralExpression;
 
 		let nodeToHighlight;
 
-		if (fnArg === null) { // The method is init, but no argument has been found
+		if (!initArg) {
 			nodeToHighlight = node;
-		} else if (fnArg) {
-			const apiKeyProp = (fnArg as ts.ObjectLiteralExpression)
-				.properties?.find((prop: ts.ObjectLiteralElementLike) => {
-					return ts.isPropertyAssignment(prop) &&
-						ts.isIdentifier(prop.name) && prop.name.text === "apiVersion";
-				}) as ts.PropertyAssignment | undefined;
+		} else {
+			const apiKeyProp = this.extractPropsRecursive(initArg);
 
-			if (!apiKeyProp) { // no apiVersion key at all
-				nodeToHighlight = node;
-			} else if (ts.isLiteralExpression(apiKeyProp.initializer) && apiKeyProp.initializer.text !== "2") {
-				// Checks the value itself
-				nodeToHighlight = apiKeyProp;
+			if (!apiKeyProp["apiVersion"]) {
+				nodeToHighlight = node;	
+			} else if (apiKeyProp["apiVersion"].value !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiKeyProp["apiVersion"].node;
 			}
 		}
 
 		if (nodeToHighlight) {
+			const importedVarName = ((nodeExp.name.parent as unknown) as ts.CallExpression).expression.getText();
+
 			this.#reporter.addMessage({
 				node: nodeToHighlight,
 				severity: LintMessageSeverity.Error,

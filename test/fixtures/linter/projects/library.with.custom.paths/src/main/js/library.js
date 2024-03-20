@@ -24,6 +24,9 @@ sap.ui.define([
 		apiVersion: 11
 	});
 	Library.init({
+		apiVersion: "2"
+	});
+	Library.init({
 		apiVersion: 2
 	});
 
