@@ -18,6 +18,7 @@ const test = anyTest as TestFn<{
 	processErrWrite: SinonStub;
 	formatText: SinonStub;
 	formatJson: SinonStub;
+	createExitStub: () => SinonStub;
 	cli: Argv;
 	base: typeof Base;
 }>;
@@ -78,6 +79,10 @@ test.beforeEach(async (t) => {
 	});
 
 	t.context.base(t.context.cli);
+
+	t.context.createExitStub = () => {
+		return sinon.stub(process, "exit");
+	};
 });
 
 test.afterEach.always((t) => {
@@ -150,17 +155,8 @@ test.serial("ui5lint --format json ", async (t) => {
 });
 
 test.serial("Yargs error handling", async (t) => {
-	const {processStdErrWriteStub, consoleWriterStopStub, cli} = t.context;
-
-	const processExit = new Promise((resolve) => {
-		const processExitStub = sinon.stub(process, "exit");
-		// @ts-expect-error callsFake definition returns never, instead of void which is not that correct.
-		processExitStub.callsFake((errorCode) => {
-			processExitStub.restore();
-			resolve(errorCode);
-		});
-	});
-
+	const {processStdErrWriteStub, consoleWriterStopStub, cli, createExitStub} = t.context;
+	const processExitStub = createExitStub();
 	cli.command({
 		command: "foo",
 		describe: "This is a task",
@@ -170,9 +166,7 @@ test.serial("Yargs error handling", async (t) => {
 
 	await cli.parseAsync(["invalid"]);
 
-	const errorCode = await processExit;
-
-	t.is(errorCode, 1, "Should exit with error code 1");
+	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(consoleWriterStopStub.callCount, 0, "ConsoleWriter.stop did not get called");
 	t.is(processStdErrWriteStub.callCount, 5);
 	t.deepEqual(processStdErrWriteStub.getCall(0).args, [
@@ -190,17 +184,8 @@ test.serial("Yargs error handling", async (t) => {
 });
 
 test.serial("Exception error handling", async (t) => {
-	const {cli, processStdErrWriteStub, consoleWriterStopStub} = t.context;
-
-	const processExit = new Promise((resolve) => {
-		const processExitStub = sinon.stub(process, "exit");
-		// @ts-expect-error callsFake definition returns never, instead of void which is not that correct.
-		processExitStub.callsFake((errorCode) => {
-			processExitStub.restore();
-			resolve(errorCode);
-		});
-	});
-
+	const {cli, processStdErrWriteStub, consoleWriterStopStub, createExitStub} = t.context;
+	const processExitStub = createExitStub();
 	const error = new Error("Some error from foo command");
 
 	cli.command({
@@ -215,9 +200,7 @@ test.serial("Exception error handling", async (t) => {
 		is: error,
 	});
 
-	const errorCode = await processExit;
-
-	t.is(errorCode, 1, "Should exit with error code 1");
+	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(consoleWriterStopStub.callCount, 1, "ConsoleWriter.stop got called once");
 	t.is(processStdErrWriteStub.callCount, 7);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
@@ -236,18 +219,9 @@ test.serial("Exception error handling", async (t) => {
 });
 
 test.serial("Exception error handling without logging (silent)", async (t) => {
-	const {cli, processStdErrWriteStub, isLogLevelEnabledStub, consoleWriterStopStub} = t.context;
-
+	const {cli, processStdErrWriteStub, isLogLevelEnabledStub, consoleWriterStopStub, createExitStub} = t.context;
+	const processExitStub = createExitStub();
 	isLogLevelEnabledStub.withArgs("error").returns(false);
-
-	const processExit = new Promise((resolve) => {
-		const processExitStub = sinon.stub(process, "exit");
-		// @ts-expect-error callsFake definition returns never, instead of void which is not that correct.
-		processExitStub.callsFake((errorCode) => {
-			processExitStub.restore();
-			resolve(errorCode);
-		});
-	});
 
 	const error = new Error("Some error from foo command");
 
@@ -263,27 +237,16 @@ test.serial("Exception error handling without logging (silent)", async (t) => {
 		is: error,
 	});
 
-	const errorCode = await processExit;
-
-	t.is(errorCode, 1, "Should exit with error code 1");
+	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(consoleWriterStopStub.callCount, 1, "ConsoleWriter.stop got called once");
 	t.is(processStdErrWriteStub.callCount, 0);
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("Exception error handling with verbose logging", async (t) => {
-	const {cli, processStdErrWriteStub, isLogLevelEnabledStub} = t.context;
-
+	const {cli, processStdErrWriteStub, isLogLevelEnabledStub, createExitStub} = t.context;
+	const processExitStub = createExitStub();
 	isLogLevelEnabledStub.withArgs("verbose").returns(true);
-
-	const processExit = new Promise((resolve) => {
-		const processExitStub = sinon.stub(process, "exit");
-		// @ts-expect-error callsFake definition returns never, instead of void which is not that correct.
-		processExitStub.callsFake((errorCode) => {
-			processExitStub.restore();
-			resolve(errorCode);
-		});
-	});
 
 	const error = new Error("Some error from foo command");
 
@@ -299,9 +262,7 @@ test.serial("Exception error handling with verbose logging", async (t) => {
 		is: error,
 	});
 
-	const errorCode = await processExit;
-
-	t.is(errorCode, 1, "Should exit with error code 1");
+	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(processStdErrWriteStub.callCount, 10);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
 		chalk.bold.red("⚠️  Process Failed With Error") + "\n",
@@ -326,17 +287,8 @@ test.serial("Exception error handling with verbose logging", async (t) => {
 });
 
 test.serial("Unexpected error handling", async (t) => {
-	const {processStdErrWriteStub, consoleWriterStopStub, cli} = t.context;
-
-	const processExit = new Promise((resolve) => {
-		const processExitStub = sinon.stub(process, "exit");
-		// @ts-expect-error callsFake definition returns never, instead of void which is not that correct.
-		processExitStub.callsFake((errorCode) => {
-			processExitStub.restore();
-			resolve(errorCode);
-		});
-	});
-
+	const {processStdErrWriteStub, consoleWriterStopStub, cli, createExitStub} = t.context;
+	const processExitStub = createExitStub();
 	const typeError = new TypeError("Cannot do this");
 
 	cli.command({
@@ -351,9 +303,7 @@ test.serial("Unexpected error handling", async (t) => {
 		is: typeError,
 	});
 
-	const errorCode = await processExit;
-
-	t.is(errorCode, 1, "Should exit with error code 1");
+	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(consoleWriterStopStub.callCount, 1, "ConsoleWriter.stop got called once");
 	t.is(processStdErrWriteStub.callCount, 10);
 	t.deepEqual(processStdErrWriteStub.getCall(1).args, [
