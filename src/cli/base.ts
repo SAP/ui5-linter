@@ -141,6 +141,11 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	if (profile) {
 		await profile.stop();
 	}
+
+	if (res.some((file) => !!file.errorCount)) {
+		// At least one error is reported. Exit with non-zero exit code.
+		process.exit(1);
+	}
 }
 
 export default function base(cli: Argv) {
@@ -191,7 +196,7 @@ export default function base(cli: Argv) {
 				process.stderr.write("\n");
 				process.stderr.write(chalk.dim(`See 'ui5lint --help'`) + "\n");
 			}
-			process.exit(1);
+			process.exit(2);
 		});
 
 	cli.command(lintCommand);
