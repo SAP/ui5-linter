@@ -1,10 +1,6 @@
 /*!
  * ${copyright}
  */
-
-/**
- * Initialization Code and shared classes of library library.with.custom.paths.
- */
 sap.ui.define([
 	"sap/ui/core/Lib",
 ], function (Library) {
