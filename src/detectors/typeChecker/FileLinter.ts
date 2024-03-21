@@ -211,15 +211,16 @@ export default class FileLinter {
 			messageDetails: deprecationInfo.messageDetails,
 		});
 	}
-	
+
 	/**
 	 * Extracts & builds object literal
 	 *
-	 * @param node 
+	 * @param node
 	 * @returns {object}
 	 */
 	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
-		const properties: Record<string,any> = Object.create(null);
+		type propsType = Record<string, {value: null | boolean | string | propsType; node: ts.Node}>;
+		const properties = Object.create(null) as propsType;
 
 		node.properties?.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop) || !prop.name) {
@@ -231,30 +232,28 @@ export default class FileLinter {
 				properties[key] = {value: false, node: prop.initializer};
 			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
 				properties[key] = {value: null, node: prop.initializer};
-			} if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
-				properties[key] = { value: this.extractPropsRecursive(prop.initializer), node: prop.initializer };
-			} else if (
-				(ts.isIdentifier(prop.initializer) || 
-				ts.isNumericLiteral(prop.initializer) ||
-				ts.isStringLiteral(prop.initializer))
-				
-				&& prop.initializer.text) {
+			} else if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
+				properties[key] = {value: this.extractPropsRecursive(prop.initializer), node: prop.initializer};
+			} else if ((ts.isIdentifier(prop.initializer) ||
+			ts.isNumericLiteral(prop.initializer) ||
+			ts.isStringLiteral(prop.initializer)) &&
+			prop.initializer.text) {
 				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
 			}
 		});
 		return properties;
-	}
+	};
 
 	analyzeLibInitCall(node: ts.CallExpression) {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
-		const methodName = symbol && symbol.getName();
-		
+		const methodName = symbol?.getName();
+
 		// TS parser uses some intermediate types that are not available as definitions.
 		// In this case SymbolObject which is a ts.Symbol + ts.Node and that's
 		// why we need these ugly type castings
 		const importDeclaration =
-			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getName() as string;
+			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getName();
 
 		if (importDeclaration !== "\"sap/ui/core/Lib\"" || methodName !== "init") {
 			return;
@@ -269,10 +268,10 @@ export default class FileLinter {
 		} else {
 			const apiKeyProp = this.extractPropsRecursive(initArg);
 
-			if (!apiKeyProp["apiVersion"]) {
-				nodeToHighlight = node;	
-			} else if (apiKeyProp["apiVersion"].value !== "2") { // String value would be "\"2\""
-				nodeToHighlight = apiKeyProp["apiVersion"].node;
+			if (!apiKeyProp.apiVersion) {
+				nodeToHighlight = node;
+			} else if (apiKeyProp.apiVersion.value !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiKeyProp.apiVersion.node;
 			}
 		}
 
