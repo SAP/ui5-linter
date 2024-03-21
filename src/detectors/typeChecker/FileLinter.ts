@@ -244,18 +244,27 @@ export default class FileLinter {
 		return properties;
 	};
 
+	getSymbolModuleDeclaration(symbol: ts.Symbol) {
+		let parent = symbol.valueDeclaration?.parent;
+		while (parent && !ts.isModuleDeclaration(parent)) {
+			parent = parent.parent;
+		}
+		return parent;
+	}
+
 	analyzeLibInitCall(node: ts.CallExpression) {
 		const nodeExp = node.expression as ts.PropertyAccessExpression;
 		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
+		if (!symbol) {
+			return;
+		}
 		const methodName = symbol?.getName();
+		if (methodName !== "init") {
+			return;
+		}
 
-		// TS parser uses some intermediate types that are not available as definitions.
-		// In this case SymbolObject which is a ts.Symbol + ts.Node and that's
-		// why we need these ugly type castings
-		const importDeclaration =
-			((((symbol as unknown) as ts.Node)?.parent?.parent as unknown) as ts.Symbol)?.getName();
-
-		if (importDeclaration !== "\"sap/ui/core/Lib\"" || methodName !== "init") {
+		const moduleDeclaration = this.getSymbolModuleDeclaration(symbol);
+		if (moduleDeclaration?.name.text !== "sap/ui/core/Lib") {
 			return;
 		}
 
