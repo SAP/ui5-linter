@@ -253,22 +253,20 @@ export default class FileLinter {
 	}
 
 	analyzeLibInitCall(node: ts.CallExpression) {
-		const nodeExp = node.expression as ts.PropertyAccessExpression;
-		const {symbol} = this.#checker.getTypeAtLocation(nodeExp);
-		if (!symbol) {
-			return;
-		}
-		const methodName = symbol?.getName();
-		if (methodName !== "init") {
+		const nodeExp = (ts.isPropertyAccessExpression(node.expression) || 
+			ts.isElementAccessExpression(node.expression)) && node.expression;
+		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType || nodeType.symbol?.getName() !== "init") {
 			return;
 		}
 
-		const moduleDeclaration = this.getSymbolModuleDeclaration(symbol);
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
 		if (moduleDeclaration?.name.text !== "sap/ui/core/Lib") {
 			return;
 		}
 
-		const initArg = node.arguments[0] as ts.ObjectLiteralExpression;
+		const initArg = node?.arguments[0] &&
+			ts.isObjectLiteralExpression(node.arguments[0]) && node.arguments[0];
 
 		let nodeToHighlight;
 
@@ -285,7 +283,7 @@ export default class FileLinter {
 		}
 
 		if (nodeToHighlight) {
-			const importedVarName = ((nodeExp.name.parent as unknown) as ts.CallExpression).expression.getText();
+			const importedVarName = node.expression.expression.getText()
 
 			this.#reporter.addMessage({
 				node: nodeToHighlight,
