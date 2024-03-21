@@ -119,6 +119,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} 
 				else if (resourcePath.endsWith(".yaml")) {
+					// TODO: account for all ui5.yaml schemas
 					resourcePath = resourcePath.replace(/\.yaml$/, ".js");
 					const resourceContent = await resource.getString();
 					console.log(resourceContent);
@@ -173,7 +174,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
 		
-		const rootFileTypes = "ui5.yaml"; // future: extend with other root files (e.g. 'ui5-XXX.yaml')
+		const rootFileTypes = "{ui5.yaml,*-ui5.yaml,*.ui5.yaml,ui5-deploy.yaml,ui5-dist.yaml,ui5-local.yaml}"; // future: extend with other root files (e.g. 'ui5-XXX.yaml')
 			// currently: only support for 'ui5.yaml'
 		const rootDirectoryResources = await rootReader.byGlob("/" + rootFileTypes);
 		globEnd();
