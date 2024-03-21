@@ -43,9 +43,12 @@
 			"minUI5Version": "1.119.0",
 			"libs": {
 				"sap.ui.core": {},
-				"sap.m": {}, 
+				"sap.m": {},
 				"sap.ca.scfld.md": {},
 				"sap.ca.ui": {},
+				"sap.fe.common": {},
+				"sap.fe.plugins": {},
+				"sap.fe.semantics": {},
 				"sap.landvisz": {},
 				"sap.makit": {},
 				"sap.me": {},

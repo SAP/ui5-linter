@@ -20,6 +20,9 @@ interface locType {
 const deprecatedLibraries: string[] = [
 	"sap.ca.scfld.md",
 	"sap.ca.ui",
+	"sap.fe.common", // Internal, removed in 1.110
+	"sap.fe.plugins", // Internal, removed in 1.102
+	"sap.fe.semantics", // Internal, removed in 1.104
 	"sap.landvisz", // Removed in 1.120
 	"sap.makit",
 	"sap.me",
