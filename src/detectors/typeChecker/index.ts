@@ -9,6 +9,7 @@ import {taskStart} from "../util/perf.js";
 import {amdToEsm} from "../transpilers/amd/transpiler.js";
 import {xmlToJs} from "../transpilers/xml/transpiler.js";
 import {lintManifest} from "../../linter/json/linter.js";
+import {lintUI5Yaml} from "../../linter/yaml/linter.js";
 import {
 	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector,
 } from "../AbstractDetector.js";
@@ -116,7 +117,16 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
-				} else {
+				} 
+				else if (resourcePath.endsWith(".yaml")) {
+					// TODO: account for all ui5.yaml schemas
+					resourcePath = resourcePath.replace(/\.yaml$/, ".js");
+					const resourceContent = await resource.getString();
+					console.log(resourceContent);
+					({source, messages} = await lintUI5Yaml(resourcePath, resourceContent));
+					console.log("STOP");//TODO: remove
+				}
+				else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
 			} catch (err: unknown) {
@@ -156,12 +166,17 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		const reader = this.project.getReader({
 			style: "buildtime",
 		});
+		const rootReader = this.project.getRootReader();
 
 		// Read all resources and test-resources and their content since tsc works completely synchronous
 		const globEnd = taskStart("Locating Resources");
 		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json}";
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
+		
+		const rootFileTypes = "{ui5.yaml,*-ui5.yaml,*.ui5.yaml,ui5-deploy.yaml,ui5-dist.yaml,ui5-local.yaml}"; // future: extend with other root files (e.g. 'ui5-XXX.yaml')
+			// currently: only support for 'ui5.yaml'
+		const rootDirectoryResources = await rootReader.byGlob("/" + rootFileTypes);
 		globEnd();
 		const resources = new Map<string, string>();
 		const sourceMaps = new Map<string, string>();
@@ -176,6 +191,11 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			`${allTestResources.length} Resources`);
 		await this.analyzeFiles(allTestResources, resources, sourceMaps, resourceMessages, vfsToFsPaths, result);
 		transpileTestResourcesTaskEnd();
+
+		const analyzeRootDirectoryFilesTaskEnd = taskStart("Analyzing root directory",
+			`${rootDirectoryResources.length} Resources`);
+		await this.analyzeFiles(rootDirectoryResources, resources, sourceMaps, resourceMessages, vfsToFsPaths, result);
+		analyzeRootDirectoryFilesTaskEnd();
 
 		/*	Handle filePaths parameter:
 
