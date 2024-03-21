@@ -253,7 +253,7 @@ export default class FileLinter {
 	}
 
 	analyzeLibInitCall(node: ts.CallExpression) {
-		const nodeExp = (ts.isPropertyAccessExpression(node.expression) || 
+		const nodeExp = (ts.isPropertyAccessExpression(node.expression) ||
 			ts.isElementAccessExpression(node.expression)) && node.expression;
 		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
 		if (!nodeType || nodeType.symbol?.getName() !== "init") {
@@ -283,7 +283,7 @@ export default class FileLinter {
 		}
 
 		if (nodeToHighlight) {
-			const importedVarName = node.expression.expression.getText()
+			const importedVarName = node.expression.expression.getText();
 
 			this.#reporter.addMessage({
 				node: nodeToHighlight,
