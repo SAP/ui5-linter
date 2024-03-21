@@ -20,19 +20,19 @@ interface locType {
 const deprecatedLibraries: string[] = [
 	"sap.ca.scfld.md",
 	"sap.ca.ui",
-	"sap.dragonfly",
-	"sap.landviz",
+	"sap.landvisz", // Removed in 1.120
 	"sap.makit",
 	"sap.me",
+	"sap.sac.grid", // Removed in 1.114
 	"sap.ui.commons",
 	"sap.ui.suite",
 	"sap.ui.ux3",
 	"sap.ui.vtm",
 	"sap.uiext.inbox",
 	"sap.webanalytics.core",
-	"sap.zen.dsh",
 	"sap.zen.commons",
 	"sap.zen.crosstab",
+	"sap.zen.dsh",
 ];
 
 const deprecatedComponents: string[] = [
