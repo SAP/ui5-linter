@@ -251,7 +251,11 @@ export async function createVirtualCompilerHost(
 				const moduleName = fileName.match(/\/types\/@ui5\/linter\/dynamic-types\/(.*)\.d\.ts/)?.[1];
 				if (moduleName) {
 					const libraryNameCheck = moduleName?.replace(/\//g, ".");
-					const libraryName = SAPUI5_TYPES_FILES.find(($) => libraryNameCheck.startsWith($));
+					if (libraryNameCheck.startsWith("sap.ui.core.") || !libraryNameCheck.startsWith("sap.")) {
+						// sap.ui.core is loaded by default
+						return;
+					}
+					const libraryName = SAPUI5_TYPES_FILES.find(($) => libraryNameCheck.startsWith($ + "."));
 					if (libraryName) {
 						sourceText = `/// <reference path="/types/@sapui5/types/types/${libraryName}.d.ts"/>`;
 					} else {
