@@ -261,7 +261,7 @@ export default class FileLinter {
 		}
 
 		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (moduleDeclaration?.name.text !== "sap/ui/core/Lib") {
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
 			return;
 		}
 
