@@ -24,4 +24,19 @@ sap.ui.define([
 	Library["init"]({
 		apiVersion: 1
 	});
+	
+	const LibInit = Library.init;
+	LibInit({
+		apiVersion: 1
+	});
+
+	const {init} = Library;
+	init({
+		apiVersion: 1
+	});
+
+	const {init: intRenames} = Library;
+	intRenames({
+		apiVersion: 1
+	});
 });
