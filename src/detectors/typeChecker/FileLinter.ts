@@ -256,7 +256,7 @@ export default class FileLinter {
 		const nodeExp = (ts.isPropertyAccessExpression(node.expression) ||
 			ts.isElementAccessExpression(node.expression)) && node.expression;
 		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
-		if (!nodeType || nodeType.symbol?.getName() !== "init") {
+		if (!nodeType?.symbol || nodeType.symbol.getName() !== "init") {
 			return;
 		}
 
