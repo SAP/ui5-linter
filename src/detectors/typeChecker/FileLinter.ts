@@ -271,6 +271,7 @@ export default class FileLinter {
 				ruleId: "ui5-linter-no-partially-deprecated-api",
 				message:
 					`Call to ${importedVarName}() must be declared with property {apiVersion: 2}`,
+				messageDetails: this.#messageDetails ? `{@link sap.ui.core.Lib.init Lib.init}` : undefined,
 			});
 		}
 	}
