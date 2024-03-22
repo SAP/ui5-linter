@@ -57,9 +57,21 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 		const namespace = project.getNamespace();
 		this.#projectBasePath = `/resources/${namespace}/`;
+
+		const namespacePathMapping = [
+			`${this.#projectBasePath}*`,
+		];
+
+		// Special handling when linting sap/* namespaces (UI5 framework libraries):
+		// Add mapping for dynamic type lookup. Otherwise types within the sap library itself
+		// can't be resolved.
+		if (namespace.startsWith("sap/")) {
+			namespacePathMapping.push(`/types/@ui5/linter/dynamic-types/${namespace}/*`);
+		}
+
 		this.compilerOptions.paths = {
-			[`${namespace}/*`]: [`${this.#projectBasePath}*`],
 			"sap/*": ["/types/@ui5/linter/dynamic-types/sap/*"],
+			[`${namespace}/*`]: namespacePathMapping,
 		};
 	}
 
