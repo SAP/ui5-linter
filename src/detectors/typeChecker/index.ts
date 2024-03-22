@@ -59,6 +59,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		this.#projectBasePath = `/resources/${namespace}/`;
 		this.compilerOptions.paths = {
 			[`${namespace}/*`]: [`${this.#projectBasePath}*`],
+			"sap/*": ["/types/@ui5/linter/dynamic-types/sap/*"],
 		};
 	}
 
@@ -263,6 +264,9 @@ export class TsFileDetector extends FileBasedDetector {
 		const options: ts.CompilerOptions = {
 			...DEFAULT_OPTIONS,
 			rootDir: this.rootDir,
+			paths: {
+				"sap/*": ["/types/@ui5/linter/dynamic-types/sap/*"],
+			},
 		};
 
 		const resources = new Map<string, string>();

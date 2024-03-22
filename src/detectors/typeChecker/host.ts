@@ -5,6 +5,71 @@ import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
+const SAPUI5_TYPES_FILES = [
+	"sap.apf",
+	"sap.chart",
+	"sap.ui.codeeditor",
+	"sap.collaboration",
+	"sap.zen.crosstab",
+	"sap.zen.dsh",
+	"sap.zen.commons",
+	"sap.sac.df",
+	"sap.ui.commons",
+	"sap.ui.comp",
+	"sap.ui.core",
+	"sap.ui.dt",
+	"sap.ui.export",
+	"sap.f",
+	"sap.ui.fl",
+	"sap.gantt",
+	"sap.ui.generic.app",
+	"sap.ui.generic.template",
+	"sap.uiext.inbox",
+	"sap.insights",
+	"sap.ui.integration",
+	"sap.ui.layout",
+	"sap.makit",
+	"sap.ui.mdc",
+	"sap.m",
+	"sap.me",
+	"sap.ndc",
+	"sap.ovp",
+	"sap.ui.richtexteditor",
+	"sap.ui.rta",
+	"sap.esh.search.ui",
+	"sap.fe.core",
+	"sap.fe.macros",
+	"sap.fe.navigation",
+	"sap.fe.placeholder",
+	"sap.fe.templates",
+	"sap.fe.test",
+	"sap.fe.tools",
+	"sap.feedback.ui",
+	"sap.rules.ui",
+	"sap.suite.ui.generic.template",
+	"sap.ui.vk",
+	"sap.ui.vtm",
+	"sap.webanalytics.core",
+	"sap.ui.suite",
+	"sap.suite.ui.commons",
+	"sap.suite.ui.microchart",
+	"sap.ui.support",
+	"sap.ui.table",
+	"sap.ui.testrecorder",
+	"sap.tnt",
+	"sap.ca.ui",
+	"sap.ui.unified",
+	"sap.ushell",
+	"sap.ushell_abap",
+	"sap.ui.ux3",
+	"sap.uxap",
+	"sap.ui.vbm",
+	"sap.viz",
+	"sap.ui.webc.common",
+	"sap.ui.webc.fiori",
+	"sap.ui.webc.main",
+];
+
 interface PackageJson {
 	dependencies: Record<string, string>;
 }
@@ -50,8 +115,11 @@ export async function createVirtualCompilerHost(
 	));
 
 	options.typeRoots = ["/types"];
-	// Request compiler to use all types we found in the dependencies of "@sapui5/types"
-	options.types = typePackageDirs;
+	options.types = [
+		// Request compiler to only use sap.ui.core types by default - other types will be loaded on demand
+		...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"),
+		"/types/@sapui5/types/types/sap.ui.core.d.ts",
+	];
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(
@@ -125,6 +193,9 @@ export async function createVirtualCompilerHost(
 				if (fsPath) {
 					return ts.sys.directoryExists(fsPath);
 				}
+				if (directory.startsWith("/types/@ui5/linter/dynamic-types/")) {
+					return true;
+				}
 			}
 			return false;
 		},
@@ -138,6 +209,9 @@ export async function createVirtualCompilerHost(
 				const fsPath = mapToTypePath(fileName);
 				if (fsPath) {
 					return ts.sys.fileExists(fsPath);
+				}
+				if (fileName.startsWith("/types/@ui5/linter/dynamic-types/") && fileName.endsWith(".d.ts")) {
+					return true;
 				}
 			}
 			return false;
@@ -170,7 +244,26 @@ export async function createVirtualCompilerHost(
 			if (sourceFileCache.has(fileName)) {
 				return sourceFileCache.get(fileName);
 			}
-			const sourceText = getFile(fileName);
+
+			let sourceText: string | undefined = undefined;
+
+			if (fileName.startsWith("/types/@ui5/linter/dynamic-types/") && fileName.endsWith(".d.ts")) {
+				const moduleName = fileName.match(/\/types\/@ui5\/linter\/dynamic-types\/(.*)\.d\.ts/)?.[1];
+				if (moduleName) {
+					const libraryNameCheck = moduleName?.replace(/\//g, ".");
+					const libraryName = SAPUI5_TYPES_FILES.find(($) => libraryNameCheck.startsWith($));
+					if (libraryName) {
+						sourceText = `/// <reference path="/types/@sapui5/types/types/${libraryName}.d.ts"/>`;
+					} else {
+						// Can happen e.g. for sap/ui/base/Event.d.ts, but sap.ui.core.d.ts is loaded by default
+						return;
+					}
+				}
+			}
+
+			if (!sourceText) {
+				sourceText = getFile(fileName);
+			}
 			if (sourceText === undefined) {
 				throw new Error(`File not found: ${fileName}`);
 			}
