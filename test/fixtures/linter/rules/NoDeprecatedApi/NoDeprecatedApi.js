@@ -1,7 +1,7 @@
 sap.ui.define([
-	"sap/m/Button", "sap/m/DateTimeInput", "sap/base/util/includes", "sap/ui/Device", "sap/ui/core/library",
+	"sap/m/Button", "sap/m/DateTimeInput", "sap/base/util/includes", "sap/ui/Device", "sap/ui/core/library", "sap/ui/generic/app/navigation/service/NavigationHandler",
 	"sap/ui/table/Table", "sap/ui/table/plugins/MultiSelectionPlugin", "sap/ui/core/Configuration", "sap/m/library"
-], function(Button, DateTimeInput, includes, Device, coreLib, Table, MultiSelectionPlugin, Configuration, mobileLib) {
+], function(Button, DateTimeInput, includes, Device, coreLib, NavigationHandler, Table, MultiSelectionPlugin, Configuration, mobileLib) {
 
 	var dateTimeInput = new DateTimeInput(); // TODO detect: Control is deprecated
 
@@ -34,4 +34,7 @@ sap.ui.define([
 	coreLib.MessageType; // Enum "MessageType" is deprecated
 
 	mobileLib.InputType.Date; // Enum value "InputType.Date" is deprecated
+
+	const navigationHandler = new NavigationHandler();
+	navigationHandler.storeInnerAppState({}); // Method "storeInnerAppState" is deprecated
 });
