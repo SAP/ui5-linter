@@ -254,7 +254,7 @@ export default class FileLinter {
 
 	analyzeLibInitCall(node: ts.CallExpression) {
 		const nodeExp = (
-			ts.isIdentifier(node.expression) ||
+			ts.isIdentifier(node.expression) || // Assignment `const LibInit = Library.init` and destructuring
 			ts.isPropertyAccessExpression(node.expression) ||
 			ts.isElementAccessExpression(node.expression)) && node.expression;
 		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
