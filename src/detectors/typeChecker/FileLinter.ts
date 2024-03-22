@@ -253,7 +253,9 @@ export default class FileLinter {
 	}
 
 	analyzeLibInitCall(node: ts.CallExpression) {
-		const nodeExp = (ts.isPropertyAccessExpression(node.expression) ||
+		const nodeExp = (
+			ts.isIdentifier(node.expression) ||
+			ts.isPropertyAccessExpression(node.expression) ||
 			ts.isElementAccessExpression(node.expression)) && node.expression;
 		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
 		if (!nodeType || !nodeType.symbol || nodeType.symbol.getName() !== "init") {
@@ -283,14 +285,19 @@ export default class FileLinter {
 		}
 
 		if (nodeToHighlight) {
-			const importedVarName = node.expression.expression.getText();
+			let importedVarName: string;
+			if (ts.isIdentifier(nodeExp)) {
+				importedVarName = nodeExp.getText();
+			} else {
+				importedVarName = nodeExp.expression.getText() + ".init";
+			}
 
 			this.#reporter.addMessage({
 				node: nodeToHighlight,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-no-partially-deprecated-api",
 				message:
-					`Call to ${importedVarName}.init() must be declared with property {apiVersion: 2}`,
+					`Call to ${importedVarName}() must be declared with property {apiVersion: 2}`,
 			});
 		}
 	}
