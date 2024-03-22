@@ -9,6 +9,7 @@ import {taskStart} from "../util/perf.js";
 import {amdToEsm} from "../transpilers/amd/transpiler.js";
 import {xmlToJs} from "../transpilers/xml/transpiler.js";
 import {lintManifest} from "../../linter/json/linter.js";
+import {lintHtml} from "../../linter/html/linter.js";
 import {
 	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector,
 } from "../AbstractDetector.js";
@@ -116,6 +117,10 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
+				} else if (resourcePath.endsWith(".html")) {
+					resourcePath = resourcePath.replace(/\.html$/, ".html.js");
+					const resourceStream = resource.getStream();
+					({source, messages, map} = await lintHtml(resourcePath, resourceStream));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
@@ -159,7 +164,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 		// Read all resources and test-resources and their content since tsc works completely synchronous
 		const globEnd = taskStart("Locating Resources");
-		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json}";
+		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json,*.html}";
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
 		globEnd();
