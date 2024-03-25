@@ -117,13 +117,11 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
-				} 
-				else if (resourcePath.endsWith(".yaml")) {
+				} else if (resourcePath.endsWith(".yaml")) {
 					resourcePath = resourcePath.replace(/\.yaml$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintUI5Yaml(resourcePath, resourceContent));
-				}
-				else {
+				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
 			} catch (err: unknown) {
