@@ -226,7 +226,7 @@ export default class FileLinter {
 			!ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) {
 			return;
 		}
-		
+
 		const nodeExp = node.expression;
 		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
@@ -239,7 +239,7 @@ export default class FileLinter {
 		}
 
 		const initArg = node?.arguments[0] &&
-			ts.isObjectLiteralExpression(node.arguments[0]) && 
+			ts.isObjectLiteralExpression(node.arguments[0]) &&
 			node.arguments[0];
 
 		let nodeToHighlight;
