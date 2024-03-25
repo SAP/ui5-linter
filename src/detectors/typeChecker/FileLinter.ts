@@ -221,12 +221,15 @@ export default class FileLinter {
 	}
 
 	analyzeLibInitCall(node: ts.CallExpression) {
-		const nodeExp = (
-			ts.isIdentifier(node.expression) || // Assignment `const LibInit = Library.init` and destructuring
-			ts.isPropertyAccessExpression(node.expression) || /* Lib.init() */
-			ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) && node.expression;
-		const nodeType = nodeExp && this.#checker.getTypeAtLocation(nodeExp);
-		if (!nodeType || !nodeType.symbol || nodeType.symbol.getName() !== "init") {
+		if (!ts.isIdentifier(node.expression) && // Assignment `const LibInit = Library.init` and destructuring
+			!ts.isPropertyAccessExpression(node.expression) && /* Lib.init() */
+			!ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) {
+			return;
+		}
+		
+		const nodeExp = node.expression;
+		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
 			return;
 		}
 
@@ -236,7 +239,8 @@ export default class FileLinter {
 		}
 
 		const initArg = node?.arguments[0] &&
-			ts.isObjectLiteralExpression(node.arguments[0]) && node.arguments[0];
+			ts.isObjectLiteralExpression(node.arguments[0]) && 
+			node.arguments[0];
 
 		let nodeToHighlight;
 
