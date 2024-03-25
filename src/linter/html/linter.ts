@@ -1,7 +1,7 @@
 import {taskStart} from "../../detectors/util/perf.js";
-import {extractScriptTags} from "../../detectors/transpilers/html/transpiler.js";
+import {extractScriptTags} from "../../detectors/transpilers/html/parser.js";
 import {LintMessageSeverity} from "../../detectors/AbstractDetector.js";
-import Reporter from "../å../detectors/Reporter.js";
+import Reporter from "../../detectors/Reporter.js";
 
 import type { TranspileResult } from "../../detectors/transpilers/AbstractTranspiler.js";
 import type { ReadStream } from "node:fs";
