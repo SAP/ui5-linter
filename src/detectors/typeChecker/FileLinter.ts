@@ -212,38 +212,6 @@ export default class FileLinter {
 		});
 	}
 
-	/**
-	 * Extracts & builds object literal
-	 *
-	 * @param node
-	 * @returns {object}
-	 */
-	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
-		type propsType = Record<string, {value: null | boolean | string | propsType; node: ts.Node}>;
-		const properties = Object.create(null) as propsType;
-
-		node.properties?.forEach((prop) => {
-			if (!ts.isPropertyAssignment(prop) || !prop.name) {
-				return;
-			}
-
-			const key = prop.name.getText();
-			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-				properties[key] = {value: false, node: prop.initializer};
-			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
-				properties[key] = {value: null, node: prop.initializer};
-			} else if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
-				properties[key] = {value: this.extractPropsRecursive(prop.initializer), node: prop.initializer};
-			} else if ((ts.isIdentifier(prop.initializer) ||
-			ts.isNumericLiteral(prop.initializer) ||
-			ts.isStringLiteral(prop.initializer)) &&
-			prop.initializer.text) {
-				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
-			}
-		});
-		return properties;
-	};
-
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
 		let parent = symbol.valueDeclaration?.parent;
 		while (parent && !ts.isModuleDeclaration(parent)) {
@@ -275,12 +243,17 @@ export default class FileLinter {
 		if (!initArg) {
 			nodeToHighlight = node;
 		} else {
-			const apiKeyProp = this.extractPropsRecursive(initArg);
+			const apiVersionNode = initArg.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "apiVersion";
+			});
 
-			if (!apiKeyProp.apiVersion) {
+			if (!apiVersionNode) { // No arguments or no 'apiVersion' property
 				nodeToHighlight = node;
-			} else if (apiKeyProp.apiVersion.value !== "2") { // String value would be "\"2\""
-				nodeToHighlight = apiKeyProp.apiVersion.node;
+			} else if (ts.isPropertyAssignment(apiVersionNode) &&
+			apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
 			}
 		}
 
