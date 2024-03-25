@@ -1,8 +1,8 @@
-import type { ReadStream } from "node:fs";
-import { Detail, SaxEventType, SAXParser, Tag as SaxTag } from "sax-wasm";
-import { finished } from "node:stream/promises";
+import type {ReadStream} from "node:fs";
+import {Detail, SaxEventType, SAXParser, Tag as SaxTag} from "sax-wasm";
+import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
+import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
 let saxWasmBuffer: Buffer;
@@ -15,7 +15,7 @@ async function initSaxWasm() {
 	return saxWasmBuffer;
 }
 
-export async function parseHtml(contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Detail) => void) {
+async function parseHtml(contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Detail) => void) {
 	const options = { highWaterMark: 32 * 1024 }; // 32k chunks
 	const saxWasmBuffer = await initSaxWasm();
 	const saxParser = new SAXParser(SaxEventType.OpenTag | SaxEventType.CloseTag, options);
@@ -46,13 +46,14 @@ export async function parseHtml(contentStream: ReadStream, parseHandler: (type: 
 }
 
 export async function extractScriptTags(contentStream: ReadStream) {
+	const scriptTags: SaxTag[] = [];
 	await parseHtml(contentStream, (event, tag) => {
-		if (tag instanceof SaxTag) {
-			if (event === SaxEventType.OpenTag) {
-				console.log(tag.value);
-			} else if (event === SaxEventType.CloseTag) {
-				console.log(tag.value);
-			}
+		if (tag instanceof SaxTag &&
+			event === SaxEventType.CloseTag &&
+			tag.value === "script") {
+			scriptTags.push(tag);
 		}
 	});
+
+	return scriptTags;
 }
