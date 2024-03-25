@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
-const SAPUI5_TYPES_FILES = [
+const SAPUI5_TYPES_LIBS = [
 	"sap.apf",
 	"sap.chart",
 	"sap.ui.codeeditor",
@@ -70,6 +70,19 @@ const SAPUI5_TYPES_FILES = [
 	"sap.ui.webc.main",
 ];
 
+function addSapui5TypesMappingToCompilerOptions(options: ts.CompilerOptions) {
+	const paths = options.paths ?? (options.paths = {});
+	SAPUI5_TYPES_LIBS.forEach((lib) => {
+		if (lib === "sap.ui.core") {
+			// No need to add a mapping for sap.ui.core, as it is loaded by default
+			return;
+		}
+		const namespace = lib.replace(/\./g, "/") + "/*";
+		const pathsEntry = paths[namespace] ?? (paths[namespace] = []);
+		pathsEntry.push(`/types/@sapui5/types/types/${lib}.d.ts`);
+	});
+}
+
 interface PackageJson {
 	dependencies: Record<string, string>;
 }
@@ -120,6 +133,8 @@ export async function createVirtualCompilerHost(
 		...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"),
 		"/types/@sapui5/types/types/sap.ui.core.d.ts",
 	];
+
+	addSapui5TypesMappingToCompilerOptions(options);
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(
@@ -193,9 +208,6 @@ export async function createVirtualCompilerHost(
 				if (fsPath) {
 					return ts.sys.directoryExists(fsPath);
 				}
-				if (directory.startsWith("/types/@ui5/linter/dynamic-types/")) {
-					return true;
-				}
 			}
 			return false;
 		},
@@ -209,9 +221,6 @@ export async function createVirtualCompilerHost(
 				const fsPath = mapToTypePath(fileName);
 				if (fsPath) {
 					return ts.sys.fileExists(fsPath);
-				}
-				if (fileName.startsWith("/types/@ui5/linter/dynamic-types/") && fileName.endsWith(".d.ts")) {
-					return true;
 				}
 			}
 			return false;
@@ -244,30 +253,7 @@ export async function createVirtualCompilerHost(
 			if (sourceFileCache.has(fileName)) {
 				return sourceFileCache.get(fileName);
 			}
-
-			let sourceText: string | undefined = undefined;
-
-			if (fileName.startsWith("/types/@ui5/linter/dynamic-types/") && fileName.endsWith(".d.ts")) {
-				const moduleName = fileName.match(/\/types\/@ui5\/linter\/dynamic-types\/(.*)\.d\.ts/)?.[1];
-				if (moduleName) {
-					const libraryNameCheck = moduleName?.replace(/\//g, ".");
-					if (libraryNameCheck.startsWith("sap.ui.core.") || !libraryNameCheck.startsWith("sap.")) {
-						// sap.ui.core is loaded by default
-						return;
-					}
-					const libraryName = SAPUI5_TYPES_FILES.find(($) => libraryNameCheck.startsWith($ + "."));
-					if (libraryName) {
-						sourceText = `/// <reference path="/types/@sapui5/types/types/${libraryName}.d.ts"/>`;
-					} else {
-						// Can happen e.g. for sap/ui/base/Event.d.ts, but sap.ui.core.d.ts is loaded by default
-						return;
-					}
-				}
-			}
-
-			if (!sourceText) {
-				sourceText = getFile(fileName);
-			}
+			const sourceText = getFile(fileName);
 			if (sourceText === undefined) {
 				throw new Error(`File not found: ${fileName}`);
 			}
