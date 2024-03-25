@@ -6,7 +6,7 @@ import path from "node:path";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 
-interface LinterOptions {
+export interface LinterOptions {
 	rootDir: string;
 	filePaths: string[];
 	reportCoverage?: boolean;

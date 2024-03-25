@@ -2,7 +2,12 @@ import anyTest, {TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {createTestsForFixtures, assertExpectedLintResults, esmockDeprecationText} from "./_linterHelper.js";
+import {
+	createTestsForFixtures, assertExpectedLintResults,
+	esmockDeprecationText, preprocessLintResultsForSnapshot,
+} from "./_linterHelper.js";
+import {LintResult} from "../../../src/detectors/AbstractDetector.js";
+import {LinterOptions} from "../../../src/linter/linter.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "..", "fixtures", "linter");
@@ -11,7 +16,7 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	lintProject: SinonStub;
+	lintProject: SinonStub<[LinterOptions], Promise<LintResult[]>>;
 }>;
 
 test.before(async (t) => {
@@ -32,18 +37,14 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {lintProject} = t.context;
 
-	let res = await lintProject({
+	const res = await lintProject({
 		rootDir: projectPath,
 		filePaths: [],
 		reportCoverage: true,
 		messageDetails: true,
 	});
 
-	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
-		return a.filePath.localeCompare(b.filePath);
-	});
-
-	t.snapshot(res);
+	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
 test.serial("lint: Some files of com.ui5.troublesome.app (without details / coverage)", async (t) => {
@@ -55,13 +56,9 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 	];
 	const {lintProject} = t.context;
 
-	let res = await lintProject({
+	const res = await lintProject({
 		rootDir: projectPath,
 		filePaths,
-	});
-
-	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
-		return a.filePath.localeCompare(b.filePath);
 	});
 
 	assertExpectedLintResults(t, res, projectPath, [
@@ -69,23 +66,19 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 		...filePaths,
 	]);
 
-	t.snapshot(res);
+	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
 test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
 	const {lintProject} = t.context;
 
-	let res = await lintProject({
+	const res = await lintProject({
 		rootDir: projectPath,
 		filePaths: [],
 		reportCoverage: true,
 		messageDetails: true,
 	});
 
-	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
-		return a.filePath.localeCompare(b.filePath);
-	});
-
-	t.snapshot(res);
+	t.snapshot(preprocessLintResultsForSnapshot(res));
 });

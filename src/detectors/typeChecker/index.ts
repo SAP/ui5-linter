@@ -272,7 +272,7 @@ export class TsFileDetector extends FileBasedDetector {
 		const internalfilePaths = await Promise.all(filePaths.map(async (filePath: string) => {
 			let transformationResult;
 			filePath = path.join(this.rootDir, filePath);
-			let internalfilePath = filePath;
+			let internalfilePath = filePath.replace(/\\/g, "/");
 			if (filePath.endsWith(".js")) {
 				const fileContent = ts.sys.readFile(filePath);
 				if (!fileContent) {
@@ -281,15 +281,15 @@ export class TsFileDetector extends FileBasedDetector {
 				transformationResult = amdToEsm(path.basename(filePath, ".js"), fileContent);
 			} else if (filePath.endsWith(".xml")) {
 				const fileStream = fs.createReadStream(filePath);
-				internalfilePath = filePath.replace(/\.xml$/, ".js");
+				internalfilePath = internalfilePath.replace(/\.xml$/, ".js");
 				transformationResult = await xmlToJs(path.basename(filePath), fileStream);
 			} else if (filePath.endsWith(".json")) {
 				const fileContent = ts.sys.readFile(filePath);
 				if (!fileContent) {
 					throw new Error(`Failed to read file ${filePath}`);
 				}
-				internalfilePath = filePath.replace(/\.json$/, ".js");
-				transformationResult = await lintManifest(internalfilePath, fileContent);
+				internalfilePath = internalfilePath.replace(/\.json$/, ".js");
+				transformationResult = await lintManifest(filePath.replace(/\.json$/, ".js"), fileContent);
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
