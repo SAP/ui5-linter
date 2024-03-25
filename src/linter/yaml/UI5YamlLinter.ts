@@ -1,39 +1,38 @@
-//TODO: refactor whole file to account for ui5.yaml
-import type {
-	SAPJSONSchemaForWebApplicationManifestFile,
-	JSONSchemaForSAPUI5Namespace,
-	JSONSchemaForSAPAPPNamespace,
-	Model as ManifestModel,
-	DataSource as ManifestDataSource,
-} from "../../manifest.js";
 import type {LintResult} from "../../detectors/AbstractDetector.js";
-
-import ManifestReporter from "../json/ManifestReporter.js";
-import {LintMessageSeverity} from "../../detectors/AbstractDetector.js";
-import jsonMap from "json-source-map";
-
+import type {LintMessage} from "../../detectors/AbstractDetector.js";
+import {LintMessageSeverity, CoverageInfo} from "../../detectors/AbstractDetector.js";
 import yaml from 'js-yaml';
+import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
 
-interface locType {
-	line: number;
-	column: number;
-	pos: number;
-}
-
-export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
-
-export interface jsonSourceMapType {
-	data: SAPJSONSchemaForWebApplicationManifestFile;
-	pointers: jsonMapPointers;
-}
+const deprecatedLibraries: string[] = [//TODO: outsource as constant (for reuse in ManifestLinter.ts)
+	"sap.ca.scfld.md",
+	"sap.ca.ui",
+	"sap.fe.common", // Internal, removed in 1.110
+	"sap.fe.plugins", // Internal, removed in 1.102
+	"sap.fe.semantics", // Internal, removed in 1.104
+	"sap.landvisz", // Removed in 1.120
+	"sap.makit",
+	"sap.me",
+	"sap.sac.grid", // Removed in 1.114
+	"sap.ui.commons",
+	"sap.ui.suite",
+	"sap.ui.ux3",
+	"sap.ui.vtm",
+	"sap.uiext.inbox",
+	"sap.webanalytics.core",
+	"sap.zen.commons",
+	"sap.zen.crosstab",
+	"sap.zen.dsh",
+];
 
 export default class UI5YamlLinter {
-	#reporter: ManifestReporter | null;
 	#content = "";
+	#fromYamlContent: DataWithPosition = "";
 	#path = "";
+	#messages: LintMessage[] = [];
+	#coverageInfo: CoverageInfo[] = [];
 
 	constructor(content: string, path: string) {
-		this.#reporter = null;
 		this.#content = content;
 		this.#path = path;
 	}
@@ -41,76 +40,54 @@ export default class UI5YamlLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async getReport(): Promise<LintResult> {
 		const source = this.#parseUI5Yaml(this.#content);
-		console.log('STOP2');
-        // this.#reporter = new ManifestReporter(this.#path, source);//TODO: adjust
-		// this.#analyzeUI5Yaml(source.data);
+		this.#analyzeUI5Yaml(source);
 
-		// const report = this.#reporter.getReport();
-		// return report;
-        return {filePath:"", messages: [], coverageInfo: [], errorCount: 0, fatalErrorCount: 0, warningCount: 0};//TODO: remove
+        let errorCount = 0;
+		let warningCount = 0;
+		let fatalErrorCount = 0;
+		for (const {severity, fatal} of this.#messages) {
+			if (severity === LintMessageSeverity.Error) {
+				errorCount++;
+				if (fatal) {
+					fatalErrorCount++;
+				}
+			} else {
+				warningCount++;
+			}
+		}
+
+		return {
+			filePath: this.#path,
+			messages: this.#messages,
+			coverageInfo: this.#coverageInfo,
+			errorCount,
+			fatalErrorCount,
+			warningCount,
+		};
 	}
 
-	#parseUI5Yaml(fileContent: string) {//TODO: add custom YAML types + Schema for ui5.yaml ?
+	#parseUI5Yaml(fileContent: string) {
+		this.#fromYamlContent = fromYaml(fileContent);
 		return yaml.load(fileContent);
 	}
 
-	#analyzeUI5Yaml(manifest: SAPJSONSchemaForWebApplicationManifestFile) {//TODO: adjust
-		//TODO: adjust
-
-        // const {resources, models} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
-		// const {dataSources} = (manifest["sap.app"] ?? {} as JSONSchemaForSAPAPPNamespace);
-
-		// if (resources?.js) {
-		// 	this.#reporter?.addMessage({
-		// 		node: "/sap.ui5/resources/js",
-		// 		severity: LintMessageSeverity.Error,
-		// 		ruleId: "ui5-linter-no-deprecated-api",
-		// 		message: `Use of deprecated property 'sap.ui5/resources/js'`,
-		// 	});
-		// }
-
-		// const modelKeys: string[] = (models && Object.keys(models)) ?? [];
-		// modelKeys.forEach((modelKey: string) => {
-		// 	const curModel: ManifestModel = (models?.[modelKey]) ?? {};
-
-		// 	if (!curModel.type) {
-		// 		const curDataSource = dataSources && curModel.dataSource &&
-		// 			dataSources[curModel.dataSource] as ManifestDataSource | undefined;
-
-		// 		if (curDataSource &&
-		// 			/* if not provided dataSource.type="OData" */
-		// 			(curDataSource.type === "OData" || !curDataSource.type)) {
-		// 			curModel.type = curDataSource.settings?.odataVersion === "4.0" ?
-		// 				"sap.ui.model.odata.v4.ODataModel" :
-		// 				"sap.ui.model.odata.v2.ODataModel";
-		// 		}
-		// 		// There are other types that can be found in sap/ui/core/Component, but the one
-		// 		// we actually care here is just the "sap.ui.model.odata.v4.ODataModel"
-		// 	}
-
-		// 	if (curModel.type && [
-		// 		"sap.ui.model.odata.ODataModel",
-		// 		"sap.zen.dsh.widgets.SDKModel",
-		// 	].includes(curModel.type)) {
-		// 		this.#reporter?.addMessage({
-		// 			node: `/sap.ui5/models/${modelKey}/type`,
-		// 			severity: LintMessageSeverity.Error,
-		// 			ruleId: "ui5-linter-no-deprecated-api",
-		// 			message: `Use of deprecated model type ` +
-		// 			`'sap.ui5/models/${modelKey}/type="${curModel.type}"'`,
-		// 		});
-		// 	}
-
-		// 	if (curModel.type === "sap.ui.model.odata.v4.ODataModel" &&
-		// 		curModel.settings && "synchronizationMode" in curModel.settings) {
-		// 		this.#reporter?.addMessage({
-		// 			node: `/sap.ui5/models/${modelKey}/settings/synchronizationMode`,
-		// 			severity: LintMessageSeverity.Error,
-		// 			ruleId: "ui5-linter-no-deprecated-api",
-		// 			message: `Use of deprecated property ` +
-		// 			`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`,
-		// 		});
-		// 	}
-		// });
+	#analyzeUI5Yaml(ui5YamlObject: any) { // maybe add ui5.yaml specific schema (https://sap.github.io/ui5-tooling/schema/ui5.yaml.json)?
+		// Check for deprecated libraries
+		if (ui5YamlObject && ui5YamlObject.framework && ui5YamlObject.framework.libraries
+				&& ui5YamlObject.framework.libraries.length) {
+			ui5YamlObject.framework.libraries.forEach((lib: { name: any; }, index: any) => {
+				if (deprecatedLibraries.includes(lib.name)) {
+					const positionInfo = getPosition(this.#fromYamlContent.framework.libraries[index]);
+					this.#messages.push({
+						ruleId: 'ui5-linter-no-deprecated-api',
+						severity: LintMessageSeverity.Error,
+						fatal: undefined,
+						line: positionInfo.start.line,
+						column: positionInfo.start.column,
+						message: `Use of deprecated library '${lib.name}'`,
+					});
+				}
+			});
+		}
 	}
 }

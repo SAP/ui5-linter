@@ -119,12 +119,9 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} 
 				else if (resourcePath.endsWith(".yaml")) {
-					// TODO: account for all ui5.yaml schemas
 					resourcePath = resourcePath.replace(/\.yaml$/, ".js");
 					const resourceContent = await resource.getString();
-					console.log(resourceContent);
 					({source, messages} = await lintUI5Yaml(resourcePath, resourceContent));
-					console.log("STOP");//TODO: remove
 				}
 				else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
@@ -173,9 +170,8 @@ export class TsProjectDetector extends ProjectBasedDetector {
 		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json}";
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
-		
-		const rootFileTypes = "{ui5.yaml,*-ui5.yaml,*.ui5.yaml,ui5-deploy.yaml,ui5-dist.yaml,ui5-local.yaml}"; // future: extend with other root files (e.g. 'ui5-XXX.yaml')
-			// currently: only support for 'ui5.yaml'
+
+		const rootFileTypes = "{ui5.yaml,*-ui5.yaml,*.ui5.yaml,ui5-deploy.yaml,ui5-dist.yaml,ui5-local.yaml}";
 		const rootDirectoryResources = await rootReader.byGlob("/" + rootFileTypes);
 		globEnd();
 		const resources = new Map<string, string>();
