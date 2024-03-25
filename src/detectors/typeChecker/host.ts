@@ -5,84 +5,6 @@ import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 
-const SAPUI5_TYPES_LIBS = [
-	"sap.apf",
-	"sap.chart",
-	"sap.ui.codeeditor",
-	"sap.collaboration",
-	"sap.zen.crosstab",
-	"sap.zen.dsh",
-	"sap.zen.commons",
-	"sap.sac.df",
-	"sap.ui.commons",
-	"sap.ui.comp",
-	"sap.ui.core",
-	"sap.ui.dt",
-	"sap.ui.export",
-	"sap.f",
-	"sap.ui.fl",
-	"sap.gantt",
-	"sap.ui.generic.app",
-	"sap.ui.generic.template",
-	"sap.uiext.inbox",
-	"sap.insights",
-	"sap.ui.integration",
-	"sap.ui.layout",
-	"sap.makit",
-	"sap.ui.mdc",
-	"sap.m",
-	"sap.me",
-	"sap.ndc",
-	"sap.ovp",
-	"sap.ui.richtexteditor",
-	"sap.ui.rta",
-	"sap.esh.search.ui",
-	"sap.fe.core",
-	"sap.fe.macros",
-	"sap.fe.navigation",
-	"sap.fe.placeholder",
-	"sap.fe.templates",
-	"sap.fe.test",
-	"sap.fe.tools",
-	"sap.feedback.ui",
-	"sap.rules.ui",
-	"sap.suite.ui.generic.template",
-	"sap.ui.vk",
-	"sap.ui.vtm",
-	"sap.webanalytics.core",
-	"sap.ui.suite",
-	"sap.suite.ui.commons",
-	"sap.suite.ui.microchart",
-	"sap.ui.support",
-	"sap.ui.table",
-	"sap.ui.testrecorder",
-	"sap.tnt",
-	"sap.ca.ui",
-	"sap.ui.unified",
-	"sap.ushell",
-	"sap.ushell_abap",
-	"sap.ui.ux3",
-	"sap.uxap",
-	"sap.ui.vbm",
-	"sap.viz",
-	"sap.ui.webc.common",
-	"sap.ui.webc.fiori",
-	"sap.ui.webc.main",
-];
-
-function addSapui5TypesMappingToCompilerOptions(options: ts.CompilerOptions) {
-	const paths = options.paths ?? (options.paths = {});
-	SAPUI5_TYPES_LIBS.forEach((lib) => {
-		if (lib === "sap.ui.core") {
-			// No need to add a mapping for sap.ui.core, as it is loaded by default
-			return;
-		}
-		const namespace = lib.replace(/\./g, "/") + "/*";
-		const pathsEntry = paths[namespace] ?? (paths[namespace] = []);
-		pathsEntry.push(`/types/@sapui5/types/types/${lib}.d.ts`);
-	});
-}
-
 interface PackageJson {
 	dependencies: Record<string, string>;
 }
@@ -109,6 +31,28 @@ async function collectTransitiveDependencies(pkgName: string, deps: Set<string>)
 	return deps;
 }
 
+async function collectSapui5TypesFiles() {
+	const typesDir = path.dirname(require.resolve("@sapui5/types/package.json"));
+	const typesFiles = await fs.readdir(path.join(typesDir, "types"), {withFileTypes: true});
+	return typesFiles
+		.filter((entry) => entry.isFile() && entry.name.endsWith(".d.ts") && entry.name !== "index.d.ts")
+		.map((entry) => entry.name);
+}
+
+function addSapui5TypesMappingToCompilerOptions(sapui5TypesFiles: string[], options: ts.CompilerOptions) {
+	const paths = options.paths ?? (options.paths = {});
+	sapui5TypesFiles.forEach((fileName) => {
+		if (fileName === "sap.ui.core.d.ts") {
+			// No need to add a mapping for sap.ui.core, as it is loaded by default
+			return;
+		}
+		const libraryName = posixPath.basename(fileName, ".d.ts");
+		const namespace = libraryName.replace(/\./g, "/") + "/*";
+		const pathsEntry = paths[namespace] ?? (paths[namespace] = []);
+		pathsEntry.push(`/types/@sapui5/types/types/${fileName}`);
+	});
+}
+
 export async function createVirtualCompilerHost(
 	options: ts.CompilerOptions, files: Map<string, string>
 ): Promise<ts.CompilerHost> {
@@ -130,11 +74,13 @@ export async function createVirtualCompilerHost(
 	options.typeRoots = ["/types"];
 	options.types = [
 		// Request compiler to only use sap.ui.core types by default - other types will be loaded on demand
+		// (see addSapui5TypesMappingToCompilerOptions)
 		...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"),
 		"/types/@sapui5/types/types/sap.ui.core.d.ts",
 	];
 
-	addSapui5TypesMappingToCompilerOptions(options);
+	// Adds mappings for all other sapui5 types, so that they are only loaded once a module is imported
+	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options);
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(
