@@ -55,6 +55,7 @@ export default class FileLinter {
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
+			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -209,6 +210,74 @@ export default class FileLinter {
 				`'${symbol.escapedName as string}'${additionalMessage}`,
 			messageDetails: deprecationInfo.messageDetails,
 		});
+	}
+
+	getSymbolModuleDeclaration(symbol: ts.Symbol) {
+		let parent = symbol.valueDeclaration?.parent;
+		while (parent && !ts.isModuleDeclaration(parent)) {
+			parent = parent.parent;
+		}
+		return parent;
+	}
+
+	analyzeLibInitCall(node: ts.CallExpression) {
+		if (!ts.isIdentifier(node.expression) && // Assignment `const LibInit = Library.init` and destructuring
+			!ts.isPropertyAccessExpression(node.expression) && /* Lib.init() */
+			!ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) {
+			return;
+		}
+
+		const nodeExp = node.expression;
+		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
+			return;
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
+			return;
+		}
+
+		const initArg = node?.arguments[0] &&
+			ts.isObjectLiteralExpression(node.arguments[0]) &&
+			node.arguments[0];
+
+		let nodeToHighlight;
+
+		if (!initArg) {
+			nodeToHighlight = node;
+		} else {
+			const apiVersionNode = initArg.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "apiVersion";
+			});
+
+			if (!apiVersionNode) { // No arguments or no 'apiVersion' property
+				nodeToHighlight = node;
+			} else if (ts.isPropertyAssignment(apiVersionNode) &&
+			apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
+			}
+		}
+
+		if (nodeToHighlight) {
+			let importedVarName: string;
+			if (ts.isIdentifier(nodeExp)) {
+				importedVarName = nodeExp.getText();
+			} else {
+				importedVarName = nodeExp.expression.getText() + ".init";
+			}
+
+			this.#reporter.addMessage({
+				node: nodeToHighlight,
+				severity: LintMessageSeverity.Error,
+				ruleId: "ui5-linter-no-partially-deprecated-api",
+				message:
+					`Call to ${importedVarName}() must be declared with property {apiVersion: 2}`,
+				messageDetails: this.#messageDetails ? `{@link sap.ui.core.Lib.init Lib.init}` : undefined,
+			});
+		}
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
