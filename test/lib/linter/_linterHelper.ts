@@ -6,12 +6,13 @@ import esmock from "esmock";
 import {LintResult} from "../../../src/detectors/AbstractDetector.js";
 import FileLinter from "../../../src/detectors/typeChecker/FileLinter.js";
 import {SourceFile, TypeChecker} from "typescript";
+import {LinterOptions} from "../../../src/linter/linter.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	lintFile: SinonStub;
+	lintFile: SinonStub<[LinterOptions], Promise<LintResult[]>>;
 }>;
 
 test.before(async (t) => {
@@ -93,7 +94,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					messageDetails: true,
 				});
 				assertExpectedLintResults(t, res, fixturesPath, filePaths);
-				res.forEach((results: {filePath: string}) => {
+				res.forEach((results) => {
 					results.filePath = testName;
 				});
 				t.snapshot(res);
@@ -106,4 +107,15 @@ export function createTestsForFixtures(fixturesPath: string) {
 		}
 		throw err;
 	}
+}
+
+export function preprocessLintResultsForSnapshot(res: LintResult[]) {
+	res.sort((a, b) => {
+		return a.filePath.localeCompare(b.filePath);
+	});
+	res.forEach((message) => {
+		// Convert to posix paths to align snapshots across platforms
+		message.filePath = message.filePath.replace(/\\/g, "/");
+	});
+	return res;
 }

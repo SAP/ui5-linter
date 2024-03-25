@@ -91,7 +91,7 @@ export async function createVirtualCompilerHost(
 	for (const filePath of files.keys()) {
 		// Add every directory of the file path to the set of directories
 		let directory = posixPath.dirname(filePath);
-		while (directory !== "/") {
+		while (directory !== "/" && directory !== ".") {
 			directories.add(directory);
 			directory = posixPath.dirname(directory);
 		}
@@ -100,7 +100,7 @@ export async function createVirtualCompilerHost(
 	for (const typePackageDir of typePackageDirs) {
 		// Add every directory of the type package path to the set of directories
 		let directory = typePackageDir;
-		while (directory !== "/") {
+		while (directory !== "/" && directory !== ".") {
 			directories.add(directory);
 			directory = posixPath.dirname(directory);
 		}
