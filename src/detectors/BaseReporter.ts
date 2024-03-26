@@ -1,5 +1,6 @@
 import type ts from "typescript";
 import type {LintMessage, CoverageInfo, LintResult} from "../detectors/AbstractDetector.js";
+import type {Tag as SaxTag} from "sax-wasm";
 
 export interface BaseReporter {
 	addMessage(args: ReporterMessage): void;
@@ -8,7 +9,7 @@ export interface BaseReporter {
 }
 
 export interface ReporterMessage {
-	node?: ts.Node | string;
+	node?: ts.Node | SaxTag | string;
 	message: LintMessage["message"];
 	messageDetails?: LintMessage["messageDetails"];
 	severity: LintMessage["severity"];
