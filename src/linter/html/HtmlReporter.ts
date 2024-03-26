@@ -2,6 +2,7 @@ import type {BaseReporter, ReporterMessage, ReporterCoverageInfo} from "../../de
 import type {LintMessage} from "../../detectors/AbstractDetector.js";
 import {Tag as SaxTag} from "sax-wasm";
 import {LintMessageSeverity, CoverageInfo} from "../../detectors/AbstractDetector.js";
+import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 export default class HtmlReporter implements BaseReporter {
 	#filePath: string;
@@ -12,7 +13,7 @@ export default class HtmlReporter implements BaseReporter {
 		this.#filePath = filePath;
 	}
 
-	addMessage({node, message, severity, ruleId, fatal = undefined}: ReporterMessage) {
+	addMessage({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
 		if (fatal && severity !== LintMessageSeverity.Error) {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
@@ -22,14 +23,20 @@ export default class HtmlReporter implements BaseReporter {
 			({line, character: column} = node.openStart);
 		}
 
-		this.#messages.push({
+		const msg: LintMessage = {
 			ruleId,
 			severity,
 			fatal,
 			line: line + 1,
 			column: column + 1,
 			message,
-		});
+		};
+
+		if (messageDetails) {
+			msg.messageDetails = resolveLinks(messageDetails);
+		}
+
+		this.#messages.push(msg);
 	}
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
