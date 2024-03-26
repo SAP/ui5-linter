@@ -1,14 +1,14 @@
 import {taskStart} from "../../detectors/util/perf.js";
 import {extractScriptTags} from "../../detectors/transpilers/html/parser.js";
 import {LintMessageSeverity} from "../../detectors/AbstractDetector.js";
-import Reporter from "../../detectors/Reporter.js";
+import HtmlReporter from "./HtmlReporter.js";
 
 import type {TranspileResult} from "../../detectors/transpilers/AbstractTranspiler.js";
 import type {ReadStream} from "node:fs";
 
 export async function lintHtml(resourceName: string, contentStream: ReadStream): Promise<TranspileResult> {
 	const taskLintEnd = taskStart("Static lint", resourceName);
-	const report = new Reporter("", resourceName);
+	const report = new HtmlReporter(resourceName);
 
 	const scriptTags = await extractScriptTags(contentStream);
 	const jsScriptTags = scriptTags.filter((tag) => tag.attributes.every((attr) => {
@@ -25,9 +25,9 @@ export async function lintHtml(resourceName: string, contentStream: ReadStream):
 	jsScriptTags.forEach((tag) => {
 		const scriptContent = tag.textNodes?.map((tNode) => tNode.value).join("").trim();
 
-		if (scriptContent) {
+		if (scriptContent) {			
 			report.addMessage({
-				// node: `/sap.ui5/dependencies/libs/${libKey}`,
+				node: tag,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-csp-compliance",
 				message: `Use of inline javascript`,

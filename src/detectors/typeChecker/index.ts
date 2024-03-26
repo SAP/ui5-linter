@@ -119,8 +119,8 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} else if (resourcePath.endsWith(".html")) {
 					resourcePath = resourcePath.replace(/\.html$/, ".html.js");
-					const resourceStream = resource.getStream();
-					({source, messages, map} = await lintHtml(resourcePath, resourceStream));
+					source = await resource.getString();
+					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
