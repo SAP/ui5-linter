@@ -31,6 +31,32 @@ async function collectTransitiveDependencies(pkgName: string, deps: Set<string>)
 	return deps;
 }
 
+async function collectSapui5TypesFiles() {
+	const typesDir = path.dirname(require.resolve("@sapui5/types/package.json"));
+	const allFiles = await fs.readdir(path.join(typesDir, "types"), {withFileTypes: true});
+	const typesFiles = [];
+	for (const entry of allFiles) {
+		if (entry.isFile() && entry.name.endsWith(".d.ts") && entry.name !== "index.d.ts") {
+			typesFiles.push(entry.name);
+		}
+	}
+	return typesFiles;
+}
+
+function addSapui5TypesMappingToCompilerOptions(sapui5TypesFiles: string[], options: ts.CompilerOptions) {
+	const paths = options.paths ?? (options.paths = {});
+	sapui5TypesFiles.forEach((fileName) => {
+		if (fileName === "sap.ui.core.d.ts") {
+			// No need to add a mapping for sap.ui.core, as it is loaded by default
+			return;
+		}
+		const libraryName = posixPath.basename(fileName, ".d.ts");
+		const namespace = libraryName.replace(/\./g, "/") + "/*";
+		const pathsEntry = paths[namespace] ?? (paths[namespace] = []);
+		pathsEntry.push(`/types/@sapui5/types/types/${fileName}`);
+	});
+}
+
 export async function createVirtualCompilerHost(
 	options: ts.CompilerOptions, files: Map<string, string>
 ): Promise<ts.CompilerHost> {
@@ -50,8 +76,15 @@ export async function createVirtualCompilerHost(
 	));
 
 	options.typeRoots = ["/types"];
-	// Request compiler to use all types we found in the dependencies of "@sapui5/types"
-	options.types = typePackageDirs;
+	options.types = [
+		// Request compiler to only use sap.ui.core types by default - other types will be loaded on demand
+		// (see addSapui5TypesMappingToCompilerOptions)
+		...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"),
+		"/types/@sapui5/types/types/sap.ui.core.d.ts",
+	];
+
+	// Adds mappings for all other sapui5 types, so that they are only loaded once a module is imported
+	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options);
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(
