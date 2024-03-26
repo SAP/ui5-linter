@@ -11,7 +11,7 @@ updates:
   schedule:
     interval: weekly
     day: sunday
-    time: "10:00"
+    time: "11:00"
     timezone: Etc/UCT
   reviewers:
   - "SAP/ui5-foundation"
