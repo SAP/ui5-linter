@@ -33,10 +33,14 @@ async function collectTransitiveDependencies(pkgName: string, deps: Set<string>)
 
 async function collectSapui5TypesFiles() {
 	const typesDir = path.dirname(require.resolve("@sapui5/types/package.json"));
-	const typesFiles = await fs.readdir(path.join(typesDir, "types"), {withFileTypes: true});
-	return typesFiles
-		.filter((entry) => entry.isFile() && entry.name.endsWith(".d.ts") && entry.name !== "index.d.ts")
-		.map((entry) => entry.name);
+	const allFiles = await fs.readdir(path.join(typesDir, "types"), {withFileTypes: true});
+	const typesFiles = [];
+	for (const entry of allFiles) {
+		if (entry.isFile() && entry.name.endsWith(".d.ts") && entry.name !== "index.d.ts") {
+			typesFiles.push(entry.name);
+		}
+	}
+	return typesFiles;
 }
 
 function addSapui5TypesMappingToCompilerOptions(sapui5TypesFiles: string[], options: ts.CompilerOptions) {
