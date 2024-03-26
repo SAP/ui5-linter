@@ -309,7 +309,7 @@ export class TsFileDetector extends FileBasedDetector {
 				if (!fileContent) {
 					throw new Error(`Failed to read file ${filePath}`);
 				}
-				internalfilePath = filePath.replace(/\.html$/, ".html.js");
+				internalfilePath = filePath.replace(/\.html$/, ".js");
 				transformationResult = await lintHtml(internalfilePath, fs.createReadStream(filePath));
 				transformationResult.source = fileContent;
 			} else {
