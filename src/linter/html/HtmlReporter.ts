@@ -1,4 +1,4 @@
-import type {BaseReporter, ReporterMessage, ReporterCoverageInfo, PositionInfo} from "../../detectors/BaseReporter.js";
+import type {BaseReporter, ReporterMessage, ReporterCoverageInfo} from "../../detectors/BaseReporter.js";
 import type {LintMessage} from "../../detectors/AbstractDetector.js";
 import {Tag as SaxTag} from "sax-wasm";
 import {LintMessageSeverity, CoverageInfo} from "../../detectors/AbstractDetector.js";
@@ -17,10 +17,9 @@ export default class HtmlReporter implements BaseReporter {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
-		
 		let line = 1, column = 1;
 		if (node instanceof SaxTag) {
-			({ line, character: column } = node.openStart);
+			({line, character: column} = node.openStart);
 		}
 
 		this.#messages.push({
@@ -36,8 +35,8 @@ export default class HtmlReporter implements BaseReporter {
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
 		let line = 1, column = 1, endLine = 1, endColumn = 1;
 		if (node instanceof SaxTag) {
-			({ line, character: column } = node.openStart);
-			({ line: endLine, character: endColumn } = node.closeEnd);
+			({line, character: column} = node.openStart);
+			({line: endLine, character: endColumn} = node.closeEnd);
 		}
 
 		this.#coverageInfo.push({

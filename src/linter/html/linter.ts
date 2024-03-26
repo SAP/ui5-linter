@@ -25,7 +25,7 @@ export async function lintHtml(resourceName: string, contentStream: ReadStream):
 	jsScriptTags.forEach((tag) => {
 		const scriptContent = tag.textNodes?.map((tNode) => tNode.value).join("").trim();
 
-		if (scriptContent) {			
+		if (scriptContent) {
 			report.addMessage({
 				node: tag,
 				severity: LintMessageSeverity.Error,
