@@ -118,7 +118,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} else if (resourcePath.endsWith(".html")) {
-					resourcePath = resourcePath.replace(/\.html$/, ".html.js");
+					resourcePath = resourcePath.replace(/\.html$/, ".js");
 					source = await resource.getString();
 					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
@@ -217,11 +217,20 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			});
 
 			// Rewrite fs-paths to virtual paths
-			resourcePaths = allResources.map((res: Resource) => {
+			resourcePaths = [...allResources, ...allTestResources].map((res: Resource) => {
 				if (absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
 					return res.getPath();
 				}
-			}).filter(($: string | undefined) => $);
+			})
+				.filter(($: string | undefined) => $)
+				.map((res) => {
+					if (res && !res.endsWith(".js")) {
+						const chunks = res?.split(".");
+						chunks.splice(-1, 1, "js")
+						res = chunks.join(".");
+					}
+					return res;
+				});
 		} else {
 			resourcePaths = Array.from(resources.keys());
 		}
@@ -295,6 +304,14 @@ export class TsFileDetector extends FileBasedDetector {
 				}
 				internalfilePath = internalfilePath.replace(/\.json$/, ".js");
 				transformationResult = await lintManifest(filePath.replace(/\.json$/, ".js"), fileContent);
+			} else if (filePath.endsWith(".html")) {
+				const fileContent = ts.sys.readFile(filePath);
+				if (!fileContent) {
+					throw new Error(`Failed to read file ${filePath}`);
+				}
+				internalfilePath = filePath.replace(/\.html$/, ".html.js");
+				transformationResult = await lintHtml(internalfilePath, fs.createReadStream(filePath));
+				transformationResult.source = fileContent;
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
