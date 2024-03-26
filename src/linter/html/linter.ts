@@ -31,7 +31,7 @@ export async function lintHtml(resourceName: string, contentStream: ReadStream):
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-csp-compliance",
 				message: `Use of inline javascript`,
-				messageDetails: "In order to avoid CSP errors, avoid usage of inline javascript",
+				messageDetails: "In order to avoid CSP errors, remove the usage of inline javascript",
 			});
 		}
 	});
