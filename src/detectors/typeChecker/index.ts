@@ -309,9 +309,9 @@ export class TsFileDetector extends FileBasedDetector {
 				if (!fileContent) {
 					throw new Error(`Failed to read file ${filePath}`);
 				}
-				internalfilePath = filePath.replace(/\.html$/, ".js");
-				transformationResult = await lintHtml(internalfilePath, fs.createReadStream(filePath));
+				transformationResult = await lintHtml(filePath, fs.createReadStream(filePath));
 				transformationResult.source = fileContent;
+				internalfilePath = filePath.replace(/\.html$/, ".js");
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
