@@ -225,7 +225,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 				.filter(($: string | undefined) => $)
 				.map((res) => {
 					if (res && !res.endsWith(".js")) {
-						const chunks = res?.split(".");
+						const chunks = res.split(".");
 						chunks.splice(-1, 1, "js");
 						res = chunks.join(".");
 					}
