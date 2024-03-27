@@ -49,21 +49,21 @@ window.sap.ui.require(["my/module"], (Module) => {
 window[sap.ui.require(["my/module"], (Module) => {
 	return Module;
 })];
-window.["window"]sap.ui.require(["my/module"], (Module) => {
+window["window"].sap.ui.require(["my/module"], (Module) => {
 	return Module;
 });
 
-window.["sap"]["ui"]["require"](["my/module"], (Module) => {
+window["sap"]["ui"]["require"](["my/module"], (Module) => {
 	return Module;
 });
 
-let val = sap.ui.require(["my/module"], (Module) => {
+let val6 = sap.ui.require(["my/module"], (Module) => {
 	return Module;
 });
-let val2 = sap.ui.require(["my/module"], (Module) => {
+let val7 = sap.ui.require(["my/module"], (Module) => {
 	return Module;
 }) + 1;
-let val3 = () => sap.ui.require(["my/module"], (Module) => {
+let val8 = () => sap.ui.require(["my/module"], (Module) => {
 		return Module;
 	});
 
@@ -87,7 +87,7 @@ for (let i = 0; i < sap.ui.require(["my/module"], (Module) => {
 	})[i]
 }
 
-function () {
+function fn1() {
 	sap.ui.require(["my/module"], (Module) => {
 		return Module;
 	});
@@ -103,7 +103,7 @@ function () {
 	return Module;
 }));
 
-var function () {
+const fn2 = function () {
 	sap.ui.require(["my/module"], (Module) => {
 		return Module;
 	});
@@ -124,7 +124,7 @@ class MyClass {
 	});
 	[sap.ui.require(["my/module"], (Module) => {
 		return Module;
-	})]: "foo";
+	})] = "foo";
 	load() {
 		sap.ui.require(["my/module"], (Module) => {
 			return Module;
@@ -138,9 +138,7 @@ function* generatorFunction() {
 	});
 }
 
-var deps = ["my/module"], (Module) => {
-		return Module;
-	};
+var deps = ["my/module"];
 var callback = (MyModule) => {
 	console.log(MyModule);
 };
