@@ -18,7 +18,6 @@ const arr = [sap.ui.require(["my/module"]), sap.ui.require(["my/module"])];
 let val = sap.ui.require(["my/module"]);
 let val2 = sap.ui.require(["my/module"]) + 1;
 let val3 = -sap.ui.require(["my/module"]);
-let val4 = sap.ui.require(["my/module"])++;
 let val5 = () => sap.ui.require(["my/module"]);
 
 window.sap.ui.require(["my/module"]);
