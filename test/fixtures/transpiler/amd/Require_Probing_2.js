@@ -19,15 +19,15 @@ const arr = [sap.ui.require("my/module"), sap.ui.require("my/module")];
 let val = sap.ui.require("my/module");
 let val2 = sap.ui.require("my/module") + 1;
 let val3 = -sap.ui.require("my/module");
-let val5 = () => sap.ui.require("my/module");
+let val4 = () => sap.ui.require("my/module");
 
 window.sap.ui.require("my/module");
 window[sap.ui.require("my/module")];
-window.["sap"].ui.require("my/module");
+window["sap"].ui.require("my/module");
 
-let val = sap.ui.require("my/module");
-let val2 = sap.ui.require("my/module") + 1;
-let val3 = () => sap.ui.require("my/module");
+let val5 = sap.ui.require("my/module");
+let val6 = sap.ui.require("my/module") + 1;
+let val7 = () => sap.ui.require("my/module");
 
 new val(sap.ui.require("my/module"))(sap.ui.require("my/module"));
 
@@ -43,7 +43,7 @@ for (let i = 0; i < sap.ui.require("my/module"); i++) {
 	sap.ui.require("my/module")[i]
 }
 
-function () {
+function fn1() {
 	sap.ui.require("my/module");
 }
 
@@ -53,7 +53,7 @@ function () {
 
 (() => sap.ui.require("my/module"));
 
-var function () {
+const fn2 = function () {
 	sap.ui.require("my/module");
 }
 
@@ -64,7 +64,7 @@ const obj1 = {
 
 class MyClass {
 	prop1 = sap.ui.require("my/module");
-	[sap.ui.require("my/module")]: "foo";
+	[sap.ui.require("my/module")] = "foo";
 	load() {
 		sap.ui.require("my/module")
 	}
