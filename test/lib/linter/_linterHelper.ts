@@ -65,7 +65,10 @@ export function createTestsForFixtures(fixturesPath: string) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
 		for (const fileName of testFiles) {
-			if (!fileName.endsWith(".js") && !fileName.endsWith(".xml") && !fileName.endsWith(".json") && !fileName.endsWith(".html")) {
+			if (!fileName.endsWith(".js") &&
+				!fileName.endsWith(".xml") &&
+				!fileName.endsWith(".json") &&
+				!fileName.endsWith(".html")) {
 				// Ignore non-JavaScript, non-XML, non-JSON and non-HTML files
 				continue;
 			}
