@@ -39,9 +39,6 @@ let val2 = sap.ui.require(["my/module"], (Module) => {
 let val3 = -sap.ui.require(["my/module"], (Module) => {
 	return Module;
 });
-let val4 = sap.ui.require(["my/module"], (Module) => {
-	return Module;
-})++;
 let val5 = () => sap.ui.require(["my/module"], (Module) => {
 	return Module;
 });
