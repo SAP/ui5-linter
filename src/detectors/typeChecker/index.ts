@@ -118,7 +118,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} else if (resourcePath.endsWith(".html")) {
-					resourcePath = resourcePath.replace(/\.html$/, ".js");
+					resourcePath = resourcePath.replace(/\.html$/, ".jsx");
 					source = await resource.getString();
 					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
@@ -224,7 +224,9 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			})
 				.filter(($: string | undefined) => $)
 				.map((res) => {
-					if (res && !res.endsWith(".js")) {
+					if (res && res.endsWith(".html")) {
+						res = res.replace(/\.[a-z]+$/, ".jsx");
+					} else if (res && !res.endsWith(".js")) {
 						res = res.replace(/\.[a-z]+$/, ".js");
 					}
 					return res;
