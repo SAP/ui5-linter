@@ -9,6 +9,7 @@ import {taskStart} from "../util/perf.js";
 import {amdToEsm} from "../transpilers/amd/transpiler.js";
 import {xmlToJs} from "../transpilers/xml/transpiler.js";
 import {lintManifest} from "../../linter/json/linter.js";
+import {lintHtml} from "../../linter/html/linter.js";
 import {
 	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector,
 } from "../AbstractDetector.js";
@@ -116,6 +117,10 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
+				} else if (resourcePath.endsWith(".html")) {
+					resourcePath = resourcePath.replace(/\.html$/, ".jsx");
+					source = await resource.getString();
+					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
@@ -159,7 +164,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 		// Read all resources and test-resources and their content since tsc works completely synchronous
 		const globEnd = taskStart("Locating Resources");
-		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json}";
+		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json,*.html}";
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
 		globEnd();
@@ -212,11 +217,20 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			});
 
 			// Rewrite fs-paths to virtual paths
-			resourcePaths = allResources.map((res: Resource) => {
+			resourcePaths = [...allResources, ...allTestResources].map((res: Resource) => {
 				if (absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
 					return res.getPath();
 				}
-			}).filter(($: string | undefined) => $);
+			})
+				.filter(($: string | undefined) => $)
+				.map((res) => {
+					if (res && res.endsWith(".html")) {
+						res = res.replace(/\.[a-z]+$/, ".jsx");
+					} else if (res && !res.endsWith(".js")) {
+						res = res.replace(/\.[a-z]+$/, ".js");
+					}
+					return res;
+				});
 		} else {
 			resourcePaths = Array.from(resources.keys());
 		}
@@ -290,6 +304,14 @@ export class TsFileDetector extends FileBasedDetector {
 				}
 				internalfilePath = internalfilePath.replace(/\.json$/, ".js");
 				transformationResult = await lintManifest(filePath.replace(/\.json$/, ".js"), fileContent);
+			} else if (filePath.endsWith(".html")) {
+				const fileContent = ts.sys.readFile(filePath);
+				if (!fileContent) {
+					throw new Error(`Failed to read file ${filePath}`);
+				}
+				internalfilePath = internalfilePath.replace(/\.html$/, ".js");
+				transformationResult = await lintHtml(path.basename(filePath), fs.createReadStream(filePath));
+				transformationResult.source = fileContent;
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}

@@ -1,0 +1,23 @@
+<html>
+
+<head>
+	<title>No inline JS</title>
+</head>
+
+<body>
+	<script id="myXml" type="text/xmldata">
+		<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="myController" displayBlock="true">
+			<App>
+				<Page title="Hello">
+					<Button text="{/buttonText}" press= "doSomething"/>
+				</Page>
+			</App>
+		</mvc:View>
+	</script>
+
+	<script type="" src="./path/to/js.js"></script>
+
+	<script src="./another/path/to/js.js"></script>
+</body>
+
+</html>
