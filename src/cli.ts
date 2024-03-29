@@ -20,6 +20,7 @@ export default async function () {
 		process.env.NODE_ENV === "test" ||
 		process.argv.includes(NO_UPDATE_NOTIFIER);
 
+	/* istanbul ignore if */
 	if (!disableUpdateNotifier) {
 		const {default: updateNotifier} = await import("update-notifier");
 		updateNotifier({
@@ -30,6 +31,7 @@ export default async function () {
 	}
 
 	// Remove --no-update-notifier from argv as it's not known to yargs, but we still want to support using it
+	/* istanbul ignore if */
 	if (process.argv.includes(NO_UPDATE_NOTIFIER)) {
 		process.argv = process.argv.filter((v) => v !== NO_UPDATE_NOTIFIER);
 	}
