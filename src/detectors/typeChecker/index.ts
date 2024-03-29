@@ -46,6 +46,8 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	// an "import * as ABC" instead of a default import is created.
 	// This logic needs to be in sync with the generator for UI5 TypeScript definitions.
 	allowSyntheticDefaultImports: true,
+	// Allow parsing of renamed html (to jsx) files
+	jsx: ts.JsxEmit.Preserve,
 };
 
 export class TsProjectDetector extends ProjectBasedDetector {
