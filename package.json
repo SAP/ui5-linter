@@ -71,7 +71,8 @@
 		"json-source-map": "^0.6.1",
 		"sax-wasm": "^2.2.4",
 		"typescript": "5.3.x",
-		"yargs": "^17.7.2"
+		"yargs": "^17.7.2",
+		"update-notifier": "^7.0.0"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^19.2.1",
@@ -83,6 +84,7 @@
 		"@types/he": "^1.2.3",
 		"@types/node": "^20.12.5",
 		"@types/sinon": "^17.0.3",
+		"@types/update-notifier": "^6.0.8",
 		"@types/yargs": "^17.0.32",
 		"@ui5-language-assistant/semantic-model": "^3.3.1",
 		"@ui5-language-assistant/semantic-model-types": "^3.3.1",
