@@ -7,7 +7,7 @@ import type {TranspileResult} from "../../detectors/transpilers/AbstractTranspil
 import type {ReadStream} from "node:fs";
 
 export async function lintHtml(resourceName: string, contentStream: ReadStream): Promise<TranspileResult> {
-	const taskLintEnd = taskStart("Static lint", resourceName);
+	const taskLintEnd = taskStart("Linting HTML", resourceName);
 	const report = new HtmlReporter(resourceName);
 
 	const scriptTags = await extractScriptTags(contentStream);

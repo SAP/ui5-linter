@@ -18,7 +18,7 @@ export default class HtmlReporter implements BaseReporter {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
-		let line = 1, column = 1;
+		let line = 0, column = 0;
 		if (node instanceof SaxTag) {
 			({line, character: column} = node.openStart);
 		}
@@ -40,7 +40,7 @@ export default class HtmlReporter implements BaseReporter {
 	}
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
-		let line = 1, column = 1, endLine = 1, endColumn = 1;
+		let line = 0, column = 0, endLine = 0, endColumn = 0;
 		if (node instanceof SaxTag) {
 			({line, character: column} = node.openStart);
 			({line: endLine, character: endColumn} = node.closeEnd);
