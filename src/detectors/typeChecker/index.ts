@@ -220,19 +220,19 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 			// Rewrite fs-paths to virtual paths
 			resourcePaths = [...allResources, ...allTestResources].map((res: Resource) => {
-				if (absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
-					return res.getPath();
+				if (!absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
+					return;
 				}
+
+				let resPath = res.getPath();
+				if (resPath.endsWith(".html")) {
+					resPath = resPath.replace(/\.[a-z]+$/, ".jsx");
+				} else if (!resPath.endsWith(".js")) {
+					resPath = resPath.replace(/\.[a-z]+$/, ".js");
+				}
+				return resPath;
 			})
-				.filter(($: string | undefined) => $)
-				.map((res) => {
-					if (res && res.endsWith(".html")) {
-						res = res.replace(/\.[a-z]+$/, ".jsx");
-					} else if (res && !res.endsWith(".js")) {
-						res = res.replace(/\.[a-z]+$/, ".js");
-					}
-					return res;
-				});
+				.filter(($: string | undefined) => $);
 		} else {
 			resourcePaths = Array.from(resources.keys());
 		}
