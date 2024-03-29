@@ -25,7 +25,7 @@ export default async function () {
 		updateNotifier({
 			pkg,
 			updateCheckInterval: 86400000, // 1 day
-			shouldNotifyInNpmScript: true
+			shouldNotifyInNpmScript: true,
 		}).notify();
 	}
 
