@@ -10,8 +10,8 @@ updates:
   directory: "/"
   schedule:
     interval: weekly
-    day: sunday
-    time: "11:00"
+    day: friday
+    time: "09:00"
     timezone: Etc/UCT
   reviewers:
   - "SAP/ui5-foundation"
