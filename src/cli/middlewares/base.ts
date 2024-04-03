@@ -1,4 +1,6 @@
 import {initLogger} from "./logger.js";
+import updateNotifier from "./updateNotifier.js";
+
 import type {ArgumentsCamelCase} from "yargs";
 import type {LinterArg} from "../base.ts";
 /**
@@ -8,4 +10,5 @@ import type {LinterArg} from "../base.ts";
  */
 export default async function (argv: ArgumentsCamelCase<LinterArg>) {
 	await initLogger(argv);
+	await updateNotifier();
 }
