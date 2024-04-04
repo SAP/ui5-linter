@@ -28,10 +28,10 @@ export async function lintHtml(resourceName: string, contentStream: ReadStream):
 		if (scriptContent) {
 			report.addMessage({
 				node: tag,
-				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-csp-compliance",
-				message: `Use of inline javascript`,
-				messageDetails: "In order to avoid CSP errors, remove the usage of inline javascript",
+				severity: LintMessageSeverity.Warning,
+				ruleId: "ui5-linter-csp-unsafe-inline-script",
+				message: `Use of unsafe inline script`,
+				messageDetails: "{@link topic:fe1a6dba940e479fb7c3bc753f92b28c Content Security Policy}",
 			});
 		}
 	});
