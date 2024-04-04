@@ -11,8 +11,8 @@ import {
 
 export default class MetadataProvider {
 	#model: UI5SemanticModel | null = null;
-	async init(apiJsonsRoot: string) {
-		this.#model = await createSemanticModel(apiJsonsRoot);
+	async init(apiJsonsRoot: string, sapui5Version: string) {
+		this.#model = await createSemanticModel(apiJsonsRoot, sapui5Version);
 	}
 
 	getModel(): UI5SemanticModel {

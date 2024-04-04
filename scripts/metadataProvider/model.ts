@@ -50,7 +50,7 @@ function getTypeNameFix(): TypeNameFix {
 }
 
 let model: UI5SemanticModel | null = null;
-export async function createSemanticModel(apiJsonsRoot: string): Promise<UI5SemanticModel> {
+export async function createSemanticModel(apiJsonsRoot: string, sapui5Version: string): Promise<UI5SemanticModel> {
 	if (model) {
 		return model;
 	}
@@ -71,7 +71,7 @@ export async function createSemanticModel(apiJsonsRoot: string): Promise<UI5Sema
 		console.error = () => {};
 	}
 	model = generate({
-		version: "1.120.9",
+		version: sapui5Version,
 		libraries: indexJson,
 		typeNameFix: getTypeNameFix(),
 		strict: false, // Throw instead of log errors

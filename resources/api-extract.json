@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.11"
+    "version": "1.120.12"
   },
   "defaultAggregations": {
     "sap.ca.ui.CustomerControlListItem": "content",
@@ -347,6 +347,7 @@
     "sap.ui.vbm.ClusterDistance": "vizTemplate",
     "sap.ui.vbm.ClusterGrid": "vizTemplate",
     "sap.ui.vbm.ClusterTree": "vizTemplate",
+    "sap.ui.vbm.ContainerBase": "content",
     "sap.ui.vbm.Containers": "items",
     "sap.ui.vbm.FeatureCollection": "items",
     "sap.ui.vbm.GeoCircles": "items",
@@ -354,6 +355,7 @@
     "sap.ui.vbm.GeoMap": "vos",
     "sap.ui.vbm.Heatmap": "items",
     "sap.ui.vbm.Legend": "items",
+    "sap.ui.vbm.MapContainer": "content",
     "sap.ui.vbm.Pie": "items",
     "sap.ui.vbm.Pies": "items",
     "sap.ui.vbm.Routes": "items",

@@ -7,7 +7,7 @@ import {
 
 async function main(apiJsonsRoot: string, sapui5Version: string) {
 	const metadataProvider = new MetadataProvider();
-	await metadataProvider.init(apiJsonsRoot);
+	await metadataProvider.init(apiJsonsRoot, sapui5Version);
 
 	const semanticModel = metadataProvider.getModel();
 
