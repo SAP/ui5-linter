@@ -23,15 +23,15 @@ async function downloadAPIJsons(url: string) {
 async function transformFiles() {
 	const metadataProvider = new MetadataProvider();
 	await metadataProvider.init(RAW_API_JSON_FILES_FOLDER);
-	
+
 	const {enums} = metadataProvider.getModel();
-	
+
 	const groupedEnums = Object.keys(enums).reduce((acc: Record<string, UI5Enum[]>, enumKey: string) => {
 		const curEnum = enums[enumKey];
 
 		acc[curEnum.library] = acc[curEnum.library] ?? [];
 		acc[curEnum.library].push(curEnum);
-		
+
 		return acc;
 	}, Object.create(null));
 
@@ -40,16 +40,16 @@ async function transformFiles() {
 
 async function addOverrides(enums: Record<string, UI5Enum[]>) {
 	const indexFilesImports: string[] = [];
-	const buildJSDoc = (enumEntry: UI5Enum, indent: string = "") => {
+	const buildJSDoc = (enumEntry: UI5Enum, indent = "") => {
 		const jsDocBuilder: string[] = [`${indent}/**`];
-		
+
 		if (enumEntry.description) {
 			jsDocBuilder.push(`${indent} * ${enumEntry.description.replaceAll("\n", "\n" + indent + " * ")}`);
 			jsDocBuilder.push(`${indent} *`);
 		}
 
 		if (enumEntry.experimentalInfo) {
-			let experimental: string = `${indent} * @experimental`;
+			let experimental = `${indent} * @experimental`;
 			if (enumEntry.experimentalInfo.since) {
 				experimental += ` (since ${enumEntry.experimentalInfo.since})`;
 			}
@@ -58,9 +58,9 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 			}
 			jsDocBuilder.push(experimental);
 		}
-		
+
 		if (enumEntry.deprecatedInfo) {
-			let deprecated: string = `${indent} * @deprecated`;
+			let deprecated = `${indent} * @deprecated`;
 			if (enumEntry.deprecatedInfo.since) {
 				deprecated += ` (since ${enumEntry.deprecatedInfo.since})`;
 			}
@@ -78,15 +78,15 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 			jsDocBuilder.push(`${indent} * @since ${enumEntry.since}`);
 		}
 		jsDocBuilder.push(`${indent}*/`);
-		
+
 		return jsDocBuilder.join("\n");
-	}
-	
+	};
+
 	Object.keys(enums).forEach(async (libName) => {
 		const enumEntries = enums[libName];
 
-		let stringBuilder: string[] = [
-			`declare module "${libName.replaceAll(".", "/")}/library" {`
+		const stringBuilder: string[] = [
+			`declare module "${libName.replaceAll(".", "/")}/library" {`,
 		];
 		enumEntries.forEach((enumEntry) => {
 			if (enumEntry.kind !== "UI5Enum") {
@@ -103,7 +103,7 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 
 			return stringBuilder.join("\n");
 		});
-		stringBuilder.push(`}`)
+		stringBuilder.push(`}`);
 
 		indexFilesImports.push(`import "./${libName}";`);
 		await writeFile(
@@ -111,7 +111,7 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 			stringBuilder.join("\n")
 		);
 	});
-	
+
 	await writeFile(
 		new URL(`../../resources/overrides/library/index.d.ts`, import.meta.url),
 		indexFilesImports.join("\n")
