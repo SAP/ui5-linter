@@ -46,8 +46,6 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	// an "import * as ABC" instead of a default import is created.
 	// This logic needs to be in sync with the generator for UI5 TypeScript definitions.
 	allowSyntheticDefaultImports: true,
-	// Allow parsing of renamed html (to jsx) files
-	jsx: ts.JsxEmit.Preserve,
 };
 
 export class TsProjectDetector extends ProjectBasedDetector {
@@ -121,7 +119,10 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
 				} else if (resourcePath.endsWith(".html")) {
 					resourcePath = resourcePath.replace(/\.html$/, ".jsx");
-					source = await resource.getString();
+					// TODO: Enable when implement script extraction and parse
+					// Details: TS treats HTML as JSX, but parsing results are not consistent. https://github.com/SAP/ui5-linter/pull/48#discussion_r1551412367
+					// source = await resource.getString();
+					source = "";
 					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
@@ -307,13 +308,16 @@ export class TsFileDetector extends FileBasedDetector {
 				internalfilePath = internalfilePath.replace(/\.json$/, ".js");
 				transformationResult = await lintManifest(filePath.replace(/\.json$/, ".js"), fileContent);
 			} else if (filePath.endsWith(".html")) {
-				const fileContent = ts.sys.readFile(filePath);
-				if (!fileContent) {
-					throw new Error(`Failed to read file ${filePath}`);
-				}
+				// TODO: Enable when implement script extraction and parse
+				// Details: TS treats HTML as JSX, but parsing results are not consistent. https://github.com/SAP/ui5-linter/pull/48#discussion_r1551412367
+				// const fileContent = ts.sys.readFile(filePath);
+				// if (!fileContent) {
+				// 	throw new Error(`Failed to read file ${filePath}`);
+				// }
 				internalfilePath = internalfilePath.replace(/\.html$/, ".js");
 				transformationResult = await lintHtml(path.basename(filePath), fs.createReadStream(filePath));
-				transformationResult.source = fileContent;
+				// transformationResult.source = fileContent;
+				transformationResult.source = "";
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
