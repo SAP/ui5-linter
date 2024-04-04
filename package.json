@@ -43,7 +43,8 @@
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
-		"update-semantic-model-info": "tsx scripts/metadataProvider/createMetadataInfo.ts"
+		"update-semantic-model-info": "tsx scripts/metadataProvider/createMetadataInfo.ts",
+		"update-pseudo-modules-info": "tsx scripts/metadataProvider/createPseudoModulesInfo.ts"
 	},
 	"files": [
 		"CHANGELOG.md",
@@ -99,6 +100,7 @@
 		"semver": "^7.6.0",
 		"sinon": "^17.0.1",
 		"tsx": "^4.7.2",
-		"typescript-eslint": "^7.6.0"
+		"typescript-eslint": "^7.6.0",
+		"unzip-stream": "^0.3.1"
 	}
 }
