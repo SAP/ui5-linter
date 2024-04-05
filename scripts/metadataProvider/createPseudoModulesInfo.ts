@@ -85,15 +85,15 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 
 	for (const libName of Object.keys(enums)) {
 		const enumEntries = enums[libName];
+		const stringBuilder: string[] = [];
 
-		const stringBuilder: string[] = [
-			`declare module "${libName.replaceAll(".", "/")}/library" {`,
-		];
 		enumEntries.forEach((enumEntry) => {
 			if (enumEntry.kind !== "UI5Enum") {
 				return;
 			}
 
+			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${enumEntry.name}" {`);
+			stringBuilder.push("");
 			stringBuilder.push(buildJSDoc(enumEntry, "\t"));
 			stringBuilder.push(`\texport enum ${enumEntry.name} {`);
 			enumEntry.fields.forEach((value) => {
@@ -101,10 +101,11 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 				stringBuilder.push(`\t\t${value.name} = "${value.name}",`);
 			});
 			stringBuilder.push(`\t}`);
+			stringBuilder.push(`}`);
+			stringBuilder.push("");
 
 			return stringBuilder.join("\n");
 		});
-		stringBuilder.push(`}`);
 
 		indexFilesImports.push(`import "./${libName}";`);
 		await writeFile(
