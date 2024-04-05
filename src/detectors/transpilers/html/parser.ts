@@ -45,13 +45,27 @@ async function parseHtml(contentStream: ReadStream, parseHandler: (type: SaxEven
 	saxParser.end();
 }
 
-export async function extractScriptTags(contentStream: ReadStream) {
+export async function extractJSScriptTags(contentStream: ReadStream) {
 	const scriptTags: SaxTag[] = [];
+
 	await parseHtml(contentStream, (event, tag) => {
 		if (tag instanceof SaxTag &&
 			event === SaxEventType.CloseTag &&
 			tag.value === "script") {
-			scriptTags.push(tag);
+			const isJSScriptTag = tag.attributes.every((attr) => {
+				// The "type" attribute of the script tag should be
+				// 1. not set (default),
+				// 2. an empty string,
+				// 3. or a JavaScript MIME type (text/javascript)
+				// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type#attribute_is_not_set_default_an_empty_string_or_a_javascript_mime_type
+				return attr.name.value !== "type" ||
+					(attr.name.value === "type" &&
+					(attr.value.value === "" || attr.value.value === "text/javascript"));
+			});
+
+			if (isJSScriptTag) {
+				scriptTags.push(tag);
+			}
 		}
 	});
 
