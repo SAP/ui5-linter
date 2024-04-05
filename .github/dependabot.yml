@@ -9,10 +9,7 @@ updates:
 - package-ecosystem: npm
   directory: "/"
   schedule:
-    interval: weekly
-    day: friday
-    time: "11:00"
-    timezone: Etc/UCT
+    interval: "daily"
   reviewers:
   - "SAP/ui5-foundation"
   versioning-strategy: increase
