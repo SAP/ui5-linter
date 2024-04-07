@@ -81,7 +81,7 @@
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin": "^1.7.0",
 		"@types/he": "^1.2.3",
-		"@types/node": "^20.12.2",
+		"@types/node": "^20.12.5",
 		"@types/sinon": "^17.0.3",
 		"@types/yargs": "^17.0.32",
 		"@ui5-language-assistant/semantic-model": "^3.3.1",
@@ -96,7 +96,7 @@
 		"rimraf": "^5.0.5",
 		"semver": "^7.6.0",
 		"sinon": "^17.0.1",
-		"tsx": "^4.7.1",
-		"typescript-eslint": "^7.4.0"
+		"tsx": "^4.7.2",
+		"typescript-eslint": "^7.5.0"
 	}
 }
