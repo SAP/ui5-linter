@@ -46,11 +46,12 @@ async function extractPseudoModuleNames() {
 	}, Object.create(null) as Record<string, boolean>);
 }
 
-async function transformFiles() {
+async function transformFiles(sapui5Version: string) {
 	const metadataProvider = new MetadataProvider();
-	await metadataProvider.init(RAW_API_JSON_FILES_FOLDER, "1.120.12" /** TODO: Extract it from URL */);
-
-	const pseudoModuleNames = await extractPseudoModuleNames();
+	const [, pseudoModuleNames] = await Promise.all([
+		metadataProvider.init(RAW_API_JSON_FILES_FOLDER, sapui5Version),
+		extractPseudoModuleNames(),
+	]);
 
 	const {enums} = metadataProvider.getModel();
 
@@ -151,18 +152,30 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 	);
 }
 
-async function main(url: string) {
+async function main(url: string, sapui5Version: string) {
 	await downloadAPIJsons(url);
 
-	await transformFiles();
+	await transformFiles(sapui5Version);
 }
 
 try {
 	const url = process.argv[2];
+	let sapui5Version: string | null | undefined = process.argv[3];
+
 	if (!url) {
 		throw new Error("second argument \"url\" is missing");
 	}
-	await main(url);
+
+	if (!sapui5Version) {
+		// Try to extract version from url
+		const versionMatch = url.match(/\/\d{1}\.\d{1,3}\.\d{1,3}\//gi);
+		sapui5Version = versionMatch?.[0].replaceAll("/", "");
+	}
+	if (!sapui5Version) {
+		throw new Error("\"sapui5Version\" cannot be determined. Provide it as a second argument");
+	}
+
+	await main(url, sapui5Version);
 } catch (err) {
 	process.stderr.write(String(err));
 	process.exit(1);
