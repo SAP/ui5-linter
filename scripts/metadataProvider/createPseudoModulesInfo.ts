@@ -25,9 +25,17 @@ async function downloadAPIJsons(url: string) {
 
 async function extractPseudoModuleNames() {
 	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
-	
+
+	interface apiJSON {
+		symbols: {
+			name: string;
+			kind: string;
+			resource: string;
+		};
+	}
+
 	return apiJsonList.flatMap((library) => {
-		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library));
+		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as apiJSON;
 		return libApiJson.symbols;
 	}).reduce((acc: Record<string, boolean>, symbol) => {
 		if (symbol.kind === "enum" && symbol.resource.endsWith("library.js")) {
@@ -118,14 +126,12 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 			}
 
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${enumEntry.name}" {`);
+
+			stringBuilder.push(`\timport ${enumEntry.name} from "${libName.replaceAll(".", "/")}/library";`);
 			stringBuilder.push("");
 			stringBuilder.push(buildJSDoc(enumEntry, "\t"));
-			stringBuilder.push(`\texport enum ${enumEntry.name} {`);
-			enumEntry.fields.forEach((value) => {
-				stringBuilder.push(buildJSDoc(value, "\t\t"));
-				stringBuilder.push(`\t\t${value.name} = "${value.name}",`);
-			});
-			stringBuilder.push(`\t}`);
+			stringBuilder.push(`\texport default ${enumEntry.name};`);
+
 			stringBuilder.push(`}`);
 			stringBuilder.push("");
 
