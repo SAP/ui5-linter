@@ -1,9 +1,12 @@
 import {pipeline} from "node:stream/promises";
 import {Extract} from "unzip-stream";
 import MetadataProvider from "./MetadataProvider.js";
-import {writeFile} from "node:fs/promises";
+import {writeFile, readdir} from "node:fs/promises";
+import {createRequire} from "module";
+const require = createRequire(import.meta.url);
 
 import type {UI5Enum, UI5EnumValue} from "@ui5-language-assistant/semantic-model-types";
+import path from "node:path";
 
 const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
 
@@ -20,13 +23,35 @@ async function downloadAPIJsons(url: string) {
 	}
 }
 
+async function extractPseudoModuleNames() {
+	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
+	
+	return apiJsonList.flatMap((library) => {
+		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library));
+		return libApiJson.symbols;
+	}).reduce((acc: Record<string, boolean>, symbol) => {
+		if (symbol.kind === "enum" && symbol.resource.endsWith("library.js")) {
+			acc[symbol.name] = true;
+		}
+
+		return acc;
+	}, Object.create(null) as Record<string, boolean>);
+}
+
 async function transformFiles() {
 	const metadataProvider = new MetadataProvider();
-	await metadataProvider.init(RAW_API_JSON_FILES_FOLDER);
+	await metadataProvider.init(RAW_API_JSON_FILES_FOLDER, "1.120.12" /** TODO: Extract it from URL */);
+
+	const pseudoModuleNames = await extractPseudoModuleNames();
 
 	const {enums} = metadataProvider.getModel();
 
 	const groupedEnums = Object.keys(enums).reduce((acc: Record<string, UI5Enum[]>, enumKey: string) => {
+		// Filter only real pseudo modules i.e. defined within library.js files
+		if (!pseudoModuleNames[enumKey]) {
+			return acc;
+		}
+
 		const curEnum = enums[enumKey];
 
 		acc[curEnum.library] = acc[curEnum.library] ?? [];
