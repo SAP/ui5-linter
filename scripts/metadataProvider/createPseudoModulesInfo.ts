@@ -1,15 +1,15 @@
-import {pipeline} from "node:stream/promises";
-import https from "node:https";
-import yauzl from "yauzl-promise";
-import path from "node:path";
-import MetadataProvider from "./MetadataProvider.js";
-import {writeFile, readdir, mkdir, unlink} from "node:fs/promises";
-import {createWriteStream} from "node:fs";
 import {createRequire} from "module";
-const require = createRequire(import.meta.url);
+import {createWriteStream} from "node:fs";
+import {writeFile, readdir, mkdir, unlink} from "node:fs/promises";
+import https from "node:https";
+import path from "node:path";
+import {pipeline} from "node:stream/promises";
+import yauzl from "yauzl-promise";
+import MetadataProvider from "./MetadataProvider.js";
 
 import type {UI5Enum, UI5EnumValue} from "@ui5-language-assistant/semantic-model-types";
 
+const require = createRequire(import.meta.url);
 const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
 
 async function fetchAndExtractAPIJsons(url: string) {
