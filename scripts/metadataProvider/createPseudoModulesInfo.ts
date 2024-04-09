@@ -1,4 +1,5 @@
 import {pipeline} from "node:stream/promises";
+import https from "node:https";
 import yauzl from "yauzl-promise";
 import path from "node:path";
 import MetadataProvider from "./MetadataProvider.js";
@@ -21,7 +22,12 @@ async function fetchAndExtractAPIJsons(url: string) {
 		const zipFileName: string = url.split("/").pop() ?? "";
 		const zipFile = path.resolve(RAW_API_JSON_FILES_FOLDER, zipFileName);
 		await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER), {recursive: true});
-		await pipeline(response.body, createWriteStream(zipFile));
+
+		await new Promise((resolve) => {
+			https.get(url, (res) => {
+				resolve(pipeline(res, createWriteStream(zipFile)));
+			});
+		});
 
 		const zip = await yauzl.open(zipFile);
 		try {
