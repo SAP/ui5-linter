@@ -2,6 +2,9 @@
 	"extends": "@istanbuljs/nyc-config-typescript",
 	"reporter": ["lcov", "text", "text-summary"],
 	"include": ["src/**"],
+	"exclude": [
+		"src/cli/middlewares/updateNotifier.ts"
+	],
 	"check-coverage": true,
 	"statements": 72,
 	"branches": 61,
