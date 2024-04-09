@@ -3,10 +3,9 @@ import sinonGlobal, {SinonStub} from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
 import esmock from "esmock";
-import {LintResult} from "../../../src/detectors/AbstractDetector.js";
-import FileLinter from "../../../src/detectors/typeChecker/FileLinter.js";
+import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
 import {SourceFile, TypeChecker} from "typescript";
-import {LinterOptions} from "../../../src/linter/linter.js";
+import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -23,28 +22,31 @@ test.before(async (t) => {
 // Mock getDeprecationText as we do not have control over the deprecated texts and they could
 // change anytime creating false positive failing tests. That way is ensured consistent and testable behavior.
 export async function esmockDeprecationText() {
-	const checkerModule = await esmock("../../../src/detectors/typeChecker/index.js", {
-		"../../../src/detectors/typeChecker/FileLinter.js":
+	const typeLinterModule = await esmock("../../../src/linter/ui5Types/TypeLinter.js", {
+		"../../../src/linter/ui5Types/SourceFileLinter.js":
 		function (
-			rootDir: string, filePath: string, sourceFile: SourceFile,
+			context: LinterContext, filePath: string, sourceFile: SourceFile,
 			sourceMap: string | undefined, checker: TypeChecker,
 			reportCoverage: boolean | undefined = false,
 			messageDetails: boolean | undefined = false
 		) {
 			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
-			const linter = new FileLinter(
-				rootDir, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails
+			const linter = new SourceFileLinter(
+				context, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails
 			);
 			linter.getDeprecationText = () => "Deprecated test message";
 			return linter;
 		},
 	});
-
-	const lintModule = await esmock("../../../src/linter/linter.js", {
-		"../../../src/detectors/typeChecker/index.js": checkerModule,
+	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
+		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
 	});
 
-	return {lintModule, checkerModule};
+	const lintModule = await esmock("../../../src/linter/linter.js", {
+		"../../../src/linter/lintWorkspace.js": lintWorkspaceModule,
+	});
+
+	return {lintModule};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots
@@ -72,7 +74,6 @@ export function createTestsForFixtures(fixturesPath: string) {
 				// Ignore non-JavaScript, non-XML, non-JSON and non-HTML files
 				continue;
 			}
-
 			let testName = fileName;
 			let defineTest = test.serial;
 			if (fileName.startsWith("_")) {

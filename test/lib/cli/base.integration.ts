@@ -4,7 +4,7 @@ import yargs, {Argv} from "yargs";
 import path from "node:path";
 import cliBase from "../../../src/cli/base.js";
 import {fileURLToPath} from "node:url";
-import {LintResult} from "../../../src/detectors/AbstractDetector.js";
+import {LintResult} from "../../../src/linter/LinterContext.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sampleProjectPath = path.join(__dirname, "..", "..", "fixtures", "linter", "projects", "com.ui5.troublesome.app");

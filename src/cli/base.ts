@@ -12,7 +12,7 @@ import ConsoleWriter from "@ui5/logger/writers/Console";
 
 export interface LinterArg {
 	coverage: boolean;
-	filePaths: string[];
+	filePaths?: string[];
 	details: boolean;
 	format: string;
 }

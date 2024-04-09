@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import path from "node:path";
-import {LintMessageSeverity, LintResult, LintMessage} from "../detectors/AbstractDetector.js";
+import {LintMessageSeverity, LintResult, LintMessage} from "../linter/LinterContext.js";
 
 function formatSeverity(severity: LintMessageSeverity) {
 	if (severity === LintMessageSeverity.Error) {

@@ -7,6 +7,10 @@ declare module "@ui5/project" {
 		getNamespace: () => ProjectNamespace;
 		getReader: (options: import("@ui5/fs").ReaderOptions) => import("@ui5/fs").AbstractReader;
 		getRootPath: () => string;
+		getSourcePath: () => string;
+		_testPath: string; // TODO UI5 Tooling: Expose API for optional test path
+		_testPathExists: string;
+		_isSourceNamespaced: boolean;
 	}
 	interface ProjectGraph {
 		getRoot: () => Project;
@@ -61,6 +65,8 @@ declare module "@ui5/fs" {
 	type ResourcePath = string;
 	interface ResourceSourceMetadata {
 		fsPath: string;
+		adapter: string;
+		contentModified: boolean;
 	}
 	interface Resource {
 		getBuffer: () => Promise<Buffer>;
@@ -81,6 +87,7 @@ declare module "@ui5/fs" {
 	}
 	export interface AbstractReader {
 		byGlob: (virPattern: string | string[], options?: GlobOptions) => Promise<Resource[]>;
+		byPath: (path: string) => Promise<Resource>;
 	}
 	export interface AbstractAdapter extends AbstractReader {
 		write: (resource: Resource) => Promise<void>;
@@ -88,10 +95,30 @@ declare module "@ui5/fs" {
 }
 
 declare module "@ui5/fs/resourceFactory" {
-	export function createAdapter(parameters: {fsBasePath: string; virBasePath: string}):
-	import("@ui5/fs").AbstractAdapter;
-	export function createResource(parameters: {path: string; string: string}):
-	import("@ui5/fs").Resource;
+	export function createAdapter(
+		parameters: {fsBasePath: string; virBasePath: string}
+	): import("@ui5/fs").AbstractAdapter;
+	export function createResource(
+		parameters: {path: string; string: string; sourceMetadata?: object}
+	): import("@ui5/fs").Resource;
+	export function createReader(
+		parameters: {
+			fsBasePath: string;
+			virBasePath: string;
+			project?: import("@ui5/project").Project;
+			excludes?: string[];
+			name?: string;
+		}
+	): import("@ui5/fs").AbstractReader;
+	export function createWorkspace(
+		parameters: {reader: import("@ui5/fs").AbstractReader}
+	): import("@ui5/fs").AbstractAdapter;
+	export function createReaderCollection(
+		parameters: {
+			readers: import("@ui5/fs").AbstractReader[];
+			name?: string;
+		}
+	): import("@ui5/fs").AbstractAdapter;
 }
 
 declare module "@ui5/logger" {

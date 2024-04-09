@@ -6,8 +6,7 @@ import {
 	createTestsForFixtures, assertExpectedLintResults,
 	esmockDeprecationText, preprocessLintResultsForSnapshot,
 } from "./_linterHelper.js";
-import {LintResult} from "../../../src/detectors/AbstractDetector.js";
-import {LinterOptions} from "../../../src/linter/linter.js";
+import {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "..", "fixtures", "linter");

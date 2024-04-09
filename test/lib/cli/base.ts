@@ -5,7 +5,7 @@ import esmock from "esmock";
 import chalk from "chalk";
 import yargs, {Argv} from "yargs";
 import path from "node:path";
-import type {LintResult} from "../../../src/detectors/AbstractDetector.js";
+import type {LintResult} from "../../../src/linter/LinterContext.js";
 import type Base from "../../../src/cli/base.js";
 
 const test = anyTest as TestFn<{
