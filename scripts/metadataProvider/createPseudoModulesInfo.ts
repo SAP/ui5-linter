@@ -1,29 +1,51 @@
 import {pipeline} from "node:stream/promises";
-import {Extract} from "unzip-stream";
+import yauzl from "yauzl-promise";
+import path from "node:path";
 import MetadataProvider from "./MetadataProvider.js";
-import {writeFile, readdir} from "node:fs/promises";
+import {writeFile, readdir, mkdir, unlink} from "node:fs/promises";
+import {createWriteStream} from "node:fs";
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
 
 import type {UI5Enum, UI5EnumValue} from "@ui5-language-assistant/semantic-model-types";
-import path from "node:path";
 
 const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
 
-async function downloadAPIJsons(url: string) {
+async function fetchAndExtractAPIJsons(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`unexpected response ${response.statusText}`);
 	}
 
 	if (response.body && response.body instanceof ReadableStream) {
-		await pipeline(response.body, Extract({path: RAW_API_JSON_FILES_FOLDER}));
+		const zipFileName: string = url.split("/").pop() ?? "";
+		const zipFile = path.resolve(RAW_API_JSON_FILES_FOLDER, zipFileName);
+		await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER), {recursive: true});
+		await pipeline(response.body, createWriteStream(zipFile));
+
+		const zip = await yauzl.open(zipFile);
+		try {
+			for await (const entry of zip) {
+				if (entry.filename.endsWith("/")) {
+					await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER, entry.filename));
+				} else {
+					const readEntry = await entry.openReadStream();
+					const writeEntry = createWriteStream(path.resolve(RAW_API_JSON_FILES_FOLDER, entry.filename));
+					await pipeline(readEntry, writeEntry);
+				}
+			}
+		} finally {
+			await zip.close();
+		}
+
+		// Cleanup the ZIP file, so that the folder will contain only JSON files
+		await unlink(zipFile);
 	} else {
 		throw new Error("Malformed response");
 	}
 }
 
-async function extractPseudoModuleNames() {
+async function getPseudoModuleNames() {
 	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
 
 	interface apiJSON {
@@ -50,7 +72,7 @@ async function transformFiles(sapui5Version: string) {
 	const metadataProvider = new MetadataProvider();
 	const [, pseudoModuleNames] = await Promise.all([
 		metadataProvider.init(RAW_API_JSON_FILES_FOLDER, sapui5Version),
-		extractPseudoModuleNames(),
+		getPseudoModuleNames(),
 	]);
 
 	const {enums} = metadataProvider.getModel();
@@ -153,7 +175,7 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 }
 
 async function main(url: string, sapui5Version: string) {
-	await downloadAPIJsons(url);
+	await fetchAndExtractAPIJsons(url);
 
 	await transformFiles(sapui5Version);
 }
