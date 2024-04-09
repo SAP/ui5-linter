@@ -176,7 +176,7 @@ async function addOverrides(enums: Record<string, UI5Enum[]>) {
 
 	await writeFile(
 		new URL(`../../resources/overrides/library/index.d.ts`, import.meta.url),
-		indexFilesImports.join("\n")
+		indexFilesImports.join("\n") + "\n"
 	);
 }
 
