@@ -1,0 +1,48 @@
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>No inline JS</title>
+</head>
+
+<body>
+	<script type="text/javascript">
+		sap.ui.controller("my.own.controller", {
+			doSomething: function () {
+				alert("Hello World!");
+			}
+		});
+	</script>
+
+	<script type="application/javascript">
+		sap.ui.controller("my.own.controller", {
+			doSomething: function () {
+				alert("Hello World!");
+			}
+		});
+	</script>
+
+	<script type="">
+		(function() {
+			alert("test")
+		})();
+	</script>
+
+	<script>
+		sap.ui.controller("myController", {
+			onInit: function () {
+				var model = new sap.ui.model.json.JSONModel();
+				model.setData({
+					buttonText: "Click Me!"
+				});
+				this.getView().setModel(model);
+			},
+			doSomething: function () {
+				alert("Hello World!");
+			}
+		});
+		sap.ui.xmlview({ viewContent: jQuery('#myXml').html() }).placeAt("content");
+	</script>
+</body>
+
+</html>

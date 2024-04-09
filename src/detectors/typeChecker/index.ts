@@ -9,6 +9,7 @@ import {taskStart} from "../util/perf.js";
 import {amdToEsm} from "../transpilers/amd/transpiler.js";
 import {xmlToJs} from "../transpilers/xml/transpiler.js";
 import {lintManifest} from "../../linter/json/linter.js";
+import {lintHtml} from "../../linter/html/linter.js";
 import {
 	FileBasedDetector, LintMessage, LintMessageSeverity, LintResult, ProjectBasedDetector,
 } from "../AbstractDetector.js";
@@ -116,6 +117,13 @@ export class TsProjectDetector extends ProjectBasedDetector {
 					resourcePath = resourcePath.replace(/\.json$/, ".js");
 					const resourceContent = await resource.getString();
 					({source, messages} = await lintManifest(resourcePath, resourceContent));
+				} else if (resourcePath.endsWith(".html")) {
+					resourcePath = resourcePath.replace(/\.html$/, ".jsx");
+					// TODO: Enable when implement script extraction and parse
+					// Details: TS treats HTML as JSX, but parsing results are not consistent. https://github.com/SAP/ui5-linter/pull/48#discussion_r1551412367
+					// source = await resource.getString();
+					source = "";
+					({messages} = await lintHtml(resourcePath, resource.getStream()));
 				} else {
 					throw new Error(`Unsupported file type for ${resourcePath}`);
 				}
@@ -159,7 +167,7 @@ export class TsProjectDetector extends ProjectBasedDetector {
 
 		// Read all resources and test-resources and their content since tsc works completely synchronous
 		const globEnd = taskStart("Locating Resources");
-		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json}";
+		const fileTypes = "{*.js,*.view.xml,*.fragment.xml,manifest.json,*.html}";
 		const allResources = await reader.byGlob("/resources/**/" + fileTypes);
 		const allTestResources = await reader.byGlob("/test-resources/**/" + fileTypes);
 		globEnd();
@@ -212,11 +220,20 @@ export class TsProjectDetector extends ProjectBasedDetector {
 			});
 
 			// Rewrite fs-paths to virtual paths
-			resourcePaths = allResources.map((res: Resource) => {
-				if (absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
-					return res.getPath();
+			resourcePaths = [...allResources, ...allTestResources].map((res: Resource) => {
+				if (!absoluteFilePaths.includes(res.getSourceMetadata().fsPath)) {
+					return;
 				}
-			}).filter(($: string | undefined) => $);
+
+				let resPath = res.getPath();
+				if (resPath.endsWith(".html")) {
+					resPath = resPath.replace(/\.[a-z]+$/, ".jsx");
+				} else if (!resPath.endsWith(".js")) {
+					resPath = resPath.replace(/\.[a-z]+$/, ".js");
+				}
+				return resPath;
+			})
+				.filter(($: string | undefined) => $);
 		} else {
 			resourcePaths = Array.from(resources.keys());
 		}
@@ -290,6 +307,17 @@ export class TsFileDetector extends FileBasedDetector {
 				}
 				internalfilePath = internalfilePath.replace(/\.json$/, ".js");
 				transformationResult = await lintManifest(filePath.replace(/\.json$/, ".js"), fileContent);
+			} else if (filePath.endsWith(".html")) {
+				// TODO: Enable when implement script extraction and parse
+				// Details: TS treats HTML as JSX, but parsing results are not consistent. https://github.com/SAP/ui5-linter/pull/48#discussion_r1551412367
+				// const fileContent = ts.sys.readFile(filePath);
+				// if (!fileContent) {
+				// 	throw new Error(`Failed to read file ${filePath}`);
+				// }
+				internalfilePath = internalfilePath.replace(/\.html$/, ".jsx");
+				transformationResult = await lintHtml(path.basename(filePath), fs.createReadStream(filePath));
+				// transformationResult.source = fileContent;
+				transformationResult.source = "";
 			} else {
 				throw new Error(`Unsupported file type for ${filePath}`);
 			}
