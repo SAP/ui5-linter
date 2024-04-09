@@ -74,29 +74,4 @@ export default class ManifestReporter {
 			column,
 		};
 	}
-
-	// getReport() {
-	// 	let errorCount = 0;
-	// 	let warningCount = 0;
-	// 	let fatalErrorCount = 0;
-	// 	for (const {severity, fatal} of this.#messages) {
-	// 		if (severity === LintMessageSeverity.Error) {
-	// 			errorCount++;
-	// 			if (fatal) {
-	// 				fatalErrorCount++;
-	// 			}
-	// 		} else {
-	// 			warningCount++;
-	// 		}
-	// 	}
-
-	// 	return {
-	// 		filePath: this.#filePath,
-	// 		messages: this.#messages,
-	// 		coverageInfo: this.#coverageInfo,
-	// 		errorCount,
-	// 		warningCount,
-	// 		fatalErrorCount,
-	// 	};
-	// }
 }
