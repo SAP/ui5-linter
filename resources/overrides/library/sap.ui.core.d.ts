@@ -1,5 +1,5 @@
 declare module "sap/ui/core/AccessibleLandmarkRole" {
-	import AccessibleLandmarkRole from "sap/ui/core/library";
+	import {AccessibleLandmarkRole} from "sap/ui/core/library";
 
 	/**
 	 * Defines the accessible landmark roles for ARIA support. This enumeration is used with the AccessibleRole control property. For more information, go to "Roles for Accessible Rich Internet Applications (WAI-ARIA Roles)" at the www.w3.org homepage.
@@ -10,7 +10,7 @@ declare module "sap/ui/core/AccessibleLandmarkRole" {
 }
 
 declare module "sap/ui/core/AccessibleRole" {
-	import AccessibleRole from "sap/ui/core/library";
+	import {AccessibleRole} from "sap/ui/core/library";
 
 	/**
 	 * Defines the accessible roles for ARIA support. This enumeration is used with the AccessibleRole control property. For more information, goto "Roles for Accessible Rich Internet Applications (WAI-ARIA Roles)" at the www.w3.org homepage.
@@ -20,8 +20,8 @@ declare module "sap/ui/core/AccessibleRole" {
 	export default AccessibleRole;
 }
 
-declare module "sap/ui/core/HasPopup" {
-	import HasPopup from "sap/ui/core/library";
+declare module "sap/ui/core/aria/HasPopup" {
+	import {aria} from "sap/ui/core/library";
 
 	/**
 	 * Types of popups to set as aria-haspopup attribute. Most of the values (except "None") of the enumeration are taken from the ARIA specification: https://www.w3.org/TR/wai-aria/#aria-haspopup
@@ -29,11 +29,11 @@ declare module "sap/ui/core/HasPopup" {
 	 * @public
 	 * @since 1.84
 	*/
-	export default HasPopup;
+	export default aria.HasPopup;
 }
 
 declare module "sap/ui/core/BarColor" {
-	import BarColor from "sap/ui/core/library";
+	import {BarColor} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for the colors of a progress bar.
@@ -44,7 +44,7 @@ declare module "sap/ui/core/BarColor" {
 }
 
 declare module "sap/ui/core/BusyIndicatorSize" {
-	import BusyIndicatorSize from "sap/ui/core/library";
+	import {BusyIndicatorSize} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for the <code>BusyIndicator</code> size.
@@ -55,7 +55,7 @@ declare module "sap/ui/core/BusyIndicatorSize" {
 }
 
 declare module "sap/ui/core/ComponentLifecycle" {
-	import ComponentLifecycle from "sap/ui/core/library";
+	import {ComponentLifecycle} from "sap/ui/core/library";
 
 	/**
 	 * Enumeration for different lifecycle behaviors of components created by the <code>ComponentContainer</code>.
@@ -66,7 +66,7 @@ declare module "sap/ui/core/ComponentLifecycle" {
 }
 
 declare module "sap/ui/core/Design" {
-	import Design from "sap/ui/core/library";
+	import {Design} from "sap/ui/core/library";
 
 	/**
 	 * Font design for texts.
@@ -76,8 +76,8 @@ declare module "sap/ui/core/Design" {
 	export default Design;
 }
 
-declare module "sap/ui/core/DropEffect" {
-	import DropEffect from "sap/ui/core/library";
+declare module "sap/ui/core/dnd/DropEffect" {
+	import {dnd} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for visual drop effects that are given during a drag and drop operation.
@@ -85,11 +85,11 @@ declare module "sap/ui/core/DropEffect" {
 	 * @public
 	 * @since 1.52.0
 	*/
-	export default DropEffect;
+	export default dnd.DropEffect;
 }
 
-declare module "sap/ui/core/DropLayout" {
-	import DropLayout from "sap/ui/core/library";
+declare module "sap/ui/core/dnd/DropLayout" {
+	import {dnd} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for the layout of the droppable controls.
@@ -97,11 +97,11 @@ declare module "sap/ui/core/DropLayout" {
 	 * @public
 	 * @since 1.52.0
 	*/
-	export default DropLayout;
+	export default dnd.DropLayout;
 }
 
-declare module "sap/ui/core/DropPosition" {
-	import DropPosition from "sap/ui/core/library";
+declare module "sap/ui/core/dnd/DropPosition" {
+	import {dnd} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for drop positions.
@@ -109,11 +109,11 @@ declare module "sap/ui/core/DropPosition" {
 	 * @public
 	 * @since 1.52.0
 	*/
-	export default DropPosition;
+	export default dnd.DropPosition;
 }
 
-declare module "sap/ui/core/RelativeDropPosition" {
-	import RelativeDropPosition from "sap/ui/core/library";
+declare module "sap/ui/core/dnd/RelativeDropPosition" {
+	import {dnd} from "sap/ui/core/library";
 
 	/**
 	 * Drop positions relative to a dropped element.
@@ -121,11 +121,11 @@ declare module "sap/ui/core/RelativeDropPosition" {
 	 * @public
 	 * @since 1.100.0
 	*/
-	export default RelativeDropPosition;
+	export default dnd.RelativeDropPosition;
 }
 
 declare module "sap/ui/core/HorizontalAlign" {
-	import HorizontalAlign from "sap/ui/core/library";
+	import {HorizontalAlign} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for horizontal alignments of controls.
@@ -136,7 +136,7 @@ declare module "sap/ui/core/HorizontalAlign" {
 }
 
 declare module "sap/ui/core/IconColor" {
-	import IconColor from "sap/ui/core/library";
+	import {IconColor} from "sap/ui/core/library";
 
 	/**
 	 * Semantic Colors of an icon.
@@ -147,7 +147,7 @@ declare module "sap/ui/core/IconColor" {
 }
 
 declare module "sap/ui/core/ImeMode" {
-	import ImeMode from "sap/ui/core/library";
+	import {ImeMode} from "sap/ui/core/library";
 
 	/**
 	 * State of the Input Method Editor (IME) for the control.
@@ -160,7 +160,7 @@ declare module "sap/ui/core/ImeMode" {
 }
 
 declare module "sap/ui/core/IndicationColor" {
-	import IndicationColor from "sap/ui/core/library";
+	import {IndicationColor} from "sap/ui/core/library";
 
 	/**
 	 * Colors to highlight certain UI elements.
@@ -174,7 +174,7 @@ declare module "sap/ui/core/IndicationColor" {
 }
 
 declare module "sap/ui/core/InvisibleMessageMode" {
-	import InvisibleMessageMode from "sap/ui/core/library";
+	import {InvisibleMessageMode} from "sap/ui/core/library";
 
 	/**
 	 * Enumeration for different mode behaviors of the <code>InvisibleMessage</code>.
@@ -187,7 +187,7 @@ declare module "sap/ui/core/InvisibleMessageMode" {
 }
 
 declare module "sap/ui/core/MessageType" {
-	import MessageType from "sap/ui/core/library";
+	import {MessageType} from "sap/ui/core/library";
 
 	/**
 	 * Specifies possible message types.
@@ -199,7 +199,7 @@ declare module "sap/ui/core/MessageType" {
 }
 
 declare module "sap/ui/core/OpenState" {
-	import OpenState from "sap/ui/core/library";
+	import {OpenState} from "sap/ui/core/library";
 
 	/**
 	 * Defines the different possible states of an element that can be open or closed and does not only toggle between these states, but also spends some time in between (e.g. because of an animation).
@@ -210,7 +210,7 @@ declare module "sap/ui/core/OpenState" {
 }
 
 declare module "sap/ui/core/Orientation" {
-	import Orientation from "sap/ui/core/library";
+	import {Orientation} from "sap/ui/core/library";
 
 	/**
 	 * Orientation of a UI element.
@@ -222,7 +222,7 @@ declare module "sap/ui/core/Orientation" {
 }
 
 declare module "sap/ui/core/Priority" {
-	import Priority from "sap/ui/core/library";
+	import {Priority} from "sap/ui/core/library";
 
 	/**
 	 * Priorities for general use.
@@ -232,19 +232,19 @@ declare module "sap/ui/core/Priority" {
 	export default Priority;
 }
 
-declare module "sap/ui/core/HistoryDirection" {
-	import HistoryDirection from "sap/ui/core/library";
+declare module "sap/ui/core/routing/HistoryDirection" {
+	import {routing} from "sap/ui/core/library";
 
 	/**
 	 * Enumeration for different HistoryDirections.
 	 *
 	 * @public
 	*/
-	export default HistoryDirection;
+	export default routing.HistoryDirection;
 }
 
 declare module "sap/ui/core/ScrollBarAction" {
-	import ScrollBarAction from "sap/ui/core/library";
+	import {ScrollBarAction} from "sap/ui/core/library";
 
 	/**
 	 * Actions are: Click on track, button, drag of thumb, or mouse wheel click.
@@ -255,7 +255,7 @@ declare module "sap/ui/core/ScrollBarAction" {
 }
 
 declare module "sap/ui/core/Scrolling" {
-	import Scrolling from "sap/ui/core/library";
+	import {Scrolling} from "sap/ui/core/library";
 
 	/**
 	 * Defines the possible values for horizontal and vertical scrolling behavior.
@@ -266,7 +266,7 @@ declare module "sap/ui/core/Scrolling" {
 }
 
 declare module "sap/ui/core/SortOrder" {
-	import SortOrder from "sap/ui/core/library";
+	import {SortOrder} from "sap/ui/core/library";
 
 	/**
 	 * Sort order of a column.
@@ -278,7 +278,7 @@ declare module "sap/ui/core/SortOrder" {
 }
 
 declare module "sap/ui/core/TextAlign" {
-	import TextAlign from "sap/ui/core/library";
+	import {TextAlign} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for text alignments.
@@ -289,7 +289,7 @@ declare module "sap/ui/core/TextAlign" {
 }
 
 declare module "sap/ui/core/TextDirection" {
-	import TextDirection from "sap/ui/core/library";
+	import {TextDirection} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for the direction of texts.
@@ -300,7 +300,7 @@ declare module "sap/ui/core/TextDirection" {
 }
 
 declare module "sap/ui/core/TitleLevel" {
-	import TitleLevel from "sap/ui/core/library";
+	import {TitleLevel} from "sap/ui/core/library";
 
 	/**
 	 * Level of a title.
@@ -312,7 +312,7 @@ declare module "sap/ui/core/TitleLevel" {
 }
 
 declare module "sap/ui/core/ValueState" {
-	import ValueState from "sap/ui/core/library";
+	import {ValueState} from "sap/ui/core/library";
 
 	/**
 	 * Marker for the correctness of the current value.
@@ -324,7 +324,7 @@ declare module "sap/ui/core/ValueState" {
 }
 
 declare module "sap/ui/core/VerticalAlign" {
-	import VerticalAlign from "sap/ui/core/library";
+	import {VerticalAlign} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for vertical alignments, for example of a layout cell content within the borders.
@@ -335,7 +335,7 @@ declare module "sap/ui/core/VerticalAlign" {
 }
 
 declare module "sap/ui/core/Wrapping" {
-	import Wrapping from "sap/ui/core/library";
+	import {Wrapping} from "sap/ui/core/library";
 
 	/**
 	 * Configuration options for text wrapping.

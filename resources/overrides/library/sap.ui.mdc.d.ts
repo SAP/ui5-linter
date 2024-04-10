@@ -1,5 +1,5 @@
 declare module "sap/ui/mdc/ChartP13nMode" {
-	import ChartP13nMode from "sap/ui/mdc/library";
+	import {ChartP13nMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the personalization mode of the chart.
@@ -12,7 +12,7 @@ declare module "sap/ui/mdc/ChartP13nMode" {
 }
 
 declare module "sap/ui/mdc/ChartToolbarActionType" {
-	import ChartToolbarActionType from "sap/ui/mdc/library";
+	import {ChartToolbarActionType} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the types of chart actions in the toolbar.<br> Can be used to remove some of the default <code>ToolbarAction</code>. For more information, see @link sap.ui.mdc.Chart#ignoreToolbarActions}.
@@ -25,7 +25,7 @@ declare module "sap/ui/mdc/ChartToolbarActionType" {
 }
 
 declare module "sap/ui/mdc/FilterBarP13nMode" {
-	import FilterBarP13nMode from "sap/ui/mdc/library";
+	import {FilterBarP13nMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the personalization mode of the filter bar.
@@ -38,7 +38,7 @@ declare module "sap/ui/mdc/FilterBarP13nMode" {
 }
 
 declare module "sap/ui/mdc/GrowingMode" {
-	import GrowingMode from "sap/ui/mdc/library";
+	import {GrowingMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the growing options of the responsive table.
@@ -51,7 +51,7 @@ declare module "sap/ui/mdc/GrowingMode" {
 }
 
 declare module "sap/ui/mdc/MultiSelectMode" {
-	import MultiSelectMode from "sap/ui/mdc/library";
+	import {MultiSelectMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Enumeration of the <code>multiSelectMode</code> in <code>ListBase</code>.
@@ -63,7 +63,7 @@ declare module "sap/ui/mdc/MultiSelectMode" {
 }
 
 declare module "sap/ui/mdc/RowAction" {
-	import RowAction from "sap/ui/mdc/library";
+	import {RowAction} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the actions that can be used in the table.
@@ -76,7 +76,7 @@ declare module "sap/ui/mdc/RowAction" {
 }
 
 declare module "sap/ui/mdc/RowCountMode" {
-	import RowCountMode from "sap/ui/mdc/library";
+	import {RowCountMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the row count mode of the GridTable.
@@ -89,7 +89,7 @@ declare module "sap/ui/mdc/RowCountMode" {
 }
 
 declare module "sap/ui/mdc/SelectionMode" {
-	import SelectionMode from "sap/ui/mdc/library";
+	import {SelectionMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the mode of the table.
@@ -102,7 +102,7 @@ declare module "sap/ui/mdc/SelectionMode" {
 }
 
 declare module "sap/ui/mdc/TableP13nMode" {
-	import TableP13nMode from "sap/ui/mdc/library";
+	import {TableP13nMode} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the personalization mode of the table.
@@ -115,7 +115,7 @@ declare module "sap/ui/mdc/TableP13nMode" {
 }
 
 declare module "sap/ui/mdc/TableType" {
-	import TableType from "sap/ui/mdc/library";
+	import {TableType} from "sap/ui/mdc/library";
 
 	/**
 	 * Defines the type of table used in the MDC table.

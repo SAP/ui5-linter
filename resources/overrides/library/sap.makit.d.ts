@@ -1,5 +1,5 @@
 declare module "sap/makit/ChartType" {
-	import ChartType from "sap/makit/library";
+	import {ChartType} from "sap/makit/library";
 
 	/**
 	 * Enumeration for chart type
@@ -12,7 +12,7 @@ declare module "sap/makit/ChartType" {
 }
 
 declare module "sap/makit/LegendPosition" {
-	import LegendPosition from "sap/makit/library";
+	import {LegendPosition} from "sap/makit/library";
 
 	/**
 	 * Enumeration for legend position.
@@ -24,7 +24,7 @@ declare module "sap/makit/LegendPosition" {
 }
 
 declare module "sap/makit/SortOrder" {
-	import SortOrder from "sap/makit/library";
+	import {SortOrder} from "sap/makit/library";
 
 	/**
 	 * Enumeration for sort order
@@ -37,7 +37,7 @@ declare module "sap/makit/SortOrder" {
 }
 
 declare module "sap/makit/ValueBubblePosition" {
-	import ValueBubblePosition from "sap/makit/library";
+	import {ValueBubblePosition} from "sap/makit/library";
 
 	/**
 	 * Position for Value Bubble only applies to Pie/Donut Chart.
@@ -50,7 +50,7 @@ declare module "sap/makit/ValueBubblePosition" {
 }
 
 declare module "sap/makit/ValueBubbleStyle" {
-	import ValueBubbleStyle from "sap/makit/library";
+	import {ValueBubbleStyle} from "sap/makit/library";
 
 	/**
 	 * Enumeration for Value Bubble's positioning style. This applies all chart types except Pie/Donut/HBar chart.

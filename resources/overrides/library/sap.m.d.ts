@@ -1,5 +1,5 @@
 declare module "sap/m/BackgroundDesign" {
-	import BackgroundDesign from "sap/m/library";
+	import {BackgroundDesign} from "sap/m/library";
 
 	/**
 	 * Available Background Design.
@@ -10,7 +10,7 @@ declare module "sap/m/BackgroundDesign" {
 }
 
 declare module "sap/m/BadgeAnimationType" {
-	import BadgeAnimationType from "sap/m/library";
+	import {BadgeAnimationType} from "sap/m/library";
 
 	/**
 	 * Types of animation performed by {@link sap.m.BadgeEnabler}.
@@ -22,7 +22,7 @@ declare module "sap/m/BadgeAnimationType" {
 }
 
 declare module "sap/m/BadgeState" {
-	import BadgeState from "sap/m/library";
+	import {BadgeState} from "sap/m/library";
 
 	/**
 	 * Types of state of {@link sap.m.BadgeEnabler} to expose its current state.
@@ -34,7 +34,7 @@ declare module "sap/m/BadgeState" {
 }
 
 declare module "sap/m/BarDesign" {
-	import BarDesign from "sap/m/library";
+	import {BarDesign} from "sap/m/library";
 
 	/**
 	 * Types of the Bar design.
@@ -46,7 +46,7 @@ declare module "sap/m/BarDesign" {
 }
 
 declare module "sap/m/BorderDesign" {
-	import BorderDesign from "sap/m/library";
+	import {BorderDesign} from "sap/m/library";
 
 	/**
 	 * Available Border Design.
@@ -57,7 +57,7 @@ declare module "sap/m/BorderDesign" {
 }
 
 declare module "sap/m/BreadcrumbsSeparatorStyle" {
-	import BreadcrumbsSeparatorStyle from "sap/m/library";
+	import {BreadcrumbsSeparatorStyle} from "sap/m/library";
 
 	/**
 	 * Variations of the {@link sap.m.Breadcrumbs} separators.
@@ -69,7 +69,7 @@ declare module "sap/m/BreadcrumbsSeparatorStyle" {
 }
 
 declare module "sap/m/ButtonAccessibleRole" {
-	import ButtonAccessibleRole from "sap/m/library";
+	import {ButtonAccessibleRole} from "sap/m/library";
 
 	/**
 	 * Enumeration for possible Button accessibility roles.
@@ -81,7 +81,7 @@ declare module "sap/m/ButtonAccessibleRole" {
 }
 
 declare module "sap/m/ButtonType" {
-	import ButtonType from "sap/m/library";
+	import {ButtonType} from "sap/m/library";
 
 	/**
 	 * Different predefined button types for the {@link sap.m.Button sap.m.Button}.
@@ -92,7 +92,7 @@ declare module "sap/m/ButtonType" {
 }
 
 declare module "sap/m/CarouselArrowsPlacement" {
-	import CarouselArrowsPlacement from "sap/m/library";
+	import {CarouselArrowsPlacement} from "sap/m/library";
 
 	/**
 	 * Carousel arrows align.
@@ -103,7 +103,7 @@ declare module "sap/m/CarouselArrowsPlacement" {
 }
 
 declare module "sap/m/DateTimeInputType" {
-	import DateTimeInputType from "sap/m/library";
+	import {DateTimeInputType} from "sap/m/library";
 
 	/**
 	 * A subset of DateTimeInput types that fit to a simple API returning one string.
@@ -115,7 +115,7 @@ declare module "sap/m/DateTimeInputType" {
 }
 
 declare module "sap/m/DeviationIndicator" {
-	import DeviationIndicator from "sap/m/library";
+	import {DeviationIndicator} from "sap/m/library";
 
 	/**
 	 * Enum of the available deviation markers for the NumericContent control.
@@ -127,7 +127,7 @@ declare module "sap/m/DeviationIndicator" {
 }
 
 declare module "sap/m/DialogRoleType" {
-	import DialogRoleType from "sap/m/library";
+	import {DialogRoleType} from "sap/m/library";
 
 	/**
 	 * Enum for the ARIA role of {@link sap.m.Dialog} control.
@@ -139,7 +139,7 @@ declare module "sap/m/DialogRoleType" {
 }
 
 declare module "sap/m/DialogType" {
-	import DialogType from "sap/m/library";
+	import {DialogType} from "sap/m/library";
 
 	/**
 	 * Enum for the type of {@link sap.m.Dialog} control.
@@ -150,7 +150,7 @@ declare module "sap/m/DialogType" {
 }
 
 declare module "sap/m/DraftIndicatorState" {
-	import DraftIndicatorState from "sap/m/library";
+	import {DraftIndicatorState} from "sap/m/library";
 
 	/**
 	 * Enum for the state of {@link sap.m.DraftIndicator} control.
@@ -161,7 +161,7 @@ declare module "sap/m/DraftIndicatorState" {
 }
 
 declare module "sap/m/DynamicDateRangeGroups" {
-	import DynamicDateRangeGroups from "sap/m/library";
+	import {DynamicDateRangeGroups} from "sap/m/library";
 
 	/**
 	 * Defines the groups in {@link sap.m.DynamicDateRange}.
@@ -173,7 +173,7 @@ declare module "sap/m/DynamicDateRangeGroups" {
 }
 
 declare module "sap/m/EmptyIndicatorMode" {
-	import EmptyIndicatorMode from "sap/m/library";
+	import {EmptyIndicatorMode} from "sap/m/library";
 
 	/**
 	 * Modes in which a control will render empty indicator if its content is empty.
@@ -185,7 +185,7 @@ declare module "sap/m/EmptyIndicatorMode" {
 }
 
 declare module "sap/m/ExpandableTextOverflowMode" {
-	import ExpandableTextOverflowMode from "sap/m/library";
+	import {ExpandableTextOverflowMode} from "sap/m/library";
 
 	/**
 	 * Expandable text overflow mode
@@ -196,7 +196,7 @@ declare module "sap/m/ExpandableTextOverflowMode" {
 }
 
 declare module "sap/m/FacetFilterListDataType" {
-	import FacetFilterListDataType from "sap/m/library";
+	import {FacetFilterListDataType} from "sap/m/library";
 
 	/**
 	 * FacetFilterList data types.
@@ -207,7 +207,7 @@ declare module "sap/m/FacetFilterListDataType" {
 }
 
 declare module "sap/m/FacetFilterType" {
-	import FacetFilterType from "sap/m/library";
+	import {FacetFilterType} from "sap/m/library";
 
 	/**
 	 * Used by the FacetFilter control to adapt its design according to type.
@@ -218,7 +218,7 @@ declare module "sap/m/FacetFilterType" {
 }
 
 declare module "sap/m/FlexAlignContent" {
-	import FlexAlignContent from "sap/m/library";
+	import {FlexAlignContent} from "sap/m/library";
 
 	/**
 	 * Available options for the layout of container lines along the cross axis of the flexbox layout.
@@ -229,7 +229,7 @@ declare module "sap/m/FlexAlignContent" {
 }
 
 declare module "sap/m/FlexAlignItems" {
-	import FlexAlignItems from "sap/m/library";
+	import {FlexAlignItems} from "sap/m/library";
 
 	/**
 	 * Available options for the layout of all elements along the cross axis of the flexbox layout.
@@ -240,7 +240,7 @@ declare module "sap/m/FlexAlignItems" {
 }
 
 declare module "sap/m/FlexAlignSelf" {
-	import FlexAlignSelf from "sap/m/library";
+	import {FlexAlignSelf} from "sap/m/library";
 
 	/**
 	 * Available options for the layout of individual elements along the cross axis of the flexbox layout overriding the default alignment.
@@ -251,7 +251,7 @@ declare module "sap/m/FlexAlignSelf" {
 }
 
 declare module "sap/m/FlexDirection" {
-	import FlexDirection from "sap/m/library";
+	import {FlexDirection} from "sap/m/library";
 
 	/**
 	 * Available directions for flex layouts.
@@ -262,7 +262,7 @@ declare module "sap/m/FlexDirection" {
 }
 
 declare module "sap/m/FlexJustifyContent" {
-	import FlexJustifyContent from "sap/m/library";
+	import {FlexJustifyContent} from "sap/m/library";
 
 	/**
 	 * Available options for the layout of elements along the main axis of the flexbox layout.
@@ -273,7 +273,7 @@ declare module "sap/m/FlexJustifyContent" {
 }
 
 declare module "sap/m/FlexRendertype" {
-	import FlexRendertype from "sap/m/library";
+	import {FlexRendertype} from "sap/m/library";
 
 	/**
 	 * Determines the type of HTML elements used for rendering controls.
@@ -284,7 +284,7 @@ declare module "sap/m/FlexRendertype" {
 }
 
 declare module "sap/m/FlexWrap" {
-	import FlexWrap from "sap/m/library";
+	import {FlexWrap} from "sap/m/library";
 
 	/**
 	 * Available options for the wrapping behavior of a flex container.
@@ -295,7 +295,7 @@ declare module "sap/m/FlexWrap" {
 }
 
 declare module "sap/m/FrameType" {
-	import FrameType from "sap/m/library";
+	import {FrameType} from "sap/m/library";
 
 	/**
 	 * Enum for possible frame size types for sap.m.TileContent and sap.m.GenericTile control.
@@ -307,7 +307,7 @@ declare module "sap/m/FrameType" {
 }
 
 declare module "sap/m/GenericTagDesign" {
-	import GenericTagDesign from "sap/m/library";
+	import {GenericTagDesign} from "sap/m/library";
 
 	/**
 	 * Design modes for the <code>GenericTag</code> control.
@@ -319,7 +319,7 @@ declare module "sap/m/GenericTagDesign" {
 }
 
 declare module "sap/m/GenericTagValueState" {
-	import GenericTagValueState from "sap/m/library";
+	import {GenericTagValueState} from "sap/m/library";
 
 	/**
 	 * Value states for the <code>GenericTag</code> control.
@@ -331,7 +331,7 @@ declare module "sap/m/GenericTagValueState" {
 }
 
 declare module "sap/m/GenericTileMode" {
-	import GenericTileMode from "sap/m/library";
+	import {GenericTileMode} from "sap/m/library";
 
 	/**
 	 * Defines the mode of GenericTile.
@@ -343,7 +343,7 @@ declare module "sap/m/GenericTileMode" {
 }
 
 declare module "sap/m/GenericTileScope" {
-	import GenericTileScope from "sap/m/library";
+	import {GenericTileScope} from "sap/m/library";
 
 	/**
 	 * Defines the scopes of GenericTile enabling the developer to implement different "flavors" of tiles.
@@ -355,7 +355,7 @@ declare module "sap/m/GenericTileScope" {
 }
 
 declare module "sap/m/HeaderLevel" {
-	import HeaderLevel from "sap/m/library";
+	import {HeaderLevel} from "sap/m/library";
 
 	/**
 	 * Different levels for headers.
@@ -366,7 +366,7 @@ declare module "sap/m/HeaderLevel" {
 }
 
 declare module "sap/m/IBarHTMLTag" {
-	import IBarHTMLTag from "sap/m/library";
+	import {IBarHTMLTag} from "sap/m/library";
 
 	/**
 	 * Allowed tags for the implementation of the IBar interface.
@@ -378,7 +378,7 @@ declare module "sap/m/IBarHTMLTag" {
 }
 
 declare module "sap/m/IconTabDensityMode" {
-	import IconTabDensityMode from "sap/m/library";
+	import {IconTabDensityMode} from "sap/m/library";
 
 	/**
 	 * Specifies <code>IconTabBar</code> tab density mode.
@@ -389,7 +389,7 @@ declare module "sap/m/IconTabDensityMode" {
 }
 
 declare module "sap/m/IconTabFilterDesign" {
-	import IconTabFilterDesign from "sap/m/library";
+	import {IconTabFilterDesign} from "sap/m/library";
 
 	/**
 	 * Available Filter Item Design.
@@ -400,7 +400,7 @@ declare module "sap/m/IconTabFilterDesign" {
 }
 
 declare module "sap/m/IconTabHeaderMode" {
-	import IconTabHeaderMode from "sap/m/library";
+	import {IconTabHeaderMode} from "sap/m/library";
 
 	/**
 	 * Specifies <code>IconTabBar</code> header mode.
@@ -411,7 +411,7 @@ declare module "sap/m/IconTabHeaderMode" {
 }
 
 declare module "sap/m/ImageMode" {
-	import ImageMode from "sap/m/library";
+	import {ImageMode} from "sap/m/library";
 
 	/**
 	 * Determines how the source image is used on the output DOM element.
@@ -423,7 +423,7 @@ declare module "sap/m/ImageMode" {
 }
 
 declare module "sap/m/InputTextFormatMode" {
-	import InputTextFormatMode from "sap/m/library";
+	import {InputTextFormatMode} from "sap/m/library";
 
 	/**
 	 * Defines how the input display text should be formatted.
@@ -435,7 +435,7 @@ declare module "sap/m/InputTextFormatMode" {
 }
 
 declare module "sap/m/InputType" {
-	import InputType from "sap/m/library";
+	import {InputType} from "sap/m/library";
 
 	/**
 	 * A subset of input types that fits to a simple API returning one string.
@@ -448,7 +448,7 @@ declare module "sap/m/InputType" {
 }
 
 declare module "sap/m/LabelDesign" {
-	import LabelDesign from "sap/m/library";
+	import {LabelDesign} from "sap/m/library";
 
 	/**
 	 * Available label display modes.
@@ -459,7 +459,7 @@ declare module "sap/m/LabelDesign" {
 }
 
 declare module "sap/m/LightBoxLoadingStates" {
-	import LightBoxLoadingStates from "sap/m/library";
+	import {LightBoxLoadingStates} from "sap/m/library";
 
 	/**
 	 * Types of LightBox loading stages.
@@ -471,7 +471,7 @@ declare module "sap/m/LightBoxLoadingStates" {
 }
 
 declare module "sap/m/LinkAccessibleRole" {
-	import LinkAccessibleRole from "sap/m/library";
+	import {LinkAccessibleRole} from "sap/m/library";
 
 	/**
 	 * Enumeration for possible Link accessibility roles.
@@ -483,7 +483,7 @@ declare module "sap/m/LinkAccessibleRole" {
 }
 
 declare module "sap/m/LinkConversion" {
-	import LinkConversion from "sap/m/library";
+	import {LinkConversion} from "sap/m/library";
 
 	/**
 	 * Enumeration for possible link-to-anchor conversion strategy.
@@ -495,7 +495,7 @@ declare module "sap/m/LinkConversion" {
 }
 
 declare module "sap/m/ListGrowingDirection" {
-	import ListGrowingDirection from "sap/m/library";
+	import {ListGrowingDirection} from "sap/m/library";
 
 	/**
 	 * Defines the growing direction of the <code>sap.m.List</code> or <code>sap.m.Table</code>.
@@ -507,7 +507,7 @@ declare module "sap/m/ListGrowingDirection" {
 }
 
 declare module "sap/m/ListHeaderDesign" {
-	import ListHeaderDesign from "sap/m/library";
+	import {ListHeaderDesign} from "sap/m/library";
 
 	/**
 	 * Defines the different header styles.
@@ -519,7 +519,7 @@ declare module "sap/m/ListHeaderDesign" {
 }
 
 declare module "sap/m/ListKeyboardMode" {
-	import ListKeyboardMode from "sap/m/library";
+	import {ListKeyboardMode} from "sap/m/library";
 
 	/**
 	 * Defines the keyboard handling behavior of the <code>sap.m.List</code> or <code>sap.m.Table</code>.
@@ -531,7 +531,7 @@ declare module "sap/m/ListKeyboardMode" {
 }
 
 declare module "sap/m/ListMode" {
-	import ListMode from "sap/m/library";
+	import {ListMode} from "sap/m/library";
 
 	/**
 	 * Defines the mode of the list.
@@ -542,7 +542,7 @@ declare module "sap/m/ListMode" {
 }
 
 declare module "sap/m/ListSeparators" {
-	import ListSeparators from "sap/m/library";
+	import {ListSeparators} from "sap/m/library";
 
 	/**
 	 * Defines which separator style will be applied for the items.
@@ -553,7 +553,7 @@ declare module "sap/m/ListSeparators" {
 }
 
 declare module "sap/m/ListType" {
-	import ListType from "sap/m/library";
+	import {ListType} from "sap/m/library";
 
 	/**
 	 * Defines the visual indication and behaviour of the list items.
@@ -564,7 +564,7 @@ declare module "sap/m/ListType" {
 }
 
 declare module "sap/m/LoadState" {
-	import LoadState from "sap/m/library";
+	import {LoadState} from "sap/m/library";
 
 	/**
 	 * Enumeration of possible load statuses.
@@ -576,7 +576,7 @@ declare module "sap/m/LoadState" {
 }
 
 declare module "sap/m/MenuButtonMode" {
-	import MenuButtonMode from "sap/m/library";
+	import {MenuButtonMode} from "sap/m/library";
 
 	/**
 	 * Different modes for a MenuButton (predefined types).
@@ -588,7 +588,7 @@ declare module "sap/m/MenuButtonMode" {
 }
 
 declare module "sap/m/MultiSelectMode" {
-	import MultiSelectMode from "sap/m/library";
+	import {MultiSelectMode} from "sap/m/library";
 
 	/**
 	 * Enumeration of the <code>multiSelectMode>/code> in <code>ListBase</code>.
@@ -600,7 +600,7 @@ declare module "sap/m/MultiSelectMode" {
 }
 
 declare module "sap/m/ObjectHeaderPictureShape" {
-	import ObjectHeaderPictureShape from "sap/m/library";
+	import {ObjectHeaderPictureShape} from "sap/m/library";
 
 	/**
 	 * Used by the <code>ObjectHeader</code> control to define which shape to use for the image.
@@ -612,7 +612,7 @@ declare module "sap/m/ObjectHeaderPictureShape" {
 }
 
 declare module "sap/m/ObjectMarkerType" {
-	import ObjectMarkerType from "sap/m/library";
+	import {ObjectMarkerType} from "sap/m/library";
 
 	/**
 	 * Predefined types for ObjectMarker.
@@ -623,7 +623,7 @@ declare module "sap/m/ObjectMarkerType" {
 }
 
 declare module "sap/m/ObjectMarkerVisibility" {
-	import ObjectMarkerVisibility from "sap/m/library";
+	import {ObjectMarkerVisibility} from "sap/m/library";
 
 	/**
 	 * Predefined visibility for ObjectMarker.
@@ -634,7 +634,7 @@ declare module "sap/m/ObjectMarkerVisibility" {
 }
 
 declare module "sap/m/OverflowToolbarPriority" {
-	import OverflowToolbarPriority from "sap/m/library";
+	import {OverflowToolbarPriority} from "sap/m/library";
 
 	/**
 	 * Defines the priorities of the controls within {@link sap.m.OverflowToolbar}.
@@ -646,7 +646,7 @@ declare module "sap/m/OverflowToolbarPriority" {
 }
 
 declare module "sap/m/P13nConditionOperation" {
-	import P13nConditionOperation from "sap/m/library";
+	import {P13nConditionOperation} from "sap/m/library";
 
 	/**
 	 * @experimental (since 1.26) - !!! THIS TYPE IS ONLY FOR INTERNAL USE !!!
@@ -656,7 +656,7 @@ declare module "sap/m/P13nConditionOperation" {
 }
 
 declare module "sap/m/P13nPanelType" {
-	import P13nPanelType from "sap/m/library";
+	import {P13nPanelType} from "sap/m/library";
 
 	/**
 	 * Type of panels used in the personalization dialog.
@@ -667,7 +667,7 @@ declare module "sap/m/P13nPanelType" {
 }
 
 declare module "sap/m/P13nPopupMode" {
-	import P13nPopupMode from "sap/m/library";
+	import {P13nPopupMode} from "sap/m/library";
 
 	/**
 	 * Type of popup used in the <code>sap.m.p13n.Popup</code>.
@@ -678,7 +678,7 @@ declare module "sap/m/P13nPopupMode" {
 }
 
 declare module "sap/m/PageBackgroundDesign" {
-	import PageBackgroundDesign from "sap/m/library";
+	import {PageBackgroundDesign} from "sap/m/library";
 
 	/**
 	 * Available Page Background Design.
@@ -689,7 +689,7 @@ declare module "sap/m/PageBackgroundDesign" {
 }
 
 declare module "sap/m/PanelAccessibleRole" {
-	import PanelAccessibleRole from "sap/m/library";
+	import {PanelAccessibleRole} from "sap/m/library";
 
 	/**
 	 * Available Panel Accessible Landmark Roles.
@@ -700,7 +700,7 @@ declare module "sap/m/PanelAccessibleRole" {
 }
 
 declare module "sap/m/PDFViewerDisplayType" {
-	import PDFViewerDisplayType from "sap/m/library";
+	import {PDFViewerDisplayType} from "sap/m/library";
 
 	/**
 	 * PDF viewer display types.
@@ -711,7 +711,7 @@ declare module "sap/m/PDFViewerDisplayType" {
 }
 
 declare module "sap/m/PlacementType" {
-	import PlacementType from "sap/m/library";
+	import {PlacementType} from "sap/m/library";
 
 	/**
 	 * Types for the placement of Popover control.
@@ -722,7 +722,7 @@ declare module "sap/m/PlacementType" {
 }
 
 declare module "sap/m/PlanningCalendarBuiltInView" {
-	import PlanningCalendarBuiltInView from "sap/m/library";
+	import {PlanningCalendarBuiltInView} from "sap/m/library";
 
 	/**
 	 * A list of the default built-in views in a {@link sap.m.PlanningCalendar}, described by their keys.
@@ -734,7 +734,7 @@ declare module "sap/m/PlanningCalendarBuiltInView" {
 }
 
 declare module "sap/m/PlanningCalendarStickyMode" {
-	import PlanningCalendarStickyMode from "sap/m/library";
+	import {PlanningCalendarStickyMode} from "sap/m/library";
 
 	/**
 	 * Available sticky modes for the {@link sap.m.SinglePlanningCalendar}
@@ -745,8 +745,8 @@ declare module "sap/m/PlanningCalendarStickyMode" {
 	export default PlanningCalendarStickyMode;
 }
 
-declare module "sap/m/CopyPreference" {
-	import CopyPreference from "sap/m/library";
+declare module "sap/m/plugins/CopyPreference" {
+	import {plugins} from "sap/m/library";
 
 	/**
 	 * Enumeration of the <code>copyPreference</code> in <code>CopyProvider</code>. Determines what is copied during a copy operation.
@@ -754,11 +754,11 @@ declare module "sap/m/CopyPreference" {
 	 * @public
 	 * @since 1.119
 	*/
-	export default CopyPreference;
+	export default plugins.CopyPreference;
 }
 
 declare module "sap/m/PopinDisplay" {
-	import PopinDisplay from "sap/m/library";
+	import {PopinDisplay} from "sap/m/library";
 
 	/**
 	 * Defines the display of table pop-ins.
@@ -770,7 +770,7 @@ declare module "sap/m/PopinDisplay" {
 }
 
 declare module "sap/m/PopinLayout" {
-	import PopinLayout from "sap/m/library";
+	import {PopinLayout} from "sap/m/library";
 
 	/**
 	 * Defines the layout options of the table popins.
@@ -782,7 +782,7 @@ declare module "sap/m/PopinLayout" {
 }
 
 declare module "sap/m/Priority" {
-	import Priority from "sap/m/library";
+	import {Priority} from "sap/m/library";
 
 	/**
 	 * Defines the priority for the TileContent in ActionMode
@@ -793,7 +793,7 @@ declare module "sap/m/Priority" {
 }
 
 declare module "sap/m/QuickViewGroupElementType" {
-	import QuickViewGroupElementType from "sap/m/library";
+	import {QuickViewGroupElementType} from "sap/m/library";
 
 	/**
 	 * QuickViewGroupElement is a combination of one label and another control (Link or Text) associated to this label.
@@ -804,7 +804,7 @@ declare module "sap/m/QuickViewGroupElementType" {
 }
 
 declare module "sap/m/RatingIndicatorVisualMode" {
-	import RatingIndicatorVisualMode from "sap/m/library";
+	import {RatingIndicatorVisualMode} from "sap/m/library";
 
 	/**
 	 * Possible values for the visualization of float values in the RatingIndicator control.
@@ -815,7 +815,7 @@ declare module "sap/m/RatingIndicatorVisualMode" {
 }
 
 declare module "sap/m/ResetAllMode" {
-	import ResetAllMode from "sap/m/library";
+	import {ResetAllMode} from "sap/m/library";
 
 	/**
 	 * Enumeration of the <code>ResetAllMode>/code> that can be used in a <code>TablePersoController</code>.
@@ -826,7 +826,7 @@ declare module "sap/m/ResetAllMode" {
 }
 
 declare module "sap/m/ScreenSize" {
-	import ScreenSize from "sap/m/library";
+	import {ScreenSize} from "sap/m/library";
 
 	/**
 	 * Breakpoint names for different screen sizes.
@@ -837,7 +837,7 @@ declare module "sap/m/ScreenSize" {
 }
 
 declare module "sap/m/SelectDialogInitialFocus" {
-	import SelectDialogInitialFocus from "sap/m/library";
+	import {SelectDialogInitialFocus} from "sap/m/library";
 
 	/**
 	 * Defines the control that will receive the initial focus in the <code>sap.m.SelectDialog</code> or <code>sap.m.TableSelectDialog</code>.
@@ -849,7 +849,7 @@ declare module "sap/m/SelectDialogInitialFocus" {
 }
 
 declare module "sap/m/SelectionDetailsActionLevel" {
-	import SelectionDetailsActionLevel from "sap/m/library";
+	import {SelectionDetailsActionLevel} from "sap/m/library";
 
 	/**
 	 * Enumeration for different action levels in sap.m.SelectionDetails control.
@@ -861,7 +861,7 @@ declare module "sap/m/SelectionDetailsActionLevel" {
 }
 
 declare module "sap/m/SelectListKeyboardNavigationMode" {
-	import SelectListKeyboardNavigationMode from "sap/m/library";
+	import {SelectListKeyboardNavigationMode} from "sap/m/library";
 
 	/**
 	 * Defines the keyboard navigation mode.
@@ -873,7 +873,7 @@ declare module "sap/m/SelectListKeyboardNavigationMode" {
 }
 
 declare module "sap/m/SelectType" {
-	import SelectType from "sap/m/library";
+	import {SelectType} from "sap/m/library";
 
 	/**
 	 * Enumeration for different Select types.
@@ -884,8 +884,8 @@ declare module "sap/m/SelectType" {
 	export default SelectType;
 }
 
-declare module "sap/m/SemanticRuleSetType" {
-	import SemanticRuleSetType from "sap/m/library";
+declare module "sap/m/semantic/SemanticRuleSetType" {
+	import {semantic} from "sap/m/library";
 
 	/**
 	 * Declares the type of semantic ruleset that will govern the styling and positioning of semantic content.
@@ -893,11 +893,11 @@ declare module "sap/m/SemanticRuleSetType" {
 	 * @public
 	 * @since 1.44
 	*/
-	export default SemanticRuleSetType;
+	export default semantic.SemanticRuleSetType;
 }
 
 declare module "sap/m/SinglePlanningCalendarSelectionMode" {
-	import SinglePlanningCalendarSelectionMode from "sap/m/library";
+	import {SinglePlanningCalendarSelectionMode} from "sap/m/library";
 
 	/**
 	 * Available selection modes for the {@link sap.m.SinglePlanningCalendar}
@@ -909,7 +909,7 @@ declare module "sap/m/SinglePlanningCalendarSelectionMode" {
 }
 
 declare module "sap/m/Size" {
-	import Size from "sap/m/library";
+	import {Size} from "sap/m/library";
 
 	/**
 	 * Enumeration of possible size settings.
@@ -921,7 +921,7 @@ declare module "sap/m/Size" {
 }
 
 declare module "sap/m/SplitAppMode" {
-	import SplitAppMode from "sap/m/library";
+	import {SplitAppMode} from "sap/m/library";
 
 	/**
 	 * The mode of SplitContainer or SplitApp control to show/hide the master area.
@@ -932,7 +932,7 @@ declare module "sap/m/SplitAppMode" {
 }
 
 declare module "sap/m/StandardDynamicDateRangeKeys" {
-	import StandardDynamicDateRangeKeys from "sap/m/library";
+	import {StandardDynamicDateRangeKeys} from "sap/m/library";
 
 	/**
 	 * The option keys of all the standard options of a DynamicDateRange control.
@@ -943,7 +943,7 @@ declare module "sap/m/StandardDynamicDateRangeKeys" {
 }
 
 declare module "sap/m/StandardTileType" {
-	import StandardTileType from "sap/m/library";
+	import {StandardTileType} from "sap/m/library";
 
 	/**
 	 * Types for StandardTile.
@@ -954,7 +954,7 @@ declare module "sap/m/StandardTileType" {
 }
 
 declare module "sap/m/StepInputStepModeType" {
-	import StepInputStepModeType from "sap/m/library";
+	import {StepInputStepModeType} from "sap/m/library";
 
 	/**
 	 * Available step modes for {@link sap.m.StepInput}.
@@ -966,7 +966,7 @@ declare module "sap/m/StepInputStepModeType" {
 }
 
 declare module "sap/m/StepInputValidationMode" {
-	import StepInputValidationMode from "sap/m/library";
+	import {StepInputValidationMode} from "sap/m/library";
 
 	/**
 	 * Available validation modes for {@link sap.m.StepInput}.
@@ -977,7 +977,7 @@ declare module "sap/m/StepInputValidationMode" {
 }
 
 declare module "sap/m/Sticky" {
-	import Sticky from "sap/m/library";
+	import {Sticky} from "sap/m/library";
 
 	/**
 	 * Defines which area of the control remains fixed at the top of the page during vertical scrolling as long as the control is in the viewport.
@@ -989,7 +989,7 @@ declare module "sap/m/Sticky" {
 }
 
 declare module "sap/m/StringFilterOperator" {
-	import StringFilterOperator from "sap/m/library";
+	import {StringFilterOperator} from "sap/m/library";
 
 	/**
 	 * Types of string filter operators.
@@ -1001,7 +1001,7 @@ declare module "sap/m/StringFilterOperator" {
 }
 
 declare module "sap/m/SwipeDirection" {
-	import SwipeDirection from "sap/m/library";
+	import {SwipeDirection} from "sap/m/library";
 
 	/**
 	 * Directions for swipe event.
@@ -1012,7 +1012,7 @@ declare module "sap/m/SwipeDirection" {
 }
 
 declare module "sap/m/SwitchType" {
-	import SwitchType from "sap/m/library";
+	import {SwitchType} from "sap/m/library";
 
 	/**
 	 * Enumeration for different switch types.
@@ -1022,8 +1022,8 @@ declare module "sap/m/SwitchType" {
 	export default SwitchType;
 }
 
-declare module "sap/m/Category" {
-	import Category from "sap/m/library";
+declare module "sap/m/table/columnmenu/Category" {
+	import {table} from "sap/m/library";
 
 	/**
 	 * Categories of column menu entries.
@@ -1031,11 +1031,11 @@ declare module "sap/m/Category" {
 	 * @public
 	 * @since 1.110
 	*/
-	export default Category;
+	export default table.columnmenu.Category;
 }
 
 declare module "sap/m/TabsOverflowMode" {
-	import TabsOverflowMode from "sap/m/library";
+	import {TabsOverflowMode} from "sap/m/library";
 
 	/**
 	 * Specifies <code>IconTabBar</code> tab overflow mode.
@@ -1047,7 +1047,7 @@ declare module "sap/m/TabsOverflowMode" {
 }
 
 declare module "sap/m/TileSizeBehavior" {
-	import TileSizeBehavior from "sap/m/library";
+	import {TileSizeBehavior} from "sap/m/library";
 
 	/**
 	 * Describes the behavior of tiles when displayed on a small-screened phone (374px wide and lower).
@@ -1059,7 +1059,7 @@ declare module "sap/m/TileSizeBehavior" {
 }
 
 declare module "sap/m/TimePickerMaskMode" {
-	import TimePickerMaskMode from "sap/m/library";
+	import {TimePickerMaskMode} from "sap/m/library";
 
 	/**
 	 * Different modes for the <code>sap.m.TimePicker</code> mask.
@@ -1071,7 +1071,7 @@ declare module "sap/m/TimePickerMaskMode" {
 }
 
 declare module "sap/m/TitleAlignment" {
-	import TitleAlignment from "sap/m/library";
+	import {TitleAlignment} from "sap/m/library";
 
 	/**
 	 * Declares the type of title alignment for some controls
@@ -1082,7 +1082,7 @@ declare module "sap/m/TitleAlignment" {
 }
 
 declare module "sap/m/TokenizerRenderMode" {
-	import TokenizerRenderMode from "sap/m/library";
+	import {TokenizerRenderMode} from "sap/m/library";
 
 	/**
 	 * Types of the <code>sap.m.Tokenizer</code> responsive modes.
@@ -1094,7 +1094,7 @@ declare module "sap/m/TokenizerRenderMode" {
 }
 
 declare module "sap/m/ToolbarDesign" {
-	import ToolbarDesign from "sap/m/library";
+	import {ToolbarDesign} from "sap/m/library";
 
 	/**
 	 * Types of the Toolbar Design.
@@ -1108,7 +1108,7 @@ declare module "sap/m/ToolbarDesign" {
 }
 
 declare module "sap/m/ToolbarStyle" {
-	import ToolbarStyle from "sap/m/library";
+	import {ToolbarStyle} from "sap/m/library";
 
 	/**
 	 * Types of visual styles for the {@link sap.m.Toolbar}.
@@ -1124,7 +1124,7 @@ declare module "sap/m/ToolbarStyle" {
 }
 
 declare module "sap/m/UploadSetwithTableActionPlaceHolder" {
-	import UploadSetwithTableActionPlaceHolder from "sap/m/library";
+	import {UploadSetwithTableActionPlaceHolder} from "sap/m/library";
 
 	/**
 	 * Defines the placeholder type for the control to be replaced.
@@ -1136,7 +1136,7 @@ declare module "sap/m/UploadSetwithTableActionPlaceHolder" {
 }
 
 declare module "sap/m/UploadState" {
-	import UploadState from "sap/m/library";
+	import {UploadState} from "sap/m/library";
 
 	/**
 	 * States of the upload process of {@link sap.m.UploadCollectionItem}.
@@ -1147,7 +1147,7 @@ declare module "sap/m/UploadState" {
 }
 
 declare module "sap/m/UploadType" {
-	import UploadType from "sap/m/library";
+	import {UploadType} from "sap/m/library";
 
 	/**
 	 * Type of the upload {@link sap.m.UploadSetItem}.
@@ -1158,7 +1158,7 @@ declare module "sap/m/UploadType" {
 }
 
 declare module "sap/m/ValueColor" {
-	import ValueColor from "sap/m/library";
+	import {ValueColor} from "sap/m/library";
 
 	/**
 	 * Enumeration of possible value color settings.
@@ -1169,7 +1169,7 @@ declare module "sap/m/ValueColor" {
 }
 
 declare module "sap/m/VerticalPlacementType" {
-	import VerticalPlacementType from "sap/m/library";
+	import {VerticalPlacementType} from "sap/m/library";
 
 	/**
 	 * Types for the placement of message Popover control.
@@ -1180,7 +1180,7 @@ declare module "sap/m/VerticalPlacementType" {
 }
 
 declare module "sap/m/WizardRenderMode" {
-	import WizardRenderMode from "sap/m/library";
+	import {WizardRenderMode} from "sap/m/library";
 
 	/**
 	 * Wizard rendering mode.
@@ -1192,7 +1192,7 @@ declare module "sap/m/WizardRenderMode" {
 }
 
 declare module "sap/m/WrappingType" {
-	import WrappingType from "sap/m/library";
+	import {WrappingType} from "sap/m/library";
 
 	/**
 	 * Available wrapping types for text controls that can be wrapped that enable you to display the text as hyphenated.

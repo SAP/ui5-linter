@@ -1,5 +1,5 @@
 declare module "sap/ui/webc/main/AvatarColorScheme" {
-	import AvatarColorScheme from "sap/ui/webc/main/library";
+	import {AvatarColorScheme} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of AvatarColorScheme.
@@ -12,7 +12,7 @@ declare module "sap/ui/webc/main/AvatarColorScheme" {
 }
 
 declare module "sap/ui/webc/main/AvatarGroupType" {
-	import AvatarGroupType from "sap/ui/webc/main/library";
+	import {AvatarGroupType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of AvatarGroupType.
@@ -25,7 +25,7 @@ declare module "sap/ui/webc/main/AvatarGroupType" {
 }
 
 declare module "sap/ui/webc/main/AvatarShape" {
-	import AvatarShape from "sap/ui/webc/main/library";
+	import {AvatarShape} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of AvatarShape.
@@ -38,7 +38,7 @@ declare module "sap/ui/webc/main/AvatarShape" {
 }
 
 declare module "sap/ui/webc/main/AvatarSize" {
-	import AvatarSize from "sap/ui/webc/main/library";
+	import {AvatarSize} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of AvatarSize.
@@ -51,7 +51,7 @@ declare module "sap/ui/webc/main/AvatarSize" {
 }
 
 declare module "sap/ui/webc/main/BackgroundDesign" {
-	import BackgroundDesign from "sap/ui/webc/main/library";
+	import {BackgroundDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Defines background designs.
@@ -64,7 +64,7 @@ declare module "sap/ui/webc/main/BackgroundDesign" {
 }
 
 declare module "sap/ui/webc/main/BorderDesign" {
-	import BorderDesign from "sap/ui/webc/main/library";
+	import {BorderDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Defines border designs.
@@ -77,7 +77,7 @@ declare module "sap/ui/webc/main/BorderDesign" {
 }
 
 declare module "sap/ui/webc/main/BreadcrumbsDesign" {
-	import BreadcrumbsDesign from "sap/ui/webc/main/library";
+	import {BreadcrumbsDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Breadcrumbs designs.
@@ -90,7 +90,7 @@ declare module "sap/ui/webc/main/BreadcrumbsDesign" {
 }
 
 declare module "sap/ui/webc/main/BreadcrumbsSeparatorStyle" {
-	import BreadcrumbsSeparatorStyle from "sap/ui/webc/main/library";
+	import {BreadcrumbsSeparatorStyle} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Breadcrumbs separator styles.
@@ -103,7 +103,7 @@ declare module "sap/ui/webc/main/BreadcrumbsSeparatorStyle" {
 }
 
 declare module "sap/ui/webc/main/BusyIndicatorSize" {
-	import BusyIndicatorSize from "sap/ui/webc/main/library";
+	import {BusyIndicatorSize} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different BusyIndicator sizes.
@@ -116,7 +116,7 @@ declare module "sap/ui/webc/main/BusyIndicatorSize" {
 }
 
 declare module "sap/ui/webc/main/ButtonDesign" {
-	import ButtonDesign from "sap/ui/webc/main/library";
+	import {ButtonDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Button designs.
@@ -129,7 +129,7 @@ declare module "sap/ui/webc/main/ButtonDesign" {
 }
 
 declare module "sap/ui/webc/main/ButtonType" {
-	import ButtonType from "sap/ui/webc/main/library";
+	import {ButtonType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Determines if the button has special form-related functionality.
@@ -142,7 +142,7 @@ declare module "sap/ui/webc/main/ButtonType" {
 }
 
 declare module "sap/ui/webc/main/CalendarSelectionMode" {
-	import CalendarSelectionMode from "sap/ui/webc/main/library";
+	import {CalendarSelectionMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Calendar selection mode.
@@ -155,7 +155,7 @@ declare module "sap/ui/webc/main/CalendarSelectionMode" {
 }
 
 declare module "sap/ui/webc/main/CarouselArrowsPlacement" {
-	import CarouselArrowsPlacement from "sap/ui/webc/main/library";
+	import {CarouselArrowsPlacement} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Carousel arrows placement.
@@ -168,7 +168,7 @@ declare module "sap/ui/webc/main/CarouselArrowsPlacement" {
 }
 
 declare module "sap/ui/webc/main/CarouselPageIndicatorStyle" {
-	import CarouselPageIndicatorStyle from "sap/ui/webc/main/library";
+	import {CarouselPageIndicatorStyle} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Carousel page indicator styles.
@@ -181,7 +181,7 @@ declare module "sap/ui/webc/main/CarouselPageIndicatorStyle" {
 }
 
 declare module "sap/ui/webc/main/ComboBoxFilter" {
-	import ComboBoxFilter from "sap/ui/webc/main/library";
+	import {ComboBoxFilter} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different filtering types of the ComboBox.
@@ -194,7 +194,7 @@ declare module "sap/ui/webc/main/ComboBoxFilter" {
 }
 
 declare module "sap/ui/webc/main/HasPopup" {
-	import HasPopup from "sap/ui/webc/main/library";
+	import {HasPopup} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of HasPopup.
@@ -207,7 +207,7 @@ declare module "sap/ui/webc/main/HasPopup" {
 }
 
 declare module "sap/ui/webc/main/IconDesign" {
-	import IconDesign from "sap/ui/webc/main/library";
+	import {IconDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different Icon semantic designs.
@@ -220,7 +220,7 @@ declare module "sap/ui/webc/main/IconDesign" {
 }
 
 declare module "sap/ui/webc/main/InputType" {
-	import InputType from "sap/ui/webc/main/library";
+	import {InputType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different input types.
@@ -233,7 +233,7 @@ declare module "sap/ui/webc/main/InputType" {
 }
 
 declare module "sap/ui/webc/main/LinkDesign" {
-	import LinkDesign from "sap/ui/webc/main/library";
+	import {LinkDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different link designs.
@@ -246,7 +246,7 @@ declare module "sap/ui/webc/main/LinkDesign" {
 }
 
 declare module "sap/ui/webc/main/ListGrowingMode" {
-	import ListGrowingMode from "sap/ui/webc/main/library";
+	import {ListGrowingMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different list growing modes.
@@ -259,7 +259,7 @@ declare module "sap/ui/webc/main/ListGrowingMode" {
 }
 
 declare module "sap/ui/webc/main/ListItemType" {
-	import ListItemType from "sap/ui/webc/main/library";
+	import {ListItemType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different list item types.
@@ -272,7 +272,7 @@ declare module "sap/ui/webc/main/ListItemType" {
 }
 
 declare module "sap/ui/webc/main/ListMode" {
-	import ListMode from "sap/ui/webc/main/library";
+	import {ListMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different list modes.
@@ -285,7 +285,7 @@ declare module "sap/ui/webc/main/ListMode" {
 }
 
 declare module "sap/ui/webc/main/ListSeparators" {
-	import ListSeparators from "sap/ui/webc/main/library";
+	import {ListSeparators} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of list items separators.
@@ -298,7 +298,7 @@ declare module "sap/ui/webc/main/ListSeparators" {
 }
 
 declare module "sap/ui/webc/main/MessageStripDesign" {
-	import MessageStripDesign from "sap/ui/webc/main/library";
+	import {MessageStripDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * MessageStrip designs.
@@ -311,7 +311,7 @@ declare module "sap/ui/webc/main/MessageStripDesign" {
 }
 
 declare module "sap/ui/webc/main/PanelAccessibleRole" {
-	import PanelAccessibleRole from "sap/ui/webc/main/library";
+	import {PanelAccessibleRole} from "sap/ui/webc/main/library";
 
 	/**
 	 * Panel accessible roles.
@@ -324,7 +324,7 @@ declare module "sap/ui/webc/main/PanelAccessibleRole" {
 }
 
 declare module "sap/ui/webc/main/PopoverHorizontalAlign" {
-	import PopoverHorizontalAlign from "sap/ui/webc/main/library";
+	import {PopoverHorizontalAlign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Popover horizontal align types.
@@ -337,7 +337,7 @@ declare module "sap/ui/webc/main/PopoverHorizontalAlign" {
 }
 
 declare module "sap/ui/webc/main/PopoverPlacementType" {
-	import PopoverPlacementType from "sap/ui/webc/main/library";
+	import {PopoverPlacementType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Popover placement types.
@@ -350,7 +350,7 @@ declare module "sap/ui/webc/main/PopoverPlacementType" {
 }
 
 declare module "sap/ui/webc/main/PopoverVerticalAlign" {
-	import PopoverVerticalAlign from "sap/ui/webc/main/library";
+	import {PopoverVerticalAlign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Popover vertical align types.
@@ -363,7 +363,7 @@ declare module "sap/ui/webc/main/PopoverVerticalAlign" {
 }
 
 declare module "sap/ui/webc/main/PopupAccessibleRole" {
-	import PopupAccessibleRole from "sap/ui/webc/main/library";
+	import {PopupAccessibleRole} from "sap/ui/webc/main/library";
 
 	/**
 	 * Popup accessible roles.
@@ -376,7 +376,7 @@ declare module "sap/ui/webc/main/PopupAccessibleRole" {
 }
 
 declare module "sap/ui/webc/main/Priority" {
-	import Priority from "sap/ui/webc/main/library";
+	import {Priority} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of Priority.
@@ -389,7 +389,7 @@ declare module "sap/ui/webc/main/Priority" {
 }
 
 declare module "sap/ui/webc/main/SegmentedButtonMode" {
-	import SegmentedButtonMode from "sap/ui/webc/main/library";
+	import {SegmentedButtonMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different SegmentedButton modes.
@@ -402,7 +402,7 @@ declare module "sap/ui/webc/main/SegmentedButtonMode" {
 }
 
 declare module "sap/ui/webc/main/SemanticColor" {
-	import SemanticColor from "sap/ui/webc/main/library";
+	import {SemanticColor} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of SemanticColor.
@@ -415,7 +415,7 @@ declare module "sap/ui/webc/main/SemanticColor" {
 }
 
 declare module "sap/ui/webc/main/SwitchDesign" {
-	import SwitchDesign from "sap/ui/webc/main/library";
+	import {SwitchDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of Switch designs.
@@ -428,7 +428,7 @@ declare module "sap/ui/webc/main/SwitchDesign" {
 }
 
 declare module "sap/ui/webc/main/TabContainerBackgroundDesign" {
-	import TabContainerBackgroundDesign from "sap/ui/webc/main/library";
+	import {TabContainerBackgroundDesign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Background design for the header and content of TabContainer.
@@ -441,7 +441,7 @@ declare module "sap/ui/webc/main/TabContainerBackgroundDesign" {
 }
 
 declare module "sap/ui/webc/main/TabLayout" {
-	import TabLayout from "sap/ui/webc/main/library";
+	import {TabLayout} from "sap/ui/webc/main/library";
 
 	/**
 	 * Tab layout of TabContainer.
@@ -454,7 +454,7 @@ declare module "sap/ui/webc/main/TabLayout" {
 }
 
 declare module "sap/ui/webc/main/TableColumnPopinDisplay" {
-	import TableColumnPopinDisplay from "sap/ui/webc/main/library";
+	import {TableColumnPopinDisplay} from "sap/ui/webc/main/library";
 
 	/**
 	 * Table cell popin display.
@@ -467,7 +467,7 @@ declare module "sap/ui/webc/main/TableColumnPopinDisplay" {
 }
 
 declare module "sap/ui/webc/main/TableGrowingMode" {
-	import TableGrowingMode from "sap/ui/webc/main/library";
+	import {TableGrowingMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different table growing modes.
@@ -480,7 +480,7 @@ declare module "sap/ui/webc/main/TableGrowingMode" {
 }
 
 declare module "sap/ui/webc/main/TableMode" {
-	import TableMode from "sap/ui/webc/main/library";
+	import {TableMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different table modes.
@@ -493,7 +493,7 @@ declare module "sap/ui/webc/main/TableMode" {
 }
 
 declare module "sap/ui/webc/main/TableRowType" {
-	import TableRowType from "sap/ui/webc/main/library";
+	import {TableRowType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different table row types.
@@ -506,7 +506,7 @@ declare module "sap/ui/webc/main/TableRowType" {
 }
 
 declare module "sap/ui/webc/main/TabsOverflowMode" {
-	import TabsOverflowMode from "sap/ui/webc/main/library";
+	import {TabsOverflowMode} from "sap/ui/webc/main/library";
 
 	/**
 	 * Tabs overflow mode in TabContainer.
@@ -519,7 +519,7 @@ declare module "sap/ui/webc/main/TabsOverflowMode" {
 }
 
 declare module "sap/ui/webc/main/TitleLevel" {
-	import TitleLevel from "sap/ui/webc/main/library";
+	import {TitleLevel} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of Title level.
@@ -532,7 +532,7 @@ declare module "sap/ui/webc/main/TitleLevel" {
 }
 
 declare module "sap/ui/webc/main/ToastPlacement" {
-	import ToastPlacement from "sap/ui/webc/main/library";
+	import {ToastPlacement} from "sap/ui/webc/main/library";
 
 	/**
 	 * Toast placement.
@@ -545,7 +545,7 @@ declare module "sap/ui/webc/main/ToastPlacement" {
 }
 
 declare module "sap/ui/webc/main/ToolbarAlign" {
-	import ToolbarAlign from "sap/ui/webc/main/library";
+	import {ToolbarAlign} from "sap/ui/webc/main/library";
 
 	/**
 	 * Defines which direction the items of ui5-toolbar will be aligned.
@@ -558,7 +558,7 @@ declare module "sap/ui/webc/main/ToolbarAlign" {
 }
 
 declare module "sap/ui/webc/main/ToolbarItemOverflowBehavior" {
-	import ToolbarItemOverflowBehavior from "sap/ui/webc/main/library";
+	import {ToolbarItemOverflowBehavior} from "sap/ui/webc/main/library";
 
 	/**
 	 * Defines the priority of the toolbar item to go inside overflow popover.
@@ -571,7 +571,7 @@ declare module "sap/ui/webc/main/ToolbarItemOverflowBehavior" {
 }
 
 declare module "sap/ui/webc/main/WrappingType" {
-	import WrappingType from "sap/ui/webc/main/library";
+	import {WrappingType} from "sap/ui/webc/main/library";
 
 	/**
 	 * Different types of wrapping.

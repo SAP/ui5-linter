@@ -1,5 +1,5 @@
 declare module "sap/ui/layout/BackgroundDesign" {
-	import BackgroundDesign from "sap/ui/layout/library";
+	import {BackgroundDesign} from "sap/ui/layout/library";
 
 	/**
 	 * Available Background Design.
@@ -11,7 +11,7 @@ declare module "sap/ui/layout/BackgroundDesign" {
 }
 
 declare module "sap/ui/layout/BlockBackgroundType" {
-	import BlockBackgroundType from "sap/ui/layout/library";
+	import {BlockBackgroundType} from "sap/ui/layout/library";
 
 	/**
 	 * A string type that is used inside the BlockLayout to set predefined background color to the cells inside the control.
@@ -22,7 +22,7 @@ declare module "sap/ui/layout/BlockBackgroundType" {
 }
 
 declare module "sap/ui/layout/BlockLayoutCellColorSet" {
-	import BlockLayoutCellColorSet from "sap/ui/layout/library";
+	import {BlockLayoutCellColorSet} from "sap/ui/layout/library";
 
 	/**
 	 * A string type that is used inside the BlockLayoutCell to set a predefined set of colors for the cells.
@@ -34,7 +34,7 @@ declare module "sap/ui/layout/BlockLayoutCellColorSet" {
 }
 
 declare module "sap/ui/layout/BlockLayoutCellColorShade" {
-	import BlockLayoutCellColorShade from "sap/ui/layout/library";
+	import {BlockLayoutCellColorShade} from "sap/ui/layout/library";
 
 	/**
 	 * A string type that is used inside the BlockLayoutCell to set a predefined set of color shades for the cells. The colors are defined with sap.ui.layout.BlockLayoutCellColorSet. And this is for the shades only.
@@ -46,7 +46,7 @@ declare module "sap/ui/layout/BlockLayoutCellColorShade" {
 }
 
 declare module "sap/ui/layout/BlockRowColorSets" {
-	import BlockRowColorSets from "sap/ui/layout/library";
+	import {BlockRowColorSets} from "sap/ui/layout/library";
 
 	/**
 	 * A string type that is used inside the BlockLayoutRow to set predefined set of colors the cells inside the control. Color sets depend on sap.ui.layout.BlockBackgroundType
@@ -56,8 +56,8 @@ declare module "sap/ui/layout/BlockRowColorSets" {
 	export default BlockRowColorSets;
 }
 
-declare module "sap/ui/layout/CSSGridAutoFlow" {
-	import CSSGridAutoFlow from "sap/ui/layout/library";
+declare module "sap/ui/layout/cssgrid/CSSGridAutoFlow" {
+	import {cssgrid} from "sap/ui/layout/library";
 
 	/**
 	 * A string type that is used for CSS grid to control how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.
@@ -65,11 +65,11 @@ declare module "sap/ui/layout/CSSGridAutoFlow" {
 	 * @public
 	 * @since 1.60.0
 	*/
-	export default CSSGridAutoFlow;
+	export default cssgrid.CSSGridAutoFlow;
 }
 
-declare module "sap/ui/layout/SimpleFormLayout" {
-	import SimpleFormLayout from "sap/ui/layout/library";
+declare module "sap/ui/layout/form/SimpleFormLayout" {
+	import {form} from "sap/ui/layout/library";
 
 	/**
 	 * Available <code>FormLayouts</code> used to render a <code>SimpleForm</code>.
@@ -77,11 +77,11 @@ declare module "sap/ui/layout/SimpleFormLayout" {
 	 * @public
 	 * @since 1.16.0
 	*/
-	export default SimpleFormLayout;
+	export default form.SimpleFormLayout;
 }
 
 declare module "sap/ui/layout/GridPosition" {
-	import GridPosition from "sap/ui/layout/library";
+	import {GridPosition} from "sap/ui/layout/library";
 
 	/**
 	 * The position of the {@link sap.ui.layout.Grid}. Can be <code>Left</code> (default), <code>Center</code> or <code>Right</code>.
@@ -92,7 +92,7 @@ declare module "sap/ui/layout/GridPosition" {
 }
 
 declare module "sap/ui/layout/SideContentFallDown" {
-	import SideContentFallDown from "sap/ui/layout/library";
+	import {SideContentFallDown} from "sap/ui/layout/library";
 
 	/**
 	 * Types of the DynamicSideContent FallDown options
@@ -104,7 +104,7 @@ declare module "sap/ui/layout/SideContentFallDown" {
 }
 
 declare module "sap/ui/layout/SideContentPosition" {
-	import SideContentPosition from "sap/ui/layout/library";
+	import {SideContentPosition} from "sap/ui/layout/library";
 
 	/**
 	 * The position of the side content - End (default) and Begin.
@@ -115,7 +115,7 @@ declare module "sap/ui/layout/SideContentPosition" {
 }
 
 declare module "sap/ui/layout/SideContentVisibility" {
-	import SideContentVisibility from "sap/ui/layout/library";
+	import {SideContentVisibility} from "sap/ui/layout/library";
 
 	/**
 	 * Types of the DynamicSideContent Visibility options

@@ -1,60 +1,60 @@
-declare module "sap/chart/GradationDivergingColorScheme" {
-	import GradationDivergingColorScheme from "sap/chart/library";
+declare module "sap/chart/coloring/GradationDivergingColorScheme" {
+	import {coloring} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported Gradation diverging color scheme in analytical chart
 	 *
 	 * @public
 	*/
-	export default GradationDivergingColorScheme;
+	export default coloring.GradationDivergingColorScheme;
 }
 
-declare module "sap/chart/GradationSaturation" {
-	import GradationSaturation from "sap/chart/library";
+declare module "sap/chart/coloring/GradationSaturation" {
+	import {coloring} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported Gradation color saturation in analytical chart
 	 *
 	 * @public
 	*/
-	export default GradationSaturation;
+	export default coloring.GradationSaturation;
 }
 
-declare module "sap/chart/GradationSingleColorScheme" {
-	import GradationSingleColorScheme from "sap/chart/library";
+declare module "sap/chart/coloring/GradationSingleColorScheme" {
+	import {coloring} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported Gradation single color scheme in analytical chart
 	 *
 	 * @public
 	*/
-	export default GradationSingleColorScheme;
+	export default coloring.GradationSingleColorScheme;
 }
 
-declare module "sap/chart/GradationTargetColorScheme" {
-	import GradationTargetColorScheme from "sap/chart/library";
+declare module "sap/chart/coloring/GradationTargetColorScheme" {
+	import {coloring} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported Gradation target color scheme in analytical chart
 	 *
 	 * @public
 	*/
-	export default GradationTargetColorScheme;
+	export default coloring.GradationTargetColorScheme;
 }
 
-declare module "sap/chart/ImprovementDirectionType" {
-	import ImprovementDirectionType from "sap/chart/library";
+declare module "sap/chart/coloring/ImprovementDirectionType" {
+	import {coloring} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported ImprovementDirection types in analytical chart
 	 *
 	 * @public
 	*/
-	export default ImprovementDirectionType;
+	export default coloring.ImprovementDirectionType;
 }
 
 declare module "sap/chart/MessageId" {
-	import MessageId from "sap/chart/library";
+	import {MessageId} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported message types in analytical chart.
@@ -65,7 +65,7 @@ declare module "sap/chart/MessageId" {
 }
 
 declare module "sap/chart/SelectionBehavior" {
-	import SelectionBehavior from "sap/chart/library";
+	import {SelectionBehavior} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported selection behavior in analytical chart
@@ -76,7 +76,7 @@ declare module "sap/chart/SelectionBehavior" {
 }
 
 declare module "sap/chart/SelectionMode" {
-	import SelectionMode from "sap/chart/library";
+	import {SelectionMode} from "sap/chart/library";
 
 	/**
 	 * Enumeration for supported selection mode in analytical chart

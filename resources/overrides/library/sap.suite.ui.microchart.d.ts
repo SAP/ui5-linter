@@ -1,5 +1,5 @@
 declare module "sap/suite/ui/microchart/AreaMicroChartViewType" {
-	import AreaMicroChartViewType from "sap/suite/ui/microchart/library";
+	import {AreaMicroChartViewType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Enum of available views for the area micro chart concerning the position of the labels.
@@ -11,7 +11,7 @@ declare module "sap/suite/ui/microchart/AreaMicroChartViewType" {
 }
 
 declare module "sap/suite/ui/microchart/BulletMicroChartModeType" {
-	import BulletMicroChartModeType from "sap/suite/ui/microchart/library";
+	import {BulletMicroChartModeType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Defines if the horizontal bar represents a current value only or if it represents the delta between a current value and a threshold value.
@@ -23,7 +23,7 @@ declare module "sap/suite/ui/microchart/BulletMicroChartModeType" {
 }
 
 declare module "sap/suite/ui/microchart/CommonBackgroundType" {
-	import CommonBackgroundType from "sap/suite/ui/microchart/library";
+	import {CommonBackgroundType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Lists the available theme-specific background colors.
@@ -35,7 +35,7 @@ declare module "sap/suite/ui/microchart/CommonBackgroundType" {
 }
 
 declare module "sap/suite/ui/microchart/ComparisonMicroChartViewType" {
-	import ComparisonMicroChartViewType from "sap/suite/ui/microchart/library";
+	import {ComparisonMicroChartViewType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Lists the views of the comparison micro chart concerning the position of titles and labels.
@@ -47,7 +47,7 @@ declare module "sap/suite/ui/microchart/ComparisonMicroChartViewType" {
 }
 
 declare module "sap/suite/ui/microchart/DeltaMicroChartViewType" {
-	import DeltaMicroChartViewType from "sap/suite/ui/microchart/library";
+	import {DeltaMicroChartViewType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Lists the views of the delta micro chart concerning the position of titles.
@@ -59,7 +59,7 @@ declare module "sap/suite/ui/microchart/DeltaMicroChartViewType" {
 }
 
 declare module "sap/suite/ui/microchart/HorizontalAlignmentType" {
-	import HorizontalAlignmentType from "sap/suite/ui/microchart/library";
+	import {HorizontalAlignmentType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Alignment type for the microchart content.
@@ -71,7 +71,7 @@ declare module "sap/suite/ui/microchart/HorizontalAlignmentType" {
 }
 
 declare module "sap/suite/ui/microchart/LineType" {
-	import LineType from "sap/suite/ui/microchart/library";
+	import {LineType} from "sap/suite/ui/microchart/library";
 
 	/**
 	 * Type of the microchart line.

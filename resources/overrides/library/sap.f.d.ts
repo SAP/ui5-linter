@@ -1,5 +1,5 @@
 declare module "sap/f/AvatarGroupType" {
-	import AvatarGroupType from "sap/f/library";
+	import {AvatarGroupType} from "sap/f/library";
 
 	/**
 	 * Group modes for the {@link sap.f.AvatarGroup} control.
@@ -11,8 +11,8 @@ declare module "sap/f/AvatarGroupType" {
 	export default AvatarGroupType;
 }
 
-declare module "sap/f/HeaderPosition" {
-	import HeaderPosition from "sap/f/library";
+declare module "sap/f/cards/HeaderPosition" {
+	import {cards} from "sap/f/library";
 
 	/**
 	 * Different options for the position of the header in controls that implement the {@link sap.f.ICard} interface.
@@ -20,11 +20,11 @@ declare module "sap/f/HeaderPosition" {
 	 * @public
 	 * @since 1.65
 	*/
-	export default HeaderPosition;
+	export default cards.HeaderPosition;
 }
 
-declare module "sap/f/NumericHeaderSideIndicatorsAlignment" {
-	import NumericHeaderSideIndicatorsAlignment from "sap/f/library";
+declare module "sap/f/cards/NumericHeaderSideIndicatorsAlignment" {
+	import {cards} from "sap/f/library";
 
 	/**
 	 * Different options for the alignment of the side indicators in the numeric header.
@@ -32,11 +32,11 @@ declare module "sap/f/NumericHeaderSideIndicatorsAlignment" {
 	 * @public
 	 * @since 1.96
 	*/
-	export default NumericHeaderSideIndicatorsAlignment;
+	export default cards.NumericHeaderSideIndicatorsAlignment;
 }
 
 declare module "sap/f/DynamicPageTitleArea" {
-	import DynamicPageTitleArea from "sap/f/library";
+	import {DynamicPageTitleArea} from "sap/f/library";
 
 	/**
 	 * Defines the areas within the <code>sap.f.DynamicPageTitle</code> control.
@@ -49,7 +49,7 @@ declare module "sap/f/DynamicPageTitleArea" {
 }
 
 declare module "sap/f/LayoutType" {
-	import LayoutType from "sap/f/library";
+	import {LayoutType} from "sap/f/library";
 
 	/**
 	 * Layouts, representing the number of columns to be displayed and their relative widths for a {@link sap.f.FlexibleColumnLayout} control.
@@ -67,7 +67,7 @@ declare module "sap/f/LayoutType" {
 }
 
 declare module "sap/f/NavigationDirection" {
-	import NavigationDirection from "sap/f/library";
+	import {NavigationDirection} from "sap/f/library";
 
 	/**
 	 * Enumeration for different navigation directions.
@@ -79,7 +79,7 @@ declare module "sap/f/NavigationDirection" {
 }
 
 declare module "sap/f/SidePanelPosition" {
-	import SidePanelPosition from "sap/f/library";
+	import {SidePanelPosition} from "sap/f/library";
 
 	/**
 	 * Enumeration for different SidePanel position.

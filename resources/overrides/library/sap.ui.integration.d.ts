@@ -1,5 +1,5 @@
 declare module "sap/ui/integration/AttributesLayoutType" {
-	import AttributesLayoutType from "sap/ui/integration/library";
+	import {AttributesLayoutType} from "sap/ui/integration/library";
 
 	/**
 	 * Defines the layout type of the List card attributes.
@@ -11,7 +11,7 @@ declare module "sap/ui/integration/AttributesLayoutType" {
 }
 
 declare module "sap/ui/integration/CardActionType" {
-	import CardActionType from "sap/ui/integration/library";
+	import {CardActionType} from "sap/ui/integration/library";
 
 	/**
 	 * Enumeration of possible card action types.
@@ -23,7 +23,7 @@ declare module "sap/ui/integration/CardActionType" {
 }
 
 declare module "sap/ui/integration/CardArea" {
-	import CardArea from "sap/ui/integration/library";
+	import {CardArea} from "sap/ui/integration/library";
 
 	/**
 	 * Defines the areas in a card.
@@ -35,7 +35,7 @@ declare module "sap/ui/integration/CardArea" {
 }
 
 declare module "sap/ui/integration/CardBlockingMessageType" {
-	import CardBlockingMessageType from "sap/ui/integration/library";
+	import {CardBlockingMessageType} from "sap/ui/integration/library";
 
 	/**
 	 * Card blocking message types.
@@ -47,7 +47,7 @@ declare module "sap/ui/integration/CardBlockingMessageType" {
 }
 
 declare module "sap/ui/integration/CardDataMode" {
-	import CardDataMode from "sap/ui/integration/library";
+	import {CardDataMode} from "sap/ui/integration/library";
 
 	/**
 	 * Possible data modes for <code>{@link sap.ui.integration.widgets.Card}</code>.
@@ -60,7 +60,7 @@ declare module "sap/ui/integration/CardDataMode" {
 }
 
 declare module "sap/ui/integration/CardDesign" {
-	import CardDesign from "sap/ui/integration/library";
+	import {CardDesign} from "sap/ui/integration/library";
 
 	/**
 	 * Possible designs for <code>{@link sap.ui.integration.widgets.Card}</code>.
@@ -73,7 +73,7 @@ declare module "sap/ui/integration/CardDesign" {
 }
 
 declare module "sap/ui/integration/CardDisplayVariant" {
-	import CardDisplayVariant from "sap/ui/integration/library";
+	import {CardDisplayVariant} from "sap/ui/integration/library";
 
 	/**
 	 * Possible variants for <code>{@link sap.ui.integration.widgets.Card}</code> rendering and behavior.
@@ -86,7 +86,7 @@ declare module "sap/ui/integration/CardDisplayVariant" {
 }
 
 declare module "sap/ui/integration/CardPreviewMode" {
-	import CardPreviewMode from "sap/ui/integration/library";
+	import {CardPreviewMode} from "sap/ui/integration/library";
 
 	/**
 	 * Preview modes for <code>{@link sap.ui.integration.widgets.Card}</code>. Helpful in scenarios when the end user is choosing or configuring a card.

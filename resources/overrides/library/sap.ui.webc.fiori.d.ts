@@ -1,5 +1,5 @@
 declare module "sap/ui/webc/fiori/BarDesign" {
-	import BarDesign from "sap/ui/webc/fiori/library";
+	import {BarDesign} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different types of Bar design
@@ -12,7 +12,7 @@ declare module "sap/ui/webc/fiori/BarDesign" {
 }
 
 declare module "sap/ui/webc/fiori/FCLLayout" {
-	import FCLLayout from "sap/ui/webc/fiori/library";
+	import {FCLLayout} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different types of FCLLayout.
@@ -25,7 +25,7 @@ declare module "sap/ui/webc/fiori/FCLLayout" {
 }
 
 declare module "sap/ui/webc/fiori/IllustrationMessageSize" {
-	import IllustrationMessageSize from "sap/ui/webc/fiori/library";
+	import {IllustrationMessageSize} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different types of IllustrationMessageSize.
@@ -38,7 +38,7 @@ declare module "sap/ui/webc/fiori/IllustrationMessageSize" {
 }
 
 declare module "sap/ui/webc/fiori/IllustrationMessageType" {
-	import IllustrationMessageType from "sap/ui/webc/fiori/library";
+	import {IllustrationMessageType} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different illustration types of Illustrated Message.
@@ -51,7 +51,7 @@ declare module "sap/ui/webc/fiori/IllustrationMessageType" {
 }
 
 declare module "sap/ui/webc/fiori/MediaGalleryItemLayout" {
-	import MediaGalleryItemLayout from "sap/ui/webc/fiori/library";
+	import {MediaGalleryItemLayout} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Defines the layout of the content displayed in the <code>ui5-media-gallery-item</code>.
@@ -64,7 +64,7 @@ declare module "sap/ui/webc/fiori/MediaGalleryItemLayout" {
 }
 
 declare module "sap/ui/webc/fiori/MediaGalleryLayout" {
-	import MediaGalleryLayout from "sap/ui/webc/fiori/library";
+	import {MediaGalleryLayout} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Defines the layout type of the thumbnails list of the <code>ui5-media-gallery</code> component.
@@ -77,7 +77,7 @@ declare module "sap/ui/webc/fiori/MediaGalleryLayout" {
 }
 
 declare module "sap/ui/webc/fiori/MediaGalleryMenuHorizontalAlign" {
-	import MediaGalleryMenuHorizontalAlign from "sap/ui/webc/fiori/library";
+	import {MediaGalleryMenuHorizontalAlign} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Defines the horizontal alignment of the thumbnails menu of the <code>ui5-media-gallery</code> component.
@@ -90,7 +90,7 @@ declare module "sap/ui/webc/fiori/MediaGalleryMenuHorizontalAlign" {
 }
 
 declare module "sap/ui/webc/fiori/MediaGalleryMenuVerticalAlign" {
-	import MediaGalleryMenuVerticalAlign from "sap/ui/webc/fiori/library";
+	import {MediaGalleryMenuVerticalAlign} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Types for the vertical alignment of the thumbnails menu of the <code>ui5-media-gallery</code> component.
@@ -103,7 +103,7 @@ declare module "sap/ui/webc/fiori/MediaGalleryMenuVerticalAlign" {
 }
 
 declare module "sap/ui/webc/fiori/PageBackgroundDesign" {
-	import PageBackgroundDesign from "sap/ui/webc/fiori/library";
+	import {PageBackgroundDesign} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Available Page Background Design.
@@ -116,7 +116,7 @@ declare module "sap/ui/webc/fiori/PageBackgroundDesign" {
 }
 
 declare module "sap/ui/webc/fiori/SideContentFallDown" {
-	import SideContentFallDown from "sap/ui/webc/fiori/library";
+	import {SideContentFallDown} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * SideContent FallDown options.
@@ -129,7 +129,7 @@ declare module "sap/ui/webc/fiori/SideContentFallDown" {
 }
 
 declare module "sap/ui/webc/fiori/SideContentPosition" {
-	import SideContentPosition from "sap/ui/webc/fiori/library";
+	import {SideContentPosition} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Side Content position options.
@@ -142,7 +142,7 @@ declare module "sap/ui/webc/fiori/SideContentPosition" {
 }
 
 declare module "sap/ui/webc/fiori/SideContentVisibility" {
-	import SideContentVisibility from "sap/ui/webc/fiori/library";
+	import {SideContentVisibility} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Side Content visibility options.
@@ -155,7 +155,7 @@ declare module "sap/ui/webc/fiori/SideContentVisibility" {
 }
 
 declare module "sap/ui/webc/fiori/TimelineLayout" {
-	import TimelineLayout from "sap/ui/webc/fiori/library";
+	import {TimelineLayout} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Available Timeline layout orientation
@@ -168,7 +168,7 @@ declare module "sap/ui/webc/fiori/TimelineLayout" {
 }
 
 declare module "sap/ui/webc/fiori/UploadState" {
-	import UploadState from "sap/ui/webc/fiori/library";
+	import {UploadState} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different types of UploadState.
@@ -181,7 +181,7 @@ declare module "sap/ui/webc/fiori/UploadState" {
 }
 
 declare module "sap/ui/webc/fiori/ViewSettingsDialogMode" {
-	import ViewSettingsDialogMode from "sap/ui/webc/fiori/library";
+	import {ViewSettingsDialogMode} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Different types of Bar.
@@ -194,7 +194,7 @@ declare module "sap/ui/webc/fiori/ViewSettingsDialogMode" {
 }
 
 declare module "sap/ui/webc/fiori/WizardContentLayout" {
-	import WizardContentLayout from "sap/ui/webc/fiori/library";
+	import {WizardContentLayout} from "sap/ui/webc/fiori/library";
 
 	/**
 	 * Enumeration for different content layouts of the <code>ui5-wizard</code>.

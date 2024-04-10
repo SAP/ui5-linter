@@ -1,5 +1,5 @@
 declare module "sap/suite/ui/commons/BulletChartMode" {
-	import BulletChartMode from "sap/suite/ui/commons/library";
+	import {BulletChartMode} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible BulletChart display modes.
@@ -11,7 +11,7 @@ declare module "sap/suite/ui/commons/BulletChartMode" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderComparisonOperatorType" {
-	import CalculationBuilderComparisonOperatorType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderComparisonOperatorType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Comparison operators supported by the calculation builder.
@@ -22,7 +22,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderComparisonOperatorType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderFunctionType" {
-	import CalculationBuilderFunctionType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderFunctionType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Functions supported by the calculation builder.<br> To add a custom function, use {@link sap.suite.ui.commons.CalculationBuilderFunction}.
@@ -33,7 +33,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderFunctionType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderItemType" {
-	import CalculationBuilderItemType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderItemType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The types of items (operands) that can be used in a calculation builder expression.
@@ -44,7 +44,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderItemType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderLayoutType" {
-	import CalculationBuilderLayoutType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderLayoutType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Layout of the calculation builder.
@@ -55,7 +55,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderLayoutType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderLogicalOperatorType" {
-	import CalculationBuilderLogicalOperatorType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderLogicalOperatorType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Logical operators supported by the calculation builder.
@@ -66,7 +66,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderLogicalOperatorType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderOperatorType" {
-	import CalculationBuilderOperatorType from "sap/suite/ui/commons/library";
+	import {CalculationBuilderOperatorType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Arithmetic operators supported by the calculation builder.
@@ -77,7 +77,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderOperatorType" {
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderValidationMode" {
-	import CalculationBuilderValidationMode from "sap/suite/ui/commons/library";
+	import {CalculationBuilderValidationMode} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Types of expression validation that define when the expression entered into the {@link sap.suite.ui.commons.CalculationBuilder} is validated.
@@ -88,7 +88,7 @@ declare module "sap/suite/ui/commons/CalculationBuilderValidationMode" {
 }
 
 declare module "sap/suite/ui/commons/CommonBackground" {
-	import CommonBackground from "sap/suite/ui/commons/library";
+	import {CommonBackground} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible theme specific background colors.
@@ -100,7 +100,7 @@ declare module "sap/suite/ui/commons/CommonBackground" {
 }
 
 declare module "sap/suite/ui/commons/ComparisonChartView" {
-	import ComparisonChartView from "sap/suite/ui/commons/library";
+	import {ComparisonChartView} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The view of the ComparisonChart.
@@ -112,7 +112,7 @@ declare module "sap/suite/ui/commons/ComparisonChartView" {
 }
 
 declare module "sap/suite/ui/commons/DeviationIndicator" {
-	import DeviationIndicator from "sap/suite/ui/commons/library";
+	import {DeviationIndicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The marker for the deviation trend.
@@ -124,7 +124,7 @@ declare module "sap/suite/ui/commons/DeviationIndicator" {
 }
 
 declare module "sap/suite/ui/commons/FacetOverviewHeight" {
-	import FacetOverviewHeight from "sap/suite/ui/commons/library";
+	import {FacetOverviewHeight} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible FacetOverview height settings.
@@ -136,7 +136,7 @@ declare module "sap/suite/ui/commons/FacetOverviewHeight" {
 }
 
 declare module "sap/suite/ui/commons/FilePickerModes" {
-	import FilePickerModes from "sap/suite/ui/commons/library";
+	import {FilePickerModes} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Modes for the {@link sap.suite.ui.commons.CloudFilePicker}.
@@ -147,7 +147,7 @@ declare module "sap/suite/ui/commons/FilePickerModes" {
 }
 
 declare module "sap/suite/ui/commons/FilePickerType" {
-	import FilePickerType from "sap/suite/ui/commons/library";
+	import {FilePickerType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Runtime mode for the {@link sap.suite.ui.commons.CloudFilePicker}.
@@ -158,7 +158,7 @@ declare module "sap/suite/ui/commons/FilePickerType" {
 }
 
 declare module "sap/suite/ui/commons/FrameType" {
-	import FrameType from "sap/suite/ui/commons/library";
+	import {FrameType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible frame types.
@@ -170,7 +170,7 @@ declare module "sap/suite/ui/commons/FrameType" {
 }
 
 declare module "sap/suite/ui/commons/HeaderContainerView" {
-	import HeaderContainerView from "sap/suite/ui/commons/library";
+	import {HeaderContainerView} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The list of possible HeaderContainer views.
@@ -182,7 +182,7 @@ declare module "sap/suite/ui/commons/HeaderContainerView" {
 }
 
 declare module "sap/suite/ui/commons/ImageEditorContainerButton" {
-	import ImageEditorContainerButton from "sap/suite/ui/commons/library";
+	import {ImageEditorContainerButton} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Action buttons for the {@link sap.suite.ui.commons.imageeditor.ImageEditorContainer}.
@@ -193,7 +193,7 @@ declare module "sap/suite/ui/commons/ImageEditorContainerButton" {
 }
 
 declare module "sap/suite/ui/commons/ImageEditorContainerMode" {
-	import ImageEditorContainerMode from "sap/suite/ui/commons/library";
+	import {ImageEditorContainerMode} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Mode types for {@link sap.suite.ui.commons.imageeditor.ImageEditorContainer}.
@@ -204,7 +204,7 @@ declare module "sap/suite/ui/commons/ImageEditorContainerMode" {
 }
 
 declare module "sap/suite/ui/commons/ImageEditorMode" {
-	import ImageEditorMode from "sap/suite/ui/commons/library";
+	import {ImageEditorMode} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Mode types for {@link sap.suite.ui.commons.imageeditor.ImageEditor}.
@@ -215,7 +215,7 @@ declare module "sap/suite/ui/commons/ImageEditorMode" {
 }
 
 declare module "sap/suite/ui/commons/ImageFormat" {
-	import ImageFormat from "sap/suite/ui/commons/library";
+	import {ImageFormat} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Image file format.
@@ -226,7 +226,7 @@ declare module "sap/suite/ui/commons/ImageFormat" {
 }
 
 declare module "sap/suite/ui/commons/InfoTileSize" {
-	import InfoTileSize from "sap/suite/ui/commons/library";
+	import {InfoTileSize} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible PointTile size settings.
@@ -238,7 +238,7 @@ declare module "sap/suite/ui/commons/InfoTileSize" {
 }
 
 declare module "sap/suite/ui/commons/InfoTileTextColor" {
-	import InfoTileTextColor from "sap/suite/ui/commons/library";
+	import {InfoTileTextColor} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible InfoTile text color settings.
@@ -250,7 +250,7 @@ declare module "sap/suite/ui/commons/InfoTileTextColor" {
 }
 
 declare module "sap/suite/ui/commons/InfoTileValueColor" {
-	import InfoTileValueColor from "sap/suite/ui/commons/library";
+	import {InfoTileValueColor} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible InfoTile value color settings.
@@ -262,7 +262,7 @@ declare module "sap/suite/ui/commons/InfoTileValueColor" {
 }
 
 declare module "sap/suite/ui/commons/LayoutType" {
-	import LayoutType from "sap/suite/ui/commons/library";
+	import {LayoutType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Supported Layout Types for {@link sap.suite.ui.commons.BaseContainer}.
@@ -273,7 +273,7 @@ declare module "sap/suite/ui/commons/LayoutType" {
 }
 
 declare module "sap/suite/ui/commons/LoadState" {
-	import LoadState from "sap/suite/ui/commons/library";
+	import {LoadState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible load states for LoadableView.
@@ -285,7 +285,7 @@ declare module "sap/suite/ui/commons/LoadState" {
 }
 
 declare module "sap/suite/ui/commons/MicroAreaChartView" {
-	import MicroAreaChartView from "sap/suite/ui/commons/library";
+	import {MicroAreaChartView} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The list of possible MicroAreaChart views.
@@ -297,7 +297,7 @@ declare module "sap/suite/ui/commons/MicroAreaChartView" {
 }
 
 declare module "sap/suite/ui/commons/MicroProcessFlowRenderType" {
-	import MicroProcessFlowRenderType from "sap/suite/ui/commons/library";
+	import {MicroProcessFlowRenderType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Options that define how the micro process flow should be rendered inside its parent container. <br>These options can be useful when the width of the parent container does not allow for all nodes in the micro process flow to be displayed on the same line.
@@ -307,140 +307,140 @@ declare module "sap/suite/ui/commons/MicroProcessFlowRenderType" {
 	export default MicroProcessFlowRenderType;
 }
 
-declare module "sap/suite/ui/commons/ActionButtonPosition" {
-	import ActionButtonPosition from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/ActionButtonPosition" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Position of a custom action button.
 	 *
 	 * @public
 	*/
-	export default ActionButtonPosition;
+	export default networkgraph.ActionButtonPosition;
 }
 
-declare module "sap/suite/ui/commons/BackgroundColor" {
-	import BackgroundColor from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/BackgroundColor" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Background color for the network graph.
 	 *
 	 * @public
 	*/
-	export default BackgroundColor;
+	export default networkgraph.BackgroundColor;
 }
 
-declare module "sap/suite/ui/commons/ElementStatus" {
-	import ElementStatus from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/ElementStatus" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Semantic type of the node status.
 	 *
 	 * @public
 	*/
-	export default ElementStatus;
+	export default networkgraph.ElementStatus;
 }
 
-declare module "sap/suite/ui/commons/HeaderCheckboxState" {
-	import HeaderCheckboxState from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/HeaderCheckboxState" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * States of the Header checkbox.
 	 *
 	 * @public
 	*/
-	export default HeaderCheckboxState;
+	export default networkgraph.HeaderCheckboxState;
 }
 
-declare module "sap/suite/ui/commons/LayoutRenderType" {
-	import LayoutRenderType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/LayoutRenderType" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Types of layout algorithms that define the visual features and layout of the network graph.
 	 *
 	 * @public
 	*/
-	export default LayoutRenderType;
+	export default networkgraph.LayoutRenderType;
 }
 
-declare module "sap/suite/ui/commons/LineArrowOrientation" {
-	import LineArrowOrientation from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/LineArrowOrientation" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Direction of the arrow on the connector line.
 	 *
 	 * @public
 	*/
-	export default LineArrowOrientation;
+	export default networkgraph.LineArrowOrientation;
 }
 
-declare module "sap/suite/ui/commons/LineArrowPosition" {
-	import LineArrowPosition from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/LineArrowPosition" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Position of the arrow on a connector line.
 	 *
 	 * @public
 	*/
-	export default LineArrowPosition;
+	export default networkgraph.LineArrowPosition;
 }
 
-declare module "sap/suite/ui/commons/LineType" {
-	import LineType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/LineType" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Type of connector line used in the network graph.
 	 *
 	 * @public
 	*/
-	export default LineType;
+	export default networkgraph.LineType;
 }
 
-declare module "sap/suite/ui/commons/NodePlacement" {
-	import NodePlacement from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/NodePlacement" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Type of node placement for Layered Algorithm. See {@link https://rtsys.informatik.uni-kiel.de/confluence/display/KIELER/KLay+Layered+Layout+Options#KLayLayeredLayoutOptions-nodePlacement}
 	 *
 	 * @public
 	*/
-	export default NodePlacement;
+	export default networkgraph.NodePlacement;
 }
 
-declare module "sap/suite/ui/commons/NodeShape" {
-	import NodeShape from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/NodeShape" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Shape of a node in a network graph.
 	 *
 	 * @public
 	*/
-	export default NodeShape;
+	export default networkgraph.NodeShape;
 }
 
-declare module "sap/suite/ui/commons/Orientation" {
-	import Orientation from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/Orientation" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Orientation of layered layout.
 	 *
 	 * @public
 	*/
-	export default Orientation;
+	export default networkgraph.Orientation;
 }
 
-declare module "sap/suite/ui/commons/RenderType" {
-	import RenderType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/networkgraph/RenderType" {
+	import {networkgraph} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Determines how nodes are rendered. For optimal performance and usability, it is recommended that you use HTML, which allows you to avoid dealing with SVG limitations.
 	 *
 	 * @public
 	*/
-	export default RenderType;
+	export default networkgraph.RenderType;
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowConnectionLabelState" {
-	import ProcessFlowConnectionLabelState from "sap/suite/ui/commons/library";
+	import {ProcessFlowConnectionLabelState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Describes the state of a connection label.
@@ -451,7 +451,7 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionLabelState" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowConnectionState" {
-	import ProcessFlowConnectionState from "sap/suite/ui/commons/library";
+	import {ProcessFlowConnectionState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Describes the state of a connection.
@@ -462,7 +462,7 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionState" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowConnectionType" {
-	import ProcessFlowConnectionType from "sap/suite/ui/commons/library";
+	import {ProcessFlowConnectionType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Describes the type of a connection.
@@ -473,7 +473,7 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionType" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowDisplayState" {
-	import ProcessFlowDisplayState from "sap/suite/ui/commons/library";
+	import {ProcessFlowDisplayState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The ProcessFlow calculates the ProcessFlowDisplayState based on the 'focused' and 'highlighted' properties of each node.
@@ -484,7 +484,7 @@ declare module "sap/suite/ui/commons/ProcessFlowDisplayState" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowLaneState" {
-	import ProcessFlowLaneState from "sap/suite/ui/commons/library";
+	import {ProcessFlowLaneState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * This type is used in the 'state' property of the ProcessFlowLaneHeader. For example, app developers can set the status of the lane header if lanes are displayed without documents. If the complete process flow is displayed (that is, if the lane header is displayed with documents underneath), the given state values of the lane header are ignored and will be calculated in the ProcessFlow according to the current state of the documents.
@@ -495,7 +495,7 @@ declare module "sap/suite/ui/commons/ProcessFlowLaneState" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowNodeState" {
-	import ProcessFlowNodeState from "sap/suite/ui/commons/library";
+	import {ProcessFlowNodeState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Describes the state connected to the content it is representing in the Process Flow Node. The state is also displayed in the Process Flow Lane Header as a color segment of the donut.
@@ -506,7 +506,7 @@ declare module "sap/suite/ui/commons/ProcessFlowNodeState" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowNodeType" {
-	import ProcessFlowNodeType from "sap/suite/ui/commons/library";
+	import {ProcessFlowNodeType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Describes the type of a node. The type value could be single or aggregated. With this type, the application can define if several nodes should be displayed as one aggregated node in a path per column to represent a grouping of semantically equal nodes.
@@ -517,7 +517,7 @@ declare module "sap/suite/ui/commons/ProcessFlowNodeType" {
 }
 
 declare module "sap/suite/ui/commons/ProcessFlowZoomLevel" {
-	import ProcessFlowZoomLevel from "sap/suite/ui/commons/library";
+	import {ProcessFlowZoomLevel} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The zoom level defines level of details for the node and how much space the process flow requires.
@@ -528,7 +528,7 @@ declare module "sap/suite/ui/commons/ProcessFlowZoomLevel" {
 }
 
 declare module "sap/suite/ui/commons/SelectionModes" {
-	import SelectionModes from "sap/suite/ui/commons/library";
+	import {SelectionModes} from "sap/suite/ui/commons/library";
 
 	/**
 	 * File selection mode(Upload) for the {@link sap.suite.ui.commons.CloudFilePicker}.
@@ -539,7 +539,7 @@ declare module "sap/suite/ui/commons/SelectionModes" {
 }
 
 declare module "sap/suite/ui/commons/SelectionState" {
-	import SelectionState from "sap/suite/ui/commons/library";
+	import {SelectionState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * SelectionState
@@ -550,8 +550,8 @@ declare module "sap/suite/ui/commons/SelectionState" {
 	export default SelectionState;
 }
 
-declare module "sap/suite/ui/commons/FillingDirectionType" {
-	import FillingDirectionType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/FillingDirectionType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The direction of animation.<br>
@@ -560,77 +560,77 @@ declare module "sap/suite/ui/commons/FillingDirectionType" {
 	 *
 	 * @public
 	*/
-	export default FillingDirectionType;
+	export default statusindicator.FillingDirectionType;
 }
 
-declare module "sap/suite/ui/commons/FillingType" {
-	import FillingType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/FillingType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The type of filling.
 	 *
 	 * @public
 	*/
-	export default FillingType;
+	export default statusindicator.FillingType;
 }
 
-declare module "sap/suite/ui/commons/HorizontalAlignmentType" {
-	import HorizontalAlignmentType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/HorizontalAlignmentType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The horizontal alignment of the status indicator within its parent container.
 	 *
 	 * @public
 	*/
-	export default HorizontalAlignmentType;
+	export default statusindicator.HorizontalAlignmentType;
 }
 
-declare module "sap/suite/ui/commons/LabelPositionType" {
-	import LabelPositionType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/LabelPositionType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Position of the label, relative to the status indicator.
 	 *
 	 * @public
 	*/
-	export default LabelPositionType;
+	export default statusindicator.LabelPositionType;
 }
 
-declare module "sap/suite/ui/commons/SizeType" {
-	import SizeType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/SizeType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Predefined sizes of the status indicator.
 	 *
 	 * @public
 	*/
-	export default SizeType;
+	export default statusindicator.SizeType;
 }
 
-declare module "sap/suite/ui/commons/VerticalAlignmentType" {
-	import VerticalAlignmentType from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/statusindicator/VerticalAlignmentType" {
+	import {statusindicator} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The vertical alignment of the status indicator within its parent container.
 	 *
 	 * @public
 	*/
-	export default VerticalAlignmentType;
+	export default statusindicator.VerticalAlignmentType;
 }
 
-declare module "sap/suite/ui/commons/TAccountPanelState" {
-	import TAccountPanelState from "sap/suite/ui/commons/library";
+declare module "sap/suite/ui/commons/taccount/TAccountPanelState" {
+	import {taccount} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The state of the {@link sap.suite.ui.commons.taccount.TAccountPanel} that defines how T accounts included in the panel are displayed.
 	 *
 	 * @public
 	*/
-	export default TAccountPanelState;
+	export default taccount.TAccountPanelState;
 }
 
 declare module "sap/suite/ui/commons/ThingGroupDesign" {
-	import ThingGroupDesign from "sap/suite/ui/commons/library";
+	import {ThingGroupDesign} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Defines the way how UnifiedThingGroup control is rendered.
@@ -642,7 +642,7 @@ declare module "sap/suite/ui/commons/ThingGroupDesign" {
 }
 
 declare module "sap/suite/ui/commons/TimelineAlignment" {
-	import TimelineAlignment from "sap/suite/ui/commons/library";
+	import {TimelineAlignment} from "sap/suite/ui/commons/library";
 
 	/**
 	 * The alignment of timeline posts relative to the timeline axis.
@@ -653,7 +653,7 @@ declare module "sap/suite/ui/commons/TimelineAlignment" {
 }
 
 declare module "sap/suite/ui/commons/TimelineAxisOrientation" {
-	import TimelineAxisOrientation from "sap/suite/ui/commons/library";
+	import {TimelineAxisOrientation} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Defines the orientation of the timeline axis.
@@ -664,7 +664,7 @@ declare module "sap/suite/ui/commons/TimelineAxisOrientation" {
 }
 
 declare module "sap/suite/ui/commons/TimelineFilterType" {
-	import TimelineFilterType from "sap/suite/ui/commons/library";
+	import {TimelineFilterType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Filter type for the timeline.
@@ -675,7 +675,7 @@ declare module "sap/suite/ui/commons/TimelineFilterType" {
 }
 
 declare module "sap/suite/ui/commons/TimelineGroupType" {
-	import TimelineGroupType from "sap/suite/ui/commons/library";
+	import {TimelineGroupType} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Type of grouping for timeline entries.
@@ -686,7 +686,7 @@ declare module "sap/suite/ui/commons/TimelineGroupType" {
 }
 
 declare module "sap/suite/ui/commons/TimelineScrollingFadeout" {
-	import TimelineScrollingFadeout from "sap/suite/ui/commons/library";
+	import {TimelineScrollingFadeout} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Type of the fadeout effect applied to the upper and lower margins of the visible timeline area.
@@ -698,7 +698,7 @@ declare module "sap/suite/ui/commons/TimelineScrollingFadeout" {
 }
 
 declare module "sap/suite/ui/commons/ValueStatus" {
-	import ValueStatus from "sap/suite/ui/commons/library";
+	import {ValueStatus} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Marker for the key value status.

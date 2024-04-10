@@ -1,5 +1,5 @@
 declare module "sap/ui/export/EdmType" {
-	import EdmType from "sap/ui/export/library";
+	import {EdmType} from "sap/ui/export/library";
 
 	/**
 	 * EDM data types for document export.
@@ -11,7 +11,7 @@ declare module "sap/ui/export/EdmType" {
 }
 
 declare module "sap/ui/export/FileType" {
-	import FileType from "sap/ui/export/library";
+	import {FileType} from "sap/ui/export/library";
 
 	/**
 	 * File types for document export.

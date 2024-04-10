@@ -1,5 +1,5 @@
 declare module "sap/me/CalendarDesign" {
-	import CalendarDesign from "sap/me/library";
+	import {CalendarDesign} from "sap/me/library";
 
 	/**
 	 * Type of Design for the Calendar
@@ -12,7 +12,7 @@ declare module "sap/me/CalendarDesign" {
 }
 
 declare module "sap/me/CalendarEventType" {
-	import CalendarEventType from "sap/me/library";
+	import {CalendarEventType} from "sap/me/library";
 
 	/**
 	 * Type code for a calendar event
@@ -25,7 +25,7 @@ declare module "sap/me/CalendarEventType" {
 }
 
 declare module "sap/me/CalendarSelectionMode" {
-	import CalendarSelectionMode from "sap/me/library";
+	import {CalendarSelectionMode} from "sap/me/library";
 
 	/**
 	 * Selection Mode for the Calendar

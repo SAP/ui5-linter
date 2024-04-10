@@ -1,5 +1,5 @@
 declare module "sap/ui/table/GroupEventType" {
-	import GroupEventType from "sap/ui/table/library";
+	import {GroupEventType} from "sap/ui/table/library";
 
 	/**
 	 * Details about the group event to distinguish between different actions associated with grouping
@@ -10,7 +10,7 @@ declare module "sap/ui/table/GroupEventType" {
 }
 
 declare module "sap/ui/table/NavigationMode" {
-	import NavigationMode from "sap/ui/table/library";
+	import {NavigationMode} from "sap/ui/table/library";
 
 	/**
 	 * Navigation mode of the table
@@ -22,7 +22,7 @@ declare module "sap/ui/table/NavigationMode" {
 }
 
 declare module "sap/ui/table/ResetAllMode" {
-	import ResetAllMode from "sap/ui/table/library";
+	import {ResetAllMode} from "sap/ui/table/library";
 
 	/**
 	 * Enumeration of the <code>ResetAllMode</code> that can be used in a <code>TablePersoController</code>.
@@ -34,7 +34,7 @@ declare module "sap/ui/table/ResetAllMode" {
 }
 
 declare module "sap/ui/table/RowActionType" {
-	import RowActionType from "sap/ui/table/library";
+	import {RowActionType} from "sap/ui/table/library";
 
 	/**
 	 * Row Action types.
@@ -45,7 +45,7 @@ declare module "sap/ui/table/RowActionType" {
 }
 
 declare module "sap/ui/table/SelectionBehavior" {
-	import SelectionBehavior from "sap/ui/table/library";
+	import {SelectionBehavior} from "sap/ui/table/library";
 
 	/**
 	 * Selection behavior of the table
@@ -56,7 +56,7 @@ declare module "sap/ui/table/SelectionBehavior" {
 }
 
 declare module "sap/ui/table/SelectionMode" {
-	import SelectionMode from "sap/ui/table/library";
+	import {SelectionMode} from "sap/ui/table/library";
 
 	/**
 	 * Selection mode of the table
@@ -67,7 +67,7 @@ declare module "sap/ui/table/SelectionMode" {
 }
 
 declare module "sap/ui/table/SharedDomRef" {
-	import SharedDomRef from "sap/ui/table/library";
+	import {SharedDomRef} from "sap/ui/table/library";
 
 	/**
 	 * Shared DOM Reference IDs of the table.
@@ -80,7 +80,7 @@ declare module "sap/ui/table/SharedDomRef" {
 }
 
 declare module "sap/ui/table/SortOrder" {
-	import SortOrder from "sap/ui/table/library";
+	import {SortOrder} from "sap/ui/table/library";
 
 	/**
 	 * Sort order of a column
@@ -92,7 +92,7 @@ declare module "sap/ui/table/SortOrder" {
 }
 
 declare module "sap/ui/table/VisibleRowCountMode" {
-	import VisibleRowCountMode from "sap/ui/table/library";
+	import {VisibleRowCountMode} from "sap/ui/table/library";
 
 	/**
 	 * VisibleRowCountMode of the table

@@ -59,19 +59,20 @@ async function getPseudoModuleNames() {
 			name: string;
 			kind: string;
 			resource: string;
+			export: string;
 		};
 	}
 
 	return apiJsonList.flatMap((library) => {
 		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as apiJSON;
 		return libApiJson.symbols;
-	}).reduce((acc: Record<string, boolean>, symbol) => {
+	}).reduce((acc: Record<string, string>, symbol) => {
 		if (symbol.kind === "enum" && symbol.resource.endsWith("library.js")) {
-			acc[symbol.name] = true;
+			acc[symbol.name] = symbol.export ?? symbol.name;
 		}
 
 		return acc;
-	}, Object.create(null) as Record<string, boolean>);
+	}, Object.create(null) as Record<string, string>);
 }
 
 async function transformFiles(sapui5Version: string) {
@@ -83,7 +84,7 @@ async function transformFiles(sapui5Version: string) {
 
 	const {enums} = metadataProvider.getModel();
 
-	const groupedEnums = Object.keys(enums).reduce((acc: Record<string, UI5Enum[]>, enumKey: string) => {
+	const groupedEnums = Object.keys(enums).reduce((acc: Record<string, {enum: UI5Enum, export: string}[]>, enumKey: string) => {
 		// Filter only real pseudo modules i.e. defined within library.js files
 		if (!pseudoModuleNames[enumKey]) {
 			return acc;
@@ -92,10 +93,10 @@ async function transformFiles(sapui5Version: string) {
 		const curEnum = enums[enumKey];
 
 		acc[curEnum.library] = acc[curEnum.library] ?? [];
-		acc[curEnum.library].push(curEnum);
+		acc[curEnum.library].push({enum: curEnum, export: pseudoModuleNames[enumKey]});
 
 		return acc;
-	}, Object.create(null) as Record<string, UI5Enum[]>);
+	}, Object.create(null) as Record<string, {enum: UI5Enum, export: string}[]>);
 
 	await addOverrides(groupedEnums);
 }
@@ -142,24 +143,27 @@ function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue, indent = "") {
 	return jsDocBuilder.join("\n");
 }
 
-async function addOverrides(enums: Record<string, UI5Enum[]>) {
+async function addOverrides(enums: Record<string, {enum: UI5Enum, export: string}[]>) {
 	const indexFilesImports: string[] = [];
 
 	for (const libName of Object.keys(enums)) {
 		const enumEntries = enums[libName];
 		const stringBuilder: string[] = [];
 
-		enumEntries.forEach((enumEntry) => {
+		enumEntries.forEach(({enum: enumEntry, export: exportName}) => {
 			if (enumEntry.kind !== "UI5Enum") {
 				return;
 			}
 
-			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${enumEntry.name}" {`);
+			const exportNameChunks = exportName.split(".");
+			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing;
 
-			stringBuilder.push(`\timport ${enumEntry.name} from "${libName.replaceAll(".", "/")}/library";`);
+			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
+
+			stringBuilder.push(`\timport {${name}} from "${libName.replaceAll(".", "/")}/library";`);
 			stringBuilder.push("");
 			stringBuilder.push(buildJSDoc(enumEntry, "\t"));
-			stringBuilder.push(`\texport default ${enumEntry.name};`);
+			stringBuilder.push(`\texport default ${exportName};`);
 
 			stringBuilder.push(`}`);
 			stringBuilder.push("");

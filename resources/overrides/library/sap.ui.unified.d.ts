@@ -1,5 +1,5 @@
 declare module "sap/ui/unified/CalendarAppointmentHeight" {
-	import CalendarAppointmentHeight from "sap/ui/unified/library";
+	import {CalendarAppointmentHeight} from "sap/ui/unified/library";
 
 	/**
 	 * Types of a calendar appointment display mode
@@ -11,7 +11,7 @@ declare module "sap/ui/unified/CalendarAppointmentHeight" {
 }
 
 declare module "sap/ui/unified/CalendarAppointmentRoundWidth" {
-	import CalendarAppointmentRoundWidth from "sap/ui/unified/library";
+	import {CalendarAppointmentRoundWidth} from "sap/ui/unified/library";
 
 	/**
 	 * Types of a calendar appointment display mode
@@ -24,7 +24,7 @@ declare module "sap/ui/unified/CalendarAppointmentRoundWidth" {
 }
 
 declare module "sap/ui/unified/CalendarAppointmentVisualization" {
-	import CalendarAppointmentVisualization from "sap/ui/unified/library";
+	import {CalendarAppointmentVisualization} from "sap/ui/unified/library";
 
 	/**
 	 * Visualization types for {@link sap.ui.unified.CalendarAppointment}.
@@ -36,7 +36,7 @@ declare module "sap/ui/unified/CalendarAppointmentVisualization" {
 }
 
 declare module "sap/ui/unified/CalendarDayType" {
-	import CalendarDayType from "sap/ui/unified/library";
+	import {CalendarDayType} from "sap/ui/unified/library";
 
 	/**
 	 * Types of a calendar day used for visualization.
@@ -48,7 +48,7 @@ declare module "sap/ui/unified/CalendarDayType" {
 }
 
 declare module "sap/ui/unified/CalendarIntervalType" {
-	import CalendarIntervalType from "sap/ui/unified/library";
+	import {CalendarIntervalType} from "sap/ui/unified/library";
 
 	/**
 	 * Interval types in a <code>CalendarRow</code>.
@@ -60,7 +60,7 @@ declare module "sap/ui/unified/CalendarIntervalType" {
 }
 
 declare module "sap/ui/unified/ColorPickerMode" {
-	import ColorPickerMode from "sap/ui/unified/library";
+	import {ColorPickerMode} from "sap/ui/unified/library";
 
 	/**
 	 * different styles for a ColorPicker.
@@ -71,7 +71,7 @@ declare module "sap/ui/unified/ColorPickerMode" {
 }
 
 declare module "sap/ui/unified/ContentSwitcherAnimation" {
-	import ContentSwitcherAnimation from "sap/ui/unified/library";
+	import {ContentSwitcherAnimation} from "sap/ui/unified/library";
 
 	/**
 	 * Predefined animations for the ContentSwitcher
@@ -84,7 +84,7 @@ declare module "sap/ui/unified/ContentSwitcherAnimation" {
 }
 
 declare module "sap/ui/unified/GroupAppointmentsMode" {
-	import GroupAppointmentsMode from "sap/ui/unified/library";
+	import {GroupAppointmentsMode} from "sap/ui/unified/library";
 
 	/**
 	 * Types of display mode for overlapping appointments.
@@ -96,7 +96,7 @@ declare module "sap/ui/unified/GroupAppointmentsMode" {
 }
 
 declare module "sap/ui/unified/StandardCalendarLegendItem" {
-	import StandardCalendarLegendItem from "sap/ui/unified/library";
+	import {StandardCalendarLegendItem} from "sap/ui/unified/library";
 
 	/**
 	 * Standard day types visualized in a {@link sap.m.PlanningCalendarLegend}, which correspond to days in a {@link sap.ui.unified.Calendar}.

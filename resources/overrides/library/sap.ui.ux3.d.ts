@@ -1,5 +1,5 @@
 declare module "sap/ui/ux3/ActionBarSocialActions" {
-	import ActionBarSocialActions from "sap/ui/ux3/library";
+	import {ActionBarSocialActions} from "sap/ui/ux3/library";
 
 	/**
 	 * Enumeration of available standard actions for 'sap.ui.ux3.ActionBar'. To be used as parameters for function 'sap.ui.ux3.ActionBar.getSocialAction'.
@@ -12,7 +12,7 @@ declare module "sap/ui/ux3/ActionBarSocialActions" {
 }
 
 declare module "sap/ui/ux3/ExactOrder" {
-	import ExactOrder from "sap/ui/ux3/library";
+	import {ExactOrder} from "sap/ui/ux3/library";
 
 	/**
 	 * Defines the order of the sub lists of a list in the ExactBrowser.
@@ -25,7 +25,7 @@ declare module "sap/ui/ux3/ExactOrder" {
 }
 
 declare module "sap/ui/ux3/FeederType" {
-	import FeederType from "sap/ui/ux3/library";
+	import {FeederType} from "sap/ui/ux3/library";
 
 	/**
 	 * Type of a Feeder.
@@ -38,7 +38,7 @@ declare module "sap/ui/ux3/FeederType" {
 }
 
 declare module "sap/ui/ux3/FollowActionState" {
-	import FollowActionState from "sap/ui/ux3/library";
+	import {FollowActionState} from "sap/ui/ux3/library";
 
 	/**
 	 * Defines the states of the follow action
@@ -50,7 +50,7 @@ declare module "sap/ui/ux3/FollowActionState" {
 }
 
 declare module "sap/ui/ux3/NotificationBarStatus" {
-	import NotificationBarStatus from "sap/ui/ux3/library";
+	import {NotificationBarStatus} from "sap/ui/ux3/library";
 
 	/**
 	 * This entries are used to set the visibility status of a NotificationBar
@@ -62,7 +62,7 @@ declare module "sap/ui/ux3/NotificationBarStatus" {
 }
 
 declare module "sap/ui/ux3/ShellDesignType" {
-	import ShellDesignType from "sap/ui/ux3/library";
+	import {ShellDesignType} from "sap/ui/ux3/library";
 
 	/**
 	 * Available shell design types.
@@ -75,7 +75,7 @@ declare module "sap/ui/ux3/ShellDesignType" {
 }
 
 declare module "sap/ui/ux3/ShellHeaderType" {
-	import ShellHeaderType from "sap/ui/ux3/library";
+	import {ShellHeaderType} from "sap/ui/ux3/library";
 
 	/**
 	 * Available shell header display types.
@@ -87,7 +87,7 @@ declare module "sap/ui/ux3/ShellHeaderType" {
 }
 
 declare module "sap/ui/ux3/ThingViewerHeaderType" {
-	import ThingViewerHeaderType from "sap/ui/ux3/library";
+	import {ThingViewerHeaderType} from "sap/ui/ux3/library";
 
 	/**
 	 * Available ThingViewer header display types.
@@ -100,7 +100,7 @@ declare module "sap/ui/ux3/ThingViewerHeaderType" {
 }
 
 declare module "sap/ui/ux3/VisibleItemCountMode" {
-	import VisibleItemCountMode from "sap/ui/ux3/library";
+	import {VisibleItemCountMode} from "sap/ui/ux3/library";
 
 	/**
 	 * VisibleItemCountMode of the FacetFilter defines if the FacetFilter takes the whole available height (Auto) in the surrounding container, or is so high as needed to show 5 Items ("Fixed " - default).

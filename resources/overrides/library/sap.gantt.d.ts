@@ -1,5 +1,5 @@
 declare module "sap/gantt/AdhocLineLayer" {
-	import AdhocLineLayer from "sap/gantt/library";
+	import {AdhocLineLayer} from "sap/gantt/library";
 
 	/**
 	 * The layer of adhoc line in chart area
@@ -9,52 +9,52 @@ declare module "sap/gantt/AdhocLineLayer" {
 	export default AdhocLineLayer;
 }
 
-declare module "sap/gantt/BirdEyeRange" {
-	import BirdEyeRange from "sap/gantt/library";
+declare module "sap/gantt/config/BirdEyeRange" {
+	import {config} from "sap/gantt/library";
 
 	/**
 	 * Define the range of data that bird eye would use to calculate visibleHorizon
 	 *
 	 * @public
 	*/
-	export default BirdEyeRange;
+	export default config.BirdEyeRange;
 }
 
-declare module "sap/gantt/FindMode" {
-	import FindMode from "sap/gantt/library";
+declare module "sap/gantt/config/FindMode" {
+	import {config} from "sap/gantt/library";
 
 	/**
 	 * Defines the control where find and select search box will appear
 	 *
 	 * @public
 	*/
-	export default FindMode;
+	export default config.FindMode;
 }
 
-declare module "sap/gantt/TimeUnit" {
-	import TimeUnit from "sap/gantt/library";
+declare module "sap/gantt/config/TimeUnit" {
+	import {config} from "sap/gantt/library";
 
 	/**
 	 * Different time units used as part of the zoom level. They are names of d3 time unit classes.
 	 *
 	 * @public
 	*/
-	export default TimeUnit;
+	export default config.TimeUnit;
 }
 
-declare module "sap/gantt/ZoomControlType" {
-	import ZoomControlType from "sap/gantt/library";
+declare module "sap/gantt/config/ZoomControlType" {
+	import {config} from "sap/gantt/library";
 
 	/**
 	 * Define the type of zoom control in global tool bar
 	 *
 	 * @public
 	*/
-	export default ZoomControlType;
+	export default config.ZoomControlType;
 }
 
-declare module "sap/gantt/ColorMatrixValue" {
-	import ColorMatrixValue from "sap/gantt/library";
+declare module "sap/gantt/def/filter/ColorMatrixValue" {
+	import {def} from "sap/gantt/library";
 
 	/**
 	 * Color Matrix Values.
@@ -63,11 +63,11 @@ declare module "sap/gantt/ColorMatrixValue" {
 	 *
 	 * @public
 	*/
-	export default ColorMatrixValue;
+	export default def.filter.ColorMatrixValue;
 }
 
-declare module "sap/gantt/MorphologyOperator" {
-	import MorphologyOperator from "sap/gantt/library";
+declare module "sap/gantt/def/filter/MorphologyOperator" {
+	import {def} from "sap/gantt/library";
 
 	/**
 	 * Morphology Operators.
@@ -76,11 +76,11 @@ declare module "sap/gantt/MorphologyOperator" {
 	 *
 	 * @public
 	*/
-	export default MorphologyOperator;
+	export default def.filter.MorphologyOperator;
 }
 
 declare module "sap/gantt/DeltaLineLayer" {
-	import DeltaLineLayer from "sap/gantt/library";
+	import {DeltaLineLayer} from "sap/gantt/library";
 
 	/**
 	 * The layer of delta line in chart area
@@ -91,19 +91,19 @@ declare module "sap/gantt/DeltaLineLayer" {
 	export default DeltaLineLayer;
 }
 
-declare module "sap/gantt/GhostAlignment" {
-	import GhostAlignment from "sap/gantt/library";
+declare module "sap/gantt/dragdrop/GhostAlignment" {
+	import {dragdrop} from "sap/gantt/library";
 
 	/**
 	 * Defines how Gantt Chart aligns a draggable shape to the mouse pointer before dragging.
 	 *
 	 * @public
 	*/
-	export default GhostAlignment;
+	export default dragdrop.GhostAlignment;
 }
 
-declare module "sap/gantt/SnapMode" {
-	import SnapMode from "sap/gantt/library";
+declare module "sap/gantt/dragdrop/SnapMode" {
+	import {dragdrop} from "sap/gantt/library";
 
 	/**
 	 * Defines the side of the shape that gets attached to the nearest visual element.
@@ -111,11 +111,11 @@ declare module "sap/gantt/SnapMode" {
 	 * @public
 	 * @since 1.91
 	*/
-	export default SnapMode;
+	export default dragdrop.SnapMode;
 }
 
 declare module "sap/gantt/DragOrientation" {
-	import DragOrientation from "sap/gantt/library";
+	import {DragOrientation} from "sap/gantt/library";
 
 	/**
 	 * Defines how dragged ghost moves when dragging.
@@ -126,7 +126,7 @@ declare module "sap/gantt/DragOrientation" {
 }
 
 declare module "sap/gantt/MouseWheelZoomType" {
-	import MouseWheelZoomType from "sap/gantt/library";
+	import {MouseWheelZoomType} from "sap/gantt/library";
 
 	/**
 	 * Different zoom type for mouse wheel zooming
@@ -137,7 +137,7 @@ declare module "sap/gantt/MouseWheelZoomType" {
 }
 
 declare module "sap/gantt/SelectionMode" {
-	import SelectionMode from "sap/gantt/library";
+	import {SelectionMode} from "sap/gantt/library";
 
 	/**
 	 * Different selection mode for GanttChart
@@ -147,19 +147,19 @@ declare module "sap/gantt/SelectionMode" {
 	export default SelectionMode;
 }
 
-declare module "sap/gantt/RelationshipType" {
-	import RelationshipType from "sap/gantt/library";
+declare module "sap/gantt/shape/ext/rls/RelationshipType" {
+	import {shape} from "sap/gantt/library";
 
 	/**
 	 * Type of relationships
 	 *
 	 * @public
 	*/
-	export default RelationshipType;
+	export default shape.ext.rls.RelationshipType;
 }
 
-declare module "sap/gantt/ShapeCategory" {
-	import ShapeCategory from "sap/gantt/library";
+declare module "sap/gantt/shape/ShapeCategory" {
+	import {shape} from "sap/gantt/library";
 
 	/**
 	 * Shape Categories.
@@ -168,11 +168,11 @@ declare module "sap/gantt/ShapeCategory" {
 	 *
 	 * @public
 	*/
-	export default ShapeCategory;
+	export default shape.ShapeCategory;
 }
 
-declare module "sap/gantt/connectorType" {
-	import connectorType from "sap/gantt/library";
+declare module "sap/gantt/simple/connectorType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Type connector shapes for relationship
@@ -180,22 +180,22 @@ declare module "sap/gantt/connectorType" {
 	 * @public
 	 * @since 1.86
 	*/
-	export default connectorType;
+	export default simple.connectorType;
 }
 
-declare module "sap/gantt/ContainerToolbarPlaceholderType" {
-	import ContainerToolbarPlaceholderType from "sap/gantt/library";
+declare module "sap/gantt/simple/ContainerToolbarPlaceholderType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Toolbar placeholders for a Gantt chart container.
 	 *
 	 * @public
 	*/
-	export default ContainerToolbarPlaceholderType;
+	export default simple.ContainerToolbarPlaceholderType;
 }
 
-declare module "sap/gantt/findByOperator" {
-	import findByOperator from "sap/gantt/library";
+declare module "sap/gantt/simple/findByOperator" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Defines the relationship between the operator and the property names using the findAll method
@@ -203,22 +203,22 @@ declare module "sap/gantt/findByOperator" {
 	 * @public
 	 * @since 1.100
 	*/
-	export default findByOperator;
+	export default simple.findByOperator;
 }
 
-declare module "sap/gantt/GanttChartWithTableDisplayType" {
-	import GanttChartWithTableDisplayType from "sap/gantt/library";
+declare module "sap/gantt/simple/GanttChartWithTableDisplayType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Gantt chart display types.
 	 *
 	 * @public
 	*/
-	export default GanttChartWithTableDisplayType;
+	export default simple.GanttChartWithTableDisplayType;
 }
 
-declare module "sap/gantt/horizontalTextAlignment" {
-	import horizontalTextAlignment from "sap/gantt/library";
+declare module "sap/gantt/simple/horizontalTextAlignment" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Configuration options for horizontal alignment of title of the shape representing a Task.
@@ -226,11 +226,11 @@ declare module "sap/gantt/horizontalTextAlignment" {
 	 * @public
 	 * @since 1.81
 	*/
-	export default horizontalTextAlignment;
+	export default simple.horizontalTextAlignment;
 }
 
-declare module "sap/gantt/relationshipShapeSize" {
-	import relationshipShapeSize from "sap/gantt/library";
+declare module "sap/gantt/simple/relationshipShapeSize" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Size of shapes in the relationship
@@ -238,11 +238,11 @@ declare module "sap/gantt/relationshipShapeSize" {
 	 * @public
 	 * @since 1.96
 	*/
-	export default relationshipShapeSize;
+	export default simple.relationshipShapeSize;
 }
 
-declare module "sap/gantt/RelationshipType" {
-	import RelationshipType from "sap/gantt/library";
+declare module "sap/gantt/simple/RelationshipType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Type of relationship shape. <code>sap.gantt.simple.RelationshipType</code> shall be used to define property type on class <code>sap.gantt.simple.Relationship</code>
@@ -250,11 +250,11 @@ declare module "sap/gantt/RelationshipType" {
 	 * @public
 	 * @since 1.60.0
 	*/
-	export default RelationshipType;
+	export default simple.RelationshipType;
 }
 
-declare module "sap/gantt/ShapeAlignment" {
-	import ShapeAlignment from "sap/gantt/library";
+declare module "sap/gantt/simple/shapes/ShapeAlignment" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Configuration options for vertical alignment of shape representing a Task. This is only applicable for Tasks.
@@ -262,11 +262,11 @@ declare module "sap/gantt/ShapeAlignment" {
 	 * @public
 	 * @since 1.81
 	*/
-	export default ShapeAlignment;
+	export default simple.shapes.ShapeAlignment;
 }
 
-declare module "sap/gantt/TaskType" {
-	import TaskType from "sap/gantt/library";
+declare module "sap/gantt/simple/shapes/TaskType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Type of task shape.
@@ -274,11 +274,11 @@ declare module "sap/gantt/TaskType" {
 	 * @public
 	 * @since 1.69
 	*/
-	export default TaskType;
+	export default simple.shapes.TaskType;
 }
 
-declare module "sap/gantt/verticalTextAlignment" {
-	import verticalTextAlignment from "sap/gantt/library";
+declare module "sap/gantt/simple/verticalTextAlignment" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Configuration options for vertical alignment of title of the shape representing a Task.
@@ -286,11 +286,11 @@ declare module "sap/gantt/verticalTextAlignment" {
 	 * @public
 	 * @since 1.81
 	*/
-	export default verticalTextAlignment;
+	export default simple.verticalTextAlignment;
 }
 
-declare module "sap/gantt/VisibleHorizonUpdateSubType" {
-	import VisibleHorizonUpdateSubType from "sap/gantt/library";
+declare module "sap/gantt/simple/VisibleHorizonUpdateSubType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * This specifies the sub reason detailing why the visible horizon is changing
@@ -298,11 +298,11 @@ declare module "sap/gantt/VisibleHorizonUpdateSubType" {
 	 * @public
 	 * @since 1.100
 	*/
-	export default VisibleHorizonUpdateSubType;
+	export default simple.VisibleHorizonUpdateSubType;
 }
 
-declare module "sap/gantt/VisibleHorizonUpdateType" {
-	import VisibleHorizonUpdateType from "sap/gantt/library";
+declare module "sap/gantt/simple/VisibleHorizonUpdateType" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * This type specifies the reason why visible horizon is changing.
@@ -310,11 +310,11 @@ declare module "sap/gantt/VisibleHorizonUpdateType" {
 	 * @public
 	 * @since 1.68
 	*/
-	export default VisibleHorizonUpdateType;
+	export default simple.VisibleHorizonUpdateType;
 }
 
-declare module "sap/gantt/yAxisColumnContent" {
-	import yAxisColumnContent from "sap/gantt/library";
+declare module "sap/gantt/simple/yAxisColumnContent" {
+	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Configaration option for yAxis Column.
@@ -322,5 +322,5 @@ declare module "sap/gantt/yAxisColumnContent" {
 	 * @public
 	 * @since 1.102
 	*/
-	export default yAxisColumnContent;
+	export default simple.yAxisColumnContent;
 }

@@ -1,5 +1,5 @@
 declare module "sap/rules/ui/DecisionTableCellFormat" {
-	import DecisionTableCellFormat from "sap/rules/ui/library";
+	import {DecisionTableCellFormat} from "sap/rules/ui/library";
 
 	/**
 	 * An enumeration that defines how a cell in a decision table is formulated by the rule creator.
@@ -11,7 +11,7 @@ declare module "sap/rules/ui/DecisionTableCellFormat" {
 }
 
 declare module "sap/rules/ui/DecisionTableFormat" {
-	import DecisionTableFormat from "sap/rules/ui/library";
+	import {DecisionTableFormat} from "sap/rules/ui/library";
 
 	/**
 	 * An enumeration that decides the rendering format for decisionTable.
@@ -22,7 +22,7 @@ declare module "sap/rules/ui/DecisionTableFormat" {
 }
 
 declare module "sap/rules/ui/ExpressionType" {
-	import ExpressionType from "sap/rules/ui/library";
+	import {ExpressionType} from "sap/rules/ui/library";
 
 	/**
 	 * An enumeration that defines the different business data types for an expression
@@ -33,7 +33,7 @@ declare module "sap/rules/ui/ExpressionType" {
 }
 
 declare module "sap/rules/ui/RuleHitPolicy" {
-	import RuleHitPolicy from "sap/rules/ui/library";
+	import {RuleHitPolicy} from "sap/rules/ui/library";
 
 	/**
 	 * An enumeration that defines the output when more than one rule in the decision table is matched for a given set of inputs.
@@ -45,7 +45,7 @@ declare module "sap/rules/ui/RuleHitPolicy" {
 }
 
 declare module "sap/rules/ui/RuleType" {
-	import RuleType from "sap/rules/ui/library";
+	import {RuleType} from "sap/rules/ui/library";
 
 	/**
 	 * An enumeration that defines whether the rule is formulated as a table with multiple rules instead of a rule with a single associated condition.

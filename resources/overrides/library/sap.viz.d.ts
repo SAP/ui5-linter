@@ -1,5 +1,5 @@
-declare module "sap/viz/Area_drawingEffect" {
-	import Area_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Area_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_drawingEffect
@@ -13,11 +13,11 @@ declare module "sap/viz/Area_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Area_drawingEffect;
+	export default ui5.types.Area_drawingEffect;
 }
 
-declare module "sap/viz/Area_marker_shape" {
-	import Area_marker_shape from "sap/viz/library";
+declare module "sap/viz/ui5/types/Area_marker_shape" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_marker_shape
@@ -31,11 +31,11 @@ declare module "sap/viz/Area_marker_shape" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Area_marker_shape;
+	export default ui5.types.Area_marker_shape;
 }
 
-declare module "sap/viz/Area_mode" {
-	import Area_mode from "sap/viz/library";
+declare module "sap/viz/ui5/types/Area_mode" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_mode
@@ -49,11 +49,11 @@ declare module "sap/viz/Area_mode" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Area_mode;
+	export default ui5.types.Area_mode;
 }
 
-declare module "sap/viz/Area_orientation" {
-	import Area_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Area_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_orientation
@@ -67,11 +67,11 @@ declare module "sap/viz/Area_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Area_orientation;
+	export default ui5.types.Area_orientation;
 }
 
-declare module "sap/viz/Axis_gridline_type" {
-	import Axis_gridline_type from "sap/viz/library";
+declare module "sap/viz/ui5/types/Axis_gridline_type" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_gridline_type
@@ -85,11 +85,11 @@ declare module "sap/viz/Axis_gridline_type" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Axis_gridline_type;
+	export default ui5.types.Axis_gridline_type;
 }
 
-declare module "sap/viz/Axis_label_unitFormatType" {
-	import Axis_label_unitFormatType from "sap/viz/library";
+declare module "sap/viz/ui5/types/Axis_label_unitFormatType" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_label_unitFormatType
@@ -103,11 +103,11 @@ declare module "sap/viz/Axis_label_unitFormatType" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Axis_label_unitFormatType;
+	export default ui5.types.Axis_label_unitFormatType;
 }
 
-declare module "sap/viz/Axis_position" {
-	import Axis_position from "sap/viz/library";
+declare module "sap/viz/ui5/types/Axis_position" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_position
@@ -121,11 +121,11 @@ declare module "sap/viz/Axis_position" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Axis_position;
+	export default ui5.types.Axis_position;
 }
 
-declare module "sap/viz/Axis_type" {
-	import Axis_type from "sap/viz/library";
+declare module "sap/viz/ui5/types/Axis_type" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_type
@@ -139,11 +139,11 @@ declare module "sap/viz/Axis_type" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Axis_type;
+	export default ui5.types.Axis_type;
 }
 
-declare module "sap/viz/Background_direction" {
-	import Background_direction from "sap/viz/library";
+declare module "sap/viz/ui5/types/Background_direction" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Background_direction
@@ -157,11 +157,11 @@ declare module "sap/viz/Background_direction" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Background_direction;
+	export default ui5.types.Background_direction;
 }
 
-declare module "sap/viz/Background_drawingEffect" {
-	import Background_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Background_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Background_drawingEffect
@@ -175,11 +175,11 @@ declare module "sap/viz/Background_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Background_drawingEffect;
+	export default ui5.types.Background_drawingEffect;
 }
 
-declare module "sap/viz/Bar_drawingEffect" {
-	import Bar_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Bar_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bar_drawingEffect
@@ -193,11 +193,11 @@ declare module "sap/viz/Bar_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Bar_drawingEffect;
+	export default ui5.types.Bar_drawingEffect;
 }
 
-declare module "sap/viz/Bar_orientation" {
-	import Bar_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Bar_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bar_orientation
@@ -211,11 +211,11 @@ declare module "sap/viz/Bar_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Bar_orientation;
+	export default ui5.types.Bar_orientation;
 }
 
-declare module "sap/viz/Bubble_drawingEffect" {
-	import Bubble_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Bubble_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bubble_drawingEffect
@@ -229,11 +229,11 @@ declare module "sap/viz/Bubble_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Bubble_drawingEffect;
+	export default ui5.types.Bubble_drawingEffect;
 }
 
-declare module "sap/viz/Bullet_drawingEffect" {
-	import Bullet_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Bullet_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bullet_drawingEffect
@@ -247,11 +247,11 @@ declare module "sap/viz/Bullet_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Bullet_drawingEffect;
+	export default ui5.types.Bullet_drawingEffect;
 }
 
-declare module "sap/viz/Bullet_orientation" {
-	import Bullet_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Bullet_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bullet_orientation
@@ -265,11 +265,11 @@ declare module "sap/viz/Bullet_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Bullet_orientation;
+	export default ui5.types.Bullet_orientation;
 }
 
-declare module "sap/viz/Combination_drawingEffect" {
-	import Combination_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Combination_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Combination_drawingEffect
@@ -283,11 +283,11 @@ declare module "sap/viz/Combination_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Combination_drawingEffect;
+	export default ui5.types.Combination_drawingEffect;
 }
 
-declare module "sap/viz/Combination_orientation" {
-	import Combination_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Combination_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Combination_orientation
@@ -301,11 +301,11 @@ declare module "sap/viz/Combination_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Combination_orientation;
+	export default ui5.types.Combination_orientation;
 }
 
-declare module "sap/viz/Interaction_pan_orientation" {
-	import Interaction_pan_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/controller/Interaction_pan_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.controller.Interaction_pan_orientation
@@ -319,11 +319,11 @@ declare module "sap/viz/Interaction_pan_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Interaction_pan_orientation;
+	export default ui5.types.controller.Interaction_pan_orientation;
 }
 
-declare module "sap/viz/Interaction_selectability_mode" {
-	import Interaction_selectability_mode from "sap/viz/library";
+declare module "sap/viz/ui5/types/controller/Interaction_selectability_mode" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.controller.Interaction_selectability_mode
@@ -337,11 +337,11 @@ declare module "sap/viz/Interaction_selectability_mode" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Interaction_selectability_mode;
+	export default ui5.types.controller.Interaction_selectability_mode;
 }
 
-declare module "sap/viz/Datalabel_orientation" {
-	import Datalabel_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Datalabel_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_orientation
@@ -355,11 +355,11 @@ declare module "sap/viz/Datalabel_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Datalabel_orientation;
+	export default ui5.types.Datalabel_orientation;
 }
 
-declare module "sap/viz/Datalabel_outsidePosition" {
-	import Datalabel_outsidePosition from "sap/viz/library";
+declare module "sap/viz/ui5/types/Datalabel_outsidePosition" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_outsidePosition
@@ -373,11 +373,11 @@ declare module "sap/viz/Datalabel_outsidePosition" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Datalabel_outsidePosition;
+	export default ui5.types.Datalabel_outsidePosition;
 }
 
-declare module "sap/viz/Datalabel_paintingMode" {
-	import Datalabel_paintingMode from "sap/viz/library";
+declare module "sap/viz/ui5/types/Datalabel_paintingMode" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_paintingMode
@@ -391,11 +391,11 @@ declare module "sap/viz/Datalabel_paintingMode" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Datalabel_paintingMode;
+	export default ui5.types.Datalabel_paintingMode;
 }
 
-declare module "sap/viz/Datalabel_position" {
-	import Datalabel_position from "sap/viz/library";
+declare module "sap/viz/ui5/types/Datalabel_position" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_position
@@ -409,11 +409,11 @@ declare module "sap/viz/Datalabel_position" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Datalabel_position;
+	export default ui5.types.Datalabel_position;
 }
 
-declare module "sap/viz/Common_alignment" {
-	import Common_alignment from "sap/viz/library";
+declare module "sap/viz/ui5/types/legend/Common_alignment" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_alignment
@@ -427,11 +427,11 @@ declare module "sap/viz/Common_alignment" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Common_alignment;
+	export default ui5.types.legend.Common_alignment;
 }
 
-declare module "sap/viz/Common_drawingEffect" {
-	import Common_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/legend/Common_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_drawingEffect
@@ -445,11 +445,11 @@ declare module "sap/viz/Common_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Common_drawingEffect;
+	export default ui5.types.legend.Common_drawingEffect;
 }
 
-declare module "sap/viz/Common_position" {
-	import Common_position from "sap/viz/library";
+declare module "sap/viz/ui5/types/legend/Common_position" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_position
@@ -463,11 +463,11 @@ declare module "sap/viz/Common_position" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Common_position;
+	export default ui5.types.legend.Common_position;
 }
 
-declare module "sap/viz/Common_type" {
-	import Common_type from "sap/viz/library";
+declare module "sap/viz/ui5/types/legend/Common_type" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_type
@@ -481,11 +481,11 @@ declare module "sap/viz/Common_type" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Common_type;
+	export default ui5.types.legend.Common_type;
 }
 
-declare module "sap/viz/Legend_layout_position" {
-	import Legend_layout_position from "sap/viz/library";
+declare module "sap/viz/ui5/types/Legend_layout_position" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Legend_layout_position
@@ -499,11 +499,11 @@ declare module "sap/viz/Legend_layout_position" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Legend_layout_position;
+	export default ui5.types.Legend_layout_position;
 }
 
-declare module "sap/viz/Line_drawingEffect" {
-	import Line_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Line_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_drawingEffect
@@ -517,11 +517,11 @@ declare module "sap/viz/Line_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Line_drawingEffect;
+	export default ui5.types.Line_drawingEffect;
 }
 
-declare module "sap/viz/Line_marker_shape" {
-	import Line_marker_shape from "sap/viz/library";
+declare module "sap/viz/ui5/types/Line_marker_shape" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_marker_shape
@@ -535,11 +535,11 @@ declare module "sap/viz/Line_marker_shape" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Line_marker_shape;
+	export default ui5.types.Line_marker_shape;
 }
 
-declare module "sap/viz/Line_orientation" {
-	import Line_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/Line_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_orientation
@@ -553,11 +553,11 @@ declare module "sap/viz/Line_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Line_orientation;
+	export default ui5.types.Line_orientation;
 }
 
-declare module "sap/viz/Pie_drawingEffect" {
-	import Pie_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Pie_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Pie_drawingEffect
@@ -571,11 +571,11 @@ declare module "sap/viz/Pie_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Pie_drawingEffect;
+	export default ui5.types.Pie_drawingEffect;
 }
 
-declare module "sap/viz/Pie_valign" {
-	import Pie_valign from "sap/viz/library";
+declare module "sap/viz/ui5/types/Pie_valign" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Pie_valign
@@ -589,11 +589,11 @@ declare module "sap/viz/Pie_valign" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Pie_valign;
+	export default ui5.types.Pie_valign;
 }
 
-declare module "sap/viz/Scatter_drawingEffect" {
-	import Scatter_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Scatter_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Scatter_drawingEffect
@@ -607,11 +607,11 @@ declare module "sap/viz/Scatter_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Scatter_drawingEffect;
+	export default ui5.types.Scatter_drawingEffect;
 }
 
-declare module "sap/viz/StackedVerticalBar_drawingEffect" {
-	import StackedVerticalBar_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/StackedVerticalBar_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_drawingEffect
@@ -625,11 +625,11 @@ declare module "sap/viz/StackedVerticalBar_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default StackedVerticalBar_drawingEffect;
+	export default ui5.types.StackedVerticalBar_drawingEffect;
 }
 
-declare module "sap/viz/StackedVerticalBar_mode" {
-	import StackedVerticalBar_mode from "sap/viz/library";
+declare module "sap/viz/ui5/types/StackedVerticalBar_mode" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_mode
@@ -643,11 +643,11 @@ declare module "sap/viz/StackedVerticalBar_mode" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default StackedVerticalBar_mode;
+	export default ui5.types.StackedVerticalBar_mode;
 }
 
-declare module "sap/viz/StackedVerticalBar_orientation" {
-	import StackedVerticalBar_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/StackedVerticalBar_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_orientation
@@ -661,11 +661,11 @@ declare module "sap/viz/StackedVerticalBar_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default StackedVerticalBar_orientation;
+	export default ui5.types.StackedVerticalBar_orientation;
 }
 
-declare module "sap/viz/Title_alignment" {
-	import Title_alignment from "sap/viz/library";
+declare module "sap/viz/ui5/types/Title_alignment" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Title_alignment
@@ -679,11 +679,11 @@ declare module "sap/viz/Title_alignment" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Title_alignment;
+	export default ui5.types.Title_alignment;
 }
 
-declare module "sap/viz/Tooltip_drawingEffect" {
-	import Tooltip_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/Tooltip_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Tooltip_drawingEffect
@@ -697,11 +697,11 @@ declare module "sap/viz/Tooltip_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default Tooltip_drawingEffect;
+	export default ui5.types.Tooltip_drawingEffect;
 }
 
-declare module "sap/viz/VerticalBar_drawingEffect" {
-	import VerticalBar_drawingEffect from "sap/viz/library";
+declare module "sap/viz/ui5/types/VerticalBar_drawingEffect" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.VerticalBar_drawingEffect
@@ -715,11 +715,11 @@ declare module "sap/viz/VerticalBar_drawingEffect" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default VerticalBar_drawingEffect;
+	export default ui5.types.VerticalBar_drawingEffect;
 }
 
-declare module "sap/viz/VerticalBar_orientation" {
-	import VerticalBar_orientation from "sap/viz/library";
+declare module "sap/viz/ui5/types/VerticalBar_orientation" {
+	import {ui5} from "sap/viz/library";
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.VerticalBar_orientation
@@ -733,5 +733,5 @@ declare module "sap/viz/VerticalBar_orientation" {
 	 * @public
 	 * @since 1.7.2
 	*/
-	export default VerticalBar_orientation;
+	export default ui5.types.VerticalBar_orientation;
 }

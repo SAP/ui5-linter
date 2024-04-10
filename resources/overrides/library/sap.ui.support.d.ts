@@ -1,5 +1,5 @@
 declare module "sap/ui/support/Audiences" {
-	import Audiences from "sap/ui/support/library";
+	import {Audiences} from "sap/ui/support/library";
 
 	/**
 	 * Defines the Audiences.
@@ -11,7 +11,7 @@ declare module "sap/ui/support/Audiences" {
 }
 
 declare module "sap/ui/support/Categories" {
-	import Categories from "sap/ui/support/library";
+	import {Categories} from "sap/ui/support/library";
 
 	/**
 	 * Issue Categories.
@@ -23,7 +23,7 @@ declare module "sap/ui/support/Categories" {
 }
 
 declare module "sap/ui/support/HistoryFormats" {
-	import HistoryFormats from "sap/ui/support/library";
+	import {HistoryFormats} from "sap/ui/support/library";
 
 	/**
 	 * Analysis history formats.
@@ -35,7 +35,7 @@ declare module "sap/ui/support/HistoryFormats" {
 }
 
 declare module "sap/ui/support/Severity" {
-	import Severity from "sap/ui/support/library";
+	import {Severity} from "sap/ui/support/library";
 
 	/**
 	 * Defines severity types.
@@ -47,7 +47,7 @@ declare module "sap/ui/support/Severity" {
 }
 
 declare module "sap/ui/support/SystemPresets" {
-	import SystemPresets from "sap/ui/support/library";
+	import {SystemPresets} from "sap/ui/support/library";
 
 	/**
 	 * Contains the available system presets.
