@@ -196,7 +196,7 @@ async function main(url: string, sapui5Version: string) {
 	await fetchAndExtractAPIJsons(url);
 
 	await transformFiles(sapui5Version);
-	
+
 	await cleanup();
 }
 
