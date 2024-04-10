@@ -16,15 +16,29 @@
 		</mvc:View>
 	</script>
 
-	<script type="module">
+	<script src="">
+		sap.ui.controller("my.own.controller", {
+			doSomething: function () {
+				alert("Hello World!");
+			}
+		});
+	</script>
+
+	<script src>
+		console.log("this code won't run");
+	</script>
+
+	<script type="" src="./path/to/js.js">
+		 // should not be reported as it is not a CSP violation
+	</script>
+	
+	<script type="module" src>
 		import { log } from "utils";
 
 		log("Exporting dog names.");
 
 		export const names = ["Kayla", "Bentley", "Gilligan"];
 	</script>
-
-	<script type="" src="./path/to/js.js"></script>
 
 	<script src="./another/path/to/js.js"></script>
 </body>

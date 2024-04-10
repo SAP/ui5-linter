@@ -43,6 +43,14 @@
 		});
 		sap.ui.xmlview({ viewContent: jQuery('#myXml').html() }).placeAt("content");
 	</script>
+
+	<script type="module">
+		import { log } from "utils";
+
+		log("Exporting dog names.");
+
+		export const names = ["Kayla", "Bentley", "Gilligan"];
+	</script>
 </body>
 
 </html>

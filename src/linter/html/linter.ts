@@ -13,8 +13,12 @@ export async function lintHtml(resourceName: string, contentStream: ReadStream):
 
 	jsScriptTags.forEach((tag) => {
 		const scriptContent = tag.textNodes?.map((tNode) => tNode.value).join("").trim();
+		// Tags with src attribute do not parse and run inline code
+		const hasSrc = tag.attributes.some((attr) => {
+			return attr.name.value.toLowerCase() === "src";
+		});
 
-		if (scriptContent) {
+		if (!hasSrc && scriptContent) {
 			report.addMessage({
 				node: tag,
 				severity: LintMessageSeverity.Warning,
