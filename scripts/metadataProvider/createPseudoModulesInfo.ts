@@ -84,19 +84,21 @@ async function transformFiles(sapui5Version: string) {
 
 	const {enums} = metadataProvider.getModel();
 
-	const groupedEnums = Object.keys(enums).reduce((acc: Record<string, {enum: UI5Enum, export: string}[]>, enumKey: string) => {
+	const groupedEnums = Object.keys(enums)
+		.reduce((acc: Record<string, {enum: UI5Enum; export: string}[]>, enumKey: string) => {
 		// Filter only real pseudo modules i.e. defined within library.js files
-		if (!pseudoModuleNames[enumKey]) {
+			if (!pseudoModuleNames[enumKey]) {
+				return acc;
+			}
+
+			const curEnum = enums[enumKey];
+
+			acc[curEnum.library] = acc[curEnum.library] ?? [];
+			acc[curEnum.library].push(
+				{enum: curEnum, export: pseudoModuleNames[enumKey]});
+
 			return acc;
-		}
-
-		const curEnum = enums[enumKey];
-
-		acc[curEnum.library] = acc[curEnum.library] ?? [];
-		acc[curEnum.library].push({enum: curEnum, export: pseudoModuleNames[enumKey]});
-
-		return acc;
-	}, Object.create(null) as Record<string, {enum: UI5Enum, export: string}[]>);
+		}, Object.create(null) as Record<string, {enum: UI5Enum; export: string}[]>);
 
 	await addOverrides(groupedEnums);
 }
@@ -143,7 +145,7 @@ function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue, indent = "") {
 	return jsDocBuilder.join("\n");
 }
 
-async function addOverrides(enums: Record<string, {enum: UI5Enum, export: string}[]>) {
+async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string}[]>) {
 	const indexFilesImports: string[] = [];
 
 	for (const libName of Object.keys(enums)) {
