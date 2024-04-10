@@ -1,5 +1,5 @@
-sap.ui.define(["./BaseController"],
-	function (BaseController) {
+sap.ui.define(["./BaseController", "sap/m/BackgroundDesign"],
+	function (BaseController, BackgroundDesign) {
 	"use strict";
 
 	return BaseController.extend("com.ui5.troublesome.app.controller.App", {
