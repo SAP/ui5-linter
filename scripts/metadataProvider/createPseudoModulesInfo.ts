@@ -158,7 +158,7 @@ async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string
 			}
 
 			const exportNameChunks = exportName.split(".");
-			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing;
+			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing
 
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
 
@@ -186,10 +186,18 @@ async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string
 	);
 }
 
+async function cleanup() {
+	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
+
+	await Promise.all(apiJsonList.map((library) => unlink(path.resolve(RAW_API_JSON_FILES_FOLDER, library))));
+}
+
 async function main(url: string, sapui5Version: string) {
 	await fetchAndExtractAPIJsons(url);
 
 	await transformFiles(sapui5Version);
+	
+	await cleanup();
 }
 
 try {
