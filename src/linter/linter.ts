@@ -191,6 +191,13 @@ function resolveFilePaths(rootDir: string, filePaths: string[]): string[] {
 	});
 }
 
+function ensurePosix(inputPath: string) {
+	if (!inputPath.includes("\\")) {
+		return inputPath;
+	}
+	return inputPath.replace(/\\/g, "/");
+}
+
 /**
  * Normalize provided filePaths to virtual paths.
  * Returned paths are absolute, POSIX-style paths
@@ -202,9 +209,9 @@ function transformFilePathsToVirtualPaths(
 ): FilePath[] {
 	return filePaths.map((filePath) => {
 		if (filePath.startsWith(srcFsBasePath)) {
-			return posixPath.join(srcVirBasePath, path.relative(srcFsBasePath, filePath));
+			return posixPath.join(srcVirBasePath, ensurePosix(path.relative(srcFsBasePath, filePath)));
 		} else if (testFsBasePath && testVirBasePath && filePath.startsWith(testFsBasePath)) {
-			return posixPath.join(testVirBasePath, path.relative(testFsBasePath, filePath));
+			return posixPath.join(testVirBasePath, ensurePosix(path.relative(testFsBasePath, filePath)));
 		} else {
 			throw new Error(
 				`File path ${filePath} is not located within the detected source or test directories of the project`);
