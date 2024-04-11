@@ -1,15 +1,15 @@
 import {ReadStream} from "node:fs";
 import {extractJSScriptTags} from "./parser.js";
 import HtmlReporter from "./HtmlReporter.js";
-import LinterContext, {LintMessageSeverity, TranspileResult} from "../LinterContext.js";
+import LinterContext, {LintMessageSeverity, ResourcePath, TranspileResult} from "../LinterContext.js";
 import {taskStart} from "../../util/perf.js";
 
 export default async function transpileHtml(
-	resourceName: string, contentStream: ReadStream, context: LinterContext
+	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext
 ): Promise<TranspileResult> {
 	try {
-		const taskEnd = taskStart("Transpile XML", resourceName, true);
-		const report = new HtmlReporter(resourceName, context);
+		const taskEnd = taskStart("Transpile XML", resourcePath, true);
+		const report = new HtmlReporter(resourcePath, context);
 		const jsScriptTags = await extractJSScriptTags(contentStream);
 
 		jsScriptTags.forEach((tag) => {
@@ -33,7 +33,7 @@ export default async function transpileHtml(
 		return {source: "", map: ""};
 	} catch (err) {
 		if (err instanceof Error) {
-			throw new Error(`Failed to transpile resource ${resourceName}: ${err.message}`, {
+			throw new Error(`Failed to transpile resource ${resourcePath}: ${err.message}`, {
 				cause: err,
 			});
 		} else {

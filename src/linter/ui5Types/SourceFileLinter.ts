@@ -1,6 +1,6 @@
 import ts, {Identifier} from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {FilePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -8,7 +8,7 @@ interface DeprecationInfo {
 }
 
 export default class SourceFileLinter {
-	#filePath: string;
+	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
 	#checker: ts.TypeChecker;
 	#reporter: SourceFileReporter;
@@ -17,14 +17,14 @@ export default class SourceFileLinter {
 	#messageDetails: boolean;
 
 	constructor(
-		context: LinterContext, filePath: FilePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
+		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
 		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
 		messageDetails: boolean | undefined = false
 	) {
-		this.#filePath = filePath;
+		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
 		this.#checker = checker;
-		this.#reporter = new SourceFileReporter(context, filePath, sourceFile, sourceMap);
+		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
@@ -37,7 +37,7 @@ export default class SourceFileLinter {
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			if (err instanceof Error) {
-				throw new Error(`Failed to produce report for ${this.#filePath}: ${err.message}`, {
+				throw new Error(`Failed to produce report for ${this.#resourcePath}: ${err.message}`, {
 					cause: err,
 				});
 			}

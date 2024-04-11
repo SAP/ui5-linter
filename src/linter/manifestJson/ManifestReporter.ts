@@ -1,6 +1,6 @@
 import type {jsonSourceMapType, jsonMapPointers} from "./ManifestLinter.js";
 import LinterContext, {
-	FilePath, LintMessage, LintMessageSeverity, CoverageInfo, PositionInfo,
+	LintMessage, LintMessageSeverity, CoverageInfo, PositionInfo, ResourcePath,
 } from "../LinterContext.js";
 
 interface ReporterMessage extends LintMessage {
@@ -12,12 +12,12 @@ interface ReporterCoverageInfo extends CoverageInfo {
 }
 
 export default class ManifestReporter {
-	#filePath: string;
+	#resourcePath: ResourcePath;
 	#pointers: jsonMapPointers;
 	#context: LinterContext;
 
-	constructor(filePath: FilePath, context: LinterContext, manifest: jsonSourceMapType) {
-		this.#filePath = filePath;
+	constructor(resourcePath: ResourcePath, context: LinterContext, manifest: jsonSourceMapType) {
+		this.#resourcePath = resourcePath;
 		this.#pointers = manifest.pointers;
 		this.#context = context;
 	}
@@ -29,7 +29,7 @@ export default class ManifestReporter {
 
 		const {line, column} = this.#getPosition(node);
 
-		this.#context.addLintingMessage(this.#filePath, {
+		this.#context.addLintingMessage(this.#resourcePath, {
 			ruleId,
 			severity,
 			fatal,
@@ -41,7 +41,7 @@ export default class ManifestReporter {
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
 		const location = this.#getPositionsForNode(node);
-		this.#context.addCoverageInfo(this.#filePath, {
+		this.#context.addCoverageInfo(this.#resourcePath, {
 			category,
 			// One-based to be aligned with most IDEs
 			line: location.key.line,

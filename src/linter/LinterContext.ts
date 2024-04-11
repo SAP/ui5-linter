@@ -1,7 +1,8 @@
 import {AbstractAdapter, AbstractReader} from "@ui5/fs";
 import {createReader} from "@ui5/fs/resourceFactory";
 
-export type FilePath = string;
+export type FilePath = string; // Platform-dependent path
+export type ResourcePath = string; // Always POSIX
 
 // Data types are structured very similar to the ESLint types for better compatibility into existing integrations:
 // https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type
@@ -53,9 +54,9 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	namespace?: string;
-	filePaths?: FilePath[];
+	pathsToLint?: FilePath[];
 	reportCoverage?: boolean;
-	messageDetails?: boolean;
+	includeMessageDetails?: boolean;
 }
 
 export interface LinterParameters {
@@ -83,24 +84,24 @@ export interface LintMetadata {
 export default class LinterContext {
 	#rootDir: string;
 	#namespace: string | undefined;
-	#messages = new Map<FilePath, LintMessage[]>();
-	#coverageInfo = new Map<FilePath, CoverageInfo[]>();
-	#metadata = new Map<FilePath, LintMetadata>();
+	#messages = new Map<ResourcePath, LintMessage[]>();
+	#coverageInfo = new Map<ResourcePath, CoverageInfo[]>();
+	#metadata = new Map<ResourcePath, LintMetadata>();
 	#rootReader: AbstractReader | undefined;
 
-	#filePaths: FilePath[] | undefined;
-	// Mapping original file paths to aliases, such as the paths of transpiled resources
-	#filePathAliases = new Map<FilePath, FilePath>();
+	#resourcePathsToLint: ResourcePath[] | undefined;
+	// Mapping original resource paths to aliases, such as the paths of transpiled resources
+	#resourcePathAliases = new Map<ResourcePath, ResourcePath>();
 
 	#reportCoverage: boolean;
-	#messageDetails: boolean;
+	#includeMessageDetails: boolean;
 
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#filePaths = options.filePaths ? [...options.filePaths] : undefined;
+		this.#resourcePathsToLint = options.pathsToLint ? [...options.pathsToLint] : undefined;
 		this.#reportCoverage = !!options.reportCoverage;
-		this.#messageDetails = !!options.messageDetails;
+		this.#includeMessageDetails = !!options.includeMessageDetails;
 	}
 
 	getRootDir(): string {
@@ -122,60 +123,60 @@ export default class LinterContext {
 		return this.#namespace;
 	}
 
-	getFilePaths(): FilePath[] | undefined {
-		return this.#filePaths;
+	getPathsToLint(): ResourcePath[] | undefined {
+		return this.#resourcePathsToLint;
 	}
 
 	getReportCoverage(): boolean {
 		return this.#reportCoverage;
 	}
 
-	getMessageDetails(): boolean {
-		return this.#messageDetails;
+	getIncludeMessageDetails(): boolean {
+		return this.#includeMessageDetails;
 	}
 
-	getMetadata(filePath: FilePath): LintMetadata {
-		let metadata = this.#metadata.get(filePath);
+	getMetadata(resourcePath: ResourcePath): LintMetadata {
+		let metadata = this.#metadata.get(resourcePath);
 		if (!metadata) {
 			metadata = {} as LintMetadata;
-			this.#metadata.set(filePath, metadata);
+			this.#metadata.set(resourcePath, metadata);
 		}
 		return metadata;
 	}
 
-	addFilePathToLint(filePath: FilePath) {
-		this.#filePaths?.push(filePath);
+	addPathToLint(resourcePath: ResourcePath) {
+		this.#resourcePathsToLint?.push(resourcePath);
 	}
 
-	getLintingMessages(filePath: FilePath): LintMessage[] {
-		let messages = this.#messages.get(filePath);
+	getLintingMessages(resourcePath: ResourcePath): LintMessage[] {
+		let messages = this.#messages.get(resourcePath);
 		if (!messages) {
 			messages = [];
-			this.#messages.set(filePath, messages);
+			this.#messages.set(resourcePath, messages);
 		}
 		return messages;
 	}
 
-	addLintingMessage(filePath: FilePath, message: LintMessage) {
-		this.getLintingMessages(filePath).push(message);
+	addLintingMessage(resourcePath: ResourcePath, message: LintMessage) {
+		this.getLintingMessages(resourcePath).push(message);
 	}
 
-	getCoverageInfo(filePath: FilePath): CoverageInfo[] {
-		let coverageInfo = this.#coverageInfo.get(filePath);
+	getCoverageInfo(resourcePath: ResourcePath): CoverageInfo[] {
+		let coverageInfo = this.#coverageInfo.get(resourcePath);
 		if (!coverageInfo) {
 			coverageInfo = [];
-			this.#coverageInfo.set(filePath, coverageInfo);
+			this.#coverageInfo.set(resourcePath, coverageInfo);
 		}
 		return coverageInfo;
 	}
 
-	addCoverageInfo(filePath: FilePath, coverageInfo: CoverageInfo) {
-		this.getCoverageInfo(filePath).push(coverageInfo);
+	addCoverageInfo(resourcePath: ResourcePath, coverageInfo: CoverageInfo) {
+		this.getCoverageInfo(resourcePath).push(coverageInfo);
 	}
 
-	generateLintResult(filePath: FilePath): LintResult {
-		const messages = this.#messages.get(filePath) ?? [];
-		const coverageInfo = this.#coverageInfo.get(filePath) ?? [];
+	generateLintResult(resourcePath: ResourcePath): LintResult {
+		const messages = this.#messages.get(resourcePath) ?? [];
+		const coverageInfo = this.#coverageInfo.get(resourcePath) ?? [];
 		let errorCount = 0;
 		let warningCount = 0;
 		let fatalErrorCount = 0;
@@ -190,13 +191,8 @@ export default class LinterContext {
 			}
 		}
 
-		// Map aliases back to the original file
-		if (this.#filePathAliases.has(filePath)) {
-			filePath = this.#filePathAliases.get(filePath)!;
-		}
-
 		return {
-			filePath,
+			filePath: resourcePath,
 			messages,
 			coverageInfo,
 			errorCount,
@@ -207,14 +203,14 @@ export default class LinterContext {
 
 	generateLintResults(): LintResult[] {
 		const lintResults: LintResult[] = [];
-		let filePaths;
+		let resourcePaths;
 		if (this.#reportCoverage) {
-			filePaths = new Set([...this.#messages.keys(), ...this.#coverageInfo.keys()]).values();
+			resourcePaths = new Set([...this.#messages.keys(), ...this.#coverageInfo.keys()]).values();
 		} else {
-			filePaths = this.#messages.keys();
+			resourcePaths = this.#messages.keys();
 		}
-		for (const filePath of filePaths) {
-			lintResults.push(this.generateLintResult(filePath));
+		for (const resourcePath of resourcePaths) {
+			lintResults.push(this.generateLintResult(resourcePath));
 		}
 		return lintResults;
 	}

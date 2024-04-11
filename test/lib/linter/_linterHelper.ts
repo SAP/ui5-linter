@@ -93,9 +93,9 @@ export function createTestsForFixtures(fixturesPath: string) {
 
 				const res = await lintFile({
 					rootDir: fixturesPath,
-					filePaths,
+					pathsToLint: filePaths,
 					reportCoverage: true,
-					messageDetails: true,
+					includeMessageDetails: true,
 				});
 				assertExpectedLintResults(t, res, fixturesPath, filePaths);
 				res.forEach((results) => {

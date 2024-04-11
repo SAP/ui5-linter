@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path/posix";
 import ts from "typescript";
 import {
 	TraceMap,
@@ -10,7 +10,7 @@ import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 import LinterContext, {
 	LintMessage, CoverageInfo, LintMessageSeverity,
-	PositionInfo, PositionRange, FilePath,
+	PositionInfo, PositionRange, ResourcePath,
 } from "../LinterContext.js";
 
 interface ReporterMessage extends LintMessage {
@@ -23,27 +23,27 @@ interface ReporterCoverageInfo extends CoverageInfo {
 
 export default class SourceFileReporter {
 	#context: LinterContext;
-	#filePath: string;
-	#sourceFilePath: string;
+	#resourcePath: ResourcePath;
+	#originalResourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile | undefined;
 	#traceMap: TraceMap | undefined;
 	#messages: LintMessage[] = [];
 	#coverageInfo: CoverageInfo[] = [];
 
 	constructor(
-		context: LinterContext, filePath: FilePath,
+		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined
 	) {
 		this.#context = context;
-		this.#filePath = filePath;
+		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
 		if (sourceMap) {
 			this.#traceMap = new TraceMap(sourceMap);
 		}
 
-		this.#sourceFilePath = this.#getSourceFilePath() ?? filePath;
+		this.#originalResourcePath = this.#getOriginalResourcePath() ?? resourcePath;
 		// Do not use messages from context yet, to allow local de-duplication
-		this.#coverageInfo = context.getCoverageInfo(this.#sourceFilePath);
+		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
 	addMessage({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
@@ -105,7 +105,7 @@ export default class SourceFileReporter {
 
 	#getPosition(pos: number): PositionInfo {
 		if (!this.#sourceFile) {
-			throw new Error(`No source file available for file ${this.#filePath}`);
+			throw new Error(`No source file available for file ${this.#resourcePath}`);
 		}
 		// Typescript positions are all zero-based
 		const {line, character: column} = this.#sourceFile.getLineAndCharacterOfPosition(pos);
@@ -144,10 +144,10 @@ export default class SourceFileReporter {
 		};
 	}
 
-	#getSourceFilePath(): string | undefined {
+	#getOriginalResourcePath(): ResourcePath | undefined {
 		if (this.#traceMap?.sources?.length && this.#traceMap.sources[0] &&
 			this.#traceMap.sources[0] !== "UNKNOWN") {
-			return path.join(path.dirname(this.#filePath), this.#traceMap.sources[0]);
+			return path.join(path.dirname(this.#resourcePath), this.#traceMap.sources[0]);
 		}
 	}
 
@@ -191,6 +191,6 @@ export default class SourceFileReporter {
 			});
 		}
 
-		this.#context.getLintingMessages(this.#sourceFilePath).push(...messages);
+		this.#context.getLintingMessages(this.#originalResourcePath).push(...messages);
 	}
 }

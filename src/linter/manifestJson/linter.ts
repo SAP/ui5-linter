@@ -8,16 +8,16 @@ export default async function lintJson({workspace, context}: LinterParameters) {
 
 	let jsonResources: Resource[];
 
-	const filePaths = context.getFilePaths();
-	if (filePaths?.length) {
+	const pathsToLint = context.getPathsToLint();
+	if (pathsToLint?.length) {
 		jsonResources = [];
-		await Promise.all(filePaths.map(async (filePath) => {
-			if (!filePath.endsWith("manifest.json") && !filePath.endsWith("manifest.appdescr_variant")) {
+		await Promise.all(pathsToLint.map(async (resourcePath) => {
+			if (!resourcePath.endsWith("manifest.json") && !resourcePath.endsWith("manifest.appdescr_variant")) {
 				return;
 			}
-			const resource = await workspace.byPath(filePath);
+			const resource = await workspace.byPath(resourcePath);
 			if (!resource) {
-				throw new Error(`Resource not found: ${filePath}`);
+				throw new Error(`Resource not found: ${resourcePath}`);
 			}
 			jsonResources.push(resource);
 		}));
@@ -25,7 +25,7 @@ export default async function lintJson({workspace, context}: LinterParameters) {
 		jsonResources = await workspace.byGlob("**/{manifest.json,manifest.appdescr_variant}");
 	}
 	await Promise.all(jsonResources.map(async (resource: Resource) => {
-		const linter = new ManifestLinter(await resource.getString(), resource.getPath(), context);
+		const linter = new ManifestLinter(resource.getPath(), await resource.getString(), context);
 		await linter.lint();
 	}));
 	lintingDone();

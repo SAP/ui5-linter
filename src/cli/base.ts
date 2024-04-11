@@ -120,9 +120,9 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
-		filePaths: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
+		pathsToLint: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
 		reportCoverage,
-		messageDetails: details,
+		includeMessageDetails: details,
 	});
 
 	if (reportCoverage) {

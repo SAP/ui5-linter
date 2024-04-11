@@ -7,7 +7,7 @@ import type {
 } from "../../manifest.d.ts";
 
 import ManifestReporter from "./ManifestReporter.js";
-import {LintMessageSeverity} from "../LinterContext.js";
+import {LintMessageSeverity, ResourcePath} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import LinterContext from "../LinterContext.js";
 
@@ -52,19 +52,19 @@ export interface jsonSourceMapType {
 export default class ManifestLinter {
 	#reporter: ManifestReporter | undefined;
 	#content = "";
-	#path = "";
+	#resourcePath = "";
 	#context: LinterContext;
 
-	constructor(content: string, path: string, context: LinterContext) {
+	constructor(resourcePath: ResourcePath, content: string, context: LinterContext) {
+		this.#resourcePath = resourcePath;
 		this.#content = content;
-		this.#path = path;
 		this.#context = context;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		const source = this.#parseManifest(this.#content);
-		this.#reporter = new ManifestReporter(this.#path, this.#context, source);
+		this.#reporter = new ManifestReporter(this.#resourcePath, this.#context, source);
 		this.#analyzeManifest(source.data);
 	}
 

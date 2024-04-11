@@ -1,5 +1,5 @@
 import {Tag as SaxTag} from "sax-wasm";
-import LinterContext, {CoverageInfo, LintMessage, LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {CoverageInfo, LintMessage, LintMessageSeverity, ResourcePath} from "../LinterContext.js";
 import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 interface ReporterMessage extends LintMessage {
@@ -11,11 +11,11 @@ interface ReporterCoverageInfo extends CoverageInfo {
 }
 
 export default class HtmlReporter {
-	#filePath: string;
+	#resourcePath: string;
 	#context: LinterContext;
 
-	constructor(filePath: string, context: LinterContext) {
-		this.#filePath = filePath;
+	constructor(resourcePath: ResourcePath, context: LinterContext) {
+		this.#resourcePath = resourcePath;
 		this.#context = context;
 	}
 
@@ -29,7 +29,7 @@ export default class HtmlReporter {
 			({line, character: column} = node.openStart);
 		}
 
-		this.#context.addLintingMessage(this.#filePath, {
+		this.#context.addLintingMessage(this.#resourcePath, {
 			ruleId,
 			severity,
 			fatal,
@@ -47,7 +47,7 @@ export default class HtmlReporter {
 			({line: endLine, character: endColumn} = node.closeEnd);
 		}
 
-		this.#context.addCoverageInfo(this.#filePath, {
+		this.#context.addCoverageInfo(this.#resourcePath, {
 			category,
 			// One-based to be aligned with most IDEs
 			line: line + 1,

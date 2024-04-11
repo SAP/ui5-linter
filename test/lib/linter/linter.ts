@@ -38,9 +38,9 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		filePaths: [],
+		pathsToLint: [],
 		reportCoverage: true,
-		messageDetails: true,
+		includeMessageDetails: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -57,7 +57,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		filePaths,
+		pathsToLint: filePaths,
 	});
 
 	assertExpectedLintResults(t, res, projectPath, [
@@ -74,9 +74,9 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		filePaths: [],
+		pathsToLint: [],
 		reportCoverage: true,
-		messageDetails: true,
+		includeMessageDetails: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -88,9 +88,9 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 
 	let res = await lintProject({
 		rootDir: projectPath,
-		filePaths: [],
+		pathsToLint: [],
 		reportCoverage: true,
-		messageDetails: true,
+		includeMessageDetails: true,
 	});
 
 	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {

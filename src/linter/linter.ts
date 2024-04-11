@@ -24,7 +24,7 @@ async function lint(
 }
 
 export async function lintProject({
-	rootDir, filePaths, reportCoverage, messageDetails,
+	rootDir, pathsToLint, reportCoverage, includeMessageDetails,
 }: LinterOptions): Promise<LintResult[]> {
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir);
@@ -60,8 +60,8 @@ export async function lintProject({
 		});
 	}
 	let resolvedFilePaths;
-	if (filePaths?.length) {
-		const absoluteFilePaths = resolveFilePaths(rootDir, filePaths);
+	if (pathsToLint?.length) {
+		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
 		resolvedFilePaths = transformFilePathsToVirtualPaths(
 			absoluteFilePaths, fsBasePath, virBasePath, fsBasePathTest, virBasePathTest);
 	}
@@ -69,9 +69,9 @@ export async function lintProject({
 	const res = await lint(reader, {
 		rootDir,
 		namespace: project.getNamespace(),
-		filePaths: resolvedFilePaths,
+		pathsToLint: resolvedFilePaths,
 		reportCoverage,
-		messageDetails,
+		includeMessageDetails,
 	});
 
 	const relFsBasePath = path.relative(rootDir, fsBasePath);
@@ -85,15 +85,15 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePaths, namespace, reportCoverage, messageDetails,
+	rootDir, pathsToLint, namespace, reportCoverage, includeMessageDetails,
 }: LinterOptions): Promise<LintResult[]> {
 	const reader = createReader({
 		fsBasePath: rootDir,
 		virBasePath: "/",
 	});
 	let resolvedFilePaths;
-	if (filePaths?.length) {
-		const absoluteFilePaths = resolveFilePaths(rootDir, filePaths);
+	if (pathsToLint?.length) {
+		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
 		resolvedFilePaths = transformFilePathsToVirtualPaths(
 			absoluteFilePaths, rootDir, "/", rootDir);
 	}
@@ -101,9 +101,9 @@ export async function lintFile({
 	const res = await lint(reader, {
 		rootDir,
 		namespace,
-		filePaths: resolvedFilePaths,
+		pathsToLint: resolvedFilePaths,
 		reportCoverage,
-		messageDetails,
+		includeMessageDetails,
 	});
 
 	res.forEach((result) => {
@@ -221,12 +221,12 @@ function transformVirtualPathToFilePath(
 	testFsBasePath?: string, testVirBasePath?: string
 ): FilePath {
 	if (virtualPath.startsWith(srcVirBasePath)) {
-		return posixPath.join(srcFsBasePath, path.relative(srcVirBasePath, virtualPath));
+		return path.join(srcFsBasePath, posixPath.relative(srcVirBasePath, virtualPath));
 	} else if (testFsBasePath && testVirBasePath && virtualPath.startsWith(testVirBasePath)) {
-		return posixPath.join(testFsBasePath, path.relative(testVirBasePath, virtualPath));
+		return path.join(testFsBasePath, posixPath.relative(testVirBasePath, virtualPath));
 	} else {
 		throw new Error(
-			`File path ${virtualPath} is not located within the virtual source or test directories of the project`);
+			`Resource path ${virtualPath} is not located within the virtual source or test directories of the project`);
 	}
 }
 

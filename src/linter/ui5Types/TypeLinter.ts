@@ -66,10 +66,10 @@ export default class TypeChecker {
 		let lazyFileLoading = true;
 
 		const resources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
-		let filePathsToLint = this.#context.getFilePaths();
-		if (!filePathsToLint?.length) {
+		let pathsToLint = this.#context.getPathsToLint();
+		if (!pathsToLint?.length) {
 			lazyFileLoading = false;
-			filePathsToLint = resources.map((resource) => resource.getPath());
+			pathsToLint = resources.map((resource) => resource.getPath());
 		}
 		for (const resource of resources) {
 			const resourcePath = resource.getPath();
@@ -90,14 +90,14 @@ export default class TypeChecker {
 		}
 
 		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps);
-		const program = ts.createProgram(filePathsToLint, this.#compilerOptions, host);
+		const program = ts.createProgram(pathsToLint, this.#compilerOptions, host);
 		const checker = program.getTypeChecker();
 
 		const reportCoverage = this.#context.getReportCoverage();
-		const messageDetails = this.#context.getMessageDetails();
+		const messageDetails = this.#context.getIncludeMessageDetails();
 		const typeCheckDone = taskStart("Linting all transpiled resources");
 		for (const sourceFile of program.getSourceFiles()) {
-			if (!sourceFile.isDeclarationFile && filePathsToLint.includes(sourceFile.fileName)) {
+			if (!sourceFile.isDeclarationFile && pathsToLint.includes(sourceFile.fileName)) {
 				const sourceMap = sourceMaps.get(sourceFile.fileName);
 				if (!sourceMap) {
 					log.warn(`Failed to get source map for ${sourceFile.fileName}`);

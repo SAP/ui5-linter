@@ -4,16 +4,16 @@ import {Resource} from "@ui5/fs";
 
 export default async function lintHtml({workspace, context}: LinterParameters) {
 	let htmlResources: Resource[];
-	const filePaths = context.getFilePaths();
-	if (filePaths?.length) {
+	const pathsToLint = context.getPathsToLint();
+	if (pathsToLint?.length) {
 		htmlResources = [];
-		await Promise.all(filePaths.map(async (filePath) => {
-			if (!filePath.endsWith(".html")) {
+		await Promise.all(pathsToLint.map(async (resourcePath) => {
+			if (!resourcePath.endsWith(".html")) {
 				return;
 			}
-			const resource = await workspace.byPath(filePath);
+			const resource = await workspace.byPath(resourcePath);
 			if (!resource) {
-				throw new Error(`Resource not found: ${filePath}`);
+				throw new Error(`Resource not found: ${resourcePath}`);
 			}
 			htmlResources.push(resource);
 		}));

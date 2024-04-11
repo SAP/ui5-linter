@@ -4,7 +4,7 @@ import posixPath from "node:path/posix";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 import {transpileFile} from "./amdTranspiler/transpiler.js";
-import {FilePath} from "../LinterContext.js";
+import {ResourcePath} from "../LinterContext.js";
 const require = createRequire(import.meta.url);
 
 interface PackageJson {
@@ -59,7 +59,7 @@ function addSapui5TypesMappingToCompilerOptions(sapui5TypesFiles: string[], opti
 	});
 }
 
-export type FileContents = Map<FilePath, string | (() => string)>;
+export type FileContents = Map<ResourcePath, string | (() => string)>;
 
 export async function createVirtualCompilerHost(
 	options: ts.CompilerOptions,
