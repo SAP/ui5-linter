@@ -22,6 +22,6 @@ export default async function lintHtml({workspace, context}: LinterParameters) {
 	}
 
 	await Promise.all(htmlResources.map(async (resource: Resource) => {
-		await transpileHtml(resource.getPath(), resource.getStream(), context);
+		return transpileHtml(resource.getPath(), resource.getStream(), context);
 	}));
 }
