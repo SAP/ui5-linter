@@ -1,41 +1,115 @@
 import {graphFromObject} from "@ui5/project/graph";
-import {LintResult} from "../detectors/AbstractDetector.js";
-import {TsFileDetector, TsProjectDetector} from "../detectors/typeChecker/index.js";
-import {taskStart} from "../detectors/util/perf.js";
+import {createReader, createWorkspace, createReaderCollection} from "@ui5/fs/resourceFactory";
+import {FilePath, LinterOptions, LintResult} from "./LinterContext.js";
+import lintWorkspace from "./lintWorkspace.js";
+import {taskStart} from "../util/perf.js";
 import path from "node:path";
+import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
+import {AbstractReader} from "@ui5/fs";
 
-export interface LinterOptions {
-	rootDir: string;
-	filePaths: string[];
-	reportCoverage?: boolean;
-	messageDetails?: boolean;
+async function lint(
+	resourceReader: AbstractReader, options: LinterOptions
+): Promise<LintResult[]> {
+	const lintEnd = taskStart("Linting");
+
+	const workspace = createWorkspace({
+		reader: resourceReader,
+	});
+
+	const res = await lintWorkspace(workspace, options);
+	lintEnd();
+	return res;
 }
 
-async function fsStat(fsPath: string) {
-	try {
-		return await stat(fsPath);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	} catch (err: any) {
-		// "File or directory does not exist"
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-		if (err.code === "ENOENT") {
-			return false;
-		} else {
-			throw err;
-		}
+export async function lintProject({
+	rootDir, pathsToLint, reportCoverage, includeMessageDetails,
+}: LinterOptions): Promise<LintResult[]> {
+	const projectGraphDone = taskStart("Project Graph creation");
+	const graph = await getProjectGraph(rootDir);
+	const project = graph.getRoot();
+	projectGraphDone();
+
+	let virBasePath = "/resources/";
+	if (!project._isSourceNamespaced) {
+		// Ensure the virtual filesystem includes the project namespace to allow relative imports
+		// of framework resources from the project
+		virBasePath += project.getNamespace() + "/";
 	}
+	const fsBasePath = project.getSourcePath();
+	let reader = createReader({
+		fsBasePath,
+		virBasePath,
+	});
+	let virBasePathTest: string | undefined;
+	let fsBasePathTest: string | undefined;
+	if (project._testPathExists) {
+		fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+		virBasePathTest = "/test-resources/";
+		if (!project._isSourceNamespaced) {
+			// Dynamically add namespace if the physical project structure does not include it
+			// This logic is identical to the specification implementation in ui5-project
+			virBasePathTest += project.getNamespace() + "/";
+		}
+		reader = createReaderCollection({
+			readers: [reader, createReader({
+				fsBasePath: fsBasePathTest,
+				virBasePath: virBasePathTest,
+			})],
+		});
+	}
+	let resolvedFilePaths;
+	if (pathsToLint?.length) {
+		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
+		resolvedFilePaths = transformFilePathsToVirtualPaths(
+			absoluteFilePaths, fsBasePath, virBasePath, fsBasePathTest, virBasePathTest);
+	}
+
+	const res = await lint(reader, {
+		rootDir,
+		namespace: project.getNamespace(),
+		pathsToLint: resolvedFilePaths,
+		reportCoverage,
+		includeMessageDetails,
+	});
+
+	const relFsBasePath = path.relative(rootDir, fsBasePath);
+	const relFsBasePathTest = fsBasePathTest ? path.relative(rootDir, fsBasePathTest) : undefined;
+	res.forEach((result) => {
+		result.filePath = transformVirtualPathToFilePath(result.filePath,
+			relFsBasePath, virBasePath,
+			relFsBasePathTest, virBasePathTest);
+	});
+	return res;
 }
 
-async function dirExists(dirPath: string) {
-	const stats = await fsStat(dirPath);
-	return stats && stats.isDirectory();
-}
+export async function lintFile({
+	rootDir, pathsToLint, namespace, reportCoverage, includeMessageDetails,
+}: LinterOptions): Promise<LintResult[]> {
+	const reader = createReader({
+		fsBasePath: rootDir,
+		virBasePath: "/",
+	});
+	let resolvedFilePaths;
+	if (pathsToLint?.length) {
+		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
+		resolvedFilePaths = transformFilePathsToVirtualPaths(
+			absoluteFilePaths, rootDir, "/", rootDir);
+	}
 
-async function fileExists(dirPath: string) {
-	const stats = await fsStat(dirPath);
-	return stats && stats.isFile();
+	const res = await lint(reader, {
+		rootDir,
+		namespace,
+		pathsToLint: resolvedFilePaths,
+		reportCoverage,
+		includeMessageDetails,
+	});
+
+	res.forEach((result) => {
+		result.filePath = transformVirtualPathToFilePath(result.filePath, "", "/");
+	});
+	return res;
 }
 
 async function getProjectGraph(rootDir: string): Promise<ProjectGraph> {
@@ -87,23 +161,103 @@ async function getProjectGraph(rootDir: string): Promise<ProjectGraph> {
 	});
 }
 
-export async function lintProject({
-	rootDir, filePaths, reportCoverage, messageDetails,
-}: LinterOptions): Promise<LintResult[]> {
-	const lintEnd = taskStart("Linting Project");
-	const projectGraphDone = taskStart("Project Graph creation");
-	const graph = await getProjectGraph(rootDir);
-	const project = graph.getRoot();
-	projectGraphDone();
-	const tsDetector = new TsProjectDetector(project);
-	const res = await tsDetector.createReports(filePaths, reportCoverage, messageDetails);
-	lintEnd();
-	return res;
+/**
+ * Resolve provided filePaths to absolute paths and ensure they are located within the project root.
+ * Returned paths are absolute.
+*/
+function resolveFilePaths(rootDir: string, filePaths: string[]): string[] {
+	/* rootDir is always absolute, e.g. '/home/user/projects/com.ui5.troublesome.app/'
+
+		filePaths can be absolute, or relative to rootDir:
+			Absolute example:
+			'/home/user/projects/com.ui5.troublesome.app/webapp/model/formatter.js/webapp/controller/BaseController.js'
+			'/home/user/projects/com.ui5.troublesome.app/webapp/model/formatter.js/webapp/model/formatter.js'
+
+			Relative example:
+			'webapp/controller/BaseController.js'
+			'webapp/model/formatter.js'
+	*/
+	return filePaths.map((filePath) => {
+		if (!path.isAbsolute(filePath)) {
+			// Resolve relative filePaths
+			filePath = path.join(rootDir, filePath);
+		}
+		// Ensure file path is located within project root
+		if (!filePath.startsWith(rootDir)) {
+			throw new Error(
+				`File path ${filePath} is not located within project root ${rootDir}`);
+		}
+		return filePath;
+	});
 }
 
-export async function lintFile({
-	rootDir, filePaths, reportCoverage, messageDetails,
-}: LinterOptions): Promise<LintResult[]> {
-	const tsDetector = new TsFileDetector(rootDir);
-	return await tsDetector.createReports(filePaths, reportCoverage, messageDetails);
+function ensurePosix(inputPath: string) {
+	if (!inputPath.includes("\\")) {
+		return inputPath;
+	}
+	return inputPath.replace(/\\/g, "/");
+}
+
+/**
+ * Normalize provided filePaths to virtual paths.
+ * Returned paths are absolute, POSIX-style paths
+ */
+function transformFilePathsToVirtualPaths(
+	filePaths: FilePath[],
+	srcFsBasePath: string, srcVirBasePath: string,
+	testFsBasePath?: string, testVirBasePath?: string
+): FilePath[] {
+	return filePaths.map((filePath) => {
+		if (filePath.startsWith(srcFsBasePath)) {
+			return posixPath.join(srcVirBasePath, ensurePosix(path.relative(srcFsBasePath, filePath)));
+		} else if (testFsBasePath && testVirBasePath && filePath.startsWith(testFsBasePath)) {
+			return posixPath.join(testVirBasePath, ensurePosix(path.relative(testFsBasePath, filePath)));
+		} else {
+			throw new Error(
+				`File path ${filePath} is not located within the detected source or test directories of the project`);
+		}
+	});
+}
+
+/**
+ * Normalize provided virtual paths to the original file paths
+ */
+function transformVirtualPathToFilePath(
+	virtualPath: string,
+	srcFsBasePath: string, srcVirBasePath: string,
+	testFsBasePath?: string, testVirBasePath?: string
+): FilePath {
+	if (virtualPath.startsWith(srcVirBasePath)) {
+		return path.join(srcFsBasePath, posixPath.relative(srcVirBasePath, virtualPath));
+	} else if (testFsBasePath && testVirBasePath && virtualPath.startsWith(testVirBasePath)) {
+		return path.join(testFsBasePath, posixPath.relative(testVirBasePath, virtualPath));
+	} else {
+		throw new Error(
+			`Resource path ${virtualPath} is not located within the virtual source or test directories of the project`);
+	}
+}
+
+async function fsStat(fsPath: string) {
+	try {
+		return await stat(fsPath);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (err: any) {
+		// "File or directory does not exist"
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		if (err.code === "ENOENT") {
+			return false;
+		} else {
+			throw err;
+		}
+	}
+}
+
+async function dirExists(dirPath: string) {
+	const stats = await fsStat(dirPath);
+	return stats && stats.isDirectory();
+}
+
+async function fileExists(dirPath: string) {
+	const stats = await fsStat(dirPath);
+	return stats && stats.isFile();
 }

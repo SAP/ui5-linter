@@ -5,7 +5,7 @@ import esmock from "esmock";
 import chalk from "chalk";
 import yargs, {Argv} from "yargs";
 import path from "node:path";
-import type {LintResult} from "../../../src/detectors/AbstractDetector.js";
+import type {LintResult} from "../../../src/linter/LinterContext.js";
 import type Base from "../../../src/cli/base.js";
 
 const test = anyTest as TestFn<{
@@ -98,8 +98,8 @@ test.serial("ui5lint (default) ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePaths: undefined,
-		messageDetails: false, reportCoverage: false,
+		rootDir: path.join(process.cwd()), pathsToLint: undefined,
+		includeMessageDetails: false, reportCoverage: false,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -115,8 +115,8 @@ test.serial("ui5lint --file-paths ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePaths,
-		messageDetails: false, reportCoverage: false,
+		rootDir: path.join(process.cwd()), pathsToLint: filePaths,
+		includeMessageDetails: false, reportCoverage: false,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -129,8 +129,8 @@ test.serial("ui5lint --coverage ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePaths: undefined,
-		messageDetails: false, reportCoverage: true,
+		rootDir: path.join(process.cwd()), pathsToLint: undefined,
+		includeMessageDetails: false, reportCoverage: true,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });

@@ -1,4 +1,4 @@
-import {LintMessage, LintResult} from "../detectors/AbstractDetector.js";
+import {LintMessage, LintResult} from "../linter/LinterContext.js";
 
 export class Json {
 	format(lintResults: LintResult[], showDetails: boolean) {

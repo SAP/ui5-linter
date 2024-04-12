@@ -4,7 +4,7 @@ import {
 	LintMessageSeverity,
 	CoverageInfo,
 	CoverageCategory,
-} from "../detectors/AbstractDetector.js";
+} from "../linter/LinterContext.js";
 import {readFile} from "fs/promises";
 
 const visualizedSpace = "\u00b7";

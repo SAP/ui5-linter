@@ -1,16 +1,22 @@
-import type {BaseReporter, ReporterMessage, ReporterCoverageInfo} from "../../detectors/BaseReporter.js";
-import type {LintMessage} from "../../detectors/AbstractDetector.js";
 import {Tag as SaxTag} from "sax-wasm";
-import {LintMessageSeverity, CoverageInfo} from "../../detectors/AbstractDetector.js";
+import LinterContext, {CoverageInfo, LintMessage, LintMessageSeverity, ResourcePath} from "../LinterContext.js";
 import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
-export default class HtmlReporter implements BaseReporter {
-	#filePath: string;
-	#messages: LintMessage[] = [];
-	#coverageInfo: CoverageInfo[] = [];
+interface ReporterMessage extends LintMessage {
+	node: SaxTag;
+}
 
-	constructor(filePath: string) {
-		this.#filePath = filePath;
+interface ReporterCoverageInfo extends CoverageInfo {
+	node: SaxTag;
+}
+
+export default class HtmlReporter {
+	#resourcePath: string;
+	#context: LinterContext;
+
+	constructor(resourcePath: ResourcePath, context: LinterContext) {
+		this.#resourcePath = resourcePath;
+		this.#context = context;
 	}
 
 	addMessage({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
@@ -23,20 +29,15 @@ export default class HtmlReporter implements BaseReporter {
 			({line, character: column} = node.openStart);
 		}
 
-		const msg: LintMessage = {
+		this.#context.addLintingMessage(this.#resourcePath, {
 			ruleId,
 			severity,
 			fatal,
 			line: line + 1,
 			column: column + 1,
 			message,
-		};
-
-		if (messageDetails) {
-			msg.messageDetails = resolveLinks(messageDetails);
-		}
-
-		this.#messages.push(msg);
+			messageDetails: messageDetails ? resolveLinks(messageDetails) : undefined,
+		});
 	}
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
@@ -46,7 +47,7 @@ export default class HtmlReporter implements BaseReporter {
 			({line: endLine, character: endColumn} = node.closeEnd);
 		}
 
-		this.#coverageInfo.push({
+		this.#context.addCoverageInfo(this.#resourcePath, {
 			category,
 			// One-based to be aligned with most IDEs
 			line: line + 1,
@@ -55,30 +56,5 @@ export default class HtmlReporter implements BaseReporter {
 			endColumn: endColumn + 1,
 			message,
 		});
-	}
-
-	getReport() {
-		let errorCount = 0;
-		let warningCount = 0;
-		let fatalErrorCount = 0;
-		for (const {severity, fatal} of this.#messages) {
-			if (severity === LintMessageSeverity.Error) {
-				errorCount++;
-				if (fatal) {
-					fatalErrorCount++;
-				}
-			} else {
-				warningCount++;
-			}
-		}
-
-		return {
-			filePath: this.#filePath,
-			messages: this.#messages,
-			coverageInfo: this.#coverageInfo,
-			errorCount,
-			warningCount,
-			fatalErrorCount,
-		};
 	}
 }
