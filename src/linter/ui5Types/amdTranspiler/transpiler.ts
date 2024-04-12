@@ -102,7 +102,7 @@ export default function transpileAmdToEsm(fileName: string, content: string, str
 			throw err;
 		}
 		if (err instanceof UnsupportedModuleError) {
-			log.verbose(`Failed to transform module: ${err.message}`);
+			log.verbose(`Failed to transform module ${fileName}: ${err.message}`);
 			if (err.stack && log.isLevelEnabled("verbose")) {
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);
@@ -110,7 +110,7 @@ export default function transpileAmdToEsm(fileName: string, content: string, str
 			return {source: content, map: ""};
 		} else if (err instanceof Error && err.message.startsWith("Debug Failure")) {
 			// We probably failed to create a valid AST
-			log.verbose(`AST transformation failed for module: ${err.message}`);
+			log.verbose(`AST transformation failed for module ${fileName}: ${err.message}`);
 			if (err.stack && log.isLevelEnabled("verbose")) {
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);

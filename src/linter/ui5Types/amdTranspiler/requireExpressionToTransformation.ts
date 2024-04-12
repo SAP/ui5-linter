@@ -104,7 +104,7 @@ export function transformAsyncRequireCall(
 			errbackDeclaration = nodeFactory.createFunctionDeclaration(
 				errback.modifiers,
 				errback.asteriskToken,
-				errback.name,
+				errback.name ?? nodeFactory.createUniqueName("extracted_require_errback"),
 				errback.typeParameters,
 				errback.parameters,
 				errback.type,
