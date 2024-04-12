@@ -23,7 +23,11 @@ export default async function lintXml({workspace, context}: LinterParameters) {
 	}
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
-		const {source, map} = await transpileXml(resource.getPath(), resource.getStream(), context);
+		const res = await transpileXml(resource.getPath(), resource.getStream(), context);
+		if (!res) {
+			return;
+		}
+		const {source, map} = res;
 		const resourcePath = resource.getPath();
 
 		// Write transpiled resource to workspace

@@ -51,8 +51,8 @@ export interface jsonSourceMapType {
 
 export default class ManifestLinter {
 	#reporter: ManifestReporter | undefined;
-	#content = "";
-	#resourcePath = "";
+	#content: string;
+	#resourcePath: string;
 	#context: LinterContext;
 
 	constructor(resourcePath: ResourcePath, content: string, context: LinterContext) {
@@ -63,9 +63,19 @@ export default class ManifestLinter {
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
-		const source = this.#parseManifest(this.#content);
-		this.#reporter = new ManifestReporter(this.#resourcePath, this.#context, source);
-		this.#analyzeManifest(source.data);
+		try {
+			const source = this.#parseManifest(this.#content);
+			this.#reporter = new ManifestReporter(this.#resourcePath, this.#context, source);
+			this.#analyzeManifest(source.data);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err);
+			this.#context.addLintingMessage(this.#resourcePath, {
+				severity: LintMessageSeverity.Error,
+				message,
+				ruleId: "ui5-linter-parsing-error",
+				fatal: true,
+			});
+		}
 	}
 
 	#parseManifest(manifest: string): jsonSourceMapType {
