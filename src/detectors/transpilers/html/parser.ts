@@ -61,6 +61,7 @@ export async function extractJSScriptTags(contentStream: ReadStream) {
 				return attr.name.value !== "type" ||
 					(attr.name.value === "type" &&
 					["",
+						"module",
 						"text/javascript",
 						"application/javascript", /* legacy */
 					].includes(attr.value.value.toLowerCase()));
