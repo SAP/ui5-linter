@@ -101,7 +101,7 @@ export default class TypeChecker {
 			if (!sourceFile.isDeclarationFile && pathsToLint.includes(sourceFile.fileName)) {
 				const sourceMap = sourceMaps.get(sourceFile.fileName);
 				if (!sourceMap) {
-					log.warn(`Failed to get source map for ${sourceFile.fileName}`);
+					log.verbose(`Failed to get source map for ${sourceFile.fileName}`);
 				}
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(
