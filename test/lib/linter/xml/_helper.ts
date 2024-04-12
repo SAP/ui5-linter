@@ -43,7 +43,12 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const context = new LinterContext({
 					rootDir: fixturesPath,
 				});
-				const {source, map} = await transpileXml(testName, fileStream, context);
+				const res = await transpileXml(testName, fileStream, context);
+				if (!res) {
+					t.fail("Transpile result is undefined");
+					return;
+				}
+				const {source, map} = res;
 				t.snapshot(source);
 				t.snapshot(map && JSON.parse(map));
 				t.snapshot(context.getLintingMessages(testName));

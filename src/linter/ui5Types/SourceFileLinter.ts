@@ -11,6 +11,7 @@ export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
 	#checker: ts.TypeChecker;
+	#context: LinterContext;
 	#reporter: SourceFileReporter;
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
@@ -24,6 +25,7 @@ export default class SourceFileLinter {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
 		this.#checker = checker;
+		this.#context = context;
 		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
@@ -36,12 +38,13 @@ export default class SourceFileLinter {
 			this.visitNode(this.#sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
-			if (err instanceof Error) {
-				throw new Error(`Failed to produce report for ${this.#resourcePath}: ${err.message}`, {
-					cause: err,
-				});
-			}
-			throw err;
+			const message = err instanceof Error ? err.message : String(err);
+			this.#context.addLintingMessage(this.#resourcePath, {
+				severity: LintMessageSeverity.Error,
+				message,
+				ruleId: "ui5-linter-parsing-error",
+				fatal: true,
+			});
 		}
 	}
 

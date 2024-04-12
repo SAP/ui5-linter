@@ -6,7 +6,7 @@ import {taskStart} from "../../util/perf.js";
 
 export default async function transpileHtml(
 	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext
-): Promise<TranspileResult> {
+): Promise<TranspileResult | undefined> {
 	try {
 		const taskEnd = taskStart("Transpile XML", resourcePath, true);
 		const report = new HtmlReporter(resourcePath, context);
@@ -32,12 +32,13 @@ export default async function transpileHtml(
 		taskEnd();
 		return {source: "", map: ""};
 	} catch (err) {
-		if (err instanceof Error) {
-			throw new Error(`Failed to transpile resource ${resourcePath}: ${err.message}`, {
-				cause: err,
-			});
-		} else {
-			throw err;
-		}
+		const message = err instanceof Error ? err.message : String(err);
+		context.addLintingMessage(resourcePath, {
+			severity: LintMessageSeverity.Error,
+			message,
+			ruleId: "ui5-linter-parsing-error",
+			fatal: true,
+		});
+		return;
 	}
 }
