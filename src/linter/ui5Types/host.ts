@@ -3,7 +3,7 @@ import path from "node:path";
 import posixPath from "node:path/posix";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
-import {transpileFile} from "./amdTranspiler/transpiler.js";
+import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
 import {ResourcePath} from "../LinterContext.js";
 const require = createRequire(import.meta.url);
 
@@ -119,7 +119,7 @@ export async function createVirtualCompilerHost(
 			}
 			if (fileContent && fileName.endsWith(".js") && !sourceMaps.get(fileName)) {
 				// No source map indicates no transpilation was done yet
-				const res = transpileFile(path.basename(fileName), fileContent);
+				const res = transpileAmdToEsm(path.basename(fileName), fileContent);
 				files.set(fileName, res.source);
 				sourceMaps.set(fileName, res.map);
 				fileContent = res.source;
