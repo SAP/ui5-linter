@@ -50,7 +50,7 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 	return ts.createProgram(inputFileNames, compilerOptions, host);
 }
 
-export function transpileFile(fileName: string, content: string, strict?: boolean): TranspileResult {
+export default function transpileAmdToEsm(fileName: string, content: string, strict?: boolean): TranspileResult {
 	// This is heavily inspired by the TypesScript "transpileModule" API
 
 	const taskDone = taskStart("Transpiling AMD to ESM", fileName, true);

@@ -6,6 +6,7 @@ import {getLogger} from "@ui5/logger";
 import LinterContext, {LinterParameters} from "../LinterContext.js";
 // import {Project} from "@ui5/project";
 import {AbstractAdapter} from "@ui5/fs";
+import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -114,5 +115,46 @@ export default class TypeChecker {
 			}
 		}
 		typeCheckDone();
+
+		if (process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES) {
+			// If requested, write out every resource that has a source map (which indicates it has been transformed)
+			// Loop over sourceMaps set
+			for (const [resourcePath, sourceMap] of sourceMaps) {
+				let fileContent = files.get(resourcePath);
+
+				if (typeof fileContent === "function") {
+					fileContent = fileContent();
+				}
+				if (fileContent) {
+					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
+						resourcePath, fileContent, sourceMap);
+				}
+			}
+		}
+	}
+}
+
+async function writeTransformedSources(fsBasePath: string,
+	originalResourcePath: string,
+	source: string, map: string | undefined) {
+	const transformedWriter = createAdapter({
+		fsBasePath,
+		virBasePath: "/",
+	});
+
+	await transformedWriter.write(
+		createResource({
+			path: originalResourcePath + ".ui5lint.transformed.js",
+			string: source,
+		})
+	);
+
+	if (map) {
+		await transformedWriter.write(
+			createResource({
+				path: originalResourcePath + ".ui5lint.transformed.js.map",
+				string: JSON.stringify(JSON.parse(map), null, "\t"),
+			})
+		);
 	}
 }
