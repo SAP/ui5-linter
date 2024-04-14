@@ -71,8 +71,8 @@
 		"json-source-map": "^0.6.1",
 		"sax-wasm": "^2.2.4",
 		"typescript": "5.3.x",
-		"yargs": "^17.7.2",
-		"update-notifier": "^7.0.0"
+		"update-notifier": "^7.0.0",
+		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^19.2.1",
@@ -82,7 +82,7 @@
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin": "^1.7.0",
 		"@types/he": "^1.2.3",
-		"@types/node": "^20.12.5",
+		"@types/node": "^20.12.7",
 		"@types/sinon": "^17.0.3",
 		"@types/update-notifier": "^6.0.8",
 		"@types/yargs": "^17.0.32",
@@ -99,6 +99,6 @@
 		"semver": "^7.6.0",
 		"sinon": "^17.0.1",
 		"tsx": "^4.7.2",
-		"typescript-eslint": "^7.5.0"
+		"typescript-eslint": "^7.6.0"
 	}
 }
