@@ -205,7 +205,7 @@ try {
 	let sapui5Version: string | null | undefined = process.argv[3];
 
 	if (!url) {
-		throw new Error("Second argument \"url\" is missing");
+		throw new Error("First argument \"url\" is missing");
 	}
 
 	if (!sapui5Version) {
