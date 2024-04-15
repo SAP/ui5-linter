@@ -19,7 +19,7 @@ async function fetchAndExtractAPIJsons(url: string) {
 	}
 
 	if (response.body && response.body instanceof ReadableStream) {
-		const zipFileName: string = url.split("/").pop() as string;
+		const zipFileName: string = url.split("/").pop()!;
 		const zipFile = path.resolve(RAW_API_JSON_FILES_FOLDER, zipFileName);
 		await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER), {recursive: true});
 

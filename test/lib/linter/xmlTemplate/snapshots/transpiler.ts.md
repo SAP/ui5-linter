@@ -1,4 +1,4 @@
-# Snapshot report for `test/lib/linter/xml/transpiler.ts`
+# Snapshot report for `test/lib/linter/xmlTemplate/transpiler.ts`
 
 The actual snapshot is saved in `transpiler.ts.snap`.
 
