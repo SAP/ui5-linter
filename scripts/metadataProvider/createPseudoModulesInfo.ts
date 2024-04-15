@@ -15,11 +15,11 @@ const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
 async function fetchAndExtractAPIJsons(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error(`unexpected response ${response.statusText}`);
+		throw new Error(`Unexpected response ${response.statusText}`);
 	}
 
 	if (response.body && response.body instanceof ReadableStream) {
-		const zipFileName: string = url.split("/").pop() ?? "";
+		const zipFileName: string = url.split("/").pop() as string;
 		const zipFile = path.resolve(RAW_API_JSON_FILES_FOLDER, zipFileName);
 		await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER), {recursive: true});
 
@@ -44,10 +44,10 @@ async function fetchAndExtractAPIJsons(url: string) {
 			await zip.close();
 		}
 
-		// Cleanup the ZIP file, so that the folder will contain only JSON files
+		// Remove the ZIP file, so that the folder will contain only JSON files
 		await unlink(zipFile);
 	} else {
-		throw new Error("Malformed response");
+		throw new Error(`The request to "${url}" returned a malformed response that cannot be parsed.`);
 	}
 }
 
@@ -86,7 +86,7 @@ async function transformFiles(sapui5Version: string) {
 
 	const groupedEnums = Object.keys(enums)
 		.reduce((acc: Record<string, {enum: UI5Enum; export: string}[]>, enumKey: string) => {
-		// Filter only real pseudo modules i.e. defined within library.js files
+			// Filter only real pseudo modules i.e. defined within library.js files
 			if (!pseudoModuleNames[enumKey]) {
 				return acc;
 			}
@@ -205,7 +205,7 @@ try {
 	let sapui5Version: string | null | undefined = process.argv[3];
 
 	if (!url) {
-		throw new Error("second argument \"url\" is missing");
+		throw new Error("Second argument \"url\" is missing");
 	}
 
 	if (!sapui5Version) {
