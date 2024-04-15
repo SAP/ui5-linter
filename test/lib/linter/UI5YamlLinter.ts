@@ -4,7 +4,7 @@ import LinterContext from "../../../src/linter/LinterContext.js";
 
 test("Test UI5YamlLinter report (parsing and analyzing)", async (t) => {
 	/* Mock resource content of ui5.yaml file,
-	(formatted as used in src/detectors/typeChecker/index.ts - #analyzeFiles()),
+	(formatted as used in src/linter/yaml/linter.ts)
 	(contains relevant 'framework' property and 'libraries' sub-property),
 	(contains only deprecated libraries) */
 	const resourceContent =
@@ -20,7 +20,7 @@ framework:
     - name: sap.ca.ui
     - name: sap.fe.common`;
 
-	const resourcePath = "/ui5.js"; // '.js' due to renaming in src/detectors/typeChecker/index.ts - #analyzeFiles()
+	const resourcePath = "/ui5.yaml";
 	const projectPath = "test.ui5yamllinter";
 	const context = new LinterContext({rootDir: projectPath});
 
@@ -29,7 +29,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.js");
+	const messages = context.getLintingMessages("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 3, "Detection of 3 deprecated libraries expected");
