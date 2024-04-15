@@ -482,8 +482,7 @@ export default class SourceFileLinter {
 		}
 		
 		if (classInterfaces && ts.isPropertyDeclaration(classInterfaces) &&
-			classInterfaces.initializer && ts.isIntersectionTypeNode(classInterfaces.initializer) &&
-			classInterfaces.initializer.elements && ts.isArrayLiteralExpression(classInterfaces.initializer.elements)) {
+			classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
 			const hasAsyncInterface = classInterfaces.initializer
 				.elements.some((implementedInterface) => implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
 
@@ -491,10 +490,60 @@ export default class SourceFileLinter {
 				return; // When the IAsyncContentCreation everything down the stream implicitly becomes async
 			}
 		}
-		
-		if (classMetadata) {
-			// TODO: extract manifest object
+
+		let manifestJson;
+		if (classMetadata && ts.isPropertyDeclaration(classMetadata) &&
+			classMetadata.initializer && ts.isObjectLiteralExpression(classMetadata.initializer)) {
+			manifestJson = this.extractPropsRecursive(classMetadata.initializer);
 		}
+
+		if (manifestJson?.manifest.value === "\"json\"") { // The manifest is an external manifest.json file
+			// TODO: Read manifest.json from file system
+		} 
+		
+		if (manifestJson?.manifest) {
+			// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
+			if (manifestJson?.["sap.ui5"]?.rootView?.async === true &&
+				manifestJson?.["sap.ui5"]?.routing?.config?.async === true
+			) {
+				return;
+			}
+		}
+
+		this.#reporter.addMessage({
+			node: classMetadata ?? classInterfaces ?? classDec,
+			severity: LintMessageSeverity.Error,
+			ruleId: "ui5-linter-no-sync-loading",
+			message: "zzzz",
+			messageDetails: "",
+		});
+	}
+	
+	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
+		const properties: Record<string, any> = Object.create(null);
+
+		node.properties?.forEach((prop) => {
+			if (!ts.isPropertyAssignment(prop) || !prop.name) {
+				return;
+			}
+
+			const key = prop.name.getText();
+			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+				properties[key] = { value: false, node: prop.initializer };
+			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
+				properties[key] = { value: null, node: prop.initializer };
+			} if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
+				properties[key] = { value: this.extractPropsRecursive(prop.initializer), node: prop.initializer };
+			} else if (
+				(ts.isIdentifier(prop.initializer) ||
+					ts.isNumericLiteral(prop.initializer) ||
+					ts.isStringLiteral(prop.initializer))
+
+				&& prop.initializer.text) {
+				properties[key] = { value: prop.initializer.getText(), node: prop.initializer };
+			}
+		});
+		return properties;
 	}
 
 	isSymbolOfUi5Type(symbol: ts.Symbol) {
