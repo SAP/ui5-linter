@@ -440,7 +440,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage({
 				node: moduleSpecifierNode,
 				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-deprecated-api",
+				ruleId: "ui5-linter-no-pseudo-modules",
 				message:
 					`Import of pseudo module ` +
 					`'${moduleSpecifierNode.text}'`,
@@ -478,7 +478,7 @@ export default class SourceFileLinter {
 	}
 
 	isSymbolOfPseudoType(symbol: ts.Symbol | undefined) {
-		return symbol?.valueDeclaration?.getSourceFile().fileName.includes("/types/@ui5/linter/overrides/library/");
+		return symbol?.valueDeclaration?.getSourceFile().fileName.startsWith("/types/@ui5/linter/overrides/library/");
 	}
 
 	findClassOrInterface(node: ts.Node): ts.Type | undefined {
