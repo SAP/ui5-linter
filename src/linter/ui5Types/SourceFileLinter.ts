@@ -67,6 +67,8 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
+		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments) {
+			this.analyzeComponentJson(node as ts.ExpressionWithTypeArguments);
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -446,6 +448,52 @@ export default class SourceFileLinter {
 					`'${moduleSpecifierNode.text}'`,
 				messageDetails: "Import library and reuse the enum from there",
 			});
+		}
+	}
+	
+	analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
+		if (node.expression.getText() !== "UIComponent") {
+			return;
+		}
+		
+		let parent = node.parent;
+		let classDec;
+		while(!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
+			if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
+				classDec = parent;
+			}
+			parent = parent.parent;
+		}
+		
+		if (!ts.isSourceFile(parent) || !parent.fileName.includes("Component.js") || !classDec) {
+			return;
+		}
+		
+		let classInterfaces: ts.ClassElement | undefined;
+		let classMetadata: ts.ClassElement | undefined;
+		if (ts.isClassDeclaration(classDec)) {
+			classDec.members.forEach((classMember) => {
+				if (classMember.name?.getText() === "interfaces") {
+					classInterfaces = classMember;
+				} else if (classMember.name?.getText() === "metadata") {
+					classMetadata = classMember;
+				}
+			});	
+		}
+		
+		if (classInterfaces && ts.isPropertyDeclaration(classInterfaces) &&
+			classInterfaces.initializer && ts.isIntersectionTypeNode(classInterfaces.initializer) &&
+			classInterfaces.initializer.elements && ts.isArrayLiteralExpression(classInterfaces.initializer.elements)) {
+			const hasAsyncInterface = classInterfaces.initializer
+				.elements.some((implementedInterface) => implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
+
+			if (hasAsyncInterface) {
+				return; // When the IAsyncContentCreation everything down the stream implicitly becomes async
+			}
+		}
+		
+		if (classMetadata) {
+			// TODO: extract manifest object
 		}
 	}
 
