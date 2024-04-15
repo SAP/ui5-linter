@@ -231,6 +231,8 @@ function transformVirtualPathToFilePath(
 		return path.join(srcFsBasePath, posixPath.relative(srcVirBasePath, virtualPath));
 	} else if (testFsBasePath && testVirBasePath && virtualPath.startsWith(testVirBasePath)) {
 		return path.join(testFsBasePath, posixPath.relative(testVirBasePath, virtualPath));
+	} else if (virtualPath.startsWith("/")) {
+		return posixPath.relative("/", virtualPath);
 	} else {
 		throw new Error(
 			`Resource path ${virtualPath} is not located within the virtual source or test directories of the project`);

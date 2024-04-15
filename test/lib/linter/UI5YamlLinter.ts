@@ -25,7 +25,7 @@ framework:
 	const context = new LinterContext({rootDir: projectPath});
 
 	// Create UI5YamlLinter instance with resource content
-	const linter = new UI5YamlLinter(resourceContent, resourcePath, context);
+	const linter = new UI5YamlLinter(resourcePath, resourceContent, context);
 	// Run UI5YamlLinter report
 	await linter.lint();
 

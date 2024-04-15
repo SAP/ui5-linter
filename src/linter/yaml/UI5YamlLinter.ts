@@ -37,7 +37,7 @@ export default class UI5YamlLinter {
 	#resourcePath = "";
 	#context: LinterContext;
 
-	constructor(content: string, resourcePath: string, context: LinterContext) {
+	constructor(resourcePath: string, content: string, context: LinterContext) {
 		this.#content = content;
 		this.#resourcePath = resourcePath;
 		this.#context = context;
