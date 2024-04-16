@@ -100,7 +100,7 @@ npm run update-pseudo-modules-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-d
 ```
 
 ```sh
-npm run update-semantic-model-info -- $URL 1.120.12
+npm run update-semantic-model-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.12/sapui5-sdk-dist-1.120.12-api-jsons.zip 1.120.12
 ```
 
 
