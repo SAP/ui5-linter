@@ -451,25 +451,25 @@ export default class SourceFileLinter {
 			});
 		}
 	}
-	
-	async analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
+
+	analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
 		if (node.expression.getText() !== "UIComponent") {
 			return;
 		}
-		
+
 		let parent = node.parent;
 		let classDesc;
-		while(!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
+		while (!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
 			if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
 				classDesc = parent;
 			}
 			parent = parent.parent;
 		}
-		
+
 		if (!ts.isSourceFile(parent) || !parent.fileName.includes("Component.js") || !classDesc) {
 			return;
 		}
-		
+
 		let classInterfaces: ts.ClassElement | undefined;
 		let componentManifest: ts.ClassElement | undefined;
 		if (ts.isClassDeclaration(classDesc)) {
@@ -479,14 +479,15 @@ export default class SourceFileLinter {
 				} else if (classMember.name?.getText() === "metadata") {
 					componentManifest = classMember;
 				}
-			});	
+			});
 		}
 
-		let hasAsyncInterface: boolean = false;
+		let hasAsyncInterface = false;
 		if (classInterfaces && ts.isPropertyDeclaration(classInterfaces) &&
 			classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
 			hasAsyncInterface = classInterfaces.initializer
-				.elements.some((implementedInterface) => implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
+				.elements.some((implementedInterface) =>
+					implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
 		}
 
 		let manifestJson;
@@ -495,37 +496,68 @@ export default class SourceFileLinter {
 			manifestJson = this.extractPropsRecursive(componentManifest.initializer);
 		}
 
-		if (manifestJson?.manifest.value === "\"json\"") { // The manifest is an external manifest.json file
-			// TODO: Read manifest.json from file system
-			const reader = this.#context.getRootReader();
-			const manifestPath = this.#resourcePath.replace("Component.js", "manifest.json");
-			// const manifestResource = await reader.byPath(manifestPath);
-			const manifestResource = await reader.byGlob("manifest.json");
-			
-			console.log(manifestPath);
-		}
+		// if (manifestJson?.manifest.value === "\"json\"") { // The manifest is an external manifest.json file
+		// 	// TODO: Read manifest.json from file system
+		// 	const reader = this.#context.getRootReader();
+		// 	const manifestPath = this.#resourcePath.replace("Component.js", "manifest.json");
+		// 	// const manifestResource = await reader.byPath(manifestPath);
+		// 	const manifestResource = await reader.byGlob("manifest.json");
 
-		if (!hasAsyncInterface && manifestJson?.manifest) {
-			// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
-			if (manifestJson?.manifest?.value["\"sap.ui5\""]?.value.rootView?.value.async?.value === true &&
-				manifestJson?.manifest?.value["\"sap.ui5\""]?.value.routing?.value.config?.value.async?.value === true
-			) {
-				return;
+		// 	console.log(manifestPath);
+		// }
+
+		const manifestSapui5Section = manifestJson?.manifest?.value?.["\"sap.ui5\""];
+		const rootViewAsyncValue = manifestSapui5Section?.value.rootView?.value.async?.value;
+		const rootViewAsyncNode = manifestSapui5Section?.value.rootView?.value.async?.node;
+		const routeAsyncValue = manifestSapui5Section?.value.routing?.value.config?.value.async?.value;
+		const routeAsyncNode = manifestSapui5Section?.value.routing?.value.config?.value.async?.node;
+
+		// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
+		if (!hasAsyncInterface) {
+			if (rootViewAsyncValue !== true || routeAsyncValue !== true) {
+				this.#reporter.addMessage({
+					node: classDesc,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-sync-loading",
+					message: "Use of sync loading for Component's views",
+					messageDetails: `Configure the Component.js to implement the ` +
+					`"sap.ui.core.IAsyncContentCreation" interface or set the ` +
+					`"sap.ui5/rootView/async" and "sap.ui5/routing/config/async" flags to true.`,
+				});
+			}
+		} else {
+			if (rootViewAsyncValue === true) {
+				this.#reporter.addMessage({
+					node: rootViewAsyncNode ?? classDesc,
+					severity: LintMessageSeverity.Warning,
+					ruleId: "ui5-linter-no-sync-loading",
+					message: "Remove the async flag from \"sap.ui5/rootView\"",
+					messageDetails: `The Component.js is configured to implement the ` +
+					`"sap.ui.core.IAsyncContentCreation" interface. "sap.ui5/rootView/async" ` +
+					`and "sap.ui5/rootView/async" flags are implicitly overridden and unnecessary.`,
+				});
+			}
+			if (routeAsyncValue === true) {
+				this.#reporter.addMessage({
+					node: routeAsyncNode ?? classDesc,
+					severity: LintMessageSeverity.Warning,
+					ruleId: "ui5-linter-no-sync-loading",
+					message: "Remove the async flag from \"sap.ui5/routing/config\"",
+					messageDetails: `The Component.js is configured to implement the ` +
+					`"sap.ui.core.IAsyncContentCreation" interface. "sap.ui5/rootView/async" ` +
+					`and "sap.ui5/routing/config/async" flags are implicitly overridden and unnecessary.`,
+				});
 			}
 		}
-
-		this.#reporter.addMessage({
-			node: classDesc,
-			severity: LintMessageSeverity.Error,
-			ruleId: "ui5-linter-no-sync-loading",
-			message: "Use of sync loading for Component's views",
-			messageDetails: `Configure the Component.js to implement the "sap.ui.core.IAsyncContentCreation" interface` +
-				`or set the "sap.ui5/rootView/async" and "sap.ui5/routing/config/async" flags to true.`,
-		});
 	}
-	
+
 	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
-		const properties: Record<string, any> = Object.create(null);
+		type propsRecordValueType = string | boolean | undefined | null | number | object;
+		type propsRecord = Record<string, {
+			value: propsRecord | propsRecordValueType | propsRecordValueType[];
+			node: ts.Node;
+		}>;
+		const properties = Object.create(null) as propsRecord;
 
 		node.properties?.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop) || !prop.name) {
@@ -534,36 +566,36 @@ export default class SourceFileLinter {
 
 			const key = prop.name.getText();
 			if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
-				properties[key] = { value: true, node: prop.initializer };
+				properties[key] = {value: true, node: prop.initializer};
 			} else if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-				properties[key] = { value: false, node: prop.initializer };
+				properties[key] = {value: false, node: prop.initializer};
 			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
-				properties[key] = { value: null, node: prop.initializer };
+				properties[key] = {value: null, node: prop.initializer};
 			} else if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
-				properties[key] = { value: this.extractPropsRecursive(prop.initializer), node: prop.initializer };
+				properties[key] = {value: this.extractPropsRecursive(prop.initializer), node: prop.initializer};
 			} else if (ts.isArrayLiteralExpression(prop.initializer)) {
 				const resolvedValue = prop.initializer.elements.map((elem) => {
 					if (!ts.isObjectLiteralExpression(elem)) {
 						return;
 					}
-					
-					return this.extractPropsRecursive(elem)
+
+					return this.extractPropsRecursive(elem);
 				}).filter(($) => $);
 
-				properties[key] = { value: resolvedValue, node: prop.initializer };
+				properties[key] = {value: resolvedValue, node: prop.initializer};
 			} else if (
 				(ts.isIdentifier(prop.initializer) ||
-					ts.isNumericLiteral(prop.initializer) ||
-					ts.isStringLiteral(prop.initializer))
+				ts.isNumericLiteral(prop.initializer) ||
+				ts.isStringLiteral(prop.initializer)) &&
 
-				&& prop.initializer.getText()) {
-				properties[key] = { value: prop.initializer.getText(), node: prop.initializer };
+				prop.initializer.getText()) {
+				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
 			} else {
 				throw new Error("Unhandled property assignment");
 			}
 		});
 		return properties;
-	}
+	};
 
 	isSymbolOfUi5Type(symbol: ts.Symbol) {
 		if (symbol.name.startsWith("sap/")) {
