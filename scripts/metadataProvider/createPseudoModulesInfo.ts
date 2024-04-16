@@ -1,55 +1,12 @@
 import {createRequire} from "module";
-import {createWriteStream} from "node:fs";
-import {writeFile, readdir, mkdir, unlink} from "node:fs/promises";
-import https from "node:https";
+import {writeFile, readdir} from "node:fs/promises";
 import path from "node:path";
-import {pipeline} from "node:stream/promises";
-import yauzl from "yauzl-promise";
 import MetadataProvider from "./MetadataProvider.js";
+import {fetchAndExtractAPIJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
 
 import type {UI5Enum, UI5EnumValue} from "@ui5-language-assistant/semantic-model-types";
 
 const require = createRequire(import.meta.url);
-const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
-
-async function fetchAndExtractAPIJsons(url: string) {
-	const response = await fetch(url);
-	if (!response.ok) {
-		throw new Error(`Unexpected response ${response.statusText}`);
-	}
-
-	if (response.body && response.body instanceof ReadableStream) {
-		const zipFileName: string = url.split("/").pop()!;
-		const zipFile = path.resolve(RAW_API_JSON_FILES_FOLDER, zipFileName);
-		await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER), {recursive: true});
-
-		await new Promise((resolve) => {
-			https.get(url, (res) => {
-				resolve(pipeline(res, createWriteStream(zipFile)));
-			});
-		});
-
-		const zip = await yauzl.open(zipFile);
-		try {
-			for await (const entry of zip) {
-				if (entry.filename.endsWith("/")) {
-					await mkdir(path.resolve(RAW_API_JSON_FILES_FOLDER, entry.filename));
-				} else {
-					const readEntry = await entry.openReadStream();
-					const writeEntry = createWriteStream(path.resolve(RAW_API_JSON_FILES_FOLDER, entry.filename));
-					await pipeline(readEntry, writeEntry);
-				}
-			}
-		} finally {
-			await zip.close();
-		}
-
-		// Remove the ZIP file, so that the folder will contain only JSON files
-		await unlink(zipFile);
-	} else {
-		throw new Error(`The request to "${url}" returned a malformed response that cannot be parsed.`);
-	}
-}
 
 async function getPseudoModuleNames() {
 	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
@@ -186,39 +143,11 @@ async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string
 	);
 }
 
-async function cleanup() {
-	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
-
-	await Promise.all(apiJsonList.map((library) => unlink(path.resolve(RAW_API_JSON_FILES_FOLDER, library))));
-}
-
-async function main(url: string, sapui5Version: string) {
+// Entrypoint
+await handleCli(async (url, sapui5Version) => {
 	await fetchAndExtractAPIJsons(url);
 
 	await transformFiles(sapui5Version);
 
 	await cleanup();
-}
-
-try {
-	const url = process.argv[2];
-	let sapui5Version: string | null | undefined = process.argv[3];
-
-	if (!url) {
-		throw new Error("First argument \"url\" is missing");
-	}
-
-	if (!sapui5Version) {
-		// Try to extract version from url
-		const versionMatch = url.match(/\/\d{1}\.\d{1,3}\.\d{1,3}\//gi);
-		sapui5Version = versionMatch?.[0].replaceAll("/", "");
-	}
-	if (!sapui5Version) {
-		throw new Error("\"sapui5Version\" cannot be determined. Provide it as a second argument");
-	}
-
-	await main(url, sapui5Version);
-} catch (err) {
-	process.stderr.write(String(err));
-	process.exit(1);
-}
+});
