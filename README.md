@@ -85,6 +85,25 @@ Choose the output format. Currently, `stylish` (default) and `json` are supporte
 ui5lint --format json
 ```
 
+## Metadata generation
+
+**Note:** This section is intended to support UI5 Linter developers and is not meant for end users of the linter!
+
+The UI5 Linter requires metadata to accurately identify certain issues within the codebase. While the absence of this metadata does not hinder the linter's basic functionality, it may result in incomplete findings.
+
+The extracted and generated metadata is stored within the repository under the `/resources` folder. This metadata plays a crucial role in enhancing the accuracy of the linter's analysis.
+
+Regular updates to the metadata are necessary to ensure that the data is compatible with the corresponding UI5 type definitions.
+
+```sh
+npm run update-pseudo-modules-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.12/sapui5-sdk-dist-1.120.12-api-jsons.zip 1.120.12
+```
+
+```sh
+npm run update-semantic-model-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.12/sapui5-sdk-dist-1.120.12-api-jsons.zip 1.120.12
+```
+
+
 ## Support, Feedback, Contributing
 
 This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/SAP/ui5-linter/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).

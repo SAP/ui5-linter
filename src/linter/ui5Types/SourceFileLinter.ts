@@ -435,6 +435,18 @@ export default class SourceFileLinter {
 				messageDetails: deprecationInfo.messageDetails,
 			});
 		}
+
+		if (this.isSymbolOfPseudoType(symbol)) {
+			this.#reporter.addMessage({
+				node: moduleSpecifierNode,
+				severity: LintMessageSeverity.Error,
+				ruleId: "ui5-linter-no-pseudo-modules",
+				message:
+					`Import of pseudo module ` +
+					`'${moduleSpecifierNode.text}'`,
+				messageDetails: "Import library and reuse the enum from there",
+			});
+		}
 	}
 
 	isSymbolOfUi5Type(symbol: ts.Symbol) {
@@ -463,6 +475,10 @@ export default class SourceFileLinter {
 
 	isSymbolOfJquerySapType(symbol: ts.Symbol) {
 		return symbol.valueDeclaration?.getSourceFile().fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
+	}
+
+	isSymbolOfPseudoType(symbol: ts.Symbol | undefined) {
+		return symbol?.valueDeclaration?.getSourceFile().fileName.startsWith("/types/@ui5/linter/overrides/library/");
 	}
 
 	findClassOrInterface(node: ts.Node): ts.Type | undefined {

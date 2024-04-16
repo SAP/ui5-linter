@@ -1,5 +1,7 @@
 import {writeFile} from "node:fs/promises";
 import MetadataProvider from "./MetadataProvider.js";
+import path from "node:path";
+import {fetchAndExtractAPIJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
 
 import {
 	forEachSymbol,
@@ -33,17 +35,11 @@ async function main(apiJsonsRoot: string, sapui5Version: string) {
 	);
 }
 
-try {
-	const apiJsonsRoot = process.argv[2];
-	if (!apiJsonsRoot) {
-		throw new Error("first argument 'apiJsonsRoot' is missing");
-	}
-	const sapui5Version = process.argv[3];
-	if (!sapui5Version) {
-		throw new Error("second argument 'sapui5Version' is missing");
-	}
-	await main(apiJsonsRoot, sapui5Version);
-} catch (err) {
-	process.stderr.write(String(err));
-	process.exit(1);
-}
+// Entrypoint
+await handleCli(async (url, sapui5Version) => {
+	await fetchAndExtractAPIJsons(url);
+
+	await main(path.resolve(RAW_API_JSON_FILES_FOLDER), sapui5Version);
+
+	await cleanup();
+});
