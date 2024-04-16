@@ -507,8 +507,8 @@ export default class SourceFileLinter {
 
 		if (!hasAsyncInterface && manifestJson?.manifest) {
 			// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
-			if (manifestJson?.["sap.ui5"]?.rootView?.async === true &&
-				manifestJson?.["sap.ui5"]?.routing?.config?.async === true
+			if (manifestJson?.manifest?.value["\"sap.ui5\""]?.value.rootView?.value.async?.value === true &&
+				manifestJson?.manifest?.value["\"sap.ui5\""]?.value.routing?.value.config?.value.async?.value === true
 			) {
 				return;
 			}
@@ -533,19 +533,33 @@ export default class SourceFileLinter {
 			}
 
 			const key = prop.name.getText();
-			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+			if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
+				properties[key] = { value: true, node: prop.initializer };
+			} else if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
 				properties[key] = { value: false, node: prop.initializer };
 			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
 				properties[key] = { value: null, node: prop.initializer };
-			} if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
+			} else if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
 				properties[key] = { value: this.extractPropsRecursive(prop.initializer), node: prop.initializer };
+			} else if (ts.isArrayLiteralExpression(prop.initializer)) {
+				const resolvedValue = prop.initializer.elements.map((elem) => {
+					if (!ts.isObjectLiteralExpression(elem)) {
+						return;
+					}
+					
+					return this.extractPropsRecursive(elem)
+				}).filter(($) => $);
+
+				properties[key] = { value: resolvedValue, node: prop.initializer };
 			} else if (
 				(ts.isIdentifier(prop.initializer) ||
 					ts.isNumericLiteral(prop.initializer) ||
 					ts.isStringLiteral(prop.initializer))
 
-				&& prop.initializer.text) {
+				&& prop.initializer.getText()) {
 				properties[key] = { value: prop.initializer.getText(), node: prop.initializer };
+			} else {
+				throw new Error("Unhandled property assignment");
 			}
 		});
 		return properties;
