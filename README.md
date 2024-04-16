@@ -87,7 +87,7 @@ ui5lint --format json
 
 ## Metadata generation
 
-**Note:** This section is intended to support UI5 Linter developers, but is not meant for end users of the linter!
+**Note:** This section is intended to support UI5 Linter developers and is not meant for end users of the linter!
 
 The UI5 Linter requires metadata to accurately identify certain issues within the codebase. While the absence of this metadata does not hinder the linter's basic functionality, it may result in incomplete findings.
 
