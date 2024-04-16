@@ -35,19 +35,24 @@ export default class YamlLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			// TODO: Support multiple documents in one Yaml file
-			// https://sap.github.io/ui5-tooling/stable/pages/extensibility/CustomTasks/#example-custom-task-extension-defined-in-ui5-project
-			// How: Loop through this.#content for each line
-			// Check if line matches yamlDocumentSeparator ('---')
-			// Use index of line as offset
-			// Call analyzeYaml() and Pass offset
+			/* Support multiple documents in one Yaml file
+			https://sap.github.io/ui5-tooling/stable/pages/extensibility/CustomTasks/#example-custom-task-extension-defined-in-ui5-project */
 
-			// const yamlDocumentLines = this.#content.split(/\r?\n|\r|\n/g); // End of line regex
-			this.#content.split("---").forEach((partDocument) => {
-				// TODO: Calculate offset + Pass to analyzeYaml()
-				const source: YamlContent = this.#parseYaml(partDocument);
-				this.#analyzeYaml(source);
-			});
+			// Split Yaml file into part documents by '---' separator
+			const partDocuments = this.#content.split(/(\r?\n|\r|\n)---/g).map((part) => part.trim());
+
+			// Calculate the starting line number of each part document
+			let lineNumberOffset = 0;
+			for (const part of partDocuments) {
+				if (part !== "") {
+					// Parse content only of the current part
+					const parsedYamlWithPosInfo: YamlContent = this.#parseYaml(part);
+					// Analyze part content with line number offset
+					this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
+					// Update line number offset for next part
+					lineNumberOffset += part.split(/\r?\n|\r|\n/g).length;
+				}
+			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, {
@@ -64,17 +69,16 @@ export default class YamlLinter {
 		return fromYaml(fileContent) as YamlContent;
 	}
 
-	#analyzeYaml(yamlObject: YamlContent) {
+	#analyzeYaml(yamlObject: YamlContent, offset: number) {
 		// Check for deprecated libraries
 		yamlObject?.framework?.libraries?.forEach((lib) => {
 			if (deprecatedLibraries.includes(lib.name.toString())) {
 				const positionInfo = getPosition(lib);
-				// TODO: Add offset to line property (addition)
 				this.#context.addLintingMessage(this.#resourcePath, {
 					ruleId: "ui5-linter-no-deprecated-api",
 					severity: LintMessageSeverity.Error,
 					fatal: undefined,
-					line: positionInfo.start.line,
+					line: positionInfo.start.line + offset,
 					column: positionInfo.start.column,
 					message: `Use of deprecated library '${lib.name}'`,
 				});
