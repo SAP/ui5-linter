@@ -1,5 +1,5 @@
 import {LinterParameters} from "../LinterContext.js";
-import UI5YamlLinter from "./UI5YamlLinter.js";
+import YamlLinter from "./YamlLinter.js";
 import {Resource} from "@ui5/fs";
 
 export default async function lintUI5Yaml({context}: LinterParameters) {
@@ -23,7 +23,7 @@ export default async function lintUI5Yaml({context}: LinterParameters) {
 	}
 
 	await Promise.all(ui5YamlResources.map(async (resource: Resource) => {
-		const linter = new UI5YamlLinter(resource.getPath(), await resource.getString(), context);
+		const linter = new YamlLinter(resource.getPath(), await resource.getString(), context);
 		await linter.lint();
 	}));
 }
