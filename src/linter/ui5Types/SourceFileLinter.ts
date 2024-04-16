@@ -16,6 +16,7 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
+	#context: LinterContext;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
@@ -451,57 +452,60 @@ export default class SourceFileLinter {
 		}
 	}
 	
-	analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
+	async analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
 		if (node.expression.getText() !== "UIComponent") {
 			return;
 		}
 		
 		let parent = node.parent;
-		let classDec;
+		let classDesc;
 		while(!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
 			if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
-				classDec = parent;
+				classDesc = parent;
 			}
 			parent = parent.parent;
 		}
 		
-		if (!ts.isSourceFile(parent) || !parent.fileName.includes("Component.js") || !classDec) {
+		if (!ts.isSourceFile(parent) || !parent.fileName.includes("Component.js") || !classDesc) {
 			return;
 		}
 		
 		let classInterfaces: ts.ClassElement | undefined;
-		let classMetadata: ts.ClassElement | undefined;
-		if (ts.isClassDeclaration(classDec)) {
-			classDec.members.forEach((classMember) => {
+		let componentManifest: ts.ClassElement | undefined;
+		if (ts.isClassDeclaration(classDesc)) {
+			classDesc.members.forEach((classMember) => {
 				if (classMember.name?.getText() === "interfaces") {
 					classInterfaces = classMember;
 				} else if (classMember.name?.getText() === "metadata") {
-					classMetadata = classMember;
+					componentManifest = classMember;
 				}
 			});	
 		}
-		
+
+		let hasAsyncInterface: boolean = false;
 		if (classInterfaces && ts.isPropertyDeclaration(classInterfaces) &&
 			classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
-			const hasAsyncInterface = classInterfaces.initializer
+			hasAsyncInterface = classInterfaces.initializer
 				.elements.some((implementedInterface) => implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
-
-			if (hasAsyncInterface) {
-				return; // When the IAsyncContentCreation everything down the stream implicitly becomes async
-			}
 		}
 
 		let manifestJson;
-		if (classMetadata && ts.isPropertyDeclaration(classMetadata) &&
-			classMetadata.initializer && ts.isObjectLiteralExpression(classMetadata.initializer)) {
-			manifestJson = this.extractPropsRecursive(classMetadata.initializer);
+		if (componentManifest && ts.isPropertyDeclaration(componentManifest) &&
+			componentManifest.initializer && ts.isObjectLiteralExpression(componentManifest.initializer)) {
+			manifestJson = this.extractPropsRecursive(componentManifest.initializer);
 		}
 
 		if (manifestJson?.manifest.value === "\"json\"") { // The manifest is an external manifest.json file
 			// TODO: Read manifest.json from file system
-		} 
-		
-		if (manifestJson?.manifest) {
+			const reader = this.#context.getRootReader();
+			const manifestPath = this.#resourcePath.replace("Component.js", "manifest.json");
+			// const manifestResource = await reader.byPath(manifestPath);
+			const manifestResource = await reader.byGlob("manifest.json");
+			
+			console.log(manifestPath);
+		}
+
+		if (!hasAsyncInterface && manifestJson?.manifest) {
 			// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
 			if (manifestJson?.["sap.ui5"]?.rootView?.async === true &&
 				manifestJson?.["sap.ui5"]?.routing?.config?.async === true
@@ -511,11 +515,12 @@ export default class SourceFileLinter {
 		}
 
 		this.#reporter.addMessage({
-			node: classMetadata ?? classInterfaces ?? classDec,
+			node: classDesc,
 			severity: LintMessageSeverity.Error,
 			ruleId: "ui5-linter-no-sync-loading",
-			message: "zzzz",
-			messageDetails: "",
+			message: "Use of sync loading for Component's views",
+			messageDetails: `Configure the Component.js to implement the "sap.ui.core.IAsyncContentCreation" interface` +
+				`or set the "sap.ui5/rootView/async" and "sap.ui5/routing/config/async" flags to true.`,
 		});
 	}
 	
