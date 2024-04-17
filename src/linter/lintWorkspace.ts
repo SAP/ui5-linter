@@ -2,6 +2,7 @@ import {AbstractAdapter} from "@ui5/fs";
 import lintXml from "./xmlTemplate/linter.js";
 import lintJson from "./manifestJson/linter.js";
 import lintHtml from "./html/linter.js";
+import lintUI5Yaml from "./yaml/linter.js";
 import {taskStart} from "../util/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
@@ -20,6 +21,7 @@ export default async function lintWorkspace(
 		lintXml(params),
 		lintJson(params),
 		lintHtml(params),
+		lintUI5Yaml(params),
 	]);
 
 	const typeLinter = new TypeLinter(params);

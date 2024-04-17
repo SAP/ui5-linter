@@ -67,6 +67,7 @@
 		"@ui5/logger": "^3.0.0",
 		"@ui5/project": "^3.9.1",
 		"chalk": "^5.3.0",
+		"data-with-position": "^0.5.0",
 		"figures": "^6.1.0",
 		"he": "^1.2.0",
 		"json-source-map": "^0.6.1",

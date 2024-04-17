@@ -12,3 +12,4 @@ framework:
   version: "1.120.6"
   libraries:
     - name: sap.ui.core
+    - name: sap.landvisz
