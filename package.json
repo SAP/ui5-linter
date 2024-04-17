@@ -72,10 +72,9 @@
 		"he": "^1.2.0",
 		"json-source-map": "^0.6.1",
 		"sax-wasm": "^2.2.4",
-		"typescript": "5.3.x",
-		"yargs": "^17.7.2",
+		"typescript": "^5.4.5",
 		"update-notifier": "^7.0.0",
-		"yauzl-promise": "^4.0.0"
+		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^19.2.1",
@@ -103,6 +102,7 @@
 		"semver": "^7.6.0",
 		"sinon": "^17.0.1",
 		"tsx": "^4.7.2",
-		"typescript-eslint": "^7.6.0"
+		"typescript-eslint": "^7.7.0",
+		"yauzl-promise": "^4.0.0"
 	}
 }
