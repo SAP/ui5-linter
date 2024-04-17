@@ -43,7 +43,7 @@ Run the `ui5lint` command in your project root folder
 ```sh
 ui5lint
 
-## UI5Lint Report ##
+UI5 linter report:
 
 /application/webapp/controller/App.controller.js
   10:4 error Call to deprecated function 'attachTap' of class 'Button'
@@ -66,6 +66,15 @@ Note: Use "ui5lint --details" to show more information about the findings
 ```
 
 ### Options
+
+#### `--file-paths`
+
+Specify which files to lint by providing a list of file paths.
+
+**Example:**
+```sh
+ui5lint --file-paths webapp/controller/App.controller.js webapp/view/App.view.xml
+```
 
 #### `--details`
 
