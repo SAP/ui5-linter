@@ -36,7 +36,7 @@ export default class YamlLinter {
 	async lint() {
 		try {
 			// Split Yaml file into part documents by '---' separator
-			const allDocuments: string[] = this.#content.split(/(?:\r?\n|\r|\n)---/g);
+			const allDocuments: string[] = this.#content.split(/(?:\r\n|\r|\n)---/g);
 
 			// Calculate the starting line number of each part document
 			let lineNumberOffset = 0;
@@ -46,7 +46,7 @@ export default class YamlLinter {
 				// Analyze part content with line number offset
 				this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
 				// Update line number offset for next part
-				lineNumberOffset += document.split(/\r?\n|\r|\n/g).length;
+				lineNumberOffset += document.split(/\r\n|\r|\n/g).length;
 			});
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
