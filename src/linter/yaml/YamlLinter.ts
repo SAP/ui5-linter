@@ -39,20 +39,18 @@ export default class YamlLinter {
 			https://sap.github.io/ui5-tooling/stable/pages/extensibility/CustomTasks/#example-custom-task-extension-defined-in-ui5-project */
 
 			// Split Yaml file into part documents by '---' separator
-			const partDocuments = this.#content.split(/(\r?\n|\r|\n)---/g).map((part) => part.trim());
+			const partDocuments: string[] = this.#content.split(/(?:\r?\n|\r|\n)---/g);
 
 			// Calculate the starting line number of each part document
 			let lineNumberOffset = 0;
-			for (const part of partDocuments) {
-				if (part !== "") {
-					// Parse content only of the current part
-					const parsedYamlWithPosInfo: YamlContent = this.#parseYaml(part);
-					// Analyze part content with line number offset
-					this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
-					// Update line number offset for next part
-					lineNumberOffset += part.split(/\r?\n|\r|\n/g).length;
-				}
-			}
+			partDocuments.forEach((part: string) => {
+				// Parse content only of the current part
+				const parsedYamlWithPosInfo: YamlContent = this.#parseYaml(part);
+				// Analyze part content with line number offset
+				this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
+				// Update line number offset for next part
+				lineNumberOffset += part.split(/\r?\n|\r|\n/g).length;
+			});
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, {
