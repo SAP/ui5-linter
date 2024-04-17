@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.2.1](https://github.com/SAP/ui5-linter/compare/v0.2.0...v0.2.1) (2024-04-17)
+
+
+### Features
+
+* Alerts for new ui5lint version in console ([#57](https://github.com/SAP/ui5-linter/issues/57)) ([9b17887](https://github.com/SAP/ui5-linter/commit/9b1788780c205080eb9a25fb1f682017a1736fc2))
+* Check script tags for inline JS ([#48](https://github.com/SAP/ui5-linter/issues/48)) ([70b719a](https://github.com/SAP/ui5-linter/commit/70b719aa7b7b1bd7d1bfc5d19c0ca4c22c20983c))
+* Detect deprecations in ui5.yaml (in root directory) ([#39](https://github.com/SAP/ui5-linter/issues/39)) ([db118b1](https://github.com/SAP/ui5-linter/commit/db118b16851a4aae328da33060213842009137fc))
+* Detect pseudo modules ([#60](https://github.com/SAP/ui5-linter/issues/60)) ([508d81d](https://github.com/SAP/ui5-linter/commit/508d81d9ec8b9042bab63cff97e81c9c6305935f))
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Fix substiute for sap.ui.require errbacks ([c52b53f](https://github.com/SAP/ui5-linter/commit/c52b53fc4ec8d289a6684ae43d4bc0af86e460f6))
+* Respect src attribute for script tags and include module type for checks ([#70](https://github.com/SAP/ui5-linter/issues/70)) ([2b28e5f](https://github.com/SAP/ui5-linter/commit/2b28e5fdeae125aca1cf839a253f28244767d5a7))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.12 ([fa7592b](https://github.com/SAP/ui5-linter/commit/fa7592b2b8d955cfd33aba425350fea3178bb490))
+* Update typescript to v5.4.5 and move yauzl-promise to dev-deps ([8982185](https://github.com/SAP/ui5-linter/commit/8982185960ecee36de558b34eea06679c78a037a))
+
 ## [0.2.0](https://github.com/SAP/ui5-linter/compare/v0.1.3...v0.2.0) (2024-03-26)
 
 
