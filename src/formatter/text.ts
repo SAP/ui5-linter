@@ -24,8 +24,7 @@ export class Text {
 	#buffer = "";
 
 	format(lintResults: LintResult[], showDetails: boolean) {
-		this.#writeln("");
-		this.#writeln(`## UI5Lint Report (${new Date().toLocaleString()}) ##`);
+		this.#writeln(`UI5 linter report:`);
 		this.#writeln("");
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
