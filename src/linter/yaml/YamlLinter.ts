@@ -3,7 +3,7 @@ import LinterContext from "../LinterContext.js";
 import deprecatedLibraries from "../../utils/deprecatedLibs.js";
 import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
 
-interface YamlContent extends DataWithPosition {
+interface YamlWithPosInfo extends DataWithPosition {
 	framework?: {
 		libraries?: {
 			name: string;
@@ -35,21 +35,18 @@ export default class YamlLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			/* Support multiple documents in one Yaml file
-			https://sap.github.io/ui5-tooling/stable/pages/extensibility/CustomTasks/#example-custom-task-extension-defined-in-ui5-project */
-
 			// Split Yaml file into part documents by '---' separator
-			const partDocuments: string[] = this.#content.split(/(?:\r?\n|\r|\n)---/g);
+			const allDocuments: string[] = this.#content.split(/(?:\r?\n|\r|\n)---/g);
 
 			// Calculate the starting line number of each part document
 			let lineNumberOffset = 0;
-			partDocuments.forEach((part: string) => {
+			allDocuments.forEach((document: string) => {
 				// Parse content only of the current part
-				const parsedYamlWithPosInfo: YamlContent = this.#parseYaml(part);
+				const parsedYamlWithPosInfo: YamlWithPosInfo = this.#parseYaml(document);
 				// Analyze part content with line number offset
 				this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
 				// Update line number offset for next part
-				lineNumberOffset += part.split(/\r?\n|\r|\n/g).length;
+				lineNumberOffset += document.split(/\r?\n|\r|\n/g).length;
 			});
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -62,14 +59,14 @@ export default class YamlLinter {
 		}
 	}
 
-	#parseYaml(fileContent: string): YamlContent {
+	#parseYaml(content: string): YamlWithPosInfo {
 		// Create JS object from YAML content with position information
-		return fromYaml(fileContent) as YamlContent;
+		return fromYaml(content) as YamlWithPosInfo;
 	}
 
-	#analyzeYaml(yamlObject: YamlContent, offset: number) {
+	#analyzeYaml(yaml: YamlWithPosInfo, offset: number) {
 		// Check for deprecated libraries
-		yamlObject?.framework?.libraries?.forEach((lib) => {
+		yaml?.framework?.libraries?.forEach((lib) => {
 			if (deprecatedLibraries.includes(lib.name.toString())) {
 				const positionInfo = getPosition(lib);
 				this.#context.addLintingMessage(this.#resourcePath, {
