@@ -146,6 +146,7 @@ export class Coverage {
 		this.#writeln(`</div>`);
 	}
 
+	// eslint-disable-next-line no-unused-private-class-members
 	#write(str: string) {
 		this.#buffer += str;
 	}

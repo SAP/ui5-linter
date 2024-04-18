@@ -113,6 +113,7 @@ export class Text {
 		return this.#buffer;
 	}
 
+	// eslint-disable-next-line no-unused-private-class-members
 	#write(str: string) {
 		this.#buffer += str;
 	}

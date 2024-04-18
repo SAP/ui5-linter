@@ -90,8 +90,6 @@ export default class LinterContext {
 	#rootReader: AbstractReader | undefined;
 
 	#resourcePathsToLint: ResourcePath[] | undefined;
-	// Mapping original resource paths to aliases, such as the paths of transpiled resources
-	#resourcePathAliases = new Map<ResourcePath, ResourcePath>();
 
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
