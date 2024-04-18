@@ -1,11 +1,18 @@
 import ts, {Identifier} from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.d.ts";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails?: string;
 }
+
+type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
+type propsRecord = Record<string, {
+	value: propsRecordValueType | propsRecordValueType[];
+	node?: ts.Node;
+}>;
 
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
@@ -17,11 +24,12 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#context: LinterContext;
+	#manifestContent: string | undefined;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
 		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
-		messageDetails: boolean | undefined = false
+		messageDetails: boolean | undefined = false, manifestContent: string | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -31,6 +39,7 @@ export default class SourceFileLinter {
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
+		this.#manifestContent = manifestContent;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -490,73 +499,86 @@ export default class SourceFileLinter {
 					implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
 		}
 
-		let manifestJson;
+		let manifestJson: propsRecord = {};
 		if (componentManifest && ts.isPropertyDeclaration(componentManifest) &&
 			componentManifest.initializer && ts.isObjectLiteralExpression(componentManifest.initializer)) {
-			manifestJson = this.extractPropsRecursive(componentManifest.initializer);
+			manifestJson = this.extractPropsRecursive(componentManifest.initializer) ?? {};
 		}
 
-		// if (manifestJson?.manifest.value === "\"json\"") { // The manifest is an external manifest.json file
-		// 	// TODO: Read manifest.json from file system
-		// 	const reader = this.#context.getRootReader();
-		// 	const manifestPath = this.#resourcePath.replace("Component.js", "manifest.json");
-		// 	// const manifestResource = await reader.byPath(manifestPath);
-		// 	const manifestResource = await reader.byGlob("manifest.json");
+		let rootViewAsyncFlag: boolean | undefined;
+		let routingAsyncFlag: boolean | undefined;
+		let rootViewAsyncFlagNode: ts.Node | undefined;
+		let routingAsyncFlagNode: ts.Node | undefined;
 
-		// 	console.log(manifestPath);
-		// }
+		if (manifestJson.manifest?.value === "\"json\"") { // The manifest is an external manifest.json file
+			const parsedManifestContent =
+				JSON.parse(this.#manifestContent ?? "") as SAPJSONSchemaForWebApplicationManifestFile;
 
-		const manifestSapui5Section = manifestJson?.manifest?.value?.["\"sap.ui5\""];
-		const rootViewAsyncValue = manifestSapui5Section?.value.rootView?.value.async?.value;
-		const rootViewAsyncNode = manifestSapui5Section?.value.rootView?.value.async?.node;
-		const routeAsyncValue = manifestSapui5Section?.value.routing?.value.config?.value.async?.value;
-		const routeAsyncNode = manifestSapui5Section?.value.routing?.value.config?.value.async?.node;
+			const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
+			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
+			rootViewAsyncFlag = rootView?.async as boolean;
+			routingAsyncFlag = routing?.config?.async;
+		} else {
+			/* eslint-disable  @typescript-eslint/no-explicit-any */
+			const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
+				return obj && typeof obj === "object";
+			};
 
-		// https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717
+			let manifestSapui5Section: propsRecord | undefined;
+			if (instanceOfPropsRecord(manifestJson.manifest?.value) &&
+				instanceOfPropsRecord(manifestJson.manifest.value["\"sap.ui5\""].value)) {
+				manifestSapui5Section = manifestJson.manifest.value["\"sap.ui5\""].value;
+			}
+
+			if (instanceOfPropsRecord(manifestSapui5Section) &&
+				instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
+				typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
+				rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
+				rootViewAsyncFlagNode = manifestSapui5Section?.rootView?.value.async?.node;
+			}
+
+			if (instanceOfPropsRecord(manifestSapui5Section) &&
+				instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
+				instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
+				typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
+				routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
+				routingAsyncFlagNode = manifestSapui5Section?.routing?.value.config?.value.async?.node;
+			}
+		}
+
 		if (!hasAsyncInterface) {
-			if (rootViewAsyncValue !== true || routeAsyncValue !== true) {
+			if (rootViewAsyncFlag !== true || routingAsyncFlag !== true) {
 				this.#reporter.addMessage({
 					node: classDesc,
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Use of sync loading for Component's views",
-					messageDetails: `Configure the Component.js to implement the ` +
-					`"sap.ui.core.IAsyncContentCreation" interface or set the ` +
-					`"sap.ui5/rootView/async" and "sap.ui5/routing/config/async" flags to true.`,
+					messageDetails: `https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717`,
 				});
 			}
 		} else {
-			if (rootViewAsyncValue === true) {
+			if (rootViewAsyncFlag === true) {
 				this.#reporter.addMessage({
-					node: rootViewAsyncNode ?? classDesc,
+					node: rootViewAsyncFlagNode ?? classDesc,
 					severity: LintMessageSeverity.Warning,
 					ruleId: "ui5-linter-no-sync-loading",
-					message: "Remove the async flag from \"sap.ui5/rootView\"",
-					messageDetails: `The Component.js is configured to implement the ` +
-					`"sap.ui.core.IAsyncContentCreation" interface. "sap.ui5/rootView/async" ` +
-					`and "sap.ui5/rootView/async" flags are implicitly overridden and unnecessary.`,
+					message: "Remove the async flag for \"sap.ui5/rootView\" from the manifest",
+					messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
 				});
 			}
-			if (routeAsyncValue === true) {
+			if (routingAsyncFlag === true) {
 				this.#reporter.addMessage({
-					node: routeAsyncNode ?? classDesc,
+					node: routingAsyncFlagNode ?? classDesc,
 					severity: LintMessageSeverity.Warning,
 					ruleId: "ui5-linter-no-sync-loading",
-					message: "Remove the async flag from \"sap.ui5/routing/config\"",
-					messageDetails: `The Component.js is configured to implement the ` +
-					`"sap.ui.core.IAsyncContentCreation" interface. "sap.ui5/rootView/async" ` +
-					`and "sap.ui5/routing/config/async" flags are implicitly overridden and unnecessary.`,
+					message: "Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
+					messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
 				});
 			}
 		}
 	}
 
 	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
-		type propsRecordValueType = string | boolean | undefined | null | number | object;
-		type propsRecord = Record<string, {
-			value: propsRecord | propsRecordValueType | propsRecordValueType[];
-			node: ts.Node;
-		}>;
 		const properties = Object.create(null) as propsRecord;
 
 		node.properties?.forEach((prop) => {
@@ -578,9 +600,8 @@ export default class SourceFileLinter {
 					if (!ts.isObjectLiteralExpression(elem)) {
 						return;
 					}
-
 					return this.extractPropsRecursive(elem);
-				}).filter(($) => $);
+				}).filter(($) => $) as propsRecordValueType[];
 
 				properties[key] = {value: resolvedValue, node: prop.initializer};
 			} else if (
@@ -591,7 +612,7 @@ export default class SourceFileLinter {
 				prop.initializer.getText()) {
 				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
 			} else {
-				throw new Error("Unhandled property assignment");
+				// throw new Error("Unhandled property assignment");
 			}
 		});
 		return properties;
