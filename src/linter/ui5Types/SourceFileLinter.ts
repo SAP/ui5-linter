@@ -23,7 +23,6 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
-	#context: LinterContext;
 	#manifestContent: string | undefined;
 
 	constructor(
