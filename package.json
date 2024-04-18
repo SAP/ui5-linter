@@ -58,7 +58,6 @@
 		"node": "^18.14.2 || ^20.11.0 || >=21.2.0",
 		"npm": ">= 9.5.0"
 	},
-	"packageManager": "npm@10.1.0",
 	"dependencies": {
 		"@jridgewell/sourcemap-codec": "^1.4.15",
 		"@jridgewell/trace-mapping": "^0.3.25",
