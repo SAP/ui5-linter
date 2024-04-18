@@ -29,7 +29,7 @@ export default class SourceFileLinter {
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
 		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
-		messageDetails: boolean | undefined = false, manifestContent: string | undefined
+		messageDetails: boolean | undefined = false, manifestContent?: string | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -512,16 +512,16 @@ export default class SourceFileLinter {
 
 		if (manifestJson.manifest?.value === "\"json\"") { // The manifest is an external manifest.json file
 			const parsedManifestContent =
-				JSON.parse(this.#manifestContent ?? "") as SAPJSONSchemaForWebApplicationManifestFile;
+				JSON.parse(this.#manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
 
 			const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
 			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
 			rootViewAsyncFlag = rootView?.async as boolean;
 			routingAsyncFlag = routing?.config?.async;
 		} else {
-			/* eslint-disable  @typescript-eslint/no-explicit-any */
+			/* eslint-disable @typescript-eslint/no-explicit-any */
 			const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
-				return obj && typeof obj === "object";
+				return !!obj && typeof obj === "object";
 			};
 
 			let manifestSapui5Section: propsRecord | undefined;
