@@ -2,7 +2,6 @@ sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/Device", "./model/models"], fu
 	"use strict";
 
 	return UIComponent.extend("com.ui5.troublesome.app.Component", {
-		interfaces: ["sap.ui.core.IAsyncContentCreation"],
 		metadata: {
 			manifest: "json"
 		},
