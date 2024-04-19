@@ -2,6 +2,7 @@ import anyTest, {ExecutionContext, TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
+import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
 import {SourceFile, TypeChecker} from "typescript";
@@ -124,4 +125,12 @@ export function preprocessLintResultsForSnapshot(res: LintResult[]) {
 		message.filePath = message.filePath.replace(/\\/g, "/");
 	});
 	return res;
+}
+
+export function runLintRulesTests(filePath: string) {
+	const __dirname = path.dirname(filePath);
+	const fileName = path.basename(filePath, ".ts");
+	const fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
+
+	createTestsForFixtures(fixturesPath);
 }
