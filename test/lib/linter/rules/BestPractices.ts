@@ -1,7 +1,7 @@
-import { fileURLToPath } from "node:url";
-import { runLintRulesTests } from "../_linterHelper.js";
+import {fileURLToPath} from "node:url";
+import {runLintRulesTests} from "../_linterHelper.js";
 import path from "node:path";
-import { readdirSync, lstatSync } from "node:fs";
+import {readdirSync, lstatSync} from "node:fs";
 
 const filePath = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(filePath);

@@ -474,7 +474,7 @@ export default class SourceFileLinter {
 			parent = parent.parent;
 		}
 
-		if (!ts.isSourceFile(parent) || !parent.fileName.includes("Component.js") || !classDesc) {
+		if (!ts.isSourceFile(parent) || !parent.fileName.endsWith("Component.js") || !classDesc) {
 			return;
 		}
 
@@ -552,7 +552,7 @@ export default class SourceFileLinter {
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Use of sync loading for Component's views",
-					messageDetails: `https://sapui5.hana.ondemand.com/sdk/#/topic/676b636446c94eada183b1218a824717`,
+					messageDetails: "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}",
 				});
 			}
 		} else {
@@ -562,7 +562,8 @@ export default class SourceFileLinter {
 					severity: LintMessageSeverity.Warning,
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Remove the async flag for \"sap.ui5/rootView\" from the manifest",
-					messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
+					messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
+					// messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
 				});
 			}
 			if (routingAsyncFlag === true) {
@@ -571,7 +572,7 @@ export default class SourceFileLinter {
 					severity: LintMessageSeverity.Warning,
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
-					messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
+					messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
 				});
 			}
 		}
