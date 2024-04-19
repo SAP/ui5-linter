@@ -504,8 +504,12 @@ export default class SourceFileLinter {
 			manifestJson = this.extractPropsRecursive(componentManifest.initializer) ?? {};
 		}
 
-		let rootViewAsyncFlag: boolean | undefined;
-		let routingAsyncFlag: boolean | undefined;
+		// undefined has ambiguous meaning in that context.
+		// It could mean either implicit "true" or "false".
+		// To distinguish whether it's been set from manifest's config
+		// or not set at all, we'll use null.
+		let rootViewAsyncFlag: boolean | undefined | null = null;
+		let routingAsyncFlag: boolean | undefined | null = null;
 		let rootViewAsyncFlagNode: ts.Node | undefined;
 		let routingAsyncFlagNode: ts.Node | undefined;
 
@@ -515,8 +519,8 @@ export default class SourceFileLinter {
 
 			const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
 			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
-			rootViewAsyncFlag = rootView?.async as boolean;
-			routingAsyncFlag = routing?.config?.async;
+			rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
+			routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
 		} else {
 			/* eslint-disable @typescript-eslint/no-explicit-any */
 			const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
@@ -546,7 +550,8 @@ export default class SourceFileLinter {
 		}
 
 		if (!hasAsyncInterface) {
-			if (rootViewAsyncFlag !== true || routingAsyncFlag !== true) {
+			if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
+				routingAsyncFlag === false || routingAsyncFlag === undefined) {
 				this.#reporter.addMessage({
 					node: classDesc,
 					severity: LintMessageSeverity.Error,
@@ -563,7 +568,6 @@ export default class SourceFileLinter {
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Remove the async flag for \"sap.ui5/rootView\" from the manifest",
 					messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
-					// messageDetails: `https://sapui5.hana.ondemand.com/#/api/sap.ui.core.IAsyncContentCreation`,
 				});
 			}
 			if (routingAsyncFlag === true) {
