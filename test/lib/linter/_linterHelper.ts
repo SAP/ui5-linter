@@ -25,20 +25,20 @@ test.before(async (t) => {
 export async function esmockDeprecationText() {
 	const typeLinterModule = await esmock("../../../src/linter/ui5Types/TypeLinter.js", {
 		"../../../src/linter/ui5Types/SourceFileLinter.js":
-		function (
-			context: LinterContext, filePath: string, sourceFile: SourceFile,
-			sourceMap: string | undefined, checker: TypeChecker,
-			reportCoverage: boolean | undefined = false,
-			messageDetails: boolean | undefined = false,
-			manifestContent?: string | undefined
-		) {
-			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
-			const linter = new SourceFileLinter(
-				context, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails, manifestContent
-			);
-			linter.getDeprecationText = () => "Deprecated test message";
-			return linter;
-		},
+			function (
+				context: LinterContext, filePath: string, sourceFile: SourceFile,
+				sourceMap: string | undefined, checker: TypeChecker,
+				reportCoverage: boolean | undefined = false,
+				messageDetails: boolean | undefined = false,
+				manifestContent?: string | undefined
+			) {
+				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
+				const linter = new SourceFileLinter(
+					context, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails, manifestContent
+				);
+				linter.getDeprecationText = () => "Deprecated test message";
+				return linter;
+			},
 	});
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
@@ -90,7 +90,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 			}
 			// Executing linting in parallel might lead to OOM errors in the CI
 			// Therefore always use serial
-			defineTest(`General: ${testName}`, async (t) => {
+			defineTest(`General: ${path.basename(fixturesPath)}/${testName}`, async (t) => {
 				const filePaths = [fileName];
 				const {lintFile} = t.context;
 
@@ -127,10 +127,12 @@ export function preprocessLintResultsForSnapshot(res: LintResult[]) {
 	return res;
 }
 
-export function runLintRulesTests(filePath: string) {
-	const __dirname = path.dirname(filePath);
-	const fileName = path.basename(filePath, ".ts");
-	const fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
+export function runLintRulesTests(filePath: string, fixturesPath?: string) {
+	if (!fixturesPath) {
+		const __dirname = path.dirname(filePath);
+		const fileName = path.basename(filePath, ".ts");
+		fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
+	}
 
 	createTestsForFixtures(fixturesPath);
 }
