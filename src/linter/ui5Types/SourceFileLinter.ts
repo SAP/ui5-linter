@@ -558,8 +558,8 @@ export default class SourceFileLinter {
 					ruleId: "ui5-linter-no-sync-loading",
 					message: "Root View and Routing are not configured to load targets asynchronously",
 					messageDetails: "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-						"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
-						"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest.json",
+					"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
+					"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest.json",
 				});
 			}
 		} else {
