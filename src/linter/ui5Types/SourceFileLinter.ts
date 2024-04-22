@@ -478,30 +478,35 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		let classInterfaces: ts.ClassElement | undefined;
-		let componentManifest: ts.ClassElement | undefined;
+		let classInterfaces: ts.ObjectLiteralElementLike | undefined;
+		let componentManifest: ts.ObjectLiteralElementLike | undefined;
+		let metadata: ts.ClassElement | undefined;
 		if (ts.isClassDeclaration(classDesc)) {
 			classDesc.members.forEach((classMember) => {
-				if (classMember.name?.getText() === "interfaces") {
-					classInterfaces = classMember;
-				} else if (classMember.name?.getText() === "metadata") {
-					componentManifest = classMember;
+				if (classMember.name?.getText() === "metadata") {
+					metadata = classMember;
+				}
+			});
+		}
+
+		if (metadata && ts.isPropertyDeclaration(metadata) &&
+			metadata.initializer && ts.isObjectLiteralExpression(metadata.initializer)) {
+			metadata.initializer.properties.forEach((prop) => {
+				if (prop.name?.getText() === "interfaces") {
+					classInterfaces = prop;
+				}
+				if (prop.name?.getText() === "manifest") {
+					componentManifest = prop;
 				}
 			});
 		}
 
 		let hasAsyncInterface = false;
-		if (classInterfaces && ts.isPropertyDeclaration(classInterfaces) &&
+		if (classInterfaces && ts.isPropertyAssignment(classInterfaces) &&
 			classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
 			hasAsyncInterface = classInterfaces.initializer
 				.elements.some((implementedInterface) =>
 					implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
-		}
-
-		let manifestJson: propsRecord = {};
-		if (componentManifest && ts.isPropertyDeclaration(componentManifest) &&
-			componentManifest.initializer && ts.isObjectLiteralExpression(componentManifest.initializer)) {
-			manifestJson = this.extractPropsRecursive(componentManifest.initializer) ?? {};
 		}
 
 		// undefined has ambiguous meaning in that context.
@@ -513,39 +518,42 @@ export default class SourceFileLinter {
 		let rootViewAsyncFlagNode: ts.Node | undefined;
 		let routingAsyncFlagNode: ts.Node | undefined;
 
-		if (manifestJson.manifest?.value === "\"json\"") { // The manifest is an external manifest.json file
-			const parsedManifestContent =
-				JSON.parse(this.#manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
+		if (componentManifest && ts.isPropertyAssignment(componentManifest)) {
+			// The manifest is an external manifest.json file
+			if (componentManifest.initializer.getText() === "\"json\"") {
+				const parsedManifestContent =
+					JSON.parse(this.#manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
 
-			const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
-			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
-			rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
-			routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
-		} else {
-			/* eslint-disable @typescript-eslint/no-explicit-any */
-			const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
-				return !!obj && typeof obj === "object";
-			};
+				const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
+				// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
+				rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
+				routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
+			} else if (ts.isObjectLiteralExpression(componentManifest.initializer)) {
+				/* eslint-disable @typescript-eslint/no-explicit-any */
+				const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
+					return !!obj && typeof obj === "object";
+				};
 
-			let manifestSapui5Section: propsRecord | undefined;
-			if (instanceOfPropsRecord(manifestJson.manifest?.value) &&
-				instanceOfPropsRecord(manifestJson.manifest.value["\"sap.ui5\""].value)) {
-				manifestSapui5Section = manifestJson.manifest.value["\"sap.ui5\""].value;
-			}
+				const manifestJson = this.extractPropsRecursive(componentManifest.initializer) ?? {};
+				let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
+				if (instanceOfPropsRecord(manifestJson["\"sap.ui5\""])) {
+					manifestSapui5Section = manifestJson["\"sap.ui5\""].value;
+				}
 
-			if (instanceOfPropsRecord(manifestSapui5Section) &&
-				instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
-				typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
-				rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
-				rootViewAsyncFlagNode = manifestSapui5Section?.rootView?.value.async?.node;
-			}
+				if (instanceOfPropsRecord(manifestSapui5Section) &&
+					instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
+					typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
+					rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
+					rootViewAsyncFlagNode = manifestSapui5Section?.rootView?.value.async?.node;
+				}
 
-			if (instanceOfPropsRecord(manifestSapui5Section) &&
-				instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
-				instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
-				typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
-				routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
-				routingAsyncFlagNode = manifestSapui5Section?.routing?.value.config?.value.async?.node;
+				if (instanceOfPropsRecord(manifestSapui5Section) &&
+					instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
+					instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
+					typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
+					routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
+					routingAsyncFlagNode = manifestSapui5Section?.routing?.value.config?.value.async?.node;
+				}
 			}
 		}
 
