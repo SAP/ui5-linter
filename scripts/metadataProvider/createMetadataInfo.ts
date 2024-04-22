@@ -1,7 +1,7 @@
 import {writeFile} from "node:fs/promises";
 import MetadataProvider from "./MetadataProvider.js";
 import path from "node:path";
-import {fetchAndExtractAPIJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
+import {fetchAndExtractApiJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
 
 import {
 	forEachSymbol,
@@ -37,7 +37,7 @@ async function main(apiJsonsRoot: string, sapui5Version: string) {
 
 // Entrypoint
 await handleCli(async (url, sapui5Version) => {
-	await fetchAndExtractAPIJsons(url);
+	await fetchAndExtractApiJsons(url);
 
 	await main(path.resolve(RAW_API_JSON_FILES_FOLDER), sapui5Version);
 

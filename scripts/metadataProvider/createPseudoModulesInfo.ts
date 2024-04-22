@@ -2,17 +2,20 @@ import {createRequire} from "module";
 import {writeFile, readdir} from "node:fs/promises";
 import path from "node:path";
 import MetadataProvider from "./MetadataProvider.js";
-import {fetchAndExtractAPIJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
+import {fetchAndExtractApiJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
 
-import type {UI5Enum, UI5EnumValue} from "@ui5-language-assistant/semantic-model-types";
+import type {UI5Enum, UI5EnumValue, UI5Namespace} from "@ui5-language-assistant/semantic-model-types";
 
 const require = createRequire(import.meta.url);
 
 async function getPseudoModuleNames() {
 	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
 
-	interface apiJSON {
+	interface apiJson {
 		symbols: {
+			"ui5-metadata": {
+				stereotype: string
+			},
 			name: string;
 			kind: string;
 			resource: string;
@@ -21,10 +24,11 @@ async function getPseudoModuleNames() {
 	}
 
 	return apiJsonList.flatMap((library) => {
-		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as apiJSON;
+		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as apiJson;
 		return libApiJson.symbols;
 	}).reduce((acc: Record<string, string>, symbol) => {
-		if (symbol.kind === "enum" && symbol.resource.endsWith("library.js")) {
+		if (["datatype", "enum"].includes(symbol?.["ui5-metadata"]?.stereotype) &&
+			symbol.resource.endsWith("library.js")) {
 			acc[symbol.name] = symbol.export ?? symbol.name;
 		}
 
@@ -39,20 +43,27 @@ async function transformFiles(sapui5Version: string) {
 		getPseudoModuleNames(),
 	]);
 
-	const {enums} = metadataProvider.getModel();
+	const {enums, namespaces: dataTypes} = metadataProvider.getModel();
 
-	const groupedEnums = Object.keys(enums)
-		.reduce((acc: Record<string, {enum: UI5Enum; export: string}[]>, enumKey: string) => {
+	const groupedEnums = Object.keys({...enums, ...dataTypes})
+		.reduce((acc: Record<string, {enum?: UI5Enum; dataType?: UI5Namespace; export: string}[]>, key: string) => {
 			// Filter only real pseudo modules i.e. defined within library.js files
-			if (!pseudoModuleNames[enumKey]) {
+			if (!pseudoModuleNames[key]) {
 				return acc;
 			}
 
-			const curEnum = enums[enumKey];
+			const curEnum = enums[key];
+			const curDataType = dataTypes[key];
 
-			acc[curEnum.library] = acc[curEnum.library] ?? [];
-			acc[curEnum.library].push(
-				{enum: curEnum, export: pseudoModuleNames[enumKey]});
+			if (curEnum) {
+				acc[curEnum.library] = acc[curEnum.library] ?? [];
+				acc[curEnum.library].push(
+					{ enum: curEnum, export: pseudoModuleNames[key] });
+			} else if (curDataType) {
+				acc[curDataType.library] = acc[curDataType.library] ?? [];
+				acc[curDataType.library].push(
+					{ dataType: curDataType, export: pseudoModuleNames[key] });
+			}
 
 			return acc;
 		}, Object.create(null) as Record<string, {enum: UI5Enum; export: string}[]>);
@@ -102,15 +113,15 @@ function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue, indent = "") {
 	return jsDocBuilder.join("\n");
 }
 
-async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string}[]>) {
+async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI5Namespace; export: string}[]>) {
 	const indexFilesImports: string[] = [];
 
 	for (const libName of Object.keys(enums)) {
 		const enumEntries = enums[libName];
 		const stringBuilder: string[] = [];
 
-		enumEntries.forEach(({enum: enumEntry, export: exportName}) => {
-			if (enumEntry.kind !== "UI5Enum") {
+		enumEntries.forEach(({enum: enumEntry, dataType: dataTypeEntry, export: exportName}) => {
+			if (enumEntry?.kind !== "UI5Enum" || dataTypeEntry?.kind !== "UI5Namespace") {
 				return;
 			}
 
@@ -121,7 +132,7 @@ async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string
 
 			stringBuilder.push(`\timport {${name}} from "${libName.replaceAll(".", "/")}/library";`);
 			stringBuilder.push("");
-			stringBuilder.push(buildJSDoc(enumEntry, "\t"));
+			stringBuilder.push(buildJSDoc(enumEntry ?? dataTypeEntry, "\t"));
 			stringBuilder.push(`\texport default ${exportName};`);
 
 			stringBuilder.push(`}`);
@@ -145,7 +156,7 @@ async function addOverrides(enums: Record<string, {enum: UI5Enum; export: string
 
 // Entrypoint
 await handleCli(async (url, sapui5Version) => {
-	await fetchAndExtractAPIJsons(url);
+	await fetchAndExtractApiJsons(url);
 
 	await transformFiles(sapui5Version);
 

@@ -7,7 +7,7 @@ import yauzl from "yauzl-promise";
 
 export const RAW_API_JSON_FILES_FOLDER = "tmp/apiJson";
 
-export async function fetchAndExtractAPIJsons(url: string) {
+export async function fetchAndExtractApiJsons(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`Unexpected response ${response.statusText}`);
