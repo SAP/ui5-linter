@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/SAP/ui5-linter/compare/v0.2.1...v0.2.2) (2024-04-23)
+
+
+### Bug Fixes
+
+* Don't exit synchronously when there still might be async I/O ([#90](https://github.com/SAP/ui5-linter/issues/90)) ([fd9b7b9](https://github.com/SAP/ui5-linter/commit/fd9b7b949ed1b6b1f6d481ef214f4b5f39484f98))
+
+
+### Dependencies
+
+* **eslint:** Upgrade @eslint/js and @stylistic/eslint-plugin ([41b3a98](https://github.com/SAP/ui5-linter/commit/41b3a98d81c7f33939b8bda748c17a02c82a7397))
+
 ## [0.2.1](https://github.com/SAP/ui5-linter/compare/v0.2.0...v0.2.1) (2024-04-17)
 
 
