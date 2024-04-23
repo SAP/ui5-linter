@@ -133,6 +133,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	if (format === "json") {
 		const jsonFormatter = new Json();
 		process.stdout.write(jsonFormatter.format(res, details));
+		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text();
 		process.stderr.write(textFormatter.format(res, details));
@@ -144,7 +145,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	if (res.some((file) => !!file.errorCount)) {
 		// At least one error is reported. Exit with non-zero exit code.
-		process.exit(1);
+		process.exitCode = 1;
 	}
 }
 
