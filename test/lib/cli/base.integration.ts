@@ -38,14 +38,20 @@ test.serial("ui5lint --format json", async (t) => {
 
 	t.is(consoleLogStub.callCount, 0, "console.log should not be used");
 	t.true(processCwdStub.callCount > 0, "process.cwd was called");
-	t.is(processStdoutWriteStub.callCount, 1, "process.stdout.write is only used once");
-	t.is(processExitStub.callCount, 1, "process.exit got called once");
-	t.is(processExitStub.firstCall.firstArg, 1, "process.exit got called with exit code 1");
+	t.is(processStdoutWriteStub.callCount, 2, "process.stdout.write was called twice");
+	t.is(processExitStub.callCount, 0, "process.exit got never called");
+	t.is(process.exitCode, 1, "process.exitCode was set to 1");
+	// cleanup: reset exit code in order not to fail the test (it cannot be stubbed with sinon)
+	process.exitCode = 0;
 
-	const resultProcessStdout = processStdoutWriteStub.firstCall.firstArg;
+	const resultProcessStdoutJSON = processStdoutWriteStub.firstCall.firstArg;
 	let parsedJson: LintResult[];
 
-	t.notThrows(() => parsedJson = JSON.parse(resultProcessStdout), "Output of process.stdout.write is JSON-formatted");
+	t.notThrows(() => parsedJson = JSON.parse(resultProcessStdoutJSON),
+		"Output of process.stdout.write is JSON-formatted");
 	t.true(Array.isArray(parsedJson!), "The parsed JSON output is a LintResult array");
 	t.true(parsedJson!.length > 0, "The parsed JSON output contains at least one result");
+
+	const resultProcessStdoutNL = processStdoutWriteStub.secondCall.firstArg;
+	t.is(resultProcessStdoutNL, "\n", "second write only adds a single newline");
 });
