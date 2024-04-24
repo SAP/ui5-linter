@@ -1,18 +1,12 @@
 import ts, {Identifier} from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
-import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.d.ts";
+import analyzeComponentJson from "./BestPractices.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails?: string;
 }
-
-type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
-type propsRecord = Record<string, {
-	value: propsRecordValueType | propsRecordValueType[];
-	node?: ts.Node;
-}>;
 
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
@@ -77,7 +71,12 @@ export default class SourceFileLinter {
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments) {
-			this.analyzeComponentJson(node as ts.ExpressionWithTypeArguments);
+			analyzeComponentJson(
+				node as ts.ExpressionWithTypeArguments,
+				this.#manifestContent,
+				this.#reporter,
+				this.#checker
+			);
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -459,178 +458,6 @@ export default class SourceFileLinter {
 			});
 		}
 	}
-
-	analyzeComponentJson(node: ts.ExpressionWithTypeArguments) {
-		if (node.expression.getText() !== "UIComponent") {
-			return;
-		}
-
-		let parent = node.parent;
-		let classDesc;
-		while (!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
-			if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
-				classDesc = parent;
-			}
-			parent = parent.parent;
-		}
-
-		if (!ts.isSourceFile(parent) || !parent.fileName.endsWith("Component.js") || !classDesc) {
-			return;
-		}
-
-		let classInterfaces: ts.ObjectLiteralElementLike | undefined;
-		let componentManifest: ts.ObjectLiteralElementLike | undefined;
-		let metadata: ts.ClassElement | undefined;
-		if (ts.isClassDeclaration(classDesc)) {
-			classDesc.members.forEach((classMember) => {
-				if (classMember.name?.getText() === "metadata") {
-					metadata = classMember;
-				}
-			});
-		}
-
-		if (metadata && ts.isPropertyDeclaration(metadata) &&
-			metadata.initializer && ts.isObjectLiteralExpression(metadata.initializer)) {
-			metadata.initializer.properties.forEach((prop) => {
-				if (prop.name?.getText() === "interfaces") {
-					classInterfaces = prop;
-				}
-				if (prop.name?.getText() === "manifest") {
-					componentManifest = prop;
-				}
-			});
-		}
-
-		let hasAsyncInterface = false;
-		if (classInterfaces && ts.isPropertyAssignment(classInterfaces) &&
-			classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
-			hasAsyncInterface = classInterfaces.initializer
-				.elements.some((implementedInterface) =>
-					implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
-		}
-
-		// undefined has ambiguous meaning in that context.
-		// It could mean either implicit "true" or "false".
-		// To distinguish whether it's been set from manifest's config
-		// or not set at all, we'll use null.
-		let rootViewAsyncFlag: boolean | undefined | null = null;
-		let routingAsyncFlag: boolean | undefined | null = null;
-		let rootViewAsyncFlagNode: ts.Node | undefined;
-		let routingAsyncFlagNode: ts.Node | undefined;
-
-		if (componentManifest && ts.isPropertyAssignment(componentManifest)) {
-			// The manifest is an external manifest.json file
-			if (componentManifest.initializer.getText() === "\"json\"") {
-				const parsedManifestContent =
-					JSON.parse(this.#manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
-
-				const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
-				// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
-				rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
-				routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
-			} else if (ts.isObjectLiteralExpression(componentManifest.initializer)) {
-				/* eslint-disable @typescript-eslint/no-explicit-any */
-				const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
-					return !!obj && typeof obj === "object";
-				};
-
-				const manifestJson = this.extractPropsRecursive(componentManifest.initializer) ?? {};
-				let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
-				if (instanceOfPropsRecord(manifestJson["\"sap.ui5\""])) {
-					manifestSapui5Section = manifestJson["\"sap.ui5\""].value;
-				}
-
-				if (instanceOfPropsRecord(manifestSapui5Section) &&
-					instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
-					typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
-					rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
-					rootViewAsyncFlagNode = manifestSapui5Section?.rootView?.value.async?.node;
-				}
-
-				if (instanceOfPropsRecord(manifestSapui5Section) &&
-					instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
-					instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
-					typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
-					routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
-					routingAsyncFlagNode = manifestSapui5Section?.routing?.value.config?.value.async?.node;
-				}
-			}
-		}
-
-		if (!hasAsyncInterface) {
-			if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
-				routingAsyncFlag === false || routingAsyncFlag === undefined) {
-				this.#reporter.addMessage({
-					node: classDesc,
-					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-sync-loading",
-					message: "Root View and Routing are not configured to load targets asynchronously",
-					messageDetails: "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-					"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
-					"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest.json",
-				});
-			}
-		} else {
-			if (rootViewAsyncFlag === true) {
-				this.#reporter.addMessage({
-					node: rootViewAsyncFlagNode ?? classDesc,
-					severity: LintMessageSeverity.Warning,
-					ruleId: "ui5-linter-no-sync-loading",
-					message: "Remove the async flag for \"sap.ui5/rootView\" from the manifest",
-					messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
-				});
-			}
-			if (routingAsyncFlag === true) {
-				this.#reporter.addMessage({
-					node: routingAsyncFlagNode ?? classDesc,
-					severity: LintMessageSeverity.Warning,
-					ruleId: "ui5-linter-no-sync-loading",
-					message: "Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
-					messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
-				});
-			}
-		}
-	}
-
-	extractPropsRecursive = (node: ts.ObjectLiteralExpression) => {
-		const properties = Object.create(null) as propsRecord;
-
-		node.properties?.forEach((prop) => {
-			if (!ts.isPropertyAssignment(prop) || !prop.name) {
-				return;
-			}
-
-			const key = prop.name.getText();
-			if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
-				properties[key] = {value: true, node: prop.initializer};
-			} else if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-				properties[key] = {value: false, node: prop.initializer};
-			} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword) {
-				properties[key] = {value: null, node: prop.initializer};
-			} else if (ts.isObjectLiteralExpression(prop.initializer) && prop.initializer.properties) {
-				properties[key] = {value: this.extractPropsRecursive(prop.initializer), node: prop.initializer};
-			} else if (ts.isArrayLiteralExpression(prop.initializer)) {
-				const resolvedValue = prop.initializer.elements.map((elem) => {
-					if (!ts.isObjectLiteralExpression(elem)) {
-						return;
-					}
-					return this.extractPropsRecursive(elem);
-				}).filter(($) => $) as propsRecordValueType[];
-
-				properties[key] = {value: resolvedValue, node: prop.initializer};
-			} else if (
-				(ts.isIdentifier(prop.initializer) ||
-				ts.isNumericLiteral(prop.initializer) ||
-				ts.isStringLiteral(prop.initializer)) &&
-
-				prop.initializer.getText()) {
-				properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
-			} else {
-				// throw new Error("Unhandled property assignment");
-			}
-		});
-		return properties;
-	};
 
 	isSymbolOfUi5Type(symbol: ts.Symbol) {
 		if (symbol.name.startsWith("sap/")) {
