@@ -15,6 +15,13 @@ interface AsyncInterfaceFindType {
 	rootViewAsyncFlag: boolean | undefined | null;
 }
 
+const expectedUIComponentsList = [
+	"sap/ui/core/UIComponent",
+	"sap/ui/generic/app/AppComponent",
+	"sap/suite/ui/generic/template/lib/AppComponent",
+	"sap/fe/core/AppComponent",
+];
+
 export default function analyzeComponentJson(
 	node: ts.ExpressionWithTypeArguments,
 	manifestContent: string | undefined,
@@ -34,15 +41,18 @@ export default function analyzeComponentJson(
 		return;
 	}
 
-	// const expectedUIComponentsList = {
-	// 	"sap/ui/core/UIComponent": "UIComponent",
-	// 	"sap/ui/generic/app/AppComponent": "AppComponent",
-	// 	"sap/suite/ui/generic/template/lib/AppComponent": "AppComponent",
-	// 	"sap/fe/core/AppComponent": "AppComponent",
-	// };
+	// Gets module dependency's var name
+	// @ts-expect-error: imports is part of the sourceFile, but is not defined in types
+	const importsList = parent.imports as ts.Node[];
+	const uiComponentImportStatement = importsList.find((importStatement) =>
+		expectedUIComponentsList.includes(importStatement.getText()));
+	let uiComponentImportVar = "UIComponent";
+	if (uiComponentImportStatement && ts.isImportDeclaration(uiComponentImportStatement.parent)) {
+		uiComponentImportVar = uiComponentImportStatement.parent.importClause?.name?.getText() ?? uiComponentImportVar;
+	}
 
 	if (classDesc && ts.isClassDeclaration(classDesc)) {
-		const analysisResult = findAsyncInterface(classDesc, manifestContent, checker);
+		const analysisResult = findAsyncInterface(classDesc, manifestContent, checker, uiComponentImportVar);
 
 		if (analysisResult) {
 			reportResults(analysisResult, reporter, classDesc);
@@ -79,7 +89,8 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 function findAsyncInterface(
 	classDefinition: ts.ClassDeclaration,
 	manifestContent: string | undefined,
-	checker: ts.TypeChecker
+	checker: ts.TypeChecker,
+	uiComponentImportVar = "UIComponent"
 ): AsyncInterfaceFindType | undefined {
 	if (ts.isClassDeclaration(classDefinition)) {
 		const returnTypeTemplate = {
@@ -104,7 +115,7 @@ function findAsyncInterface(
 						// Continue down the heritage chain to search for
 						// the async interface or manifest flags
 						if (ts.isClassDeclaration(declaration) &&
-							declaration?.name?.getText() !== "UIComponent") {
+							declaration?.name?.getText() !== uiComponentImportVar) {
 							result = findAsyncInterface(declaration, manifestContent, checker) ?? result;
 						}
 
@@ -135,7 +146,7 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 		});
 	}
 
-	let hasAsyncInterface = false;
+	let hasAsyncInterface = null;
 	if (classInterfaces && ts.isPropertyAssignment(classInterfaces) &&
 		classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
 		hasAsyncInterface = classInterfaces.initializer
@@ -246,7 +257,8 @@ function reportResults(
 
 	if (!hasAsyncInterface) {
 		if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
-			routingAsyncFlag === false || routingAsyncFlag === undefined) {
+			routingAsyncFlag === false || routingAsyncFlag === undefined ||
+			(hasAsyncInterface === null && rootViewAsyncFlag === null && routingAsyncFlag === null)) {
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
