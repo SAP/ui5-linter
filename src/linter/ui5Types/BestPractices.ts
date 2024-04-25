@@ -15,13 +15,6 @@ interface AsyncInterfaceFindType {
 	rootViewAsyncFlag: boolean | undefined | null;
 }
 
-const expectedUIComponentsList = [
-	"sap/ui/core/UIComponent",
-	"sap/ui/generic/app/AppComponent",
-	"sap/suite/ui/generic/template/lib/AppComponent",
-	"sap/fe/core/AppComponent",
-];
-
 export default function analyzeComponentJson(
 	node: ts.ExpressionWithTypeArguments,
 	manifestContent: string | undefined,
@@ -41,18 +34,8 @@ export default function analyzeComponentJson(
 		return;
 	}
 
-	// Gets module dependency's var name
-	// @ts-expect-error: imports is part of the sourceFile, but is not defined in types
-	const importsList = parent.imports as ts.Node[];
-	const uiComponentImportStatement = importsList.find((importStatement) =>
-		expectedUIComponentsList.includes(importStatement.getText()));
-	let uiComponentImportVar = "UIComponent";
-	if (uiComponentImportStatement && ts.isImportDeclaration(uiComponentImportStatement.parent)) {
-		uiComponentImportVar = uiComponentImportStatement.parent.importClause?.name?.getText() ?? uiComponentImportVar;
-	}
-
 	if (classDesc && ts.isClassDeclaration(classDesc)) {
-		const analysisResult = findAsyncInterface(classDesc, manifestContent, checker, uiComponentImportVar);
+		const analysisResult = findAsyncInterface(classDesc, manifestContent, checker);
 
 		if (analysisResult) {
 			reportResults(analysisResult, reporter, classDesc);
@@ -89,8 +72,7 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 function findAsyncInterface(
 	classDefinition: ts.ClassDeclaration,
 	manifestContent: string | undefined,
-	checker: ts.TypeChecker,
-	uiComponentImportVar = "UIComponent"
+	checker: ts.TypeChecker
 ): AsyncInterfaceFindType | undefined {
 	if (ts.isClassDeclaration(classDefinition)) {
 		const returnTypeTemplate = {
@@ -115,7 +97,7 @@ function findAsyncInterface(
 						// Continue down the heritage chain to search for
 						// the async interface or manifest flags
 						if (ts.isClassDeclaration(declaration) &&
-							declaration?.name?.getText() !== uiComponentImportVar) {
+							declaration?.name?.getText() !== "UIComponent") {
 							result = findAsyncInterface(declaration, manifestContent, checker) ?? result;
 						}
 
