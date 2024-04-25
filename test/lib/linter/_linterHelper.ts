@@ -68,44 +68,31 @@ export function createTestsForFixtures(fixturesPath: string) {
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
-		for (const fileName of testFiles) {
-			if (!fileName.endsWith(".js") &&
-				!fileName.endsWith(".xml") &&
-				!fileName.endsWith(".json") &&
-				!fileName.endsWith(".html") &&
-				!fileName.endsWith(".yaml")) {
-				// Ignore non-JavaScript, non-XML, non-JSON, non-HTML and non-YAML files
-				continue;
-			}
-			let testName = fileName;
-			let defineTest = test.serial;
-			if (fileName.startsWith("_")) {
-				// Skip tests for files starting with underscore
-				defineTest = defineTest.skip as typeof test;
-				testName = fileName.slice(1);
-			} else if (fileName.startsWith("only_")) {
-				// Only run test when file starts with only_
-				defineTest = defineTest.only as typeof test;
-				testName = fileName.slice(5);
-			}
-			// Executing linting in parallel might lead to OOM errors in the CI
-			// Therefore always use serial
-			defineTest(`General: ${path.basename(fixturesPath)}/${testName}`, async (t) => {
-				const filePaths = [fileName];
-				const {lintFile} = t.context;
-
-				const res = await lintFile({
-					rootDir: fixturesPath,
-					pathsToLint: filePaths,
-					reportCoverage: true,
-					includeMessageDetails: true,
-				});
-				assertExpectedLintResults(t, res, fixturesPath, filePaths);
-				res.forEach((results) => {
-					results.filePath = testName;
-				});
-				t.snapshot(res);
+		if (fixturesPath.includes("BestPractices")) {
+			testDefinition({
+				testName: `${path.basename(fixturesPath)}/Component.js`,
+				fileName: "Component.js",
+				fixturesPath,
+				filePaths: testFiles,
 			});
+		} else {
+			for (const fileName of testFiles) {
+				if (!fileName.endsWith(".js") &&
+					!fileName.endsWith(".xml") &&
+					!fileName.endsWith(".json") &&
+					!fileName.endsWith(".html") &&
+					!fileName.endsWith(".yaml")) {
+					// Ignore non-JavaScript, non-XML, non-JSON, non-HTML and non-YAML files
+					continue;
+				}
+
+				testDefinition({
+					testName: fileName,
+					fileName,
+					fixturesPath,
+					filePaths: [fileName],
+				});
+			}
 		}
 	} catch (err) {
 		if (err instanceof Error) {
@@ -114,6 +101,39 @@ export function createTestsForFixtures(fixturesPath: string) {
 		}
 		throw err;
 	}
+}
+
+function testDefinition(
+	{testName, fileName, fixturesPath, filePaths}:
+	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]}) {
+	let defineTest = test.serial;
+
+	if (fileName.startsWith("_")) {
+		// Skip tests for files starting with underscore
+		defineTest = defineTest.skip as typeof test;
+		testName = fileName.slice(1);
+	} else if (fileName.startsWith("only_")) {
+		// Only run test when file starts with only_
+		defineTest = defineTest.only as typeof test;
+		testName = fileName.slice(5);
+	}
+	// Executing linting in parallel might lead to OOM errors in the CI
+	// Therefore always use serial
+	defineTest(`General: ${testName}`, async (t) => {
+		const {lintFile} = t.context;
+
+		const res = await lintFile({
+			rootDir: fixturesPath,
+			pathsToLint: filePaths,
+			reportCoverage: true,
+			includeMessageDetails: true,
+		});
+		assertExpectedLintResults(t, res, fixturesPath, filePaths);
+		res.forEach((results) => {
+			results.filePath = testName;
+		});
+		t.snapshot(res);
+	});
 }
 
 export function preprocessLintResultsForSnapshot(res: LintResult[]) {
