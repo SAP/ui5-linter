@@ -37,7 +37,7 @@ export default function analyzeComponentJson(
 		parent = parent.parent;
 	}
 
-	if (!ts.isSourceFile(parent) || !parent.fileName.endsWith("Component.js") || !classDesc) {
+	if (!ts.isSourceFile(parent) || !parent.fileName.endsWith("/Component.js") || !classDesc) {
 		return;
 	}
 
