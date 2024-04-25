@@ -109,7 +109,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 
 function testDefinition(
 	{testName, fileName, fixturesPath, filePaths, namespace}:
-	{testName: string; fileName: string; fixturesPath: string; filePaths: string[], namespace?: string}) {
+	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]; namespace?: string}) {
 	let defineTest = test.serial;
 
 	if (fileName.startsWith("_")) {
