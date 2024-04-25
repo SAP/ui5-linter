@@ -12,7 +12,7 @@ const testSubDirs = readdirSync(fixturesPath);
 
 for (const subDir of testSubDirs) {
 	const dirPath = path.join(fixturesPath, subDir);
-	if (!subDir.startsWith("_") && lstatSync(dirPath).isDirectory()) {
+	if (lstatSync(dirPath).isDirectory()) {
 		runLintRulesTests(fileName, dirPath);
 	}
 }

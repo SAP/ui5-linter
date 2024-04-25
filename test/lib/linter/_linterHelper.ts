@@ -69,10 +69,11 @@ export function createTestsForFixtures(fixturesPath: string) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
 		if (fixturesPath.includes("BestPractices")) {
+			const dirName = fixturesPath.split("/").pop();
 			testDefinition({
 				testName: `${path.basename(fixturesPath)}/Component.js`,
 				namespace: "mycomp",
-				fileName: "Component.js",
+				fileName: `${dirName}/Component.js`,
 				fixturesPath,
 				// Needed, because without a namespace, TS's type definition detection
 				// does not function properly for the inheritance case
