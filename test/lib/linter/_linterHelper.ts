@@ -71,9 +71,12 @@ export function createTestsForFixtures(fixturesPath: string) {
 		if (fixturesPath.includes("BestPractices")) {
 			testDefinition({
 				testName: `${path.basename(fixturesPath)}/Component.js`,
+				namespace: "mycomp",
 				fileName: "Component.js",
 				fixturesPath,
-				filePaths: testFiles,
+				// Needed, because without a namespace, TS's type definition detection
+				// does not function properly for the inheritance case
+				filePaths: testFiles.map((fileName) => `resources/mycomp/${fileName}`),
 			});
 		} else {
 			for (const fileName of testFiles) {
@@ -104,8 +107,8 @@ export function createTestsForFixtures(fixturesPath: string) {
 }
 
 function testDefinition(
-	{testName, fileName, fixturesPath, filePaths}:
-	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]}) {
+	{testName, fileName, fixturesPath, filePaths, namespace}:
+	{testName: string; fileName: string; fixturesPath: string; filePaths: string[], namespace?: string}) {
 	let defineTest = test.serial;
 
 	if (fileName.startsWith("_")) {
@@ -124,6 +127,7 @@ function testDefinition(
 
 		const res = await lintFile({
 			rootDir: fixturesPath,
+			namespace,
 			pathsToLint: filePaths,
 			reportCoverage: true,
 			includeMessageDetails: true,

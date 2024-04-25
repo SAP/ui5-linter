@@ -1,14 +1,14 @@
 sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 	"use strict";
 
-	return UIComponent.extend("com.ui5.troublesome.app.Component", {
+	return UIComponent.extend("mycomp.Component", {
 		metadata: {
 			interfaces: ["sap.ui.core.IAsyncContentCreation"],
 			manifest: {
 				_version: "1.12.0",
 
 				"sap.app": {
-					id: "com.ui5.troublesome.app",
+					id: "mycomp",
 					type: "application",
 					i18n: "i18n/i18n.properties",
 					title: "{{appTitle}}",
@@ -20,7 +20,7 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 
 				"sap.ui5": {
 					rootView: {
-						viewName: "com.ui5.troublesome.app.view.App",
+						viewName: "mycomp.view.App",
 						type: "XML",
 						id: "app",
 					},
@@ -29,7 +29,7 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 						config: {
 							routerClass: "sap.m.routing.Router",
 							viewType: "XML",
-							viewPath: "com.ui5.troublesome.app.view",
+							viewPath: "mycomp.view",
 							controlId: "app",
 							controlAggregation: "pages",
 						},
