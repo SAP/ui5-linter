@@ -77,7 +77,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				fixturesPath,
 				// Needed, because without a namespace, TS's type definition detection
 				// does not function properly for the inheritance case
-				filePaths: testFiles.map((fileName) => path.posix.join("resources", "mycomp", fileName)),
+				filePaths: testFiles.map((fileName) => path.join("resources", "mycomp", fileName)),
 			});
 		} else {
 			for (const fileName of testFiles) {
