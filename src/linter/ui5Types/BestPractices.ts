@@ -270,7 +270,8 @@ function reportResults(
 				node: classDesc,
 				severity: LintMessageSeverity.Warning,
 				ruleId: "ui5-linter-no-sync-loading",
-				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. Remove the async flag for \"sap.ui5/rootView\" from the manifest",
+				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +
+				"Remove the async flag for \"sap.ui5/rootView\" from the manifest",
 				messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
 			});
 		}
@@ -279,7 +280,8 @@ function reportResults(
 				node: classDesc,
 				severity: LintMessageSeverity.Warning,
 				ruleId: "ui5-linter-no-sync-loading",
-				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
+				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +
+				"Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
 				messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
 			});
 		}
