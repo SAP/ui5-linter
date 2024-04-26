@@ -136,11 +136,11 @@ function testDefinition(
 		assertExpectedLintResults(t, res, fixturesPath, filePaths);
 		res.forEach((results) => {
 			const chunks = testName.split("/").slice(0, -1);
-			
+
 			if (chunks.length > 0) {
 				results.filePath = path.join(...chunks, path.basename(results.filePath));
 			} else {
-				results.filePath = testName;	
+				results.filePath = testName;
 			}
 		});
 		t.snapshot(res);
