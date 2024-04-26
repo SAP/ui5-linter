@@ -138,7 +138,7 @@ function testDefinition(
 			const chunks = testName.split("/").slice(0, -1);
 
 			if (chunks.length > 0) {
-				results.filePath = path.join(...chunks, path.basename(results.filePath));
+				results.filePath = path.posix.join(...chunks, path.basename(results.filePath));
 			} else {
 				results.filePath = testName;
 			}
