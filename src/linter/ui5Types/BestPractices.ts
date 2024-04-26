@@ -200,7 +200,10 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 		// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
 		rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
 		routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
-		hasManifestDefinition = !!manifestContent;
+
+		hasManifestDefinition = !!(componentManifest &&
+		ts.isPropertyAssignment(componentManifest) &&
+		componentManifest.initializer.getText() === "\"json\"");
 	}
 
 	return {
