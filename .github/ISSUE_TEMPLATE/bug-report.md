@@ -35,7 +35,7 @@ Thank you 🧡
 
 ## Context
 
-- UI5 linter package and version
+- UI5 linter version: **`unknown`**
 - Node.js Version: **`unknown`**
 - npm Version: `unknown`
 - OS/Platform: `unknown`
