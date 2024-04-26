@@ -11,6 +11,7 @@ type propsRecord = Record<string, {
 
 interface AsyncInterfaceFindType {
 	hasAsyncInterface: boolean | undefined | null;
+	hasManifestDefinition: boolean;
 	routingAsyncFlag: boolean | undefined | null;
 	rootViewAsyncFlag: boolean | undefined | null;
 }
@@ -74,6 +75,7 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 	};
 
 	return {
+		hasManifestDefinition: a.hasManifestDefinition || b.hasManifestDefinition,
 		routingAsyncFlag: compareValues(a.routingAsyncFlag, b.routingAsyncFlag),
 		rootViewAsyncFlag: compareValues(a.rootViewAsyncFlag, b.rootViewAsyncFlag),
 		hasAsyncInterface: compareValues(a.hasAsyncInterface, b.hasAsyncInterface),
@@ -91,6 +93,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 			hasAsyncInterface: null,
 			routingAsyncFlag: null,
 			rootViewAsyncFlag: null,
+			hasManifestDefinition: false,
 		} as AsyncInterfaceFindType;
 
 		// Checks the interfaces and manifest
@@ -159,6 +162,7 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 	// or not set at all, we'll use null.
 	let rootViewAsyncFlag: boolean | undefined | null = null;
 	let routingAsyncFlag: boolean | undefined | null = null;
+	let hasManifestDefinition = false;
 
 	if (componentManifest &&
 		ts.isPropertyAssignment(componentManifest) &&
@@ -167,6 +171,8 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 		const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
 			return !!obj && typeof obj === "object";
 		};
+
+		hasManifestDefinition = true;
 
 		const manifestJson = extractPropsRecursive(componentManifest.initializer) ?? {};
 		let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
@@ -194,12 +200,14 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 		// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
 		rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
 		routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
+		hasManifestDefinition = !!manifestContent;
 	}
 
 	return {
 		routingAsyncFlag,
 		rootViewAsyncFlag,
 		hasAsyncInterface,
+		hasManifestDefinition,
 	};
 }
 
@@ -248,7 +256,18 @@ function reportResults(
 	reporter: SourceFileReporter,
 	classDesc: ts.ClassDeclaration
 ) {
-	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag} = analysisResult;
+	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag, hasManifestDefinition} = analysisResult;
+
+	if (!hasManifestDefinition) {
+		reporter.addMessage({
+			node: classDesc,
+			severity: LintMessageSeverity.Warning,
+			ruleId: "ui5-linter-add-manifest", // TODO: Add rule id
+			message: "Include a manifest section into the Component.js",
+			messageDetails: "manifest.json will be loaded and used, " +
+			"but is not defined in Component's metadata section",
+		});
+	}
 
 	if (!hasAsyncInterface) {
 		if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
