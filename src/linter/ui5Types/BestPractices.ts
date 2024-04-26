@@ -34,8 +34,19 @@ export default function analyzeComponentJson(
 		return;
 	}
 
+	// @ts-expect-error imports is part of SourceFileObject
+	const moduleImports = parent.imports as ts.Node[];
+	const uiComponentImportVar = moduleImports.reduce((varName: string, importClause: ts.Node) => {
+		if (ts.isIdentifier(importClause) && importClause.text === "sap/ui/core/UIComponent" &&
+			ts.isImportDeclaration(importClause.parent)) {
+			varName = importClause.parent?.importClause?.name?.getText() ?? "";
+		}
+		return varName;
+	}, "");
+
 	if (classDesc && ts.isClassDeclaration(classDesc)) {
-		const analysisResult = findAsyncInterface(classDesc, manifestContent, checker);
+		const analysisResult = findAsyncInterface({
+			classDefinition: classDesc, manifestContent, checker, uiComponentImportVar});
 
 		if (analysisResult) {
 			reportResults(analysisResult, reporter, classDesc);
@@ -69,11 +80,12 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 	};
 }
 
-function findAsyncInterface(
-	classDefinition: ts.ClassDeclaration,
-	manifestContent: string | undefined,
-	checker: ts.TypeChecker
-): AsyncInterfaceFindType | undefined {
+function findAsyncInterface({classDefinition, manifestContent, checker, uiComponentImportVar}: {
+	classDefinition: ts.ClassDeclaration;
+	manifestContent: string | undefined;
+	checker: ts.TypeChecker;
+	uiComponentImportVar: string;
+}): AsyncInterfaceFindType | undefined {
 	if (ts.isClassDeclaration(classDefinition)) {
 		const returnTypeTemplate = {
 			hasAsyncInterface: null,
@@ -97,8 +109,13 @@ function findAsyncInterface(
 						// Continue down the heritage chain to search for
 						// the async interface or manifest flags
 						if (ts.isClassDeclaration(declaration) &&
-							declaration?.name?.getText() !== "UIComponent") {
-							result = findAsyncInterface(declaration, manifestContent, checker) ?? result;
+							(!uiComponentImportVar || declaration?.name?.getText() !== uiComponentImportVar)) {
+							result = findAsyncInterface({
+								classDefinition: declaration,
+								manifestContent,
+								checker,
+								uiComponentImportVar,
+							}) ?? result;
 						}
 
 						return result;
