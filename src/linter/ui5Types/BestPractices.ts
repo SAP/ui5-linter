@@ -143,41 +143,40 @@ function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | un
 	let rootViewAsyncFlag: boolean | undefined | null = null;
 	let routingAsyncFlag: boolean | undefined | null = null;
 
-	if (componentManifest && ts.isPropertyAssignment(componentManifest)) {
-		// The manifest is an external manifest.json file
-		if (componentManifest.initializer.getText() === "\"json\"") {
-			const parsedManifestContent =
-				JSON.parse(manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
+	if (componentManifest &&
+		ts.isPropertyAssignment(componentManifest) &&
+		ts.isObjectLiteralExpression(componentManifest.initializer)) {
+		/* eslint-disable @typescript-eslint/no-explicit-any */
+		const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
+			return !!obj && typeof obj === "object";
+		};
 
-			const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
-			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
-			rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
-			routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
-		} else if (ts.isObjectLiteralExpression(componentManifest.initializer)) {
-			/* eslint-disable @typescript-eslint/no-explicit-any */
-			const instanceOfPropsRecord = (obj: any): obj is propsRecord => {
-				return !!obj && typeof obj === "object";
-			};
-
-			const manifestJson = extractPropsRecursive(componentManifest.initializer) ?? {};
-			let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
-			if (instanceOfPropsRecord(manifestJson["\"sap.ui5\""])) {
-				manifestSapui5Section = manifestJson["\"sap.ui5\""].value;
-			}
-
-			if (instanceOfPropsRecord(manifestSapui5Section) &&
-				instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
-				typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
-				rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
-			}
-
-			if (instanceOfPropsRecord(manifestSapui5Section) &&
-				instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
-				instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
-				typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
-				routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
-			}
+		const manifestJson = extractPropsRecursive(componentManifest.initializer) ?? {};
+		let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
+		if (instanceOfPropsRecord(manifestJson["\"sap.ui5\""])) {
+			manifestSapui5Section = manifestJson["\"sap.ui5\""].value;
 		}
+
+		if (instanceOfPropsRecord(manifestSapui5Section) &&
+			instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
+			typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
+			rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
+		}
+
+		if (instanceOfPropsRecord(manifestSapui5Section) &&
+			instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
+			instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
+			typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
+			routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
+		}
+	} else {
+		const parsedManifestContent =
+			JSON.parse(manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
+
+		const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
+		// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
+		rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
+		routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
 	}
 
 	return {
