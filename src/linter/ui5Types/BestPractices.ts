@@ -232,10 +232,7 @@ function reportResults(
 	reporter: SourceFileReporter,
 	classDesc: ts.ClassDeclaration
 ) {
-	let hasAsyncInterface: null | undefined | boolean = null;
-	let routingAsyncFlag: null | undefined | boolean = null;
-	let rootViewAsyncFlag: null | undefined | boolean = null;
-	({hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag} = analysisResult);
+	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag} = analysisResult;
 
 	if (!hasAsyncInterface) {
 		if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
