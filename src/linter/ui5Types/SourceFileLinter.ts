@@ -419,22 +419,6 @@ export default class SourceFileLinter {
 			return;
 		}
 		const symbol = this.#checker.getSymbolAtLocation(moduleSpecifierNode);
-		// Only check for the "default" export regardless of what's declared
-		// as UI5 / AMD only supports importing the default anyways.
-		// TODO: This needs to be enhanced in future
-		const defaultExportSymbol = symbol?.exports?.get("default" as ts.__String);
-		const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
-		if (deprecationInfo) {
-			this.#reporter.addMessage({
-				node: moduleSpecifierNode,
-				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-deprecated-api",
-				message:
-					`Import of deprecated module ` +
-					`'${moduleSpecifierNode.text}'`,
-				messageDetails: deprecationInfo.messageDetails,
-			});
-		}
 
 		if (this.isSymbolOfPseudoType(symbol)) {
 			this.#reporter.addMessage({
@@ -446,6 +430,63 @@ export default class SourceFileLinter {
 					`'${moduleSpecifierNode.text}'`,
 				messageDetails: "Import library and reuse the enum from there",
 			});
+			return;
+		}
+
+		// Check whether all exports are marked as deprecated, as otherwise we might create a false positive.
+		// TODO TS: This needs to be enhanced for checks of TypeScript sources to only check for the actual
+		// imports (default, *, named)
+		if (!symbol?.exports) {
+			return;
+		}
+		let hasDeprecatedExports = false;
+		const messageDetails: string[] = [];
+		for (const exportSymbol of symbol.exports.values()) {
+			const deprecationInfo = this.getDeprecationInfo(exportSymbol);
+			if (deprecationInfo) {
+				hasDeprecatedExports = true;
+				if (deprecationInfo.messageDetails) {
+					messageDetails.push(deprecationInfo.messageDetails);
+				}
+				continue;
+			} else if (
+				exportSymbol.flags === ts.SymbolFlags.ValueModule ||
+				exportSymbol.flags === ts.SymbolFlags.NamespaceModule
+			) {
+				// A namespace can be a "ValueModule" or a "NamespaceModule".
+				// The namespace itself is most likely not deprecated,
+				// but all symbols exported by the namespace might be.
+				if (exportSymbol.exports) {
+					for (const namespacedExportSymbol of exportSymbol.exports.values()) {
+						const namespacedDeprecationInfo = this.getDeprecationInfo(namespacedExportSymbol);
+						if (namespacedDeprecationInfo) {
+							hasDeprecatedExports = true;
+							if (namespacedDeprecationInfo.messageDetails) {
+								messageDetails.push(namespacedDeprecationInfo.messageDetails);
+							}
+							continue;
+						}
+						// For now, all exports must be deprecated for the import to be considered deprecated
+						// See TODO TS above for future enhancements
+						return;
+					}
+					continue;
+				}
+			}
+			// For now, all exports must be deprecated for the import to be considered deprecated
+			// See TODO TS above for future enhancements
+			return;
+		}
+		if (hasDeprecatedExports) {
+			this.#reporter.addMessage({
+				node: moduleSpecifierNode,
+				severity: LintMessageSeverity.Error,
+				ruleId: "ui5-linter-no-deprecated-api",
+				message:
+				`Import of deprecated module ` +
+				`'${moduleSpecifierNode.text}'`,
+				messageDetails: messageDetails.length ? messageDetails.join("\n") : undefined,
+			});
 		}
 	}
 
@@ -453,9 +494,14 @@ export default class SourceFileLinter {
 		if (symbol.name.startsWith("sap/")) {
 			return true;
 		} else {
-			const sourceFile = symbol.valueDeclaration?.getSourceFile();
-			if (sourceFile?.fileName.match(/@openui5|@sapui5|@ui5/)) {
-				return true;
+			const declarations = symbol.getDeclarations();
+			if (declarations) {
+				for (const declaration of declarations) {
+					const sourceFile = declaration.getSourceFile();
+					if (sourceFile.fileName.match(/@openui5|@sapui5|@ui5/)) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -465,20 +511,41 @@ export default class SourceFileLinter {
 		if (symbol.name.startsWith("sap/")) {
 			return true;
 		} else {
-			const sourceFile = symbol.valueDeclaration?.getSourceFile();
-			if (sourceFile?.fileName.match(/@openui5|@sapui5|@ui5|@types\/jquery/)) {
-				return true;
+			const declarations = symbol.getDeclarations();
+			if (declarations) {
+				for (const declaration of declarations) {
+					const sourceFile = declaration.getSourceFile();
+					if (sourceFile.fileName.match(/@openui5|@sapui5|@ui5|@types\/jquery/)) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
 	}
 
 	isSymbolOfJquerySapType(symbol: ts.Symbol) {
-		return symbol.valueDeclaration?.getSourceFile().fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
+		const declarations = symbol.getDeclarations();
+		if (declarations) {
+			for (const declaration of declarations) {
+				const sourceFile = declaration.getSourceFile();
+				if (sourceFile.fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts") {
+					return true;
+				}
+			}
+		}
 	}
 
 	isSymbolOfPseudoType(symbol: ts.Symbol | undefined) {
-		return symbol?.valueDeclaration?.getSourceFile().fileName.startsWith("/types/@ui5/linter/overrides/library/");
+		const declarations = symbol?.getDeclarations();
+		if (declarations) {
+			for (const declaration of declarations) {
+				const sourceFile = declaration.getSourceFile();
+				if (sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/library/")) {
+					return true;
+				}
+			}
+		}
 	}
 
 	findClassOrInterface(node: ts.Node): ts.Type | undefined {
