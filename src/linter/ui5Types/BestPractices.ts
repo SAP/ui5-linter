@@ -98,7 +98,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 
 		// Checks the interfaces and manifest
 		const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
-			const checkResult = doChecks(member as ts.PropertyDeclaration, manifestContent);
+			const checkResult = doPropChecks(member as ts.PropertyDeclaration, manifestContent);
 			return mergeResults(acc, checkResult);
 		}, {...returnTypeTemplate});
 
@@ -119,6 +119,8 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 								checker,
 								uiComponentImportVar,
 							}) ?? result;
+						} else if (ts.isInterfaceDeclaration(declaration)) {
+							result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
 						}
 
 						return result;
@@ -132,7 +134,33 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	}
 }
 
-function doChecks(metadata: ts.PropertyDeclaration, manifestContent: string | undefined) {
+function doAsyncInterfaceChecks(importDeclaration: ts.Node): boolean | undefined {
+	while (!importDeclaration || importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
+		importDeclaration = importDeclaration.parent;
+	}
+
+	// @ts-expect-error imports is part of SourceFileObject
+	const moduleImports = importDeclaration?.imports as ts.Node[];
+	const coreLib = moduleImports?.find((importModule) => {
+		return importModule.getText() === "\"sap/ui/core/library\"";
+	}) as ts.StringLiteral | undefined;
+
+	let hasAsyncInterface;
+	if (coreLib && ts.isImportDeclaration(coreLib.parent)) {
+		if (coreLib.parent.importClause?.namedBindings &&
+			coreLib.parent.importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
+			hasAsyncInterface = coreLib.parent.importClause.namedBindings.elements.some(
+				(namedImport) => namedImport.getText() === "IAsyncContentCreation");
+		} else {
+			hasAsyncInterface =
+				coreLib.parent.importClause?.name?.getText() === "IAsyncContentCreation";
+		}
+	}
+
+	return hasAsyncInterface;
+}
+
+function doPropChecks(metadata: ts.PropertyDeclaration, manifestContent: string | undefined) {
 	let classInterfaces: ts.ObjectLiteralElementLike | undefined;
 	let componentManifest: ts.ObjectLiteralElementLike | undefined;
 
