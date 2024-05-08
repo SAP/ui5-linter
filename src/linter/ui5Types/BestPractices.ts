@@ -88,50 +88,52 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	checker: ts.TypeChecker;
 	uiComponentImportVar: string;
 }): AsyncInterfaceFindType | undefined {
-	if (ts.isClassDeclaration(classDefinition)) {
-		const returnTypeTemplate = {
-			hasAsyncInterface: null,
-			routingAsyncFlag: null,
-			rootViewAsyncFlag: null,
-			hasManifestDefinition: false,
-		} as AsyncInterfaceFindType;
-
-		// Checks the interfaces and manifest
-		const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
-			const checkResult = doPropChecks(member as ts.PropertyDeclaration, manifestContent);
-			return mergeResults(acc, checkResult);
-		}, {...returnTypeTemplate});
-
-		const heritageAnalysis =
-			classDefinition?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.flatMap((parentClass) => {
-					const parentClassType = checker.getTypeAtLocation(parentClass);
-
-					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
-						let result = {...returnTypeTemplate} as AsyncInterfaceFindType;
-						// Continue down the heritage chain to search for
-						// the async interface or manifest flags
-						if (ts.isClassDeclaration(declaration) &&
-							(!uiComponentImportVar || declaration?.name?.getText() !== uiComponentImportVar)) {
-							result = findAsyncInterface({
-								classDefinition: declaration,
-								manifestContent,
-								checker,
-								uiComponentImportVar,
-							}) ?? result;
-						} else if (ts.isInterfaceDeclaration(declaration)) {
-							result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
-						}
-
-						return result;
-					});
-				});
-			}) ?? [];
-
-		return [...heritageAnalysis, curClassAnalysis].reduce((acc, curAnalysis) => {
-			return mergeResults(acc ?? {...returnTypeTemplate}, curAnalysis ?? {...returnTypeTemplate});
-		});
+	if (!ts.isClassDeclaration(classDefinition)) {
+		return;
 	}
+
+	const returnTypeTemplate = {
+		hasAsyncInterface: null,
+		routingAsyncFlag: null,
+		rootViewAsyncFlag: null,
+		hasManifestDefinition: false,
+	} as AsyncInterfaceFindType;
+
+	// Checks the interfaces and manifest
+	const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
+		const checkResult = doPropsCheck(member as ts.PropertyDeclaration, manifestContent);
+		return mergeResults(acc, checkResult);
+	}, { ...returnTypeTemplate });
+
+	const heritageAnalysis =
+		classDefinition?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
+			return parentClasses.types.flatMap((parentClass) => {
+				const parentClassType = checker.getTypeAtLocation(parentClass);
+
+				return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+					let result = { ...returnTypeTemplate } as AsyncInterfaceFindType;
+					// Continue down the heritage chain to search for
+					// the async interface or manifest flags
+					if (ts.isClassDeclaration(declaration) &&
+						(!uiComponentImportVar || declaration?.name?.getText() !== uiComponentImportVar)) {
+						result = findAsyncInterface({
+							classDefinition: declaration,
+							manifestContent,
+							checker,
+							uiComponentImportVar,
+						}) ?? result;
+					} else if (ts.isInterfaceDeclaration(declaration)) {
+						result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
+					}
+
+					return result;
+				});
+			});
+		}) ?? [];
+
+	return [...heritageAnalysis, curClassAnalysis].reduce((acc, curAnalysis) => {
+		return mergeResults(acc ?? { ...returnTypeTemplate }, curAnalysis ?? { ...returnTypeTemplate });
+	});
 }
 
 function doAsyncInterfaceChecks(importDeclaration: ts.Node): boolean | undefined {
@@ -160,7 +162,7 @@ function doAsyncInterfaceChecks(importDeclaration: ts.Node): boolean | undefined
 	return hasAsyncInterface;
 }
 
-function doPropChecks(metadata: ts.PropertyDeclaration, manifestContent: string | undefined) {
+function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string | undefined) {
 	let classInterfaces: ts.ObjectLiteralElementLike | undefined;
 	let componentManifest: ts.ObjectLiteralElementLike | undefined;
 
@@ -301,6 +303,10 @@ function reportResults(
 	}
 
 	if (!hasAsyncInterface) {
+		// undefined has ambiguous meaning in that context.
+		// It could mean either implicit "true" or "false".
+		// To distinguish whether it's been set from manifest's config
+		// or not set at all, we'll use null.
 		if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
 			routingAsyncFlag === false || routingAsyncFlag === undefined ||
 			(hasAsyncInterface === null && rootViewAsyncFlag === null && routingAsyncFlag === null)) {
