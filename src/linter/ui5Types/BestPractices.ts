@@ -103,7 +103,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
 		const checkResult = doPropsCheck(member as ts.PropertyDeclaration, manifestContent);
 		return mergeResults(acc, checkResult);
-	}, { ...returnTypeTemplate });
+	}, {...returnTypeTemplate});
 
 	const heritageAnalysis =
 		classDefinition?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
@@ -111,7 +111,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 				const parentClassType = checker.getTypeAtLocation(parentClass);
 
 				return parentClassType.symbol?.declarations?.flatMap((declaration) => {
-					let result = { ...returnTypeTemplate } as AsyncInterfaceFindType;
+					let result = {...returnTypeTemplate} as AsyncInterfaceFindType;
 					// Continue down the heritage chain to search for
 					// the async interface or manifest flags
 					if (ts.isClassDeclaration(declaration) &&
@@ -132,7 +132,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 		}) ?? [];
 
 	return [...heritageAnalysis, curClassAnalysis].reduce((acc, curAnalysis) => {
-		return mergeResults(acc ?? { ...returnTypeTemplate }, curAnalysis ?? { ...returnTypeTemplate });
+		return mergeResults(acc ?? {...returnTypeTemplate}, curAnalysis ?? {...returnTypeTemplate});
 	});
 }
 
