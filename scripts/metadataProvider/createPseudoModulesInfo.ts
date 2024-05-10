@@ -14,12 +14,12 @@ async function getPseudoModuleNames() {
 	interface apiJson {
 		symbols: {
 			"ui5-metadata": {
-				stereotype: string
-			},
-			name: string;
-			kind: string;
-			resource: string;
-			export: string;
+				stereotype: string;
+			};
+			"name": string;
+			"kind": string;
+			"resource": string;
+			"export": string;
 		};
 	}
 
@@ -58,11 +58,11 @@ async function transformFiles(sapui5Version: string) {
 			if (curEnum) {
 				acc[curEnum.library] = acc[curEnum.library] ?? [];
 				acc[curEnum.library].push(
-					{ enum: curEnum, export: pseudoModuleNames[key] });
+					{enum: curEnum, export: pseudoModuleNames[key]});
 			} else if (curDataType) {
 				acc[curDataType.library] = acc[curDataType.library] ?? [];
 				acc[curDataType.library].push(
-					{ dataType: curDataType, export: pseudoModuleNames[key] });
+					{dataType: curDataType, export: pseudoModuleNames[key]});
 			}
 
 			return acc;
