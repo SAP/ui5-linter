@@ -495,7 +495,8 @@ export default class SourceFileLinter {
 					severity: LintMessageSeverity.Error,
 					ruleId: "ui5-linter-no-pseudo-modules",
 					message: `Deprecated access to DataType ('${moduleSpecifierNode.text}').`,
-					messageDetails: "DataType can then be accessed via the static DataType.getType(...) method. " +
+					messageDetails: `DataType can then be accessed via the static ` +
+					` DataType.getType("${moduleSpecifierNode.text}") method. ` +
 					"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
 				});
 			} else { // Enum
