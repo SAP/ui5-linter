@@ -113,11 +113,12 @@ function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue | UI5Namespace, indent = "
 	return jsDocBuilder.join("\n");
 }
 
-async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI5Namespace; export: string}[]>) {
+async function addOverrides(ui5Types: Record<string, {enum?: UI5Enum; dataType?: UI5Namespace; export: string}[]>) {
 	const indexFilesImports: string[] = [];
+	const dataTypesMap: Record<string, string> = Object.create(null);
 
-	for (const libName of Object.keys(enums)) {
-		const enumEntries = enums[libName];
+	for (const libName of Object.keys(ui5Types)) {
+		const enumEntries = ui5Types[libName];
 		const stringBuilder: string[] = [];
 
 		enumEntries.forEach(({enum: enumEntry, dataType: dataTypeEntry, export: exportName}) => {
@@ -127,6 +128,8 @@ async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI
 
 			const exportNameChunks = exportName.split(".");
 			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing
+			
+			dataTypesMap[`${libName}.${name}`] = name;
 
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
 
@@ -151,6 +154,10 @@ async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI
 	await writeFile(
 		new URL(`../../resources/overrides/library/index.d.ts`, import.meta.url),
 		indexFilesImports.join("\n") + "\n"
+	);
+	await writeFile(
+		new URL(`../../resources/overrides/dataTypes.json`, import.meta.url),
+		JSON.stringify(dataTypesMap)
 	);
 }
 
