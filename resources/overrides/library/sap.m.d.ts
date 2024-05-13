@@ -126,18 +126,6 @@ declare module "sap/m/DeviationIndicator" {
 	export default DeviationIndicator;
 }
 
-declare module "sap/m/DialogRoleType" {
-	import {DialogRoleType} from "sap/m/library";
-
-	/**
-	 * Enum for the ARIA role of {@link sap.m.Dialog} control.
-	 *
-	 * @public
-	 * @since 1.65
-	*/
-	export default DialogRoleType;
-}
-
 declare module "sap/m/DialogType" {
 	import {DialogType} from "sap/m/library";
 
@@ -458,18 +446,6 @@ declare module "sap/m/LabelDesign" {
 	export default LabelDesign;
 }
 
-declare module "sap/m/LightBoxLoadingStates" {
-	import {LightBoxLoadingStates} from "sap/m/library";
-
-	/**
-	 * Types of LightBox loading stages.
-	 *
-	 * @public
-	 * @since 1.40
-	*/
-	export default LightBoxLoadingStates;
-}
-
 declare module "sap/m/LinkAccessibleRole" {
 	import {LinkAccessibleRole} from "sap/m/library";
 
@@ -719,18 +695,6 @@ declare module "sap/m/PlacementType" {
 	 * @public
 	*/
 	export default PlacementType;
-}
-
-declare module "sap/m/PlanningCalendarBuiltInView" {
-	import {PlanningCalendarBuiltInView} from "sap/m/library";
-
-	/**
-	 * A list of the default built-in views in a {@link sap.m.PlanningCalendar}, described by their keys.
-	 *
-	 * @public
-	 * @since 1.50
-	*/
-	export default PlanningCalendarBuiltInView;
 }
 
 declare module "sap/m/PlanningCalendarStickyMode" {
@@ -1203,4 +1167,31 @@ declare module "sap/m/WrappingType" {
 	 * @since 1.60
 	*/
 	export default WrappingType;
+}
+
+declare module "sap/m/SelectColumnRatio" {
+	import {SelectColumnRatio} from "sap/m/library";
+
+	/**
+	 * A string type that represents column ratio.
+	 * 
+	 * Allowed values are strings that follow the number:number (3:2) format.
+	 *
+	 * @public
+	 * @since 1.86
+	*/
+	export default SelectColumnRatio;
+}
+
+declare module "sap/m/ValueCSSColor" {
+	import {ValueCSSColor} from "sap/m/library";
+
+	/**
+	 * A string type that represents CSS color values, sap.m.ValueColor or less parameter values.
+	 * 
+	 * Allowed values are {@link sap.ui.core.CSSColor}, {@link sap.m.ValueColor} or a less parameter name (string). In case the less parameter color cannot be determined, the validation fails. You need to check if less parameters are supported on control level. An empty string is also allowed and has the same effect as setting no color.
+	 *
+	 * @public
+	*/
+	export default ValueCSSColor;
 }

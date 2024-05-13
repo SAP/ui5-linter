@@ -10,28 +10,6 @@ declare module "sap/suite/ui/commons/BulletChartMode" {
 	export default BulletChartMode;
 }
 
-declare module "sap/suite/ui/commons/CalculationBuilderComparisonOperatorType" {
-	import {CalculationBuilderComparisonOperatorType} from "sap/suite/ui/commons/library";
-
-	/**
-	 * Comparison operators supported by the calculation builder.
-	 *
-	 * @public
-	*/
-	export default CalculationBuilderComparisonOperatorType;
-}
-
-declare module "sap/suite/ui/commons/CalculationBuilderFunctionType" {
-	import {CalculationBuilderFunctionType} from "sap/suite/ui/commons/library";
-
-	/**
-	 * Functions supported by the calculation builder.<br> To add a custom function, use {@link sap.suite.ui.commons.CalculationBuilderFunction}.
-	 *
-	 * @public
-	*/
-	export default CalculationBuilderFunctionType;
-}
-
 declare module "sap/suite/ui/commons/CalculationBuilderItemType" {
 	import {CalculationBuilderItemType} from "sap/suite/ui/commons/library";
 
@@ -63,17 +41,6 @@ declare module "sap/suite/ui/commons/CalculationBuilderLogicalOperatorType" {
 	 * @public
 	*/
 	export default CalculationBuilderLogicalOperatorType;
-}
-
-declare module "sap/suite/ui/commons/CalculationBuilderOperatorType" {
-	import {CalculationBuilderOperatorType} from "sap/suite/ui/commons/library";
-
-	/**
-	 * Arithmetic operators supported by the calculation builder.
-	 *
-	 * @public
-	*/
-	export default CalculationBuilderOperatorType;
 }
 
 declare module "sap/suite/ui/commons/CalculationBuilderValidationMode" {
@@ -525,17 +492,6 @@ declare module "sap/suite/ui/commons/ProcessFlowZoomLevel" {
 	 * @public
 	*/
 	export default ProcessFlowZoomLevel;
-}
-
-declare module "sap/suite/ui/commons/SelectionModes" {
-	import {SelectionModes} from "sap/suite/ui/commons/library";
-
-	/**
-	 * File selection mode(Upload) for the {@link sap.suite.ui.commons.CloudFilePicker}.
-	 *
-	 * @public
-	*/
-	export default SelectionModes;
 }
 
 declare module "sap/suite/ui/commons/SelectionState" {

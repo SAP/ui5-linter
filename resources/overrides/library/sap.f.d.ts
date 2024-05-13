@@ -89,3 +89,15 @@ declare module "sap/f/SidePanelPosition" {
 	*/
 	export default SidePanelPosition;
 }
+
+declare module "sap/f/DynamicPageTitleShrinkRatio" {
+	import {DynamicPageTitleShrinkRatio} from "sap/f/library";
+
+	/**
+	 * A string type that represents the shrink ratios of the areas within the <code>sap.f.DynamicPageTitle</code>.
+	 *
+	 * @public
+	 * @since 1.54
+	*/
+	export default DynamicPageTitleShrinkRatio;
+}

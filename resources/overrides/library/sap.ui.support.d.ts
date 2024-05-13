@@ -45,15 +45,3 @@ declare module "sap/ui/support/Severity" {
 	*/
 	export default Severity;
 }
-
-declare module "sap/ui/support/SystemPresets" {
-	import {SystemPresets} from "sap/ui/support/library";
-
-	/**
-	 * Contains the available system presets.
-	 *
-	 * @public
-	 * @since 1.60
-	*/
-	export default SystemPresets;
-}

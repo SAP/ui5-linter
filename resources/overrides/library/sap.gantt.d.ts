@@ -31,17 +31,6 @@ declare module "sap/gantt/config/FindMode" {
 	export default config.FindMode;
 }
 
-declare module "sap/gantt/config/TimeUnit" {
-	import {config} from "sap/gantt/library";
-
-	/**
-	 * Different time units used as part of the zoom level. They are names of d3 time unit classes.
-	 *
-	 * @public
-	*/
-	export default config.TimeUnit;
-}
-
 declare module "sap/gantt/config/ZoomControlType" {
 	import {config} from "sap/gantt/library";
 
@@ -51,32 +40,6 @@ declare module "sap/gantt/config/ZoomControlType" {
 	 * @public
 	*/
 	export default config.ZoomControlType;
-}
-
-declare module "sap/gantt/def/filter/ColorMatrixValue" {
-	import {def} from "sap/gantt/library";
-
-	/**
-	 * Color Matrix Values.
-	 * 
-	 * The matrix decides what target color from source color.
-	 *
-	 * @public
-	*/
-	export default def.filter.ColorMatrixValue;
-}
-
-declare module "sap/gantt/def/filter/MorphologyOperator" {
-	import {def} from "sap/gantt/library";
-
-	/**
-	 * Morphology Operators.
-	 * 
-	 * The operator decides the morphology to make the shape fatter or slimmer.
-	 *
-	 * @public
-	*/
-	export default def.filter.MorphologyOperator;
 }
 
 declare module "sap/gantt/DeltaLineLayer" {
@@ -156,19 +119,6 @@ declare module "sap/gantt/shape/ext/rls/RelationshipType" {
 	 * @public
 	*/
 	export default shape.ext.rls.RelationshipType;
-}
-
-declare module "sap/gantt/shape/ShapeCategory" {
-	import {shape} from "sap/gantt/library";
-
-	/**
-	 * Shape Categories.
-	 * 
-	 * Different categories use different Drawers. Therefore, different categories may have different designs of parameters in their getter methods.
-	 *
-	 * @public
-	*/
-	export default shape.ShapeCategory;
 }
 
 declare module "sap/gantt/simple/connectorType" {
@@ -323,4 +273,55 @@ declare module "sap/gantt/simple/yAxisColumnContent" {
 	 * @since 1.102
 	*/
 	export default simple.yAxisColumnContent;
+}
+
+declare module "sap/gantt/GenericArray" {
+	import {GenericArray} from "sap/gantt/library";
+
+	/**
+	 * A hybrid data type that can represent an array of string, or array of object. The result value parsed by this data type are "string[]" or "object[]"
+	 * 
+	 * Examples of valid values in js: <ol> <li>["order", "activity"]</li> <li>[{name:"order", idName:"OrderNo"},{name:"activity"}]</li> <li>[{name:"order", idName:"OrderNo"},"activity"]</li> </ol>
+	 * 
+	 * Examples of valid values in xml view: <ol> <li>"order,activity"</li> <li>"[order,activity]"</li> <li>[{"name":"order", "idName":"OrderNo"},{"name":"activity"}]</li> </ol>
+	 *
+	 * @public
+	*/
+	export default GenericArray;
+}
+
+declare module "sap/gantt/PaletteColor" {
+	import {PaletteColor} from "sap/gantt/library";
+
+	/**
+	 * Accepts only Gantt palette colors names.
+	 *
+	 * @public
+	 * @since 1.69
+	*/
+	export default PaletteColor;
+}
+
+declare module "sap/gantt/SVGLength" {
+	import {SVGLength} from "sap/gantt/library";
+
+	/**
+	 * A length is a distance measurement, given as a number along with a unit. If unit is not provided, the length value represents a distance in the current user coordinate system.
+	 *
+	 * @public
+	*/
+	export default SVGLength;
+}
+
+declare module "sap/gantt/ValueSVGPaintServer" {
+	import {ValueSVGPaintServer} from "sap/gantt/library";
+
+	/**
+	 * A string type that represents SVG fill color values.
+	 * 
+	 * Allowed values are {@link sap.ui.core.CSSColor} and {@link sap.m.ValueColor} and LESS parameter The empty string and invalid less parameter fall back to default black color.
+	 *
+	 * @public
+	*/
+	export default ValueSVGPaintServer;
 }

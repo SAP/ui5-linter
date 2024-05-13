@@ -71,7 +71,7 @@ async function transformFiles(sapui5Version: string) {
 	await addOverrides(groupedEnums);
 }
 
-function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue, indent = "") {
+function buildJSDoc(enumEntry: UI5Enum | UI5EnumValue | UI5Namespace, indent = "") {
 	const jsDocBuilder: string[] = [`${indent}/**`];
 
 	if (enumEntry.description) {
@@ -121,7 +121,7 @@ async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI
 		const stringBuilder: string[] = [];
 
 		enumEntries.forEach(({enum: enumEntry, dataType: dataTypeEntry, export: exportName}) => {
-			if (enumEntry?.kind !== "UI5Enum" || dataTypeEntry?.kind !== "UI5Namespace") {
+			if (enumEntry?.kind !== "UI5Enum" && dataTypeEntry?.kind !== "UI5Namespace") {
 				return;
 			}
 
@@ -132,7 +132,7 @@ async function addOverrides(enums: Record<string, {enum?: UI5Enum; dataType?: UI
 
 			stringBuilder.push(`\timport {${name}} from "${libName.replaceAll(".", "/")}/library";`);
 			stringBuilder.push("");
-			stringBuilder.push(buildJSDoc(enumEntry ?? dataTypeEntry, "\t"));
+			stringBuilder.push(buildJSDoc((enumEntry ?? dataTypeEntry)!, "\t"));
 			stringBuilder.push(`\texport default ${exportName};`);
 
 			stringBuilder.push(`}`);
