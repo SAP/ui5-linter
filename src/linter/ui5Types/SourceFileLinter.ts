@@ -2,6 +2,7 @@ import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import fs from "node:fs/promises";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 
 interface DeprecationInfo {
@@ -18,6 +19,7 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
+	#dataTypes: Record<string, string> = {};
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
@@ -43,6 +45,12 @@ export default class SourceFileLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
+			const dataTypes = await fs.readFile(
+				new URL("../../../resources/dataTypes.json", import.meta.url),
+				{encoding: "utf-8"}
+			);
+			this.#dataTypes = JSON.parse(dataTypes) as Record<string, string>;
+
 			this.visitNode(this.#sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
@@ -479,15 +487,29 @@ export default class SourceFileLinter {
 		}
 
 		if (this.isSymbolOfPseudoType(symbol)) {
-			this.#reporter.addMessage({
-				node: moduleSpecifierNode,
-				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-pseudo-modules",
-				message:
-					`Import of pseudo module ` +
-					`'${moduleSpecifierNode.text}'`,
-				messageDetails: "Import library and reuse the enum from there",
-			});
+			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
+			const isDataType = !!this.#dataTypes[moduleNamespaceName];
+			if (isDataType) {
+				this.#reporter.addMessage({
+					node: moduleSpecifierNode,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-pseudo-modules",
+					message: `Deprecated access to DataType ('${moduleSpecifierNode.text}').`,
+					messageDetails: "DataType can then be accessed via the static DataType.getType(...) method. " +
+					"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
+				});
+			} else { // Enum
+				this.#reporter.addMessage({
+					node: moduleSpecifierNode,
+					severity: LintMessageSeverity.Error,
+					ruleId: "ui5-linter-no-pseudo-modules",
+					message:
+						`Deprecated access to ENUM pseudo module ` +
+						`'${moduleSpecifierNode.text}'`,
+					messageDetails:
+						"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
+				});
+			}
 		}
 	}
 
