@@ -129,7 +129,9 @@ async function addOverrides(ui5Types: Record<string, {enum?: UI5Enum; dataType?:
 			const exportNameChunks = exportName.split(".");
 			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing
 
-			dataTypesMap[`${libName}.${name}`] = name;
+			if (!!dataTypeEntry) {
+				dataTypesMap[`${libName}.${name}`] = name;
+			}
 
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
 
