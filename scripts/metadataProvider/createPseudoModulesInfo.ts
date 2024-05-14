@@ -118,10 +118,10 @@ async function addOverrides(ui5Types: Record<string, {enum?: UI5Enum; dataType?:
 	const dataTypesMap = Object.create(null) as Record<string, string>;
 
 	for (const libName of Object.keys(ui5Types)) {
-		const enumEntries = ui5Types[libName];
+		const pseudoModulesEntries = ui5Types[libName];
 		const stringBuilder: string[] = [];
 
-		enumEntries.forEach(({enum: enumEntry, dataType: dataTypeEntry, export: exportName}) => {
+		pseudoModulesEntries.forEach(({enum: enumEntry, dataType: dataTypeEntry, export: exportName}) => {
 			if (enumEntry?.kind !== "UI5Enum" && dataTypeEntry?.kind !== "UI5Namespace") {
 				return;
 			}
