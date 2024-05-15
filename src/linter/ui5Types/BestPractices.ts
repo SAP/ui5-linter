@@ -26,7 +26,7 @@ export default function analyzeComponentJson(
 ) {
 	let parent = node.parent;
 	let classDesc;
-	while (!parent || parent.kind !== ts.SyntaxKind.SourceFile) {
+	while (parent && parent.kind !== ts.SyntaxKind.SourceFile) {
 		if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
 			classDesc = parent;
 		}
@@ -132,7 +132,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 }
 
 function doAsyncInterfaceChecks(importDeclaration: ts.Node): AsyncInterfaceStatus {
-	while (!importDeclaration || importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
+	while (importDeclaration && importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
 		importDeclaration = importDeclaration.parent;
 	}
 
