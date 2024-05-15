@@ -94,9 +94,9 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	}
 
 	const returnTypeTemplate = {
-		hasAsyncInterface: AsyncInterfaceStatus.propNotSet,
-		routingAsyncFlag: AsyncInterfaceStatus.propNotSet,
-		rootViewAsyncFlag: AsyncInterfaceStatus.propNotSet,
+		hasAsyncInterface: AsyncInterfaceStatus.parentPropNotSet,
+		routingAsyncFlag: AsyncInterfaceStatus.parentPropNotSet,
+		rootViewAsyncFlag: AsyncInterfaceStatus.parentPropNotSet,
 		hasManifestDefinition: false,
 	} as AsyncInterfaceFindType;
 
