@@ -87,10 +87,6 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	checker: ts.TypeChecker;
 	uiComponentImportVar: string;
 }): AsyncInterfaceFindType | undefined {
-	if (!ts.isClassDeclaration(classDefinition)) {
-		return;
-	}
-
 	const returnTypeTemplate = {
 		hasAsyncInterface: AsyncInterfaceStatus.parentPropNotSet,
 		routingAsyncFlag: AsyncInterfaceStatus.parentPropNotSet,
