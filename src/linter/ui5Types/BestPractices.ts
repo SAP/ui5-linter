@@ -314,7 +314,7 @@ function reportResults(
 	if (hasAsyncInterface !== AsyncInterfaceStatus.true) {
 		if ([AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(rootViewAsyncFlag) ||
 			[AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(routingAsyncFlag)) {
-			let componentsToAddress = [];
+			const componentsToAddress = [];
 			if (AsyncInterfaceStatus.parentPropNotSet !== rootViewAsyncFlag) {
 				componentsToAddress.push("Root View");
 			}
