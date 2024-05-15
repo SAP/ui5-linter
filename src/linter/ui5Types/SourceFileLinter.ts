@@ -1,7 +1,7 @@
 import ts, {Identifier} from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
-import analyzeComponentJson from "./BestPractices.js";
+import analyzeComponentJson from "./bestPractices.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;

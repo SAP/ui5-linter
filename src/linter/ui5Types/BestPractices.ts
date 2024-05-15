@@ -1,6 +1,6 @@
 import ts from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
-import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.d.ts";
+import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
 import {LintMessageSeverity} from "../LinterContext.js";
 
 type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
