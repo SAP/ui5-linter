@@ -58,10 +58,6 @@ export default function analyzeComponentJson(
 }
 
 function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): AsyncInterfaceFindType {
-	// null = parent property does not exist i.e. rootView
-	// undefined = async flag is missing
-	// true|false = async flag is explicitly set
-
 	const compareValues = (aProp: AsyncInterfaceStatus, bProp: AsyncInterfaceStatus): AsyncInterfaceStatus => {
 		const priorityCheck = [
 			AsyncInterfaceStatus.parentPropNotSet,
