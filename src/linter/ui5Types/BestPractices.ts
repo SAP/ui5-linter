@@ -314,11 +314,20 @@ function reportResults(
 	if (hasAsyncInterface !== AsyncInterfaceStatus.true) {
 		if ([AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(rootViewAsyncFlag) ||
 			[AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(routingAsyncFlag)) {
+			let componentsToAddress = [];
+			if (AsyncInterfaceStatus.parentPropNotSet !== rootViewAsyncFlag) {
+				componentsToAddress.push("Root View");
+			}
+			if (AsyncInterfaceStatus.parentPropNotSet !== routingAsyncFlag) {
+				componentsToAddress.push("Routing");
+			}
+
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-no-sync-loading",
-				message: "Root View and Routing are not configured to load targets asynchronously",
+				message: `${componentsToAddress.join(" and ")} ${componentsToAddress.length > 1 ? "are" : "is"} ` +
+				"not configured to load targets asynchronously",
 				messageDetails: "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
 				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
 				"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest.json",
