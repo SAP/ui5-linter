@@ -40,18 +40,8 @@ export default function analyzeComponentJson(
 		return;
 	}
 
-	// @ts-expect-error imports is part of SourceFileObject
-	const moduleImports = parent.imports as ts.Node[];
-	const uiComponentImportVar = moduleImports.reduce((varName: string, importClause: ts.Node) => {
-		if (ts.isIdentifier(importClause) && importClause.text === "sap/ui/core/UIComponent" &&
-			ts.isImportDeclaration(importClause.parent)) {
-			varName = importClause.parent?.importClause?.name?.getText() ?? "";
-		}
-		return varName;
-	}, "");
-
 	const analysisResult = findAsyncInterface({
-		classDefinition: classDesc, manifestContent, checker, uiComponentImportVar,
+		classDefinition: classDesc, manifestContent, checker,
 	});
 
 	if (analysisResult) {
@@ -81,11 +71,10 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 	};
 }
 
-function findAsyncInterface({classDefinition, manifestContent, checker, uiComponentImportVar}: {
+function findAsyncInterface({classDefinition, manifestContent, checker}: {
 	classDefinition: ts.ClassDeclaration;
 	manifestContent: string | undefined;
 	checker: ts.TypeChecker;
-	uiComponentImportVar: string;
 }): AsyncInterfaceFindType | undefined {
 	const returnTypeTemplate = {
 		hasAsyncInterface: AsyncInterfaceStatus.parentPropNotSet,
@@ -109,13 +98,11 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 					let result = {...returnTypeTemplate} as AsyncInterfaceFindType;
 					// Continue down the heritage chain to search for
 					// the async interface or manifest flags
-					if (ts.isClassDeclaration(declaration) &&
-						(!uiComponentImportVar || declaration?.name?.getText() !== uiComponentImportVar)) {
+					if (ts.isClassDeclaration(declaration)) {
 						result = findAsyncInterface({
 							classDefinition: declaration,
 							manifestContent,
 							checker,
-							uiComponentImportVar,
 						}) ?? result;
 					} else if (ts.isInterfaceDeclaration(declaration)) {
 						result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
