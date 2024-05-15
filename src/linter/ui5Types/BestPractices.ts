@@ -33,7 +33,10 @@ export default function analyzeComponentJson(
 		parent = parent.parent;
 	}
 
-	if (!ts.isSourceFile(parent) || !parent.fileName.endsWith("/Component.js") || !classDesc) {
+	if (!ts.isSourceFile(parent) ||
+		!parent.fileName.endsWith("/Component.js") ||
+		!classDesc ||
+		!ts.isClassDeclaration(classDesc)) {
 		return;
 	}
 
@@ -47,13 +50,12 @@ export default function analyzeComponentJson(
 		return varName;
 	}, "");
 
-	if (classDesc && ts.isClassDeclaration(classDesc)) {
-		const analysisResult = findAsyncInterface({
-			classDefinition: classDesc, manifestContent, checker, uiComponentImportVar});
+	const analysisResult = findAsyncInterface({
+		classDefinition: classDesc, manifestContent, checker, uiComponentImportVar,
+	});
 
-		if (analysisResult) {
-			reportResults(analysisResult, reporter, classDesc);
-		}
+	if (analysisResult) {
+		reportResults(analysisResult, reporter, classDesc);
 	}
 }
 
