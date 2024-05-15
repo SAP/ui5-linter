@@ -9,11 +9,13 @@ type propsRecord = Record<string, {
 	node?: ts.Node;
 }>;
 
+enum AsyncInterfaceStatus {true, false, propNotSet, parentPropNotSet};
+
 interface AsyncInterfaceFindType {
-	hasAsyncInterface: boolean | undefined | null;
+	hasAsyncInterface: AsyncInterfaceStatus;
 	hasManifestDefinition: boolean;
-	routingAsyncFlag: boolean | undefined | null;
-	rootViewAsyncFlag: boolean | undefined | null;
+	routingAsyncFlag: AsyncInterfaceStatus;
+	rootViewAsyncFlag: AsyncInterfaceStatus;
 }
 
 export default function analyzeComponentJson(
@@ -60,18 +62,17 @@ function mergeResults(a: AsyncInterfaceFindType, b: AsyncInterfaceFindType): Asy
 	// undefined = async flag is missing
 	// true|false = async flag is explicitly set
 
-	const compareValues = (aProp: null | undefined | boolean,
-		bProp: null | undefined | boolean): null | undefined | boolean => {
-		let result = null;
-		if (aProp === undefined || bProp === undefined) {
-			result = undefined;
-		}
-		if (typeof aProp === "boolean" || typeof bProp === "boolean") {
-			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-			result = aProp || bProp;
-		}
+	const compareValues = (aProp: AsyncInterfaceStatus, bProp: AsyncInterfaceStatus): AsyncInterfaceStatus => {
+		const priorityCheck = [
+			AsyncInterfaceStatus.parentPropNotSet,
+			AsyncInterfaceStatus.propNotSet,
+			AsyncInterfaceStatus.false,
+			AsyncInterfaceStatus.true,
+		];
+		const aIndex = priorityCheck.indexOf(aProp);
+		const bIndex = priorityCheck.indexOf(bProp);
 
-		return result;
+		return (aIndex > bIndex) ? aProp : bProp;
 	};
 
 	return {
@@ -93,9 +94,9 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	}
 
 	const returnTypeTemplate = {
-		hasAsyncInterface: null,
-		routingAsyncFlag: null,
-		rootViewAsyncFlag: null,
+		hasAsyncInterface: AsyncInterfaceStatus.propNotSet,
+		routingAsyncFlag: AsyncInterfaceStatus.propNotSet,
+		rootViewAsyncFlag: AsyncInterfaceStatus.propNotSet,
 		hasManifestDefinition: false,
 	} as AsyncInterfaceFindType;
 
@@ -136,7 +137,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker, uiCompon
 	});
 }
 
-function doAsyncInterfaceChecks(importDeclaration: ts.Node): boolean | undefined {
+function doAsyncInterfaceChecks(importDeclaration: ts.Node): AsyncInterfaceStatus {
 	while (!importDeclaration || importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
 		importDeclaration = importDeclaration.parent;
 	}
@@ -147,15 +148,19 @@ function doAsyncInterfaceChecks(importDeclaration: ts.Node): boolean | undefined
 		return importModule.getText() === "\"sap/ui/core/library\"";
 	}) as ts.StringLiteral | undefined;
 
-	let hasAsyncInterface;
+	let hasAsyncInterface = AsyncInterfaceStatus.propNotSet;
 	if (coreLib && ts.isImportDeclaration(coreLib.parent)) {
 		if (coreLib.parent.importClause?.namedBindings &&
 			coreLib.parent.importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
-			hasAsyncInterface = coreLib.parent.importClause.namedBindings.elements.some(
+			const hasAsyncImport = coreLib.parent.importClause.namedBindings.elements.some(
 				(namedImport) => namedImport.getText() === "IAsyncContentCreation");
+
+			hasAsyncInterface = hasAsyncImport ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 		} else {
-			hasAsyncInterface =
+			const implementsAsyncInterface =
 				coreLib.parent.importClause?.name?.getText() === "IAsyncContentCreation";
+
+			hasAsyncInterface = implementsAsyncInterface ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 		}
 	}
 
@@ -177,20 +182,22 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 		});
 	}
 
-	let hasAsyncInterface = null;
+	let hasAsyncInterface = AsyncInterfaceStatus.propNotSet;
 	if (classInterfaces && ts.isPropertyAssignment(classInterfaces) &&
 		classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
-		hasAsyncInterface = classInterfaces.initializer
+		const hasAsyncInterfaceProp = classInterfaces.initializer
 			.elements.some((implementedInterface) =>
 				implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
+
+		hasAsyncInterface = hasAsyncInterfaceProp ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 	}
 
 	// undefined has ambiguous meaning in that context.
 	// It could mean either implicit "true" or "false".
 	// To distinguish whether it's been set from manifest's config
 	// or not set at all, we'll use null.
-	let rootViewAsyncFlag: boolean | undefined | null = null;
-	let routingAsyncFlag: boolean | undefined | null = null;
+	let rootViewAsyncFlag: AsyncInterfaceStatus = AsyncInterfaceStatus.parentPropNotSet;
+	let routingAsyncFlag: AsyncInterfaceStatus = AsyncInterfaceStatus.parentPropNotSet;
 	let hasManifestDefinition = false;
 
 	if (componentManifest &&
@@ -210,25 +217,47 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 		}
 
 		if (instanceOfPropsRecord(manifestSapui5Section) &&
-			instanceOfPropsRecord(manifestSapui5Section?.rootView?.value) &&
-			typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
-			rootViewAsyncFlag = manifestSapui5Section?.rootView?.value.async?.value;
+			instanceOfPropsRecord(manifestSapui5Section?.rootView?.value)) {
+			rootViewAsyncFlag = AsyncInterfaceStatus.propNotSet;
+
+			if (typeof manifestSapui5Section?.rootView?.value.async?.value === "boolean") {
+				const isRootViewAsync = manifestSapui5Section?.rootView?.value.async?.value;
+				rootViewAsyncFlag = isRootViewAsync ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
+			}
 		}
 
 		if (instanceOfPropsRecord(manifestSapui5Section) &&
-			instanceOfPropsRecord(manifestSapui5Section?.routing?.value) &&
-			instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
-			typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
-			routingAsyncFlag = manifestSapui5Section?.routing?.value.config?.value.async?.value;
+			instanceOfPropsRecord(manifestSapui5Section?.routing?.value)) {
+			routingAsyncFlag = AsyncInterfaceStatus.propNotSet;
+
+			if (instanceOfPropsRecord(manifestSapui5Section?.routing?.value.config?.value) &&
+				typeof manifestSapui5Section?.routing?.value.config?.value.async?.value === "boolean") {
+				const isRoutingAsync = manifestSapui5Section?.routing?.value.config?.value.async?.value;
+				routingAsyncFlag = isRoutingAsync ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
+			}
 		}
 	} else {
 		const parsedManifestContent =
 			JSON.parse(manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
 
 		const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
-		// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
-		rootViewAsyncFlag = rootView ? rootView.async as boolean | undefined : rootViewAsyncFlag;
-		routingAsyncFlag = routing?.config ? routing.config.async : routingAsyncFlag;
+
+		if (rootView) {
+			rootViewAsyncFlag = AsyncInterfaceStatus.propNotSet;
+			// @ts-expect-error async is part of RootViewDefFlexEnabled and RootViewDef
+			const isRootViewAsync = rootView.async as boolean | undefined;
+			if (typeof isRootViewAsync === "boolean") {
+				rootViewAsyncFlag = isRootViewAsync ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
+			}
+		}
+
+		if (routing) {
+			routingAsyncFlag = AsyncInterfaceStatus.propNotSet;
+			const isRoutingAsync = routing?.config?.async;
+			if (typeof isRoutingAsync === "boolean") {
+				routingAsyncFlag = isRoutingAsync ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
+			}
+		}
 
 		hasManifestDefinition = !!(componentManifest &&
 		ts.isPropertyAssignment(componentManifest) &&
@@ -294,21 +323,16 @@ function reportResults(
 		reporter.addMessage({
 			node: classDesc,
 			severity: LintMessageSeverity.Warning,
-			ruleId: "ui5-linter-add-manifest", // TODO: Add rule id
+			ruleId: "ui5-linter-add-manifest",
 			message: "Include a manifest section into the Component.js",
 			messageDetails: "manifest.json will be loaded and used, " +
 			"but is not defined in Component's metadata section",
 		});
 	}
 
-	if (!hasAsyncInterface) {
-		// undefined has ambiguous meaning in that context.
-		// It could mean either implicit "true" or "false".
-		// To distinguish whether it's been set from manifest's config
-		// or not set at all, we'll use null.
-		if (rootViewAsyncFlag === false || rootViewAsyncFlag === undefined ||
-			routingAsyncFlag === false || routingAsyncFlag === undefined ||
-			(hasAsyncInterface === null && rootViewAsyncFlag === null && routingAsyncFlag === null)) {
+	if (hasAsyncInterface !== AsyncInterfaceStatus.true) {
+		if ([AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(rootViewAsyncFlag) ||
+			[AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(routingAsyncFlag)) {
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
@@ -320,7 +344,7 @@ function reportResults(
 			});
 		}
 	} else {
-		if (rootViewAsyncFlag === true) {
+		if (rootViewAsyncFlag === AsyncInterfaceStatus.true) {
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Warning,
@@ -330,7 +354,7 @@ function reportResults(
 				messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
 			});
 		}
-		if (routingAsyncFlag === true) {
+		if (routingAsyncFlag === AsyncInterfaceStatus.true) {
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Warning,
