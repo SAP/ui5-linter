@@ -169,10 +169,9 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 	if (metadata && ts.isPropertyDeclaration(metadata) &&
 		metadata.initializer && ts.isObjectLiteralExpression(metadata.initializer)) {
 		metadata.initializer.properties.forEach((prop) => {
-			if (prop.name?.getText() === "interfaces") {
+			if (["interfaces", "\"interfaces\""].includes(prop.name?.getText() ?? "")) {
 				classInterfaces = prop;
-			}
-			if (prop.name?.getText() === "manifest") {
+			} else if (["manifest", "\"manifest\""].includes(prop.name?.getText() ?? "")) {
 				componentManifest = prop;
 			}
 		});
