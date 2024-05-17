@@ -330,23 +330,31 @@ function reportResults({
 	if (hasAsyncInterface !== AsyncInterfaceStatus.true) {
 		if ([AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(rootViewAsyncFlag) ||
 			[AsyncInterfaceStatus.propNotSet, AsyncInterfaceStatus.false].includes(routingAsyncFlag)) {
-			const componentsToAddress = [];
+			let message = "Root View and Routing are not configured to load their modules asynchronously.";
+			let messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
+				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
+				"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest";
+
 			if (AsyncInterfaceStatus.parentPropNotSet !== rootViewAsyncFlag) {
-				componentsToAddress.push("Root View");
-			}
-			if (AsyncInterfaceStatus.parentPropNotSet !== routingAsyncFlag) {
-				componentsToAddress.push("Routing");
+				// sap.ui5/rootView is not set at all, so skip it in the message
+				message = "Routing is not configured to load its targets asynchronously.";
+				messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
+				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flag for " +
+				"\"sap.ui5/routing/config\" in the manifest.";
+			} else if (AsyncInterfaceStatus.parentPropNotSet !== routingAsyncFlag) {
+				// sap.ui5/routing/config is not set at all, so skip it in the message
+				message = "Root View is not configured to load its views asynchronously.";
+				messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
+				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flag for " +
+				"\"sap.ui5/rootView\" in the manifest.";
 			}
 
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-no-sync-loading",
-				message: `${componentsToAddress.join(" and ")} ${componentsToAddress.length > 1 ? "are" : "is"} ` +
-				"not configured to load targets asynchronously",
-				messageDetails: "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
-				"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest.json",
+				message,
+				messageDetails,
 			});
 		}
 	} else {
