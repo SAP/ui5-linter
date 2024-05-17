@@ -1,7 +1,9 @@
 import ts from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
 import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
-import {LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {LintMessage, LintMessageSeverity} from "../LinterContext.js";
+import jsonMap from "json-source-map";
+import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 
 type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
 type propsRecord = Record<string, {
@@ -18,12 +20,21 @@ interface AsyncInterfaceFindType {
 	rootViewAsyncFlag: AsyncInterfaceStatus;
 }
 
-export default function analyzeComponentJson(
-	node: ts.ExpressionWithTypeArguments,
-	manifestContent: string | undefined,
-	reporter: SourceFileReporter,
-	checker: ts.TypeChecker
-) {
+export default function analyzeComponentJson({
+	node,
+	manifestContent,
+	resourcePath,
+	reporter,
+	context,
+	checker,
+}: {
+	node: ts.ExpressionWithTypeArguments;
+	manifestContent: string | undefined;
+	resourcePath: string;
+	reporter: SourceFileReporter;
+	context: LinterContext;
+	checker: ts.TypeChecker;
+}) {
 	let parent = node.parent;
 	let classDesc;
 	while (parent && parent.kind !== ts.SyntaxKind.SourceFile) {
@@ -45,7 +56,7 @@ export default function analyzeComponentJson(
 	});
 
 	if (analysisResult) {
-		reportResults(analysisResult, reporter, classDesc);
+		reportResults({analysisResult, context, reporter, resourcePath, classDesc, manifestContent});
 	}
 }
 
@@ -293,11 +304,16 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 	return properties;
 }
 
-function reportResults(
-	analysisResult: AsyncInterfaceFindType,
-	reporter: SourceFileReporter,
-	classDesc: ts.ClassDeclaration
-) {
+function reportResults({
+	analysisResult, reporter, classDesc, manifestContent, resourcePath, context
+}: {
+	analysisResult: AsyncInterfaceFindType;
+	reporter: SourceFileReporter;
+	context: LinterContext;
+	classDesc: ts.ClassDeclaration;
+	manifestContent: string | undefined;
+	resourcePath: string;
+}) {
 	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag, hasManifestDefinition} = analysisResult;
 
 	if (!hasManifestDefinition) {
@@ -334,9 +350,19 @@ function reportResults(
 			});
 		}
 	} else {
+		const {pointers} = jsonMap.parse<jsonSourceMapType>(manifestContent ?? "{}");
+		const report = (pointerKey: string, message: LintMessage) => {
+			if (manifestContent) {
+				// If the manifest.json is present, then we need to redirect the message pointers to it
+				const {key: posInfo} = pointers[pointerKey];
+				context.addLintingMessage(resourcePath.replace("Component.js", "manifest.json"), {...message, ...posInfo});
+			} else {
+				reporter.addMessage({...message, ...{node: classDesc}});
+			}
+		};
+
 		if (rootViewAsyncFlag === AsyncInterfaceStatus.true) {
-			reporter.addMessage({
-				node: classDesc,
+			report("/sap.ui5/rootView/async", {
 				severity: LintMessageSeverity.Warning,
 				ruleId: "ui5-linter-no-sync-loading",
 				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +
@@ -345,8 +371,7 @@ function reportResults(
 			});
 		}
 		if (routingAsyncFlag === AsyncInterfaceStatus.true) {
-			reporter.addMessage({
-				node: classDesc,
+			report("/sap.ui5/routing/config/async", {
 				severity: LintMessageSeverity.Warning,
 				ruleId: "ui5-linter-no-sync-loading",
 				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +

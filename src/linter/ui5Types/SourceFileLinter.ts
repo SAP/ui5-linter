@@ -71,12 +71,14 @@ export default class SourceFileLinter {
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments) {
-			analyzeComponentJson(
-				node as ts.ExpressionWithTypeArguments,
-				this.#manifestContent,
-				this.#reporter,
-				this.#checker
-			);
+			analyzeComponentJson({
+				node: node as ts.ExpressionWithTypeArguments,
+				manifestContent: this.#manifestContent,
+				resourcePath: this.#resourcePath,
+				reporter: this.#reporter,
+				context: this.#context,
+				checker: this.#checker,
+			});
 		}
 
 		// Traverse the whole AST from top to bottom
