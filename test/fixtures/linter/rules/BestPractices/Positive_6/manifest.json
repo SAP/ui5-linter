@@ -16,7 +16,8 @@
 		"rootView": {
 			"viewName": "mycomp.view.App",
 			"type": "XML",
-			"id": "app"
+			"id": "app",
+			"async": true
 		},
 
 		"routing": {
