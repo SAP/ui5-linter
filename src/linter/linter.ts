@@ -93,7 +93,7 @@ export async function lintFile({
 		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
 		resolvedFilePaths = transformFilePathsToVirtualPaths(
 			absoluteFilePaths, rootDir, "/", rootDir);
-
+		// Extract the (virtual) path from the filename
 		virBasePath = resolvedFilePaths[0].split("/").slice(0, -1).join("/");
 	}
 	const reader = createReader({

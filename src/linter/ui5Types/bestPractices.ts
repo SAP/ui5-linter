@@ -177,10 +177,6 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 		hasAsyncInterface = hasAsyncInterfaceProp ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 	}
 
-	// undefined has ambiguous meaning in that context.
-	// It could mean either implicit "true" or "false".
-	// To distinguish whether it's been set from manifest's config
-	// or not set at all, we'll use null.
 	let rootViewAsyncFlag: AsyncInterfaceStatus = AsyncInterfaceStatus.parentPropNotSet;
 	let routingAsyncFlag: AsyncInterfaceStatus = AsyncInterfaceStatus.parentPropNotSet;
 	let hasManifestDefinition = false;
