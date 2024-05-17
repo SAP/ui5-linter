@@ -305,7 +305,7 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 }
 
 function reportResults({
-	analysisResult, reporter, classDesc, manifestContent, resourcePath, context
+	analysisResult, reporter, classDesc, manifestContent, resourcePath, context,
 }: {
 	analysisResult: AsyncInterfaceFindType;
 	reporter: SourceFileReporter;
@@ -355,7 +355,8 @@ function reportResults({
 			if (manifestContent) {
 				// If the manifest.json is present, then we need to redirect the message pointers to it
 				const {key: posInfo} = pointers[pointerKey];
-				context.addLintingMessage(resourcePath.replace("Component.js", "manifest.json"), {...message, ...posInfo});
+				context.addLintingMessage(
+					resourcePath.replace("Component.js", "manifest.json"), {...message, ...posInfo});
 			} else {
 				reporter.addMessage({...message, ...{node: classDesc}});
 			}

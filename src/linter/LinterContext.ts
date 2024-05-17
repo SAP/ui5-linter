@@ -160,7 +160,7 @@ export default class LinterContext {
 		if (message.messageDetails) {
 			message.messageDetails = resolveLinks(message.messageDetails);
 		}
-		
+
 		this.getLintingMessages(resourcePath).push(message);
 	}
 
