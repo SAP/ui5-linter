@@ -1,5 +1,6 @@
 import {AbstractAdapter, AbstractReader} from "@ui5/fs";
 import {createReader} from "@ui5/fs/resourceFactory";
+import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
@@ -156,6 +157,10 @@ export default class LinterContext {
 	}
 
 	addLintingMessage(resourcePath: ResourcePath, message: LintMessage) {
+		if (message.messageDetails) {
+			message.messageDetails = resolveLinks(message.messageDetails);
+		}
+		
 		this.getLintingMessages(resourcePath).push(message);
 	}
 
