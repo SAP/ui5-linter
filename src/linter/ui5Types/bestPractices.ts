@@ -35,19 +35,12 @@ export default function analyzeComponentJson({
 	context: LinterContext;
 	checker: ts.TypeChecker;
 }) {
-	let parent = node.parent;
-	let classDesc;
-	while (parent && parent.kind !== ts.SyntaxKind.SourceFile) {
-		if (parent.kind === ts.SyntaxKind.ClassDeclaration) {
-			classDesc = parent;
-		}
-		parent = parent.parent;
+	let classDesc = node.parent;
+	while (classDesc && classDesc.kind !== ts.SyntaxKind.ClassDeclaration) {
+		classDesc = classDesc.parent;
 	}
 
-	if (!ts.isSourceFile(parent) ||
-		!parent.fileName.endsWith("/Component.js") ||
-		!classDesc ||
-		!ts.isClassDeclaration(classDesc)) {
+	if (!classDesc || !ts.isClassDeclaration(classDesc)) {
 		return;
 	}
 

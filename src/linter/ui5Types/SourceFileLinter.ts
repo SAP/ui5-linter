@@ -70,7 +70,9 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
-		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments) {
+		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments &&
+		ts.isSourceFile(this.#sourceFile) &&
+		this.#sourceFile.fileName.endsWith("/Component.js")) {
 			analyzeComponentJson({
 				node: node as ts.ExpressionWithTypeArguments,
 				manifestContent: this.#manifestContent,
