@@ -305,7 +305,7 @@ function reportResults({
 }) {
 	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag, hasManifestDefinition} = analysisResult;
 
-	if (!hasManifestDefinition) {
+	if (!hasManifestDefinition && !!manifestContent) {
 		reporter.addMessage({
 			node: classDesc,
 			severity: LintMessageSeverity.Warning,
