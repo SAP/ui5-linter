@@ -2,6 +2,8 @@ import chalk from "chalk";
 import path from "node:path";
 import {LintMessageSeverity, LintResult, LintMessage} from "../linter/LinterContext.js";
 
+const detailsHeader = chalk.white.bold("Details:");
+
 function formatSeverity(severity: LintMessageSeverity) {
 	if (severity === LintMessageSeverity.Error) {
 		return chalk.red("error");
@@ -18,6 +20,17 @@ function formatLocation(line: LintMessage["line"], column: LintMessage["column"]
 	const columnStr = (column === undefined ? "0" : column.toString()).padEnd(columnInfoLength, " ");
 
 	return chalk.dim(`${lineStr}:${columnStr}`);
+}
+
+function formatMessageDetails(msg: LintMessage, showDetails: boolean) {
+	if (!showDetails || !msg.messageDetails) {
+		return "";
+	}
+	// Ensure that details are not containing line breaks as every message should be just a single line.
+	// In addition, some integrations understand two whitespace chars (e.g. two spaces) as a separator
+	// for a message code (e.g. $eslint-stylish problems matcher in VS Code).
+	// Therefore, two or more whitespace chars are reduced to a single space.
+	return `. ${detailsHeader} ${chalk.italic(msg.messageDetails.replace(/\s\s+|\n/g, " "))}`;
 }
 
 export class Text {
@@ -72,16 +85,11 @@ export class Text {
 				const formattedLocation =
 					formatLocation(msg.line, msg.column, lineInfoLength, columnInfoLength);
 
-				const messageDetails = (showDetails && msg.messageDetails) ?
-						(`\n  ${formattedLocation}   ${chalk.white.bold("Details:")} ` +
-						`${chalk.italic(msg.messageDetails.replaceAll("\n", " "))}`) :
-					"";
-
 				this.#writeln(
 					`  ${formattedLocation} ` +
 					`${formatSeverity(msg.severity)} ` +
 					`${msg.message}` +
-					`${messageDetails}`);
+					`${formatMessageDetails(msg, showDetails)}`);
 			});
 
 			this.#writeln("");
