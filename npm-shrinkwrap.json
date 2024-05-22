@@ -40,7 +40,7 @@
 				"@types/sinon": "^17.0.3",
 				"@types/update-notifier": "^6.0.8",
 				"@types/yargs": "^17.0.32",
-				"@types/yauzl-promise": "^4.0.0",
+				"@types/yauzl-promise": "^4.0.1",
 				"@ui5-language-assistant/semantic-model": "^3.3.1",
 				"@ui5-language-assistant/semantic-model-types": "^3.3.1",
 				"ava": "^5.3.1",
@@ -3236,9 +3236,9 @@
 			"dev": true
 		},
 		"node_modules/@types/yauzl-promise": {
-			"version": "4.0.0",
-			"resolved": "https://registry.npmjs.org/@types/yauzl-promise/-/yauzl-promise-4.0.0.tgz",
-			"integrity": "sha512-0ZUmYerNiqTWGOKEkU5sBlSthzJV5EwUezOaL6a7ZD2bGG9uRmjkpNaS4DyMzKHkQkvVKYXnVuUXtWAfRj3iPw==",
+			"version": "4.0.1",
+			"resolved": "https://registry.npmjs.org/@types/yauzl-promise/-/yauzl-promise-4.0.1.tgz",
+			"integrity": "sha512-qYEC3rJwqiJpdQ9b+bPNeuSY0c3JUM8vIuDy08qfuVN7xHm3ZDsHn2kGphUIB0ruEXrPGNXZ64nMUcu4fDjViQ==",
 			"dev": true,
 			"dependencies": {
 				"@types/node": "*"
