@@ -1,3 +1,30 @@
+declare module "sap/ui/core/AbsoluteCSSSize" {
+	import {AbsoluteCSSSize} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents non-relative CSS size values.
+	 * 
+	 * This is a subtype of the <code>'&lt;length&gt; type'</code> defined in the CSS specifications. Allowed values are only absolute CSS sizes like &quot;1px&quot; or &quot;2em&quot;. Percentage sizes like &quot;50%&quot; and the special values &quot;auto&quot; and &quot;inherit&quot; are NOT allowed. Mathematical expressions using the CSS3 <code>calc(<i>expression</i>)</code> operator are allowed as long as they do not use percentage sizes.
+	 * 
+	 * Note that CSS might not allow all these values for every CSS property representing a size. So even if a value is accepted by <code>sap.ui.core.AbsoluteCSSSize</code>, it still might have no effect in a specific context. In other words: UI5 controls usually don't extend the range of allowed values in CSS.
+	 * 
+	 * <b>Units</b>
+	 * 
+	 * Valid font-relative units are <code>em, ex</code> and <code>rem</code>. Supported absolute units are <code>cm, mm, in, pc, pt</code> and <code>px</code>. Other units are not supported.
+	 * 
+	 * <b>Mathematical Expressions</b>
+	 * 
+	 * Expressions inside the <code>calc()</code> operator are only roughly checked for validity. Not every value that this type accepts is a valid expression in the sense of the CSS spec. But vice versa, any expression that is valid according to the spec should be accepted by this type. The current implementation is based on the {@link http://dev.w3.org/csswg/css-values-3/#calc-syntax CSS3 Draft specification from 22 April 2015}.
+	 * 
+	 * Noteworthy details: <ul> <li>whitespace is mandatory around a '-' or '+' operator and optional otherwise</li> <li>parentheses are accepted but not checked for being balanced (a restriction of regexp based checks)</li> <li>semantic constraints like type restrictions are not checked</li> </ul>
+	 * 
+	 * Future versions of UI5 might check <code>calc()</code> expressions in more detail, so applications should not assume that a value, that is invalid according to the CSS spec but currently accepted by this type still will be accepted by future versions of this type.
+	 *
+	 * @public
+	*/
+	export default AbsoluteCSSSize;
+}
+
 declare module "sap/ui/core/AccessibleLandmarkRole" {
 	import {AccessibleLandmarkRole} from "sap/ui/core/library";
 
@@ -54,6 +81,21 @@ declare module "sap/ui/core/BusyIndicatorSize" {
 	export default BusyIndicatorSize;
 }
 
+declare module "sap/ui/core/Collision" {
+	import {Collision} from "sap/ui/core/library";
+
+	/**
+	 * Collision behavior: horizontal/vertical.
+	 * 
+	 * Defines how the position of an element should be adjusted in case it overflows the window in some direction. For both directions this can be "flip", "fit", "flipfit" or "none". If only one behavior is provided it is applied to both directions.
+	 * 
+	 * Examples: "flip", "fit none", "flipfit fit"
+	 *
+	 * @public
+	*/
+	export default Collision;
+}
+
 declare module "sap/ui/core/ComponentLifecycle" {
 	import {ComponentLifecycle} from "sap/ui/core/library";
 
@@ -63,6 +105,60 @@ declare module "sap/ui/core/ComponentLifecycle" {
 	 * @public
 	*/
 	export default ComponentLifecycle;
+}
+
+declare module "sap/ui/core/CSSColor" {
+	import {CSSColor} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents CSS color values (CSS Color Level 3).
+	 * 
+	 * <b>Allowed values are:</b> <ul> <li>Hex colors like <code>#666666</code> or <code>#fff</code>,</li> <li>HSL/RGB values with or without transparency, like <code>hsla(90,10%,30%,0.5)</code> or <code>rgb(0,0,0)</code>,</li> <li>CSS color names like <code>darkblue</code>, or special values like <code>inherit</code> and <code>transparent</code>,</li> <li>an empty string, which has the same effect as setting no color.</li> </ul> For more information about the CSS Level 3 color specification, see {@link https://www.w3.org/TR/css-color-3/#css-system}.
+	 *
+	 * @public
+	*/
+	export default CSSColor;
+}
+
+declare module "sap/ui/core/CSSSize" {
+	import {CSSSize} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents CSS size values.
+	 * 
+	 * The CSS specifications calls this the <code>'&lt;length&gt; type'</code>. Allowed values are CSS sizes like "1px" or "2em" or "50%". The special values <code>auto</code> and <code>inherit</code> are also accepted as well as mathematical expressions using the CSS3 <code>calc(<i>expression</i>)</code> operator. Furthermore, length units representing a percentage of the current viewport dimensions: width (vw), height (vh), the smaller of the two (vmin), or the larger of the two (vmax) can also be defined as a CSS size.
+	 * 
+	 * Note that CSS does not allow all these values for every CSS property representing a size. E.g. <code>padding-left</code> doesn't allow the value <code>auto</code>. So even if a value is accepted by <code>sap.ui.core.CSSSize</code>, it still might have no effect in a specific context. In other words: UI5 controls usually don't extend the range of allowed values in CSS.
+	 * 
+	 * <b>Units</b>
+	 * 
+	 * Valid font-relative units are <code>em, ex</code> and <code>rem</code>. Viewport relative units <code>vw, vh, vmin, vmax</code> are also valid. Supported absolute units are <code>cm, mm, in, pc, pt</code> and <code>px</code>.Other units are not supported yet.
+	 * 
+	 * <b>Mathematical Expressions</b>
+	 * 
+	 * Expressions inside the <code>calc()</code> operator are only roughly checked for validity. Not every value that this type accepts might be a valid expression in the sense of the CSS spec. But vice versa, any expression that is valid according to the spec should be accepted by this type. The current implementation is based on the {@link http://dev.w3.org/csswg/css-values-3/#calc-syntax CSS3 Draft specification from 22 April 2015}.
+	 * 
+	 * Noteworthy details: <ul> <li>whitespace is mandatory around a '-' or '+' operator and optional otherwise</li> <li>parentheses are accepted but not checked for being balanced (a restriction of regexp based checks)</li> <li>semantic constraints like type restrictions are not checked</li> </ul>
+	 * 
+	 * Future versions of UI5 might check <code>calc()</code> expressions in more detail, so applications should not assume that a value, that is invalid according to the CSS spec but currently accepted by this type still will be accepted by future versions of this type.
+	 *
+	 * @public
+	*/
+	export default CSSSize;
+}
+
+declare module "sap/ui/core/CSSSizeShortHand" {
+	import {CSSSizeShortHand} from "sap/ui/core/library";
+
+	/**
+	 * This type checks the short hand form of a margin or padding definition.
+	 * 
+	 * E.g. "1px 1px" or up to four CSSSize values are allowed or tHe special keyword <code>inherit</code>.
+	 *
+	 * @public
+	 * @since 1.11.0
+	*/
+	export default CSSSizeShortHand;
 }
 
 declare module "sap/ui/core/Design" {
@@ -124,6 +220,19 @@ declare module "sap/ui/core/dnd/RelativeDropPosition" {
 	export default dnd.RelativeDropPosition;
 }
 
+declare module "sap/ui/core/Dock" {
+	import {Dock} from "sap/ui/core/library";
+
+	/**
+	 * Docking position: horizontal/vertical.
+	 * 
+	 * Defines a position on the element which is used for aligned positioning of another element (e.g. the left top corner of a popup is positioned at the left bottom corner of the input field). For the horizontal position possible values are "begin", "left", "center", "right" and "end", where left/right always are left and right, or begin/end which are dependent on the text direction. For the vertical position possible values are "top", "center" and "bottom". Examples: "left top", "end bottom", "center center".
+	 *
+	 * @public
+	*/
+	export default Dock;
+}
+
 declare module "sap/ui/core/HorizontalAlign" {
 	import {HorizontalAlign} from "sap/ui/core/library";
 
@@ -144,6 +253,19 @@ declare module "sap/ui/core/IconColor" {
 	 * @public
 	*/
 	export default IconColor;
+}
+
+declare module "sap/ui/core/ID" {
+	import {ID} from "sap/ui/core/library";
+
+	/**
+	 * A string type representing an ID or a name.
+	 * 
+	 * Allowed is a sequence of characters (capital/lowercase), digits, underscores, dashes, points and/or colons. It may start with a character or underscore only.
+	 *
+	 * @public
+	*/
+	export default ID;
 }
 
 declare module "sap/ui/core/ImeMode" {
@@ -207,6 +329,17 @@ declare module "sap/ui/core/Orientation" {
 	 * @since 1.22
 	*/
 	export default Orientation;
+}
+
+declare module "sap/ui/core/Percentage" {
+	import {Percentage} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents a percentage value.
+	 *
+	 * @public
+	*/
+	export default Percentage;
 }
 
 declare module "sap/ui/core/Priority" {
@@ -299,6 +432,17 @@ declare module "sap/ui/core/TitleLevel" {
 	export default TitleLevel;
 }
 
+declare module "sap/ui/core/URI" {
+	import {URI} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents an RFC 3986 conformant URI.
+	 *
+	 * @public
+	*/
+	export default URI;
+}
+
 declare module "sap/ui/core/ValueState" {
 	import {ValueState} from "sap/ui/core/library";
 
@@ -331,148 +475,4 @@ declare module "sap/ui/core/Wrapping" {
 	 * @public
 	*/
 	export default Wrapping;
-}
-
-declare module "sap/ui/core/AbsoluteCSSSize" {
-	import {AbsoluteCSSSize} from "sap/ui/core/library";
-
-	/**
-	 * A string type that represents non-relative CSS size values.
-	 * 
-	 * This is a subtype of the <code>'&lt;length&gt; type'</code> defined in the CSS specifications. Allowed values are only absolute CSS sizes like &quot;1px&quot; or &quot;2em&quot;. Percentage sizes like &quot;50%&quot; and the special values &quot;auto&quot; and &quot;inherit&quot; are NOT allowed. Mathematical expressions using the CSS3 <code>calc(<i>expression</i>)</code> operator are allowed as long as they do not use percentage sizes.
-	 * 
-	 * Note that CSS might not allow all these values for every CSS property representing a size. So even if a value is accepted by <code>sap.ui.core.AbsoluteCSSSize</code>, it still might have no effect in a specific context. In other words: UI5 controls usually don't extend the range of allowed values in CSS.
-	 * 
-	 * <b>Units</b>
-	 * 
-	 * Valid font-relative units are <code>em, ex</code> and <code>rem</code>. Supported absolute units are <code>cm, mm, in, pc, pt</code> and <code>px</code>. Other units are not supported.
-	 * 
-	 * <b>Mathematical Expressions</b>
-	 * 
-	 * Expressions inside the <code>calc()</code> operator are only roughly checked for validity. Not every value that this type accepts is a valid expression in the sense of the CSS spec. But vice versa, any expression that is valid according to the spec should be accepted by this type. The current implementation is based on the {@link http://dev.w3.org/csswg/css-values-3/#calc-syntax CSS3 Draft specification from 22 April 2015}.
-	 * 
-	 * Noteworthy details: <ul> <li>whitespace is mandatory around a '-' or '+' operator and optional otherwise</li> <li>parentheses are accepted but not checked for being balanced (a restriction of regexp based checks)</li> <li>semantic constraints like type restrictions are not checked</li> </ul>
-	 * 
-	 * Future versions of UI5 might check <code>calc()</code> expressions in more detail, so applications should not assume that a value, that is invalid according to the CSS spec but currently accepted by this type still will be accepted by future versions of this type.
-	 *
-	 * @public
-	*/
-	export default AbsoluteCSSSize;
-}
-
-declare module "sap/ui/core/Collision" {
-	import {Collision} from "sap/ui/core/library";
-
-	/**
-	 * Collision behavior: horizontal/vertical.
-	 * 
-	 * Defines how the position of an element should be adjusted in case it overflows the window in some direction. For both directions this can be "flip", "fit", "flipfit" or "none". If only one behavior is provided it is applied to both directions.
-	 * 
-	 * Examples: "flip", "fit none", "flipfit fit"
-	 *
-	 * @public
-	*/
-	export default Collision;
-}
-
-declare module "sap/ui/core/CSSColor" {
-	import {CSSColor} from "sap/ui/core/library";
-
-	/**
-	 * A string type that represents CSS color values (CSS Color Level 3).
-	 * 
-	 * <b>Allowed values are:</b> <ul> <li>Hex colors like <code>#666666</code> or <code>#fff</code>,</li> <li>HSL/RGB values with or without transparency, like <code>hsla(90,10%,30%,0.5)</code> or <code>rgb(0,0,0)</code>,</li> <li>CSS color names like <code>darkblue</code>, or special values like <code>inherit</code> and <code>transparent</code>,</li> <li>an empty string, which has the same effect as setting no color.</li> </ul> For more information about the CSS Level 3 color specification, see {@link https://www.w3.org/TR/css-color-3/#css-system}.
-	 *
-	 * @public
-	*/
-	export default CSSColor;
-}
-
-declare module "sap/ui/core/CSSSize" {
-	import {CSSSize} from "sap/ui/core/library";
-
-	/**
-	 * A string type that represents CSS size values.
-	 * 
-	 * The CSS specifications calls this the <code>'&lt;length&gt; type'</code>. Allowed values are CSS sizes like "1px" or "2em" or "50%". The special values <code>auto</code> and <code>inherit</code> are also accepted as well as mathematical expressions using the CSS3 <code>calc(<i>expression</i>)</code> operator. Furthermore, length units representing a percentage of the current viewport dimensions: width (vw), height (vh), the smaller of the two (vmin), or the larger of the two (vmax) can also be defined as a CSS size.
-	 * 
-	 * Note that CSS does not allow all these values for every CSS property representing a size. E.g. <code>padding-left</code> doesn't allow the value <code>auto</code>. So even if a value is accepted by <code>sap.ui.core.CSSSize</code>, it still might have no effect in a specific context. In other words: UI5 controls usually don't extend the range of allowed values in CSS.
-	 * 
-	 * <b>Units</b>
-	 * 
-	 * Valid font-relative units are <code>em, ex</code> and <code>rem</code>. Viewport relative units <code>vw, vh, vmin, vmax</code> are also valid. Supported absolute units are <code>cm, mm, in, pc, pt</code> and <code>px</code>.Other units are not supported yet.
-	 * 
-	 * <b>Mathematical Expressions</b>
-	 * 
-	 * Expressions inside the <code>calc()</code> operator are only roughly checked for validity. Not every value that this type accepts might be a valid expression in the sense of the CSS spec. But vice versa, any expression that is valid according to the spec should be accepted by this type. The current implementation is based on the {@link http://dev.w3.org/csswg/css-values-3/#calc-syntax CSS3 Draft specification from 22 April 2015}.
-	 * 
-	 * Noteworthy details: <ul> <li>whitespace is mandatory around a '-' or '+' operator and optional otherwise</li> <li>parentheses are accepted but not checked for being balanced (a restriction of regexp based checks)</li> <li>semantic constraints like type restrictions are not checked</li> </ul>
-	 * 
-	 * Future versions of UI5 might check <code>calc()</code> expressions in more detail, so applications should not assume that a value, that is invalid according to the CSS spec but currently accepted by this type still will be accepted by future versions of this type.
-	 *
-	 * @public
-	*/
-	export default CSSSize;
-}
-
-declare module "sap/ui/core/CSSSizeShortHand" {
-	import {CSSSizeShortHand} from "sap/ui/core/library";
-
-	/**
-	 * This type checks the short hand form of a margin or padding definition.
-	 * 
-	 * E.g. "1px 1px" or up to four CSSSize values are allowed or tHe special keyword <code>inherit</code>.
-	 *
-	 * @public
-	 * @since 1.11.0
-	*/
-	export default CSSSizeShortHand;
-}
-
-declare module "sap/ui/core/Dock" {
-	import {Dock} from "sap/ui/core/library";
-
-	/**
-	 * Docking position: horizontal/vertical.
-	 * 
-	 * Defines a position on the element which is used for aligned positioning of another element (e.g. the left top corner of a popup is positioned at the left bottom corner of the input field). For the horizontal position possible values are "begin", "left", "center", "right" and "end", where left/right always are left and right, or begin/end which are dependent on the text direction. For the vertical position possible values are "top", "center" and "bottom". Examples: "left top", "end bottom", "center center".
-	 *
-	 * @public
-	*/
-	export default Dock;
-}
-
-declare module "sap/ui/core/ID" {
-	import {ID} from "sap/ui/core/library";
-
-	/**
-	 * A string type representing an ID or a name.
-	 * 
-	 * Allowed is a sequence of characters (capital/lowercase), digits, underscores, dashes, points and/or colons. It may start with a character or underscore only.
-	 *
-	 * @public
-	*/
-	export default ID;
-}
-
-declare module "sap/ui/core/Percentage" {
-	import {Percentage} from "sap/ui/core/library";
-
-	/**
-	 * A string type that represents a percentage value.
-	 *
-	 * @public
-	*/
-	export default Percentage;
-}
-
-declare module "sap/ui/core/URI" {
-	import {URI} from "sap/ui/core/library";
-
-	/**
-	 * A string type that represents an RFC 3986 conformant URI.
-	 *
-	 * @public
-	*/
-	export default URI;
 }

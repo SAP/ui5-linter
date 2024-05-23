@@ -88,6 +88,21 @@ declare module "sap/gantt/DragOrientation" {
 	export default DragOrientation;
 }
 
+declare module "sap/gantt/GenericArray" {
+	import {GenericArray} from "sap/gantt/library";
+
+	/**
+	 * A hybrid data type that can represent an array of string, or array of object. The result value parsed by this data type are "string[]" or "object[]"
+	 * 
+	 * Examples of valid values in js: <ol> <li>["order", "activity"]</li> <li>[{name:"order", idName:"OrderNo"},{name:"activity"}]</li> <li>[{name:"order", idName:"OrderNo"},"activity"]</li> </ol>
+	 * 
+	 * Examples of valid values in xml view: <ol> <li>"order,activity"</li> <li>"[order,activity]"</li> <li>[{"name":"order", "idName":"OrderNo"},{"name":"activity"}]</li> </ol>
+	 *
+	 * @public
+	*/
+	export default GenericArray;
+}
+
 declare module "sap/gantt/MouseWheelZoomType" {
 	import {MouseWheelZoomType} from "sap/gantt/library";
 
@@ -97,6 +112,18 @@ declare module "sap/gantt/MouseWheelZoomType" {
 	 * @public
 	*/
 	export default MouseWheelZoomType;
+}
+
+declare module "sap/gantt/PaletteColor" {
+	import {PaletteColor} from "sap/gantt/library";
+
+	/**
+	 * Accepts only Gantt palette colors names.
+	 *
+	 * @public
+	 * @since 1.69
+	*/
+	export default PaletteColor;
 }
 
 declare module "sap/gantt/SelectionMode" {
@@ -273,33 +300,6 @@ declare module "sap/gantt/simple/yAxisColumnContent" {
 	 * @since 1.102
 	*/
 	export default simple.yAxisColumnContent;
-}
-
-declare module "sap/gantt/GenericArray" {
-	import {GenericArray} from "sap/gantt/library";
-
-	/**
-	 * A hybrid data type that can represent an array of string, or array of object. The result value parsed by this data type are "string[]" or "object[]"
-	 * 
-	 * Examples of valid values in js: <ol> <li>["order", "activity"]</li> <li>[{name:"order", idName:"OrderNo"},{name:"activity"}]</li> <li>[{name:"order", idName:"OrderNo"},"activity"]</li> </ol>
-	 * 
-	 * Examples of valid values in xml view: <ol> <li>"order,activity"</li> <li>"[order,activity]"</li> <li>[{"name":"order", "idName":"OrderNo"},{"name":"activity"}]</li> </ol>
-	 *
-	 * @public
-	*/
-	export default GenericArray;
-}
-
-declare module "sap/gantt/PaletteColor" {
-	import {PaletteColor} from "sap/gantt/library";
-
-	/**
-	 * Accepts only Gantt palette colors names.
-	 *
-	 * @public
-	 * @since 1.69
-	*/
-	export default PaletteColor;
 }
 
 declare module "sap/gantt/SVGLength" {

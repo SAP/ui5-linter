@@ -56,76 +56,6 @@ declare module "sap/ui/layout/BlockRowColorSets" {
 	export default BlockRowColorSets;
 }
 
-declare module "sap/ui/layout/cssgrid/CSSGridAutoFlow" {
-	import {cssgrid} from "sap/ui/layout/library";
-
-	/**
-	 * A string type that is used for CSS grid to control how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.
-	 *
-	 * @public
-	 * @since 1.60.0
-	*/
-	export default cssgrid.CSSGridAutoFlow;
-}
-
-declare module "sap/ui/layout/form/SimpleFormLayout" {
-	import {form} from "sap/ui/layout/library";
-
-	/**
-	 * Available <code>FormLayouts</code> used to render a <code>SimpleForm</code>.
-	 *
-	 * @public
-	 * @since 1.16.0
-	*/
-	export default form.SimpleFormLayout;
-}
-
-declare module "sap/ui/layout/GridPosition" {
-	import {GridPosition} from "sap/ui/layout/library";
-
-	/**
-	 * The position of the {@link sap.ui.layout.Grid}. Can be <code>Left</code> (default), <code>Center</code> or <code>Right</code>.
-	 *
-	 * @public
-	*/
-	export default GridPosition;
-}
-
-declare module "sap/ui/layout/SideContentFallDown" {
-	import {SideContentFallDown} from "sap/ui/layout/library";
-
-	/**
-	 * Types of the DynamicSideContent FallDown options
-	 *
-	 * @public
-	 * @since 1.30
-	*/
-	export default SideContentFallDown;
-}
-
-declare module "sap/ui/layout/SideContentPosition" {
-	import {SideContentPosition} from "sap/ui/layout/library";
-
-	/**
-	 * The position of the side content - End (default) and Begin.
-	 *
-	 * @public
-	*/
-	export default SideContentPosition;
-}
-
-declare module "sap/ui/layout/SideContentVisibility" {
-	import {SideContentVisibility} from "sap/ui/layout/library";
-
-	/**
-	 * Types of the DynamicSideContent Visibility options
-	 *
-	 * @public
-	 * @since 1.30
-	*/
-	export default SideContentVisibility;
-}
-
 declare module "sap/ui/layout/BoxesPerRowConfig" {
 	import {BoxesPerRowConfig} from "sap/ui/layout/library";
 
@@ -138,6 +68,18 @@ declare module "sap/ui/layout/BoxesPerRowConfig" {
 	 * @since 1.61.0
 	*/
 	export default BoxesPerRowConfig;
+}
+
+declare module "sap/ui/layout/cssgrid/CSSGridAutoFlow" {
+	import {cssgrid} from "sap/ui/layout/library";
+
+	/**
+	 * A string type that is used for CSS grid to control how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.
+	 *
+	 * @public
+	 * @since 1.60.0
+	*/
+	export default cssgrid.CSSGridAutoFlow;
 }
 
 declare module "sap/ui/layout/cssgrid/CSSGridGapShortHand" {
@@ -260,6 +202,18 @@ declare module "sap/ui/layout/form/GridElementCells" {
 	export default form.GridElementCells;
 }
 
+declare module "sap/ui/layout/form/SimpleFormLayout" {
+	import {form} from "sap/ui/layout/library";
+
+	/**
+	 * Available <code>FormLayouts</code> used to render a <code>SimpleForm</code>.
+	 *
+	 * @public
+	 * @since 1.16.0
+	*/
+	export default form.SimpleFormLayout;
+}
+
 declare module "sap/ui/layout/GridIndent" {
 	import {GridIndent} from "sap/ui/layout/library";
 
@@ -275,6 +229,17 @@ declare module "sap/ui/layout/GridIndent" {
 	export default GridIndent;
 }
 
+declare module "sap/ui/layout/GridPosition" {
+	import {GridPosition} from "sap/ui/layout/library";
+
+	/**
+	 * The position of the {@link sap.ui.layout.Grid}. Can be <code>Left</code> (default), <code>Center</code> or <code>Right</code>.
+	 *
+	 * @public
+	*/
+	export default GridPosition;
+}
+
 declare module "sap/ui/layout/GridSpan" {
 	import {GridSpan} from "sap/ui/layout/library";
 
@@ -288,4 +253,39 @@ declare module "sap/ui/layout/GridSpan" {
 	 * @public
 	*/
 	export default GridSpan;
+}
+
+declare module "sap/ui/layout/SideContentFallDown" {
+	import {SideContentFallDown} from "sap/ui/layout/library";
+
+	/**
+	 * Types of the DynamicSideContent FallDown options
+	 *
+	 * @public
+	 * @since 1.30
+	*/
+	export default SideContentFallDown;
+}
+
+declare module "sap/ui/layout/SideContentPosition" {
+	import {SideContentPosition} from "sap/ui/layout/library";
+
+	/**
+	 * The position of the side content - End (default) and Begin.
+	 *
+	 * @public
+	*/
+	export default SideContentPosition;
+}
+
+declare module "sap/ui/layout/SideContentVisibility" {
+	import {SideContentVisibility} from "sap/ui/layout/library";
+
+	/**
+	 * Types of the DynamicSideContent Visibility options
+	 *
+	 * @public
+	 * @since 1.30
+	*/
+	export default SideContentVisibility;
 }
