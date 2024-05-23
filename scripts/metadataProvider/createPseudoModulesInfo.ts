@@ -99,11 +99,11 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 			const exportName = record.export ?? record.name;
 			const exportNameChunks = exportName.split(".");
 			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing
-			
+
 			if (record?.["ui5-metadata"]?.stereotype === "datatype") {
 				dataTypesMap[`${libName}.${exportName}`] = exportName;
 			}
-			
+
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
 
 			stringBuilder.push(`\timport {${name}} from "${libName.replaceAll(".", "/")}/library";`);
