@@ -64,6 +64,39 @@ declare module "sap/ui/comp/personalization/TableType" {
 	export default personalization.TableType;
 }
 
+declare module "sap/ui/comp/smartchart/SelectionMode" {
+	import {smartchart} from "sap/ui/comp/library";
+
+	/**
+	 * Enumeration for supported selection mode in SmartChart
+	 *
+	 * @public
+	*/
+	export default smartchart.SelectionMode;
+}
+
+declare module "sap/ui/comp/smartfield/ControlContextType" {
+	import {smartfield} from "sap/ui/comp/library";
+
+	/**
+	 * Enumeration of the different contexts supported by the SmartField, if it is using an OData model.
+	 *
+	 * @public
+	*/
+	export default smartfield.ControlContextType;
+}
+
+declare module "sap/ui/comp/smartfield/ControlProposalType" {
+	import {smartfield} from "sap/ui/comp/library";
+
+	/**
+	 * Enumeration of the different control proposals supported by the Smart Field, if it is using an OData model.
+	 *
+	 * @public
+	*/
+	export default smartfield.ControlProposalType;
+}
+
 declare module "sap/ui/comp/smartfield/ControlType" {
 	import {smartfield} from "sap/ui/comp/library";
 
@@ -176,6 +209,17 @@ declare module "sap/ui/comp/smartfilterbar/MandatoryType" {
 	export default smartfilterbar.MandatoryType;
 }
 
+declare module "sap/ui/comp/smartfilterbar/SelectOptionSign" {
+	import {smartfilterbar} from "sap/ui/comp/library";
+
+	/**
+	 * The different options to define Sign for Select Options used in SmartFilter control.
+	 *
+	 * @public
+	*/
+	export default smartfilterbar.SelectOptionSign;
+}
+
 declare module "sap/ui/comp/smartform/Importance" {
 	import {smartform} from "sap/ui/comp/library";
 
@@ -257,6 +301,18 @@ declare module "sap/ui/comp/smartvariants/ChangeHandlerType" {
 	 * @public
 	*/
 	export default smartvariants.ChangeHandlerType;
+}
+
+declare module "sap/ui/comp/TextArrangementType" {
+	import {TextArrangementType} from "sap/ui/comp/library";
+
+	/**
+	 * Enumeration of text arrangement types.
+	 *
+	 * @public
+	 * @since 1.60
+	*/
+	export default TextArrangementType;
 }
 
 declare module "sap/ui/comp/valuehelpdialog/ValueHelpRangeOperation" {

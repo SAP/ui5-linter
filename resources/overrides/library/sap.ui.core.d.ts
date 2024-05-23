@@ -308,6 +308,18 @@ declare module "sap/ui/core/InvisibleMessageMode" {
 	export default InvisibleMessageMode;
 }
 
+declare module "sap/ui/core/MessageType" {
+	import {MessageType} from "sap/ui/core/library";
+
+	/**
+	 * Specifies possible message types.
+	 *
+	 * @deprecated (since 1.120) - Please use {@link sap.ui.core.message.MessageType} instead.
+	 * @public
+	*/
+	export default MessageType;
+}
+
 declare module "sap/ui/core/OpenState" {
 	import {OpenState} from "sap/ui/core/library";
 

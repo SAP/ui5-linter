@@ -6,6 +6,7 @@ import "./sap.ui.core";
 import "./sap.ui.export";
 import "./sap.f";
 import "./sap.gantt";
+import "./sap.ui.generic.app";
 import "./sap.ui.integration";
 import "./sap.ui.layout";
 import "./sap.makit";

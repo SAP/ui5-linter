@@ -31,6 +31,17 @@ declare module "sap/gantt/config/FindMode" {
 	export default config.FindMode;
 }
 
+declare module "sap/gantt/config/TimeUnit" {
+	import {config} from "sap/gantt/library";
+
+	/**
+	 * Different time units used as part of the zoom level. They are names of d3 time unit classes.
+	 *
+	 * @public
+	*/
+	export default config.TimeUnit;
+}
+
 declare module "sap/gantt/config/ZoomControlType" {
 	import {config} from "sap/gantt/library";
 
@@ -40,6 +51,32 @@ declare module "sap/gantt/config/ZoomControlType" {
 	 * @public
 	*/
 	export default config.ZoomControlType;
+}
+
+declare module "sap/gantt/def/filter/ColorMatrixValue" {
+	import {def} from "sap/gantt/library";
+
+	/**
+	 * Color Matrix Values.
+	 * 
+	 * The matrix decides what target color from source color.
+	 *
+	 * @public
+	*/
+	export default def.filter.ColorMatrixValue;
+}
+
+declare module "sap/gantt/def/filter/MorphologyOperator" {
+	import {def} from "sap/gantt/library";
+
+	/**
+	 * Morphology Operators.
+	 * 
+	 * The operator decides the morphology to make the shape fatter or slimmer.
+	 *
+	 * @public
+	*/
+	export default def.filter.MorphologyOperator;
 }
 
 declare module "sap/gantt/DeltaLineLayer" {
@@ -146,6 +183,19 @@ declare module "sap/gantt/shape/ext/rls/RelationshipType" {
 	 * @public
 	*/
 	export default shape.ext.rls.RelationshipType;
+}
+
+declare module "sap/gantt/shape/ShapeCategory" {
+	import {shape} from "sap/gantt/library";
+
+	/**
+	 * Shape Categories.
+	 * 
+	 * Different categories use different Drawers. Therefore, different categories may have different designs of parameters in their getter methods.
+	 *
+	 * @public
+	*/
+	export default shape.ShapeCategory;
 }
 
 declare module "sap/gantt/simple/connectorType" {

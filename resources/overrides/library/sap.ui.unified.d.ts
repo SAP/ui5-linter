@@ -47,6 +47,18 @@ declare module "sap/ui/unified/CalendarDayType" {
 	export default CalendarDayType;
 }
 
+declare module "sap/ui/unified/CalendarIntervalType" {
+	import {CalendarIntervalType} from "sap/ui/unified/library";
+
+	/**
+	 * Interval types in a <code>CalendarRow</code>.
+	 *
+	 * @public
+	 * @since 1.34.0
+	*/
+	export default CalendarIntervalType;
+}
+
 declare module "sap/ui/unified/ColorPickerMode" {
 	import {ColorPickerMode} from "sap/ui/unified/library";
 

@@ -1,3 +1,14 @@
+declare module "sap/ui/vbm/ClusterInfoType" {
+	import {ClusterInfoType} from "sap/ui/vbm/library";
+
+	/**
+	 * Cluster Info Type
+	 *
+	 * @public
+	*/
+	export default ClusterInfoType;
+}
+
 declare module "sap/ui/vbm/RouteType" {
 	import {RouteType} from "sap/ui/vbm/library";
 

@@ -126,6 +126,18 @@ declare module "sap/m/DeviationIndicator" {
 	export default DeviationIndicator;
 }
 
+declare module "sap/m/DialogRoleType" {
+	import {DialogRoleType} from "sap/m/library";
+
+	/**
+	 * Enum for the ARIA role of {@link sap.m.Dialog} control.
+	 *
+	 * @public
+	 * @since 1.65
+	*/
+	export default DialogRoleType;
+}
+
 declare module "sap/m/DialogType" {
 	import {DialogType} from "sap/m/library";
 
@@ -446,6 +458,18 @@ declare module "sap/m/LabelDesign" {
 	export default LabelDesign;
 }
 
+declare module "sap/m/LightBoxLoadingStates" {
+	import {LightBoxLoadingStates} from "sap/m/library";
+
+	/**
+	 * Types of LightBox loading stages.
+	 *
+	 * @public
+	 * @since 1.40
+	*/
+	export default LightBoxLoadingStates;
+}
+
 declare module "sap/m/LinkAccessibleRole" {
 	import {LinkAccessibleRole} from "sap/m/library";
 
@@ -695,6 +719,18 @@ declare module "sap/m/PlacementType" {
 	 * @public
 	*/
 	export default PlacementType;
+}
+
+declare module "sap/m/PlanningCalendarBuiltInView" {
+	import {PlanningCalendarBuiltInView} from "sap/m/library";
+
+	/**
+	 * A list of the default built-in views in a {@link sap.m.PlanningCalendar}, described by their keys.
+	 *
+	 * @public
+	 * @since 1.50
+	*/
+	export default PlanningCalendarBuiltInView;
 }
 
 declare module "sap/m/PlanningCalendarStickyMode" {

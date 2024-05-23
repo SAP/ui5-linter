@@ -34,8 +34,8 @@ async function getPseudoModuleNames() {
 		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as {symbols: apiJson[]};
 		return libApiJson.symbols;
 	}).reduce((acc: Record<string, apiJson[]>, symbol) => {
-		if (["datatype", "enum"].includes(symbol?.["ui5-metadata"]?.stereotype) &&
-			symbol.resource.endsWith("library.js")) {
+		if ((["datatype", "enum"].includes(symbol?.["ui5-metadata"]?.stereotype) ||
+			symbol.kind === "enum") && symbol.resource.endsWith("library.js")) {
 			const libName = symbol.module.replace("/library", "").replaceAll("/", ".");
 			acc[libName] = acc[libName] ?? [];
 			acc[libName].push(symbol);

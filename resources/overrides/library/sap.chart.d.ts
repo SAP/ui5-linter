@@ -52,3 +52,36 @@ declare module "sap/chart/coloring/ImprovementDirectionType" {
 	*/
 	export default coloring.ImprovementDirectionType;
 }
+
+declare module "sap/chart/MessageId" {
+	import {MessageId} from "sap/chart/library";
+
+	/**
+	 * Enumeration for supported message types in analytical chart.
+	 *
+	 * @public
+	*/
+	export default MessageId;
+}
+
+declare module "sap/chart/SelectionBehavior" {
+	import {SelectionBehavior} from "sap/chart/library";
+
+	/**
+	 * Enumeration for supported selection behavior in analytical chart
+	 *
+	 * @public
+	*/
+	export default SelectionBehavior;
+}
+
+declare module "sap/chart/SelectionMode" {
+	import {SelectionMode} from "sap/chart/library";
+
+	/**
+	 * Enumeration for supported selection mode in analytical chart
+	 *
+	 * @public
+	*/
+	export default SelectionMode;
+}

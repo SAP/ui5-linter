@@ -66,6 +66,19 @@ declare module "sap/ui/table/SelectionMode" {
 	export default SelectionMode;
 }
 
+declare module "sap/ui/table/SharedDomRef" {
+	import {SharedDomRef} from "sap/ui/table/library";
+
+	/**
+	 * Shared DOM Reference IDs of the table.
+	 * 
+	 * Contains IDs of shared DOM references, which should be accessible to inheriting controls via getDomRef() function.
+	 *
+	 * @public
+	*/
+	export default SharedDomRef;
+}
+
 declare module "sap/ui/table/SortOrder" {
 	import {SortOrder} from "sap/ui/table/library";
 
