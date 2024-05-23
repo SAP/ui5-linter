@@ -1,7 +1,7 @@
 import ts, {Identifier} from "typescript";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
-import analyzeComponentJson from "./bestPractices.js";
+import analyzeComponentJson from "./asyncComponentFlags.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -72,7 +72,7 @@ export default class SourceFileLinter {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments &&
 		ts.isSourceFile(this.#sourceFile) &&
-		this.#sourceFile.fileName.endsWith("/Component.js")) {
+		(this.#sourceFile.fileName.endsWith("/Component.js") || this.#sourceFile.fileName.endsWith("/Component.ts"))) {
 			analyzeComponentJson({
 				node: node as ts.ExpressionWithTypeArguments,
 				manifestContent: this.#manifestContent,
