@@ -138,8 +138,8 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 await handleCli(async (url) => {
 	await fetchAndExtractApiJsons(url);
 
-	const psmN = await getPseudoModuleNames();
-	await addOverrides(psmN);
+	const pseudoModules = await getPseudoModuleNames();
+	await addOverrides(pseudoModules);
 
 	await cleanup();
 });
