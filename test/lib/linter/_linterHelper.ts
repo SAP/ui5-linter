@@ -68,12 +68,12 @@ export function createTestsForFixtures(fixturesPath: string) {
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
-		if (fixturesPath.includes("BestPractices")) {
-			const dirName = fixturesPath.split("/").pop();
+		if (fixturesPath.includes("AsyncComponentFlags")) {
+			const dirName = path.basename(fixturesPath);
 			testDefinition({
-				testName: `${path.basename(fixturesPath)}/Component.js`,
+				testName: dirName,
 				namespace: "mycomp",
-				fileName: `${dirName}/Component.js`,
+				fileName: dirName,
 				fixturesPath,
 				// Needed, because without a namespace, TS's type definition detection
 				// does not function properly for the inheritance case
@@ -134,13 +134,14 @@ function testDefinition(
 			includeMessageDetails: true,
 		});
 		assertExpectedLintResults(t, res, fixturesPath, filePaths);
-		res.forEach((results) => {
-			const chunks = testName.split("/").slice(0, -1);
-
-			if (chunks.length > 0) {
-				results.filePath = path.posix.join(...chunks, path.basename(results.filePath));
+		res.forEach((result) => {
+			const resultFileName = path.basename(result.filePath);
+			if (resultFileName === fileName) {
+				// Use "clean" testName instead of the fileName which might contain modifiers like "only_"
+				result.filePath = testName;
 			} else {
-				results.filePath = testName;
+				// Use only the file name without the directory (which might contain modifiers)
+				result.filePath = resultFileName;
 			}
 		});
 		t.snapshot(res);
