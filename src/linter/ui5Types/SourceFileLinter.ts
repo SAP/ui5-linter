@@ -19,15 +19,16 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
-	#dataTypes: Record<string, string> = {};
+	#dataTypes: Record<string, string>;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
 
 	constructor(
-		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
-		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
-		messageDetails: boolean | undefined = false, manifestContent?: string | undefined
+		context: LinterContext, resourcePath: ResourcePath,
+		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
+		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false, manifestContent?: string | undefined,
+		dataTypes: Record<string, string> | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -40,17 +41,12 @@ export default class SourceFileLinter {
 		this.#manifestContent = manifestContent;
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
+		this.#dataTypes = dataTypes ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			const dataTypes = await fs.readFile(
-				new URL("../../../resources/dataTypes.json", import.meta.url),
-				{encoding: "utf-8"}
-			);
-			this.#dataTypes = JSON.parse(dataTypes) as Record<string, string>;
-
 			this.visitNode(this.#sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
