@@ -12,10 +12,10 @@ type propsRecord = Record<string, {
 }>;
 
 enum AsyncPropertyStatus {
-	true, // Property is set to true
-	false, // Property is set to false
-	propNotSet, // Property is not set
 	parentPropNotSet, // In the manifest, the parent object of the property is not set
+	propNotSet, // Property is not set
+	false, // Property is set to false
+	true, // Property is set to true
 };
 
 interface AsyncFlags {
@@ -57,25 +57,15 @@ export default function analyzeComponentJson({
 		reportResults({analysisResult, context, reporter, resourcePath, classDesc, manifestContent});
 	}
 }
+function getHighestPropertyStatus(aProp: AsyncPropertyStatus, bProp: AsyncPropertyStatus): AsyncPropertyStatus {
+	return aProp > bProp ? aProp : bProp;
+};
 
-function mergeResults(a: AsyncFlags, b: AsyncFlags): AsyncFlags {
-	const compareValues = (aProp: AsyncPropertyStatus, bProp: AsyncPropertyStatus): AsyncPropertyStatus => {
-		const priorityCheck = [
-			AsyncPropertyStatus.parentPropNotSet,
-			AsyncPropertyStatus.propNotSet,
-			AsyncPropertyStatus.false,
-			AsyncPropertyStatus.true,
-		];
-		const aIndex = priorityCheck.indexOf(aProp);
-		const bIndex = priorityCheck.indexOf(bProp);
-
-		return (aIndex > bIndex) ? aProp : bProp;
-	};
-
+function mergeAsyncFlags(a: AsyncFlags, b: AsyncFlags): AsyncFlags {
 	return {
 		hasManifestDefinition: a.hasManifestDefinition || b.hasManifestDefinition,
-		routingAsyncFlag: compareValues(a.routingAsyncFlag, b.routingAsyncFlag),
-		rootViewAsyncFlag: compareValues(a.rootViewAsyncFlag, b.rootViewAsyncFlag),
+		routingAsyncFlag: getHighestPropertyStatus(a.routingAsyncFlag, b.routingAsyncFlag),
+		rootViewAsyncFlag: getHighestPropertyStatus(a.rootViewAsyncFlag, b.rootViewAsyncFlag),
 		hasAsyncInterface: a.hasAsyncInterface || b.hasAsyncInterface,
 	};
 }
@@ -95,7 +85,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 	// Checks the interfaces and manifest
 	const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
 		const checkResult = doPropsCheck(member as ts.PropertyDeclaration, manifestContent);
-		return mergeResults(acc, checkResult);
+		return mergeAsyncFlags(acc, checkResult);
 	}, {...returnTypeTemplate});
 
 	const heritageAnalysis =
@@ -123,7 +113,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 		}) ?? [];
 
 	return [...heritageAnalysis, curClassAnalysis].reduce((acc, curAnalysis) => {
-		return mergeResults(acc ?? {...returnTypeTemplate}, curAnalysis ?? {...returnTypeTemplate});
+		return mergeAsyncFlags(acc ?? {...returnTypeTemplate}, curAnalysis ?? {...returnTypeTemplate});
 	});
 }
 
