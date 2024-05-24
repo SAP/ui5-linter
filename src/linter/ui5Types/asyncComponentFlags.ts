@@ -122,34 +122,54 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 	});
 }
 
+function isCoreImportDeclaration(statement: ts.Node): statement is ts.ImportDeclaration {
+	return ts.isImportDeclaration(statement) &&
+		ts.isStringLiteral(statement.moduleSpecifier) &&
+		statement.moduleSpecifier.text === "sap/ui/core/library";
+}
+
 function doAsyncInterfaceChecks(importDeclaration: ts.Node): AsyncInterfaceStatus {
-	while (importDeclaration && importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
-		importDeclaration = importDeclaration.parent;
-	}
+	const sourceFile = importDeclaration.getSourceFile();
 
-	// @ts-expect-error imports is part of SourceFileObject
-	const moduleImports = importDeclaration?.imports as ts.Node[];
-	const coreLib = moduleImports?.find((importModule) => {
-		return importModule.getText() === "\"sap/ui/core/library\"";
-	}) as ts.StringLiteral | undefined;
-
-	let hasAsyncInterface = AsyncInterfaceStatus.propNotSet;
-	if (coreLib && ts.isImportDeclaration(coreLib.parent)) {
-		if (coreLib.parent.importClause?.namedBindings &&
-			coreLib.parent.importClause.namedBindings.kind === ts.SyntaxKind.NamedImports) {
-			const hasAsyncImport = coreLib.parent.importClause.namedBindings.elements.some(
-				(namedImport) => namedImport.getText() === "IAsyncContentCreation");
-
-			hasAsyncInterface = hasAsyncImport ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
-		} else {
-			const implementsAsyncInterface =
-				coreLib.parent.importClause?.name?.getText() === "IAsyncContentCreation";
-
-			hasAsyncInterface = implementsAsyncInterface ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
+	let coreLibImports: ts.ImportDeclaration[] | undefined;
+	if (sourceFile.isDeclarationFile) {
+		let moduleDeclaration: ts.ModuleDeclaration | undefined;
+		while (!moduleDeclaration && importDeclaration.kind !== ts.SyntaxKind.SourceFile) {
+			if (ts.isModuleDeclaration(importDeclaration)) {
+				moduleDeclaration = importDeclaration;
+			} else {
+				importDeclaration = importDeclaration.parent;
+			}
 		}
+
+		if (moduleDeclaration?.body?.kind === ts.SyntaxKind.ModuleBlock) {
+			coreLibImports = moduleDeclaration.body.statements.filter(isCoreImportDeclaration);
+		}
+	} else {
+		coreLibImports = sourceFile.statements.filter(isCoreImportDeclaration);
 	}
 
-	return hasAsyncInterface;
+	// let hasAsyncInterface = AsyncInterfaceStatus.propNotSet;
+	if (!coreLibImports) {
+		return AsyncInterfaceStatus.propNotSet;
+	}
+	const hasAsyncImport = coreLibImports.some((importDecl) => {
+		const importClause = importDecl.importClause;
+		if (!importClause) {
+			return;
+		}
+		if (!importClause.namedBindings) {
+			// Example: import "sap/ui/core/library"; or import library from "sap/ui/core/library";
+		} else if (ts.isNamedImports(importClause.namedBindings)) {
+			// Example: import { IAsyncContentCreation } from "sap/ui/core/library";
+			return importClause.namedBindings.elements.some(
+				(namedImport) => namedImport.getText() === "IAsyncContentCreation");
+		} else {
+			// Example: import * as library from "sap/ui/core/library";
+		}
+	});
+
+	return hasAsyncImport ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 }
 
 function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string | undefined) {
@@ -159,9 +179,14 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 	if (metadata && ts.isPropertyDeclaration(metadata) &&
 		metadata.initializer && ts.isObjectLiteralExpression(metadata.initializer)) {
 		metadata.initializer.properties.forEach((prop) => {
-			if (["interfaces", "\"interfaces\""].includes(prop.name?.getText() ?? "")) {
+			if (!prop.name) {
+				return;
+			}
+			const propText = getPropertyName(prop.name);
+
+			if (propText === "interfaces") {
 				classInterfaces = prop;
-			} else if (["manifest", "\"manifest\""].includes(prop.name?.getText() ?? "")) {
+			} else if (propText === "manifest") {
 				componentManifest = prop;
 			}
 		});
@@ -171,8 +196,10 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 	if (classInterfaces && ts.isPropertyAssignment(classInterfaces) &&
 		classInterfaces.initializer && ts.isArrayLiteralExpression(classInterfaces.initializer)) {
 		const hasAsyncInterfaceProp = classInterfaces.initializer
-			.elements.some((implementedInterface) =>
-				implementedInterface.getText() === "\"sap.ui.core.IAsyncContentCreation\"");
+			.elements.some((implementedInterface) => {
+				return ts.isStringLiteral(implementedInterface) &&
+					implementedInterface.text === "sap.ui.core.IAsyncContentCreation";
+			});
 
 		hasAsyncInterface = hasAsyncInterfaceProp ? AsyncInterfaceStatus.true : AsyncInterfaceStatus.false;
 	}
@@ -193,8 +220,8 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 
 		const manifestJson = extractPropsRecursive(componentManifest.initializer) ?? {};
 		let manifestSapui5Section: propsRecordValueType | propsRecordValueType[] | undefined;
-		if (instanceOfPropsRecord(manifestJson["\"sap.ui5\""])) {
-			manifestSapui5Section = manifestJson["\"sap.ui5\""].value;
+		if (instanceOfPropsRecord(manifestJson["sap.ui5"])) {
+			manifestSapui5Section = manifestJson["sap.ui5"].value;
 		}
 
 		if (instanceOfPropsRecord(manifestSapui5Section) &&
@@ -253,6 +280,14 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 	};
 }
 
+function getPropertyName(node: ts.PropertyName): string {
+	if (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node)) {
+		return node.text;
+	} else {
+		return node.getText();
+	}
+}
+
 function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 	const properties = Object.create(null) as propsRecord;
 
@@ -261,7 +296,7 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 			return;
 		}
 
-		const key = prop.name.getText();
+		const key = getPropertyName(prop.name);
 		if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
 			properties[key] = {value: true, node: prop.initializer};
 		} else if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
@@ -279,12 +314,9 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 			}).filter(($) => $) as propsRecordValueType[];
 
 			properties[key] = {value: resolvedValue, node: prop.initializer};
-		} else if (
-			(ts.isIdentifier(prop.initializer) ||
-			ts.isNumericLiteral(prop.initializer) ||
-			ts.isStringLiteral(prop.initializer)) &&
-
-			prop.initializer.getText()) {
+		} else if (ts.isStringLiteralLike(prop.initializer) || ts.isNumericLiteral(prop.initializer)) {
+			properties[key] = {value: prop.initializer.text, node: prop.initializer};
+		} else if (ts.isIdentifier(prop.initializer) || ts.isPrivateIdentifier(prop.initializer)) {
 			properties[key] = {value: prop.initializer.getText(), node: prop.initializer};
 		} else {
 			// throw new Error("Unhandled property assignment");
