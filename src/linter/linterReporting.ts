@@ -1,5 +1,5 @@
 export const MESSAGES = {
-	SHORT__NO_DIRECT_DATATYPE_ACCESS: "Deprecated access to DataType ('{0}').",
+	SHORT__NO_DIRECT_DATATYPE_ACCESS: "Deprecated access to DataType ('{0}')",
 	DETAILS__NO_DIRECT_DATATYPE_ACCESS: "DataType can be accessed only via the static " +
 	"DataType.getType(\"{0}\") method. " +
 	"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
