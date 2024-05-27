@@ -4,7 +4,7 @@ export const MESSAGES = {
 	"DataType.getType(\"{0}\") method. " +
 	"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
 
-	SHORT__DEPRECATED_ACCESS_ENUM: "Deprecated access to ENUM pseudo module '{0}'",
+	SHORT__DEPRECATED_ACCESS_ENUM: "Deprecated access to enum pseudo module '{0}'",
 	DETAILS__DEPRECATED_ACCESS_ENUM:
 		"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Deprecated Pseudo Modules}",
 
