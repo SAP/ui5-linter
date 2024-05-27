@@ -1,9 +1,7 @@
-// Fixture description:
-// Async flags are maintained, no IAsyncContentCreation interface implemented
 sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 	"use strict";
 
-	return UIComponent.extend("mycomp.Component", {
+	return UIComponent.extend("mycomp.subdir.ParentComponent", {
 		metadata: {
 			manifest: {
 				_version: "1.12.0",
@@ -23,7 +21,6 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 					rootView: {
 						viewName: "mycomp.view.App",
 						type: "XML",
-						async: true,
 						id: "app",
 					},
 
@@ -34,7 +31,6 @@ sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 							viewPath: "mycomp.view",
 							controlId: "app",
 							controlAggregation: "pages",
-							async: true,
 						},
 						routes: [
 							{
