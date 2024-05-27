@@ -64,7 +64,11 @@ export function assertExpectedLintResults(
 // Helper function to create linting tests for all files in a directory
 export function createTestsForFixtures(fixturesPath: string) {
 	try {
-		const testFiles = readdirSync(fixturesPath);
+		const testFiles = readdirSync(fixturesPath, {withFileTypes: true}).filter((dirEntries) => {
+			return dirEntries.isFile();
+		}).map((dirEntries) => {
+			return dirEntries.name;
+		});
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}

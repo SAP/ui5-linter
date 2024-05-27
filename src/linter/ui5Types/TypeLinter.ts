@@ -104,7 +104,7 @@ export default class TypeChecker {
 					log.verbose(`Failed to get source map for ${sourceFile.fileName}`);
 				}
 				let manifestContent;
-				if (sourceFile.fileName.endsWith("/Component.js")) {
+				if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
 					const res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
 					if (res) {
 						manifestContent = await res.getString();

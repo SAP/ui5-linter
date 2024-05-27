@@ -70,6 +70,9 @@ function mergeAsyncFlags(a: AsyncFlags, b: AsyncFlags): AsyncFlags {
 	};
 }
 
+/**
+ * Search for the async interface in the class hierarchy
+*/
 function findAsyncInterface({classDefinition, manifestContent, checker}: {
 	classDefinition: ts.ClassDeclaration;
 	manifestContent: string | undefined;
@@ -82,7 +85,7 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 		hasManifestDefinition: false,
 	} as AsyncFlags;
 
-	// Checks the interfaces and manifest
+	// Checks the interfaces and manifest of the class
 	const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
 		const checkResult = doPropsCheck(member as ts.PropertyDeclaration, manifestContent);
 		return mergeAsyncFlags(acc, checkResult);
@@ -100,7 +103,8 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 					if (ts.isClassDeclaration(declaration)) {
 						result = findAsyncInterface({
 							classDefinition: declaration,
-							manifestContent,
+							// We are unable to dynamically search for a parent-component's manifest.json
+							manifestContent: undefined,
 							checker,
 						}) ?? result;
 					} else if (ts.isInterfaceDeclaration(declaration)) {
@@ -237,9 +241,9 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 				routingAsyncFlag = isRoutingAsync ? AsyncPropertyStatus.true : AsyncPropertyStatus.false;
 			}
 		}
-	} else {
+	} else if (manifestContent) {
 		const parsedManifestContent =
-			JSON.parse(manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
+			JSON.parse(manifestContent) as SAPJSONSchemaForWebApplicationManifestFile;
 
 		const {rootView, routing} = parsedManifestContent["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace;
 

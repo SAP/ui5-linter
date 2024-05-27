@@ -183,6 +183,9 @@ export default class SourceFileLinter {
 			// returned by a class constructor.
 			// However, the OPA Matchers are a known exception where constructors do return a function.
 			return;
+		} else if (exprNode.kind === ts.SyntaxKind.SuperKeyword) {
+			// Ignore super calls
+			return;
 		}
 
 		if (!ts.isPropertyAccessExpression(exprNode) &&

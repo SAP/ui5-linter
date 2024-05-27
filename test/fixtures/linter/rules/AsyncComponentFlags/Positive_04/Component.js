@@ -1,3 +1,5 @@
+// Fixture description:
+// IAsyncContentCreation interface is implemented, redundant async flags in manifest.json
 sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
 	"use strict";
 
