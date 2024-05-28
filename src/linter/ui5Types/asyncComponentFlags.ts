@@ -359,13 +359,13 @@ function reportResults({
 
 			if (AsyncPropertyStatus.parentPropNotSet === rootViewAsyncFlag) {
 				// sap.ui5/rootView is not set at all, so skip it in the message
-				message = `Routing is not configured to load its targets asynchronously.`;
+				message = `Component Routing is not configured to load its targets asynchronously.`;
 				messageDetails = `{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
 				`Implement sap.ui.core.IAsyncContentCreation interface in ${fileName} or set the "async" flag for ` +
 				`"sap.ui5/routing/config" in the component manifest.`;
 			} else if (AsyncPropertyStatus.parentPropNotSet === routingAsyncFlag) {
 				// sap.ui5/routing/config is not set at all, so skip it in the message
-				message = `Root View is not configured to load its views asynchronously.`;
+				message = `Component Root View is not configured to load its views asynchronously.`;
 				messageDetails = `{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
 				`Implement sap.ui.core.IAsyncContentCreation interface in ${fileName} or set the "async" flag for ` +
 				`"sap.ui5/rootView" in the component manifest.`;
