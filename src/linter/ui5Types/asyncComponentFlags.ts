@@ -334,44 +334,47 @@ function reportResults({
 	resourcePath: string;
 }) {
 	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag, hasManifestDefinition} = analysisResult;
+	const fileName = path.basename(resourcePath);
 
 	if (!hasManifestDefinition && !!manifestContent) {
 		reporter.addMessage({
 			node: classDesc,
 			severity: LintMessageSeverity.Warning,
-			ruleId: "ui5-linter-add-manifest",
-			message: "Include a manifest section into the Component.js",
-			messageDetails: "manifest.json will be loaded and used, " +
-			"but is not defined in Component's metadata section",
+			ruleId: "ui5-linter-async-component-flags",
+			message: `Component does not specify that it uses the descriptor via the manifest.json file`,
+			messageDetails:
+				`A manifest.json has been found in the same directory as the component. Although it will be used at ` +
+				`runtime automatically, this should still be expressed in the ` +
+				`{@link topic:0187ea5e2eff4166b0453b9dcc8fc64f metadata of the component class}.`,
 		});
 	}
 
 	if (hasAsyncInterface !== true) {
 		if ([AsyncPropertyStatus.propNotSet, AsyncPropertyStatus.false].includes(rootViewAsyncFlag) ||
 			[AsyncPropertyStatus.propNotSet, AsyncPropertyStatus.false].includes(routingAsyncFlag)) {
-			let message = "Root View and Routing are not configured to load their modules asynchronously.";
-			let messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flags for " +
-				"\"sap.ui5/routing/config\" and \"sap.ui5/rootView\" in the manifest";
+			let message = `Component Root View and Routing are not configured to load their modules asynchronously.`;
+			let messageDetails = `{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
+				`Implement sap.ui.core.IAsyncContentCreation interface in ${fileName} or set the "async" flags for ` +
+				`"sap.ui5/routing/config" and "sap.ui5/rootView" in the component manifest.`;
 
 			if (AsyncPropertyStatus.parentPropNotSet === rootViewAsyncFlag) {
 				// sap.ui5/rootView is not set at all, so skip it in the message
-				message = "Routing is not configured to load its targets asynchronously.";
-				messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flag for " +
-				"\"sap.ui5/routing/config\" in the manifest.";
+				message = `Routing is not configured to load its targets asynchronously.`;
+				messageDetails = `{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
+				`Implement sap.ui.core.IAsyncContentCreation interface in ${fileName} or set the "async" flag for ` +
+				`"sap.ui5/routing/config" in the component manifest.`;
 			} else if (AsyncPropertyStatus.parentPropNotSet === routingAsyncFlag) {
 				// sap.ui5/routing/config is not set at all, so skip it in the message
-				message = "Root View is not configured to load its views asynchronously.";
-				messageDetails = "{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. " +
-				"Implement sap.ui.core.IAsyncContentCreation interface in Component.js or set async flag for " +
-				"\"sap.ui5/rootView\" in the manifest.";
+				message = `Root View is not configured to load its views asynchronously.`;
+				messageDetails = `{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
+				`Implement sap.ui.core.IAsyncContentCreation interface in ${fileName} or set the "async" flag for ` +
+				`"sap.ui5/rootView" in the component manifest.`;
 			}
 
 			reporter.addMessage({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-sync-loading",
+				ruleId: "ui5-linter-async-component-flags",
 				message,
 				messageDetails,
 			});
@@ -382,7 +385,6 @@ function reportResults({
 			if (manifestContent) {
 				// If the manifest.json is present, then we need to redirect the message pointers to it
 				const {key: posInfo} = pointers[pointerKey];
-				const fileName = path.basename(resourcePath);
 				context.addLintingMessage(
 					resourcePath.replace(fileName, "manifest.json"), {...message, ...posInfo});
 			} else {
@@ -393,19 +395,19 @@ function reportResults({
 		if (rootViewAsyncFlag === AsyncPropertyStatus.true) {
 			report("/sap.ui5/rootView/async", {
 				severity: LintMessageSeverity.Warning,
-				ruleId: "ui5-linter-no-sync-loading",
-				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +
-				"Remove the async flag for \"sap.ui5/rootView\" from the manifest",
-				messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
+				ruleId: "ui5-linter-async-component-flags",
+				message: `Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
+				`The redundant "async" flag for "sap.ui5/rootView" should be removed from the component manifest`,
+				messageDetails: `{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 			});
 		}
 		if (routingAsyncFlag === AsyncPropertyStatus.true) {
 			report("/sap.ui5/routing/config/async", {
 				severity: LintMessageSeverity.Warning,
-				ruleId: "ui5-linter-no-sync-loading",
-				message: "'sap.ui.core.IAsyncContentCreation' interface is implemented for Component.js. " +
-				"Remove the async flag for \"sap.ui5/routing/config\" from the manifest",
-				messageDetails: "{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}",
+				ruleId: "ui5-linter-async-component-flags",
+				message: `Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
+				`The redundant "async" flag for "sap.ui5/routing/config" should be removed from the component manifest`,
+				messageDetails: `{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 			});
 		}
 	}
