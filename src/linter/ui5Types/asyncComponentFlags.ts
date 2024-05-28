@@ -1,4 +1,5 @@
 import ts from "typescript";
+import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
 import LinterContext, {LintMessage, LintMessageSeverity} from "../LinterContext.js";
@@ -381,8 +382,9 @@ function reportResults({
 			if (manifestContent) {
 				// If the manifest.json is present, then we need to redirect the message pointers to it
 				const {key: posInfo} = pointers[pointerKey];
+				const fileName = path.basename(resourcePath);
 				context.addLintingMessage(
-					resourcePath.replace("Component.js", "manifest.json"), {...message, ...posInfo});
+					resourcePath.replace(fileName, "manifest.json"), {...message, ...posInfo});
 			} else {
 				reporter.addMessage({...message, ...{node: classDesc}});
 			}

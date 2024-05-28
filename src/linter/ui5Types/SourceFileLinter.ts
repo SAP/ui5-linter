@@ -1,4 +1,5 @@
 import ts, {Identifier} from "typescript";
+import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
@@ -18,6 +19,8 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#manifestContent: string | undefined;
+	#fileName: string;
+	#isComponent: boolean;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
@@ -33,6 +36,8 @@ export default class SourceFileLinter {
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
 		this.#manifestContent = manifestContent;
+		this.#fileName = path.basename(resourcePath);
+		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -70,9 +75,7 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
-		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments &&
-		ts.isSourceFile(this.#sourceFile) &&
-		(this.#sourceFile.fileName.endsWith("/Component.js") || this.#sourceFile.fileName.endsWith("/Component.ts"))) {
+		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments && this.#isComponent) {
 			analyzeComponentJson({
 				node: node as ts.ExpressionWithTypeArguments,
 				manifestContent: this.#manifestContent,
