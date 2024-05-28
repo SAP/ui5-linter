@@ -87,19 +87,16 @@ export async function lintProject({
 export async function lintFile({
 	rootDir, pathsToLint, namespace, reportCoverage, includeMessageDetails,
 }: LinterOptions): Promise<LintResult[]> {
+	const reader = createReader({
+		fsBasePath: rootDir,
+		virBasePath: namespace ? `/resources/${namespace}/` : "/",
+	});
 	let resolvedFilePaths;
-	let virBasePath = "";
 	if (pathsToLint?.length) {
 		const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
 		resolvedFilePaths = transformFilePathsToVirtualPaths(
 			absoluteFilePaths, rootDir, "/", rootDir);
-		// Extract the (virtual) path from the filename
-		virBasePath = resolvedFilePaths[0].split("/").slice(0, -1).join("/");
 	}
-	const reader = createReader({
-		fsBasePath: rootDir,
-		virBasePath: `${virBasePath}/`,
-	});
 
 	const res = await lint(reader, {
 		rootDir,
