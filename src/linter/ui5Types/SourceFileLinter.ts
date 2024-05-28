@@ -173,7 +173,7 @@ export default class SourceFileLinter {
 	analyzeCallExpression(node: ts.CallExpression) {
 		const exprNode = node.expression;
 		const exprType = this.#checker.getTypeAtLocation(exprNode);
-		if (!(exprType?.symbol && this.isSymbolOfUi5OrThirdPartyType(exprType.symbol))) {
+		if (!exprType?.symbol || !this.isSymbolOfUi5OrThirdPartyType(exprType.symbol)) {
 			if (this.#reportCoverage) {
 				this.handleCallExpressionUnknownType(exprType, node);
 			}
@@ -198,7 +198,7 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		const deprecationInfo = this.getDeprecationInfo(exprType?.symbol);
+		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
 		if (!deprecationInfo) {
 			return;
 		}
@@ -217,13 +217,24 @@ export default class SourceFileLinter {
 		}
 
 		let additionalMessage = "";
-		// Get the type to the left of the call expression (i.e. what the function is being called on)
-		const classNodeType = this.findClassOrInterface(node.expression);
-		if (classNodeType) {
-			additionalMessage = ` of class '${this.#checker.typeToString(classNodeType)}'`;
-		} else if (ts.isPropertyAccessExpression(exprNode)) {
-			additionalMessage = ` (${this.extractNamespace(exprNode)})`;
+		if (exprNode.kind === ts.SyntaxKind.PropertyAccessExpression ||
+			exprNode.kind === ts.SyntaxKind.ElementAccessExpression) {
+			// Get the type to the left of the call expression (i.e. what the function is being called on)
+			const lhsExpr = exprNode.expression;
+			const lhsExprType = this.#checker.getTypeAtLocation(lhsExpr);
+			if (lhsExprType.isClassOrInterface()) {
+				// left-hand-side is an instance of a class, e.g. "instance.deprecatedMethod()"
+				additionalMessage = ` of class '${this.#checker.typeToString(lhsExprType)}'`;
+			} else if (ts.isCallExpression(lhsExpr)) {
+				// left-hand-side is a function call, e.g. "function().deprecatedMethod()"
+				// Use the (return) type of that function call
+				additionalMessage = ` of module '${this.#checker.typeToString(lhsExprType)}'`;
+			} else if (ts.isPropertyAccessExpression(exprNode)) {
+				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
+				additionalMessage = ` (${this.extractNamespace(exprNode)})`;
+			}
 		}
+
 		this.#reporter.addMessage({
 			node,
 			severity: LintMessageSeverity.Error,
@@ -499,19 +510,5 @@ export default class SourceFileLinter {
 
 	isSymbolOfPseudoType(symbol: ts.Symbol | undefined) {
 		return symbol?.valueDeclaration?.getSourceFile().fileName.startsWith("/types/@ui5/linter/overrides/library/");
-	}
-
-	findClassOrInterface(node: ts.Node): ts.Type | undefined {
-		let nodeType: ts.Type | undefined = this.#checker.getTypeAtLocation(node);
-		if (nodeType.isClassOrInterface()) {
-			return nodeType;
-		}
-
-		// Check child nodes recursively to cover cases such as node being a PropertyAccessExpression
-		nodeType = ts.forEachChild<ts.Type>(node, (childNode) => {
-			return this.findClassOrInterface(childNode);
-		});
-
-		return nodeType;
 	}
 }
