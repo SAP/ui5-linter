@@ -89,7 +89,7 @@ export async function lintFile({
 }: LinterOptions): Promise<LintResult[]> {
 	const reader = createReader({
 		fsBasePath: rootDir,
-		virBasePath: "/",
+		virBasePath: namespace ? `/resources/${namespace}/` : "/",
 	});
 	let resolvedFilePaths;
 	if (pathsToLint?.length) {

@@ -2,6 +2,7 @@ import anyTest, {ExecutionContext, TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
+import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
 import {SourceFile, TypeChecker} from "typescript";
@@ -24,19 +25,20 @@ test.before(async (t) => {
 export async function esmockDeprecationText() {
 	const typeLinterModule = await esmock("../../../src/linter/ui5Types/TypeLinter.js", {
 		"../../../src/linter/ui5Types/SourceFileLinter.js":
-		function (
-			context: LinterContext, filePath: string, sourceFile: SourceFile,
-			sourceMap: string | undefined, checker: TypeChecker,
-			reportCoverage: boolean | undefined = false,
-			messageDetails: boolean | undefined = false
-		) {
-			// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
-			const linter = new SourceFileLinter(
-				context, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails
-			);
-			linter.getDeprecationText = () => "Deprecated test message";
-			return linter;
-		},
+			function (
+				context: LinterContext, filePath: string, sourceFile: SourceFile,
+				sourceMap: string | undefined, checker: TypeChecker,
+				reportCoverage: boolean | undefined = false,
+				messageDetails: boolean | undefined = false,
+				manifestContent?: string | undefined
+			) {
+				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
+				const linter = new SourceFileLinter(
+					context, filePath, sourceFile, sourceMap, checker, reportCoverage, messageDetails, manifestContent
+				);
+				linter.getDeprecationText = () => "Deprecated test message";
+				return linter;
+			},
 	});
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
@@ -62,48 +64,43 @@ export function assertExpectedLintResults(
 // Helper function to create linting tests for all files in a directory
 export function createTestsForFixtures(fixturesPath: string) {
 	try {
-		const testFiles = readdirSync(fixturesPath);
+		const testFiles = readdirSync(fixturesPath, {withFileTypes: true}).filter((dirEntries) => {
+			return dirEntries.isFile();
+		}).map((dirEntries) => {
+			return dirEntries.name;
+		});
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
-		for (const fileName of testFiles) {
-			if (!fileName.endsWith(".js") &&
-				!fileName.endsWith(".xml") &&
-				!fileName.endsWith(".json") &&
-				!fileName.endsWith(".html") &&
-				!fileName.endsWith(".yaml")) {
-				// Ignore non-JavaScript, non-XML, non-JSON, non-HTML and non-YAML files
-				continue;
-			}
-			let testName = fileName;
-			let defineTest = test.serial;
-			if (fileName.startsWith("_")) {
-				// Skip tests for files starting with underscore
-				defineTest = defineTest.skip as typeof test;
-				testName = fileName.slice(1);
-			} else if (fileName.startsWith("only_")) {
-				// Only run test when file starts with only_
-				defineTest = defineTest.only as typeof test;
-				testName = fileName.slice(5);
-			}
-			// Executing linting in parallel might lead to OOM errors in the CI
-			// Therefore always use serial
-			defineTest(`General: ${testName}`, async (t) => {
-				const filePaths = [fileName];
-				const {lintFile} = t.context;
-
-				const res = await lintFile({
-					rootDir: fixturesPath,
-					pathsToLint: filePaths,
-					reportCoverage: true,
-					includeMessageDetails: true,
-				});
-				assertExpectedLintResults(t, res, fixturesPath, filePaths);
-				res.forEach((results) => {
-					results.filePath = testName;
-				});
-				t.snapshot(res);
+		if (fixturesPath.includes("AsyncComponentFlags")) {
+			const dirName = path.basename(fixturesPath);
+			testDefinition({
+				testName: dirName,
+				namespace: "mycomp",
+				fileName: dirName,
+				fixturesPath,
+				// Needed, because without a namespace, TS's type definition detection
+				// does not function properly for the inheritance case
+				filePaths: testFiles.map((fileName) => path.join("resources", "mycomp", fileName)),
 			});
+		} else {
+			for (const fileName of testFiles) {
+				if (!fileName.endsWith(".js") &&
+					!fileName.endsWith(".xml") &&
+					!fileName.endsWith(".json") &&
+					!fileName.endsWith(".html") &&
+					!fileName.endsWith(".yaml")) {
+					// Ignore non-JavaScript, non-XML, non-JSON, non-HTML and non-YAML files
+					continue;
+				}
+
+				testDefinition({
+					testName: fileName,
+					fileName,
+					fixturesPath,
+					filePaths: [fileName],
+				});
+			}
 		}
 	} catch (err) {
 		if (err instanceof Error) {
@@ -112,6 +109,47 @@ export function createTestsForFixtures(fixturesPath: string) {
 		}
 		throw err;
 	}
+}
+
+function testDefinition(
+	{testName, fileName, fixturesPath, filePaths, namespace}:
+	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]; namespace?: string}) {
+	let defineTest = test.serial;
+
+	if (fileName.startsWith("_")) {
+		// Skip tests for files starting with underscore
+		defineTest = defineTest.skip as typeof test;
+		testName = fileName.slice(1);
+	} else if (fileName.startsWith("only_")) {
+		// Only run test when file starts with only_
+		defineTest = defineTest.only as typeof test;
+		testName = fileName.slice(5);
+	}
+	// Executing linting in parallel might lead to OOM errors in the CI
+	// Therefore always use serial
+	defineTest(`General: ${testName}`, async (t) => {
+		const {lintFile} = t.context;
+
+		const res = await lintFile({
+			rootDir: fixturesPath,
+			namespace,
+			pathsToLint: filePaths,
+			reportCoverage: true,
+			includeMessageDetails: true,
+		});
+		assertExpectedLintResults(t, res, fixturesPath, filePaths);
+		res.forEach((result) => {
+			const resultFileName = path.basename(result.filePath);
+			if (resultFileName === fileName) {
+				// Use "clean" testName instead of the fileName which might contain modifiers like "only_"
+				result.filePath = testName;
+			} else {
+				// Use only the file name without the directory (which might contain modifiers)
+				result.filePath = resultFileName;
+			}
+		});
+		t.snapshot(res);
+	});
 }
 
 export function preprocessLintResultsForSnapshot(res: LintResult[]) {
@@ -123,4 +161,14 @@ export function preprocessLintResultsForSnapshot(res: LintResult[]) {
 		message.filePath = message.filePath.replace(/\\/g, "/");
 	});
 	return res;
+}
+
+export function runLintRulesTests(filePath: string, fixturesPath?: string) {
+	if (!fixturesPath) {
+		const __dirname = path.dirname(filePath);
+		const fileName = path.basename(filePath, ".ts");
+		fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
+	}
+
+	createTestsForFixtures(fixturesPath);
 }

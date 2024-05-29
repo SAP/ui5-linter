@@ -106,11 +106,11 @@ The extracted and generated metadata is stored within the repository under the `
 Regular updates to the metadata are necessary to ensure that the data is compatible with the corresponding UI5 type definitions.
 
 ```sh
-npm run update-pseudo-modules-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.12/sapui5-sdk-dist-1.120.12-api-jsons.zip 1.120.12
+npm run update-pseudo-modules-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.13/sapui5-sdk-dist-1.120.13-api-jsons.zip 1.120.13
 ```
 
 ```sh
-npm run update-semantic-model-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.12/sapui5-sdk-dist-1.120.12-api-jsons.zip 1.120.12
+npm run update-semantic-model-info -- $DOMAIN_NAME/com/sap/ui5/dist/sapui5-sdk-dist/1.120.13/sapui5-sdk-dist-1.120.13-api-jsons.zip 1.120.13
 ```
 
 

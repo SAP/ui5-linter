@@ -4,7 +4,7 @@ import SourceFileLinter from "./SourceFileLinter.js";
 import {taskStart} from "../../util/perf.js";
 import {getLogger} from "@ui5/logger";
 import LinterContext, {LinterParameters} from "../LinterContext.js";
-// import {Project} from "@ui5/project";
+import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 
@@ -103,12 +103,20 @@ export default class TypeChecker {
 				if (!sourceMap) {
 					log.verbose(`Failed to get source map for ${sourceFile.fileName}`);
 				}
+				let manifestContent;
+				if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
+					const res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
+					if (res) {
+						manifestContent = await res.getString();
+					}
+				}
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(
 					this.#context,
 					sourceFile.fileName, sourceFile,
 					sourceMap,
-					checker, reportCoverage, messageDetails
+					checker, reportCoverage, messageDetails,
+					manifestContent
 				);
 				await linter.lint();
 				linterDone();

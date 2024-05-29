@@ -1,6 +1,8 @@
 import ts, {Identifier} from "typescript";
+import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import analyzeComponentJson from "./asyncComponentFlags.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -16,11 +18,14 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
+	#manifestContent: string | undefined;
+	#fileName: string;
+	#isComponent: boolean;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
 		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
-		messageDetails: boolean | undefined = false
+		messageDetails: boolean | undefined = false, manifestContent?: string | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -30,6 +35,9 @@ export default class SourceFileLinter {
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
+		this.#manifestContent = manifestContent;
+		this.#fileName = path.basename(resourcePath);
+		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -67,6 +75,15 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
+		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments && this.#isComponent) {
+			analyzeComponentJson({
+				node: node as ts.ExpressionWithTypeArguments,
+				manifestContent: this.#manifestContent,
+				resourcePath: this.#resourcePath,
+				reporter: this.#reporter,
+				context: this.#context,
+				checker: this.#checker,
+			});
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -168,6 +185,9 @@ export default class SourceFileLinter {
 			// This is usually unexpected and there are currently no known deprecations of functions
 			// returned by a class constructor.
 			// However, the OPA Matchers are a known exception where constructors do return a function.
+			return;
+		} else if (exprNode.kind === ts.SyntaxKind.SuperKeyword) {
+			// Ignore super calls
 			return;
 		}
 
