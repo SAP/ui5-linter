@@ -203,17 +203,13 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		let symbol;
+		let reportNode;
 		if (ts.isPropertyAccessExpression(exprNode)) {
-			symbol = this.#checker.getSymbolAtLocation(exprNode.name);
+			reportNode = exprNode.name;
 		} else if (ts.isElementAccessExpression(exprNode)) {
-			symbol = this.#checker.getSymbolAtLocation(exprNode.argumentExpression);
+			reportNode = exprNode.argumentExpression;
 		} else { // Identifier
-			symbol = this.#checker.getSymbolAtLocation(exprNode);
-		}
-
-		if (!symbol) {
-			throw new Error(`Failed to determine symbol for deprecated node of type ${ts.SyntaxKind[exprNode.kind]}`);
+			reportNode = exprNode;
 		}
 
 		let additionalMessage = "";
@@ -235,15 +231,30 @@ export default class SourceFileLinter {
 			}
 		}
 
+		let reportNodeText;
+		if (ts.isStringLiteralLike(reportNode) || ts.isNumericLiteral(reportNode)) {
+			reportNodeText = reportNode.text;
+		} else {
+			reportNodeText = reportNode.getText();
+		}
+
 		this.#reporter.addMessage({
-			node,
+			node: reportNode,
 			severity: LintMessageSeverity.Error,
 			ruleId: "ui5-linter-no-deprecated-api",
 			message:
 				`Call to deprecated function ` +
-				`'${symbol.escapedName as string}'${additionalMessage}`,
+				`'${reportNodeText}'${additionalMessage}`,
 			messageDetails: deprecationInfo.messageDetails,
 		});
+	}
+
+	getPropertyName(node: ts.PropertyName): string {
+		if (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node)) {
+			return node.text;
+		} else {
+			return node.getText();
+		}
 	}
 
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
