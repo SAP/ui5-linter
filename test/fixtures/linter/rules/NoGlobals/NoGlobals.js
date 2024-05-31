@@ -14,7 +14,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 			sap.ui.requireSync(); // ERROR: Global variable "sap"
 			window["sap"].ui.requireSync(); // ERROR: Global variable "sap"
 			window.sap.ui.requireSync(); // ERROR: Global variable "sap"
-			globalThis.sap.ui.requireSync(); // ERROR but not detected: Global variable "sap"
+			globalThis.sap.ui.requireSync(); // ERROR: Global variable "sap"
+			top.sap.ui.requireSync(); // (False-negative) Should be ERROR but TypeScript does not derive UI5 types for top
+			parent.sap.ui.requireSync(); // (False-negative) Should be ERROR but TypeScript does not derive UI5 types for parent
 			self.sap.ui.requireSync(); // ERROR: Global variable "sap"
 			const that = window;
 			that.sap.ui.requireSync(); // ERROR: Global variable "sap"
@@ -30,6 +32,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 
 			QUnit.test(); // OK: Global third-party variable "QUnit"
 			sinon.stub(); // OK: Global third-party variable "sinon"
+
+			sap?.ui?.define(); // OK: Special case sap.ui.define
+			self.sap?.ui?.define() // OK: Special case sap.ui.define
+			globalThis.sap?.ui?.define() // OK: Special case sap.ui.define
+			window.sap?.ui?.define() // OK: Special case sap.ui.define
+			top.sap?.ui?.define() // OK: Special case sap.ui.define
+		 	parent.sap?.ui?.define() // OK: Special case sap.ui.define
 		}
 	});
 });
+this.sap?.ui?.requireSync() // (False-negative) Should be ERROR but TypeScript does not derive UI5 types for top level this
+this.sap?.ui?.define() // OK: Special case sap.ui.define
