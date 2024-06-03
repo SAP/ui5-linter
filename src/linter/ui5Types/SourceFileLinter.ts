@@ -3,7 +3,6 @@ import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
-import fs from "node:fs/promises";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 
 interface DeprecationInfo {
@@ -28,8 +27,8 @@ export default class SourceFileLinter {
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
-		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false, manifestContent?: string | undefined,
-		dataTypes: Record<string, string> | undefined
+		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
+		dataTypes: Record<string, string> | undefined, manifestContent?: string | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
