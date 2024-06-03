@@ -80,6 +80,7 @@ export class Text {
 				this.#writeln(
 					`  ${formattedLocation} ` +
 					`${formatSeverity(msg.severity)} ` +
+					`${msg.fatal ? "Fatal error: " : ""}` +
 					`${msg.message}` +
 					`${messageDetails}`);
 			});
