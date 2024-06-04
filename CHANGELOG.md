@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.3](https://github.com/SAP/ui5-linter/compare/v0.2.2...v0.2.3) (2024-06-04)
+
+
+### Features
+
+* Component best practices- async flags check ([#73](https://github.com/SAP/ui5-linter/issues/73)) ([1c58105](https://github.com/SAP/ui5-linter/commit/1c5810593abf227a88a908c9d17aa9eacf113f10))
+
+
+### Bug Fixes
+
+* Correct type for deprecated call on return value of another call ([e715dbc](https://github.com/SAP/ui5-linter/commit/e715dbc5b5d9993650eae232d3f4fe86265d2ad3))
+* Improve parsing of message details in VS Code problems matcher ([ea8e258](https://github.com/SAP/ui5-linter/commit/ea8e258f29c89b43e3dfe8bda6956ccce4eb0047))
+* Position of deprecated function call errors ([7084704](https://github.com/SAP/ui5-linter/commit/70847041fe83a5a8d1974a3a0b183c0c8309c9cd))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.13 ([#116](https://github.com/SAP/ui5-linter/issues/116)) ([6e0744e](https://github.com/SAP/ui5-linter/commit/6e0744e863bfdd3397d96b894fd59bc96517d983))
+* Bump @sapui5/types to 1.120.14 ([a1afef5](https://github.com/SAP/ui5-linter/commit/a1afef5295e97462f7e5834347f993383f2e7ce2))
+
 ## [0.2.2](https://github.com/SAP/ui5-linter/compare/v0.2.1...v0.2.2) (2024-04-23)
 
 
