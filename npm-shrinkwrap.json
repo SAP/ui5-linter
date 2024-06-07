@@ -11,7 +11,7 @@
 			"dependencies": {
 				"@jridgewell/sourcemap-codec": "^1.4.15",
 				"@jridgewell/trace-mapping": "^0.3.25",
-				"@sapui5/types": "1.120.14",
+				"@sapui5/types": "1.120.15",
 				"@ui5/fs": "^3.0.5",
 				"@ui5/logger": "^3.0.0",
 				"@ui5/project": "^3.9.1",
@@ -2820,9 +2820,9 @@
 			}
 		},
 		"node_modules/@sapui5/types": {
-			"version": "1.120.14",
-			"resolved": "https://registry.npmjs.org/@sapui5/types/-/types-1.120.14.tgz",
-			"integrity": "sha512-Iu+BQvwWrxZgaWx5i+5w9yvIAXkmG0SUE1lQoF/EYFaBBFgjMO+H7//jGtN/qSzW2/jSsV17x6ERcScLazFd5g==",
+			"version": "1.120.15",
+			"resolved": "https://registry.npmjs.org/@sapui5/types/-/types-1.120.15.tgz",
+			"integrity": "sha512-VNXTXtK6jhnXpfaJqMheq94NkTo6K+18d3d8bJ4pjRI31S34LH/qXGHRSO2aAhv5x6QAe7zqXM4CArnzXkAQEw==",
 			"dependencies": {
 				"@types/jquery": "3.5.13",
 				"@types/offscreencanvas": "2019.6.4",
