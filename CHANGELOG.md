@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.4](https://github.com/SAP/ui5-linter/compare/v0.2.3...v0.2.4) (2024-06-07)
+
+
+### Features
+
+* Detect pseudo modules of DataType ([#112](https://github.com/SAP/ui5-linter/issues/112)) ([dd60374](https://github.com/SAP/ui5-linter/commit/dd60374cde874c6aba8a39ddb5d7b16ec307e950))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.15 ([#143](https://github.com/SAP/ui5-linter/issues/143)) ([65e43d4](https://github.com/SAP/ui5-linter/commit/65e43d4e44ce8da9414e6d67a744391e3bcf6373))
+
 ## [0.2.3](https://github.com/SAP/ui5-linter/compare/v0.2.2...v0.2.3) (2024-06-04)
 
 
