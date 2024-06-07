@@ -2,6 +2,7 @@ import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 
 interface DeprecationInfo {
@@ -18,14 +19,16 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
+	#dataTypes: Record<string, string>;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
 
 	constructor(
-		context: LinterContext, resourcePath: ResourcePath, sourceFile: ts.SourceFile, sourceMap: string | undefined,
-		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
-		messageDetails: boolean | undefined = false, manifestContent?: string | undefined
+		context: LinterContext, resourcePath: ResourcePath,
+		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
+		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
+		dataTypes: Record<string, string> | undefined, manifestContent?: string | undefined
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -38,6 +41,7 @@ export default class SourceFileLinter {
 		this.#manifestContent = manifestContent;
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
+		this.#dataTypes = dataTypes ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -50,7 +54,7 @@ export default class SourceFileLinter {
 			this.#context.addLintingMessage(this.#resourcePath, {
 				severity: LintMessageSeverity.Error,
 				message,
-				ruleId: "ui5-linter-parsing-error",
+				ruleId: RULES["ui5-linter-parsing-error"],
 				fatal: true,
 			});
 		}
@@ -115,9 +119,9 @@ export default class SourceFileLinter {
 								this.#reporter.addMessage({
 									node: prop,
 									severity: LintMessageSeverity.Error,
-									ruleId: "ui5-linter-no-deprecated-api",
-									message: `Use of deprecated property '${propertySymbol.escapedName as string}' ` +
-									`of class '${this.#checker.typeToString(nodeType)}'`,
+									ruleId: RULES["ui5-linter-no-deprecated-api"],
+									message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP_OF_CLASS,
+										propertySymbol.escapedName as string, this.#checker.typeToString(nodeType)),
 									messageDetails: deprecationInfo.messageDetails,
 								});
 							}
@@ -241,10 +245,9 @@ export default class SourceFileLinter {
 		this.#reporter.addMessage({
 			node: reportNode,
 			severity: LintMessageSeverity.Error,
-			ruleId: "ui5-linter-no-deprecated-api",
-			message:
-				`Call to deprecated function ` +
-				`'${reportNodeText}'${additionalMessage}`,
+			ruleId: RULES["ui5-linter-no-deprecated-api"],
+			message: formatMessage(MESSAGES.SHORT__DEPRECATED_FUNCTION_ACCESS,
+				`'${reportNodeText}'${additionalMessage}`),
 			messageDetails: deprecationInfo.messageDetails,
 		});
 	}
@@ -317,10 +320,9 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage({
 				node: nodeToHighlight,
 				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-partially-deprecated-api",
-				message:
-					`Call to ${importedVarName}() must be declared with property {apiVersion: 2}`,
-				messageDetails: this.#messageDetails ? `{@link sap.ui.core.Lib.init Lib.init}` : undefined,
+				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__LIB_INIT_2, importedVarName),
+				messageDetails: this.#messageDetails ? formatMessage(MESSAGES.DETAILS__LIB_INIT_2) : undefined,
 			});
 		}
 	}
@@ -351,20 +353,17 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage({
 					node,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-api",
-					message:
-						`Use of deprecated API ` +
-						`'${namespace ?? "jQuery.sap"}'`,
+					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, namespace ?? "jQuery.sap"),
 					messageDetails: deprecationInfo.messageDetails,
 				});
 			} else {
 				this.#reporter.addMessage({
 					node,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-property",
-					message:
-						`Access of deprecated property ` +
-						`'${deprecationInfo.symbol.escapedName as string}'`,
+					ruleId: RULES["ui5-linter-no-deprecated-property"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP_ACCESS,
+						deprecationInfo.symbol.escapedName as string),
 					messageDetails: deprecationInfo.messageDetails,
 				});
 			}
@@ -422,10 +421,9 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage({
 					node,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-globals-js",
-					message:
-						`Access of global variable '${symbol.getName()}' ` +
-						`(${this.extractNamespace((node as ts.PropertyAccessExpression))})`,
+					ruleId: RULES["ui5-linter-no-globals-js"],
+					message: formatMessage(MESSAGES.SHORT__GLOBAL_VAR_ACCESS,
+						symbol.getName(), this.extractNamespace((node as ts.PropertyAccessExpression))),
 				});
 			}
 		}
@@ -470,24 +468,33 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage({
 				node: moduleSpecifierNode,
 				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-deprecated-api",
-				message:
-					`Import of deprecated module ` +
-					`'${moduleSpecifierNode.text}'`,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_MODULE_IMPORT,
+					moduleSpecifierNode.text),
 				messageDetails: deprecationInfo.messageDetails,
 			});
 		}
 
 		if (this.isSymbolOfPseudoType(symbol)) {
-			this.#reporter.addMessage({
-				node: moduleSpecifierNode,
-				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-pseudo-modules",
-				message:
-					`Import of pseudo module ` +
-					`'${moduleSpecifierNode.text}'`,
-				messageDetails: "Import library and reuse the enum from there",
-			});
+			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
+			const isDataType = !!this.#dataTypes[moduleNamespaceName];
+			if (isDataType) {
+				this.#reporter.addMessage({
+					node: moduleSpecifierNode,
+					severity: LintMessageSeverity.Error,
+					ruleId: RULES["ui5-linter-no-pseudo-modules"],
+					message: formatMessage(MESSAGES.SHORT__NO_DIRECT_DATATYPE_ACCESS, moduleSpecifierNode.text),
+					messageDetails: formatMessage(MESSAGES.DETAILS__NO_DIRECT_DATATYPE_ACCESS, moduleNamespaceName),
+				});
+			} else { // Enum
+				this.#reporter.addMessage({
+					node: moduleSpecifierNode,
+					severity: LintMessageSeverity.Error,
+					ruleId: RULES["ui5-linter-no-pseudo-modules"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_ACCESS_ENUM, moduleSpecifierNode.text),
+					messageDetails: formatMessage(MESSAGES.DETAILS__DEPRECATED_ACCESS_ENUM),
+				});
+			}
 		}
 	}
 

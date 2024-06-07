@@ -48,6 +48,18 @@ declare module "sap/f/DynamicPageTitleArea" {
 	export default DynamicPageTitleArea;
 }
 
+declare module "sap/f/DynamicPageTitleShrinkRatio" {
+	import {DynamicPageTitleShrinkRatio} from "sap/f/library";
+
+	/**
+	 * A string type that represents the shrink ratios of the areas within the <code>sap.f.DynamicPageTitle</code>.
+	 *
+	 * @public
+	 * @since 1.54
+	*/
+	export default DynamicPageTitleShrinkRatio;
+}
+
 declare module "sap/f/LayoutType" {
 	import {LayoutType} from "sap/f/library";
 

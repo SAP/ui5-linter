@@ -214,6 +214,18 @@ declare module "sap/ui/commons/RowRepeaterDesign" {
 	export default RowRepeaterDesign;
 }
 
+declare module "sap/ui/commons/SplitterSize" {
+	import {SplitterSize} from "sap/ui/commons/library";
+
+	/**
+	 * A string type that represents subset of CSS size values. For the Splitter only px and % are allowed.
+	 *
+	 * @deprecated (since 1.38)
+	 * @public
+	*/
+	export default SplitterSize;
+}
+
 declare module "sap/ui/commons/TextViewColor" {
 	import {TextViewColor} from "sap/ui/commons/library";
 

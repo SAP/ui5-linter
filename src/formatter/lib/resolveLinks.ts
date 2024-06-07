@@ -67,7 +67,7 @@ Record<string, string>): string {
 	return `${text} (${ui5Url}/api/${sLink})`;
 }
 
-function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
+function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: string): string {
 	const linkFormatter = function (sTarget: string, sText: string): string {
 		let aMatch;
 		// keep the full target in the fallback text
@@ -91,12 +91,12 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 			/^topic:(\w{32}(?:#\w*)?(?:\/\w*)?)$/
 		);
 		if (aMatch) {
-			return formatUrlToLink(`${ui5Url}/topic/${aMatch[1]}`, sText);
+			return formatUrlToLink(`${ui5Url}/#/topic/${aMatch[1]}`, sText);
 		}
 		// demo:xxx Demo, open the demonstration page in a new window
 		aMatch = sTarget.match(/^demo:([a-zA-Z0-9/.]*)$/);
 		if (aMatch) {
-			return formatUrlToLink(`${ui5Url}/test-resources/${aMatch[1]}`, sText);
+			return formatUrlToLink(`${ui5Url}/${ui5Version}/#/test-resources/${aMatch[1]}`, sText);
 		}
 		// sap.x.Xxx.prototype.xxx - In case of prototype we have a link to method
 		aMatch = sTarget.match(
@@ -108,7 +108,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "methods",
 				className: aMatch[1],
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// Heuristics: Extend is always a static method
@@ -124,7 +124,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "methods",
 				className: (sModule ? sModule : "") + sClass,
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// Constructor links are handled in special manner by the SDK
@@ -145,7 +145,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				name: sName,
 				hrefAppend: "#constructor",
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// #.setText - local static method
@@ -158,7 +158,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "methods",
 				className: "",
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// #annotation:TextArrangement - local annotation
@@ -169,7 +169,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "annotations",
 				className: "",
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// Annotation links
@@ -187,7 +187,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "annotations",
 				className: (sModule ? sModule : "") + sClass,
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// #event:press - local event
@@ -198,7 +198,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "events",
 				className: "",
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// Event links
@@ -216,7 +216,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "events",
 				className: (sModule ? sModule : "") + sClass,
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// sap.m.Button#setText - instance method
@@ -231,7 +231,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "methods",
 				className: (sModule ? sModule : "") + sClass,
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 		// module:sap/m/Button.setText
@@ -245,7 +245,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 				type: "methods",
 				className: (sModule ? sModule : "") + sClass,
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 
@@ -259,21 +259,21 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string): string {
 			return createLink({
 				name: aTarget.slice(0, index).join("."),
 				text: sText,
-				ui5Url,
+				ui5Url: `${ui5Url}/${ui5Version}/#`,
 			});
 		}
 
 		// Possible forward reference - we will treat them as symbol link
-		return createLink({name: sTarget, text: sText, ui5Url});
+		return createLink({name: sTarget, text: sText, ui5Url: `${ui5Url}/${ui5Version}/#`});
 	};
 
 	return JSDocUtil().formatTextBlock(sText, linkFormatter);
 }
 
-export function resolveLinks(description?: string, ui5Url = "https://ui5.sap.com/1.120/#"): string {
+export function resolveLinks(description?: string, ui5Url = "https://ui5.sap.com", ui5Version = "1.120"): string {
 	if (!description) {
 		return "";
 	}
 
-	return _preProcessLinksInTextBlock(description, ui5Url);
+	return _preProcessLinksInTextBlock(description, ui5Url, ui5Version);
 }

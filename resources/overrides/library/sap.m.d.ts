@@ -836,6 +836,20 @@ declare module "sap/m/ScreenSize" {
 	export default ScreenSize;
 }
 
+declare module "sap/m/SelectColumnRatio" {
+	import {SelectColumnRatio} from "sap/m/library";
+
+	/**
+	 * A string type that represents column ratio.
+	 * 
+	 * Allowed values are strings that follow the number:number (3:2) format.
+	 *
+	 * @public
+	 * @since 1.86
+	*/
+	export default SelectColumnRatio;
+}
+
 declare module "sap/m/SelectDialogInitialFocus" {
 	import {SelectDialogInitialFocus} from "sap/m/library";
 
@@ -1166,6 +1180,19 @@ declare module "sap/m/ValueColor" {
 	 * @public
 	*/
 	export default ValueColor;
+}
+
+declare module "sap/m/ValueCSSColor" {
+	import {ValueCSSColor} from "sap/m/library";
+
+	/**
+	 * A string type that represents CSS color values, sap.m.ValueColor or less parameter values.
+	 * 
+	 * Allowed values are {@link sap.ui.core.CSSColor}, {@link sap.m.ValueColor} or a less parameter name (string). In case the less parameter color cannot be determined, the validation fails. You need to check if less parameters are supported on control level. An empty string is also allowed and has the same effect as setting no color.
+	 *
+	 * @public
+	*/
+	export default ValueCSSColor;
 }
 
 declare module "sap/m/VerticalPlacementType" {
