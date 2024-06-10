@@ -1,6 +1,6 @@
 import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
-import deprecatedLibraries from "../../utils/deprecatedLibs.js";
+import {deprecatedLibraries, deprecatedThemeLibraries} from "../../utils/deprecations.js";
 import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
 
 interface YamlWithPosInfo extends DataWithPosition {
@@ -67,7 +67,8 @@ export default class YamlLinter {
 	#analyzeYaml(yaml: YamlWithPosInfo, offset: number) {
 		// Check for deprecated libraries
 		yaml?.framework?.libraries?.forEach((lib) => {
-			if (deprecatedLibraries.includes(lib.name.toString())) {
+			const libraryName = lib.name.toString();
+			if (deprecatedLibraries.includes(libraryName) || deprecatedThemeLibraries.includes(libraryName)) {
 				const positionInfo = getPosition(lib);
 				this.#context.addLintingMessage(this.#resourcePath, {
 					ruleId: "ui5-linter-no-deprecated-api",
@@ -75,7 +76,7 @@ export default class YamlLinter {
 					fatal: undefined,
 					line: positionInfo.start.line + offset,
 					column: positionInfo.start.column,
-					message: `Use of deprecated library '${lib.name}'`,
+					message: `Use of deprecated library '${libraryName}'`,
 				});
 			}
 		});

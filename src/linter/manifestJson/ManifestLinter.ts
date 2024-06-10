@@ -10,17 +10,13 @@ import ManifestReporter from "./ManifestReporter.js";
 import {LintMessageSeverity, ResourcePath} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import LinterContext from "../LinterContext.js";
-import deprecatedLibraries from "../../utils/deprecatedLibs.js";
+import {deprecatedLibraries, deprecatedComponents} from "../../utils/deprecations.js";
 
 interface locType {
 	line: number;
 	column: number;
 	pos: number;
 }
-
-const deprecatedComponents: string[] = [
-	"sap.zen.dsh.fioriwrapper",
-];
 
 export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
 
