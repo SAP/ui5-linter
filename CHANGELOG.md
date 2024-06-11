@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/SAP/ui5-linter/compare/v0.2.4...v0.2.5) (2024-06-11)
+
+
+### Bug Fixes
+
+* Update detection of deprecated (theme-)libs ([fcfc518](https://github.com/SAP/ui5-linter/commit/fcfc518d86d4962c9bf2295f2120c255f0197092))
+
 ## [0.2.4](https://github.com/SAP/ui5-linter/compare/v0.2.3...v0.2.4) (2024-06-07)
 
 
