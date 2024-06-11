@@ -46,6 +46,6 @@ sap.ui.define([
 
 	mobileLib.InputType.Date; // Enum value "InputType.Date" is deprecated
 
-	const navigationHandler = new NavigationHandler();
+	const navigationHandler = new NavigationHandler({});
 	navigationHandler.storeInnerAppState({}); // Method "storeInnerAppState" is deprecated
 });

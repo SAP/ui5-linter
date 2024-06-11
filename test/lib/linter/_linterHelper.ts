@@ -91,11 +91,12 @@ export function createTestsForFixtures(fixturesPath: string) {
 		} else {
 			for (const fileName of testFiles) {
 				if (!fileName.endsWith(".js") &&
+					!fileName.endsWith(".ts") &&
 					!fileName.endsWith(".xml") &&
 					!fileName.endsWith(".json") &&
 					!fileName.endsWith(".html") &&
 					!fileName.endsWith(".yaml")) {
-					// Ignore non-JavaScript, non-XML, non-JSON, non-HTML and non-YAML files
+					// Ignore non-JavaScript, non-TypeScript, non-XML, non-JSON, non-HTML and non-YAML files
 					continue;
 				}
 
