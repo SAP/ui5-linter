@@ -1,10 +1,10 @@
-import Button from "sap/m/Button";
-import UIComponent from "sap/ui/core/UIComponent";
-import Controller from "sap/ui/core/mvc/Controller";
-import History from "sap/ui/core/routing/History";
+import type _Button from "sap/m/Button";
+import type _UIComponent from "sap/ui/core/UIComponent";
+import type _Controller from "sap/ui/core/mvc/Controller";
+import type _History from "sap/ui/core/routing/History";
 
 sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/UIComponent", "sap/ui/core/routing/History", "sap/m/Button"],
-	function (Controller: Controller, UIComponent: UIComponent, History: History, Button: Button) {
+	function (Controller: typeof _Controller, UIComponent: typeof _UIComponent, History: typeof _History, Button: typeof _Button) {
 	"use strict";
 
 	return Controller.extend("com.ui5.troublesome.app.controller.BaseController", {
