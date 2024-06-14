@@ -53,7 +53,7 @@
 				"rimraf": "^5.0.7",
 				"semver": "^7.6.2",
 				"sinon": "^18.0.0",
-				"tsx": "^4.15.3",
+				"tsx": "^4.15.4",
 				"typescript-eslint": "^7.13.0",
 				"yauzl-promise": "^4.0.0"
 			},
@@ -12795,9 +12795,9 @@
 			"optional": true
 		},
 		"node_modules/tsx": {
-			"version": "4.15.3",
-			"resolved": "https://registry.npmjs.org/tsx/-/tsx-4.15.3.tgz",
-			"integrity": "sha512-wLzUMy3xSUpGZQqDprd0U25hpLRJMH8RzONVsqJLwgmE65ZKsxfbs5xVG+sF08wHNyBILmqo5C2775DXYMbRog==",
+			"version": "4.15.4",
+			"resolved": "https://registry.npmjs.org/tsx/-/tsx-4.15.4.tgz",
+			"integrity": "sha512-d++FLCwJLrXaBFtRcqdPBzu6FiVOJ2j+UsvUZPtoTrnYtCGU5CEW7iHXtNZfA2fcRTvJFWPqA6SWBuB0GSva9w==",
 			"dev": true,
 			"dependencies": {
 				"esbuild": "~0.21.4",
