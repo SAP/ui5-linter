@@ -72,7 +72,7 @@ export default class SourceFileLinter {
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
 			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
-		node.kind === ts.SyntaxKind.ElementAccessExpression) {
+			node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
@@ -304,7 +304,7 @@ export default class SourceFileLinter {
 			if (!apiVersionNode) { // No arguments or no 'apiVersion' property
 				nodeToHighlight = node;
 			} else if (ts.isPropertyAssignment(apiVersionNode) &&
-			apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}
 		}
