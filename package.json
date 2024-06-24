@@ -100,7 +100,7 @@
 		"rimraf": "^5.0.7",
 		"semver": "^7.6.2",
 		"sinon": "^18.0.0",
-		"tsx": "^4.15.6",
+		"tsx": "^4.15.7",
 		"typescript-eslint": "^7.13.1",
 		"yauzl-promise": "^4.0.0"
 	}
