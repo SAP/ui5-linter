@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
 	// Allow and check JavaScript files since this is everything we'll do here
 	allowJs: true,
-	checkJs: true,
+	checkJs: false,
 	strict: true,
 	noImplicitAny: false,
 	strictNullChecks: false,
