@@ -2,7 +2,7 @@ import {ReadStream} from "node:fs";
 import {extractJSScriptTags} from "./parser.js";
 import HtmlReporter from "./HtmlReporter.js";
 import LinterContext, {LintMessageSeverity, ResourcePath, TranspileResult} from "../LinterContext.js";
-import {taskStart} from "../../util/perf.js";
+import {taskStart} from "../../utils/perf.js";
 
 export default async function transpileHtml(
 	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext

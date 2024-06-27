@@ -1,7 +1,7 @@
 import ts from "typescript";
 import {FileContents, createVirtualCompilerHost} from "./host.js";
 import SourceFileLinter from "./SourceFileLinter.js";
-import {taskStart} from "../../util/perf.js";
+import {taskStart} from "../../utils/perf.js";
 import {getLogger} from "@ui5/logger";
 import LinterContext, {LinterParameters} from "../LinterContext.js";
 import path from "node:path/posix";

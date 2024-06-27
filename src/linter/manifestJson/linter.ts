@@ -1,6 +1,6 @@
 import {Resource} from "@ui5/fs";
 import ManifestLinter from "./ManifestLinter.js";
-import {taskStart} from "../../util/perf.js";
+import {taskStart} from "../../utils/perf.js";
 import {LinterParameters} from "../LinterContext.js";
 
 export default async function lintJson({workspace, context}: LinterParameters) {

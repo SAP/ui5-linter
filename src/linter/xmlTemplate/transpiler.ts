@@ -2,7 +2,7 @@ import {SaxEventType, SAXParser, Tag as SaxTag} from "sax-wasm";
 import {ReadStream} from "node:fs";
 import fs from "node:fs/promises";
 import {finished} from "node:stream/promises";
-import {taskStart} from "../../util/perf.js";
+import {taskStart} from "../../utils/perf.js";
 import LinterContext, {TranspileResult, LintMessageSeverity} from "../LinterContext.js";
 import Parser from "./Parser.js";
 import {getLogger} from "@ui5/logger";

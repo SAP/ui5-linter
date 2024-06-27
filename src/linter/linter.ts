@@ -2,7 +2,7 @@ import {graphFromObject} from "@ui5/project/graph";
 import {createReader, createWorkspace, createReaderCollection} from "@ui5/fs/resourceFactory";
 import {FilePath, LinterOptions, LintResult} from "./LinterContext.js";
 import lintWorkspace from "./lintWorkspace.js";
-import {taskStart} from "../util/perf.js";
+import {taskStart} from "../utils/perf.js";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
