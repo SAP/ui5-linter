@@ -3,7 +3,7 @@ import lintXml from "./xmlTemplate/linter.js";
 import lintJson from "./manifestJson/linter.js";
 import lintHtml from "./html/linter.js";
 import lintUI5Yaml from "./yaml/linter.js";
-import {taskStart} from "../util/perf.js";
+import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
 

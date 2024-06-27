@@ -1,6 +1,6 @@
 import ts from "typescript";
 import {getLogger} from "@ui5/logger";
-import {taskStart} from "../../../util/perf.js";
+import {taskStart} from "../../../utils/perf.js";
 import {TranspileResult} from "../../LinterContext.js";
 import {createTransformer} from "./tsTransformer.js";
 import {UnsupportedModuleError} from "./util.js";
