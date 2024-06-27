@@ -33,7 +33,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `68` (0.19 MB)
-* Latest Result: `13 problems (13 errors, 0 warnings)`
+* Latest Result: `19 problems (19 errors, 0 warnings)`
 
 ## Medium library: OpenUI5 `sap.ui.layout`
 
@@ -42,7 +42,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `572` (2.4 MB)
-* Latest Result: `1140 problems (1140 errors, 0 warnings)`
+* Latest Result: `1308 problems (1308 errors, 0 warnings)`
 
 ## Large library: OpenUI5 `sap.m`
 
@@ -51,7 +51,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `5609` (25.67 MB)
-* Latest Result: `11293 problems (11293 errors, 0 warnings)`
+* Latest Result: `11946 problems (11945 errors, 1 warnings)`
 
 
 ## Large library: OpenUI5 `sap.ui.core`
@@ -61,9 +61,51 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `4950` (45 MB)
-* Latest Result: `4816 problems (4816 errors, 0 warnings)` + `2 fatal errors`
+* Latest Result: `4844 problems (4838 errors, 6 warnings)` + `2 fatal errors`
 
 # Benchmark Runs
+
+## June 27, 2024
+
+* UI5 linter [`b34d7e9`](https://github.com/SAP/ui5-linter/commit/b34d7e9)
+* Node.js `v22.1.0`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 595.9 ± 26.9 | 541.2 | 633.9 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.078 ± 0.028 | 2.045 | 2.132 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.591 ± 0.099 | 3.456 | 3.763 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.361 ± 0.070 | 5.257 | 5.467 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 32.459 ± 0.708 | 31.648 | 33.928 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 39.528 ± 1.298 | 37.209 | 41.396 |
 
 ## April 17, 2024
 
