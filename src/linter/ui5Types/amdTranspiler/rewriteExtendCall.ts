@@ -18,7 +18,7 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		throw new UnsupportedExtendCall(`Not a UI5 Class#extends call ${toPosStr(callExp.expression)}`);
 	}
 
-	const className = getClassNameFromArguments(callExp.arguments);
+	const className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp.arguments));
 	const body = getClassBodyFromArguments(nodeFactory, callExp.arguments);
 	return nodeFactory.createClassDeclaration(modifiers,
 		className,
