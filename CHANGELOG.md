@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.6](https://github.com/SAP/ui5-linter/compare/v0.2.5...v0.2.6) (2024-06-28)
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Ensure unique class names ([b70698c](https://github.com/SAP/ui5-linter/commit/b70698ce23ae0d66aaa82db17762a6d9fd78f235))
+* Disable TS-compiler checks for JavaScript resources ([b34d7e9](https://github.com/SAP/ui5-linter/commit/b34d7e96e6769de901573ff121a6a082ef1bc04e))
+
+
+### Dependencies
+
+* Bump @ui5/project from 3.9.1 to 3.9.2 ([b81d416](https://github.com/SAP/ui5-linter/commit/b81d41610460df273587bd061e529d16ea5484c0))
+* Bump typescript from 5.4.5 to 5.5.2 ([4743d64](https://github.com/SAP/ui5-linter/commit/4743d6498464be4d4ede95545ab32bdf880765bb))
+
 ## [0.2.5](https://github.com/SAP/ui5-linter/compare/v0.2.4...v0.2.5) (2024-06-11)
 
 
