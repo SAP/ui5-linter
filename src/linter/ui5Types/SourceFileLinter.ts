@@ -388,6 +388,14 @@ export default class SourceFileLinter {
 		}
 	}
 
+	isGlobalThis(nodeType: string) {
+		return [
+			"Window & typeof globalThis",
+			"typeof globalThis",
+			// "Window", // top and parent will resolve to this string, however they are still treated as type 'any'
+		].includes(nodeType);
+	}
+
 	analyzePropertyAccessExpression(node: ts.AccessExpression | ts.CallExpression) {
 		const exprNode = node.expression;
 		if (ts.isIdentifier(exprNode)) {
@@ -398,7 +406,7 @@ export default class SourceFileLinter {
 
 			// Get the NodeType in order to check whether this is indirect global access via Window
 			const nodeType = this.#checker.getTypeAtLocation(exprNode);
-			if (this.#checker.typeToString(nodeType) === "Window & typeof globalThis") {
+			if (this.isGlobalThis(this.#checker.typeToString(nodeType))) {
 				// In case of Indirect global access we need to check for
 				// a global UI5 variable on the right side of the expression instead of left
 				if (ts.isPropertyAccessExpression(node)) {
@@ -446,7 +454,9 @@ export default class SourceFileLinter {
 			"sap.ui.require.toUrl",
 			"sap.ui.loader.config",
 		].some((allowedAccessString) => {
-			return propAccess == allowedAccessString || propAccess.startsWith(allowedAccessString + ".");
+			return propAccess == allowedAccessString ||
+				propAccess.startsWith(allowedAccessString + ".") ||
+				propAccess.endsWith("." + allowedAccessString);
 		});
 	}
 
