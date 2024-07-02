@@ -71,7 +71,7 @@
 		"he": "^1.2.0",
 		"json-source-map": "^0.6.1",
 		"sax-wasm": "^2.2.4",
-		"typescript": "^5.5.2",
+		"typescript": "^5.5.3",
 		"update-notifier": "^7.0.0",
 		"yargs": "^17.7.2"
 	},
