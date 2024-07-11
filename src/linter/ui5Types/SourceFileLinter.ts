@@ -325,6 +325,22 @@ export default class SourceFileLinter {
 				messageDetails: this.#messageDetails ? formatMessage(MESSAGES.DETAILS__LIB_INIT_2) : undefined,
 			});
 		}
+
+		if (initArg) {
+			this._libInitDeprecatedLibsCheck(initArg);
+		}
+	}
+
+	_libInitDeprecatedLibsCheck(initArg: ts.ObjectLiteralExpression) {
+		const dependenciesNode = initArg.properties.find((prop) => {
+			return ts.isPropertyAssignment(prop) &&
+				ts.isIdentifier(prop.name) &&
+				prop.name.text === "dependencies";
+		});
+
+		if (!dependenciesNode) {
+			return;
+		}
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
