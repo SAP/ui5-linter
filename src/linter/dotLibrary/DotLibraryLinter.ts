@@ -16,7 +16,6 @@ export default class DotLibraryLinter {
 		this.#context = context;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
 			const parsedDotLibraryWithPosInfo = await this.#parseDotLibrary(this.#contentStream);
