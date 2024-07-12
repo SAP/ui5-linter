@@ -68,7 +68,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
-test.only("lint: All files of library.with.custom.paths", async (t) => {
+test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
 	const {lintProject} = t.context;
 
