@@ -266,8 +266,8 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 		}
 
 		hasManifestDefinition = !!(componentManifest &&
-			ts.isPropertyAssignment(componentManifest) &&
-			componentManifest.initializer.getText() === "\"json\"");
+		ts.isPropertyAssignment(componentManifest) &&
+		componentManifest.initializer.getText() === "\"json\"");
 	}
 
 	return {

@@ -197,7 +197,7 @@ function getModuleBody(
 							// 	node.expression));
 						}
 					} else if (ts.isExpressionStatement(node) && ts.isStringLiteral(node.expression) &&
-						node.expression.text === "use strict") {
+					node.expression.text === "use strict") {
 						// Ignore "use strict" directive
 						continue;
 					} else {
@@ -229,10 +229,10 @@ function getModuleBody(
 			body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
 		}
 	} else if (ts.isClassDeclaration(moduleDeclaration.factory) ||
-		ts.isLiteralExpression(moduleDeclaration.factory) ||
-		ts.isArrayLiteralExpression(moduleDeclaration.factory) ||
-		ts.isObjectLiteralExpression(moduleDeclaration.factory) ||
-		ts.isPropertyAccessExpression(moduleDeclaration.factory)) {
+	ts.isLiteralExpression(moduleDeclaration.factory) ||
+	ts.isArrayLiteralExpression(moduleDeclaration.factory) ||
+	ts.isObjectLiteralExpression(moduleDeclaration.factory) ||
+	ts.isPropertyAccessExpression(moduleDeclaration.factory)) {
 		// Use factory directly
 		body = [createDefaultExport(nodeFactory, moduleDeclaration.factory)];
 	} else { // Identifier
