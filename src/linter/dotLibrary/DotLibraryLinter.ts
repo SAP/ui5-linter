@@ -1,6 +1,6 @@
 import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
-import deprecatedLibs from "../../utils/deprecatedLibs.js";
+import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 import {parseXML} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
@@ -18,8 +18,8 @@ export default class DotLibraryLinter {
 
 	async lint() {
 		try {
-			const parsedDotLibraryWithPosInfo = await this.#parseDotLibrary(this.#contentStream);
-			this.#analyzeDeprecatedLibs(parsedDotLibraryWithPosInfo);
+			const dotLibraryDependencyTags = await this.#parseDotLibrary(this.#contentStream);
+			this.#analyzeDeprecatedLibs(dotLibraryDependencyTags);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, {
@@ -50,7 +50,7 @@ export default class DotLibraryLinter {
 			const libName = lib.textNodes[0].value;
 			const {line, character: column} = lib.openStart;
 
-			if (deprecatedLibs.includes(libName)) {
+			if (deprecatedLibraries.includes(libName)) {
 				this.#context.addLintingMessage(this.#resourcePath, {
 					ruleId: "ui5-linter-no-deprecated-api",
 					severity: LintMessageSeverity.Error,
