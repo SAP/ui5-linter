@@ -4,6 +4,7 @@ import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
+import {deprecatedLibraries} from "../../utils/deprecations.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -72,7 +73,7 @@ export default class SourceFileLinter {
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
 			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
-			node.kind === ts.SyntaxKind.ElementAccessExpression) {
+		node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
@@ -304,7 +305,7 @@ export default class SourceFileLinter {
 			if (!apiVersionNode) { // No arguments or no 'apiVersion' property
 				nodeToHighlight = node;
 			} else if (ts.isPropertyAssignment(apiVersionNode) &&
-				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+			apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}
 		}
@@ -338,9 +339,25 @@ export default class SourceFileLinter {
 				prop.name.text === "dependencies";
 		});
 
-		if (!dependenciesNode) {
+		if (!dependenciesNode ||
+			!ts.isPropertyAssignment(dependenciesNode) ||
+			!ts.isArrayLiteralExpression(dependenciesNode.initializer)) {
 			return;
 		}
+
+		dependenciesNode.initializer.elements.forEach((dependency) => {
+			const curLibName = dependency.getText().replace(/"/gi, "");
+
+			if (deprecatedLibraries.includes(curLibName)) {
+				this.#reporter.addMessage({
+					ruleId: "ui5-linter-no-deprecated-api",
+					severity: LintMessageSeverity.Error,
+					fatal: undefined,
+					node: dependency,
+					message: `Use of deprecated library '${curLibName}'`,
+				});
+			}
+		});
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
