@@ -31,32 +31,34 @@ export default class DotLibraryLinter {
 		}
 	}
 
-	async #parseDotLibrary(contentStream: ReadStream): Promise<string[]> {
+	async #parseDotLibrary(contentStream: ReadStream): Promise<SaxTag[]> {
 		const libs = new Set();
 		await parseXML(contentStream, (event, tag) => {
 			if (tag instanceof SaxTag &&
 				event === SaxEventType.CloseTag &&
 				tag.value === "libraryName") {
-				libs.add(tag.textNodes[0].value);
+				libs.add(tag);
 			}
 		});
 
-		return Array.from(libs) as string[];
+		return Array.from(libs) as SaxTag[];
 	}
 
-	#analyzeDeprecatedLibs(libs: string[]) {
+	#analyzeDeprecatedLibs(libs: SaxTag[]) {
 		// // Check for deprecated libraries
 		libs.forEach((lib) => {
-			if (deprecatedLibs.includes(lib)) {
-				// const positionInfo = getPosition(lib);
-				// this.#context.addLintingMessage(this.#resourcePath, {
-				// 	ruleId: "ui5-linter-no-deprecated-api",
-				// 	severity: LintMessageSeverity.Error,
-				// 	fatal: undefined,
-				// 	line: positionInfo.start.line + offset,
-				// 	column: positionInfo.start.column,
-				// 	message: `Use of deprecated library '${lib.name}'`,
-				// });
+			const libName = lib.textNodes[0].value;
+			const {line, character: column} = lib.openStart;
+
+			if (deprecatedLibs.includes(libName)) {
+				this.#context.addLintingMessage(this.#resourcePath, {
+					ruleId: "ui5-linter-no-deprecated-api",
+					severity: LintMessageSeverity.Error,
+					fatal: undefined,
+					line: line + 1,
+					column: column + 1,
+					message: `Use of deprecated library '${libName}'`,
+				});
 			}
 		});
 	}

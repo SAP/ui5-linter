@@ -23,7 +23,7 @@ export default async function lintWorkspace(
 		lintJson(params),
 		lintHtml(params),
 		lintUI5Yaml(params),
-		lintDotLibrary(params)
+		lintDotLibrary(params),
 	]);
 
 	const typeLinter = new TypeLinter(params);
