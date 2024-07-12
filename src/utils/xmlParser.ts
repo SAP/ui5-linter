@@ -1,5 +1,5 @@
 import type {ReadStream} from "node:fs";
-import {Detail, SaxEventType, SAXParser, Tag as SaxTag} from "sax-wasm";
+import {Detail, SaxEventType, SAXParser} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";

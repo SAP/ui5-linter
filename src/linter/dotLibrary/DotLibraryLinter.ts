@@ -1,20 +1,9 @@
 import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
-import deprecatedLibraries from "../../utils/deprecatedLibs.js";
-import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
+import deprecatedLibs from "../../utils/deprecatedLibs.js";
+import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 import {parseXML} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
-
-interface DotLibraryWithPosInfo extends DataWithPosition {
-	library?: {
-		dependencies?: {
-			dependency?: {
-				libraryName: string;
-			}
-		}[];
-	};
-	// TODO: add structure for line/column info
-}
 
 export default class DotLibraryLinter {
 	#contentStream;
@@ -30,9 +19,8 @@ export default class DotLibraryLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-
 			const parsedDotLibraryWithPosInfo = await this.#parseDotLibrary(this.#contentStream);
-			this.#analyzeDotLibrary(parsedDotLibraryWithPosInfo);
+			this.#analyzeDeprecatedLibs(parsedDotLibraryWithPosInfo);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, {
@@ -44,32 +32,33 @@ export default class DotLibraryLinter {
 		}
 	}
 
-	async #parseDotLibrary(contentStream: ReadStream): DotLibraryWithPosInfo {
+	async #parseDotLibrary(contentStream: ReadStream): Promise<string[]> {
+		const libs = new Set();
 		await parseXML(contentStream, (event, tag) => {
 			if (tag instanceof SaxTag &&
 				event === SaxEventType.CloseTag &&
 				tag.value === "libraryName") {
-					console.log(tag);
-				}
+				libs.add(tag.textNodes[0].value);
+			}
 		});
+
+		return Array.from(libs) as string[];
 	}
 
-	#analyzeDotLibrary(xml: DotLibraryWithPosInfo) {
-		// TODO: add detection of 'library.dependencies[].dependency.libraryName'
-
+	#analyzeDeprecatedLibs(libs: string[]) {
 		// // Check for deprecated libraries
-		// yaml?.framework?.libraries?.forEach((lib) => {
-		// 	if (deprecatedLibraries.includes(lib.name.toString())) {
-		// 		const positionInfo = getPosition(lib);
-		// 		this.#context.addLintingMessage(this.#resourcePath, {
-		// 			ruleId: "ui5-linter-no-deprecated-api",
-		// 			severity: LintMessageSeverity.Error,
-		// 			fatal: undefined,
-		// 			line: positionInfo.start.line + offset,
-		// 			column: positionInfo.start.column,
-		// 			message: `Use of deprecated library '${lib.name}'`,
-		// 		});
-		// 	}
-		// });
+		libs.forEach((lib) => {
+			if (deprecatedLibs.includes(lib)) {
+				// const positionInfo = getPosition(lib);
+				// this.#context.addLintingMessage(this.#resourcePath, {
+				// 	ruleId: "ui5-linter-no-deprecated-api",
+				// 	severity: LintMessageSeverity.Error,
+				// 	fatal: undefined,
+				// 	line: positionInfo.start.line + offset,
+				// 	column: positionInfo.start.column,
+				// 	message: `Use of deprecated library '${lib.name}'`,
+				// });
+			}
+		});
 	}
 }
