@@ -23,7 +23,7 @@ export default async function lintDotLibrary({context}: LinterParameters) {
 	}
 
 	await Promise.all(dotLibraryResources.map(async (resource: Resource) => {
-		const linter = new DotLibraryLinter(resource.getPath(), await resource.getString(), context);
+		const linter = new DotLibraryLinter(resource.getPath(), resource.getStream(), context);
 		await linter.lint();
 	}));
 }

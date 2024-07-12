@@ -2,6 +2,8 @@ import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
 import deprecatedLibraries from "../../utils/deprecatedLibs.js";
 import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
+import {parseXML} from "../../utils/xmlParser.js";
+import {ReadStream} from "node:fs";
 
 interface DotLibraryWithPosInfo extends DataWithPosition {
 	library?: {
@@ -15,12 +17,12 @@ interface DotLibraryWithPosInfo extends DataWithPosition {
 }
 
 export default class DotLibraryLinter {
-	#content;
+	#contentStream;
 	#resourcePath;
 	#context: LinterContext;
 
-	constructor(resourcePath: string, content: string, context: LinterContext) {
-		this.#content = content;
+	constructor(resourcePath: string, contentStream: ReadStream, context: LinterContext) {
+		this.#contentStream = contentStream;
 		this.#resourcePath = resourcePath;
 		this.#context = context;
 	}
@@ -28,7 +30,8 @@ export default class DotLibraryLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			const parsedDotLibraryWithPosInfo = this.#parseDotLibrary(this.#content);
+
+			const parsedDotLibraryWithPosInfo = await this.#parseDotLibrary(this.#contentStream);
 			this.#analyzeDotLibrary(parsedDotLibraryWithPosInfo);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -41,8 +44,14 @@ export default class DotLibraryLinter {
 		}
 	}
 
-	#parseDotLibrary(content: string): DotLibraryWithPosInfo {
-		// TODO: add parsing of XML structure in .library
+	async #parseDotLibrary(contentStream: ReadStream): DotLibraryWithPosInfo {
+		await parseXML(contentStream, (event, tag) => {
+			if (tag instanceof SaxTag &&
+				event === SaxEventType.CloseTag &&
+				tag.value === "libraryName") {
+					console.log(tag);
+				}
+		});
 	}
 
 	#analyzeDotLibrary(xml: DotLibraryWithPosInfo) {

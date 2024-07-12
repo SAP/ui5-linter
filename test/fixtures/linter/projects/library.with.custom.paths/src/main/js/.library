@@ -8,5 +8,14 @@
 		<dependency>
 			<libraryName>sap.ui.core</libraryName>
 		</dependency>
+		<dependency>
+			<libraryName>sap.ca.scfld.md</libraryName>
+		</dependency>
+		<dependency>
+			<libraryName>sap.ca.scfld.md</libraryName>
+		</dependency>
+		<dependency>
+			<libraryName>sap.ca.ui</libraryName>
+		</dependency>
 	</dependencies>
 </library>
