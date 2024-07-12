@@ -17,11 +17,11 @@ export async function extractJSScriptTags(contentStream: ReadStream) {
 				// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type#attribute_is_not_set_default_an_empty_string_or_a_javascript_mime_type
 				return attr.name.value !== "type" ||
 					(attr.name.value === "type" &&
-					["",
-						"module",
-						"text/javascript",
-						"application/javascript", /* legacy */
-					].includes(attr.value.value.toLowerCase()));
+						["",
+							"module",
+							"text/javascript",
+							"application/javascript", /* legacy */
+						].includes(attr.value.value.toLowerCase()));
 			});
 
 			if (isJSScriptTag) {

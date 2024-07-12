@@ -428,7 +428,7 @@ export default class Parser {
 
 					this.#generator.writeRequire(requireExpression);
 				} else if (resolvedNamespace === FESR_NAMESPACE ||
-				resolvedNamespace === SAP_BUILD_NAMESPACE || resolvedNamespace === SAP_UI_DT_NAMESPACE) {
+					resolvedNamespace === SAP_BUILD_NAMESPACE || resolvedNamespace === SAP_UI_DT_NAMESPACE) {
 					// Silently ignore FESR, sap.build and sap.ui.dt attributes
 				} else if (resolvedNamespace === CUSTOM_DATA_NAMESPACE) {
 					// Add custom data element and add it as an aggregation
@@ -515,7 +515,7 @@ export default class Parser {
 			}
 			return ownerAggregation;
 		} else if (this.#xmlDocumentKind === DocumentKind.Fragment && moduleName === "FragmentDefinition" &&
-		namespace === CORE_NAMESPACE) {
+			namespace === CORE_NAMESPACE) {
 			// This node declares a fragment definition
 			const node: FragmentDefinitionDeclaration = {
 				kind: NodeKind.FragmentDefinition,
