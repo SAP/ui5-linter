@@ -21,6 +21,8 @@ export const MESSAGES = {
 
 	SHORT__LIB_INIT_2: "Call to {0}() must be declared with property {apiVersion: 2}",
 	DETAILS__LIB_INIT_2: "{@link sap.ui.core.Lib.init Lib.init}",
+
+	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
 };
 
 // TODO: Migrate to enum instead of Object/Map

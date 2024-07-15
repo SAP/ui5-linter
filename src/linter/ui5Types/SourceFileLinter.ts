@@ -328,11 +328,11 @@ export default class SourceFileLinter {
 		}
 
 		if (initArg) {
-			this._libInitDeprecatedLibsCheck(initArg);
+			this.#analyzeLibInitDeprecatedLibs(initArg);
 		}
 	}
 
-	_libInitDeprecatedLibsCheck(initArg: ts.ObjectLiteralExpression) {
+	#analyzeLibInitDeprecatedLibs(initArg: ts.ObjectLiteralExpression) {
 		const dependenciesNode = initArg.properties.find((prop) => {
 			return ts.isPropertyAssignment(prop) &&
 				ts.isIdentifier(prop.name) &&
@@ -346,15 +346,17 @@ export default class SourceFileLinter {
 		}
 
 		dependenciesNode.initializer.elements.forEach((dependency) => {
-			const curLibName = dependency.getText().replace(/"/gi, "");
+			let curLibName = "";
+			if (ts.isStringLiteral(dependency)) {
+				curLibName = dependency.text;
+			}
 
 			if (deprecatedLibraries.includes(curLibName)) {
 				this.#reporter.addMessage({
 					ruleId: "ui5-linter-no-deprecated-api",
 					severity: LintMessageSeverity.Error,
-					fatal: undefined,
 					node: dependency,
-					message: `Use of deprecated library '${curLibName}'`,
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, curLibName),
 				});
 			}
 		});
