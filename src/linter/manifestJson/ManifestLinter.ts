@@ -11,6 +11,7 @@ import {LintMessageSeverity, ResourcePath} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries, deprecatedComponents} from "../../utils/deprecations.js";
+import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
 
 interface locType {
 	line: number;
@@ -69,8 +70,8 @@ export default class ManifestLinter {
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/dependencies/libs/${libKey}`,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-library",
-					message: `Use of deprecated library '${libKey}'`,
+					ruleId: RULES["ui5-linter-no-deprecated-library"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, libKey),
 				});
 			}
 		});
@@ -82,8 +83,8 @@ export default class ManifestLinter {
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/dependencies/components/${componentKey}`,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-component",
-					message: `Use of deprecated component '${componentKey}'`,
+					ruleId: RULES["ui5-linter-no-deprecated-component"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_COMPONENT, componentKey),
 				});
 			}
 		});
@@ -92,8 +93,8 @@ export default class ManifestLinter {
 			this.#reporter?.addMessage({
 				node: "/sap.ui5/resources/js",
 				severity: LintMessageSeverity.Error,
-				ruleId: "ui5-linter-no-deprecated-api",
-				message: `Use of deprecated property 'sap.ui5/resources/js'`,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP, "'sap.ui5/resources/js'"),
 			});
 		}
 
@@ -123,9 +124,10 @@ export default class ManifestLinter {
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/models/${modelKey}/type`,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-api",
-					message: `Use of deprecated model type ` +
-					`'sap.ui5/models/${modelKey}/type="${curModel.type}"'`,
+					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_MODEL_TYPE,
+						`sap.ui5/models/${modelKey}/type="${curModel.type}"`)
+					,
 				});
 			}
 
@@ -134,9 +136,10 @@ export default class ManifestLinter {
 				this.#reporter?.addMessage({
 					node: `/sap.ui5/models/${modelKey}/settings/synchronizationMode`,
 					severity: LintMessageSeverity.Error,
-					ruleId: "ui5-linter-no-deprecated-api",
-					message: `Use of deprecated property ` +
-					`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`,
+					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP,
+						`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`
+					),
 				});
 			}
 		});
