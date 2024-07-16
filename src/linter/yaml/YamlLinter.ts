@@ -72,7 +72,7 @@ export default class YamlLinter {
 			if (deprecatedLibraries.includes(libraryName) || deprecatedThemeLibraries.includes(libraryName)) {
 				const positionInfo = getPosition(lib);
 				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					ruleId: RULES["ui5-linter-no-deprecated-library"],
 					severity: LintMessageSeverity.Error,
 					fatal: undefined,
 					line: positionInfo.start.line + offset,
