@@ -356,7 +356,7 @@ export default class SourceFileLinter {
 
 			if (deprecatedLibraries.includes(curLibName)) {
 				this.#reporter.addMessage({
-					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					ruleId: RULES["ui5-linter-no-deprecated-library"],
 					severity: LintMessageSeverity.Error,
 					node: dependency,
 					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, curLibName),
