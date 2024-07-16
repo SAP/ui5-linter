@@ -346,10 +346,13 @@ export default class SourceFileLinter {
 		}
 
 		dependenciesNode.initializer.elements.forEach((dependency) => {
-			let curLibName = "";
-			if (ts.isStringLiteral(dependency)) {
-				curLibName = dependency.text;
+			if (!ts.isStringLiteral(dependency)) {
+				// We won't be interested if the elements of the Array are not of type
+				// StringLiteral, so we ignore such cases here (if such at all).
+				return;
 			}
+
+			const curLibName = dependency.text;
 
 			if (deprecatedLibraries.includes(curLibName)) {
 				this.#reporter.addMessage({
