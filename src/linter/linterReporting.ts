@@ -9,6 +9,8 @@ export const MESSAGES = {
 
 	SHORT__DEPRECATED_PROP_OF_CLASS: "Use of deprecated property '{0}' of class '{1}'",
 
+	SHORT__DEPRECATED_PROP: "Use of deprecated property {0}",
+
 	SHORT__DEPRECATED_FUNCTION_ACCESS: "Call to deprecated function {0}",
 
 	SHORT__DEPRECATED_API_ACCESS: "Use of deprecated API '{0}'",
@@ -17,10 +19,16 @@ export const MESSAGES = {
 
 	SHORT__DEPRECATED_MODULE_IMPORT: "Import of deprecated module '{0}'",
 
+	SHORT__DEPRECATED_COMPONENT: "Use of deprecated component '{0}'",
+
 	SHORT__GLOBAL_VAR_ACCESS: "Access of global variable '{0}' ({1})",
 
 	SHORT__LIB_INIT_2: "Call to {0}() must be declared with property {apiVersion: 2}",
 	DETAILS__LIB_INIT_2: "{@link sap.ui.core.Lib.init Lib.init}",
+
+	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
+
+	SHORT__DEPRECATED_MODEL_TYPE: "Use of deprecated model type '{0}'",
 };
 
 // TODO: Migrate to enum instead of Object/Map
@@ -32,6 +40,8 @@ export const RULES = {
 	"ui5-linter-no-pseudo-modules": "ui5-linter-no-pseudo-modules",
 	"ui5-linter-no-globals-js": "ui5-linter-no-globals-js",
 	"ui5-linter-parsing-error": "ui5-linter-parsing-error",
+	"ui5-linter-no-deprecated-library": "ui5-linter-no-deprecated-library",
+	"ui5-linter-no-deprecated-component": "ui5-linter-no-deprecated-component",
 };
 
 export function formatMessage(message: string, ...params: string[]) {

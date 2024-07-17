@@ -4,6 +4,7 @@ import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
+import {deprecatedLibraries} from "../../utils/deprecations.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -325,6 +326,43 @@ export default class SourceFileLinter {
 				messageDetails: this.#messageDetails ? formatMessage(MESSAGES.DETAILS__LIB_INIT_2) : undefined,
 			});
 		}
+
+		if (initArg) {
+			this.#analyzeLibInitDeprecatedLibs(initArg);
+		}
+	}
+
+	#analyzeLibInitDeprecatedLibs(initArg: ts.ObjectLiteralExpression) {
+		const dependenciesNode = initArg.properties.find((prop) => {
+			return ts.isPropertyAssignment(prop) &&
+				ts.isIdentifier(prop.name) &&
+				prop.name.text === "dependencies";
+		});
+
+		if (!dependenciesNode ||
+			!ts.isPropertyAssignment(dependenciesNode) ||
+			!ts.isArrayLiteralExpression(dependenciesNode.initializer)) {
+			return;
+		}
+
+		dependenciesNode.initializer.elements.forEach((dependency) => {
+			if (!ts.isStringLiteral(dependency)) {
+				// We won't be interested if the elements of the Array are not of type
+				// StringLiteral, so we ignore such cases here (if such at all).
+				return;
+			}
+
+			const curLibName = dependency.text;
+
+			if (deprecatedLibraries.includes(curLibName)) {
+				this.#reporter.addMessage({
+					ruleId: RULES["ui5-linter-no-deprecated-library"],
+					severity: LintMessageSeverity.Error,
+					node: dependency,
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, curLibName),
+				});
+			}
+		});
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
