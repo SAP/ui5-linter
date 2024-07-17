@@ -45,7 +45,7 @@ export default class DotLibraryLinter {
 	}
 
 	#analyzeDeprecatedLibs(libs: SaxTag[]) {
-		// // Check for deprecated libraries
+		// Check for deprecated libraries
 		libs.forEach((lib) => {
 			const libName = lib.textNodes[0].value;
 			const {line, character: column} = lib.openStart;
