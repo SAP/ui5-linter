@@ -51,7 +51,7 @@
 				"licensee": "^10.0.0",
 				"nyc": "^17.0.0",
 				"rimraf": "^5.0.8",
-				"semver": "^7.6.2",
+				"semver": "^7.6.3",
 				"sinon": "^18.0.0",
 				"tsx": "^4.16.2",
 				"typescript-eslint": "^7.16.1",
@@ -11700,9 +11700,9 @@
 			"integrity": "sha512-KreOdNF02zEEDUyqLZjWQTMf+ev/6gEzp2ZT8w2xvqfHO/DRPL4RBYYeiXQpYEGD+1oZ81pjc3fPG5NLDh5ICg=="
 		},
 		"node_modules/semver": {
-			"version": "7.6.2",
-			"resolved": "https://registry.npmjs.org/semver/-/semver-7.6.2.tgz",
-			"integrity": "sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w==",
+			"version": "7.6.3",
+			"resolved": "https://registry.npmjs.org/semver/-/semver-7.6.3.tgz",
+			"integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==",
 			"bin": {
 				"semver": "bin/semver.js"
 			},
