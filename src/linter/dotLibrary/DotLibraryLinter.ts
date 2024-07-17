@@ -4,6 +4,7 @@ import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 import {parseXML} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
+import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
 
 export default class DotLibraryLinter {
 	#contentStream;
@@ -52,12 +53,12 @@ export default class DotLibraryLinter {
 
 			if (deprecatedLibraries.includes(libName)) {
 				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: "ui5-linter-no-deprecated-api",
+					ruleId: RULES["ui5-linter-no-deprecated-api"],
 					severity: LintMessageSeverity.Error,
 					fatal: undefined,
 					line: line + 1,
 					column: column + 1,
-					message: `Use of deprecated library '${libName}'`,
+					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, libName),
 				});
 			}
 		});
