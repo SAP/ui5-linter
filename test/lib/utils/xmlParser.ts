@@ -4,8 +4,8 @@ import {ReadStream} from "node:fs";
 import {Readable} from "node:stream";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 
-test("Test xmlParser with .library", async (t) => { //TODO: Remove .only
-	const rawContent = `<?xml version="1.0" ?>
+test("Test xmlParser with .library", async (t) => {
+	const sampleDotLibrary = `<?xml version="1.0" ?>
 <library xmlns="http://www.sap.com/sap.ui.library.xsd">
 	<name>library.with.custom.paths</name>
 	<vendor>SAP SE</vendor>
@@ -31,23 +31,20 @@ test("Test xmlParser with .library", async (t) => { //TODO: Remove .only
 	const contentStream = new Readable() as ReadStream;
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	contentStream._read = () => {};
-	contentStream.push(rawContent);
+	contentStream.push(sampleDotLibrary);
+	contentStream.push(null);
 
 	// Call SAXParser with the contentStream
-	const libs = new Set();
-	await parseXML(contentStream, (event, tag): void => {
+	const libs: SaxTag[] = [];
+	await parseXML(contentStream, (event, tag) => {
 		if (tag instanceof SaxTag &&
 			event === SaxEventType.CloseTag &&
 			tag.value === "libraryName") {
-			libs.add(tag);
+			libs.push(tag);
 		}
 	});
 
-	//TODO: Test if the array "libs" contains the expected values
-
-	// t.is(libs.size, 4, "Parsed .library XML should contain 4 libraries");
-	//TODO: Check if first lib is "sap.ui.core"
-
-
-	t.is(true, true, "should be true"); //TODO: remove this line
+	// Test parsed results
+	t.is(libs.length, 4, "Parsed .library XML should contain 4 libraries");
+	t.is(libs[0].textNodes[0].value, "sap.ui.core", "First library should be 'sap.ui.core'");
 });
