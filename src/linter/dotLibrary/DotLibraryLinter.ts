@@ -26,7 +26,7 @@ export default class DotLibraryLinter {
 			this.#context.addLintingMessage(this.#resourcePath, {
 				severity: LintMessageSeverity.Error,
 				message,
-				ruleId: "ui5-linter-parsing-error",
+				ruleId: RULES["ui5-linter-parsing-error"],
 				fatal: true,
 			});
 		}
