@@ -55,8 +55,8 @@
 		".reuse/**"
 	],
 	"engines": {
-		"node": "^18.14.2 || ^20.11.0 || >=21.2.0",
-		"npm": ">= 9.5.0"
+		"node": "^20.11.0 || >=22.0.0",
+		"npm": ">= 8"
 	},
 	"dependencies": {
 		"@jridgewell/sourcemap-codec": "^1.5.0",
