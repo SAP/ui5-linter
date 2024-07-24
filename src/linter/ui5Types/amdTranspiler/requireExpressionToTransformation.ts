@@ -54,10 +54,8 @@ export function transformAsyncRequireCall(
 		}
 		if (ts.isNoSubstitutionTemplateLiteral(dep)) {
 			moduleSpecifier = nodeFactory.createStringLiteral(dep.text);
-			// Set pos to the original position to preserve source mapping capability
-			// (cast type to avoid TS error due to modifying a read only property)
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-			(moduleSpecifier.pos as ts.Node["pos"]) = dep.pos;
+			// Set range to the original range to preserve source mapping capability
+			ts.setTextRange(moduleSpecifier, dep);
 		} else {
 			moduleSpecifier = dep;
 		}
