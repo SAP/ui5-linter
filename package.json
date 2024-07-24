@@ -62,7 +62,7 @@
 		"@jridgewell/sourcemap-codec": "^1.5.0",
 		"@jridgewell/trace-mapping": "^0.3.25",
 		"@sapui5/types": "1.120.15",
-		"@ui5/fs": "^3.0.5",
+		"@ui5/fs": "^4.0.0",
 		"@ui5/logger": "^4.0.1",
 		"@ui5/project": "^3.9.2",
 		"chalk": "^5.3.0",
