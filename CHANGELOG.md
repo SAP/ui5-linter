@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.3.0](https://github.com/SAP/ui5-linter/compare/v0.2.6...v0.3.0) (2024-07-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support for older Node.js has been dropped. Only Node.js 20.11.x and >=22.0.0 as well as npm v8 or higher are supported.
+
+### Features
+
+* Detect deprecated deps in Lib.init call ([#197](https://github.com/SAP/ui5-linter/issues/197)) ([9c9c406](https://github.com/SAP/ui5-linter/commit/9c9c406e72305c2fee61d03a064e57dc923cba35))
+* Drop support for node v18, v21 ([3ca58ed](https://github.com/SAP/ui5-linter/commit/3ca58edc2a9ce358be26422d210742a8cb3bfe27))
+
+
+### Bug Fixes
+
+* Consider allowed globals when they're accessed via globalThis ([d370803](https://github.com/SAP/ui5-linter/commit/d3708033623c1d82c626ff409d8c23e93ce93161))
+
+
+### Dependencies
+
+* Bump @jridgewell/sourcemap-codec from 1.4.15 to 1.5.0 ([191620e](https://github.com/SAP/ui5-linter/commit/191620eec1bc3dccada161ec7d77ee167850c65d))
+* Bump @sapui5/types to 1.120.18 ([f6f0e07](https://github.com/SAP/ui5-linter/commit/f6f0e07115cc181896051e0cbfc289ea0a227cfe))
+* Bump @ui5/fs from 3.0.5 to 4.0.0 ([6cb5130](https://github.com/SAP/ui5-linter/commit/6cb513003283d68d6197356332ae8c773b5ed475))
+* Bump @ui5/logger from 3.0.0 to 4.0.1 ([d650e1d](https://github.com/SAP/ui5-linter/commit/d650e1df8a9fdc7e10220b9b2878457539b25305))
+* Bump @ui5/project from 3.9.2 to 4.0.0 ([3834655](https://github.com/SAP/ui5-linter/commit/38346552910b0eb8363284fe657f1bed3a11f7c2))
+* Bump typescript from 5.5.2 to 5.5.3 ([d8ad2ee](https://github.com/SAP/ui5-linter/commit/d8ad2ee26585ecb9919570959a71bd4ffb356347))
+* Bump typescript from 5.5.3 to 5.5.4 ([3f911a3](https://github.com/SAP/ui5-linter/commit/3f911a3912f12aab470664c727f335ed1c5b9045))
+* Bump update-notifier from 7.0.0 to 7.1.0 ([b798d53](https://github.com/SAP/ui5-linter/commit/b798d5312e39712541ef46578f48bed403cde396))
+
 ## [0.2.6](https://github.com/SAP/ui5-linter/compare/v0.2.5...v0.2.6) (2024-06-28)
 
 
