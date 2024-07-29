@@ -18,7 +18,7 @@ export default async function lintDotLibrary({context, workspace}: LinterParamet
 			dotLibraryResources.push(resource);
 		}));
 	} else {
-		dotLibraryResources = await workspace.byGlob("/src/**/.library");
+		dotLibraryResources = await workspace.byGlob("**/.library");
 	}
 
 	await Promise.all(dotLibraryResources.map(async (resource: Resource) => {
