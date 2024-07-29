@@ -29,9 +29,6 @@ export const MESSAGES = {
 	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
 
 	SHORT__DEPRECATED_MODEL_TYPE: "Use of deprecated model type '{0}'",
-
-	SHORT__EMPTY_LIBRARY_NAME: "Empty library name",
-	DETAILS__EMPTY_LIBRARY_NAME: "Library definition is provided, but a library name is missing",
 };
 
 // TODO: Migrate to enum instead of Object/Map
@@ -45,7 +42,6 @@ export const RULES = {
 	"ui5-linter-parsing-error": "ui5-linter-parsing-error",
 	"ui5-linter-no-deprecated-library": "ui5-linter-no-deprecated-library",
 	"ui5-linter-no-deprecated-component": "ui5-linter-no-deprecated-component",
-	"ui5-linter-empty-library-name": "ui5-linter-empty-library-name",
 };
 
 export function formatMessage(message: string, ...params: string[]) {

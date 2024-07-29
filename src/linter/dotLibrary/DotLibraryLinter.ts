@@ -65,24 +65,8 @@ export default class DotLibraryLinter {
 		// Check for deprecated libraries
 		libs.forEach((lib) => {
 			const {line, character: column} = lib.openStart;
-
-			// Check for missing textNodes or for empty textNodes withing the
-			// libraryName tag
-			if (!lib.textNodes[0] || lib.textNodes[0].value.trim() === "") {
-				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: RULES["ui5-linter-empty-library-name"],
-					severity: LintMessageSeverity.Warning,
-					fatal: undefined,
-					line: line + 1,
-					column: column + 1,
-					message: formatMessage(MESSAGES.SHORT__EMPTY_LIBRARY_NAME),
-					messageDetails: formatMessage(MESSAGES.DETAILS__EMPTY_LIBRARY_NAME),
-				});
-
-				return;
-			}
-
-			const libName = lib.textNodes[0].value;
+			// textNodes is always an array, but it might be empty
+			const libName = lib.textNodes[0]?.value;
 
 			if (deprecatedLibraries.includes(libName)) {
 				this.#context.addLintingMessage(this.#resourcePath, {
