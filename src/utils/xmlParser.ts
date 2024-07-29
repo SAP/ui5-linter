@@ -18,7 +18,7 @@ async function initSaxWasm() {
 export async function parseXML(contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Detail) => void) {
 	const options = {highWaterMark: 32 * 1024}; // 32k chunks
 	const saxWasmBuffer = await initSaxWasm();
-	const saxParser = new SAXParser(SaxEventType.CloseTag, options);
+	const saxParser = new SAXParser(SaxEventType.CloseTag + SaxEventType.OpenTag, options);
 
 	saxParser.eventHandler = parseHandler;
 
