@@ -82,7 +82,7 @@ export default class DotLibraryLinter {
 				return;
 			}
 
-			const libName = lib.textNodes[0].value.trim();
+			const libName = lib.textNodes[0].value;
 
 			if (deprecatedLibraries.includes(libName)) {
 				this.#context.addLintingMessage(this.#resourcePath, {
