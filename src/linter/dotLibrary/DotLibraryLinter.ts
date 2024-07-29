@@ -86,7 +86,7 @@ export default class DotLibraryLinter {
 
 			if (deprecatedLibraries.includes(libName)) {
 				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: RULES["ui5-linter-no-deprecated-api"],
+					ruleId: RULES["ui5-linter-no-deprecated-library"],
 					severity: LintMessageSeverity.Error,
 					fatal: undefined,
 					line: line + 1,
