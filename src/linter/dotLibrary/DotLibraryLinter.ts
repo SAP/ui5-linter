@@ -34,11 +34,27 @@ export default class DotLibraryLinter {
 
 	async #parseDotLibrary(contentStream: ReadStream): Promise<SaxTag[]> {
 		const libs = new Set();
+		const tagsStack: string[] = [];
+		const libNamePath = ["library", "dependencies", "dependency"];
 		await parseXML(contentStream, (event, tag) => {
-			if (tag instanceof SaxTag &&
-				event === SaxEventType.CloseTag &&
+			if (!(tag instanceof SaxTag)) {
+				return;
+			}
+
+			if (event === SaxEventType.OpenTag && !tag.selfClosing) {
+				tagsStack.push(tag.value);
+			} else if (event === SaxEventType.CloseTag && !tag.selfClosing) {
+				tagsStack.pop();
+			}
+
+			if (event === SaxEventType.CloseTag &&
 				tag.value === "libraryName") {
-				libs.add(tag);
+				const path = tagsStack.slice(-1 * libNamePath.length);
+				const isMatchingPath = libNamePath.every((lib, index) => lib === path[index]);
+
+				if (isMatchingPath) {
+					libs.add(tag);
+				}
 			}
 		});
 
