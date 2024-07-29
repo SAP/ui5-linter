@@ -49,8 +49,8 @@ export default class DotLibraryLinter {
 
 			if (event === SaxEventType.CloseTag &&
 				tag.value === "libraryName") {
-				const path = tagsStack.slice(-1 * libNamePath.length);
-				const isMatchingPath = libNamePath.every((lib, index) => lib === path[index]);
+				const isMatchingPath = libNamePath.length === tagsStack.length &&
+					libNamePath.every((lib, index) => lib === tagsStack[index]);
 
 				if (isMatchingPath) {
 					libs.add(tag);
