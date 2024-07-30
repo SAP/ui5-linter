@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/SAP/ui5-linter/compare/v0.3.0...v0.3.1) (2024-07-30)
+
+
+### Features
+
+* Add detection for deprecated dependencies in .library ([#104](https://github.com/SAP/ui5-linter/issues/104)) ([161f157](https://github.com/SAP/ui5-linter/commit/161f157f56d88d614e9f673b737856148e42bcbc))
+
 ## [0.3.0](https://github.com/SAP/ui5-linter/compare/v0.2.6...v0.3.0) (2024-07-24)
 
 
