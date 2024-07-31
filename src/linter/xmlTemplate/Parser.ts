@@ -253,7 +253,7 @@ export default class Parser {
 					variableName,
 				};
 			});
-		} catch (err) {
+		} catch (_) {
 			throw new Error(`Failed to parse require attribute value ${attrValue} in resource ${this.#resourceName}`);
 		}
 	}
