@@ -1,7 +1,6 @@
 import {createRequire} from "module";
 import {writeFile, readdir} from "node:fs/promises";
 import path from "node:path";
-import {fetchAndExtractApiJsons, handleCli, cleanup, RAW_API_JSON_FILES_FOLDER} from "./helpers.js";
 
 interface apiJson {
 	"ui5-metadata": {
@@ -27,11 +26,11 @@ interface apiJson {
 
 const require = createRequire(import.meta.url);
 
-async function getPseudoModuleNames() {
-	const apiJsonList = await readdir(RAW_API_JSON_FILES_FOLDER);
+async function getPseudoModuleNames(apiJsonsRoot: string) {
+	const apiJsonList = await readdir(apiJsonsRoot);
 
 	return apiJsonList.flatMap((library) => {
-		const libApiJson = require(path.resolve(RAW_API_JSON_FILES_FOLDER, library)) as {symbols: apiJson[]};
+		const libApiJson = require(path.join(apiJsonsRoot, library)) as {symbols: apiJson[]};
 		return libApiJson.symbols;
 	}).reduce((acc: Record<string, apiJson[]>, symbol) => {
 		if ((["datatype", "enum"].includes(symbol?.["ui5-metadata"]?.stereotype) ||
@@ -134,12 +133,7 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 	);
 }
 
-// Entrypoint
-await handleCli(async (url) => {
-	await fetchAndExtractApiJsons(url);
-
-	const pseudoModules = await getPseudoModuleNames();
+export default async function createPseudoModulesInfo(apiJsonsRoot: string) {
+	const pseudoModules = await getPseudoModuleNames(apiJsonsRoot);
 	await addOverrides(pseudoModules);
-
-	await cleanup();
-});
+}

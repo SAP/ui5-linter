@@ -43,8 +43,7 @@
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
-		"update-semantic-model-info": "tsx scripts/metadataProvider/createMetadataInfo.ts",
-		"update-pseudo-modules-info": "tsx scripts/metadataProvider/createPseudoModulesInfo.ts"
+		"update-sapui5-types": "tsx scripts/update-sapui5-types.ts"
 	},
 	"files": [
 		"CHANGELOG.md",
