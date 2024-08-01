@@ -14,7 +14,7 @@
 				"@sapui5/types": "1.120.18",
 				"@ui5/fs": "^4.0.0",
 				"@ui5/logger": "^4.0.1",
-				"@ui5/project": "^4.0.0",
+				"@ui5/project": "^4.0.1",
 				"chalk": "^5.3.0",
 				"data-with-position": "^0.5.0",
 				"figures": "^6.1.0",
@@ -3838,9 +3838,9 @@
 			}
 		},
 		"node_modules/@ui5/project": {
-			"version": "4.0.0",
-			"resolved": "https://registry.npmjs.org/@ui5/project/-/project-4.0.0.tgz",
-			"integrity": "sha512-C30g6H/BPj1dAVwjI0cvohbdz+p6TtUvc4lzBLwnaHiIMIeDPrs41umc5Y1Wh/Z++XbPwr0rbbKlmdCDvXZ/CQ==",
+			"version": "4.0.1",
+			"resolved": "https://registry.npmjs.org/@ui5/project/-/project-4.0.1.tgz",
+			"integrity": "sha512-Bjmd1BKLMqYlPn4bB4rhhGJCfKjmGPsRkl1TzCyd060Yc+5fLAdUTGyFXyKWO4xrDjkbXYbfsub6N0/uUH+hYQ==",
 			"dependencies": {
 				"@npmcli/config": "^8.3.4",
 				"@ui5/fs": "^4.0.0",
@@ -3870,7 +3870,7 @@
 				"npm": ">= 8"
 			},
 			"peerDependencies": {
-				"@ui5/builder": "^3.4.1 || ^4.0.0"
+				"@ui5/builder": "^4.0.0"
 			},
 			"peerDependenciesMeta": {
 				"@ui5/builder": {
