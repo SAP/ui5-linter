@@ -101,7 +101,7 @@
 		"semver": "^7.6.3",
 		"sinon": "^18.0.0",
 		"tsx": "^4.16.5",
-		"typescript-eslint": "8.0.0-alpha.60",
+		"typescript-eslint": "^8.0.0",
 		"yauzl-promise": "^4.0.0"
 	}
 }
