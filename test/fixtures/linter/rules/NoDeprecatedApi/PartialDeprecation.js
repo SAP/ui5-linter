@@ -5,9 +5,15 @@ sap.ui.define([
 	"sap/ui/model/odata/v2/ODataModel"
 ], function(Parameters, JSONModel, ODataModelV4, ODataModelV2) {
 
-	Parameters.get(); // TODO detect: (deprecated since 1.92) If no parameter is given
-	Parameters.get("sapUiParam1"); // TODO detect: (deprecated since 1.94) If a string is given as first parameter
-	Parameters.get(["sapUiParam1", "sapUiParam2"]); // TODO detect: (deprecated since 1.94) If an array is given as first parameter
+	Parameters.get(); // (deprecated since 1.92) If no parameter is given
+	Parameters.get("sapUiParam1"); // (deprecated since 1.94) If a string is given as first parameter
+	Parameters.get(["sapUiParam1", "sapUiParam2"]); // (deprecated since 1.94) If an array is given as first parameter
+
+	// Negative test: Passing an object is the only non-deprecated usage
+	Parameters.get({
+		name: ["sapUiParam1", "sapUiParam2", "sapUiParam3"],
+		callback: function(mParams) {}
+	 });
 
 	var jsonModel = new JSONModel();
 	jsonModel.loadData("/api/users", undefined, false); // TODO detect: Parameter bAsync is deprecated as of Version 1.107 (default=true)
