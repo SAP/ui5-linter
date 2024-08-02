@@ -88,7 +88,6 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				// Note: This is not necessary for options of type "boolean"
 				if (Array.isArray(arg)) {
 					// If the option is specified multiple times, use the value of the last option
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					return arg[arg.length - 1];
 				}
 				return arg;

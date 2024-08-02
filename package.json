@@ -91,7 +91,7 @@
 		"@ui5-language-assistant/semantic-model-types": "^3.3.1",
 		"ava": "^6.1.3",
 		"depcheck": "^1.4.7",
-		"eslint": "^8.57.0",
+		"eslint": "^9.8.0",
 		"esmock": "^2.6.7",
 		"husky": "^9.1.4",
 		"licensee": "^10.0.0",
@@ -100,7 +100,7 @@
 		"semver": "^7.6.3",
 		"sinon": "^18.0.0",
 		"tsx": "^4.16.5",
-		"typescript-eslint": "^7.18.0",
+		"typescript-eslint": "^8.0.0",
 		"yauzl-promise": "^4.0.0"
 	}
 }
