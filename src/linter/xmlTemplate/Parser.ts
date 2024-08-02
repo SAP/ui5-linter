@@ -470,7 +470,7 @@ export default class Parser {
 		const parentNode = this._findParentNode(
 			NodeKind.Control | NodeKind.Aggregation | NodeKind.FragmentDefinition);
 
-		if (moduleName.match(/^[a-z]/)) {
+		if (/^[a-z]/.exec(moduleName)) {
 			const aggregationName = moduleName;
 			// TODO: Replace the above with a check against known controls. Even though there are
 			// no known cases of lower case control names in the framework.
