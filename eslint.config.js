@@ -48,6 +48,11 @@ export default tseslint.config(
 			...tseslint.configs.recommendedTypeChecked,
 			...tseslint.configs.stylisticTypeChecked,
 		],
+		ignores: [
+			// This file is a copy of an openui5 resource which is located at
+			// https://github.com/SAP/openui5/blob/master/lib/jsdoc/transformApiJson.js
+			"src/formatter/lib/resolveLinks.ts",
+		],
 		languageOptions: {
 			ecmaVersion: 2022,
 			sourceType: "module",
