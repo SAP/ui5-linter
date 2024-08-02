@@ -83,21 +83,25 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		}
 
 		// If the link has a protocol, do not modify, but open in a new window
-		if (sTarget.includes("://")) {
+		if (/:\/\//.test(sTarget)) {
 			return formatUrlToLink(sTarget, sText);
 		}
 		// topic:xxx Topic
-		aMatch = /^topic:(\w{32}(?:#\w*)?(?:\/\w*)?)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^topic:(\w{32}(?:#\w*)?(?:\/\w*)?)$/
+		);
 		if (aMatch) {
 			return formatUrlToLink(`${ui5Url}/#/topic/${aMatch[1]}`, sText);
 		}
 		// demo:xxx Demo, open the demonstration page in a new window
-		aMatch = /^demo:([a-zA-Z0-9/.]*)$/.exec(sTarget);
+		aMatch = sTarget.match(/^demo:([a-zA-Z0-9/.]*)$/);
 		if (aMatch) {
 			return formatUrlToLink(`${ui5Url}/${ui5Version}/#/test-resources/${aMatch[1]}`, sText);
 		}
 		// sap.x.Xxx.prototype.xxx - In case of prototype we have a link to method
-		aMatch = /([a-zA-Z0-9.$_]+?)\.prototype\.([a-zA-Z0-9.$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/([a-zA-Z0-9.$_]+?)\.prototype\.([a-zA-Z0-9.$_]+)$/
+		);
 		if (aMatch) {
 			return createLink({
 				name: aMatch[2],
@@ -110,7 +114,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		// Heuristics: Extend is always a static method
 		// sap.x.Xxx.extend
 		// module:sap/x/Xxx.extend
-		aMatch = /^(module:)?([a-zA-Z0-9.$_/]+?)\.extend$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)?([a-zA-Z0-9.$_/]+?)\.extend$/
+		);
 		if (aMatch) {
 			const [, sModule, sClass] = aMatch;
 			return createLink({
@@ -126,7 +132,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		// sap.x.Xxx#constructor
 		// module:sap/x/Xxx.constructor
 		// #constructor
-		aMatch = /^(module:)?([a-zA-Z0-9.$_/]+?)?[.#]constructor$/i.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)?([a-zA-Z0-9.$_/]+?)?[.#]constructor$/i
+		);
 		if (aMatch) {
 			const [, sModule, sClass] = aMatch;
 			let sName = "";
@@ -143,7 +151,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		// #.setText - local static method
 		// #setText - local instance method
 		// #.setText.from - local nested method
-		aMatch = /^#(\.)?([a-zA-Z0-9.$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(/^#(\.)?([a-zA-Z0-9.$_]+)$/);
 		if (aMatch) {
 			return createLink({
 				name: aMatch[2],
@@ -154,7 +162,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 			});
 		}
 		// #annotation:TextArrangement - local annotation
-		aMatch = /^#annotation:([a-zA-Z0-9$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(/^#annotation:([a-zA-Z0-9$_]+)$/);
 		if (aMatch) {
 			return createLink({
 				name: aMatch[1],
@@ -169,7 +177,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		// sap.ui.comp.smartfield.SmartField.annotation:TextArrangement
 		// module:sap/ui/comp/smartfield/SmartField.annotation:TextArrangement
 		// module:sap/ui/comp/smartfield/SmartField#annotation:TextArrangement
-		aMatch = /^(module:)?([a-zA-Z0-9.$_/]+?)[.#]annotation:([a-zA-Z0-9$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)?([a-zA-Z0-9.$_/]+?)[.#]annotation:([a-zA-Z0-9$_]+)$/
+		);
 		if (aMatch) {
 			const [, sModule, sClass, sAnnotation] = aMatch;
 			return createLink({
@@ -181,7 +191,7 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 			});
 		}
 		// #event:press - local event
-		aMatch = /^#event:([a-zA-Z0-9$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(/^#event:([a-zA-Z0-9$_]+)$/);
 		if (aMatch) {
 			return createLink({
 				name: aMatch[1],
@@ -196,7 +206,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		// sap.m.Button.event:press
 		// module:sap/m/Button.event:press
 		// module:sap/m/Button#event:press
-		aMatch = /^(module:)?([a-zA-Z0-9.$_/]+?)[.#]event:([a-zA-Z0-9$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)?([a-zA-Z0-9.$_/]+?)[.#]event:([a-zA-Z0-9$_]+)$/
+		);
 		if (aMatch) {
 			const [, sModule, sClass, sEvent] = aMatch;
 			return createLink({
@@ -209,7 +221,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 		}
 		// sap.m.Button#setText - instance method
 		// module:sap/m/Button#setText
-		aMatch = /^(module:)?([a-zA-Z0-9.$_/]+)#([a-zA-Z0-9.$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)?([a-zA-Z0-9.$_/]+)#([a-zA-Z0-9.$_]+)$/
+		);
 		if (aMatch) {
 			const [, sModule, sClass, sMethod] = aMatch;
 			return createLink({
@@ -221,7 +235,9 @@ function _preProcessLinksInTextBlock(sText: string, ui5Url: string, ui5Version: 
 			});
 		}
 		// module:sap/m/Button.setText
-		aMatch = /^(module:)([a-zA-Z0-9.$_/]+)\.([a-zA-Z0-9.$_]+)$/.exec(sTarget);
+		aMatch = sTarget.match(
+			/^(module:)([a-zA-Z0-9.$_/]+)\.([a-zA-Z0-9.$_]+)$/
+		);
 		if (aMatch) {
 			const [, sModule, sClass, sMethod] = aMatch;
 			return createLink({
