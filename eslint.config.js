@@ -67,9 +67,6 @@ export default tseslint.config(
 					caughtErrorsIgnorePattern: "^_",
 				},
 			],
-			"@typescript-eslint/no-unused-expressions": "off",
-			"@typescript-eslint/prefer-regexp-exec": "off",
-			"@typescript-eslint/prefer-includes": "off",
 		},
 	}, {
 		// To be discussed: Type-aware checks might add quite some additional work when writing tests
