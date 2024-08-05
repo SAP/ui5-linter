@@ -21,10 +21,10 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Perfrom ESLint check
+    - name: Perform ESLint check
       run: npm run lint
 
-    - name: Perfrom Licenses check
+    - name: Perform Licenses check
       run: npm run check-licenses
 
     - name: Perform dependency check
