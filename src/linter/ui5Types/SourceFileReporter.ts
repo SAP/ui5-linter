@@ -40,14 +40,17 @@ export default class SourceFileReporter {
 	#traceMap: TraceMap | undefined;
 	#messages: LintMessage[] = [];
 	#coverageInfo: CoverageInfo[] = [];
+	#messageDetails: boolean;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined
+		sourceFile: ts.SourceFile, sourceMap: string | undefined,
+		messageDetails: boolean
 	) {
 		this.#context = context;
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
+		this.#messageDetails = messageDetails;
 		if (sourceMap) {
 			this.#traceMap = new TraceMap(sourceMap);
 		}
@@ -109,9 +112,13 @@ export default class SourceFileReporter {
 		if (args) {
 			messageText = formatMessage(messageText, ...args);
 		}
-		let messageDetails = messageInfo.details;
-		if (detailsArgs) {
-			messageDetails = formatMessage(messageInfo.details, ...detailsArgs);
+		let messageDetails;
+		if (this.#messageDetails) {
+			if (detailsArgs) {
+				messageDetails = formatMessage(messageInfo.details, ...detailsArgs);
+			} else {
+				messageDetails = messageInfo.details;
+			}
 		}
 
 		return this.addMessage({
@@ -120,6 +127,7 @@ export default class SourceFileReporter {
 			messageDetails,
 			severity: messageInfo.severity,
 			ruleId: messageInfo.ruleId,
+			fatal: messageInfo.fatal,
 		});
 	}
 
