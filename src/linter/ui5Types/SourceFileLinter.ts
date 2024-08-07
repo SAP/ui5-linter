@@ -2,7 +2,7 @@ import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
-import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
+import {RULES, MESSAGES, formatMessage, MESSAGE} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 
@@ -620,10 +620,9 @@ export default class SourceFileLinter {
 			if (isDataType) {
 				this.#reporter.addMessage({
 					node: moduleSpecifierNode,
-					severity: LintMessageSeverity.Error,
-					ruleId: RULES["ui5-linter-no-pseudo-modules"],
-					message: formatMessage(MESSAGES.SHORT__NO_DIRECT_DATATYPE_ACCESS, moduleSpecifierNode.text),
-					messageDetails: formatMessage(MESSAGES.DETAILS__NO_DIRECT_DATATYPE_ACCESS, moduleNamespaceName),
+					message: MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
+					args: [moduleSpecifierNode.text],
+					detailsArgs: [moduleNamespaceName],
 				});
 			} else { // Enum
 				this.#reporter.addMessage({
