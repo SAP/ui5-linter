@@ -12,9 +12,20 @@ import LinterContext, {
 	LintMessage, CoverageInfo, LintMessageSeverity,
 	PositionInfo, PositionRange, ResourcePath,
 } from "../LinterContext.js";
+import {formatMessage, MESSAGE, MESSAGE_INFO} from "../linterReporting.js";
 
+/**
+ * @deprecated to be removed when all usages are migrated to the new signature
+ */
 interface ReporterMessage extends LintMessage {
 	node: ts.Node;
+}
+
+interface MessageParams {
+	node: ts.Node;
+	message: MESSAGE;
+	args?: string[];
+	detailsArgs?: string[];
 }
 
 interface ReporterCoverageInfo extends CoverageInfo {
@@ -46,7 +57,19 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	addMessage({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
+	/**
+	 *
+	 * @deprecated Please use the signature with the `MessageParams` object instead
+	 */
+	addMessage({node, message, messageDetails, severity, ruleId, fatal}: ReporterMessage): void;
+	addMessage({node, message, args, detailsArgs}: MessageParams): void;
+	addMessage(options: ReporterMessage | MessageParams): void {
+		if (!("ruleId" in options)) {
+			return this.#_addMessageNew(options);
+		}
+
+		const {node, message, messageDetails, severity, ruleId, fatal = undefined} = options;
+
 		if (fatal && severity !== LintMessageSeverity.Error) {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
@@ -75,6 +98,29 @@ export default class SourceFileReporter {
 		}
 
 		this.#messages.push(msg);
+	}
+
+	#_addMessageNew({node, message, args, detailsArgs}: MessageParams) {
+		const messageInfo = MESSAGE_INFO[message];
+		if (!messageInfo) {
+			throw new Error(`Invalid message '${message}'`);
+		}
+		let messageText = messageInfo.message;
+		if (args) {
+			messageText = formatMessage(messageText, ...args);
+		}
+		let messageDetails = messageInfo.details;
+		if (detailsArgs) {
+			messageDetails = formatMessage(messageInfo.details, ...detailsArgs);
+		}
+
+		return this.addMessage({
+			node,
+			message: messageText,
+			messageDetails,
+			severity: messageInfo.severity,
+			ruleId: messageInfo.ruleId,
+		});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
