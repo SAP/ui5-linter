@@ -58,7 +58,15 @@ export enum MESSAGE {
 	NO_DIRECT_DATATYPE_ACCESS,
 }
 
-export const MESSAGE_INFO = {
+interface MessageInfo {
+	severity: LintMessageSeverity;
+	ruleId: string;
+	message: string;
+	details: string;
+	fatal?: boolean;
+}
+
+export const MESSAGE_INFO: Record<MESSAGE, MessageInfo> = {
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-pseudo-modules"],

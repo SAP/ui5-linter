@@ -51,7 +51,7 @@ export default class SourceFileLinter {
 		this.#sourceFile = sourceFile;
 		this.#checker = checker;
 		this.#context = context;
-		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
+		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap, messageDetails);
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
