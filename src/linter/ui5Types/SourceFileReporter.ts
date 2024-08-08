@@ -61,14 +61,14 @@ export default class SourceFileReporter {
 	 *
 	 * @deprecated Please use the signature with the `MessageParams` object instead
 	 */
-	addMessageOld({node: tsNode, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage): void {
+	addMessageOld({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
 		if (fatal && severity !== LintMessageSeverity.Error) {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
 		let line = 1, column = 1;
-		if (tsNode) {
-			const {start} = this.#getPositionsForNode(tsNode);
+		if (node) {
+			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
 			line = start.line + 1;
 			column = start.column + 1;
@@ -96,7 +96,7 @@ export default class SourceFileReporter {
 	addMessage<M extends MESSAGE>(id: M, node: ts.Node): void;
 	addMessage<M extends MESSAGE>(
 		id: M, argsOrNode?: MessageArgs[M] | ts.Node, node?: ts.Node
-	): void {
+	) {
 		if (!argsOrNode) {
 			throw new Error("Invalid arguments: Missing second argument");
 		}
@@ -133,7 +133,7 @@ export default class SourceFileReporter {
 			messageData.fatal = messageInfo.fatal;
 		}
 
-		return this.addMessageOld(messageData);
+		this.addMessageOld(messageData);
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
