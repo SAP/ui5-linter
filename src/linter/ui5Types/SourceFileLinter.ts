@@ -618,12 +618,20 @@ export default class SourceFileLinter {
 			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
 			const isDataType = !!this.#dataTypes[moduleNamespaceName];
 			if (isDataType) {
-				this.#reporter.addMessage({
-					node: moduleSpecifierNode,
-					message: MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
-					args: [moduleSpecifierNode.text],
-					detailsArgs: [moduleNamespaceName],
-				});
+				// New proposal for a common Reporter API (defined by new BaseReporter class/interface):
+				// First argument: message
+				// Second argument (optional): message keys
+				// Additional arguments: Specific to Reporter subclasses
+				//   e.g.
+				//   - ts.Node for SourceFileReporter
+				//   - SaxTag for HtmlReporter
+				//   - positional info (e.g. /sap.ui5/models/foo)
+
+				this.#reporter.addMessage(
+					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
+					{moduleName: moduleSpecifierNode.text, foo: ""},
+					moduleSpecifierNode
+				);
 			} else { // Enum
 				this.#reporter.addMessage({
 					node: moduleSpecifierNode,

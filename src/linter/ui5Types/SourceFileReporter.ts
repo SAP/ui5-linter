@@ -12,7 +12,7 @@ import LinterContext, {
 	LintMessage, CoverageInfo, LintMessageSeverity,
 	PositionInfo, PositionRange, ResourcePath,
 } from "../LinterContext.js";
-import {formatMessage, MESSAGE, MESSAGE_INFO} from "../linterReporting.js";
+import {MESSAGE, MESSAGE_INFO, MessageArgs} from "../linterReporting.js";
 
 /**
  * @deprecated to be removed when all usages are migrated to the new signature
@@ -21,15 +21,12 @@ interface ReporterMessage extends LintMessage {
 	node: ts.Node;
 }
 
-interface MessageParams {
-	node: ts.Node;
-	message: MESSAGE;
-	args?: string[];
-	detailsArgs?: string[];
-}
-
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
+}
+
+function isTsNode(node: ts.Node | MessageArgs | undefined): node is ts.Node {
+	return !!node && typeof node.getSourceFile === "function";
 }
 
 export default class SourceFileReporter {
@@ -64,22 +61,29 @@ export default class SourceFileReporter {
 	 *
 	 * @deprecated Please use the signature with the `MessageParams` object instead
 	 */
-	addMessage({node, message, messageDetails, severity, ruleId, fatal}: ReporterMessage): void;
-	addMessage({node, message, args, detailsArgs}: MessageParams): void;
-	addMessage(options: ReporterMessage | MessageParams): void {
-		if (!("ruleId" in options)) {
-			return this.#_addMessageNew(options);
+	addMessage(options: ReporterMessage): void;
+	addMessage(message: MESSAGE, messageArgs: MessageArgs, node: ts.Node): void;
+	addMessage(message: MESSAGE, node: ts.Node): void;
+	addMessage(options: ReporterMessage | MESSAGE, messageArgs?: MessageArgs | ts.Node, node?: ts.Node): void {
+		if (typeof options !== "object") {
+			if (isTsNode(messageArgs)) {
+				return this.#_addMessageNew(options, {}, messageArgs);
+			} else if (node) {
+				return this.#_addMessageNew(options, messageArgs ?? {}, node);
+			} else {
+				throw new Error("Invalid arguments");
+			}
 		}
 
-		const {node, message, messageDetails, severity, ruleId, fatal = undefined} = options;
+		const {node: tsNode, message, messageDetails, severity, ruleId, fatal = undefined} = options;
 
 		if (fatal && severity !== LintMessageSeverity.Error) {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
 		let line = 1, column = 1;
-		if (node) {
-			const {start} = this.#getPositionsForNode(node);
+		if (tsNode) {
+			const {start} = this.#getPositionsForNode(tsNode);
 			// One-based to be aligned with most IDEs
 			line = start.line + 1;
 			column = start.column + 1;
@@ -103,22 +107,15 @@ export default class SourceFileReporter {
 		this.#messages.push(msg);
 	}
 
-	#_addMessageNew({node, message, args, detailsArgs}: MessageParams) {
+	#_addMessageNew(message: MESSAGE, messageArgs: MessageArgs, node: ts.Node): void {
 		const messageInfo = MESSAGE_INFO[message];
 		if (!messageInfo) {
 			throw new Error(`Invalid message '${message}'`);
 		}
-		let messageText = messageInfo.message;
-		if (args) {
-			messageText = formatMessage(messageText, ...args);
-		}
+		const messageText = messageInfo.message(messageArgs);
 		let messageDetails;
 		if (this.#messageDetails) {
-			if (detailsArgs) {
-				messageDetails = formatMessage(messageInfo.details, ...detailsArgs);
-			} else {
-				messageDetails = messageInfo.details;
-			}
+			messageDetails = messageInfo.details(messageArgs);
 		}
 
 		return this.addMessage({

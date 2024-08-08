@@ -58,19 +58,25 @@ export enum MESSAGE {
 	NO_DIRECT_DATATYPE_ACCESS,
 }
 
-interface MessageInfo {
+export type MessageArgs = Record<string, string>;
+
+export interface MessageInfo {
 	severity: LintMessageSeverity;
 	ruleId: string;
-	message: string;
-	details: string;
+	message: (args: MessageArgs) => string;
+	details: (args: MessageArgs) => string;
 	fatal?: boolean;
 }
 
-export const MESSAGE_INFO: Record<MESSAGE, MessageInfo> = {
+type MessageInfoMap = {
+	[key in MESSAGE]: MessageInfo;
+};
+
+export const MESSAGE_INFO: MessageInfoMap = {
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-pseudo-modules"],
-		message: "Deprecated access to DataType pseudo module '{0}'",
-		details: "{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
+		message: (args) => `Deprecated access to DataType pseudo module '${args.moduleName}'`,
+		details: () => "{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
 };
