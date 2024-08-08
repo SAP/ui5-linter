@@ -57,26 +57,26 @@ export function formatMessage(message: string, ...params: string[]) {
 export enum MESSAGE {
 	NO_DIRECT_DATATYPE_ACCESS,
 }
-
-export type MessageArgs = Record<string, string>;
-
-export interface MessageInfo {
-	severity: LintMessageSeverity;
-	ruleId: string;
-	message: (args: MessageArgs) => string;
-	details: (args: MessageArgs) => string;
-	fatal?: boolean;
-}
-
-type MessageInfoMap = {
-	[key in MESSAGE]: MessageInfo;
-};
-
-export const MESSAGE_INFO: MessageInfoMap = {
+export const MESSAGE_INFO = {
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-pseudo-modules"],
-		message: ({moduleName}) => `Deprecated access to DataType pseudo module '${moduleName}'`,
-		details: () => "{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
+		message: ({moduleName}: {moduleName: string}) =>
+			`Deprecated access to DataType pseudo module '${moduleName}'`,
+		details: () =>
+			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
+
+} as const;
+
+export type MessageInfo = typeof MESSAGE_INFO[keyof typeof MESSAGE_INFO] & {fatal?: boolean};
+
+type ExtractArgs<F> = F extends (args: infer P) => string ? P : never;
+type CombineArgs<M, D> = M & D extends object ? M & D : never;
+
+export type MessageArgs = {
+	[K in keyof typeof MESSAGE_INFO]:
+	CombineArgs<
+		ExtractArgs<typeof MESSAGE_INFO[K]["message"]>, ExtractArgs<typeof MESSAGE_INFO[K]["details"]>
+	>;
 };

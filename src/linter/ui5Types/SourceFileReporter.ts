@@ -25,8 +25,8 @@ interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
 
-function isTsNode(node: ts.Node | MessageArgs | undefined): node is ts.Node {
-	return !!node && typeof node.getSourceFile === "function";
+function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | undefined): node is ts.Node {
+	return !!node && "getSourceFile" in node && typeof node.getSourceFile === "function";
 }
 
 export default class SourceFileReporter {
@@ -61,22 +61,7 @@ export default class SourceFileReporter {
 	 *
 	 * @deprecated Please use the signature with the `MessageParams` object instead
 	 */
-	addMessage(options: ReporterMessage): void;
-	addMessage(message: MESSAGE, messageArgs: MessageArgs, node: ts.Node): void;
-	addMessage(message: MESSAGE, node: ts.Node): void;
-	addMessage(options: ReporterMessage | MESSAGE, messageArgs?: MessageArgs | ts.Node, node?: ts.Node): void {
-		if (typeof options !== "object") {
-			if (isTsNode(messageArgs)) {
-				return this.#_addMessageNew(options, {}, messageArgs);
-			} else if (node) {
-				return this.#_addMessageNew(options, messageArgs ?? {}, node);
-			} else {
-				throw new Error("Invalid arguments");
-			}
-		}
-
-		const {node: tsNode, message, messageDetails, severity, ruleId, fatal = undefined} = options;
-
+	addMessageOld({node: tsNode, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage): void {
 		if (fatal && severity !== LintMessageSeverity.Error) {
 			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
@@ -107,25 +92,48 @@ export default class SourceFileReporter {
 		this.#messages.push(msg);
 	}
 
-	#_addMessageNew(message: MESSAGE, messageArgs: MessageArgs, node: ts.Node): void {
-		const messageInfo = MESSAGE_INFO[message];
-		if (!messageInfo) {
-			throw new Error(`Invalid message '${message}'`);
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node): void;
+	addMessage<M extends MESSAGE>(id: M, node: ts.Node): void;
+	addMessage<M extends MESSAGE>(
+		id: M, argsOrNode?: MessageArgs[M] | ts.Node, node?: ts.Node
+	): void {
+		if (!argsOrNode) {
+			throw new Error("Invalid arguments: Missing second argument");
 		}
-		const messageText = messageInfo.message(messageArgs);
-		let messageDetails;
-		if (this.#messageDetails) {
-			messageDetails = messageInfo.details(messageArgs);
+		let args: MessageArgs[M];
+		if (isTsNode(argsOrNode)) {
+			node = argsOrNode;
+			args = null as unknown as MessageArgs[M];
+		} else if (!node) {
+			throw new Error("Invalid arguments: Missing 'node'");
+		} else {
+			args = argsOrNode;
 		}
 
-		return this.addMessage({
+		const messageInfo = MESSAGE_INFO[id];
+		if (!messageInfo) {
+			throw new Error(`Invalid message id '${id}'`);
+		}
+
+		const messageFunc = messageInfo.message as (args: MessageArgs[M]) => string;
+
+		const messageData: ReporterMessage = {
 			node,
-			message: messageText,
-			messageDetails,
+			message: messageFunc(args),
 			severity: messageInfo.severity,
 			ruleId: messageInfo.ruleId,
-			fatal: messageInfo.fatal,
-		});
+		};
+
+		if (this.#messageDetails) {
+			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string;
+			messageData.messageDetails = detailsFunc(args);
+		}
+
+		if ("fatal" in messageInfo && typeof messageInfo.fatal === "boolean") {
+			messageData.fatal = messageInfo.fatal;
+		}
+
+		return this.addMessageOld(messageData);
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
