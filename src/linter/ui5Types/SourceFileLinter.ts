@@ -204,7 +204,7 @@ export default class SourceFileLinter {
 						if (propertySymbol) {
 							const deprecationInfo = this.getDeprecationInfo(propertySymbol);
 							if (deprecationInfo) {
-								this.#reporter.addMessage({
+								this.#reporter.addMessageOld({
 									node: prop,
 									severity: LintMessageSeverity.Error,
 									ruleId: RULES["ui5-linter-no-deprecated-api"],
@@ -331,7 +331,7 @@ export default class SourceFileLinter {
 			reportNodeText = reportNode.getText();
 		}
 
-		this.#reporter.addMessage({
+		this.#reporter.addMessageOld({
 			node: reportNode,
 			severity: LintMessageSeverity.Error,
 			ruleId: RULES["ui5-linter-no-deprecated-api"],
@@ -406,7 +406,7 @@ export default class SourceFileLinter {
 				importedVarName = nodeExp.expression.getText() + ".init";
 			}
 
-			this.#reporter.addMessage({
+			this.#reporter.addMessageOld({
 				node: nodeToHighlight,
 				severity: LintMessageSeverity.Error,
 				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
@@ -443,7 +443,7 @@ export default class SourceFileLinter {
 			const curLibName = dependency.text;
 
 			if (deprecatedLibraries.includes(curLibName)) {
-				this.#reporter.addMessage({
+				this.#reporter.addMessageOld({
 					ruleId: RULES["ui5-linter-no-deprecated-library"],
 					severity: LintMessageSeverity.Error,
 					node: dependency,
@@ -476,7 +476,7 @@ export default class SourceFileLinter {
 				if (ts.isPropertyAccessExpression(node)) {
 					namespace = this.extractNamespace(node);
 				}
-				this.#reporter.addMessage({
+				this.#reporter.addMessageOld({
 					node,
 					severity: LintMessageSeverity.Error,
 					ruleId: RULES["ui5-linter-no-deprecated-api"],
@@ -484,7 +484,7 @@ export default class SourceFileLinter {
 					messageDetails: deprecationInfo.messageDetails,
 				});
 			} else {
-				this.#reporter.addMessage({
+				this.#reporter.addMessageOld({
 					node,
 					severity: LintMessageSeverity.Error,
 					ruleId: RULES["ui5-linter-no-deprecated-property"],
@@ -552,7 +552,7 @@ export default class SourceFileLinter {
 			// In case it is, ensure it is not one of the allowed PropertyAccessExpressions, such as "sap.ui.require"
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!(ts.isPropertyAccessExpression(node) && this.isAllowedPropertyAccess(node))) {
-				this.#reporter.addMessage({
+				this.#reporter.addMessageOld({
 					node,
 					severity: LintMessageSeverity.Error,
 					ruleId: RULES["ui5-linter-no-globals-js"],
@@ -604,7 +604,7 @@ export default class SourceFileLinter {
 		const defaultExportSymbol = symbol.exports?.get("default" as ts.__String);
 		const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
 		if (deprecationInfo) {
-			this.#reporter.addMessage({
+			this.#reporter.addMessageOld({
 				node: moduleSpecifierNode,
 				severity: LintMessageSeverity.Error,
 				ruleId: RULES["ui5-linter-no-deprecated-api"],
@@ -618,22 +618,13 @@ export default class SourceFileLinter {
 			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
 			const isDataType = !!this.#dataTypes[moduleNamespaceName];
 			if (isDataType) {
-				// New proposal for a common Reporter API (defined by new BaseReporter class/interface):
-				// First argument: message
-				// Second argument (optional): message keys
-				// Additional arguments: Specific to Reporter subclasses
-				//   e.g.
-				//   - ts.Node for SourceFileReporter
-				//   - SaxTag for HtmlReporter
-				//   - positional info (e.g. /sap.ui5/models/foo)
-
 				this.#reporter.addMessage(
 					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
-					{moduleName: moduleSpecifierNode.text, foo: ""},
+					{moduleName: moduleSpecifierNode.text},
 					moduleSpecifierNode
 				);
 			} else { // Enum
-				this.#reporter.addMessage({
+				this.#reporter.addMessageOld({
 					node: moduleSpecifierNode,
 					severity: LintMessageSeverity.Error,
 					ruleId: RULES["ui5-linter-no-pseudo-modules"],

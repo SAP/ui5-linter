@@ -337,7 +337,7 @@ function reportResults({
 	const fileName = path.basename(resourcePath);
 
 	if (!hasManifestDefinition && !!manifestContent) {
-		reporter.addMessage({
+		reporter.addMessageOld({
 			node: classDesc,
 			severity: LintMessageSeverity.Warning,
 			ruleId: "ui5-linter-async-component-flags",
@@ -371,7 +371,7 @@ function reportResults({
 				`"sap.ui5/rootView" in the component manifest.`;
 			}
 
-			reporter.addMessage({
+			reporter.addMessageOld({
 				node: classDesc,
 				severity: LintMessageSeverity.Error,
 				ruleId: "ui5-linter-async-component-flags",
@@ -388,7 +388,7 @@ function reportResults({
 				context.addLintingMessage(
 					resourcePath.replace(fileName, "manifest.json"), {...message, ...posInfo});
 			} else {
-				reporter.addMessage({...message, ...{node: classDesc}});
+				reporter.addMessageOld({...message, ...{node: classDesc}});
 			}
 		};
 
