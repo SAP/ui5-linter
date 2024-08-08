@@ -76,7 +76,7 @@ export const MESSAGE_INFO: MessageInfoMap = {
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-pseudo-modules"],
-		message: (args) => `Deprecated access to DataType pseudo module '${args.moduleName}'`,
+		message: ({moduleName}) => `Deprecated access to DataType pseudo module '${moduleName}'`,
 		details: () => "{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
 };
