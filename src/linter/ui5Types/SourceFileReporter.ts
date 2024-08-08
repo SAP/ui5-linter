@@ -12,7 +12,8 @@ import LinterContext, {
 	LintMessage, CoverageInfo, LintMessageSeverity,
 	PositionInfo, PositionRange, ResourcePath,
 } from "../LinterContext.js";
-import {MESSAGE, MESSAGE_INFO, MessageArgs} from "../linterReporting.js";
+import {MESSAGE, MESSAGE_INFO} from "../messages.js";
+import {MessageArgs} from "../linterReporting.js";
 
 /**
  * @deprecated to be removed when all usages are migrated to the new signature
