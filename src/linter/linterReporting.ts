@@ -7,7 +7,7 @@ export const MESSAGES = {
 	// Used by ManifestLinter
 	SHORT__DEPRECATED_COMPONENT: "Use of deprecated component '{0}'",
 
-	// Used by DotLibraryLinter, ManifestLinter, YamlLinter, SourceFileLinter
+	// Used by DotLibraryLinter, ManifestLinter, YamlLinter
 	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
 
 	// Used by ManifestLinter
@@ -17,6 +17,7 @@ export const MESSAGES = {
 // TODO: Migrate to enum instead of Object/Map
 // Currently, it's done this way to avoid pollution of the test snapshots
 export const RULES = {
+	"ui5-linter-async-component-flags": "ui5-linter-async-component-flags",
 	"ui5-linter-no-deprecated-api": "ui5-linter-no-deprecated-api",
 	"ui5-linter-no-partially-deprecated-api": "ui5-linter-no-partially-deprecated-api",
 	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",

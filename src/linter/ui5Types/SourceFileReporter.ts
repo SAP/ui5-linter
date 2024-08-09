@@ -15,13 +15,6 @@ import LinterContext, {
 import {MESSAGE, MESSAGE_INFO} from "../messages.js";
 import {MessageArgs} from "../linterReporting.js";
 
-/**
- * @deprecated to be removed when all usages are migrated to the new signature
- */
-interface ReporterMessage extends LintMessage {
-	node: ts.Node;
-}
-
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
@@ -58,41 +51,6 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	/**
-	 *
-	 * @deprecated Please use the signature with the `MessageParams` object instead
-	 */
-	addMessageOld({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
-		if (fatal && severity !== LintMessageSeverity.Error) {
-			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
-		}
-
-		let line = 1, column = 1;
-		if (node) {
-			const {start} = this.#getPositionsForNode(node);
-			// One-based to be aligned with most IDEs
-			line = start.line + 1;
-			column = start.column + 1;
-			// endLine = end.line + 1;
-			// endColumn = end.column + 1;
-		}
-
-		const msg: LintMessage = {
-			ruleId,
-			severity,
-			fatal,
-			line,
-			column,
-			message,
-		};
-
-		if (messageDetails) {
-			msg.messageDetails = resolveLinks(messageDetails);
-		}
-
-		this.#messages.push(msg);
-	}
-
 	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node): void;
 	addMessage<M extends MESSAGE>(id: M, node: ts.Node): void;
 	addMessage<M extends MESSAGE>(
@@ -116,25 +74,43 @@ export default class SourceFileReporter {
 			throw new Error(`Invalid message id '${id}'`);
 		}
 
+		let line = 1, column = 1;
+		if (node) {
+			const {start} = this.#getPositionsForNode(node);
+			// One-based to be aligned with most IDEs
+			line = start.line + 1;
+			column = start.column + 1;
+			// endLine = end.line + 1;
+			// endColumn = end.column + 1;
+		}
+
 		const messageFunc = messageInfo.message as (args: MessageArgs[M]) => string;
 
-		const messageData: ReporterMessage = {
-			node,
-			message: messageFunc(args),
-			severity: messageInfo.severity,
+		const msg: LintMessage = {
 			ruleId: messageInfo.ruleId,
+			severity: messageInfo.severity,
+			line,
+			column,
+			message: messageFunc(args),
 		};
 
 		if (this.#messageDetails) {
-			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string;
-			messageData.messageDetails = detailsFunc(args);
+			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string | undefined;
+			const details = detailsFunc(args);
+			if (details) {
+				msg.messageDetails = resolveLinks(details);
+			}
 		}
 
 		if ("fatal" in messageInfo && typeof messageInfo.fatal === "boolean") {
-			messageData.fatal = messageInfo.fatal;
+			msg.fatal = messageInfo.fatal;
 		}
 
-		this.addMessageOld(messageData);
+		if (msg.fatal && msg.severity !== LintMessageSeverity.Error) {
+			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
+		}
+
+		this.#messages.push(msg);
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {

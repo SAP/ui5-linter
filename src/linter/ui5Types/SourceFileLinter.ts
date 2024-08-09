@@ -437,12 +437,9 @@ export default class SourceFileLinter {
 			const curLibName = dependency.text;
 
 			if (deprecatedLibraries.includes(curLibName)) {
-				this.#reporter.addMessageOld({
-					ruleId: RULES["ui5-linter-no-deprecated-library"],
-					severity: LintMessageSeverity.Error,
-					node: dependency,
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, curLibName),
-				});
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_LIBRARY, {
+					libraryName: curLibName,
+				}, dependency);
 			}
 		});
 	}
