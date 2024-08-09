@@ -214,7 +214,8 @@ export default class SourceFileLinter {
 
 		if (!ts.isPropertyAccessExpression(exprNode) &&
 			!ts.isElementAccessExpression(exprNode) &&
-			!ts.isIdentifier(exprNode)) {
+			!ts.isIdentifier(exprNode) &&
+			!ts.isCallExpression(exprNode)) {
 			// TODO: Transform into coverage message if it's really ok not to handle this
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
@@ -229,7 +230,7 @@ export default class SourceFileLinter {
 			reportNode = exprNode.name;
 		} else if (ts.isElementAccessExpression(exprNode)) {
 			reportNode = exprNode.argumentExpression;
-		} else { // Identifier
+		} else { // Identifier / CallExpression
 			reportNode = exprNode;
 		}
 
