@@ -4,13 +4,13 @@ export const MESSAGES = {
 	// Used by ManifestLinter
 	SHORT__DEPRECATED_PROP: "Use of deprecated property {0}",
 
+	// Used by ManifestLinter
 	SHORT__DEPRECATED_COMPONENT: "Use of deprecated component '{0}'",
 
-	SHORT__LIB_INIT_2: "Call to {0}() must be declared with property {apiVersion: 2}",
-	DETAILS__LIB_INIT_2: "{@link sap.ui.core.Lib.init Lib.init}",
-
+	// Used by DotLibraryLinter, ManifestLinter, YamlLinter, SourceFileLinter
 	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
 
+	// Used by ManifestLinter
 	SHORT__DEPRECATED_MODEL_TYPE: "Use of deprecated model type '{0}'",
 };
 

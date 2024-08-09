@@ -7,6 +7,7 @@ export enum MESSAGE {
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
+	LIB_INIT_API_VERSION,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
@@ -58,6 +59,15 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
+	[MESSAGE.LIB_INIT_API_VERSION]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: ({libInitFunction}: {libInitFunction: string}) =>
+			`Call to ${libInitFunction}() must be declared with property {apiVersion: 2}`,
+		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-pseudo-modules"],
@@ -84,7 +94,7 @@ export const MESSAGE_INFO = {
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
-		details: () => null,
+		details: () => undefined,
 	},
 
 } as const;
