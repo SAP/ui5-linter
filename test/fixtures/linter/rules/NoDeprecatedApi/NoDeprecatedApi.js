@@ -23,6 +23,9 @@ sap.ui.define([
 
 	includes([1], 1); // Function "includes" is deprecated
 
+	const getIncludesFunction = () => includes;
+	getIncludesFunction()([1], 1); // Function "includes" is deprecated
+
 	Configuration.getCompatibilityVersion("sapMDialogWithPadding"); // Method "getCompatibilityVersion" is deprecated
 	Configuration["getCompatibilityVersion"]("sapMDialogWithPadding"); // Method "getCompatibilityVersion" is deprecated
 
