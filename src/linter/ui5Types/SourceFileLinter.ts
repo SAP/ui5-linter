@@ -11,6 +11,22 @@ interface DeprecationInfo {
 	messageDetails?: string;
 }
 
+function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
+	return /@openui5|@sapui5|@ui5/.test(sourceFile.fileName);
+}
+
+function isSourceFileOfUi5OrThirdPartyType(sourceFile: ts.SourceFile) {
+	return /@openui5|@sapui5|@ui5|@types\/jquery/.test(sourceFile.fileName);
+}
+
+function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {
+	return sourceFile.fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
+}
+
+function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
+	return sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/library/");
+}
+
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
@@ -507,10 +523,13 @@ export default class SourceFileLinter {
 			return;
 		}
 		const symbol = this.#checker.getSymbolAtLocation(moduleSpecifierNode);
+		if (!symbol) {
+			return;
+		}
 		// Only check for the "default" export regardless of what's declared
 		// as UI5 / AMD only supports importing the default anyways.
 		// TODO: This needs to be enhanced in future
-		const defaultExportSymbol = symbol?.exports?.get("default" as ts.__String);
+		const defaultExportSymbol = symbol.exports?.get("default" as ts.__String);
 		const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
 		if (deprecationInfo) {
 			this.#reporter.addMessage({
@@ -523,7 +542,7 @@ export default class SourceFileLinter {
 			});
 		}
 
-		if (this.isSymbolOfPseudoType(symbol)) {
+		if (this.isSymbolOfPseudoModuleType(symbol)) {
 			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
 			const isDataType = !!this.#dataTypes[moduleNamespaceName];
 			if (isDataType) {
@@ -547,34 +566,28 @@ export default class SourceFileLinter {
 	}
 
 	isSymbolOfUi5Type(symbol: ts.Symbol) {
-		if (symbol.name.startsWith("sap/")) {
-			return true;
-		} else {
-			const sourceFile = symbol.valueDeclaration?.getSourceFile();
-			if (sourceFile?.fileName.match(/@openui5|@sapui5|@ui5/)) {
-				return true;
-			}
-		}
-		return false;
+		return this.checkSymbolDeclarationSourceFile(symbol, isSourceFileOfUi5Type);
 	}
 
 	isSymbolOfUi5OrThirdPartyType(symbol: ts.Symbol) {
-		if (symbol.name.startsWith("sap/")) {
-			return true;
-		} else {
-			const sourceFile = symbol.valueDeclaration?.getSourceFile();
-			if (sourceFile?.fileName.match(/@openui5|@sapui5|@ui5|@types\/jquery/)) {
-				return true;
-			}
-		}
-		return false;
+		return this.checkSymbolDeclarationSourceFile(symbol, isSourceFileOfUi5OrThirdPartyType);
 	}
 
 	isSymbolOfJquerySapType(symbol: ts.Symbol) {
-		return symbol.valueDeclaration?.getSourceFile().fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
+		return this.checkSymbolDeclarationSourceFile(symbol, isSourceFileOfJquerySapType);
 	}
 
-	isSymbolOfPseudoType(symbol: ts.Symbol | undefined) {
-		return symbol?.valueDeclaration?.getSourceFile().fileName.startsWith("/types/@ui5/linter/overrides/library/");
+	isSymbolOfPseudoModuleType(symbol: ts.Symbol) {
+		return this.checkSymbolDeclarationSourceFile(symbol, isSourceFileOfPseudoModuleType);
+	}
+
+	checkSymbolDeclarationSourceFile(
+		symbol: ts.Symbol, checkFunction: (sourceFile: ts.SourceFile) => boolean
+	) {
+		const declarations = symbol.getDeclarations();
+		if (!declarations) {
+			return false;
+		}
+		return declarations.some((declaration) => checkFunction(declaration.getSourceFile()));
 	}
 }
