@@ -54,8 +54,8 @@ sap.ui.define([
 		]
 	});
 
-	const {init: intRenames} = Library;
-	intRenames({
+	const {init: initRenames} = Library;
+	initRenames({
 		apiVersion: 2,
 		dependencies: [
 			"sap.ui.core",

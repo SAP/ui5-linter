@@ -404,13 +404,9 @@ export default class SourceFileLinter {
 				importedVarName = nodeExp.expression.getText() + ".init";
 			}
 
-			this.#reporter.addMessageOld({
-				node: nodeToHighlight,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message: formatMessage(MESSAGES.SHORT__LIB_INIT_2, importedVarName),
-				messageDetails: this.#messageDetails ? formatMessage(MESSAGES.DETAILS__LIB_INIT_2) : undefined,
-			});
+			this.#reporter.addMessage(MESSAGE.LIB_INIT_API_VERSION, {
+				libInitFunction: importedVarName,
+			}, nodeToHighlight);
 		}
 
 		if (initArg) {
