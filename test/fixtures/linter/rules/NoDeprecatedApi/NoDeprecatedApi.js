@@ -33,6 +33,9 @@ sap.ui.define([
 
 	coreLib.MessageType; // Enum "MessageType" is deprecated
 
+	const {MessageType} = coreLib;
+	MessageType.Error; // TODO detect: Enum "MessageType" is deprecated
+
 	mobileLib.InputType.Date; // Enum value "InputType.Date" is deprecated
 
 	const navigationHandler = new NavigationHandler();
