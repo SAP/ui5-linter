@@ -1,0 +1,9 @@
+specVersion: "3.2"
+type: module
+metadata:
+  name: test.module
+
+resources:
+  configuration:
+    paths:
+      /module/foo/: ./foo/
