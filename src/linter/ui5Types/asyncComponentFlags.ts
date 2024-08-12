@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
-import LinterContext, {LintMessage, LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {LintMessageSeverity} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 import {MESSAGE} from "../messages.js";

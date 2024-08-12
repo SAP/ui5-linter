@@ -3,7 +3,7 @@ import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
-import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
+import {RULES} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 
