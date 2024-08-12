@@ -29,14 +29,18 @@ export default class Writer {
 		if (str === null || str === "") {
 			return;
 		}
-		start && this.#addMapping(start);
+		if (start) {
+			this.#addMapping(start);
+		}
 
 		const strSplit = str.split(NL);
 		this.lineOffset += strSplit.length - 1;
 		this.columnOffset += strSplit[strSplit.length - 1].length;
 		this.#buf += str;
 
-		end && this.#addMapping(end);
+		if (end) {
+			this.#addMapping(end);
+		}
 	}
 
 	writeln(str: string, start?: Position, end?: Position) {
@@ -54,18 +58,22 @@ export default class Writer {
 
 		this.#shiftMappings(lineOffset + 1); // Adding one for the additional new line we'll be adding
 
-		start && this.#addMapping(start, {
-			line: 0,
-			column: 0,
-		});
+		if (start) {
+			this.#addMapping(start, {
+				line: 0,
+				column: 0,
+			});
+		}
 
 		this.lineOffset += lineOffset + 1; // Adding one for the additional new line
 		this.#buf = str + NL + this.#buf;
 
-		end && this.#addMapping(end, {
-			line: lineOffset,
-			column: columnOffset,
-		});
+		if (end) {
+			this.#addMapping(end, {
+				line: lineOffset,
+				column: columnOffset,
+			});
+		}
 	}
 
 	getString() {
