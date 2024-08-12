@@ -159,9 +159,6 @@ function testDefinition(
 }
 
 export function preprocessLintResultsForSnapshot(res: LintResult[]) {
-	res.sort((a, b) => {
-		return a.filePath.localeCompare(b.filePath);
-	});
 	res.forEach((message) => {
 		// Convert to posix paths to align snapshots across platforms
 		message.filePath = message.filePath.replace(/\\/g, "/");

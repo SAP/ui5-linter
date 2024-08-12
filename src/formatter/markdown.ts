@@ -6,9 +6,6 @@ export class Markdown {
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
 
-		// Sort by file path
-		lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
-
 		let findings = "";
 		lintResults.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
 			if (!errorCount && !warningCount) {
