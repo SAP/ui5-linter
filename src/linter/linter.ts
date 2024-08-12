@@ -81,6 +81,9 @@ export async function lintProject({
 			relFsBasePath, virBasePath,
 			relFsBasePathTest, virBasePathTest);
 	});
+	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
+	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
+	sortLintResults(res);
 	return res;
 }
 
@@ -109,6 +112,9 @@ export async function lintFile({
 	res.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath, "", "/");
 	});
+	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
+	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
+	sortLintResults(res);
 	return res;
 }
 
@@ -262,4 +268,8 @@ async function dirExists(dirPath: string) {
 async function fileExists(dirPath: string) {
 	const stats = await fsStat(dirPath);
 	return stats && stats.isFile();
+}
+
+function sortLintResults(lintResults: LintResult[]) {
+	lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
 }

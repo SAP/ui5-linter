@@ -86,15 +86,11 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "sap.f");
 	const {lintProject} = t.context;
 
-	let res = await lintProject({
+	const res = await lintProject({
 		rootDir: projectPath,
 		pathsToLint: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
-	});
-
-	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
-		return a.filePath.localeCompare(b.filePath);
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));

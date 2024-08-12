@@ -212,9 +212,11 @@ export default class LinterContext {
 		} else {
 			resourcePaths = this.#messages.keys();
 		}
+
 		for (const resourcePath of resourcePaths) {
 			lintResults.push(this.generateLintResult(resourcePath));
 		}
+
 		return lintResults;
 	}
 }

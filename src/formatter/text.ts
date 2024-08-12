@@ -42,10 +42,6 @@ export class Text {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
-		// Sort files alphabetically
-		lintResults.sort((a, b) => {
-			return a.filePath.localeCompare(b.filePath);
-		});
 		lintResults.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
 			if (!errorCount && !warningCount) {
 				return;
