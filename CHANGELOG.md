@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.2](https://github.com/SAP/ui5-linter/compare/v0.3.1...v0.3.2) (2024-08-12)
+
+
+### Bug Fixes
+
+* Missing detection of deprecated modules that export an interface ([829e826](https://github.com/SAP/ui5-linter/commit/829e8260103a7647c2bd46de1258719f98f3a60f))
+* Unhandled CallExpression expression syntax: CallExpression ([3a7716d](https://github.com/SAP/ui5-linter/commit/3a7716d3360f3dd64025aaac5544f9bf62997053))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.19 ([2a4917f](https://github.com/SAP/ui5-linter/commit/2a4917f08cd0806f9ba4edc3ca57cfb7c4956485))
+* Bump @ui5/project from 4.0.0 to 4.0.1 ([5f516e0](https://github.com/SAP/ui5-linter/commit/5f516e0434a32e283de71d8f74f8586d4ebe6bba))
+* Bump eslint from 8.57.0 to 9.8.0 ([#230](https://github.com/SAP/ui5-linter/issues/230)) ([9e80d2f](https://github.com/SAP/ui5-linter/commit/9e80d2fa463e6526c342b0db6e037991c0694825))
+* Pin update-notifier to v7.1.0 ([cc6e8d4](https://github.com/SAP/ui5-linter/commit/cc6e8d45e159e0cf10bdaaa6a20ae27b2fb130d5))
+* Switch back to latest version of update-notifier ([3788faa](https://github.com/SAP/ui5-linter/commit/3788faa58f4e758bab0ae72e8d985d152ca7f7ff))
+
 ## [0.3.1](https://github.com/SAP/ui5-linter/compare/v0.3.0...v0.3.1) (2024-07-30)
 
 
