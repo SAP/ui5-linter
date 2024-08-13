@@ -18,6 +18,7 @@ const test = anyTest as TestFn<{
 	processErrWrite: SinonStub;
 	formatText: SinonStub;
 	formatJson: SinonStub;
+	formatMarkdown: SinonStub;
 	createExitStub: () => SinonStub;
 	cli: Argv;
 	base: typeof Base;
@@ -47,6 +48,7 @@ test.beforeEach(async (t) => {
 
 	t.context.formatText = sinon.stub().returns("");
 	t.context.formatJson = sinon.stub().returns("");
+	t.context.formatMarkdown = sinon.stub().returns("");
 
 	t.context.base = await esmock.p("../../../src/cli/base.js", {
 		"../../../src/linter/linter.js": {
@@ -65,6 +67,11 @@ test.beforeEach(async (t) => {
 		"../../../src/formatter/json.js": {
 			Json: sinon.stub().callsFake(() => {
 				return {format: t.context.formatJson};
+			}),
+		},
+		"../../../src/formatter/markdown.js": {
+			Markdown: sinon.stub().callsFake(() => {
+				return {format: t.context.formatMarkdown};
 			}),
 		},
 		"node:fs/promises": {
@@ -152,6 +159,15 @@ test.serial("ui5lint --format json ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.true(formatJson.calledOnce, "JSON formatter has been called");
+});
+
+test.serial("ui5lint --format markdown", async (t) => {
+	const {cli, lintProject, formatMarkdown} = t.context;
+
+	await cli.parseAsync(["--format", "markdown"]);
+
+	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(formatMarkdown.calledOnce, "Markdown formatter has been called");
 });
 
 test.serial("Yargs error handling", async (t) => {
