@@ -89,10 +89,51 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
+		} else if (
+			node.parent?.kind !== ts.SyntaxKind.ImportClause &&
+			node.parent?.kind !== ts.SyntaxKind.ImportSpecifier &&
+			node.kind === ts.SyntaxKind.Identifier) {
+			this.analyzeIdentifier(node as ts.Identifier);
+		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
+			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	analyzeIdentifier(node: ts.Identifier) {
+		const type = this.#checker.getTypeAtLocation(node);
+		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
+			return;
+		}
+		const deprecationInfo = this.getDeprecationInfo(type.symbol);
+		if (deprecationInfo) {
+			this.#reporter.addMessage({
+				node,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.text),
+				messageDetails: deprecationInfo.messageDetails,
+			});
+		}
+	}
+
+	analyzeImportSpecifier(node: ts.ImportSpecifier) {
+		const type = this.#checker.getTypeAtLocation(node);
+		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
+			return;
+		}
+		const deprecationInfo = this.getDeprecationInfo(type.symbol);
+		if (deprecationInfo) {
+			this.#reporter.addMessage({
+				node,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.getText()),
+				messageDetails: deprecationInfo.messageDetails,
+			});
+		}
 	}
 
 	analyzeNewExpression(nodeType: ts.Type, node: ts.NewExpression) {
