@@ -318,7 +318,7 @@ function createDefaultExport(factory: ts.NodeFactory, node: ts.Node): ts.Stateme
 				(node as ts.FunctionExpression).body);
 		default:
 			throw new UnsupportedModuleError(
-			`Unable to create default export assignment for node of type ${SyntaxKind[node.kind]} at ` +
-			toPosStr(node));
+				`Unable to create default export assignment for node of type ${SyntaxKind[node.kind]} at ` +
+				toPosStr(node));
 	}
 }

@@ -110,7 +110,7 @@ function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): Require
 				return;
 			default:
 				throw new UnsupportedModuleError(
-				`Unsupported type for argument in sap.ui.define call at index ${idx}: ${SyntaxKind[arg.kind]}`);
+					`Unsupported type for argument in sap.ui.define call at index ${idx}: ${SyntaxKind[arg.kind]}`);
 		}
 	});
 	return args as unknown as RequireCallArgument[];
