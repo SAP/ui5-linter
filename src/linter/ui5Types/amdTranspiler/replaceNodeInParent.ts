@@ -90,8 +90,8 @@ export default function (
 			return replaceInSourceFile(parent as ts.SourceFile, replacement, nodeFactory);
 		default:
 			throw new UnsupportedModuleError(
-			`Unsupported parent node type for replacement operation: ${ts.SyntaxKind[parent.kind]} at ` +
-			`${toPosStr(parent)}`);
+				`Unsupported parent node type for replacement operation: ${ts.SyntaxKind[parent.kind]} at ` +
+				`${toPosStr(parent)}`);
 	}
 }
 

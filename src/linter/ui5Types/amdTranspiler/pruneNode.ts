@@ -148,8 +148,8 @@ function isNodeRemovable(node: ts.Node): boolean {
 			return isRemovableClassDeclaration(node as ts.ClassDeclaration);
 		default:
 			throw new UnsupportedModuleError(
-			`Unsupported parent node type for prune operation: ${SyntaxKind[node.kind]} at ` +
-			`${toPosStr(node)}`);
+				`Unsupported parent node type for prune operation: ${SyntaxKind[node.kind]} at ` +
+				`${toPosStr(node)}`);
 	}
 }
 
