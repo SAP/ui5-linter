@@ -94,8 +94,20 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
+		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
+			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
+			// e.g. `const { Button } = sap.m;`
+			// This is a destructuring assignment and we need to check each property for deprecation
+			this.analyzeObjectBindingPattern(node as ts.ObjectBindingPattern);
+		} else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression &&
+			node.parent?.kind === ts.SyntaxKind.BinaryExpression &&
+			node.parent?.parent?.kind === ts.SyntaxKind.ParenthesizedExpression) {
+			// e.g. `({ Button }) = sap.m;`
+			this.analyzeObjectLiteralExpression(node as ts.ObjectLiteralExpression);
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
+		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
+			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
 		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments && this.#isComponent) {
 			analyzeComponentJson({
 				node: node as ts.ExpressionWithTypeArguments,
@@ -109,6 +121,64 @@ export default class SourceFileLinter {
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	analyzeIdentifier(node: ts.Identifier) {
+		const type = this.#checker.getTypeAtLocation(node);
+		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
+			return;
+		}
+		const deprecationInfo = this.getDeprecationInfo(type.symbol);
+		if (deprecationInfo) {
+			this.#reporter.addMessage({
+				node,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.text),
+				messageDetails: deprecationInfo.messageDetails,
+			});
+		}
+	}
+
+	analyzeImportSpecifier(node: ts.ImportSpecifier) {
+		const type = this.#checker.getTypeAtLocation(node);
+		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
+			return;
+		}
+		const deprecationInfo = this.getDeprecationInfo(type.symbol);
+		if (deprecationInfo) {
+			this.#reporter.addMessage({
+				node,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-deprecated-api"],
+				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.getText()),
+				messageDetails: deprecationInfo.messageDetails,
+			});
+		}
+	}
+
+	analyzeObjectBindingPattern(node: ts.ObjectBindingPattern) {
+		node.elements.forEach((element) => {
+			if (element.kind === ts.SyntaxKind.BindingElement &&
+				element.name.kind === ts.SyntaxKind.Identifier) {
+				this.analyzeIdentifier(element.name);
+			}
+			// TODO: Check whether handling of nested destructuring is required, example:
+			// `const { SomeObject: { SomeOtherObject } } = coreLib;`
+			// Does not cover destructuring with Computed Property Names, e.g.
+			// const propName = "SomeObject"
+			// const {[propName]: SomeVar} = coreLib;
+		});
+	}
+
+	analyzeObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
+		node.properties.forEach((prop) => {
+			if (prop.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
+				this.analyzeIdentifier(prop.name);
+			} else if (prop.kind === ts.SyntaxKind.PropertyAssignment) {
+				this.analyzeIdentifier(prop.name as ts.Identifier);
+			}
+		});
 	}
 
 	analyzeNewExpression(nodeType: ts.Type, node: ts.NewExpression) {
