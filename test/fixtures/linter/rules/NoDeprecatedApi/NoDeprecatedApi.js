@@ -36,8 +36,13 @@ sap.ui.define([
 
 	coreLib.MessageType; // Enum "MessageType" is deprecated
 
-	const {MessageType} = coreLib;
-	MessageType.Error; // TODO detect: Enum "MessageType" is deprecated
+	let {BarColor, MessageType} = coreLib; // Enum "MessageType" is deprecated
+	({MessageType} = coreLib); // Enum "MessageType" is deprecated
+	MessageType.Error;
+
+	let {BarColor, MessageType: mt} = coreLib; // Enum "MessageType" is deprecated
+	({BarColor, MessageType: mt} = coreLib); // Enum "MessageType" is deprecated
+	mt.Error;
 
 	mobileLib.InputType.Date; // Enum value "InputType.Date" is deprecated
 

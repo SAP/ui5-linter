@@ -58,7 +58,10 @@ export function assertExpectedLintResults(
 	t: ExecutionContext, res: LintResult[], basePath: string, filePaths: string[]) {
 	res.forEach((lintResult) => {
 		if (!filePaths.includes(lintResult.filePath)) {
-			t.fail(`Unexpected lint result for file ${lintResult.filePath}. Expected: ${filePaths.join(", ")}`);
+			t.fail(
+				`Unexpected lint result for file ${lintResult.filePath}. Expected: ${filePaths.join(", ")}. ` +
+				`Result: ${JSON.stringify(lintResult)}`
+			);
 		}
 	});
 }
