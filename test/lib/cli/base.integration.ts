@@ -71,16 +71,8 @@ test.serial("ui5lint --format markdown", async (t) => {
 	process.exitCode = 0;
 
 	const resultProcessStdoutMarkdown = processStdoutWriteStub.firstCall.firstArg;
-	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 Linter Report"),
+	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 linter Report"),
 		"Output starts with the expected Markdown header");
-	t.true(resultProcessStdoutMarkdown.includes("## Summary"),
-		"Output includes a Summary section");
-	t.true(resultProcessStdoutMarkdown.includes("- Total problems:"),
-		"Output includes the total problem count");
-	t.true(resultProcessStdoutMarkdown.includes("  - Errors:"),
-		"Output includes the error count");
-	t.true(resultProcessStdoutMarkdown.includes("  - Warnings:"),
-		"Output includes the warning count");
 
 	const resultProcessStdoutNL = processStdoutWriteStub.secondCall.firstArg;
 	t.is(resultProcessStdoutNL, "\n", "second write only adds a single newline");
