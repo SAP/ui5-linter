@@ -1,5 +1,5 @@
 import {graphFromObject} from "@ui5/project/graph";
-import {createReader, createWorkspace, createReaderCollection} from "@ui5/fs/resourceFactory";
+import {createReader, createWorkspace, createReaderCollection, createFilterReader} from "@ui5/fs/resourceFactory";
 import {FilePath, LinterOptions, LintResult} from "./LinterContext.js";
 import lintWorkspace from "./lintWorkspace.js";
 import {taskStart} from "../utils/perf.js";
@@ -8,14 +8,43 @@ import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 import {AbstractReader} from "@ui5/fs";
+import ConfigManager from "../utils/ConfigManager.js";
+import {Minimatch} from "minimatch";
 
 async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
+	let {ignorePattern} = options;
+
+	if (!ignorePattern) {
+		const configMngr = new ConfigManager();
+		const config = await configMngr.getConfiguration();
+		ignorePattern = config.flatMap((item) => item.ignores).filter(($) => $) as string[];
+	}
+
+	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
+
+	const filteredCollection = createFilterReader({
+		reader: resourceReader,
+		callback: (resource) => {
+			if (!miniChecks?.length) {
+				return true;
+			}
+
+			// Minimatch works with FS and relative paths.
+			// So, we need to convert virtual paths to FS paths and
+			// strip the rootDir
+			const resPath = transformVirtualPathToFilePath(
+				resource.getPath(), options.rootDir, "/resources", "test", "/test-resources")
+				.replace(options.rootDir, "");
+
+			return miniChecks.some((check) => !check.match(resPath, true));
+		},
+	});
 
 	const workspace = createWorkspace({
-		reader: resourceReader,
+		reader: filteredCollection,
 	});
 
 	const res = await lintWorkspace(workspace, options);
@@ -24,7 +53,7 @@ async function lint(
 }
 
 export async function lintProject({
-	rootDir, pathsToLint, reportCoverage, includeMessageDetails,
+	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails,
 }: LinterOptions): Promise<LintResult[]> {
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir);
@@ -70,6 +99,7 @@ export async function lintProject({
 		rootDir,
 		namespace: project.getNamespace(),
 		pathsToLint: resolvedFilePaths,
+		ignorePattern,
 		reportCoverage,
 		includeMessageDetails,
 	});
@@ -88,7 +118,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, pathsToLint, namespace, reportCoverage, includeMessageDetails,
+	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails,
 }: LinterOptions): Promise<LintResult[]> {
 	const reader = createReader({
 		fsBasePath: rootDir,
@@ -105,6 +135,7 @@ export async function lintFile({
 		rootDir,
 		namespace,
 		pathsToLint: resolvedFilePaths,
+		ignorePattern,
 		reportCoverage,
 		includeMessageDetails,
 	});
