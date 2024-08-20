@@ -163,11 +163,12 @@ export default class SourceFileLinter {
 				element.name.kind === ts.SyntaxKind.Identifier) {
 				this.analyzeIdentifier(element.name);
 			}
-			// TODO: Check whether handling of nested destructuring is required, example:
-			// `const { SomeObject: { SomeOtherObject } } = coreLib;`
-			// Does not cover destructuring with Computed Property Names, e.g.
-			// const propName = "SomeObject"
-			// const {[propName]: SomeVar} = coreLib;
+			// Currently this lacks support for handling nested destructuring, e.g.
+			//   `const { SomeObject: { SomeOtherObject } } = coreLib;`
+			// Also not covered is destructuring with computed property names, e.g.
+			//   const propName = "SomeObject"
+			//   const {[propName]: SomeVar} = coreLib;
+			// Neither is expected to be relevant in the context of UI5 API usage.
 		});
 	}
 
