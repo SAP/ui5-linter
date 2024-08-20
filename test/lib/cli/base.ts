@@ -105,7 +105,7 @@ test.serial("ui5lint (default) ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined,
+		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined,
 		includeMessageDetails: false, reportCoverage: false,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
@@ -122,7 +122,7 @@ test.serial("ui5lint --file-paths ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: filePaths,
+		rootDir: path.join(process.cwd()), pathsToLint: filePaths, ignorePattern: undefined,
 		includeMessageDetails: false, reportCoverage: false,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
@@ -136,7 +136,7 @@ test.serial("ui5lint --coverage ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined,
+		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined,
 		includeMessageDetails: false, reportCoverage: true,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
@@ -159,6 +159,18 @@ test.serial("ui5lint --format json ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.true(formatJson.calledOnce, "JSON formatter has been called");
+});
+
+test.serial("ui5lint --ignore-pattern ", async (t) => {
+	const {cli, lintProject} = t.context;
+
+	await cli.parseAsync(["--ignore-pattern", "test/**/*"]);
+
+	t.true(lintProject.calledOnce, "Linter is called");
+	t.deepEqual(lintProject.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: ["test/**/*"],
+		includeMessageDetails: false, reportCoverage: false,
+	});
 });
 
 test.serial("ui5lint --format markdown", async (t) => {

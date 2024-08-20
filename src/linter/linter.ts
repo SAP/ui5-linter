@@ -33,8 +33,8 @@ async function lint(
 			}
 
 			// Minimatch works with FS and relative paths.
-			// So, we need to convert virtual paths to FS paths and
-			// strip the rootDir
+			// So, we need to convert virtual paths to absolute
+			// FS paths and strip the rootDir
 			const resPath = transformVirtualPathToFilePath(
 				resource.getPath(), options.rootDir, "/resources", "test", "/test-resources")
 				.replace(options.rootDir, "");
