@@ -3,7 +3,7 @@ sap.ui.define([
 	"sap/ui/table/Table", "sap/ui/table/plugins/MultiSelectionPlugin", "sap/ui/core/Configuration", "sap/m/library"
 ], function(Button, DateTimeInput, includes, Device, coreLib, NavigationHandler, Table, MultiSelectionPlugin, Configuration, mobileLib) {
 
-	var dateTimeInput = new DateTimeInput(); // TODO detect: Control is deprecated
+	var dateTimeInput = new DateTimeInput(); // Control is deprecated
 
 	var btn = new Button({
 		blocked: true, // Property "blocked" is deprecated

@@ -9,7 +9,7 @@ import MultiSelectionPlugin from "sap/ui/table/plugins/MultiSelectionPlugin";
 import Configuration from "sap/ui/core/Configuration";
 import {InputType} from "sap/m/library";
 
-var dateTimeInput = new DateTimeInput(); // TODO detect: Control is deprecated
+var dateTimeInput = new DateTimeInput(); // Control is deprecated
 
 var btn = new Button({
     blocked: true, // Property "blocked" is deprecated
@@ -37,7 +37,7 @@ Device.browser["webview"]; // Property "webview" is deprecated
 
 Configuration.AnimationMode; // Property "AnimationMode" (Enum) is deprecated
 
-MessageType.Error; // TODO detect: Enum "MessageType" is deprecated
+MessageType.Error; // Enum "MessageType" is deprecated
 
 InputType.Date; // Enum value "InputType.Date" is deprecated
 
