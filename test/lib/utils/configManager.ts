@@ -22,10 +22,10 @@ test("Check config file auto discovery", async (t) => {
 
 	const config = await confManager.getConfiguration();
 
-	t.deepEqual(config, {
+	t.deepEqual(config, [{
 		ignores: [
 			"!test/sap/m/visual/Wizard.spec.js",
 			"test/**/*",
 		],
-	}, "The configuration is derived from the discovered configuration file");
+	}], "The configuration is derived from the discovered configuration file");
 });
