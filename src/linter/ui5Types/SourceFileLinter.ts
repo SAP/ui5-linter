@@ -131,13 +131,10 @@ export default class SourceFileLinter {
 		}
 		const deprecationInfo = this.getDeprecationInfo(type.symbol);
 		if (deprecationInfo) {
-			this.#reporter.addMessage({
-				node,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-deprecated-api"],
-				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.text),
-				messageDetails: deprecationInfo.messageDetails,
-			});
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
+				apiName: node.text,
+				details: deprecationInfo.messageDetails,
+			}, node);
 		}
 	}
 
@@ -148,13 +145,10 @@ export default class SourceFileLinter {
 		}
 		const deprecationInfo = this.getDeprecationInfo(type.symbol);
 		if (deprecationInfo) {
-			this.#reporter.addMessage({
-				node,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-deprecated-api"],
-				message: formatMessage(MESSAGES.SHORT__DEPRECATED_API_ACCESS, node.getText()),
-				messageDetails: deprecationInfo.messageDetails,
-			});
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
+				apiName: node.getText(),
+				details: deprecationInfo.messageDetails,
+			}, node);
 		}
 	}
 
