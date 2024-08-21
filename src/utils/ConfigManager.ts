@@ -25,7 +25,7 @@ export default class ConfigManager {
 
 		if (this.#configFile) {
 			const configFilePath = path.resolve(this.#cwd, this.#configFile);
-			config = await import(configFilePath) as UI5LintConfigType;
+			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
 			// Find configuration file
 			({default: config} = await Promise.any(
