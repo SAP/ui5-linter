@@ -15,6 +15,9 @@ sap.ui.define([
 		callback: function(mParams) {}
 	 });
 
+	var getParam = Parameters.get;
+	getParam(); // (deprecated since 1.92) If no parameter is given
+
 	var jsonModel = new JSONModel();
 	jsonModel.loadData("/api/users", undefined, false); // TODO detect: Parameter bAsync is deprecated as of Version 1.107 (default=true)
 
