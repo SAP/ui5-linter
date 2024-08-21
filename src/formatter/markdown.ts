@@ -70,7 +70,7 @@ export class Markdown {
 			`> ${totalErrorCount + totalWarningCount} problems ` +
 			`(${totalErrorCount} errors, ${totalWarningCount} warnings)  \n`;
 		if (totalFatalErrorCount) {
-			summary += `> ${totalFatalErrorCount} fatal errors\n`;
+			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
 		}
 
 		if (findings) {
