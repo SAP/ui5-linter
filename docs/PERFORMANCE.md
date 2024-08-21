@@ -65,6 +65,91 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 
 # Benchmark Runs
 
+## August 21, 2024
+
+* UI5 linter [`v0.3.3`](https://github.com/SAP/ui5-linter/commit/eda26b5eb271fb3cfce711958024ee9176cbbc49)
+* Node.js `v22.5.1`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 574.7 ± 53.3 | 505.9 | 687.8 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.194 ± 0.105 | 2.103 | 2.394 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.361 ± 0.036 | 3.291 | 3.428 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 4.961 ± 0.075 | 4.896 | 5.164 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 30.899 ± 0.159 | 30.701 | 31.158 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 38.262 ± 0.600 | 37.360 | 39.224 |
+
+## August 21, 2024
+
+* UI5 linter [`v0.3.2`](https://github.com/SAP/ui5-linter/commit/5d7de1dadc6da7f21a2ffb9d20e117b924cbe317)
+* Node.js `v22.5.1`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 593.9 ± 41.2 | 523.2 | 654.9 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.144 ± 0.042 | 2.097 | 2.214 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.289 ± 0.081 | 3.215 | 3.424 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.043 ± 0.077 | 4.959 | 5.169 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 31.440 ± 0.279 | 30.883 | 31.833 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 40.402 ± 1.115 | 38.796 | 42.786 |
+
+
 ## June 27, 2024
 
 * UI5 linter [`b34d7e9`](https://github.com/SAP/ui5-linter/commit/b34d7e9)
@@ -186,6 +271,8 @@ Mean [s] | Min [s] | Max [s] |
 
 ```sh
 # <Inside the openui5 repository root>
+git checkout 0efb2cd
+
 cd src/themelib_sap_horizon
 ui5lint
 hyperfine -i --warmup 1 \
@@ -215,10 +302,13 @@ ui5lint
 hyperfine -i --warmup 1 \
 'node $(which ui5lint)' \
 --export-markdown ../../bench-sap.ui.core.md
+
+cd ../..
 ```
 
 ```sh
 # <Inside the openui5-sample-app root>
+git checkout c9a0f7c51
 
 ui5lint
 hyperfine -i --warmup 1 \
