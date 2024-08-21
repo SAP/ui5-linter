@@ -1,4 +1,6 @@
-import path from "node:path";
+import path, {dirname} from "node:path";
+import {fileURLToPath} from "node:url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface UI5LintConfigType {
 	ignores?: string[];
@@ -24,14 +26,16 @@ export default class ConfigManager {
 		let config: UI5LintConfigType | undefined;
 
 		if (this.#configFile) {
-			const configFilePath = path.resolve(this.#cwd, this.#configFile);
+			// Relative paths are needed to make it work on Windows
+			const configFilePath = path.join(path.relative(__dirname, this.#cwd), this.#configFile);
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
 			// Find configuration file
 			({default: config} = await Promise.any(
 				CONFIG_FILENAMES.map(
 					(filename) => {
-						const configFilePath = path.resolve(this.#cwd, filename);
+						// Relative paths are needed to make it work on Windows
+						const configFilePath = path.join(path.relative(__dirname, this.#cwd), filename);
 						return import(configFilePath) as Promise<{default: UI5LintConfigType}>;
 					}))
 				// Promise.any would throw if nothing is found i.e. there's no config file
