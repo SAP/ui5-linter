@@ -27,7 +27,7 @@ export default class ConfigManager {
 
 		if (this.#configFile) {
 			// Relative paths are needed to make it work on Windows
-			const configFilePath = path.join(path.relative(__dirname, this.#cwd), this.#configFile);
+			const configFilePath = path.join(path.relative(__dirname, this.#cwd), this.#configFile).replace(/ts$/, "js");
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
 			// Find configuration file
@@ -35,7 +35,7 @@ export default class ConfigManager {
 				CONFIG_FILENAMES.map(
 					(filename) => {
 						// Relative paths are needed to make it work on Windows
-						const configFilePath = path.join(path.relative(__dirname, this.#cwd), filename);
+						const configFilePath = path.join(path.relative(__dirname, this.#cwd), filename).replace(/ts$/, "js");
 						return import(configFilePath) as Promise<{default: UI5LintConfigType}>;
 					}))
 				// Promise.any would throw if nothing is found i.e. there's no config file
