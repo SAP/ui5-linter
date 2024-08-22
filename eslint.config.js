@@ -117,10 +117,11 @@ export default tseslint.config(
 				},
 			],
 			"no-implicit-coercion": [
-				2,
+				"error",
 				{allow: ["!!"]},
 			],
 			"no-console": "error",
+			"no-eval": "error",
 		},
 	}
 );
