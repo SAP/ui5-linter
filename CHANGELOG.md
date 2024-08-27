@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/SAP/ui5-linter/compare/v0.3.3...v0.3.4) (2024-08-27)
+
+
+### Features
+
+* Add new output format markdown ([#258](https://github.com/SAP/ui5-linter/issues/258)) ([7329058](https://github.com/SAP/ui5-linter/commit/732905881909bb3de57cf068a6a60e43103b0842))
+
 ## [0.3.3](https://github.com/SAP/ui5-linter/compare/v0.3.2...v0.3.3) (2024-08-20)
 
 
