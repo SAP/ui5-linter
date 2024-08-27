@@ -3,6 +3,7 @@ import path from "node:path";
 import {lintProject} from "../linter/linter.js";
 import {Text} from "../formatter/text.js";
 import {Json} from "../formatter/json.js";
+import {Markdown} from "../formatter/markdown.js";
 import {Coverage} from "../formatter/coverage.js";
 import {writeFile} from "node:fs/promises";
 import baseMiddleware from "./middlewares/base.js";
@@ -71,7 +72,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				describe: "Set the output format for the linter result",
 				default: "stylish",
 				type: "string",
-				choices: ["stylish", "json"],
+				choices: ["stylish", "json", "markdown"],
 			})
 			.coerce([
 				// base.js
@@ -132,6 +133,10 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	if (format === "json") {
 		const jsonFormatter = new Json();
 		process.stdout.write(jsonFormatter.format(res, details));
+		process.stdout.write("\n");
+	} else if (format === "markdown") {
+		const markdownFormatter = new Markdown();
+		process.stdout.write(markdownFormatter.format(res, details));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text();

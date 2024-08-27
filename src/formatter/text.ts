@@ -56,17 +56,10 @@ export class Text {
 
 			this.#writeln(chalk.inverse(path.resolve(process.cwd(), filePath)));
 
-			// Group messages by rule
-			const rules = new Map<string, LintMessage[]>();
-			let maxLine = 0; // Needed for formatting
-			let maxColumn = 0; // Needed for formatting
+			// Determine maximum line and column for position formatting
+			let maxLine = 0;
+			let maxColumn = 0;
 			messages.forEach((msg) => {
-				const entry = rules.get(msg.ruleId);
-				if (entry) {
-					entry.push(msg);
-				} else {
-					rules.set(msg.ruleId, [msg]);
-				}
 				if (msg.line && msg.line > maxLine) {
 					maxLine = msg.line;
 				}

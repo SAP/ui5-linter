@@ -55,3 +55,25 @@ test.serial("ui5lint --format json", async (t) => {
 	const resultProcessStdoutNL = processStdoutWriteStub.secondCall.firstArg;
 	t.is(resultProcessStdoutNL, "\n", "second write only adds a single newline");
 });
+
+// New test for Markdown format
+test.serial("ui5lint --format markdown", async (t) => {
+	const {cli, consoleLogStub, processCwdStub, processStdoutWriteStub, processExitStub} = t.context;
+
+	await cli.parseAsync(["--format", "markdown"]);
+
+	t.is(consoleLogStub.callCount, 0, "console.log should not be used");
+	t.true(processCwdStub.callCount > 0, "process.cwd was called");
+	t.is(processStdoutWriteStub.callCount, 2, "process.stdout.write was called twice");
+	t.is(processExitStub.callCount, 0, "process.exit got never called");
+	t.is(process.exitCode, 1, "process.exitCode was set to 1");
+	// cleanup: reset exit code in order not to fail the test (it cannot be stubbed with sinon)
+	process.exitCode = 0;
+
+	const resultProcessStdoutMarkdown = processStdoutWriteStub.firstCall.firstArg;
+	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 linter Report"),
+		"Output starts with the expected Markdown header");
+
+	const resultProcessStdoutNL = processStdoutWriteStub.secondCall.firstArg;
+	t.is(resultProcessStdoutNL, "\n", "second write only adds a single newline");
+});
