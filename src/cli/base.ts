@@ -32,7 +32,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 	builder: function (args: Argv<object>): Argv<LinterArg> {
 		args.usage("Usage: $0 [options]")
 			.option("ignore-pattern", {
-				describe: "Pattern/files that will be ignored for linting. Can be defined also in ui5ling.config.js",
+				describe: "Pattern/files that will be ignored for linting. Can be defined also in ui5linter.config.js",
 				type: "string",
 			})
 			.array("ignore-pattern")
