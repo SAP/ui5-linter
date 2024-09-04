@@ -1,39 +1,23 @@
+import type {MESSAGE_INFO} from "./messages.js";
+
 export const MESSAGES = {
-	SHORT__NO_DIRECT_DATATYPE_ACCESS: "Deprecated access to DataType pseudo module '{0}'",
-	DETAILS__NO_DIRECT_DATATYPE_ACCESS:
-		"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
-
-	SHORT__DEPRECATED_ACCESS_ENUM: "Deprecated access to enum pseudo module '{0}'",
-	DETAILS__DEPRECATED_ACCESS_ENUM:
-		"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
-
-	SHORT__DEPRECATED_PROP_OF_CLASS: "Use of deprecated property '{0}' of class '{1}'",
-
+	// Used by ManifestLinter
 	SHORT__DEPRECATED_PROP: "Use of deprecated property {0}",
 
-	SHORT__DEPRECATED_FUNCTION_ACCESS: "Call to deprecated function {0}",
-
-	SHORT__DEPRECATED_API_ACCESS: "Use of deprecated API '{0}'",
-
-	SHORT__DEPRECATED_PROP_ACCESS: "Access of deprecated property '{0}'",
-
-	SHORT__DEPRECATED_MODULE_IMPORT: "Import of deprecated module '{0}'",
-
+	// Used by ManifestLinter
 	SHORT__DEPRECATED_COMPONENT: "Use of deprecated component '{0}'",
 
-	SHORT__GLOBAL_VAR_ACCESS: "Access of global variable '{0}' ({1})",
-
-	SHORT__LIB_INIT_2: "Call to {0}() must be declared with property {apiVersion: 2}",
-	DETAILS__LIB_INIT_2: "{@link sap.ui.core.Lib.init Lib.init}",
-
+	// Used by DotLibraryLinter, ManifestLinter, YamlLinter
 	SHORT__DEPRECATED_LIBRARY: "Use of deprecated library '{0}'",
 
+	// Used by ManifestLinter
 	SHORT__DEPRECATED_MODEL_TYPE: "Use of deprecated model type '{0}'",
 };
 
 // TODO: Migrate to enum instead of Object/Map
 // Currently, it's done this way to avoid pollution of the test snapshots
 export const RULES = {
+	"ui5-linter-async-component-flags": "ui5-linter-async-component-flags",
 	"ui5-linter-no-deprecated-api": "ui5-linter-no-deprecated-api",
 	"ui5-linter-no-partially-deprecated-api": "ui5-linter-no-partially-deprecated-api",
 	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",
@@ -51,3 +35,15 @@ export function formatMessage(message: string, ...params: string[]) {
 
 	return message;
 }
+
+export type MessageInfo = typeof MESSAGE_INFO[keyof typeof MESSAGE_INFO] & {fatal?: boolean};
+
+type ExtractArgs<F> = F extends (args: infer P) => unknown ? P : never;
+type CombineArgs<M, D> = M & D extends object ? M & D : never;
+
+export type MessageArgs = {
+	[K in keyof typeof MESSAGE_INFO]:
+	CombineArgs<
+		ExtractArgs<typeof MESSAGE_INFO[K]["message"]>, ExtractArgs<typeof MESSAGE_INFO[K]["details"]>
+	>;
+};

@@ -12,13 +12,15 @@ import LinterContext, {
 	LintMessage, CoverageInfo, LintMessageSeverity,
 	PositionInfo, PositionRange, ResourcePath,
 } from "../LinterContext.js";
-
-interface ReporterMessage extends LintMessage {
-	node: ts.Node;
-}
+import {MESSAGE, MESSAGE_INFO} from "../messages.js";
+import {MessageArgs} from "../linterReporting.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
+}
+
+function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | undefined): node is ts.Node {
+	return !!node && "getSourceFile" in node && typeof node.getSourceFile === "function";
 }
 
 export default class SourceFileReporter {
@@ -29,14 +31,17 @@ export default class SourceFileReporter {
 	#traceMap: TraceMap | undefined;
 	#messages: LintMessage[] = [];
 	#coverageInfo: CoverageInfo[] = [];
+	#messageDetails: boolean;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined
+		sourceFile: ts.SourceFile, sourceMap: string | undefined,
+		messageDetails: boolean
 	) {
 		this.#context = context;
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
+		this.#messageDetails = messageDetails;
 		if (sourceMap) {
 			this.#traceMap = new TraceMap(sourceMap);
 		}
@@ -46,9 +51,27 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	addMessage({node, message, messageDetails, severity, ruleId, fatal = undefined}: ReporterMessage) {
-		if (fatal && severity !== LintMessageSeverity.Error) {
-			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node): void;
+	addMessage<M extends MESSAGE>(id: M, node: ts.Node): void;
+	addMessage<M extends MESSAGE>(
+		id: M, argsOrNode?: MessageArgs[M] | ts.Node, node?: ts.Node
+	) {
+		if (!argsOrNode) {
+			throw new Error("Invalid arguments: Missing second argument");
+		}
+		let args: MessageArgs[M];
+		if (isTsNode(argsOrNode)) {
+			node = argsOrNode;
+			args = null as unknown as MessageArgs[M];
+		} else if (!node) {
+			throw new Error("Invalid arguments: Missing 'node'");
+		} else {
+			args = argsOrNode;
+		}
+
+		const messageInfo = MESSAGE_INFO[id];
+		if (!messageInfo) {
+			throw new Error(`Invalid message id '${id}'`);
 		}
 
 		let line = 1, column = 1;
@@ -61,17 +84,30 @@ export default class SourceFileReporter {
 			// endColumn = end.column + 1;
 		}
 
+		const messageFunc = messageInfo.message as (args: MessageArgs[M]) => string;
+
 		const msg: LintMessage = {
-			ruleId,
-			severity,
-			fatal,
+			ruleId: messageInfo.ruleId,
+			severity: messageInfo.severity,
 			line,
 			column,
-			message,
+			message: messageFunc(args),
 		};
 
-		if (messageDetails) {
-			msg.messageDetails = resolveLinks(messageDetails);
+		if (this.#messageDetails) {
+			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string | undefined;
+			const details = detailsFunc(args);
+			if (details) {
+				msg.messageDetails = resolveLinks(details);
+			}
+		}
+
+		if ("fatal" in messageInfo && typeof messageInfo.fatal === "boolean") {
+			msg.fatal = messageInfo.fatal;
+		}
+
+		if (msg.fatal && msg.severity !== LintMessageSeverity.Error) {
+			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
 		}
 
 		this.#messages.push(msg);
