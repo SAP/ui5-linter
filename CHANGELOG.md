@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/SAP/ui5-linter/compare/v0.3.4...v0.3.5) (2024-09-04)
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.20 ([ee3695f](https://github.com/SAP/ui5-linter/commit/ee3695f74b08f075c34fff8115d9452b0f468097))
+
 ## [0.3.4](https://github.com/SAP/ui5-linter/compare/v0.3.3...v0.3.4) (2024-08-27)
 
 
