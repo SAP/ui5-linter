@@ -246,9 +246,9 @@ export default class SourceFileLinter {
 		return deprecatedTag.text?.reduce((acc, text) => acc + text.text, "").split("\n\n")[0] ?? "";
 	}
 
-	getDeprecationInfo(symbol: ts.Symbol | undefined): DeprecationInfo | null {
+	getDeprecationInfo(symbol: ts.Symbol | undefined, signature?: ts.Signature): DeprecationInfo | null {
 		if (symbol && this.isSymbolOfUi5Type(symbol)) {
-			const jsdocTags = symbol.getJsDocTags(this.#checker);
+			const jsdocTags = (signature ?? symbol).getJsDocTags(this.#checker);
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 			if (deprecatedTag) {
 				const deprecationInfo: DeprecationInfo = {
@@ -313,7 +313,9 @@ export default class SourceFileLinter {
 			}
 		}
 
-		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
+		const signature = this.#checker.getResolvedSignature(node);
+		const deprecationInfo = this.getDeprecationInfo(exprType.symbol, signature);
+
 		if (!deprecationInfo) {
 			return;
 		}
@@ -610,6 +612,20 @@ export default class SourceFileLinter {
 		if (ts.isCallExpression(node.parent)) {
 			// TODO: Swap with call expression check?
 			return; // Already analyzed in context of call expression
+		}
+
+		const nodeType = this.#checker.getTypeAtLocation(node);
+		const signatures = nodeType.getCallSignatures();
+		if (signatures) {
+			const allSignaturesDeprecated = signatures.every((signature) => {
+				signature.getJsDocTags().some((tag) => {
+					return tag.name === "deprecated";
+				});
+			});
+
+			if (!allSignaturesDeprecated) {
+				return;
+			}
 		}
 
 		const deprecationInfo = this.getDeprecationInfoForAccess(node);
