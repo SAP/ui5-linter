@@ -7,7 +7,7 @@ import path from "node:path";
 import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
-import {AbstractReader} from "@ui5/fs";
+import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
@@ -25,9 +25,16 @@ async function lint(
 
 	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
 
+	const graph = await getProjectGraph(options.rootDir);
+	const project = graph.getRoot();
+	const fsBasePath = project.getSourcePath();
+	const fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
+	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
+
 	const filteredCollection = createFilterReader({
 		reader: resourceReader,
-		callback: (resource) => {
+		callback: (resource: Resource) => {
 			if (!miniChecks?.length) {
 				return true;
 			}
@@ -36,8 +43,8 @@ async function lint(
 			// So, we need to convert virtual paths to absolute
 			// FS paths and strip the rootDir
 			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), options.rootDir, "/resources", "test", "/test-resources")
-				.replace(options.rootDir, "");
+				resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources")
+				.replace(relFsBasePath, "");
 
 			return miniChecks.some((check) => !check.match(resPath, true));
 		},
