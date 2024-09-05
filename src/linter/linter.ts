@@ -24,12 +24,19 @@ async function lint(
 
 	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
 
-	// const graph = await getProjectGraph(options.rootDir);
-	// const project = graph.getRoot();
-	// const fsBasePath = project.getSourcePath();
-	// const fsBasePathTest = path.join(project.getRootPath(), project._testPath);
-	// const relFsBasePath = path.relative(options.rootDir, fsBasePath);
-	// const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
+	let fsBasePath = "";
+	let fsBasePathTest = "";
+	try {
+		const graph = await getProjectGraph(options.rootDir);
+		const project = graph.getRoot();
+		fsBasePath = project.getSourcePath();
+		fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+	} catch {
+		// Project is not resolved i.e. in tests
+	}
+
+	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
+	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
 
 	const filteredCollection = createFilterReader({
 		reader: resourceReader,
@@ -40,15 +47,8 @@ async function lint(
 
 			// Minimatch works with FS and relative paths.
 			// So, we need to convert virtual paths to absolute
-			// FS paths and strip the rootDir
-			// const resPath = transformVirtualPathToFilePath(
-			// 	resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources")
-			// 	.replace(relFsBasePath, "");
 			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), options.rootDir, "/resources", "test", "/test-resources")
-				.replace(options.rootDir, "");
-
-			// const resPath = transformVirtualPathToFilePath(resource.getPath(), "", "/");
+				resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources");
 
 			return miniChecks.some((check) => !check.match(resPath, true));
 		},
