@@ -30,9 +30,8 @@ export default class ConfigManager {
 			fileName);
 	}
 
-	async getConfiguration(): Promise<UI5LintConfigType[]> {
-		const configs: UI5LintConfigType[] = [];
-		let config: UI5LintConfigType | undefined;
+	async getConfiguration(): Promise<UI5LintConfigType> {
+		let config = {} as UI5LintConfigType;
 
 		if (this.#configFile) {
 			// Relative paths are needed to make it work on Windows
@@ -48,15 +47,9 @@ export default class ConfigManager {
 						return import(configFilePath) as Promise<{default: UI5LintConfigType}>;
 					}))
 				// Promise.any would throw if nothing is found i.e. there's no config file
-				.catch(() => ({default: undefined})));
+				.catch(() => ({default: {}})));
 		}
 
-		if (Array.isArray(config)) {
-			configs.push(...config);
-		} else if (config) {
-			configs.push(config);
-		}
-
-		return configs;
+		return config;
 	}
 }

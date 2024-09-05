@@ -19,8 +19,10 @@ async function lint(
 
 	const configMngr = new ConfigManager();
 	const config = await configMngr.getConfiguration();
-	ignorePattern = ignorePattern ?? [];
-	ignorePattern = [...config.flatMap((item) => item.ignores).filter(($) => $) as string[], ...ignorePattern];
+	ignorePattern = [
+		...(config.ignores ?? []),
+		...(ignorePattern ?? []),
+	].filter(($) => $);
 
 	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
 
