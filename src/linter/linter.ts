@@ -15,9 +15,14 @@ async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	const {ignorePattern} = options;
+	const {ignorePattern, configPath} = options;
 
-	const ignoresReader = await resolveIgnoresReader(ignorePattern, options.rootDir, resourceReader);
+	const ignoresReader = await resolveIgnoresReader(
+		ignorePattern,
+		options.rootDir,
+		resourceReader,
+		configPath
+	);
 
 	const workspace = createWorkspace({
 		reader: ignoresReader,
@@ -29,7 +34,7 @@ async function lint(
 }
 
 export async function lintProject({
-	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails,
+	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails, configPath,
 }: LinterOptions): Promise<LintResult[]> {
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir);
@@ -78,6 +83,7 @@ export async function lintProject({
 		ignorePattern,
 		reportCoverage,
 		includeMessageDetails,
+		configPath,
 	});
 
 	const relFsBasePath = path.relative(rootDir, fsBasePath);
@@ -94,7 +100,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails,
+	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath,
 }: LinterOptions): Promise<LintResult[]> {
 	const reader = createReader({
 		fsBasePath: rootDir,
@@ -114,6 +120,7 @@ export async function lintFile({
 		ignorePattern,
 		reportCoverage,
 		includeMessageDetails,
+		configPath,
 	});
 
 	res.forEach((result) => {
@@ -307,7 +314,8 @@ function isFileIncluded(file: string, patterns: string[]) {
 export async function resolveIgnoresReader(
 	ignorePattern: string[] | undefined,
 	projectRootDir: string,
-	resourceReader: AbstractReader) {
+	resourceReader: AbstractReader,
+	configPath?: string) {
 	let fsBasePath = "";
 	let fsBasePathTest = "";
 	let virBasePath = "/resources/";
@@ -332,7 +340,7 @@ export async function resolveIgnoresReader(
 	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(projectRootDir, fsBasePathTest) : undefined;
 
-	const configMngr = new ConfigManager(projectRootDir);
+	const configMngr = new ConfigManager(projectRootDir, configPath);
 	const config = await configMngr.getConfiguration();
 	ignorePattern = [
 		...(config.ignores ?? []),

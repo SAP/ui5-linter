@@ -104,6 +104,15 @@ Pattern/files that will be ignored during linting. Can also be defined in `ui5li
 ui5lint --ignore-pattern "webapp/thirdparty/**"
 ```
 
+#### `--config`
+
+Load a custom config by relative file path (default: `./ui5lint.config.js`).
+
+**Example:**
+```sh
+ui5lint --config ./ui5lint-custom.config.js
+```
+
 ## Configuration
 
 The UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 

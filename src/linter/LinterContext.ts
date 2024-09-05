@@ -62,6 +62,7 @@ export interface LinterOptions {
 	ignorePattern?: string[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
+	configPath?: string;
 }
 
 export interface LinterParameters {

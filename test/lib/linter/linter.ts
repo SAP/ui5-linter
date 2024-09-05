@@ -127,3 +127,18 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
+
+test.serial("lint: All files of com.ui5.troublesome.app with custom config", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		pathsToLint: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+		configPath: path.join(projectPath, "ui5lint-custom.config.cjs"),
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
