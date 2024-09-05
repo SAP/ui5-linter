@@ -42,7 +42,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `572` (2.4 MB)
-* Latest Result: `1308 problems (1308 errors, 0 warnings)`
+* Latest Result: `1313 problems (1313 errors, 0 warnings)`
 
 ## Large library: OpenUI5 `sap.m`
 
@@ -51,8 +51,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `5609` (25.67 MB)
-* Latest Result: `11946 problems (11945 errors, 1 warnings)`
-
+* Latest Result: `12053 problems (12053 errors, 1 warnings)`
 
 ## Large library: OpenUI5 `sap.ui.core`
 
@@ -61,9 +60,51 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `4950` (45 MB)
-* Latest Result: `4844 problems (4838 errors, 6 warnings)` + `2 fatal errors`
+* Latest Result: `5035 problems (5029 errors, 6 warnings)` + `2 fatal errors`
 
 # Benchmark Runs
+
+## September 05, 2024
+
+* UI5 linter [`v0.3.5`](https://github.com/SAP/ui5-linter/commit/4cdb94b1be12595d34f56b12e3e33e8a6d383d86)
+* Node.js `v22.5.1`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 546.5 ± 12.8 | 523.8 | 560.8 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.057 ± 0.033 | 2.010 | 2.100 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.309 ± 0.026 | 3.283 | 3.351 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.177 ± 0.092 | 5.093 | 5.426 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 32.673 ± 0.886 | 31.707 | 34.514 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 38.925 ± 0.649 | 38.206 | 39.781 |
 
 ## August 21, 2024
 
