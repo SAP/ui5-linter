@@ -17,20 +17,19 @@ async function lint(
 	const lintEnd = taskStart("Linting");
 	let {ignorePattern} = options;
 
-	if (!ignorePattern) {
-		const configMngr = new ConfigManager();
-		const config = await configMngr.getConfiguration();
-		ignorePattern = config.flatMap((item) => item.ignores).filter(($) => $) as string[];
-	}
+	const configMngr = new ConfigManager();
+	const config = await configMngr.getConfiguration();
+	ignorePattern = ignorePattern ?? [];
+	ignorePattern = [...config.flatMap((item) => item.ignores).filter(($) => $) as string[], ...ignorePattern];
 
 	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
 
-	const graph = await getProjectGraph(options.rootDir);
-	const project = graph.getRoot();
-	const fsBasePath = project.getSourcePath();
-	const fsBasePathTest = path.join(project.getRootPath(), project._testPath);
-	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
-	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
+	// const graph = await getProjectGraph(options.rootDir);
+	// const project = graph.getRoot();
+	// const fsBasePath = project.getSourcePath();
+	// const fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+	// const relFsBasePath = path.relative(options.rootDir, fsBasePath);
+	// const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
 
 	const filteredCollection = createFilterReader({
 		reader: resourceReader,
@@ -42,9 +41,14 @@ async function lint(
 			// Minimatch works with FS and relative paths.
 			// So, we need to convert virtual paths to absolute
 			// FS paths and strip the rootDir
+			// const resPath = transformVirtualPathToFilePath(
+			// 	resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources")
+			// 	.replace(relFsBasePath, "");
 			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources")
-				.replace(relFsBasePath, "");
+				resource.getPath(), options.rootDir, "/resources", "test", "/test-resources")
+				.replace(options.rootDir, "");
+
+			// const resPath = transformVirtualPathToFilePath(resource.getPath(), "", "/");
 
 			return miniChecks.some((check) => !check.match(resPath, true));
 		},
