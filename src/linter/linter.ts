@@ -26,11 +26,20 @@ async function lint(
 
 	let fsBasePath = "";
 	let fsBasePathTest = "";
+	let virBasePath = "/resources/";
+	let virBasePathTest = "/test-resources/";
 	try {
 		const graph = await getProjectGraph(options.rootDir);
 		const project = graph.getRoot();
 		fsBasePath = project.getSourcePath();
 		fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+
+		if (!project._isSourceNamespaced) {
+			// Ensure the virtual filesystem includes the project namespace to allow relative imports
+			// of framework resources from the project
+			virBasePath += project.getNamespace() + "/";
+			virBasePathTest += project.getNamespace() + "/";
+		}
 	} catch {
 		// Project is not resolved i.e. in tests
 	}
@@ -48,7 +57,7 @@ async function lint(
 			// Minimatch works with FS and relative paths.
 			// So, we need to convert virtual paths to absolute
 			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), relFsBasePath, "/resources", relFsBasePathTest, "/test-resources");
+				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
 
 			return miniChecks.some((check) => !check.match(resPath, true));
 		},
