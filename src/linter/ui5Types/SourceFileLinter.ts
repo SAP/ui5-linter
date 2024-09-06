@@ -92,6 +92,8 @@ export default class SourceFileLinter {
 			// Check for sap/ui/core/theming/Parameters.get usages
 			this.analyzeParametersGetCall(node as ts.CallExpression);
 			this.analyzeCreateComponentCall(node as ts.CallExpression);
+			this.analyzeJsonModelLoadDataCall(node as ts.CallExpression);
+			this.analyzeOdataModelV2CreateEntry(node as ts.CallExpression);
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 			node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -495,7 +497,7 @@ export default class SourceFileLinter {
 			return;
 		}
 		const firstArg = node.arguments[0];
-		let asyncFalseFound = false;
+		let asyncFalseNode;
 		for (const prop of firstArg.properties) {
 			if (!ts.isPropertyAssignment(prop)) {
 				continue;
@@ -504,18 +506,116 @@ export default class SourceFileLinter {
 				continue;
 			}
 			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-				asyncFalseFound = true;
+				asyncFalseNode = prop;
 				break;
 			}
 		}
 
-		if (asyncFalseFound) {
+		if (asyncFalseNode) {
 			this.#reporter.addMessage({
-				node,
+				node: asyncFalseNode,
 				severity: LintMessageSeverity.Error,
 				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message: "Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component.createComponent'",
-				messageDetails: this.#messageDetails ? "" : undefined,
+				message: "Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'",
+				messageDetails: this.#messageDetails ?
+					"Property 'async' must be either omitted or set to true" :
+					undefined,
+			});
+		}
+	}
+
+	analyzeOdataModelV2CreateEntry(node: ts.CallExpression) {
+		if (!ts.isIdentifier(node.expression) &&
+			!ts.isPropertyAccessExpression(node.expression) &&
+			!ts.isElementAccessExpression(node.expression)) {
+			return;
+		}
+
+		const nodeExp = node.expression;
+		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "createEntry") {
+			return;
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/model/odata/v2/ODataModel") {
+			return;
+		}
+
+		if (!node.arguments.length || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
+			return;
+		}
+		const secondArg = node.arguments[1];
+		let batchGroupId;
+		for (const prop of secondArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "batchGroupId") {
+				batchGroupId = prop;
+			}
+		}
+
+		if (batchGroupId) {
+			this.#reporter.addMessage({
+				node: batchGroupId,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+				message:
+					"Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'",
+				messageDetails: this.#messageDetails ? "Use parameter 'groupId' instead" : undefined,
+			});
+		}
+	}
+
+	analyzeJsonModelLoadDataCall(node: ts.CallExpression) {
+		if (!ts.isIdentifier(node.expression) &&
+			!ts.isPropertyAccessExpression(node.expression) &&
+			!ts.isElementAccessExpression(node.expression)) {
+			return;
+		}
+
+		const nodeExp = node.expression;
+		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "loadData") {
+			return;
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/model/json/JSONModel") {
+			return;
+		}
+
+		if (!node.arguments.length || node.arguments.length < 2) {
+			return;
+		}
+
+		const asyncArg = node.arguments[2];
+		if (asyncArg.kind === ts.SyntaxKind.FalseKeyword) {
+			this.#reporter.addMessage({
+				node: asyncArg,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+				message: "Usage of deprecated value for parameter 'bAsync' of 'sap/ui/model/json/JSONModel#loadData'",
+				messageDetails: this.#messageDetails ?
+					"Parameter 'bAsync' must be either omitted or set to true" :
+					undefined,
+			});
+		}
+
+		if (node.arguments.length < 5) {
+			return;
+		}
+		const cacheArg = node.arguments[5];
+		if (cacheArg.kind === ts.SyntaxKind.FalseKeyword) {
+			this.#reporter.addMessage({
+				node: cacheArg,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+				message: "Usage of deprecated value for parameter 'bCache' of 'sap/ui/model/json/JSONModel#loadData'",
+				messageDetails: this.#messageDetails ?
+					"Parameter 'bCache' must be either omitted or set to true" :
+					undefined,
 			});
 		}
 	}
