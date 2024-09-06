@@ -3,7 +3,8 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/odata/v4/ODataModel",
 	"sap/ui/model/odata/v2/ODataModel"
-], function(Parameters, JSONModel, ODataModelV4, ODataModelV2) {
+	"sap/ui/core/Component"
+], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component) {
 
 	Parameters.get(); // (deprecated since 1.92) If no parameter is given
 	Parameters.get("sapUiParam1"); // (deprecated since 1.94) If a string is given as first parameter
@@ -29,6 +30,29 @@ sap.ui.define([
 	v2Model.createEntry("somePath", {
 		batchGroupId: "id-123", // TODO detect: Deprecated - use groupId instead
 		properties: ["property1", "property2"] // TODO detect: Passing a list of property names is deprecated since 1.120; pass the initial values as an object instead
+	});
+
+	Component.create({
+		name: "my.comp",
+		url: "find/my/comp/here",
+		id: "myCompId1"
+	}).then(function(oComponent) {
+		oComponent.createComponent({
+			usage: "myUsage",
+			id: "myId",
+			async: false, // Deprecated: "async" must be true or omitted
+		});
+		// Negative test: No async flag will default to true
+		oComponent.createComponent({
+			usage: "myUsage",
+			id: "myId",
+		});
+		// Negative test: async true is correct
+		oComponent.createComponent({
+			usage: "myUsage",
+			id: "myId",
+			async: true,
+		});
 	});
 
 });

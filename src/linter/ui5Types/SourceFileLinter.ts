@@ -91,6 +91,7 @@ export default class SourceFileLinter {
 			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 			// Check for sap/ui/core/theming/Parameters.get usages
 			this.analyzeParametersGetCall(node as ts.CallExpression);
+			this.analyzeCreateComponentCall(node as ts.CallExpression);
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 			node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -470,6 +471,53 @@ export default class SourceFileLinter {
 			message: "Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'",
 			messageDetails: this.#messageDetails ? "" : undefined,
 		});
+	}
+
+	analyzeCreateComponentCall(node: ts.CallExpression) {
+		if (!ts.isIdentifier(node.expression) &&
+			!ts.isPropertyAccessExpression(node.expression) &&
+			!ts.isElementAccessExpression(node.expression)) {
+			return;
+		}
+
+		const nodeExp = node.expression;
+		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "createComponent") {
+			return;
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Component") {
+			return;
+		}
+
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+		const firstArg = node.arguments[0];
+		let asyncFalseFound = false;
+		for (const prop of firstArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() !== "async") {
+				continue;
+			}
+			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+				asyncFalseFound = true;
+				break;
+			}
+		}
+
+		if (asyncFalseFound) {
+			this.#reporter.addMessage({
+				node,
+				severity: LintMessageSeverity.Error,
+				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+				message: "Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component.createComponent'",
+				messageDetails: this.#messageDetails ? "" : undefined,
+			});
+		}
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
