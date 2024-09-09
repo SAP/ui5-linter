@@ -32,7 +32,7 @@ async function lint(
 		const graph = await getProjectGraph(options.rootDir);
 		const project = graph.getRoot();
 		fsBasePath = project.getSourcePath();
-		fsBasePathTest = path.join(project.getRootPath(), project._testPath);
+		fsBasePathTest = path.join(project.getRootPath(), project._testPath ?? "test");
 
 		if (!project._isSourceNamespaced) {
 			// Ensure the virtual filesystem includes the project namespace to allow relative imports
@@ -47,21 +47,19 @@ async function lint(
 	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
 
-	const filteredCollection = createFilterReader({
-		reader: resourceReader,
-		callback: (resource: Resource) => {
-			if (!ignorePattern?.length) {
-				return true;
-			}
+	const filteredCollection = !ignorePattern?.length ?
+		resourceReader :
+		createFilterReader({
+			reader: resourceReader,
+			callback: (resource: Resource) => {
+				// Minimatch works with FS and relative paths.
+				// So, we need to convert virtual paths to fs
+				const resPath = transformVirtualPathToFilePath(
+					resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
 
-			// Minimatch works with FS and relative paths.
-			// So, we need to convert virtual paths to fs
-			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
-
-			return isFileIncluded(resPath, ignorePattern);
-		},
-	});
+				return isFileIncluded(resPath, ignorePattern);
+			},
+		});
 
 	const workspace = createWorkspace({
 		reader: filteredCollection,
