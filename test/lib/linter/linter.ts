@@ -82,6 +82,24 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		pathsToLint: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+		ignorePattern: [
+			"src/**/*",
+			"!src/main/**/*",
+		],
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: All files of library with sap.f namespace", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "sap.f");
 	const {lintProject} = t.context;
