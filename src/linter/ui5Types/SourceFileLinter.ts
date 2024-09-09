@@ -288,7 +288,7 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		this.#analyzeLibInitCall(node, exprType); // Check for sap/ui/core/Lib.init usages
+		this.#analyzeLibInitCall(node, exprNode, exprType); // Check for sap/ui/core/Lib.init usages
 		// Check for partially deprecated calls
 		this.#analyzeParametersGetCall(node, exprType);
 		this.#analyzeCreateComponentCall(node, exprType);
@@ -359,7 +359,10 @@ export default class SourceFileLinter {
 		return parent;
 	}
 
-	#analyzeLibInitCall(node: ts.CallExpression, nodeType: ts.Type) {
+	#analyzeLibInitCall(
+		node: ts.CallExpression,
+		exprNode: ts.CallExpression | ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.Identifier,
+		nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
 			return;
 		}
@@ -368,7 +371,6 @@ export default class SourceFileLinter {
 		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
 			return;
 		}
-		const nodeExp = node.expression;
 
 		const initArg = node?.arguments[0] &&
 			ts.isObjectLiteralExpression(node.arguments[0]) &&
@@ -395,10 +397,10 @@ export default class SourceFileLinter {
 
 		if (nodeToHighlight) {
 			let importedVarName: string;
-			if (ts.isIdentifier(nodeExp)) {
-				importedVarName = nodeExp.getText();
+			if (ts.isIdentifier(exprNode)) {
+				importedVarName = exprNode.getText();
 			} else {
-				importedVarName = nodeExp.expression.getText() + ".init";
+				importedVarName = exprNode.expression.getText() + ".init";
 			}
 
 			this.#reporter.addMessage(MESSAGE.LIB_INIT_API_VERSION, {
