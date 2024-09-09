@@ -15,6 +15,11 @@ export enum MESSAGE {
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
+	PARTIALLY_DEPRECATED_PARAMETERS_GET,
+	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
+	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
+	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
+	PARTIALLY_DEPRECATED_CORE_ROUTER,
 }
 export const MESSAGE_INFO = {
 
@@ -143,6 +148,57 @@ export const MESSAGE_INFO = {
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
 		details: () => undefined,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
+		details: () => `{@link sap.ui.core.theming.Parameters#sap.ui.core.theming.Parameters.get Parameters.get}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
+		details: () => `Property 'async' must be either omitted or set to true. ` +
+		`{@link sap.ui.core.Component#createComponent See API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
+		details: () => `Use parameter 'groupId' instead. ` +
+		`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: ({paramName}: {paramName: string}) =>
+			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/model/json/JSONModel#loadData'`,
+		details: ({paramName}: {paramName: string}) =>
+			`Parameter '${paramName}' must be either omitted or set to true. ` +
+			`{@link sap.ui.model.json.JSONModel#loadData See API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated value for parameter 'oConfig.async' of constructor of 'sap/ui/core/Router'`,
+		details: () =>
+			`Parameter 'oConfig.async' must be set to true. ` +
+			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
 	},
 
 } as const;

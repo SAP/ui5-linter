@@ -80,20 +80,11 @@ export default class SourceFileLinter {
 
 	visitNode(node: ts.Node) {
 		if (node.kind === ts.SyntaxKind.NewExpression) { // e.g. "new Button({\n\t\t\t\tblocked: true\n\t\t\t})"
-			const nodeType = this.#checker.getTypeAtLocation(node); // checker.getContextualType(node);
-			if (nodeType.symbol && this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
-				this.analyzeNewExpression(nodeType, node as ts.NewExpression);
-			}
+			this.analyzeNewExpression(node as ts.NewExpression);
 		} else if (node.kind === ts.SyntaxKind.CallExpression) { // ts.isCallLikeExpression too?
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
-			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
-			// Check for sap/ui/core/theming/Parameters.get usages
-			this.analyzeParametersGetCall(node as ts.CallExpression);
-			this.analyzeCreateComponentCall(node as ts.CallExpression);
-			this.analyzeJsonModelLoadDataCall(node as ts.CallExpression);
-			this.analyzeOdataModelV2CreateEntry(node as ts.CallExpression);
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 			node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -182,8 +173,14 @@ export default class SourceFileLinter {
 		});
 	}
 
-	analyzeNewExpression(nodeType: ts.Type, node: ts.NewExpression) {
+	analyzeNewExpression(node: ts.NewExpression) {
+		const nodeType = this.#checker.getTypeAtLocation(node); // checker.getContextualType(node);
+		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
+			return;
+		}
 		const classType = this.#checker.getTypeAtLocation(node.expression);
+
+		this.analyzeNewCoreRouter(node, classType);
 
 		// There can be multiple and we need to find the right one
 		const [constructSignature] = classType.getConstructSignatures();
@@ -283,13 +280,20 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		if (!ts.isPropertyAccessExpression(exprNode) &&
-			!ts.isElementAccessExpression(exprNode) &&
-			!ts.isIdentifier(exprNode) &&
+		if (!ts.isPropertyAccessExpression(exprNode) && // Lib.init()
+			!ts.isElementAccessExpression(exprNode) && // Lib["init"]()
+			!ts.isIdentifier(exprNode) && // Assignment `const LibInit = Library.init` and destructuring
 			!ts.isCallExpression(exprNode)) {
 			// TODO: Transform into coverage message if it's really ok not to handle this
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
+
+		this.#analyzeLibInitCall(node, exprType); // Check for sap/ui/core/Lib.init usages
+		// Check for partially deprecated calls
+		this.#analyzeParametersGetCall(node, exprType);
+		this.#analyzeCreateComponentCall(node, exprType);
+		this.#analyzeJsonModelLoadDataCall(node, exprType);
+		this.#analyzeOdataModelV2CreateEntry(node, exprType);
 
 		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
 		if (!deprecationInfo) {
@@ -354,15 +358,7 @@ export default class SourceFileLinter {
 		return parent;
 	}
 
-	analyzeLibInitCall(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) && // Assignment `const LibInit = Library.init` and destructuring
-			!ts.isPropertyAccessExpression(node.expression) && /* Lib.init() */
-			!ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+	#analyzeLibInitCall(node: ts.CallExpression, nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
 			return;
 		}
@@ -371,6 +367,7 @@ export default class SourceFileLinter {
 		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
 			return;
 		}
+		const nodeExp = node.expression;
 
 		const initArg = node?.arguments[0] &&
 			ts.isObjectLiteralExpression(node.arguments[0]) &&
@@ -443,15 +440,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	analyzeParametersGetCall(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) &&
-			!ts.isPropertyAccessExpression(node.expression) &&
-			!ts.isElementAccessExpression(node.expression)) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+	#analyzeParametersGetCall(node: ts.CallExpression, nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "get") {
 			return;
 		}
@@ -466,24 +455,10 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		this.#reporter.addMessage({
-			node,
-			severity: LintMessageSeverity.Error,
-			ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-			message: "Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'",
-			messageDetails: this.#messageDetails ? "" : undefined,
-		});
+		this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET, node);
 	}
 
-	analyzeCreateComponentCall(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) &&
-			!ts.isPropertyAccessExpression(node.expression) &&
-			!ts.isElementAccessExpression(node.expression)) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+	#analyzeCreateComponentCall(node: ts.CallExpression, nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "createComponent") {
 			return;
 		}
@@ -512,27 +487,11 @@ export default class SourceFileLinter {
 		}
 
 		if (asyncFalseNode) {
-			this.#reporter.addMessage({
-				node: asyncFalseNode,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message: "Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'",
-				messageDetails: this.#messageDetails ?
-					"Property 'async' must be either omitted or set to true" :
-					undefined,
-			});
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, asyncFalseNode);
 		}
 	}
 
-	analyzeOdataModelV2CreateEntry(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) &&
-			!ts.isPropertyAccessExpression(node.expression) &&
-			!ts.isElementAccessExpression(node.expression)) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+	#analyzeOdataModelV2CreateEntry(node: ts.CallExpression, nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "createEntry") {
 			return;
 		}
@@ -557,26 +516,11 @@ export default class SourceFileLinter {
 		}
 
 		if (batchGroupId) {
-			this.#reporter.addMessage({
-				node: batchGroupId,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message:
-					"Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'",
-				messageDetails: this.#messageDetails ? "Use parameter 'groupId' instead" : undefined,
-			});
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, batchGroupId);
 		}
 	}
 
-	analyzeJsonModelLoadDataCall(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) &&
-			!ts.isPropertyAccessExpression(node.expression) &&
-			!ts.isElementAccessExpression(node.expression)) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
+	#analyzeJsonModelLoadDataCall(node: ts.CallExpression, nodeType: ts.Type) {
 		if (!nodeType.symbol || nodeType.symbol.getName() !== "loadData") {
 			return;
 		}
@@ -592,15 +536,9 @@ export default class SourceFileLinter {
 
 		const asyncArg = node.arguments[2];
 		if (asyncArg.kind === ts.SyntaxKind.FalseKeyword) {
-			this.#reporter.addMessage({
-				node: asyncArg,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message: "Usage of deprecated value for parameter 'bAsync' of 'sap/ui/model/json/JSONModel#loadData'",
-				messageDetails: this.#messageDetails ?
-					"Parameter 'bAsync' must be either omitted or set to true" :
-					undefined,
-			});
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
+				paramName: "bAsync",
+			}, asyncArg);
 		}
 
 		if (node.arguments.length < 5) {
@@ -608,15 +546,37 @@ export default class SourceFileLinter {
 		}
 		const cacheArg = node.arguments[5];
 		if (cacheArg.kind === ts.SyntaxKind.FalseKeyword) {
-			this.#reporter.addMessage({
-				node: cacheArg,
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
-				message: "Usage of deprecated value for parameter 'bCache' of 'sap/ui/model/json/JSONModel#loadData'",
-				messageDetails: this.#messageDetails ?
-					"Parameter 'bCache' must be either omitted or set to true" :
-					undefined,
-			});
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
+				paramName: "bCache",
+			}, cacheArg);
+		}
+	}
+
+	analyzeNewCoreRouter(node: ts.NewExpression, nodeType: ts.Type) {
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/routing/Router") {
+			return;
+		}
+
+		if (!node.arguments || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
+			return;
+		}
+
+		const configArg = node.arguments[1];
+
+		let asyncProb;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "async") {
+				asyncProb = prop;
+				break;
+			}
+		}
+
+		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, node);
 		}
 	}
 
