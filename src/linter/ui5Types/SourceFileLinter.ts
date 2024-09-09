@@ -288,13 +288,26 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		this.#analyzeLibInitCall(node, exprNode, exprType); // Check for sap/ui/core/Lib.init usages
-		// Check for partially deprecated calls
-		this.#analyzeParametersGetCall(node, exprType);
-		this.#analyzeCreateComponentCall(node, exprType);
-		this.#analyzeJsonModelLoadDataCall(node, exprType);
-		this.#analyzeOdataModelV2CreateEntry(node, exprType);
-		this.#analyzeMobileInit(node, exprType);
+		const moduleDeclaration = this.getSymbolModuleDeclaration(exprType.symbol);
+		if (exprType.symbol && moduleDeclaration) {
+			const symbolName = exprType.symbol.getName();
+			const moduleName = moduleDeclaration.name.text;
+
+			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
+				// Check for sap/ui/core/Lib.init usages
+				this.#analyzeLibInitCall(node, exprNode);
+			} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
+				this.#analyzeParametersGetCall(node);
+			} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
+				this.#analyzeCreateComponentCall(node);
+			} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
+				this.#analyzeJsonModelLoadDataCall(node);
+			} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
+				this.#analyzeOdataModelV2CreateEntry(node);
+			} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
+				this.#analyzeMobileInit(node);
+			}
+		}
 
 		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
 		if (!deprecationInfo) {
@@ -361,17 +374,7 @@ export default class SourceFileLinter {
 
 	#analyzeLibInitCall(
 		node: ts.CallExpression,
-		exprNode: ts.CallExpression | ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.Identifier,
-		nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
-			return;
-		}
-
+		exprNode: ts.CallExpression | ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.Identifier) {
 		const initArg = node?.arguments[0] &&
 			ts.isObjectLiteralExpression(node.arguments[0]) &&
 			node.arguments[0];
@@ -443,16 +446,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	#analyzeParametersGetCall(node: ts.CallExpression, nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "get") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/theming/Parameters") {
-			return;
-		}
-
+	#analyzeParametersGetCall(node: ts.CallExpression) {
 		if (node.arguments.length && ts.isObjectLiteralExpression(node.arguments[0])) {
 			// Non-deprecated usage
 			return;
@@ -461,16 +455,7 @@ export default class SourceFileLinter {
 		this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET, node);
 	}
 
-	#analyzeCreateComponentCall(node: ts.CallExpression, nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "createComponent") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Component") {
-			return;
-		}
-
+	#analyzeCreateComponentCall(node: ts.CallExpression) {
 		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
 			return;
 		}
@@ -494,16 +479,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeOdataModelV2CreateEntry(node: ts.CallExpression, nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "createEntry") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/model/odata/v2/ODataModel") {
-			return;
-		}
-
+	#analyzeOdataModelV2CreateEntry(node: ts.CallExpression) {
 		if (!node.arguments.length || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
 			return;
 		}
@@ -524,16 +500,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeJsonModelLoadDataCall(node: ts.CallExpression, nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "loadData") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/model/json/JSONModel") {
-			return;
-		}
-
+	#analyzeJsonModelLoadDataCall(node: ts.CallExpression) {
 		if (!node.arguments.length || node.arguments.length < 2) {
 			return;
 		}
@@ -556,16 +523,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeMobileInit(node: ts.CallExpression, nodeType: ts.Type) {
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/util/Mobile") {
-			return;
-		}
-
+	#analyzeMobileInit(node: ts.CallExpression) {
 		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
 			return;
 		}
