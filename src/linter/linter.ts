@@ -9,7 +9,7 @@ import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager from "../utils/ConfigManager.js";
-import {Minimatch} from "minimatch";
+import {minimatch} from "minimatch";
 
 async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
@@ -23,8 +23,6 @@ async function lint(
 		...(config.ignores ?? []),
 		...(ignorePattern ?? []),
 	].filter(($) => $);
-
-	const miniChecks = ignorePattern.map((ignore) => new Minimatch(ignore));
 
 	let fsBasePath = "";
 	let fsBasePathTest = "";
@@ -52,16 +50,16 @@ async function lint(
 	const filteredCollection = createFilterReader({
 		reader: resourceReader,
 		callback: (resource: Resource) => {
-			if (!miniChecks?.length) {
+			if (!ignorePattern?.length) {
 				return true;
 			}
 
 			// Minimatch works with FS and relative paths.
-			// So, we need to convert virtual paths to absolute
+			// So, we need to convert virtual paths to fs
 			const resPath = transformVirtualPathToFilePath(
 				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
 
-			return miniChecks.some((check) => !check.match(resPath, true));
+			return isFileIncluded(resPath, ignorePattern);
 		},
 	});
 
@@ -325,4 +323,27 @@ async function fileExists(dirPath: string) {
 
 function sortLintResults(lintResults: LintResult[]) {
 	lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
+}
+
+/**
+ * Function to check if a file path matches the patterns
+*/
+function isFileIncluded(file: string, patterns: string[]) {
+	let include = true;
+
+	for (const pattern of patterns) {
+		if (pattern.startsWith("!")) {
+			// Handle negation: exclude if the file matches the pattern
+			if (minimatch(file, pattern.slice(1))) {
+				include = true; // re-include it
+			}
+		} else {
+			// Handle inclusion: exclude if it matches
+			if (minimatch(file, pattern)) {
+				include = false;
+			}
+		}
+	}
+
+	return include;
 }
