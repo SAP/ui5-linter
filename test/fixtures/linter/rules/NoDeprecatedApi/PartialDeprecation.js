@@ -2,10 +2,11 @@ sap.ui.define([
 	"sap/ui/core/theming/Parameters",
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/odata/v4/ODataModel",
-	"sap/ui/model/odata/v2/ODataModel"
-	"sap/ui/core/Component"
-	"sap/ui/core/routing/Router"
-], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router) {
+	"sap/ui/model/odata/v2/ODataModel",
+	"sap/ui/core/Component",
+	"sap/ui/core/routing/Router",
+	"sap/ui/util/Mobile"
+], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router, Mobile) {
 
 	Parameters.get(); // (deprecated since 1.92) If no parameter is given
 	Parameters.get("sapUiParam1"); // (deprecated since 1.94) If a string is given as first parameter
@@ -61,4 +62,9 @@ sap.ui.define([
 	new Router([], {async: false}); // Deprecated: "oConfig.async" must set be true
 	new Router([], {async: true}); // Negative test: async true is correct
 
+	Mobile.init({
+		homeIcon: "icon.png", // Deprecated
+		homeIconPrecomposed: true, // Deprecated
+	});
+	Mobile.init({}); // Negative test: No deprecated parameters
 });

@@ -180,7 +180,7 @@ export default class SourceFileLinter {
 		}
 		const classType = this.#checker.getTypeAtLocation(node.expression);
 
-		this.analyzeNewCoreRouter(node, classType);
+		this.#analyzeNewCoreRouter(node, classType);
 
 		// There can be multiple and we need to find the right one
 		const [constructSignature] = classType.getConstructSignatures();
@@ -294,6 +294,7 @@ export default class SourceFileLinter {
 		this.#analyzeCreateComponentCall(node, exprType);
 		this.#analyzeJsonModelLoadDataCall(node, exprType);
 		this.#analyzeOdataModelV2CreateEntry(node, exprType);
+		this.#analyzeMobileInit(node, exprType);
 
 		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
 		if (!deprecationInfo) {
@@ -512,6 +513,7 @@ export default class SourceFileLinter {
 			}
 			if (prop.name.getText() === "batchGroupId") {
 				batchGroupId = prop;
+				break;
 			}
 		}
 
@@ -552,7 +554,51 @@ export default class SourceFileLinter {
 		}
 	}
 
-	analyzeNewCoreRouter(node: ts.NewExpression, nodeType: ts.Type) {
+	#analyzeMobileInit(node: ts.CallExpression, nodeType: ts.Type) {
+		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
+			return;
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/util/Mobile") {
+			return;
+		}
+
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+		const configArg = node.arguments[0];
+		let homeIconArg;
+		let homeIconPrecomposedArg;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			const propName = prop.name.getText();
+			if (propName === "homeIcon") {
+				homeIconArg = prop;
+			} else if (propName === "homeIconPrecomposed") {
+				homeIconPrecomposedArg = prop;
+			}
+
+			if (homeIconPrecomposedArg && homeIconArg) {
+				break;
+			}
+		}
+
+		if (homeIconArg) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
+				paramName: "homeIcon",
+			}, homeIconArg);
+		}
+		if (homeIconPrecomposedArg) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
+				paramName: "homeIconPrecomposed",
+			}, homeIconPrecomposedArg);
+		}
+	}
+
+	#analyzeNewCoreRouter(node: ts.NewExpression, nodeType: ts.Type) {
 		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
 		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/routing/Router") {
 			return;

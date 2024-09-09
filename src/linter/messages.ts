@@ -19,6 +19,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
+	PARTIALLY_DEPRECATED_MOBILE_INIT,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 }
 export const MESSAGE_INFO = {
@@ -188,6 +189,17 @@ export const MESSAGE_INFO = {
 		details: ({paramName}: {paramName: string}) =>
 			`Parameter '${paramName}' must be either omitted or set to true. ` +
 			`{@link sap.ui.model.json.JSONModel#loadData See API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: ({paramName}: {paramName: string}) =>
+			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/util/Mobile#init'`,
+		details: ({paramName}: {paramName: string}) =>
+			`Parameter '${paramName}' must be either omitted or set to true. ` +
+			`{@link sap.ui.util.Mobile#init See API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
