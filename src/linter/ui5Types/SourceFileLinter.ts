@@ -1,9 +1,8 @@
 import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {ResourcePath, CoverageCategory, LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
-import {RULES} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
@@ -53,7 +52,7 @@ export default class SourceFileLinter {
 		this.#sourceFile = sourceFile;
 		this.#checker = checker;
 		this.#context = context;
-		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap, messageDetails);
+		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
@@ -70,12 +69,7 @@ export default class SourceFileLinter {
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, {
-				severity: LintMessageSeverity.Error,
-				message,
-				ruleId: RULES["ui5-linter-parsing-error"],
-				fatal: true,
-			});
+			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 

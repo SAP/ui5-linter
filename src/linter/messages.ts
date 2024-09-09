@@ -1,16 +1,37 @@
-import {LintMessageSeverity} from "./LinterContext.js";
-import {RULES} from "./linterReporting.js";
+// TODO: Migrate to enum instead of Object/Map
+// Currently, it's done this way to avoid pollution of the test snapshots
+const RULES = {
+	"ui5-linter-async-component-flags": "ui5-linter-async-component-flags",
+	"ui5-linter-no-deprecated-api": "ui5-linter-no-deprecated-api",
+	"ui5-linter-no-partially-deprecated-api": "ui5-linter-no-partially-deprecated-api",
+	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",
+	"ui5-linter-no-pseudo-modules": "ui5-linter-no-pseudo-modules",
+	"ui5-linter-no-globals-js": "ui5-linter-no-globals-js",
+	"ui5-linter-parsing-error": "ui5-linter-parsing-error",
+	"ui5-linter-no-deprecated-library": "ui5-linter-no-deprecated-library",
+	"ui5-linter-no-deprecated-component": "ui5-linter-no-deprecated-component",
+	"ui5-linter-csp-unsafe-inline-script": "ui5-linter-csp-unsafe-inline-script",
+} as const;
+
+export enum LintMessageSeverity {
+	Warning = 1,
+	Error = 2,
+}
 
 export enum MESSAGE {
 	COMPONENT_MISSING_ASYNC_INTERFACE,
 	COMPONENT_MISSING_MANIFEST_DECLARATION,
 	COMPONENT_REDUNDANT_ASYNC_FLAG,
+	CSP_UNSAFE_INLINE_SCRIPT,
 	DEPRECATED_API_ACCESS,
+	DEPRECATED_CLASS,
+	DEPRECATED_COMPONENT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LIBRARY,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
+	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
@@ -23,6 +44,8 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_MOBILE_INIT,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V4,
+	PARSING_ERROR,
+	SVG_IN_XML,
 }
 export const MESSAGE_INFO = {
 
@@ -61,6 +84,14 @@ export const MESSAGE_INFO = {
 			`{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 	},
 
+	[MESSAGE.CSP_UNSAFE_INLINE_SCRIPT]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["ui5-linter-csp-unsafe-inline-script"],
+
+		message: () => `Use of unsafe inline script`,
+		details: () => `{@link topic:fe1a6dba940e479fb7c3bc753f92b28c Content Security Policy}`,
+	},
+
 	[MESSAGE.DEPRECATED_API_ACCESS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-deprecated-api"],
@@ -68,6 +99,24 @@ export const MESSAGE_INFO = {
 		message: ({apiName}: {apiName: string}) =>
 			`Use of deprecated API '${apiName}'`,
 		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_CLASS]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-deprecated-api"],
+
+		message: ({className}: {className: string}) =>
+			`Use of deprecated class '${className}'`,
+		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_COMPONENT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-deprecated-component"],
+
+		message: ({componentName}: {componentName: string}) =>
+			`Use of deprecated component '${componentName}'`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.DEPRECATED_FUNCTION_CALL]: {
@@ -113,6 +162,14 @@ export const MESSAGE_INFO = {
 		message: ({propertyName}: {propertyName: string}) =>
 			`Use of deprecated property '${propertyName}'`,
 		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.HTML_IN_XML]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-deprecated-api"],
+
+		message: () => `Usage of native HTML in XML Views/Fragments is deprecated`,
+		details: () => `{@link topic:be54950cae1041f59d4aa97a6bade2d8 Using Native HTML in XML Views (deprecated)}`,
 	},
 
 	[MESSAGE.LIB_INIT_API_VERSION]: {
@@ -236,6 +293,23 @@ export const MESSAGE_INFO = {
 		details: () =>
 			`Parameter 'synchronizationMode' is obsolete and must be omitted. ` +
 			`{@link sap/ui/model/odata/v4/ODataModel#constructor See API reference}`,
+	},
+
+	[MESSAGE.PARSING_ERROR]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-parsing-error"],
+		fatal: true,
+
+		message: ({message}: {message: string}) => message,
+		details: () => undefined,
+	},
+
+	[MESSAGE.SVG_IN_XML]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-deprecated-api"],
+
+		message: () => `Usage of SVG in XML Views/Fragments is deprecated`,
+		details: () => undefined,
 	},
 
 } as const;

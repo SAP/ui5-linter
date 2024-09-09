@@ -1,11 +1,11 @@
 import path from "node:path";
 import {
 	LintResult,
-	LintMessageSeverity,
 	CoverageInfo,
 	CoverageCategory,
 } from "../linter/LinterContext.js";
 import {readFile} from "fs/promises";
+import {LintMessageSeverity} from "../linter/messages.js";
 
 const visualizedSpace = "\u00b7";
 const visualizedTab = "\u00bb";

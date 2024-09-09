@@ -25,7 +25,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 3, "Detection of 3 deprecated libraries expected");
@@ -84,7 +84,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
@@ -160,7 +160,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
@@ -234,7 +234,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
@@ -307,7 +307,7 @@ framework:
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
@@ -356,7 +356,7 @@ test("Test YamlLinter report with empty ui5.yaml", async (t) => {
 	// Run UI5YamlLinter report
 	await linter.lint();
 
-	const messages = context.getLintingMessages("/ui5.yaml");
+	const {messages} = context.generateLintResult("/ui5.yaml");
 
 	// Test returned messages
 	t.is(messages.length, 0, "0 messages should be reported");

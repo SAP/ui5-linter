@@ -42,6 +42,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const fileStream = fs.createReadStream(filePath);
 				const context = new LinterContext({
 					rootDir: fixturesPath,
+					includeMessageDetails: true,
 				});
 				const res = await transpileXml(testName, fileStream, context);
 				if (!res) {
@@ -51,7 +52,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const {source, map} = res;
 				t.snapshot(source);
 				t.snapshot(map && JSON.parse(map));
-				t.snapshot(context.getLintingMessages(testName));
+				t.snapshot(context.generateLintResult(testName).messages);
 			});
 		}
 	} catch (err) {

@@ -1,10 +1,9 @@
-import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 import {parseXML} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
-import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
+import {MESSAGE} from "../messages.js";
 
 export default class DotLibraryLinter {
 	#contentStream;
@@ -23,12 +22,7 @@ export default class DotLibraryLinter {
 			this.#analyzeDeprecatedLibs(dotLibraryDependencyTags);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, {
-				severity: LintMessageSeverity.Error,
-				message,
-				ruleId: RULES["ui5-linter-parsing-error"],
-				fatal: true,
-			});
+			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 
@@ -64,19 +58,19 @@ export default class DotLibraryLinter {
 	#analyzeDeprecatedLibs(libs: SaxTag[]) {
 		// Check for deprecated libraries
 		libs.forEach((lib) => {
-			const {line, character: column} = lib.openStart;
 			// textNodes is always an array, but it might be empty
-			const libName = lib.textNodes[0]?.value;
+			const libraryName = lib.textNodes[0]?.value;
 
-			if (deprecatedLibraries.includes(libName)) {
-				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: RULES["ui5-linter-no-deprecated-library"],
-					severity: LintMessageSeverity.Error,
-					fatal: undefined,
-					line: line + 1,
-					column: column + 1,
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, libName),
-				});
+			if (deprecatedLibraries.includes(libraryName)) {
+				this.#context.addLintingMessage(
+					this.#resourcePath,
+					MESSAGE.DEPRECATED_LIBRARY,
+					{libraryName},
+					{
+						line: lib.openStart.line + 1,
+						column: lib.openStart.character + 1,
+					}
+				);
 			}
 		});
 	}

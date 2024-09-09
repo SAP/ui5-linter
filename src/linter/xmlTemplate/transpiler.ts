@@ -3,10 +3,11 @@ import {ReadStream} from "node:fs";
 import fs from "node:fs/promises";
 import {finished} from "node:stream/promises";
 import {taskStart} from "../../utils/perf.js";
-import LinterContext, {TranspileResult, LintMessageSeverity} from "../LinterContext.js";
+import LinterContext, {TranspileResult} from "../LinterContext.js";
 import Parser from "./Parser.js";
 import {getLogger} from "@ui5/logger";
 import {createRequire} from "node:module";
+import {MESSAGE} from "../messages.js";
 const require = createRequire(import.meta.url);
 
 const log = getLogger("linter:xmlTemplate:transpiler");
@@ -37,12 +38,7 @@ export default async function transpileXml(
 		return res;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
-		context.addLintingMessage(resourcePath, {
-			severity: LintMessageSeverity.Error,
-			message,
-			ruleId: "ui5-linter-parsing-error",
-			fatal: true,
-		});
+		context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 	}
 }
 

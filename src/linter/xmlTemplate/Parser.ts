@@ -3,11 +3,12 @@ import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
 import JSTokenizer from "./lib/JSTokenizer.js";
-import LinterContext, {LintMessageSeverity} from "../LinterContext.js";
+import LinterContext from "../LinterContext.js";
 import {TranspileResult} from "../LinterContext.js";
 import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
 import {ApiExtract} from "./transpiler.js";
+import {MESSAGE} from "../messages.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -317,13 +318,14 @@ export default class Parser {
 			throw new Error(`Unknown namespace ${tagNamespace} for tag ${tagName} in resource ${this.#resourceName}`);
 		} else if (namespace === SVG_NAMESPACE) {
 			// Ignore SVG nodes
-			this.#context.addLintingMessage(this.#resourceName, {
-				ruleId: "ui5-linter-no-deprecated-api",
-				severity: LintMessageSeverity.Error,
-				line: tag.openStart.line + 1, // Add one to align with IDEs
-				column: tag.openStart.character,
-				message: `Usage of SVG in XML Views/Fragments is deprecated`,
-			});
+			this.#context.addLintingMessage(this.#resourceName,
+				MESSAGE.SVG_IN_XML,
+				undefined as never,
+				{
+					line: tag.openStart.line + 1, // Add one to align with IDEs
+					column: tag.openStart.character,
+				}
+			);
 			return {
 				kind: NodeKind.Svg,
 				name: tagName,
@@ -333,15 +335,14 @@ export default class Parser {
 			};
 		} else if (namespace === XHTML_NAMESPACE) {
 			// Ignore XHTML nodes for now
-			this.#context.addLintingMessage(this.#resourceName, {
-				ruleId: "ui5-linter-no-deprecated-api",
-				severity: LintMessageSeverity.Error,
-				line: tag.openStart.line + 1, // Add one to align with IDEs
-				column: tag.openStart.character,
-				message: `Usage of native HTML in XML Views/Fragments is deprecated`,
-				messageDetails:
-					`{@link topic:be54950cae1041f59d4aa97a6bade2d8 Using Native HTML in XML Views (deprecated)}`,
-			});
+			this.#context.addLintingMessage(this.#resourceName,
+				MESSAGE.HTML_IN_XML,
+				undefined as never,
+				{
+					line: tag.openStart.line + 1, // Add one to align with IDEs
+					column: tag.openStart.character,
+				}
+			);
 			return {
 				kind: NodeKind.Xhtml,
 				name: tagName,
