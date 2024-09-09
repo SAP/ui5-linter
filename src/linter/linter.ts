@@ -21,7 +21,7 @@ async function lint(
 	const config = await configMngr.getConfiguration();
 	ignorePattern = [
 		...(config.ignores ?? []),
-		...(ignorePattern ?? []),
+		...(ignorePattern ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
 
 	let fsBasePath = "";
