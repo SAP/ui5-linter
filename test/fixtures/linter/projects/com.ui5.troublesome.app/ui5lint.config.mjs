@@ -1,3 +1,6 @@
 export default {
-	ignores: ["!test/sap/m/visual/Wizard.spec.js", "test/**/*"],
+	ignores: [
+		"test/**/*", 
+		"!test/sap/m/visual/Wizard.spec.js",
+	],
 };

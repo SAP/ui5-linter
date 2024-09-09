@@ -10,8 +10,8 @@ test("Check config file", async (t) => {
 
 	t.deepEqual(config, {
 		ignores: [
-			"!test/sap/m/visual/Wizard.spec.js",
 			"test/**/*",
+			"!test/sap/m/visual/Wizard.spec.js",
 		],
 	}, "The configuration is derived from the provided custom config file");
 });
@@ -24,8 +24,8 @@ test("Check config file auto discovery", async (t) => {
 
 	t.deepEqual(config, {
 		ignores: [
-			"!test/sap/m/visual/Wizard.spec.js",
 			"test/**/*",
+			"!test/sap/m/visual/Wizard.spec.js",
 		],
 	}, "The configuration is derived from the discovered configuration file");
 });

@@ -1,6 +1,6 @@
 module.exports = {
 	ignores: [
-		"!test/sap/m/visual/Wizard.spec.js",
-		"test/**/*"
+		"test/**/*",
+		"!test/sap/m/visual/Wizard.spec.js"
 	],
 };
