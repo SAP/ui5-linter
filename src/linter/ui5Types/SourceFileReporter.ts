@@ -9,11 +9,12 @@ import {
 import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 import LinterContext, {
-	LintMessage, CoverageInfo, LintMessageSeverity,
+	CoverageInfo,
 	PositionInfo, PositionRange, ResourcePath,
+	RawLintMessage,
 } from "../LinterContext.js";
-import {MESSAGE, MESSAGE_INFO} from "../messages.js";
-import {MessageArgs} from "../linterReporting.js";
+import {MESSAGE} from "../messages.js";
+import {MessageArgs} from "../MessageArgs.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
@@ -29,19 +30,16 @@ export default class SourceFileReporter {
 	#originalResourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile | undefined;
 	#traceMap: TraceMap | undefined;
-	#messages: LintMessage[] = [];
+	#rawMessages: RawLintMessage[] = [];
 	#coverageInfo: CoverageInfo[] = [];
-	#messageDetails: boolean;
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined,
-		messageDetails: boolean
+		sourceFile: ts.SourceFile, sourceMap: string | undefined
 	) {
 		this.#context = context;
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
-		this.#messageDetails = messageDetails;
 		if (sourceMap) {
 			this.#traceMap = new TraceMap(sourceMap);
 		}
@@ -69,48 +67,20 @@ export default class SourceFileReporter {
 			args = argsOrNode;
 		}
 
-		const messageInfo = MESSAGE_INFO[id];
-		if (!messageInfo) {
-			throw new Error(`Invalid message id '${id}'`);
-		}
-
-		let line = 1, column = 1;
+		const position: PositionInfo = {
+			line: 1,
+			column: 1,
+		};
 		if (node) {
 			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
-			line = start.line + 1;
-			column = start.column + 1;
+			position.line = start.line + 1;
+			position.column = start.column + 1;
 			// endLine = end.line + 1;
 			// endColumn = end.column + 1;
 		}
 
-		const messageFunc = messageInfo.message as (args: MessageArgs[M]) => string;
-
-		const msg: LintMessage = {
-			ruleId: messageInfo.ruleId,
-			severity: messageInfo.severity,
-			line,
-			column,
-			message: messageFunc(args),
-		};
-
-		if (this.#messageDetails) {
-			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string | undefined;
-			const details = detailsFunc(args);
-			if (details) {
-				msg.messageDetails = resolveLinks(details);
-			}
-		}
-
-		if ("fatal" in messageInfo && typeof messageInfo.fatal === "boolean") {
-			msg.fatal = messageInfo.fatal;
-		}
-
-		if (msg.fatal && msg.severity !== LintMessageSeverity.Error) {
-			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
-		}
-
-		this.#messages.push(msg);
+		this.#rawMessages.push({id, args, position});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
@@ -188,45 +158,45 @@ export default class SourceFileReporter {
 	}
 
 	deduplicateMessages() {
-		const lineColumnMessagesMap = new Map<string, LintMessage[]>();
-		const messages: LintMessage[] = [];
-		if (this.#messages.length === 0) {
+		const lineColumnRawMessagesMap = new Map<string, RawLintMessage[]>();
+		const rawMessages: RawLintMessage[] = [];
+		if (this.#rawMessages.length === 0) {
 			return;
 		}
 
-		for (const message of this.#messages) {
+		for (const message of this.#rawMessages) {
 			// Group messages by line/column so that we can deduplicate them
-			if (!message.line || !message.column) {
+			if (!message.position?.line || !message.position?.column) {
 				// If there is no line or column, we cannot group/deduplicate
-				messages.push(message);
+				rawMessages.push(message);
 				continue;
 			}
-			const lineColumnKey = `${message.line}:${message.column}`;
-			let lineColumnMessages = lineColumnMessagesMap.get(lineColumnKey);
+			const lineColumnKey = `${message.position.line}:${message.position.column}`;
+			let lineColumnMessages = lineColumnRawMessagesMap.get(lineColumnKey);
 			if (!lineColumnMessages) {
 				lineColumnMessages = [];
-				lineColumnMessagesMap.set(lineColumnKey, lineColumnMessages);
+				lineColumnRawMessagesMap.set(lineColumnKey, lineColumnMessages);
 			}
 			lineColumnMessages.push(message);
 		}
 
 		// Add deduplicated messages to the result
-		for (const lineColumnMessages of lineColumnMessagesMap.values()) {
+		for (const lineColumnMessages of lineColumnRawMessagesMap.values()) {
 			// If there are multiple messages for the same line/column,
 			// and at least one of them is NOT a "no-globals-js" message,
 			// we can deduplicate the "no-globals-js" messages.
 			const deduplicateGlobalMessages = lineColumnMessages.length > 1 &&
-				lineColumnMessages.some((message) => message.ruleId !== "ui5-linter-no-globals-js");
+				lineColumnMessages.some((message) => message.id !== MESSAGE.NO_GLOBALS);
 
 			lineColumnMessages.forEach((message) => {
-				if (deduplicateGlobalMessages && message.ruleId === "ui5-linter-no-globals-js") {
+				if (deduplicateGlobalMessages && message.id === MESSAGE.NO_GLOBALS) {
 					// Skip global messages if there are other messages for the same line/column
 					return;
 				}
-				messages.push(message);
+				rawMessages.push(message);
 			});
 		}
 
-		this.#context.getLintingMessages(this.#originalResourcePath).push(...messages);
+		this.#context.addLintingMessages(this.#originalResourcePath, rawMessages);
 	}
 }

@@ -1,8 +1,7 @@
-import {LintMessageSeverity} from "../LinterContext.js";
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries, deprecatedThemeLibraries} from "../../utils/deprecations.js";
 import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
-import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
+import {MESSAGE} from "../messages.js";
 
 interface YamlWithPosInfo extends DataWithPosition {
 	framework?: {
@@ -51,12 +50,7 @@ export default class YamlLinter {
 			});
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, {
-				severity: LintMessageSeverity.Error,
-				message,
-				ruleId: RULES["ui5-linter-parsing-error"],
-				fatal: true,
-			});
+			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 
@@ -71,14 +65,17 @@ export default class YamlLinter {
 			const libraryName = lib.name.toString();
 			if (deprecatedLibraries.includes(libraryName) || deprecatedThemeLibraries.includes(libraryName)) {
 				const positionInfo = getPosition(lib);
-				this.#context.addLintingMessage(this.#resourcePath, {
-					ruleId: RULES["ui5-linter-no-deprecated-library"],
-					severity: LintMessageSeverity.Error,
-					fatal: undefined,
-					line: positionInfo.start.line + offset,
-					column: positionInfo.start.column,
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, libraryName),
-				});
+				this.#context.addLintingMessage(
+					this.#resourcePath,
+					MESSAGE.DEPRECATED_LIBRARY,
+					{
+						libraryName,
+					},
+					{
+						line: positionInfo.start.line + offset,
+						column: positionInfo.start.column,
+					}
+				);
 			}
 		});
 	}

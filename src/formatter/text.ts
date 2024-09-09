@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import path from "node:path";
-import {LintMessageSeverity, LintResult, LintMessage} from "../linter/LinterContext.js";
+import {LintResult, LintMessage} from "../linter/LinterContext.js";
+import {LintMessageSeverity} from "../linter/messages.js";
 
 const detailsHeader = chalk.white.bold("Details:");
 

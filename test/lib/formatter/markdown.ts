@@ -1,6 +1,7 @@
 import anyTest, {TestFn} from "ava";
 import {Markdown} from "../../../src/formatter/markdown.js";
-import {LintResult, LintMessageSeverity} from "../../../src/linter/LinterContext.js";
+import {LintResult} from "../../../src/linter/LinterContext.js";
+import {LintMessageSeverity} from "../../../src/linter/messages.js";
 
 const test = anyTest as TestFn<{
 	lintResults: LintResult[];

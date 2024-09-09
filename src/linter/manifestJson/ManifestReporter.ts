@@ -1,11 +1,9 @@
 import type {jsonSourceMapType, jsonMapPointers} from "./ManifestLinter.js";
 import LinterContext, {
-	LintMessage, LintMessageSeverity, CoverageInfo, PositionInfo, ResourcePath,
+	CoverageInfo, PositionInfo, ResourcePath,
 } from "../LinterContext.js";
-
-interface ReporterMessage extends LintMessage {
-	node: string;
-}
+import {MESSAGE} from "../messages.js";
+import {MessageArgs} from "../MessageArgs.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: string;
@@ -22,21 +20,25 @@ export default class ManifestReporter {
 		this.#context = context;
 	}
 
-	addMessage({node, message, severity, ruleId, fatal = undefined}: ReporterMessage) {
-		if (fatal && severity !== LintMessageSeverity.Error) {
-			throw new Error(`Reports flagged as "fatal" must be of severity "Error"`);
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: string): void;
+	addMessage<M extends MESSAGE>(id: M, node: string): void;
+	addMessage<M extends MESSAGE>(
+		id: M, argsOrNode?: MessageArgs[M] | string, node?: string
+	) {
+		if (!argsOrNode) {
+			throw new Error("Invalid arguments: Missing second argument");
+		}
+		let args: MessageArgs[M];
+		if (typeof argsOrNode === "string") {
+			node = argsOrNode;
+			args = null as unknown as MessageArgs[M];
+		} else if (!node) {
+			throw new Error("Invalid arguments: Missing 'node'");
+		} else {
+			args = argsOrNode;
 		}
 
-		const {line, column} = this.#getPosition(node);
-
-		this.#context.addLintingMessage(this.#resourcePath, {
-			ruleId,
-			severity,
-			fatal,
-			line,
-			column,
-			message,
-		});
+		this.#context.addLintingMessage(this.#resourcePath, id, args, this.#getPosition(node));
 	}
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {

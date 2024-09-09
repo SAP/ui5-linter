@@ -1,4 +1,5 @@
-import {LintMessageSeverity, LintResult, LintMessage} from "../linter/LinterContext.js";
+import {LintResult, LintMessage} from "../linter/LinterContext.js";
+import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Markdown {
 	format(lintResults: LintResult[], showDetails: boolean): string {

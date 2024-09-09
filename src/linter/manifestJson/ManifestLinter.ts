@@ -7,11 +7,11 @@ import type {
 } from "../../manifest.d.ts";
 
 import ManifestReporter from "./ManifestReporter.js";
-import {LintMessageSeverity, ResourcePath} from "../LinterContext.js";
+import {ResourcePath} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries, deprecatedComponents} from "../../utils/deprecations.js";
-import {RULES, MESSAGES, formatMessage} from "../linterReporting.js";
+import {MESSAGE} from "../messages.js";
 
 interface locType {
 	line: number;
@@ -46,12 +46,7 @@ export default class ManifestLinter {
 			this.#analyzeManifest(source.data);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, {
-				severity: LintMessageSeverity.Error,
-				message,
-				ruleId: "ui5-linter-parsing-error",
-				fatal: true,
-			});
+			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 
@@ -67,12 +62,9 @@ export default class ManifestLinter {
 		const libKeys: string[] = (dependencies?.libs && Object.keys(dependencies.libs)) ?? [];
 		libKeys.forEach((libKey: string) => {
 			if (deprecatedLibraries.includes(libKey)) {
-				this.#reporter?.addMessage({
-					node: `/sap.ui5/dependencies/libs/${libKey}`,
-					severity: LintMessageSeverity.Error,
-					ruleId: RULES["ui5-linter-no-deprecated-library"],
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_LIBRARY, libKey),
-				});
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_LIBRARY, {
+					libraryName: libKey,
+				}, `/sap.ui5/dependencies/libs/${libKey}`);
 			}
 		});
 
@@ -80,22 +72,17 @@ export default class ManifestLinter {
 		const componentKeys: string[] = (dependencies?.components && Object.keys(dependencies.components)) ?? [];
 		componentKeys.forEach((componentKey: string) => {
 			if (deprecatedComponents.includes(componentKey)) {
-				this.#reporter?.addMessage({
-					node: `/sap.ui5/dependencies/components/${componentKey}`,
-					severity: LintMessageSeverity.Error,
-					ruleId: RULES["ui5-linter-no-deprecated-component"],
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_COMPONENT, componentKey),
-				});
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_COMPONENT, {
+					componentName: componentKey,
+				}, `/sap.ui5/dependencies/components/${componentKey}`);
 			}
 		});
 
 		if (resources?.js) {
-			this.#reporter?.addMessage({
-				node: "/sap.ui5/resources/js",
-				severity: LintMessageSeverity.Error,
-				ruleId: RULES["ui5-linter-no-deprecated-api"],
-				message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP, "'sap.ui5/resources/js'"),
-			});
+			this.#reporter?.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+				propertyName: "sap.ui5/resources/js",
+				details: "", // TODO
+			}, "/sap.ui5/resources/js");
 		}
 
 		const modelKeys: string[] = (models && Object.keys(models)) ?? [];
@@ -121,26 +108,19 @@ export default class ManifestLinter {
 				"sap.ui.model.odata.ODataModel",
 				"sap.zen.dsh.widgets.SDKModel",
 			].includes(curModel.type)) {
-				this.#reporter?.addMessage({
-					node: `/sap.ui5/models/${modelKey}/type`,
-					severity: LintMessageSeverity.Error,
-					ruleId: RULES["ui5-linter-no-deprecated-api"],
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_MODEL_TYPE,
-						`sap.ui5/models/${modelKey}/type="${curModel.type}"`)
-					,
-				});
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_CLASS, {
+					className: curModel.type,
+					details: `{@link ${curModel.type}}`,
+				}, `/sap.ui5/models/${modelKey}/type`);
 			}
 
 			if (curModel.type === "sap.ui.model.odata.v4.ODataModel" &&
 				curModel.settings && "synchronizationMode" in curModel.settings) {
-				this.#reporter?.addMessage({
-					node: `/sap.ui5/models/${modelKey}/settings/synchronizationMode`,
-					severity: LintMessageSeverity.Error,
-					ruleId: RULES["ui5-linter-no-deprecated-api"],
-					message: formatMessage(MESSAGES.SHORT__DEPRECATED_PROP,
-						`'sap.ui5/models/${modelKey}/settings/synchronizationMode' of sap.ui.model.odata.v4.ODataModel`
-					),
-				});
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS, {
+					propertyName: "synchronizationMode",
+					className: "sap.ui.model.odata.v4.ODataModel",
+					details: "As of Version 1.110.0, this parameter is obsolete.",
+				}, `/sap.ui5/models/${modelKey}/settings/synchronizationMode`);
 			}
 		});
 	}

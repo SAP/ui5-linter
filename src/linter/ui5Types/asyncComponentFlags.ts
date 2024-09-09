@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import SourceFileReporter from "./SourceFileReporter.js";
 import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
-import LinterContext, {LintMessageSeverity} from "../LinterContext.js";
+import LinterContext from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 import {MESSAGE} from "../messages.js";
@@ -360,15 +360,11 @@ function reportResults({
 				// If the manifest.json is present, then we need to redirect the message pointers to it
 				const {key: posInfo} = pointers[pointerKey];
 				context.addLintingMessage(
-					resourcePath.replace(componentFileName, "manifest.json"), {
-						severity: LintMessageSeverity.Warning,
-						ruleId: "ui5-linter-async-component-flags",
-						message: `Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
-							`The redundant "async" flag at "${pointerKey}" should be removed ` +
-							`from the component manifest`,
-						messageDetails: `{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
-						...posInfo,
-					});
+					resourcePath.replace(componentFileName, "manifest.json"),
+					MESSAGE.COMPONENT_REDUNDANT_ASYNC_FLAG,
+					{asyncFlagLocation: pointerKey},
+					posInfo
+				);
 			} else {
 				reporter.addMessage(MESSAGE.COMPONENT_REDUNDANT_ASYNC_FLAG, {
 					asyncFlagLocation: pointerKey,
