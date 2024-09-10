@@ -17,22 +17,17 @@ async function lint(
 	const lintEnd = taskStart("Linting");
 	let {ignorePattern} = options;
 
-	const configMngr = new ConfigManager();
-	const config = await configMngr.getConfiguration();
-	ignorePattern = [
-		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
-
 	let fsBasePath = "";
 	let fsBasePathTest = "";
 	let virBasePath = "/resources/";
 	let virBasePathTest = "/test-resources/";
+	let projectRootDir = options.rootDir;
 	try {
 		const graph = await getProjectGraph(options.rootDir);
 		const project = graph.getRoot();
+		projectRootDir = project.getRootPath();
 		fsBasePath = project.getSourcePath();
-		fsBasePathTest = path.join(project.getRootPath(), project._testPath ?? "test");
+		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
 
 		if (!project._isSourceNamespaced) {
 			// Ensure the virtual filesystem includes the project namespace to allow relative imports
@@ -46,6 +41,30 @@ async function lint(
 
 	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
+
+	const configMngr = new ConfigManager(projectRootDir);
+	const config = await configMngr.getConfiguration();
+	ignorePattern = [
+		...(config.ignores ?? []),
+		...(ignorePattern ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
+
+	// Patterns must be only relative (to project's root),
+	// otherwise throw an error
+	ignorePattern.forEach((pattern) => {
+		let notNegatedPattern = pattern;
+		if (pattern.startsWith("!")) {
+			notNegatedPattern = pattern.slice(1);
+		}
+
+		if (/\\/g.test(pattern)) {
+			throw Error(`Patterns must be in POSIX format. "${pattern}" defines non-posix path format.`);
+		}
+
+		if (path.isAbsolute(notNegatedPattern)) {
+			throw Error(`Patterns must be relative to project's root folder. "${pattern}" defines an absolute path.`);
+		}
+	});
 
 	const filteredCollection = !ignorePattern?.length ?
 		resourceReader :

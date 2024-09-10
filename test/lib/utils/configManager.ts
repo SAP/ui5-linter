@@ -3,8 +3,8 @@ import test from "ava";
 import ConfigManager from "../../../src/utils/ConfigManager.js";
 
 test("Check config file", async (t) => {
-	const confManager = new ConfigManager("ui5lint-custom.config.cjs",
-		"./test/fixtures/linter/projects/com.ui5.troublesome.app/");
+	const confManager = new ConfigManager("./test/fixtures/linter/projects/com.ui5.troublesome.app/",
+		"ui5lint-custom.config.cjs");
 
 	const config = await confManager.getConfiguration();
 
@@ -17,8 +17,7 @@ test("Check config file", async (t) => {
 });
 
 test("Check config file auto discovery", async (t) => {
-	const confManager = new ConfigManager(undefined,
-		"./test/fixtures/linter/projects/com.ui5.troublesome.app/");
+	const confManager = new ConfigManager("./test/fixtures/linter/projects/com.ui5.troublesome.app/");
 
 	const config = await confManager.getConfiguration();
 

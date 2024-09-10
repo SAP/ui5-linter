@@ -13,11 +13,14 @@ const CONFIG_FILENAMES = [
 ];
 
 export default class ConfigManager {
-	#cwd: string;
+	#projectRootDir: string;
 	#configFile: string | null;
 
-	constructor(configFile?: string, cwd?: string) {
-		this.#cwd = cwd ?? process.cwd();
+	constructor(projectRootDir: string, configFile?: string) {
+		if (!projectRootDir) {
+			throw Error("Project's root dir is required");
+		}
+		this.#projectRootDir = projectRootDir;
 		this.#configFile = configFile ?? null;
 	}
 
@@ -26,7 +29,7 @@ export default class ConfigManager {
 		// and modifies files extensions in tests i.e. js -> ts, mjs -> tjs
 		// Keeping the relative path in POSIX format resolves those issues.
 		return path.posix.join(
-			path.relative(__dirname, this.#cwd).replaceAll(path.win32.sep, path.posix.sep),
+			path.relative(__dirname, this.#projectRootDir).replaceAll(path.win32.sep, path.posix.sep),
 			fileName);
 	}
 
