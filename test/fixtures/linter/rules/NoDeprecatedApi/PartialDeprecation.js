@@ -26,14 +26,21 @@ sap.ui.define([
 	jsonModel.loadData("/api/users", undefined, true, "GET", false, false); // TODO detect: Parameter bCache is deprecated as of Version 1.107 (default=true)
 
 	var v4Model = new ODataModelV4({
-		synchronizationMode: "None" // TODO detect: Parameter "synchronizationMode" is deprecated since 1.110
+		synchronizationMode: "None" // Parameter "synchronizationMode" is deprecated since 1.110
+	});
+	var v4Model = new ODataModelV4({
+		synchronizationMode: true // Parameter "synchronizationMode" is deprecated since 1.110
+	});
+	var v4Model = new ODataModelV4({
+		serviceUrl: "my-service" // Negative test: Deprecated parameter is omitted
 	});
 
 	var v2Model = new ODataModelV2();
 	v2Model.createEntry("somePath", {
-		batchGroupId: "id-123", // TODO detect: Deprecated - use groupId instead
-		properties: ["property1", "property2"] // TODO detect: Passing a list of property names is deprecated since 1.120; pass the initial values as an object instead
+		batchGroupId: "id-123", // Deprecated - use groupId instead
+		properties: ["property1", "property2"] // Passing a list of property names is deprecated since 1.120; pass the initial values as an object instead
 	});
+	v2Model.createEntry("somePath"); // Negative test: No deprecated parameters
 
 	Component.create({
 		name: "my.comp",

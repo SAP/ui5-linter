@@ -180,7 +180,12 @@ export default class SourceFileLinter {
 		}
 		const classType = this.#checker.getTypeAtLocation(node.expression);
 
-		this.#analyzeNewCoreRouter(node, classType);
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (moduleDeclaration?.name.text === "sap/ui/core/routing/Router") {
+			this.#analyzeNewCoreRouter(node);
+		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
+			this.#analyzeNewOdataModelV4(node);
+		}
 
 		// There can be multiple and we need to find the right one
 		const [constructSignature] = classType.getConstructSignatures();
@@ -485,18 +490,25 @@ export default class SourceFileLinter {
 		}
 		const secondArg = node.arguments[1];
 		let batchGroupId;
+		let properties;
 		for (const prop of secondArg.properties) {
 			if (!ts.isPropertyAssignment(prop)) {
 				continue;
 			}
 			if (prop.name.getText() === "batchGroupId") {
 				batchGroupId = prop;
-				break;
+			}
+			if (prop.name.getText() === "properties") {
+				properties = prop;
 			}
 		}
 
 		if (batchGroupId) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, batchGroupId);
+		}
+		if (properties && ts.isArrayLiteralExpression(properties.initializer)) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
+				properties);
 		}
 	}
 
@@ -540,10 +552,6 @@ export default class SourceFileLinter {
 			} else if (propName === "homeIconPrecomposed") {
 				homeIconPrecomposedArg = prop;
 			}
-
-			if (homeIconPrecomposedArg && homeIconArg) {
-				break;
-			}
 		}
 
 		if (homeIconArg) {
@@ -558,12 +566,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeNewCoreRouter(node: ts.NewExpression, nodeType: ts.Type) {
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/routing/Router") {
-			return;
-		}
-
+	#analyzeNewCoreRouter(node: ts.NewExpression) {
 		if (!node.arguments || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
 			return;
 		}
@@ -583,6 +586,29 @@ export default class SourceFileLinter {
 
 		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, node);
+		}
+	}
+
+	#analyzeNewOdataModelV4(node: ts.NewExpression) {
+		if (!node.arguments || node.arguments.length < 1 || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+
+		const configArg = node.arguments[0];
+
+		let synchronizationModeProb;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "synchronizationMode") {
+				synchronizationModeProb = prop;
+				break;
+			}
+		}
+
+		if (synchronizationModeProb) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V4, synchronizationModeProb);
 		}
 	}
 

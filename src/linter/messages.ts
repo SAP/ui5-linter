@@ -18,9 +18,11 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_PARAMETERS_GET,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
+	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
 	PARTIALLY_DEPRECATED_MOBILE_INIT,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
+	PARTIALLY_DEPRECATED_ODATA_MODEL_V4,
 }
 export const MESSAGE_INFO = {
 
@@ -180,6 +182,17 @@ export const MESSAGE_INFO = {
 		`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
 	},
 
+	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
+		details: () =>
+			`Passing a list of property names is deprecated. Pass the initial values as an object instead. ` +
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+	},
+
 	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
@@ -207,10 +220,22 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
 
 		message: () =>
-			`Usage of deprecated value for parameter 'oConfig.async' of constructor of 'sap/ui/core/Router'`,
+			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
 		details: () =>
 			`Parameter 'oConfig.async' must be set to true. ` +
 			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V4]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated parameter 'mParameters.synchronizationMode' ` +
+			`of constructor 'sap/ui/model/odata/v4/ODataModel'`,
+		details: () =>
+			`Parameter 'synchronizationMode' is obsolete and must be omitted. ` +
+			`{@link sap/ui/model/odata/v4/ODataModel#constructor See API reference}`,
 	},
 
 } as const;
