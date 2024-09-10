@@ -22,8 +22,8 @@ sap.ui.define([
 	getParam(); // (deprecated since 1.92) If no parameter is given
 
 	var jsonModel = new JSONModel();
-	jsonModel.loadData("/api/users", undefined, false); // TODO detect: Parameter bAsync is deprecated as of Version 1.107 (default=true)
-	jsonModel.loadData("/api/users", undefined, true, "GET", false, false); // TODO detect: Parameter bCache is deprecated as of Version 1.107 (default=true)
+	jsonModel.loadData("/api/users", undefined, false); // Parameter bAsync is deprecated as of Version 1.107 (default=true)
+	jsonModel.loadData("/api/users", undefined, true, "GET", false, false); // Parameter bCache is deprecated as of Version 1.107 (default=true)
 
 	var v4Model = new ODataModelV4({
 		synchronizationMode: "None" // Parameter "synchronizationMode" is deprecated since 1.110
