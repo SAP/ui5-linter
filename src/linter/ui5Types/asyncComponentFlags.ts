@@ -6,6 +6,7 @@ import LinterContext, {LintMessageSeverity} from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 import {MESSAGE} from "../messages.js";
+import {getPropertyName} from "./utils.js";
 
 type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
 type propsRecord = Record<string, {
@@ -277,14 +278,6 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 		hasAsyncInterface,
 		hasManifestDefinition,
 	};
-}
-
-function getPropertyName(node: ts.PropertyName): string {
-	if (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node)) {
-		return node.text;
-	} else {
-		return node.getText();
-	}
 }
 
 function extractPropsRecursive(node: ts.ObjectLiteralExpression) {

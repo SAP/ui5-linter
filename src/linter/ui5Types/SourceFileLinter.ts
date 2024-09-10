@@ -6,6 +6,7 @@ import {MESSAGE} from "../messages.js";
 import {RULES} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
+import {getPropertyName} from "./utils.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -347,26 +348,11 @@ export default class SourceFileLinter {
 			}
 		}
 
-		let reportNodeText;
-		if (ts.isStringLiteralLike(reportNode) || ts.isNumericLiteral(reportNode)) {
-			reportNodeText = reportNode.text;
-		} else {
-			reportNodeText = reportNode.getText();
-		}
-
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
-			functionName: reportNodeText,
+			functionName: getPropertyName(reportNode),
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
-	}
-
-	getPropertyName(node: ts.PropertyName): string {
-		if (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node)) {
-			return node.text;
-		} else {
-			return node.getText();
-		}
 	}
 
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
