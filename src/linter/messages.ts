@@ -169,7 +169,7 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
 		details: () => `Property 'async' must be either omitted or set to true. ` +
-		`{@link sap.ui.core.Component#createComponent See API reference}`,
+			`{@link sap.ui.core.Component#createComponent See API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
@@ -179,7 +179,7 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
 		details: () => `Use parameter 'groupId' instead. ` +
-		`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
