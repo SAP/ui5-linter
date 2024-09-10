@@ -31,7 +31,7 @@ export async function esmockDeprecationText() {
 				reportCoverage: boolean | undefined = false,
 				messageDetails: boolean | undefined = false,
 				dataTypes: Record<string, string>,
-				manifestContent?: string | undefined
+				manifestContent?: string
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(

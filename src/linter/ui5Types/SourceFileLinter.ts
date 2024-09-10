@@ -46,7 +46,7 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, manifestContent?: string | undefined
+		dataTypes: Record<string, string> | undefined, manifestContent?: string
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
