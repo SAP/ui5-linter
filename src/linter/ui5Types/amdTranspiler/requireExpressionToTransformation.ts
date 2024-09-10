@@ -49,7 +49,7 @@ export function transformAsyncRequireCall(
 		let moduleSpecifier: ts.StringLiteral;
 		if (!ts.isStringLiteralLike(dep)) {
 			log.verbose(`Skipping non-string dependency entry of type ${ts.SyntaxKind[dep.kind]} at ` +
-			toPosStr(dep));
+				toPosStr(dep));
 			return;
 		}
 		if (ts.isNoSubstitutionTemplateLiteral(dep)) {

@@ -105,7 +105,7 @@ export class Text {
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {
 			this.#writeln("");
 			this.#writeln(chalk.dim.bold("Note: ") +
-			chalk.dim(`Use "ui5lint --details" to show more information about the findings`));
+				chalk.dim(`Use "ui5lint --details" to show more information about the findings`));
 		}
 
 		return this.#buffer;

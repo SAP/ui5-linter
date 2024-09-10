@@ -371,7 +371,8 @@ function reportResults({
 						severity: LintMessageSeverity.Warning,
 						ruleId: "ui5-linter-async-component-flags",
 						message: `Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
-						`The redundant "async" flag at "${pointerKey}" should be removed from the component manifest`,
+							`The redundant "async" flag at "${pointerKey}" should be removed ` + `
+							from the component manifest`,
 						messageDetails: `{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 						...posInfo,
 					});
