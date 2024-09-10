@@ -191,7 +191,7 @@ export default function base(cli: Argv) {
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +
-						` additional '--verbose' parameter`) + "\n");
+							` additional '--verbose' parameter`) + "\n");
 					}
 				}
 			} else {

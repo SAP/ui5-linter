@@ -221,7 +221,7 @@ export default class Parser {
 
 		if (!aggregationName) {
 			log.verbose(`Failed to determine default aggregation for control ${owner.name} used in ` +
-			`resource ${this.#resourceName}. Falling back to 'dependents'`);
+				`resource ${this.#resourceName}. Falling back to 'dependents'`);
 			// In case the default aggregation is unknown (e.g. in case of custom controls),
 			// fallback to use the generic "dependents" aggregation
 			// This is not correct at runtime, but it's the best we can do for linting purposes
@@ -460,7 +460,7 @@ export default class Parser {
 					this.#generator.writeControl(customData);
 				} else {
 					log.verbose(`Ignoring unknown namespaced attribute ${attr.localNamespace}:${attr.name} ` +
-					`for ${moduleName} in resource ${this.#resourceName}`);
+						`for ${moduleName} in resource ${this.#resourceName}`);
 				}
 			} else {
 				controlProperties.add(attr);
