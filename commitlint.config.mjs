@@ -22,6 +22,7 @@ export default {
 			],
 		],
 		"body-max-line-length": [2, "always", 160],
+		"footer-max-line-length": [0],
 		"subject-case": [
 			2, "always",
 			["sentence-case", "start-case", "pascal-case"],
