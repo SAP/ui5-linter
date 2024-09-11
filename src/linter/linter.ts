@@ -15,73 +15,12 @@ async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	let {ignorePattern} = options;
+	const {ignorePattern} = options;
 
-	let fsBasePath = "";
-	let fsBasePathTest = "";
-	let virBasePath = "/resources/";
-	let virBasePathTest = "/test-resources/";
-	let projectRootDir = options.rootDir;
-	try {
-		const graph = await getProjectGraph(options.rootDir);
-		const project = graph.getRoot();
-		projectRootDir = project.getRootPath();
-		fsBasePath = project.getSourcePath();
-		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
-
-		if (!project._isSourceNamespaced) {
-			// Ensure the virtual filesystem includes the project namespace to allow relative imports
-			// of framework resources from the project
-			virBasePath += project.getNamespace() + "/";
-			virBasePathTest += project.getNamespace() + "/";
-		}
-	} catch {
-		// Project is not resolved i.e. in tests
-	}
-
-	const relFsBasePath = path.relative(options.rootDir, fsBasePath);
-	const relFsBasePathTest = fsBasePathTest ? path.relative(options.rootDir, fsBasePathTest) : undefined;
-
-	const configMngr = new ConfigManager(projectRootDir);
-	const config = await configMngr.getConfiguration();
-	ignorePattern = [
-		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
-
-	// Patterns must be only relative (to project's root),
-	// otherwise throw an error
-	ignorePattern.forEach((pattern) => {
-		let notNegatedPattern = pattern;
-		if (pattern.startsWith("!")) {
-			notNegatedPattern = pattern.slice(1);
-		}
-
-		if (/\\/g.test(pattern)) {
-			throw Error(`Patterns must be in POSIX format. "${pattern}" defines non-posix path format.`);
-		}
-
-		if (path.isAbsolute(notNegatedPattern)) {
-			throw Error(`Patterns must be relative to project's root folder. "${pattern}" defines an absolute path.`);
-		}
-	});
-
-	const filteredCollection = !ignorePattern?.length ?
-		resourceReader :
-		createFilterReader({
-			reader: resourceReader,
-			callback: (resource: Resource) => {
-				// Minimatch works with FS and relative paths.
-				// So, we need to convert virtual paths to fs
-				const resPath = transformVirtualPathToFilePath(
-					resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
-
-				return isFileIncluded(resPath, ignorePattern);
-			},
-		});
+	const ignoresReader = await resolveIgnoresReader(ignorePattern, options.rootDir, resourceReader);
 
 	const workspace = createWorkspace({
-		reader: filteredCollection,
+		reader: ignoresReader,
 	});
 
 	const res = await lintWorkspace(workspace, options);
@@ -363,4 +302,68 @@ function isFileIncluded(file: string, patterns: string[]) {
 	}
 
 	return include;
+}
+
+async function resolveIgnoresReader(
+	ignorePattern: string[] | undefined,
+	projectRootDir: string,
+	resourceReader: AbstractReader) {
+	let fsBasePath = "";
+	let fsBasePathTest = "";
+	let virBasePath = "/resources/";
+	let virBasePathTest = "/test-resources/";
+	try {
+		const graph = await getProjectGraph(projectRootDir);
+		const project = graph.getRoot();
+		projectRootDir = project.getRootPath();
+		fsBasePath = project.getSourcePath();
+		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
+
+		if (!project._isSourceNamespaced) {
+			// Ensure the virtual filesystem includes the project namespace to allow relative imports
+			// of framework resources from the project
+			virBasePath += project.getNamespace() + "/";
+			virBasePathTest += project.getNamespace() + "/";
+		}
+	} catch {
+		// Project is not resolved i.e. in tests
+	}
+
+	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
+	const relFsBasePathTest = fsBasePathTest ? path.relative(projectRootDir, fsBasePathTest) : undefined;
+
+	const configMngr = new ConfigManager(projectRootDir);
+	const config = await configMngr.getConfiguration();
+	ignorePattern = [
+		...(config.ignores ?? []),
+		...(ignorePattern ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
+
+	// Patterns must be only relative (to project's root),
+	// otherwise throw an error
+	ignorePattern.forEach((pattern) => {
+		let notNegatedPattern = pattern;
+		if (pattern.startsWith("!")) {
+			notNegatedPattern = pattern.slice(1);
+		}
+
+		if (path.isAbsolute(notNegatedPattern)) {
+			throw Error(`Ignore pattern must be relative to project's root folder. ` +
+				`"${pattern}" defines an absolute path.`);
+		}
+	});
+
+	return !ignorePattern?.length ?
+		resourceReader :
+		createFilterReader({
+			reader: resourceReader,
+			callback: (resource: Resource) => {
+				// Minimatch works with FS and relative paths.
+				// So, we need to convert virtual paths to fs
+				const resPath = transformVirtualPathToFilePath(
+					resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
+
+				return isFileIncluded(resPath, ignorePattern);
+			},
+		});
 }
