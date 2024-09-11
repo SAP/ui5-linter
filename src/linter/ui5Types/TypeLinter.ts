@@ -14,7 +14,6 @@ const log = getLogger("linter:ui5Types:TypeLinter");
 const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	target: ts.ScriptTarget.ES2022,
 	module: ts.ModuleKind.ES2022,
-	moduleResolution: ts.ModuleResolutionKind.NodeNext,
 	// Skip lib check to speed up linting. Libs should generally be fine,
 	// we might want to add a unit test doing the check during development
 	skipLibCheck: true,
