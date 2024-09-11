@@ -1,0 +1,8 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:table="sap.ui.table"
+	xmlns:tablePlugins="sap.ui.table.plugins"
+>
+	<mvc:XMLView viewName="ui5.walkthrough.view.HelloPanel"/>
+	<mvc:View type="JSON" viewName="ui5.walkthrough.view.HelloPanel"/>
+</mvc:View>
