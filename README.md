@@ -95,6 +95,15 @@ Choose the output format. Currently, `stylish` (default), `json` and `markdown` 
 ui5lint --format json
 ```
 
+#### `--ignore-pattern`
+
+Pattern/files that will be ignored for linting. Can be defined also in `ui5lint.config.js`.
+
+**Example:**
+```sh
+ui5lint --ignore-pattern "./test"
+```
+
 ## Configuration
 
 UI5 Linter can be easily configured using an external configuration file. This file allows you to customize how the linter behaves, such as ignoring specific files or directories. 
