@@ -111,6 +111,14 @@ export default class LinterContext {
 		return this.#rootDir;
 	}
 
+	setRootReader(rootReader: AbstractReader): void {
+		if (this.#rootReader) {
+			throw new Error("Root reader is already defined");
+		}
+
+		this.#rootReader = rootReader;
+	}
+
 	getRootReader(): AbstractReader {
 		if (this.#rootReader) {
 			return this.#rootReader;

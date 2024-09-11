@@ -304,7 +304,7 @@ function isFileIncluded(file: string, patterns: string[]) {
 	return include;
 }
 
-async function resolveIgnoresReader(
+export async function resolveIgnoresReader(
 	ignorePattern: string[] | undefined,
 	projectRootDir: string,
 	resourceReader: AbstractReader) {
