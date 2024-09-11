@@ -31,7 +31,6 @@ function createCompilerHost(sourceFiles: SourceFiles, writtenFiles: WrittenFiles
 }
 
 const compilerOptions = {
-	moduleResolution: ts.ModuleResolutionKind.NodeNext,
 	checkJs: false,
 	allowJs: true,
 	skipLibCheck: true,
