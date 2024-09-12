@@ -112,7 +112,7 @@ The UI5 linter can easily be configured with an external configuration file, all
 The configuration file must be placed in the root directory of your project, alongside the `ui5.yaml` and `package.json` files. The linter will automatically detect and load the file when it runs.
 
 ### Supported Configuration File Names
-You can name your configuration file in one of the following formats:
+You can name your configuration file using one of the following formats:
 - `ui5lint.config.js`
 - `ui5lint.config.mjs`
 - `ui5lint.config.cjs`
