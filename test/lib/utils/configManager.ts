@@ -28,3 +28,19 @@ test("Check config file auto discovery", async (t) => {
 		],
 	}, "The configuration is derived from the discovered configuration file");
 });
+
+test("Throws an error if config file has Syntax errors", async (t) => {
+	const confManager = new ConfigManager(
+		"./test/fixtures/linter/projects/com.ui5.troublesome.app/", "ui5lint-custom-broken.config.cjs");
+
+	await t.throwsAsync(confManager.getConfiguration());
+});
+
+test("Resolves to an empty config if default module is not found", async (t) => {
+	const confManager = new ConfigManager(
+		"./test/fixtures/linter/projects/library.with.custom.paths/");
+
+	const config = await confManager.getConfiguration();
+
+	t.deepEqual(config, {}, "An empty configuration gets returned");
+});
