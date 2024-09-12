@@ -143,7 +143,7 @@ module.exports = {
 
 ### Configuration Options
 
-- **ignores**: This option allows you to define glob patterns to ignore specific files or directories during linting. Patterns are relative to the root of the project. You can also un-ignore specific files by using the `!` prefix. The order of the patterns matters—later patterns can override earlier ones.
+- **ignores**: This option allows you to define glob patterns to ignore specific files or directories during linting. Patterns are relative to the root of the project. You can also un-ignore specific files by using the `!` prefix. The order of the patterns matters; later patterns override earlier ones.
 
 Example:
 ```js
