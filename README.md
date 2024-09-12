@@ -153,7 +153,7 @@ ignores: [
 ];
 ```
 
-This provides flexible control over which files the UI5 Linter should process and which it should ignore.
+In this way, you can control which files the UI5 linter should process and which it should ignore.
 
 ## Support, Feedback, Contributing
 
