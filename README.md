@@ -97,7 +97,7 @@ ui5lint --format json
 
 #### `--ignore-pattern`
 
-Pattern/files that will be ignored for linting. Can be defined also in `ui5lint.config.js`.
+Pattern/files that will be ignored during linting. Can also be defined in `ui5lint.config.js`.
 
 **Example:**
 ```sh
