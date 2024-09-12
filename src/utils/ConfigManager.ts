@@ -42,6 +42,7 @@ export default class ConfigManager {
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
 			// Find configuration file
+			// @ts-expect-error If it's not a missing config file we need to propagate the exception
 			({default: config} = await Promise.any(
 				CONFIG_FILENAMES.map(
 					(filename) => {
@@ -50,7 +51,17 @@ export default class ConfigManager {
 						return import(configFilePath) as Promise<{default: UI5LintConfigType}>;
 					}))
 				// Promise.any would throw if nothing is found i.e. there's no config file
-				.catch(() => ({default: {}})));
+				.catch((errs: {errors: NodeJS.ErrnoException[]}) => {
+					const {errors} = errs;
+					if (errors?.every((e) => e?.code === "ERR_MODULE_NOT_FOUND")) {
+						return {default: {}} as {default: UI5LintConfigType};
+					}
+
+					const errToThrow = errors?.find((e) => e?.code !== "ERR_MODULE_NOT_FOUND");
+					if (errToThrow) {
+						throw errToThrow;
+					}
+				}));
 		}
 
 		return config;
