@@ -6,6 +6,7 @@ import {MESSAGE} from "../messages.js";
 import {RULES} from "../linterReporting.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
+import {getPropertyName} from "./utils.js";
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -80,15 +81,11 @@ export default class SourceFileLinter {
 
 	visitNode(node: ts.Node) {
 		if (node.kind === ts.SyntaxKind.NewExpression) { // e.g. "new Button({\n\t\t\t\tblocked: true\n\t\t\t})"
-			const nodeType = this.#checker.getTypeAtLocation(node); // checker.getContextualType(node);
-			if (nodeType.symbol && this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
-				this.analyzeNewExpression(nodeType, node as ts.NewExpression);
-			}
+			this.analyzeNewExpression(node as ts.NewExpression);
 		} else if (node.kind === ts.SyntaxKind.CallExpression) { // ts.isCallLikeExpression too?
 			// const nodeType = this.#checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
-			this.analyzeLibInitCall(node as ts.CallExpression); // Check for sap/ui/core/Lib.init usages
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 			node.kind === ts.SyntaxKind.ElementAccessExpression) {
 			this.analyzePropertyAccessExpression(
@@ -177,8 +174,19 @@ export default class SourceFileLinter {
 		});
 	}
 
-	analyzeNewExpression(nodeType: ts.Type, node: ts.NewExpression) {
+	analyzeNewExpression(node: ts.NewExpression) {
+		const nodeType = this.#checker.getTypeAtLocation(node); // checker.getContextualType(node);
+		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
+			return;
+		}
 		const classType = this.#checker.getTypeAtLocation(node.expression);
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		if (moduleDeclaration?.name.text === "sap/ui/core/routing/Router") {
+			this.#analyzeNewCoreRouter(node);
+		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
+			this.#analyzeNewOdataModelV4(node);
+		}
 
 		// There can be multiple and we need to find the right one
 		const [constructSignature] = classType.getConstructSignatures();
@@ -278,12 +286,33 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		if (!ts.isPropertyAccessExpression(exprNode) &&
-			!ts.isElementAccessExpression(exprNode) &&
-			!ts.isIdentifier(exprNode) &&
+		if (!ts.isPropertyAccessExpression(exprNode) && // Lib.init()
+			!ts.isElementAccessExpression(exprNode) && // Lib["init"]()
+			!ts.isIdentifier(exprNode) && // Assignment `const LibInit = Library.init` and destructuring
 			!ts.isCallExpression(exprNode)) {
 			// TODO: Transform into coverage message if it's really ok not to handle this
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
+		}
+
+		const moduleDeclaration = this.getSymbolModuleDeclaration(exprType.symbol);
+		if (exprType.symbol && moduleDeclaration) {
+			const symbolName = exprType.symbol.getName();
+			const moduleName = moduleDeclaration.name.text;
+
+			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
+				// Check for sap/ui/core/Lib.init usages
+				this.#analyzeLibInitCall(node, exprNode);
+			} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
+				this.#analyzeParametersGetCall(node);
+			} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
+				this.#analyzeCreateComponentCall(node);
+			} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
+				this.#analyzeJsonModelLoadDataCall(node);
+			} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
+				this.#analyzeOdataModelV2CreateEntry(node);
+			} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
+				this.#analyzeMobileInit(node);
+			}
 		}
 
 		const deprecationInfo = this.getDeprecationInfo(exprType.symbol);
@@ -319,26 +348,11 @@ export default class SourceFileLinter {
 			}
 		}
 
-		let reportNodeText;
-		if (ts.isStringLiteralLike(reportNode) || ts.isNumericLiteral(reportNode)) {
-			reportNodeText = reportNode.text;
-		} else {
-			reportNodeText = reportNode.getText();
-		}
-
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
-			functionName: reportNodeText,
+			functionName: getPropertyName(reportNode),
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
-	}
-
-	getPropertyName(node: ts.PropertyName): string {
-		if (ts.isStringLiteralLike(node) || ts.isNumericLiteral(node)) {
-			return node.text;
-		} else {
-			return node.getText();
-		}
 	}
 
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
@@ -349,24 +363,9 @@ export default class SourceFileLinter {
 		return parent;
 	}
 
-	analyzeLibInitCall(node: ts.CallExpression) {
-		if (!ts.isIdentifier(node.expression) && // Assignment `const LibInit = Library.init` and destructuring
-			!ts.isPropertyAccessExpression(node.expression) && /* Lib.init() */
-			!ts.isElementAccessExpression(node.expression) /* Lib["init"]() */) {
-			return;
-		}
-
-		const nodeExp = node.expression;
-		const nodeType = this.#checker.getTypeAtLocation(nodeExp);
-		if (!nodeType.symbol || nodeType.symbol.getName() !== "init") {
-			return;
-		}
-
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (!moduleDeclaration || moduleDeclaration.name.text !== "sap/ui/core/Lib") {
-			return;
-		}
-
+	#analyzeLibInitCall(
+		node: ts.CallExpression,
+		exprNode: ts.CallExpression | ts.ElementAccessExpression | ts.PropertyAccessExpression | ts.Identifier) {
 		const initArg = node?.arguments[0] &&
 			ts.isObjectLiteralExpression(node.arguments[0]) &&
 			node.arguments[0];
@@ -392,10 +391,10 @@ export default class SourceFileLinter {
 
 		if (nodeToHighlight) {
 			let importedVarName: string;
-			if (ts.isIdentifier(nodeExp)) {
-				importedVarName = nodeExp.getText();
+			if (ts.isIdentifier(exprNode)) {
+				importedVarName = exprNode.getText();
 			} else {
-				importedVarName = nodeExp.expression.getText() + ".init";
+				importedVarName = exprNode.expression.getText() + ".init";
 			}
 
 			this.#reporter.addMessage(MESSAGE.LIB_INIT_API_VERSION, {
@@ -436,6 +435,167 @@ export default class SourceFileLinter {
 				}, dependency);
 			}
 		});
+	}
+
+	#analyzeParametersGetCall(node: ts.CallExpression) {
+		if (node.arguments.length && ts.isObjectLiteralExpression(node.arguments[0])) {
+			// Non-deprecated usage
+			return;
+		}
+
+		this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET, node);
+	}
+
+	#analyzeCreateComponentCall(node: ts.CallExpression) {
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+		const firstArg = node.arguments[0];
+		let asyncFalseNode;
+		for (const prop of firstArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() !== "async") {
+				continue;
+			}
+			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+				asyncFalseNode = prop;
+				break;
+			}
+		}
+
+		if (asyncFalseNode) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, asyncFalseNode);
+		}
+	}
+
+	#analyzeOdataModelV2CreateEntry(node: ts.CallExpression) {
+		if (!node.arguments.length || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
+			return;
+		}
+		const secondArg = node.arguments[1];
+		let batchGroupId;
+		let properties;
+		for (const prop of secondArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "batchGroupId") {
+				batchGroupId = prop;
+			}
+			if (prop.name.getText() === "properties") {
+				properties = prop;
+			}
+		}
+
+		if (batchGroupId) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, batchGroupId);
+		}
+		if (properties && ts.isArrayLiteralExpression(properties.initializer)) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
+				properties);
+		}
+	}
+
+	#analyzeJsonModelLoadDataCall(node: ts.CallExpression) {
+		if (!node.arguments.length || node.arguments.length < 2) {
+			return;
+		}
+
+		const asyncArg = node.arguments[2];
+		if (asyncArg.kind === ts.SyntaxKind.FalseKeyword) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
+				paramName: "bAsync",
+			}, asyncArg);
+		}
+
+		if (node.arguments.length < 5) {
+			return;
+		}
+		const cacheArg = node.arguments[5];
+		if (cacheArg.kind === ts.SyntaxKind.FalseKeyword) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
+				paramName: "bCache",
+			}, cacheArg);
+		}
+	}
+
+	#analyzeMobileInit(node: ts.CallExpression) {
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+		const configArg = node.arguments[0];
+		let homeIconArg;
+		let homeIconPrecomposedArg;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			const propName = prop.name.getText();
+			if (propName === "homeIcon") {
+				homeIconArg = prop;
+			} else if (propName === "homeIconPrecomposed") {
+				homeIconPrecomposedArg = prop;
+			}
+		}
+
+		if (homeIconArg) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
+				paramName: "homeIcon",
+			}, homeIconArg);
+		}
+		if (homeIconPrecomposedArg) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
+				paramName: "homeIconPrecomposed",
+			}, homeIconPrecomposedArg);
+		}
+	}
+
+	#analyzeNewCoreRouter(node: ts.NewExpression) {
+		if (!node.arguments || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
+			return;
+		}
+
+		const configArg = node.arguments[1];
+
+		let asyncProb;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "async") {
+				asyncProb = prop;
+				break;
+			}
+		}
+
+		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, node);
+		}
+	}
+
+	#analyzeNewOdataModelV4(node: ts.NewExpression) {
+		if (!node.arguments || node.arguments.length < 1 || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+
+		const configArg = node.arguments[0];
+
+		let synchronizationModeProb;
+		for (const prop of configArg.properties) {
+			if (!ts.isPropertyAssignment(prop)) {
+				continue;
+			}
+			if (prop.name.getText() === "synchronizationMode") {
+				synchronizationModeProb = prop;
+				break;
+			}
+		}
+
+		if (synchronizationModeProb) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V4, synchronizationModeProb);
+		}
 	}
 
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
