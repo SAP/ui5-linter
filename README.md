@@ -106,7 +106,7 @@ ui5lint --ignore-pattern "./test"
 
 ## Configuration
 
-UI5 Linter can be easily configured using an external configuration file. This file allows you to customize how the linter behaves, such as ignoring specific files or directories. 
+The UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 
 
 ### Configuration File Location
 The configuration file must be placed in the root directory of your project, alongside the `ui5.yaml` and `package.json` files. The linter will automatically detect and load the file when it runs.
