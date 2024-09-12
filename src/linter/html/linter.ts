@@ -18,7 +18,7 @@ export default async function lintHtml({workspace, context}: LinterParameters) {
 			htmlResources.push(resource);
 		}));
 	} else {
-		htmlResources = await workspace.byGlob("**/{*.html}");
+		htmlResources = await workspace.byGlob("**/*.html");
 	}
 
 	await Promise.all(htmlResources.map(async (resource: Resource) => {
