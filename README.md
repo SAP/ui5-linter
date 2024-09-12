@@ -101,7 +101,7 @@ Pattern/files that will be ignored during linting. Can also be defined in `ui5li
 
 **Example:**
 ```sh
-ui5lint --ignore-pattern "./test"
+ui5lint --ignore-pattern "webapp/thirdparty/**"
 ```
 
 ## Configuration
@@ -125,8 +125,9 @@ If you need to specify a custom configuration file, you can provide it using the
 ```js
 export default {
   ignores: [
-    "test/**/*", 
-    "!test/sap/m/visual/Wizard.spec.js",
+    "webapp/thirdparty/**",
+    "webapp/test/**",
+    "!webapp/test/integration/**",
   ],
 };
 ```
@@ -135,8 +136,9 @@ export default {
 ```js
 module.exports = {
   ignores: [
-    "test/**/*", 
-    "!test/sap/m/visual/Wizard.spec.js",
+    "webapp/thirdparty/**",
+    "webapp/test/**",
+    "!webapp/test/integration/**",
   ],
 };
 ```
@@ -148,8 +150,8 @@ module.exports = {
 Example:
 ```js
 ignores: [
-  "test/**/*",              // Ignore all files in the test folder
-  "!test/sap/m/visual/**",  // Un-ignore files in a specific subdirectory
+  "webapp/test/**",               // Ignore all files in the test folder
+  "!webapp/test/integration/**",  // Un-ignore files in a specific subdirectory
 ];
 ```
 
