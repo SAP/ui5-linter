@@ -8,6 +8,12 @@
 		<title>QUnit test suite for the UI5 Application: com.ui5.troublesome.app</title>
 		<script src="../resources/sap/ui/qunit/qunit-redirect.js"></script>
 		<script src="testsuite.qunit.js" data-sap-ui-testsuite></script>
+
+		<script>
+			sap.ui.require([], async function () {
+				console.log("Hello")
+			});
+		</script>
 	</head>
 	<body></body>
 </html>
