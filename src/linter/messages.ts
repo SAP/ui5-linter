@@ -6,7 +6,7 @@ const RULES = {
 	"ui5-linter-no-partially-deprecated-api": "ui5-linter-no-partially-deprecated-api",
 	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",
 	"ui5-linter-no-pseudo-modules": "ui5-linter-no-pseudo-modules",
-	"ui5-linter-no-globals-js": "ui5-linter-no-globals-js",
+	"ui5-linter-no-globals": "ui5-linter-no-globals",
 	"ui5-linter-parsing-error": "ui5-linter-parsing-error",
 	"ui5-linter-no-deprecated-library": "ui5-linter-no-deprecated-library",
 	"ui5-linter-no-deprecated-component": "ui5-linter-no-deprecated-component",
@@ -214,7 +214,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NO_GLOBALS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-globals-js"],
+		ruleId: RULES["ui5-linter-no-globals"],
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
