@@ -62,6 +62,7 @@ export default class TypeChecker {
 	}
 
 	async lint() {
+		const silly = log.isLevelEnabled("silly");
 		const files: FileContents = new Map();
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 		let lazyFileLoading = true;
@@ -72,6 +73,14 @@ export default class TypeChecker {
 			lazyFileLoading = false;
 			pathsToLint = resources.map((resource) => resource.getPath());
 		}
+
+		// Sort paths to ensure consistent order (helps with debugging and comparing verbose/silly logs)
+		pathsToLint.sort((a, b) => a.localeCompare(b));
+
+		if (silly) {
+			log.silly(`pathsToLint: ${pathsToLint.join(", ")}`);
+		}
+
 		for (const resource of resources) {
 			const resourcePath = resource.getPath();
 			if (resourcePath.endsWith(".js.map")) {
@@ -91,8 +100,14 @@ export default class TypeChecker {
 		}
 
 		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps);
+
+		const createProgramDone = taskStart("ts.createProgram", undefined, true);
 		const program = ts.createProgram(pathsToLint, this.#compilerOptions, host);
+		createProgramDone();
+
+		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
 		const checker = program.getTypeChecker();
+		getTypeCheckerDone();
 
 		const dataTypesFile = await fs.readFile(
 			new URL("../../../resources/dataTypes.json", import.meta.url),
@@ -115,6 +130,9 @@ export default class TypeChecker {
 					if (res) {
 						manifestContent = await res.getString();
 					}
+				}
+				if (silly) {
+					log.silly(`Linting ${sourceFile.fileName}`);
 				}
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(

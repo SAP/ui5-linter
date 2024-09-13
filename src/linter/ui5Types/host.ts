@@ -5,6 +5,8 @@ import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
 import {ResourcePath} from "../LinterContext.js";
+import {getLogger} from "@ui5/logger";
+const log = getLogger("linter:ui5Types:host");
 const require = createRequire(import.meta.url);
 
 interface PackageJson {
@@ -65,6 +67,8 @@ export async function createVirtualCompilerHost(
 	options: ts.CompilerOptions,
 	files: FileContents, sourceMaps: FileContents
 ): Promise<ts.CompilerHost> {
+	const silly = log.isLevelEnabled("silly");
+
 	const typePathMappings = new Map<string, string>();
 	addPathMappingForPackage("typescript", typePathMappings);
 
@@ -155,9 +159,17 @@ export async function createVirtualCompilerHost(
 		}
 	}
 
+	if (silly) {
+		log.silly(`compilerOptions: ${JSON.stringify(options, null, 2)}`);
+	}
+
 	const sourceFileCache = new Map<string, ts.SourceFile>();
 	return {
 		directoryExists: (directory) => {
+			if (silly) {
+				log.silly(`directoryExists: ${directory}`);
+			}
+
 			if (directories.has(directory)) {
 				return true;
 			}
@@ -179,6 +191,9 @@ export async function createVirtualCompilerHost(
 		},
 		fileExists: (fileName) => {
 			// NOTE: This function should be kept in sync with "getFile"
+			if (silly) {
+				log.silly(`fileExists: ${fileName}`);
+			}
 
 			if (files.has(fileName)) {
 				return true;
@@ -191,11 +206,18 @@ export async function createVirtualCompilerHost(
 			}
 			return false;
 		},
-		getCurrentDirectory: () => options.rootDir ?? "/",
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		getCurrentDirectory: () => {
+			if (silly) {
+				log.silly(`getCurrentDirectory`);
+			}
+			return options.rootDir ?? "/";
+		},
+
 		getDirectories: (directory: string) => {
 			// This function seems to be called only if the "types" option is not set
-			// console.log(`getDirectories: ${directory}`);
+			if (silly) {
+				log.silly(`getDirectories: ${directory}`);
+			}
 			return [];
 		},
 		readDirectory: (
@@ -203,6 +225,10 @@ export async function createVirtualCompilerHost(
 			exclude?: readonly string[], include?: readonly string[],
 			depth?: number
 		): string[] => {
+			if (silly) {
+				log.silly(`readDirectory: ${dirPath}`);
+			}
+
 			// This function doesn't seem to be called during normal operations
 			// console.log(`readDirectory: ${dirPath}`);
 			return Array.from(files.keys()).filter((filePath) => {
@@ -215,7 +241,9 @@ export async function createVirtualCompilerHost(
 		getSourceFile: (
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) => {
-			// console.log(`getSourceFile ${fileName}`);
+			if (silly) {
+				log.silly(`getSourceFile: ${fileName}`);
+			}
 			if (sourceFileCache.has(fileName)) {
 				return sourceFileCache.get(fileName);
 			}
@@ -229,7 +257,9 @@ export async function createVirtualCompilerHost(
 			return sourceFile;
 		},
 		readFile: (fileName) => {
-			// console.log(`readFile ${fileName}`);
+			if (silly) {
+				log.silly(`readFile: ${fileName}`);
+			}
 			return getFile(fileName);
 		},
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
