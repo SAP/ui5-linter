@@ -230,7 +230,6 @@ export async function createVirtualCompilerHost(
 			}
 
 			// This function doesn't seem to be called during normal operations
-			// console.log(`readDirectory: ${dirPath}`);
 			return Array.from(files.keys()).filter((filePath) => {
 				if (include ?? exclude ?? depth ?? extensions) {
 					notImplemented("readDirectory: Optional parameters");
