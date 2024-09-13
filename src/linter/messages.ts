@@ -296,7 +296,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-property"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: ({modelName}: {modelName?: string}) =>
 			`Usage of deprecated parameter 'synchronizationMode' ` +
