@@ -79,10 +79,7 @@ export default class ManifestLinter {
 		});
 
 		if (resources?.js) {
-			this.#reporter?.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-				propertyName: "sap.ui5/resources/js",
-				details: "", // TODO
-			}, "/sap.ui5/resources/js");
+			this.#reporter?.addMessage(MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES, "/sap.ui5/resources/js");
 		}
 
 		const modelKeys: string[] = (models && Object.keys(models)) ?? [];
@@ -116,10 +113,8 @@ export default class ManifestLinter {
 
 			if (curModel.type === "sap.ui.model.odata.v4.ODataModel" &&
 				curModel.settings && "synchronizationMode" in curModel.settings) {
-				this.#reporter?.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS, {
-					propertyName: "synchronizationMode",
-					className: "sap.ui.model.odata.v4.ODataModel",
-					details: "As of Version 1.110.0, this parameter is obsolete.",
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, {
+					modelName: modelKey,
 				}, `/sap.ui5/models/${modelKey}/settings/synchronizationMode`);
 			}
 		});
