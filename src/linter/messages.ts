@@ -3,7 +3,7 @@
 const RULES = {
 	"ui5-linter-async-component-flags": "ui5-linter-async-component-flags",
 	"ui5-linter-no-deprecated-api": "ui5-linter-no-deprecated-api",
-	"ui5-linter-no-partially-deprecated-api": "ui5-linter-no-partially-deprecated-api",
+	"ui5-linter-no-deprecated-parameter": "ui5-linter-no-deprecated-parameter",
 	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",
 	"ui5-linter-no-pseudo-modules": "ui5-linter-no-pseudo-modules",
 	"ui5-linter-no-globals": "ui5-linter-no-globals",
@@ -185,7 +185,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.LIB_INIT_API_VERSION]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Call to ${libInitFunction}() must be declared with property {apiVersion: 2}`,
@@ -223,7 +223,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
@@ -232,7 +232,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
@@ -242,7 +242,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
@@ -252,7 +252,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
@@ -263,7 +263,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/model/json/JSONModel#loadData'`,
@@ -274,7 +274,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/util/Mobile#init'`,
@@ -285,7 +285,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
