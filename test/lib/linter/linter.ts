@@ -95,3 +95,17 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
+
+test.serial("lint: All files of library with sap.ui.suite namespace", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "sap.ui.suite");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		pathsToLint: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
