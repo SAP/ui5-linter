@@ -588,7 +588,7 @@ export default class SourceFileLinter {
 		}
 
 		if (synchronizationModeProb) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V4, synchronizationModeProb);
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, synchronizationModeProb);
 		}
 	}
 

@@ -28,6 +28,7 @@ export enum MESSAGE {
 	DEPRECATED_COMPONENT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LIBRARY,
+	DEPRECATED_MANIFEST_JS_RESOURCES,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
@@ -43,7 +44,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
 	PARTIALLY_DEPRECATED_MOBILE_INIT,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
-	PARTIALLY_DEPRECATED_ODATA_MODEL_V4,
+	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	PARSING_ERROR,
 	SVG_IN_XML,
 }
@@ -135,6 +136,16 @@ export const MESSAGE_INFO = {
 		message: ({libraryName}: {libraryName: string}) =>
 			`Use of deprecated library '${libraryName}'`,
 		details: () => undefined,
+	},
+
+	[MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["ui5-linter-no-deprecated-api"],
+
+		message: () =>
+			`Use of deprecated property 'sap.ui5/resources/js'`,
+		details: () => "As of version 1.94, the usage of js resources is deprecated. " +
+			"Please use regular dependencies instead.",
 	},
 
 	[MESSAGE.DEPRECATED_MODULE_IMPORT]: {
@@ -283,15 +294,15 @@ export const MESSAGE_INFO = {
 			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
 	},
 
-	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V4]: {
+	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-partially-deprecated-api"],
+		ruleId: RULES["ui5-linter-no-deprecated-property"],
 
-		message: () =>
-			`Usage of deprecated parameter 'mParameters.synchronizationMode' ` +
-			`of constructor 'sap/ui/model/odata/v4/ODataModel'`,
+		message: ({modelName}: {modelName?: string}) =>
+			`Usage of deprecated parameter 'synchronizationMode' ` +
+			`of constructor 'sap/ui/model/odata/v4/ODataModel'${modelName ? ` (model: '${modelName}')` : ""}`,
 		details: () =>
-			`Parameter 'synchronizationMode' is obsolete and must be omitted. ` +
+			`As of version 1.110.0, parameter 'synchronizationMode' is obsolete and must be omitted. ` +
 			`{@link sap/ui/model/odata/v4/ODataModel#constructor See API reference}`,
 	},
 

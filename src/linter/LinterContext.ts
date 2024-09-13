@@ -203,12 +203,12 @@ export default class LinterContext {
 			severity: messageInfo.severity,
 			line: rawMessage.position ? rawMessage.position.line : undefined,
 			column: rawMessage.position ? rawMessage.position.column : undefined,
-			message: messageFunc(rawMessage.args),
+			message: messageFunc(rawMessage.args || {}),
 		};
 
 		if (this.#includeMessageDetails) {
 			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string | undefined;
-			const messageDetails = detailsFunc(rawMessage.args);
+			const messageDetails = detailsFunc(rawMessage.args || {});
 			if (messageDetails) {
 				message.messageDetails = resolveLinks(messageDetails);
 			}
