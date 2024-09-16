@@ -31,6 +31,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 			jQuery.sap.require(); // ERROR: Global + deprecated variable "jQuery.sap"
 
 			QUnit.test(); // OK: Global third-party variable "QUnit"
+		 	QUnit["test"](); // OK: Global third-party variable "QUnit"
 			sinon.stub(); // OK: Global third-party variable "sinon"
 
 			sap?.ui?.define(); // OK: Special case sap.ui.define
@@ -38,7 +39,8 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 			globalThis.sap?.ui?.define() // OK: Special case sap.ui.define
 			window.sap?.ui?.define() // OK: Special case sap.ui.define
 			top.sap?.ui?.define() // OK: Special case sap.ui.define
-		 	parent.sap?.ui?.define() // OK: Special case sap.ui.define
+			parent.sap?.ui?.define() // OK: Special case sap.ui.define
+			Symbol("isProxy"); // OK: Global variable "Symbol"
 		}
 	});
 });

@@ -28,6 +28,10 @@ function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
 	return sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/library/");
 }
 
+function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
+	return sourceFile.fileName.startsWith("/types/typescript/lib/");
+}
+
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
@@ -217,7 +221,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression): string {
+	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression): string {
 		const propAccessChain: string[] = [];
 		propAccessChain.push(node.expression.getText());
 
@@ -683,7 +687,8 @@ export default class SourceFileLinter {
 			// Note: If this is a local variable, the symbol would be different
 			// In case it is, ensure it is not one of the allowed PropertyAccessExpressions, such as "sap.ui.require"
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
-				!(ts.isPropertyAccessExpression(node) && this.isAllowedPropertyAccess(node))) {
+				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
+					this.isAllowedPropertyAccess(node))) {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace: this.extractNamespace((node as ts.PropertyAccessExpression)),
@@ -692,7 +697,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	isAllowedPropertyAccess(node: ts.PropertyAccessExpression): boolean {
+	isAllowedPropertyAccess(node: ts.PropertyAccessExpression | ts.ElementAccessExpression): boolean {
 		if (!ts.isIdentifier(node.expression)) {
 			// TODO: Fixme if this happens
 			throw new Error(
@@ -781,6 +786,9 @@ export default class SourceFileLinter {
 		if (!declarations) {
 			return false;
 		}
-		return declarations.some((declaration) => checkFunction(declaration.getSourceFile()));
+		// First check if any declaration is from the TypeScript lib and if so, return false in order to never process
+		// such symbols (e.g. globals like 'Symbol', which might have dedicated types in UI5 thirdparty like JQuery)
+		return !declarations.some((declaration) => isSourceFileOfTypeScriptLib(declaration.getSourceFile())) &&
+			declarations.some((declaration) => checkFunction(declaration.getSourceFile()));
 	}
 }
