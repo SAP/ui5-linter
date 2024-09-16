@@ -5,6 +5,6 @@ import * as library from "sap/ui/core/library"; // Unused core library import fo
 
 export default class Component extends ParentComponent {
 	static metadata = {
-		manifest: "json"
+		manifest: 'json'
 	};
 }
