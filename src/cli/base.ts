@@ -33,13 +33,13 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 	builder: function (args: Argv<object>): Argv<LinterArg> {
 		args.usage("Usage: $0 [options]")
 			.option("config", {
-				describe: "Load a custom config by relative file path (default: './ui5lint.config.js')",
+				describe: "Load a custom config by file path",
 				type: "string",
 				alias: "c",
 			})
 			.option("ignore-pattern", {
 				describe: "Pattern/files that will be ignored during linting. " +
-					"Can also be defined in ui5linter.config.js",
+				"Can also be defined in ui5linter.config.js",
 				type: "string",
 			})
 			.array("ignore-pattern")
@@ -208,7 +208,7 @@ export default function base(cli: Argv) {
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +
-							` additional '--verbose' parameter`) + "\n");
+						` additional '--verbose' parameter`) + "\n");
 					}
 				}
 			} else {
