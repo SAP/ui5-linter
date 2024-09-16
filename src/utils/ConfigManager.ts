@@ -37,8 +37,11 @@ export default class ConfigManager {
 		let config = {} as UI5LintConfigType;
 
 		if (this.#configFile) {
-			// Relative paths are needed to make it work on Windows
-			const configFilePath = this.#resolveModulePaths(this.#configFile);
+			// If it's an relative path, transform to POSIX format
+			const configFilePath = path.isAbsolute(this.#configFile) ?
+				this.#configFile :
+				this.#resolveModulePaths(this.#configFile);
+
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
 			// Find configuration file

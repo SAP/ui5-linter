@@ -1,6 +1,6 @@
 module.exports = {
 	ignores: [
-		"test/**/*",
-		"!test/sap/m/visual/Wizard.spec.js"
+		"webapp/test/**/*",
+		"!webapp/test/integration/opaTests.qunit.js"
 	],
 };
