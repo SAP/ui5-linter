@@ -95,6 +95,77 @@ Choose the output format. Currently, `stylish` (default), `json` and `markdown` 
 ui5lint --format json
 ```
 
+#### `--ignore-pattern`
+
+Pattern/files that will be ignored during linting. Can also be defined in `ui5lint.config.js`.
+
+**Example:**
+```sh
+ui5lint --ignore-pattern "webapp/thirdparty/**"
+```
+
+#### `--config`
+
+Load a custom config by relative file path (default: `./ui5lint.config.js`).
+
+**Example:**
+```sh
+ui5lint --config ./ui5lint-custom.config.js
+```
+
+## Configuration
+
+The UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 
+
+### Configuration File Location
+The configuration file must be placed in the root directory of your project, alongside the `ui5.yaml` and `package.json` files. The linter will automatically detect and load the file when it runs.
+
+### Supported Configuration File Names
+You can name your configuration file using one of the following formats:
+- `ui5lint.config.js`
+- `ui5lint.config.mjs`
+- `ui5lint.config.cjs`
+
+If you need to specify a custom configuration file, you can provide it using the `--config` parameter via the command line.
+
+### Configuration File Format
+
+#### ESM (ECMAScript Modules):
+```js
+export default {
+  ignores: [
+    "webapp/thirdparty/**",
+    "webapp/test/**",
+    "!webapp/test/integration/**",
+  ],
+};
+```
+
+#### CommonJS:
+```js
+module.exports = {
+  ignores: [
+    "webapp/thirdparty/**",
+    "webapp/test/**",
+    "!webapp/test/integration/**",
+  ],
+};
+```
+
+### Configuration Options
+
+- **ignores**: This option allows you to define glob patterns to ignore specific files or directories during linting. Patterns are relative to the root of the project. You can also un-ignore specific files by using the `!` prefix. The order of the patterns matters; later patterns override earlier ones.
+
+Example:
+```js
+ignores: [
+  "webapp/test/**",               // Ignore all files in the test folder
+  "!webapp/test/integration/**",  // Un-ignore files in a specific subdirectory
+];
+```
+
+In this way, you can control which files the UI5 linter should process and which it should ignore.
+
 ## Support, Feedback, Contributing
 
 This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/SAP/ui5-linter/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).

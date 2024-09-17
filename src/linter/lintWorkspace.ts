@@ -7,6 +7,8 @@ import lintDotLibrary from "./dotLibrary/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
+import {createReader} from "@ui5/fs/resourceFactory";
+import {resolveIgnoresReader} from "./linter.js";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, options: LinterOptions
@@ -14,6 +16,15 @@ export default async function lintWorkspace(
 	const done = taskStart("Linting Workspace");
 
 	const context = new LinterContext(options);
+	context.setRootReader(await resolveIgnoresReader(
+		options.ignorePattern,
+		options.rootDir,
+		createReader({
+			fsBasePath: options.rootDir,
+			virBasePath: "/",
+		})
+	));
+
 	const params: LinterParameters = {
 		workspace, context,
 	};

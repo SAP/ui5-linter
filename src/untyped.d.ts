@@ -86,6 +86,8 @@ declare module "@ui5/fs" {
 	interface GlobOptions {
 		nodir?: boolean;
 	}
+	type Filter = (resource: Resource) => boolean;
+
 	export interface AbstractReader {
 		byGlob: (virPattern: string | string[], options?: GlobOptions) => Promise<Resource[]>;
 		byPath: (path: string) => Promise<Resource>;
@@ -120,6 +122,13 @@ declare module "@ui5/fs/resourceFactory" {
 			name?: string;
 		}
 	): import("@ui5/fs").AbstractAdapter;
+
+	export function createFilterReader(
+		parameters: {
+			reader: import("@ui5/fs").AbstractReader;
+			callback: import("@ui5/fs").Filter;
+		}
+	): import("@ui5/fs").AbstractReader;
 }
 
 declare module "@ui5/logger" {

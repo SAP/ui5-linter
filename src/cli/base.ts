@@ -14,8 +14,10 @@ import ConsoleWriter from "@ui5/logger/writers/Console";
 export interface LinterArg {
 	coverage: boolean;
 	filePaths?: string[];
+	ignorePattern?: string[];
 	details: boolean;
 	format: string;
+	config?: string;
 }
 
 // yargs type defition is missing the "middelwares" property for the CommandModule type
@@ -30,6 +32,17 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 	middlewares: [baseMiddleware],
 	builder: function (args: Argv<object>): Argv<LinterArg> {
 		args.usage("Usage: $0 [options]")
+			.option("config", {
+				describe: "Load a custom config by file path",
+				type: "string",
+				alias: "c",
+			})
+			.option("ignore-pattern", {
+				describe: "Pattern/files that will be ignored during linting. " +
+					"Can also be defined in ui5linter.config.js",
+				type: "string",
+			})
+			.array("ignore-pattern")
 			.option("file-paths", {
 				describe: "",
 				type: "string",
@@ -106,8 +119,10 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		coverage,
 		filePaths,
+		ignorePattern,
 		details,
 		format,
+		config,
 	} = argv;
 
 	let profile;
@@ -120,9 +135,11 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
+		ignorePattern,
 		pathsToLint: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
 		reportCoverage,
 		includeMessageDetails: details,
+		configPath: config,
 	});
 
 	if (reportCoverage) {

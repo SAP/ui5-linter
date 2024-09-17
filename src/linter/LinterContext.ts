@@ -59,8 +59,10 @@ export interface LinterOptions {
 	rootDir: string;
 	namespace?: string;
 	pathsToLint?: FilePath[];
+	ignorePattern?: string[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
+	configPath?: string;
 }
 
 export interface LinterParameters {
@@ -108,6 +110,14 @@ export default class LinterContext {
 
 	getRootDir(): string {
 		return this.#rootDir;
+	}
+
+	setRootReader(rootReader: AbstractReader): void {
+		if (this.#rootReader) {
+			throw new Error("Root reader is already defined");
+		}
+
+		this.#rootReader = rootReader;
 	}
 
 	getRootReader(): AbstractReader {
