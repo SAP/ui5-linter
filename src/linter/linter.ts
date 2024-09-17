@@ -9,7 +9,7 @@ import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager from "../utils/ConfigManager.js";
-import {minimatch} from "minimatch";
+import {Minimatch} from "minimatch";
 
 async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
@@ -291,18 +291,16 @@ function sortLintResults(lintResults: LintResult[]) {
 /**
  * Function to check if a file path matches the patterns
 */
-function isFileIncluded(file: string, patterns: string[]) {
+function isFileIncluded(file: string, patterns: Minimatch[]) {
 	let include = true;
 
 	for (const pattern of patterns) {
-		if (pattern.startsWith("!")) {
-			// Handle negation: exclude if the file matches the pattern
-			if (minimatch(file, pattern.slice(1))) {
+		if (pattern.negate) {
+			if (pattern.match(file)) {
 				include = true; // re-include it
 			}
 		} else {
-			// Handle inclusion: exclude if it matches
-			if (minimatch(file, pattern)) {
+			if (pattern.match(file)) { // Handle inclusion: exclude if it matches
 				include = false;
 			}
 		}
@@ -349,7 +347,7 @@ export async function resolveIgnoresReader(
 
 	// Patterns must be only relative (to project's root),
 	// otherwise throw an error
-	ignorePattern.forEach((pattern) => {
+	const miniIgnorePatterns = ignorePattern.map((pattern) => {
 		let notNegatedPattern = pattern;
 		if (pattern.startsWith("!")) {
 			notNegatedPattern = pattern.slice(1);
@@ -359,9 +357,11 @@ export async function resolveIgnoresReader(
 			throw Error(`Ignore pattern must be relative to project's root folder. ` +
 				`"${pattern}" defines an absolute path.`);
 		}
+
+		return new Minimatch(pattern, {flipNegate: true});
 	});
 
-	return !ignorePattern?.length ?
+	return !(miniIgnorePatterns.length) ?
 		resourceReader :
 		createFilterReader({
 			reader: resourceReader,
@@ -371,7 +371,7 @@ export async function resolveIgnoresReader(
 				const resPath = transformVirtualPathToFilePath(
 					resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
 
-				return isFileIncluded(resPath, ignorePattern);
+				return isFileIncluded(resPath, miniIgnorePatterns);
 			},
 		});
 }
