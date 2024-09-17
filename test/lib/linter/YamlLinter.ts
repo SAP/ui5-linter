@@ -31,17 +31,17 @@ framework:
 	t.is(messages.length, 3, "Detection of 3 deprecated libraries expected");
 
 	// Test each message
-	t.is(messages[0].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[0].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[0].message, `Use of deprecated library 'sap.ca.scfld.md'`, `Message is correct`);
 	t.is(messages[0].column, 7, `Column is correct`);
 	t.is(messages[0].line, 9, `Line is correct`);
 
-	t.is(messages[1].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[1].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[1].message, `Use of deprecated library 'sap.ca.ui'`, `Message is correct`);
 	t.is(messages[1].column, 7, `Column is correct`);
 	t.is(messages[1].line, 10, `Line is correct`);
 
-	t.is(messages[2].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[2].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[2].message, `Use of deprecated library 'sap.fe.common'`, `Message is correct`);
 	t.is(messages[2].column, 7, `Column is correct`);
 	t.is(messages[2].line, 11, `Line is correct`);
@@ -90,32 +90,32 @@ framework:
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
 
 	// Test each message
-	t.is(messages[0].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[0].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[0].message, `Use of deprecated library 'sap.sac.grid'`, `Message is correct`);
 	t.is(messages[0].column, 7, `Column is correct`);
 	t.is(messages[0].line, 11, `Line is correct`);
 
-	t.is(messages[1].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[1].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[1].message, `Use of deprecated library 'sap.ui.commons'`, `Message is correct`);
 	t.is(messages[1].column, 7, `Column is correct`);
 	t.is(messages[1].line, 12, `Line is correct`);
 
-	t.is(messages[2].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[2].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[2].message, `Use of deprecated library 'sap.ui.suite'`, `Message is correct`);
 	t.is(messages[2].column, 7, `Column is correct`);
 	t.is(messages[2].line, 13, `Line is correct`);
 
-	t.is(messages[3].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[3].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[3].message, `Use of deprecated library 'sap.ca.scfld.md'`, `Message is correct`);
 	t.is(messages[3].column, 7, `Column is correct`);
 	t.is(messages[3].line, 23, `Line is correct`);
 
-	t.is(messages[4].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[4].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[4].message, `Use of deprecated library 'sap.ca.ui'`, `Message is correct`);
 	t.is(messages[4].column, 7, `Column is correct`);
 	t.is(messages[4].line, 24, `Line is correct`);
 
-	t.is(messages[5].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[5].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[5].message, `Use of deprecated library 'sap.fe.common'`, `Message is correct`);
 	t.is(messages[5].column, 7, `Column is correct`);
 	t.is(messages[5].line, 25, `Line is correct`);
@@ -166,32 +166,32 @@ framework:
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
 
 	// Test each message
-	t.is(messages[0].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[0].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[0].message, `Use of deprecated library 'sap.sac.grid'`, `Message is correct`);
 	t.is(messages[0].column, 7, `Column is correct`);
 	t.is(messages[0].line, 11, `Line is correct`);
 
-	t.is(messages[1].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[1].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[1].message, `Use of deprecated library 'sap.ui.commons'`, `Message is correct`);
 	t.is(messages[1].column, 7, `Column is correct`);
 	t.is(messages[1].line, 12, `Line is correct`);
 
-	t.is(messages[2].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[2].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[2].message, `Use of deprecated library 'sap.ui.suite'`, `Message is correct`);
 	t.is(messages[2].column, 7, `Column is correct`);
 	t.is(messages[2].line, 13, `Line is correct`);
 
-	t.is(messages[3].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[3].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[3].message, `Use of deprecated library 'sap.ca.scfld.md'`, `Message is correct`);
 	t.is(messages[3].column, 7, `Column is correct`);
 	t.is(messages[3].line, 25, `Line is correct`);
 
-	t.is(messages[4].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[4].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[4].message, `Use of deprecated library 'sap.ca.ui'`, `Message is correct`);
 	t.is(messages[4].column, 7, `Column is correct`);
 	t.is(messages[4].line, 26, `Line is correct`);
 
-	t.is(messages[5].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[5].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[5].message, `Use of deprecated library 'sap.fe.common'`, `Message is correct`);
 	t.is(messages[5].column, 7, `Column is correct`);
 	t.is(messages[5].line, 27, `Line is correct`);
@@ -240,32 +240,32 @@ framework:
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
 
 	// Test each message
-	t.is(messages[0].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[0].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[0].message, `Use of deprecated library 'sap.sac.grid'`, `Message is correct`);
 	t.is(messages[0].column, 7, `Column is correct`);
 	t.is(messages[0].line, 11, `Line is correct`);
 
-	t.is(messages[1].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[1].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[1].message, `Use of deprecated library 'sap.ui.commons'`, `Message is correct`);
 	t.is(messages[1].column, 7, `Column is correct`);
 	t.is(messages[1].line, 12, `Line is correct`);
 
-	t.is(messages[2].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[2].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[2].message, `Use of deprecated library 'sap.ui.suite'`, `Message is correct`);
 	t.is(messages[2].column, 7, `Column is correct`);
 	t.is(messages[2].line, 13, `Line is correct`);
 
-	t.is(messages[3].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[3].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[3].message, `Use of deprecated library 'sap.ca.scfld.md'`, `Message is correct`);
 	t.is(messages[3].column, 7, `Column is correct`);
 	t.is(messages[3].line, 23, `Line is correct`);
 
-	t.is(messages[4].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[4].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[4].message, `Use of deprecated library 'sap.ca.ui'`, `Message is correct`);
 	t.is(messages[4].column, 7, `Column is correct`);
 	t.is(messages[4].line, 24, `Line is correct`);
 
-	t.is(messages[5].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[5].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[5].message, `Use of deprecated library 'sap.fe.common'`, `Message is correct`);
 	t.is(messages[5].column, 7, `Column is correct`);
 	t.is(messages[5].line, 25, `Line is correct`);
@@ -313,32 +313,32 @@ framework:
 	t.is(messages.length, 6, "Detection of 6 deprecated libraries expected");
 
 	// Test each message
-	t.is(messages[0].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[0].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[0].message, `Use of deprecated library 'sap.sac.grid'`, `Message is correct`);
 	t.is(messages[0].column, 7, `Column is correct`);
 	t.is(messages[0].line, 10, `Line is correct`);
 
-	t.is(messages[1].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[1].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[1].message, `Use of deprecated library 'sap.ui.commons'`, `Message is correct`);
 	t.is(messages[1].column, 7, `Column is correct`);
 	t.is(messages[1].line, 11, `Line is correct`);
 
-	t.is(messages[2].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[2].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[2].message, `Use of deprecated library 'sap.ui.suite'`, `Message is correct`);
 	t.is(messages[2].column, 7, `Column is correct`);
 	t.is(messages[2].line, 12, `Line is correct`);
 
-	t.is(messages[3].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[3].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[3].message, `Use of deprecated library 'sap.ca.scfld.md'`, `Message is correct`);
 	t.is(messages[3].column, 7, `Column is correct`);
 	t.is(messages[3].line, 22, `Line is correct`);
 
-	t.is(messages[4].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[4].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[4].message, `Use of deprecated library 'sap.ca.ui'`, `Message is correct`);
 	t.is(messages[4].column, 7, `Column is correct`);
 	t.is(messages[4].line, 23, `Line is correct`);
 
-	t.is(messages[5].ruleId, "ui5-linter-no-deprecated-library", `RuleId is correct`);
+	t.is(messages[5].ruleId, "no-deprecated-library", `RuleId is correct`);
 	t.is(messages[5].message, `Use of deprecated library 'sap.fe.common'`, `Message is correct`);
 	t.is(messages[5].column, 7, `Column is correct`);
 	t.is(messages[5].line, 24, `Line is correct`);
