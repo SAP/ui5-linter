@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.4.0](https://github.com/SAP/ui5-linter/compare/v0.3.5...v0.4.0) (2024-09-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **messages:** Drop 'ui5-linter-' prefix from rule names
+
+### Features
+
+* Allow excluding files from UI5 Linter checks ([#264](https://github.com/SAP/ui5-linter/issues/264)) ([7181a94](https://github.com/SAP/ui5-linter/commit/7181a945deff78b51e6326cc0b3f02e7f7241ebe))
+* Detect partially deprecated APIs ([#286](https://github.com/SAP/ui5-linter/issues/286)) ([dc66f91](https://github.com/SAP/ui5-linter/commit/dc66f91f55213d95d0fa069da7829e130d6376a2))
+
+
+### Bug Fixes
+
+* **asyncComponentFlags:** Fix detection of manifest: 'json' (single quotes) ([8a6af93](https://github.com/SAP/ui5-linter/commit/8a6af93163d75a9278576298c16fcfed509f4af0))
+* Bad formatting ([996e160](https://github.com/SAP/ui5-linter/commit/996e160847dabc17b81239fad36ac7b0e6d24617))
+* Ensure that results are in deterministic order ([5cd8757](https://github.com/SAP/ui5-linter/commit/5cd8757a390ef8a7f294018a4a63d21c29d6eb9a))
+* Eslint findings ([9d67098](https://github.com/SAP/ui5-linter/commit/9d67098d35214465a0a75a84e4631be9ac809b54))
+* Eslint findings ([f72109c](https://github.com/SAP/ui5-linter/commit/f72109c380ac31b3bd200d78d8fae2b253c4d071))
+* **linter/html:** Fix glob pattern to match HTML files ([18d80af](https://github.com/SAP/ui5-linter/commit/18d80af02388cefcb64110c8f8ea69ab3550510e))
+* **NoGlobals:** Fix false-positives for ElementAccessExpressions and some built-in globals ([db0a057](https://github.com/SAP/ui5-linter/commit/db0a057c476ef8795095884fe34584da68700ffb))
+* Remove moduleResolution CompilerHost setting ([1f1dbf8](https://github.com/SAP/ui5-linter/commit/1f1dbf820e11a561179ca6ca902f88ccf0de73e8))
+
+
+### Dependencies
+
+* Bump typescript from 5.5.4 to 5.6.2 ([2dfb412](https://github.com/SAP/ui5-linter/commit/2dfb4127a66335aa0704622c6a288c18395429dc))
+* Bump update-notifier from 7.3.0 to 7.3.1 ([2e26a3f](https://github.com/SAP/ui5-linter/commit/2e26a3f561b044b8ccca853e61ccebd0c758de18))
+
+
+### Code Refactoring
+
+* **messages:** Drop 'ui5-linter-' prefix from rule names ([119b61a](https://github.com/SAP/ui5-linter/commit/119b61a879123e7bcf6afdfc8584ebacaf3819ea))
+
 ## [0.3.5](https://github.com/SAP/ui5-linter/compare/v0.3.4...v0.3.5) (2024-09-04)
 
 
