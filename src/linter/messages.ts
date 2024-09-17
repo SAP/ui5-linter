@@ -1,16 +1,16 @@
 // TODO: Migrate to enum instead of Object/Map
 // Currently, it's done this way to avoid pollution of the test snapshots
 const RULES = {
-	"ui5-linter-async-component-flags": "ui5-linter-async-component-flags",
-	"ui5-linter-no-deprecated-api": "ui5-linter-no-deprecated-api",
-	"ui5-linter-no-deprecated-parameter": "ui5-linter-no-deprecated-parameter",
-	"ui5-linter-no-deprecated-property": "ui5-linter-no-deprecated-property",
-	"ui5-linter-no-pseudo-modules": "ui5-linter-no-pseudo-modules",
-	"ui5-linter-no-globals": "ui5-linter-no-globals",
-	"ui5-linter-parsing-error": "ui5-linter-parsing-error",
-	"ui5-linter-no-deprecated-library": "ui5-linter-no-deprecated-library",
-	"ui5-linter-no-deprecated-component": "ui5-linter-no-deprecated-component",
-	"ui5-linter-csp-unsafe-inline-script": "ui5-linter-csp-unsafe-inline-script",
+	"async-component-flags": "async-component-flags",
+	"no-deprecated-api": "no-deprecated-api",
+	"no-deprecated-parameter": "no-deprecated-parameter",
+	"no-deprecated-property": "no-deprecated-property",
+	"no-pseudo-modules": "no-pseudo-modules",
+	"no-globals": "no-globals",
+	"parsing-error": "parsing-error",
+	"no-deprecated-library": "no-deprecated-library",
+	"no-deprecated-component": "no-deprecated-component",
+	"csp-unsafe-inline-script": "csp-unsafe-inline-script",
 } as const;
 
 export enum LintMessageSeverity {
@@ -52,7 +52,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-async-component-flags"],
+		ruleId: RULES["async-component-flags"],
 
 		message: () =>
 			`Component is not configured for asynchronous loading.`,
@@ -64,7 +64,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["ui5-linter-async-component-flags"],
+		ruleId: RULES["async-component-flags"],
 
 		message: () =>
 			`Component does not specify that it uses the descriptor via the manifest.json file`,
@@ -76,7 +76,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.COMPONENT_REDUNDANT_ASYNC_FLAG]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["ui5-linter-async-component-flags"],
+		ruleId: RULES["async-component-flags"],
 
 		message: ({asyncFlagLocation}: {asyncFlagLocation: string}) =>
 			`Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
@@ -87,7 +87,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.CSP_UNSAFE_INLINE_SCRIPT]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["ui5-linter-csp-unsafe-inline-script"],
+		ruleId: RULES["csp-unsafe-inline-script"],
 
 		message: () => `Use of unsafe inline script`,
 		details: () => `{@link topic:fe1a6dba940e479fb7c3bc753f92b28c Content Security Policy}`,
@@ -95,7 +95,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_API_ACCESS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({apiName}: {apiName: string}) =>
 			`Use of deprecated API '${apiName}'`,
@@ -104,7 +104,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_CLASS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({className}: {className: string}) =>
 			`Use of deprecated class '${className}'`,
@@ -113,7 +113,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_COMPONENT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-component"],
+		ruleId: RULES["no-deprecated-component"],
 
 		message: ({componentName}: {componentName: string}) =>
 			`Use of deprecated component '${componentName}'`,
@@ -122,7 +122,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_FUNCTION_CALL]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({functionName, additionalMessage}: {functionName: string; additionalMessage: string}) =>
 			`Call to deprecated function '${functionName}'${additionalMessage ? ` ${additionalMessage}` : ""}`,
@@ -131,7 +131,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_LIBRARY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-library"],
+		ruleId: RULES["no-deprecated-library"],
 
 		message: ({libraryName}: {libraryName: string}) =>
 			`Use of deprecated library '${libraryName}'`,
@@ -140,7 +140,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () =>
 			`Use of deprecated property 'sap.ui5/resources/js'`,
@@ -150,7 +150,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_MODULE_IMPORT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({moduleName}: {moduleName: string}) =>
 			`Import of deprecated module '${moduleName}'`,
@@ -159,7 +159,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_PROPERTY_OF_CLASS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({propertyName, className}: {propertyName: string; className: string}) =>
 			`Use of deprecated property '${propertyName}' of class '${className}'`,
@@ -168,7 +168,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_PROPERTY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-property"],
+		ruleId: RULES["no-deprecated-property"],
 
 		message: ({propertyName}: {propertyName: string}) =>
 			`Use of deprecated property '${propertyName}'`,
@@ -177,7 +177,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.HTML_IN_XML]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () => `Usage of native HTML in XML Views/Fragments is deprecated`,
 		details: () => `{@link topic:be54950cae1041f59d4aa97a6bade2d8 Using Native HTML in XML Views (deprecated)}`,
@@ -185,7 +185,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.LIB_INIT_API_VERSION]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Call to ${libInitFunction}() must be declared with property {apiVersion: 2}`,
@@ -194,7 +194,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-pseudo-modules"],
+		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
 			`Deprecated access to DataType pseudo module '${moduleName}'`,
@@ -204,7 +204,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NO_DIRECT_ENUM_ACCESS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-pseudo-modules"],
+		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
 			`Deprecated access to enum pseudo module '${moduleName}'`,
@@ -214,7 +214,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NO_GLOBALS]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-globals"],
+		ruleId: RULES["no-globals"],
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
@@ -223,7 +223,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
@@ -232,7 +232,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
@@ -242,7 +242,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
@@ -252,7 +252,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
@@ -263,7 +263,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/model/json/JSONModel#loadData'`,
@@ -274,7 +274,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/util/Mobile#init'`,
@@ -285,7 +285,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
@@ -296,7 +296,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-parameter"],
 
 		message: ({modelName}: {modelName?: string}) =>
 			`Usage of deprecated parameter 'synchronizationMode' ` +
@@ -308,7 +308,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARSING_ERROR]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-parsing-error"],
+		ruleId: RULES["parsing-error"],
 		fatal: true,
 
 		message: ({message}: {message: string}) => message,
@@ -317,7 +317,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.SVG_IN_XML]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["ui5-linter-no-deprecated-api"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () => `Usage of SVG in XML Views/Fragments is deprecated`,
 		details: () => undefined,

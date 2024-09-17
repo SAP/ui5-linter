@@ -10,7 +10,7 @@ test.beforeEach((t) => {
 	t.context.lintResults = [{
 		filePath: "",
 		messages: [{
-			ruleId: "ui5-linter-no-deprecated-api",
+			ruleId: "no-deprecated-api",
 			severity: 2,
 			line: 5,
 			column: 1,
