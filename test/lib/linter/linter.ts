@@ -137,7 +137,7 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 		pathsToLint: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
-		configPath: path.join(projectPath, "ui5lint-custom.config.cjs"),
+		configPath: "./ui5lint-custom.config.cjs",
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
