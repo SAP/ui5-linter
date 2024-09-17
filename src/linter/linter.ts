@@ -295,14 +295,10 @@ function isFileIncluded(file: string, patterns: Minimatch[]) {
 	let include = true;
 
 	for (const pattern of patterns) {
-		if (pattern.negate) {
-			if (pattern.match(file)) {
-				include = true; // re-include it
-			}
-		} else {
-			if (pattern.match(file)) { // Handle inclusion: exclude if it matches
-				include = false;
-			}
+		if (pattern.negate && pattern.match(file)) {
+			include = true; // re-include it
+		} else if (pattern.match(file)) { // Handle inclusion: exclude if it matches
+			include = false;
 		}
 	}
 
