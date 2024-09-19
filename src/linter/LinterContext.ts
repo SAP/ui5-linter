@@ -59,7 +59,6 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	namespace?: string;
-	// pathsToLint?: FilePath[]; TODO: Remove
 	filePatterns?: FilePattern[];
 	ignorePattern?: FilePattern[];
 	reportCoverage?: boolean;
@@ -106,7 +105,7 @@ export default class LinterContext {
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#resourcePathsToLint = options.pathsToLint ? [...options.pathsToLint] : undefined;
+		this.#resourcePathsToLint = undefined; // TODO: Remove this one. Handled via files CLI functionality
 		this.#reportCoverage = !!options.reportCoverage;
 		this.#includeMessageDetails = !!options.includeMessageDetails;
 	}

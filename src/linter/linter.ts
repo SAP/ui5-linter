@@ -80,17 +80,10 @@ export async function lintProject({
 			})],
 		});
 	}
-	// let resolvedFilePaths;
-	// if (pathsToLint?.length) {
-	// 	const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
-	// 	resolvedFilePaths = transformFilePathsToVirtualPaths(
-	// 		absoluteFilePaths, fsBasePath, virBasePath, fsBasePathTest, virBasePathTest);
-	// }
 
 	const res = await lint(reader, {
 		rootDir,
 		namespace: project.getNamespace(),
-		// pathsToLint: resolvedFilePaths,
 		filePatterns,
 		ignorePattern,
 		reportCoverage,
@@ -122,17 +115,10 @@ export async function lintFile({
 		fsBasePath: rootDir,
 		virBasePath: namespace ? `/resources/${namespace}/` : "/",
 	});
-	// let resolvedFilePaths;
-	// if (pathsToLint?.length) {
-	// 	const absoluteFilePaths = resolveFilePaths(rootDir, pathsToLint);
-	// 	resolvedFilePaths = transformFilePathsToVirtualPaths(
-	// 		absoluteFilePaths, rootDir, "/", rootDir);
-	// }
 
 	const res = await lint(reader, {
 		rootDir,
 		namespace,
-		// pathsToLint: resolvedFilePaths,
 		filePatterns,
 		ignorePattern,
 		reportCoverage,

@@ -49,11 +49,6 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 			})
 			.array("ignore-pattern")
-			.option("file-paths", {
-				describe: "",
-				type: "string",
-			})
-			.array("file-paths")
 			.option("coverage", {
 				describe: "Whether to provide a coverage report",
 				type: "boolean",
@@ -117,9 +112,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				return arg;
 			})
 			.example("ui5lint --coverage",
-				"Execute ui5lint with coverage enabled")
-			.example("ui5lint --file-paths /path/to/resources",
-				"Execute command with scope of file-paths");
+				"Execute ui5lint with coverage enabled");
 
 		return args as Argv<LinterArg>;
 	},
@@ -129,7 +122,6 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		files: filePatterns,
 		coverage,
-		filePaths,
 		ignorePattern,
 		details,
 		format,
@@ -149,7 +141,6 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		rootDir: path.join(process.cwd()),
 		ignorePattern,
 		filePatterns,
-		pathsToLint: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
 		reportCoverage,
 		includeMessageDetails: details,
 		configPath: config,
