@@ -142,3 +142,18 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
+
+test.serial("lint: All files of com.ui5.troublesome.app with custom UI5 config", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		pathsToLint: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+		ui5ConfigPath: "./configs/ui5-custom.yaml",
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
