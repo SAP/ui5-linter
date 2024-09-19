@@ -15,13 +15,14 @@ async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	const {ignorePattern, configPath} = options;
+	const {ignorePattern, configPath, ui5ConfigPath} = options;
 
 	const ignoresReader = await resolveIgnoresReader(
 		ignorePattern,
 		options.rootDir,
 		resourceReader,
-		configPath
+		configPath,
+		ui5ConfigPath
 	);
 
 	const workspace = createWorkspace({
@@ -84,6 +85,7 @@ export async function lintProject({
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
+		ui5ConfigPath,
 	});
 
 	const relFsBasePath = path.relative(rootDir, fsBasePath);
@@ -310,13 +312,14 @@ export async function resolveIgnoresReader(
 	ignorePattern: string[] | undefined,
 	projectRootDir: string,
 	resourceReader: AbstractReader,
-	configPath?: string) {
+	configPath?: string,
+	ui5ConfigPath?: string) {
 	let fsBasePath = "";
 	let fsBasePathTest = "";
 	let virBasePath = "/resources/";
 	let virBasePathTest = "/test-resources/";
 	try {
-		const graph = await getProjectGraph(projectRootDir);
+		const graph = await getProjectGraph(projectRootDir, ui5ConfigPath);
 		const project = graph.getRoot();
 		projectRootDir = project.getRootPath();
 		fsBasePath = project.getSourcePath();
@@ -339,8 +342,13 @@ export async function resolveIgnoresReader(
 	const config = await configMngr.getConfiguration();
 	ignorePattern = [
 		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
+		...(ignorePattern ?? []), // patterns set by CLI go after config patterns
 	].filter(($) => $);
+
+	// TODO: move before project graph creation
+	// Set UI5Yaml Config path with CLI first
+	// Overwrite with Linter config second
+	ui5ConfigPath = !config.ui5Config ? ui5ConfigPath : config.ui5Config;
 
 	// Patterns must be only relative (to project's root),
 	// otherwise throw an error

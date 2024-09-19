@@ -4,6 +4,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface UI5LintConfigType {
 	ignores?: string[];
+	ui5Config?: string;
 };
 
 const CONFIG_FILENAMES = [
