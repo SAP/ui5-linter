@@ -3,6 +3,7 @@ import {fileURLToPath} from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface UI5LintConfigType {
+	files?: string[];
 	ignores?: string[];
 	ui5Config?: string;
 };
