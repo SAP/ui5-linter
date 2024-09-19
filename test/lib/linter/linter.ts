@@ -142,3 +142,21 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
+
+test.serial("lint: All files of module project", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "module");
+	const {lintProject} = t.context;
+
+	let res = await lintProject({
+		rootDir: projectPath,
+		pathsToLint: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+	});
+
+	res = res.sort((a: {filePath: string}, b: {filePath: string}) => {
+		return a.filePath.localeCompare(b.filePath);
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});

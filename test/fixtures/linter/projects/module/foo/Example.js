@@ -1,0 +1,1 @@
+sap.ui.getCore().attachInit(() => {});
