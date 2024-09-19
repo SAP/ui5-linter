@@ -15,21 +15,24 @@ async function lint(
 	resourceReader: AbstractReader, options: LinterOptions
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	const {ignorePattern, filePatterns, configPath} = options;
+	let {ignorePattern, filePatterns} = options;
+	const {configPath, rootDir} = options;
+	const configMngr = new ConfigManager(rootDir, configPath);
+	const config = await configMngr.getConfiguration();
 
 	// Resolve files to include
-	let reader = await resolveReader(
-		await resolvePatterns(options.rootDir, configPath, filePatterns),
-		options.rootDir,
-		resourceReader
-	);
+	filePatterns = [
+		...(config.files ?? []),
+		...(filePatterns ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
+	let reader = await resolveReader(filePatterns, rootDir, resourceReader);
 
 	// Resolve ignores
-	reader = await resolveReader(
-		await resolvePatterns(options.rootDir, configPath, ignorePattern),
-		options.rootDir,
-		reader
-	);
+	ignorePattern = [
+		...(config.ignores ?? []),
+		...(ignorePattern ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
+	reader = await resolveReader(ignorePattern, rootDir, reader);
 
 	const workspace = createWorkspace({reader});
 
@@ -315,9 +318,6 @@ function sortLintResults(lintResults: LintResult[]) {
 	lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
 }
 
-/**
- * Function to check if a file path matches the patterns
-*/
 function isFileIncluded(file: string, patterns: Minimatch[]) {
 	let include = true;
 
@@ -332,17 +332,7 @@ function isFileIncluded(file: string, patterns: Minimatch[]) {
 	return include;
 }
 
-async function resolvePatterns(
-	projectRootDir: string,
-	configPath?: string,
-	patterns?: string[]) {
-	const configMngr = new ConfigManager(projectRootDir, configPath);
-	const config = await configMngr.getConfiguration();
-	patterns = [
-		...(config.ignores ?? []),
-		...(patterns ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
-
+function buildPatterns(patterns: string[]) {
 	// Patterns must be only relative (to project's root),
 	// otherwise throw an error
 	return patterns.map((pattern) => {
@@ -352,7 +342,7 @@ async function resolvePatterns(
 		}
 
 		if (path.isAbsolute(notNegatedPattern)) {
-			throw Error(`Ignore pattern must be relative to project's root folder. ` +
+			throw Error(`Pattern must be relative to project's root folder. ` +
 				`"${pattern}" defines an absolute path.`);
 		}
 
@@ -361,11 +351,15 @@ async function resolvePatterns(
 }
 
 export async function resolveReader(
-	patterns: Minimatch[],
+	patterns: string[],
 	projectRootDir: string,
 	resourceReader: AbstractReader,
 	config: UI5LintConfigType,
 	ui5ConfigPath?: string) {
+	if (!patterns.length) {
+		return resourceReader;
+	}
+
 	let fsBasePath = "";
 	let fsBasePathTest = "";
 	let virBasePath = "/resources/";
@@ -390,17 +384,17 @@ export async function resolveReader(
 	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(projectRootDir, fsBasePathTest) : undefined;
 
-	return !(patterns.length) ?
-		resourceReader :
-		createFilterReader({
-			reader: resourceReader,
-			callback: (resource: Resource) => {
-				// Minimatch works with FS and relative paths.
-				// So, we need to convert virtual paths to fs
-				const resPath = transformVirtualPathToFilePath(
-					resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
+	const minimatchPatterns = buildPatterns(patterns);
 
-				return isFileIncluded(resPath, patterns);
-			},
-		});
+	return createFilterReader({
+		reader: resourceReader,
+		callback: (resource: Resource) => {
+			// Minimatch works with FS and relative paths.
+			// So, we need to convert virtual paths to fs
+			const resPath = transformVirtualPathToFilePath(
+				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
+
+			return isFileIncluded(resPath, minimatchPatterns);
+		},
+	});
 }
