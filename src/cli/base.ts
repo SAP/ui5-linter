@@ -13,6 +13,7 @@ import ConsoleWriter from "@ui5/logger/writers/Console";
 
 export interface LinterArg {
 	coverage: boolean;
+	files?: string[];
 	filePaths?: string[];
 	ignorePattern?: string[];
 	details: boolean;
@@ -21,18 +22,22 @@ export interface LinterArg {
 	ui5Config?: string;
 }
 
-// yargs type defition is missing the "middelwares" property for the CommandModule type
+// yargs type definition is missing the "middlewares" property for the CommandModule type
 interface FixedCommandModule<T, U> extends CommandModule<T, U> {
 	middlewares: MiddlewareFunction<U>[];
 }
 
 const lintCommand: FixedCommandModule<object, LinterArg> = {
-	command: "$0",
+	command: "$0 [files...]",
 	describe: "Runs linter",
 	handler: handleLint,
 	middlewares: [baseMiddleware],
 	builder: function (args: Argv<object>): Argv<LinterArg> {
-		args.usage("Usage: $0 [options]")
+		args.usage("Usage: $0 [files...] [options]")
+			.positional("files", {
+				describe: "List of patterns to lint", // Description of positional files
+				type: "string",
+			})
 			.option("config", {
 				describe: "Load a custom config by file path",
 				type: "string",
@@ -122,6 +127,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 
 async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
+		files,
 		coverage,
 		filePaths,
 		ignorePattern,
