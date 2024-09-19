@@ -194,6 +194,18 @@ test.serial("ui5lint --config", async (t) => {
 	});
 });
 
+test.serial("ui5lint --ui5-config", async (t) => {
+	const {cli, lintProject} = t.context;
+
+	await cli.parseAsync(["--ui5-config", "ui5.yaml"]);
+
+	t.true(lintProject.calledOnce, "Linter is called");
+	t.deepEqual(lintProject.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined, configPath: undefined,
+		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: "ui5.yaml",
+	});
+});
+
 test.serial("Yargs error handling", async (t) => {
 	const {processStdErrWriteStub, consoleWriterStopStub, cli, createExitStub} = t.context;
 	const processExitStub = createExitStub();
