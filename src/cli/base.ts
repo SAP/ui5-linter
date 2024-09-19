@@ -127,7 +127,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 
 async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
-		files,
+		files: filePatterns,
 		coverage,
 		filePaths,
 		ignorePattern,
@@ -148,6 +148,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
 		ignorePattern,
+		filePatterns,
 		pathsToLint: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
 		reportCoverage,
 		includeMessageDetails: details,

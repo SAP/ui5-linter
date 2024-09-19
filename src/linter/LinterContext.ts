@@ -4,6 +4,7 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 
+export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
 
@@ -58,8 +59,9 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	namespace?: string;
-	pathsToLint?: FilePath[];
-	ignorePattern?: string[];
+	// pathsToLint?: FilePath[]; TODO: Remove
+	filePatterns?: FilePattern[];
+	ignorePattern?: FilePattern[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;
