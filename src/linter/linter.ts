@@ -34,10 +34,10 @@ async function lint(
 }
 
 export async function lintProject({
-	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails, configPath,
+	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
 	const projectGraphDone = taskStart("Project Graph creation");
-	const graph = await getProjectGraph(rootDir);
+	const graph = await getProjectGraph(rootDir, ui5ConfigPath);
 	const project = graph.getRoot();
 	projectGraphDone();
 
@@ -100,7 +100,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath,
+	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
 	const reader = createReader({
 		fsBasePath: rootDir,
@@ -121,6 +121,7 @@ export async function lintFile({
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
+		ui5ConfigPath,
 	});
 
 	res.forEach((result) => {
@@ -132,9 +133,9 @@ export async function lintFile({
 	return res;
 }
 
-async function getProjectGraph(rootDir: string): Promise<ProjectGraph> {
+async function getProjectGraph(rootDir: string, ui5ConfigPath?: string): Promise<ProjectGraph> {
 	let rootConfigPath, rootConfiguration;
-	const ui5YamlPath = path.join(rootDir, "ui5.yaml");
+	const ui5YamlPath = ui5ConfigPath ? ui5ConfigPath : path.join(rootDir, "ui5.yaml");
 	if (await fileExists(ui5YamlPath)) {
 		rootConfigPath = ui5YamlPath;
 	} else {

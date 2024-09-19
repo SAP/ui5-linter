@@ -18,6 +18,7 @@ export interface LinterArg {
 	details: boolean;
 	format: string;
 	config?: string;
+	ui5Config?: string;
 }
 
 // yargs type defition is missing the "middelwares" property for the CommandModule type
@@ -39,7 +40,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 			})
 			.option("ignore-pattern", {
 				describe: "Pattern/files that will be ignored during linting. " +
-					"Can also be defined in ui5linter.config.js",
+				"Can also be defined in ui5linter.config.js",
 				type: "string",
 			})
 			.array("ignore-pattern")
@@ -87,6 +88,10 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 				choices: ["stylish", "json", "markdown"],
 			})
+			.option("ui5-config", {
+				describe: "Set a custom path for the UI5 Config (default: './ui5.yaml')",
+				type: "string",
+			})
 			.coerce([
 				// base.js
 				"log-level",
@@ -123,6 +128,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		details,
 		format,
 		config,
+		ui5Config,
 	} = argv;
 
 	let profile;
@@ -140,6 +146,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		reportCoverage,
 		includeMessageDetails: details,
 		configPath: config,
+		ui5ConfigPath: ui5Config,
 	});
 
 	if (reportCoverage) {
@@ -208,7 +215,7 @@ export default function base(cli: Argv) {
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +
-							` additional '--verbose' parameter`) + "\n");
+						` additional '--verbose' parameter`) + "\n");
 					}
 				}
 			} else {
