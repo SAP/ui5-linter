@@ -63,6 +63,7 @@ export interface LinterOptions {
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;
+	ui5ConfigPath?: string;
 }
 
 export interface LinterParameters {

@@ -1,0 +1,15 @@
+specVersion: '4.0'
+metadata:
+  name: com.ui5.troublesome.app
+type: application
+framework:
+  name: OpenUI5
+  version: "1.121.0"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.landvisz
+resources:
+  configuration:
+    paths:
+      webapp: webapp2
