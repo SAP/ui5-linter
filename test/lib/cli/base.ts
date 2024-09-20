@@ -136,7 +136,7 @@ test.serial("ui5lint --coverage ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined, configPath: undefined,
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePattern: undefined, configPath: undefined,
 		includeMessageDetails: false, reportCoverage: true, ui5ConfigPath: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
@@ -168,7 +168,7 @@ test.serial("ui5lint --ignore-pattern ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: ["test/**/*"], configPath: undefined,
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePattern: ["test/**/*"], configPath: undefined,
 		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: undefined,
 	});
 });
@@ -189,7 +189,7 @@ test.serial("ui5lint --config", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined, configPath: "config.js",
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePattern: undefined, configPath: "config.js",
 		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: undefined,
 	});
 });
@@ -216,7 +216,7 @@ test.serial("Yargs error handling", async (t) => {
 		handler: async function () {},
 	});
 
-	await cli.parseAsync(["invalid"]);
+	await cli.parseAsync(["--invalid"]);
 
 	t.is(processExitStub.firstCall.firstArg, 2, "Should exit with error code 2");
 	t.is(consoleWriterStopStub.callCount, 0, "ConsoleWriter.stop did not get called");
