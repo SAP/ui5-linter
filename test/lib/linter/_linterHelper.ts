@@ -139,7 +139,7 @@ function testDefinition(
 		const res = await lintFile({
 			rootDir: fixturesPath,
 			namespace,
-			pathsToLint: filePaths,
+			filePatterns: filePaths,
 			reportCoverage: true,
 			includeMessageDetails: true,
 		});
