@@ -3,11 +3,13 @@
 	"reporter": ["lcov", "text", "text-summary"],
 	"include": ["src/**"],
 	"exclude": [
-		"src/cli/middlewares/updateNotifier.ts"
+		"src/cli/middlewares/updateNotifier.ts",
+		"src/cli/utils/profile.ts",
+		"src/linter/xmlTemplate/lib/JSTokenizer.js"
 	],
 	"check-coverage": true,
 	"statements": 72,
-	"branches": 61,
+	"branches": 68,
 	"functions": 75,
 	"lines": 72,
 	"watermarks": {
