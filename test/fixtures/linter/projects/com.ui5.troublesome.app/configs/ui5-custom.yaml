@@ -9,3 +9,7 @@ framework:
     - name: sap.m
     - name: sap.ui.core
     - name: sap.landvisz
+resources:
+  configuration:
+    paths:
+      webapp: webapp2
