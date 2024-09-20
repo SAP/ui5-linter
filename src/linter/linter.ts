@@ -143,10 +143,11 @@ export async function lintFile({
 
 async function getProjectGraph(rootDir: string, ui5ConfigPath?: string): Promise<ProjectGraph> {
 	let rootConfigPath, rootConfiguration;
-	const ui5YamlPath = ui5ConfigPath ? ui5ConfigPath : path.join(rootDir, "ui5.yaml");
+	const ui5YamlPath = ui5ConfigPath ? path.join(rootDir, ui5ConfigPath) : path.join(rootDir, "ui5.yaml");
 	if (await fileExists(ui5YamlPath)) {
 		rootConfigPath = ui5YamlPath;
 	} else {
+		if (ui5ConfigPath) throw new Error(`Unable to find UI5 config file '${ui5ConfigPath}'`);
 		const isApp = await dirExists(path.join(rootDir, "webapp"));
 		if (isApp) {
 			rootConfiguration = {
