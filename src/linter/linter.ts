@@ -85,7 +85,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
+	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath,
 }: LinterOptions): Promise<LintResult[]> {
 	const configMngr = new ConfigManager(rootDir, configPath);
 	const config = await configMngr.getConfiguration();
@@ -109,7 +109,6 @@ export async function lintFile({
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
-		ui5ConfigPath,
 	}, config);
 
 	res.forEach((result) => {
