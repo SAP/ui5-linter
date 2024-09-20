@@ -25,6 +25,7 @@ export default async function lintWorkspace(
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
 		}),
+		true,
 		config
 	);
 	reader = await resolveReader(options.ignorePattern ?? [], options.rootDir, reader);
