@@ -25,7 +25,7 @@ async function lint(
 		...(config.files ?? []),
 		...(filePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
-	let reader = await resolveReader(filePatterns, rootDir, resourceReader);
+	let reader = await resolveReader(filePatterns, rootDir, resourceReader, true);
 
 	// Resolve ignores
 	ignorePattern = [
@@ -355,7 +355,8 @@ export async function resolveReader(
 	projectRootDir: string,
 	resourceReader: AbstractReader,
 	config: UI5LintConfigType,
-	ui5ConfigPath?: string) {
+	ui5ConfigPath?: string,
+	inverseResult = false) {
 	if (!patterns.length) {
 		return resourceReader;
 	}
@@ -394,7 +395,11 @@ export async function resolveReader(
 			const resPath = transformVirtualPathToFilePath(
 				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
 
-			return isFileIncluded(resPath, minimatchPatterns);
+			return inverseResult ?
+					// When we work with files paths we actually need to limit the result to those
+					// matches, instead of allowing all except XYZ
+					!isFileIncluded(resPath, minimatchPatterns) :
+				isFileIncluded(resPath, minimatchPatterns);
 		},
 	});
 }
