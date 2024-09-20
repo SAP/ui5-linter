@@ -38,7 +38,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -57,7 +57,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: filePaths,
+		filePatterns: filePaths,
 	});
 
 	assertExpectedLintResults(t, res, projectPath, [
@@ -74,7 +74,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -88,7 +88,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ignorePattern: [
@@ -106,7 +106,7 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -120,7 +120,7 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -134,7 +134,7 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		configPath: "./ui5lint-custom.config.cjs",

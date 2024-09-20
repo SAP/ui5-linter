@@ -65,14 +65,9 @@ export default class TypeChecker {
 		const silly = log.isLevelEnabled("silly");
 		const files: FileContents = new Map();
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
-		let lazyFileLoading = true;
 
 		const resources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
-		let pathsToLint = this.#context.getPathsToLint();
-		if (!pathsToLint?.length) {
-			lazyFileLoading = false;
-			pathsToLint = resources.map((resource) => resource.getPath());
-		}
+		const pathsToLint = resources.map((resource) => resource.getPath());
 
 		// Sort paths to ensure consistent order (helps with debugging and comparing verbose/silly logs)
 		pathsToLint.sort((a, b) => a.localeCompare(b));
@@ -90,12 +85,7 @@ export default class TypeChecker {
 					await resource.getString()
 				);
 			} else {
-				if (lazyFileLoading && resource.getSourceMetadata().adapter === "FileSystem" &&
-					!resource.getSourceMetadata().contentModified) {
-					files.set(resourcePath, () => ts.sys.readFile(resource.getSourceMetadata().fsPath) ?? "");
-				} else {
-					files.set(resourcePath, await resource.getString());
-				}
+				files.set(resourcePath, await resource.getString());
 			}
 		}
 
