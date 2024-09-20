@@ -81,12 +81,11 @@ export function createTestsForFixtures(fixturesPath: string) {
 			const dirName = path.basename(fixturesPath);
 			testDefinition({
 				testName: dirName,
-				namespace: "mycomp",
 				fileName: dirName,
 				fixturesPath,
 				// Needed, because without a namespace, TS's type definition detection
 				// does not function properly for the inheritance case
-				filePaths: testFiles.map((fileName) => path.join("resources", "mycomp", fileName)),
+				filePaths: testFiles,
 			});
 		} else {
 			for (const fileName of testFiles) {
