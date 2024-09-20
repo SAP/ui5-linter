@@ -40,7 +40,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 			})
 			.option("ignore-pattern", {
 				describe: "Pattern/files that will be ignored during linting. " +
-				"Can also be defined in ui5linter.config.js",
+					"Can also be defined in ui5linter.config.js",
 				type: "string",
 			})
 			.array("ignore-pattern")
@@ -215,7 +215,7 @@ export default function base(cli: Argv) {
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +
-						` additional '--verbose' parameter`) + "\n");
+							` additional '--verbose' parameter`) + "\n");
 					}
 				}
 			} else {
