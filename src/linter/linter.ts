@@ -37,6 +37,12 @@ async function lint(
 export async function lintProject({
 	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
+	const configMngr = new ConfigManager(rootDir, configPath);
+	const config = await configMngr.getConfiguration();
+
+	// In case path is set both by CLI and config use CLI
+	ui5ConfigPath = ui5ConfigPath ?? config.ui5Config;
+
 	const projectGraphDone = taskStart("Project Graph creation");
 	const graph = await getProjectGraph(rootDir, ui5ConfigPath);
 	const project = graph.getRoot();
@@ -344,11 +350,6 @@ export async function resolveIgnoresReader(
 		...(config.ignores ?? []),
 		...(ignorePattern ?? []), // patterns set by CLI go after config patterns
 	].filter(($) => $);
-
-	// TODO: move before project graph creation
-	// Set UI5Yaml Config path with CLI first
-	// Overwrite with Linter config second
-	ui5ConfigPath = !config.ui5Config ? ui5ConfigPath : config.ui5Config;
 
 	// Patterns must be only relative (to project's root),
 	// otherwise throw an error
