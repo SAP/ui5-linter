@@ -8,31 +8,8 @@ import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
-import ConfigManager from "../utils/ConfigManager.js";
+import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
-
-async function lint(
-	resourceReader: AbstractReader, options: LinterOptions
-): Promise<LintResult[]> {
-	const lintEnd = taskStart("Linting");
-	const {ignorePattern, configPath, ui5ConfigPath} = options;
-
-	const ignoresReader = await resolveIgnoresReader(
-		ignorePattern,
-		options.rootDir,
-		resourceReader,
-		configPath,
-		ui5ConfigPath
-	);
-
-	const workspace = createWorkspace({
-		reader: ignoresReader,
-	});
-
-	const res = await lintWorkspace(workspace, options);
-	lintEnd();
-	return res;
-}
 
 export async function lintProject({
 	rootDir, pathsToLint, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
@@ -92,7 +69,7 @@ export async function lintProject({
 		includeMessageDetails,
 		configPath,
 		ui5ConfigPath,
-	});
+	}, config);
 
 	const relFsBasePath = path.relative(rootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(rootDir, fsBasePathTest) : undefined;
@@ -110,6 +87,9 @@ export async function lintProject({
 export async function lintFile({
 	rootDir, pathsToLint, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
+	const configMngr = new ConfigManager(rootDir, configPath);
+	const config = await configMngr.getConfiguration();
+
 	const reader = createReader({
 		fsBasePath: rootDir,
 		virBasePath: namespace ? `/resources/${namespace}/` : "/",
@@ -130,7 +110,7 @@ export async function lintFile({
 		includeMessageDetails,
 		configPath,
 		ui5ConfigPath,
-	});
+	}, config);
 
 	res.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath, "", "/");
@@ -138,6 +118,29 @@ export async function lintFile({
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
 	sortLintResults(res);
+	return res;
+}
+
+async function lint(
+	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
+): Promise<LintResult[]> {
+	const lintEnd = taskStart("Linting");
+	const {ignorePattern, ui5ConfigPath} = options;
+
+	const ignoresReader = await resolveIgnoresReader(
+		ignorePattern,
+		options.rootDir,
+		resourceReader,
+		config,
+		ui5ConfigPath
+	);
+
+	const workspace = createWorkspace({
+		reader: ignoresReader,
+	});
+
+	const res = await lintWorkspace(workspace, options, config);
+	lintEnd();
 	return res;
 }
 
@@ -319,7 +322,7 @@ export async function resolveIgnoresReader(
 	ignorePattern: string[] | undefined,
 	projectRootDir: string,
 	resourceReader: AbstractReader,
-	configPath?: string,
+	config: UI5LintConfigType,
 	ui5ConfigPath?: string) {
 	let fsBasePath = "";
 	let fsBasePathTest = "";
@@ -345,8 +348,6 @@ export async function resolveIgnoresReader(
 	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
 	const relFsBasePathTest = fsBasePathTest ? path.relative(projectRootDir, fsBasePathTest) : undefined;
 
-	const configMngr = new ConfigManager(projectRootDir, configPath);
-	const config = await configMngr.getConfiguration();
 	ignorePattern = [
 		...(config.ignores ?? []),
 		...(ignorePattern ?? []), // patterns set by CLI go after config patterns
