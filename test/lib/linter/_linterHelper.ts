@@ -144,7 +144,9 @@ function testDefinition(
 			reportCoverage: true,
 			includeMessageDetails: true,
 		});
-		assertExpectedLintResults(t, res, fixturesPath, filePaths);
+		assertExpectedLintResults(t, res, fixturesPath,
+			filePaths.map((fileName) => namespace ? path.posix.join("resources", namespace, fileName) : fileName));
+
 		res.forEach((result) => {
 			const resultFileName = path.basename(result.filePath);
 			if (resultFileName === fileName) {
