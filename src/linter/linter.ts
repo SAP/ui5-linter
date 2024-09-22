@@ -25,14 +25,25 @@ async function lint(
 		...(config.files ?? []),
 		...(filePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
-	let reader = await resolveReader(filePatterns, rootDir, resourceReader, true);
+	let reader = await resolveReader({
+		patterns: filePatterns,
+		projectRootDir: rootDir,
+		resourceReader,
+		inverseResult: true,
+		namespace: options.namespace,
+	});
 
 	// Resolve ignores
 	ignorePattern = [
 		...(config.ignores ?? []),
 		...(ignorePattern ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
-	reader = await resolveReader(ignorePattern, rootDir, reader);
+	reader = await resolveReader({
+		patterns: ignorePattern,
+		projectRootDir: rootDir,
+		resourceReader: reader,
+		namespace: options.namespace,
+	});
 
 	const workspace = createWorkspace({reader});
 
@@ -350,21 +361,30 @@ function buildPatterns(patterns: string[]) {
 	});
 }
 
-export async function resolveReader(
-	patterns: string[],
-	projectRootDir: string,
-	resourceReader: AbstractReader,
+export async function resolveReader({
+	patterns,
+	projectRootDir,
+	resourceReader,
+	namespace,
+	inverseResult = false,
+}: {
+	patterns: string[];
+	projectRootDir: string;
+	resourceReader: AbstractReader;
+	namespace?: string;
 	config: UI5LintConfigType,
 	ui5ConfigPath?: string,
-	inverseResult = false) {
+	inverseResult?: boolean;
+}) {
 	if (!patterns.length) {
 		return resourceReader;
 	}
 
-	let fsBasePath = "";
+	let fsBasePath = projectRootDir;
 	let fsBasePathTest = "";
-	let virBasePath = "/resources/";
-	let virBasePathTest = "/test-resources/";
+	let virBasePath = namespace ? `/resources/${namespace}/` : "/resources/";
+	let virBasePathTest = namespace ? `/resources/${namespace}/` : "/test-resources/";
+
 	try {
 		const graph = await getProjectGraph(projectRootDir, ui5ConfigPath);
 		const project = graph.getRoot();
@@ -372,7 +392,7 @@ export async function resolveReader(
 		fsBasePath = project.getSourcePath();
 		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
 
-		if (!project._isSourceNamespaced) {
+		if (!namespace && !project._isSourceNamespaced) {
 			// Ensure the virtual filesystem includes the project namespace to allow relative imports
 			// of framework resources from the project
 			virBasePath += project.getNamespace() + "/";

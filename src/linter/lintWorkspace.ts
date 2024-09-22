@@ -18,17 +18,23 @@ export default async function lintWorkspace(
 	const done = taskStart("Linting Workspace");
 
 	const context = new LinterContext(options);
-	let reader = await resolveReader(
-		options.filePatterns ?? [],
-		options.rootDir,
-		createReader({
+	let reader = await resolveReader({
+		patterns: options.filePatterns ?? [],
+		projectRootDir: options.rootDir,
+		resourceReader: createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
 		}),
-		true,
-		config
-	);
-	reader = await resolveReader(options.ignorePattern ?? [], options.rootDir, reader);
+		inverseResult: true,
+		config,
+		namespace: options.namespace,
+	});
+	reader = await resolveReader({
+		patterns: options.ignorePattern ?? [],
+		projectRootDir: options.rootDir,
+		resourceReader: reader,
+		namespace: options.namespace,
+	});
 	context.setRootReader(reader);
 
 	const params: LinterParameters = {
