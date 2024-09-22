@@ -381,9 +381,9 @@ export async function resolveReader({
 	}
 
 	let fsBasePath = projectRootDir;
-	let fsBasePathTest = "";
+	let fsBasePathTest = path.join(projectRootDir, "test");
 	let virBasePath = namespace ? `/resources/${namespace}/` : "/resources/";
-	let virBasePathTest = namespace ? `/resources/${namespace}/` : "/test-resources/";
+	let virBasePathTest = namespace ? `/test-resources/${namespace}/` : "/test-resources/";
 
 	try {
 		const graph = await getProjectGraph(projectRootDir, ui5ConfigPath);
