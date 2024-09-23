@@ -28,12 +28,12 @@ export enum MESSAGE {
 	DEPRECATED_COMPONENT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LIBRARY,
+	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_MANIFEST_JS_RESOURCES,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	DEPRECATED_PROPERTY,
 	DEPRECATED_PROPERTY_OF_CLASS,
-	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
 	DUPLICATE_BOOTSTRAP_PARAM,
@@ -164,6 +164,15 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-library"],
+
+		message: ({themeName}: {themeName: string}) =>
+			`Use of deprecated theme '${themeName}'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -213,15 +222,6 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
-	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-library"],
-
-		message: ({themeName}: {themeName: string}) =>
-			`Use of deprecated theme '${themeName}'`,
-		details: () => undefined,
-	},
-
 	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -250,6 +250,15 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Missing bootstrap parameter '${name}'`,
+		details: ({details}: {details?: string}) => details,
+	},
+
 	[MESSAGE.HTML_IN_XML]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -265,15 +274,6 @@ export const MESSAGE_INFO = {
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Deprecated call to ${libInitFunction}(). Use parameter {apiVersion: 2} instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
-	},
-
-	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Missing bootstrap parameter '${name}'`,
-		details: ({details}: {details?: string}) => details,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
