@@ -28,12 +28,15 @@ export enum MESSAGE {
 	DEPRECATED_COMPONENT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LIBRARY,
+	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_MANIFEST_JS_RESOURCES,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
+	DEPRECATED_BOOTSTRAP_PARAM,
+	MISSING_BOOTSTRAP_PARAM,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	NO_DIRECT_DATATYPE_ACCESS,
@@ -141,6 +144,15 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-library"],
+
+		message: ({themeName}: {themeName: string}) =>
+			`Use of deprecated theme '${themeName}'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -195,6 +207,24 @@ export const MESSAGE_INFO = {
 		message: ({viewType}: {viewType: string}) =>
 			`Use of view type '${viewType}' is deprecated. Use 'XML' instead.'`,
 		details: () => undefined,
+	},
+
+	[MESSAGE.DEPRECATED_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name, value}: {name: string; value: string}) =>
+			`Use of deprecated value '${value}' for bootstrap parameter '${name}'`,
+		details: ({details}: {details?: string}) => details,
+	},
+
+	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Missing bootstrap parameter '${name}'`,
+		details: ({details}: {details?: string}) => details,
 	},
 
 	[MESSAGE.HTML_IN_XML]: {

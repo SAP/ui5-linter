@@ -1,4 +1,4 @@
-import {Tag as SaxTag} from "sax-wasm";
+import {Tag as SaxTag, Text as SaxText, Position as SaxPosition} from "sax-wasm";
 import LinterContext, {CoverageInfo, ResourcePath} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
@@ -16,10 +16,10 @@ export default class HtmlReporter {
 		this.#context = context;
 	}
 
-	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: SaxTag): void;
-	addMessage<M extends MESSAGE>(id: M, node: SaxTag): void;
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: SaxTag | SaxText): void;
+	addMessage<M extends MESSAGE>(id: M, node: SaxTag | SaxText): void;
 	addMessage<M extends MESSAGE>(
-		id: M, argsOrNode?: MessageArgs[M] | SaxTag, node?: SaxTag
+		id: M, argsOrNode?: MessageArgs[M] | SaxTag | SaxText, node?: SaxTag | SaxText
 	) {
 		if (!argsOrNode) {
 			throw new Error("Invalid arguments: Missing second argument");
@@ -28,15 +28,24 @@ export default class HtmlReporter {
 		if (argsOrNode instanceof SaxTag) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
+		} else if (argsOrNode instanceof SaxText) {
+			node = argsOrNode;
+			args = null as unknown as MessageArgs[M];
 		} else if (!node) {
 			throw new Error("Invalid arguments: Missing 'node'");
 		} else {
 			args = argsOrNode;
 		}
 
+		let startPos: SaxPosition;
+		if (node instanceof SaxTag) {
+			startPos = node.openStart;
+		} else {
+			startPos = node.start;
+		}
 		this.#context.addLintingMessage(this.#resourcePath, id, args, {
-			line: node.openStart.line + 1,
-			column: node.openStart.character + 1,
+			line: startPos.line + 1,
+			column: startPos.character + 1,
 		});
 	}
 
