@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/SAP/ui5-linter/compare/v0.4.0...v0.4.1) (2024-09-23)
+
+
+### Features
+
+* Add UI5 linter option for ui5.yaml config path ([#313](https://github.com/SAP/ui5-linter/issues/313)) ([a213084](https://github.com/SAP/ui5-linter/commit/a2130847cd35c31e00a63df7d5e21e4803042fb9))
+
 ## [0.4.0](https://github.com/SAP/ui5-linter/compare/v0.3.5...v0.4.0) (2024-09-17)
 
 
