@@ -20,7 +20,6 @@ export default async function transpileHtml(
 			const hasSrc = tag.attributes.some((attr) => {
 				return attr.name.value.toLowerCase() === "src";
 			});
-			debugger;
 			if (!hasSrc && tag.textNodes?.length > 0) {
 				report.addMessage(MESSAGE.CSP_UNSAFE_INLINE_SCRIPT, tag);
 			} else if (isBootstrapTag(tag)) {
@@ -39,11 +38,16 @@ export default async function transpileHtml(
 
 function isBootstrapTag(tag: Tag): boolean {
 	for (const attr of tag.attributes) {
-		if (attr.name.value.toLowerCase() === "id") {
-			if (attr.value.value.toLowerCase() === "sap-ui-bootstrap") {
+		if (attr.name.value.toLowerCase() === "id" &&
+			attr.value.value.toLowerCase() === "sap-ui-bootstrap") {
+			return true;
+		} else if (attr.name.value.toLowerCase() === "src") {
+			const url = attr.value.value.toLowerCase();
+			// RegEx from https://github.com/SAP/openui5/blob/661e5f4b6d5f1af9da2175e05f4a8217fbb22593/src/sap.ui.core/src/ui5loader-autoconfig.js#L78
+			const rBootScripts = /^([^?#]*\/)?(?:sap-ui-(?:core|custom|boot|merged)(?:-[^?#/]*)?|jquery.sap.global|ui5loader(?:-autoconfig)?)\.js(?:[?#]|$)/;
+			if (rBootScripts.exec(url)) {
 				return true;
 			}
-			break;
 		}
 	}
 	return false;
