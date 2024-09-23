@@ -259,6 +259,33 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details?: string}) => details,
 	},
 
+	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Redundant bootstrap parameter '${name}' should be removed`,
+		details: () => undefined,
+	},
+
+	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Abandoned bootstrap parameter '${name}' should be removed`,
+		details: () => undefined,
+	},
+
+	[MESSAGE.SPELLING_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({oldName, newName}: {oldName: string; newName: string}) =>
+			`Outdated spelling of bootstrap parameter: '${oldName}' should be '${newName}'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.HTML_IN_XML]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
