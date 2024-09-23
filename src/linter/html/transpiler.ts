@@ -49,10 +49,36 @@ function isBootstrapTag(tag: Tag): boolean {
 	return false;
 }
 
+const oldToNewAttr = new Map([
+	["data-sap-ui-compatversion", "data-sap-ui-compat-version"],
+	["data-sap-ui-flexibilityservices", "data-sap-ui-flexibility-services"],
+	["data-sap-ui-frameoptions", "data-sap-ui-frame-options"],
+	["data-sap-ui-evt-oninit", "data-sap-ui-on-init"],
+	["data-sap-ui-oninit", "data-sap-ui-on-init"],
+	["data-sap-ui-resourceroots", "data-sap-ui-resource-roots"],
+]);
+
+const aliasToAttr = new Map([
+	["data-sap-ui-bindingsyntax", "data-sap-ui-binding-syntax"],
+	["data-sap-ui-xx-bindingsyntax", "data-sap-ui-binding-syntax"],
+	["data-sap-ui-xx-binding-syntax", "data-sap-ui-binding-syntax"],
+	["data-sap-ui-xx-preload", "data-sap-ui-preload"],
+	["data-sap-ui-xx-noless", "data-sap-ui-xx-no-less"],
+]);
+
 function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 	const attributes = new Set();
 	for (const attr of tag.attributes) {
-		const attributeName = attr.name.value.toLowerCase();
+		let attributeName = attr.name.value.toLowerCase();
+		if (oldToNewAttr.has(attributeName)) {
+			attributeName = oldToNewAttr.get(attributeName)!;
+			report.addMessage(MESSAGE.SPELLING_BOOTSTRAP_PARAM, {
+				oldName: attr.name.value,
+				newName: attributeName,
+			}, attr.name);
+		} else if (aliasToAttr.has(attributeName)) {
+			attributeName = aliasToAttr.get(attributeName)!;
+		}
 		attributes.add(attributeName);
 		switch (attributeName) {
 			case "data-sap-ui-theme":
@@ -72,6 +98,17 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				break;
 			case "data-sap-ui-on-init":
 				checkOnInitAttr(attr, report);
+				break;
+			case "data-sap-ui-binding-syntax":
+			case "data-sap-ui-preload":
+				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+				}, attr.name);
+				break;
+			case "data-sap-ui-xx-no-less":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+				}, attr.name);
 				break;
 		}
 	}
