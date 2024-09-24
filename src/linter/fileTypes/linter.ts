@@ -9,10 +9,10 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 		// TODO: Refactor to utiliize reuse
 		xmlResources = [];
 		await Promise.all(pathsToLint.map(async (resourcePath) => {
-			if (!resourcePath.endsWith(".view.json") && !resourcePath.endsWith(".view.html")
-				&& !resourcePath.endsWith(".view.js") && !resourcePath.endsWith(".view.tmpl")
-				&& !resourcePath.endsWith(".view.ts") && !resourcePath.endsWith(".fragment.html")
-				&& !resourcePath.endsWith(".fragment.js")
+			if (!resourcePath.endsWith(".view.json") && !resourcePath.endsWith(".view.html") &&
+				!resourcePath.endsWith(".view.js") && !resourcePath.endsWith(".view.tmpl") &&
+				!resourcePath.endsWith(".view.ts") && !resourcePath.endsWith(".fragment.html") &&
+				!resourcePath.endsWith(".fragment.js")
 			) {
 				return;
 			}
