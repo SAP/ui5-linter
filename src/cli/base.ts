@@ -35,7 +35,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 	builder: function (args: Argv<object>): Argv<LinterArg> {
 		args.usage("Usage: $0 [files...] [options]")
 			.positional("files", {
-				describe: "List of patterns to lint", // Description of positional files
+				describe: "List of patterns to lint",
 				type: "string",
 			})
 			.option("config", {
@@ -111,6 +111,8 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				}
 				return arg;
 			})
+			.example("ui5lint ./path/to/file ./path/**/*",
+				"Execute ui5lint with specified files or glob patterns to restrict linting to the selected files only")
 			.example("ui5lint --coverage",
 				"Execute ui5lint with coverage enabled");
 
