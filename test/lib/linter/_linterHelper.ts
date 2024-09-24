@@ -73,7 +73,8 @@ export function createTestsForFixtures(fixturesPath: string) {
 			return dirEntries.isFile();
 		}).map((dirEntries) => {
 			return path.posix.join(
-				path.posix.relative(fixturesPath, dirEntries.path),
+				// Resolve relative path OS dependant, but do the join in POSIX format
+				path.relative(fixturesPath, dirEntries.path),
 				dirEntries.name
 			);
 		});
