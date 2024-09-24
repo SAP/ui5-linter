@@ -105,24 +105,7 @@ test.serial("ui5lint (default) ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined, configPath: undefined,
-		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: undefined,
-	});
-	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
-});
-
-test.serial("ui5lint --file-paths ", async (t) => {
-	const {cli, lintProject} = t.context;
-	const filePaths = [
-		path.resolve(process.cwd(), "path/to/resource"),
-		path.resolve(process.cwd(), "another/path/to/resource"),
-	];
-
-	await cli.parseAsync(["--file-paths", filePaths[0], "--file-paths", filePaths[1]]);
-
-	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: filePaths, ignorePattern: undefined, configPath: undefined,
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePattern: undefined, configPath: undefined,
 		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
@@ -201,7 +184,7 @@ test.serial("ui5lint --ui5-config", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), pathsToLint: undefined, ignorePattern: undefined, configPath: undefined,
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePattern: undefined, configPath: undefined,
 		includeMessageDetails: false, reportCoverage: false, ui5ConfigPath: "ui5.yaml",
 	});
 });

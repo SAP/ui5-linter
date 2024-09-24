@@ -21,17 +21,18 @@ export default async function lintWorkspace(
 	let reader = await resolveReader({
 		patterns: options.filePatterns ?? [],
 		projectRootDir: options.rootDir,
+		ui5ConfigPath: config.ui5Config,
 		resourceReader: createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
 		}),
 		inverseResult: true,
-		config,
 		namespace: options.namespace,
 	});
 	reader = await resolveReader({
 		patterns: options.ignorePattern ?? [],
 		projectRootDir: options.rootDir,
+		ui5ConfigPath: config.ui5Config,
 		resourceReader: reader,
 		namespace: options.namespace,
 	});

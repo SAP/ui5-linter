@@ -12,13 +12,11 @@ import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
 async function lint(
-	resourceReader: AbstractReader, options: LinterOptions
+	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
 	let {ignorePattern, filePatterns} = options;
-	const {configPath, rootDir} = options;
-	const configMngr = new ConfigManager(rootDir, configPath);
-	const config = await configMngr.getConfiguration();
+	const {rootDir} = options;
 
 	// Resolve files to include
 	filePatterns = [
@@ -47,7 +45,7 @@ async function lint(
 
 	const workspace = createWorkspace({reader});
 
-	const res = await lintWorkspace(workspace, options);
+	const res = await lintWorkspace(workspace, options, config);
 	lintEnd();
 	return res;
 }
@@ -146,29 +144,6 @@ export async function lintFile({
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
 	sortLintResults(res);
-	return res;
-}
-
-async function lint(
-	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
-): Promise<LintResult[]> {
-	const lintEnd = taskStart("Linting");
-	const {ignorePattern, ui5ConfigPath} = options;
-
-	const ignoresReader = await resolveIgnoresReader(
-		ignorePattern,
-		options.rootDir,
-		resourceReader,
-		config,
-		ui5ConfigPath
-	);
-
-	const workspace = createWorkspace({
-		reader: ignoresReader,
-	});
-
-	const res = await lintWorkspace(workspace, options, config);
-	lintEnd();
 	return res;
 }
 
@@ -366,14 +341,14 @@ export async function resolveReader({
 	projectRootDir,
 	resourceReader,
 	namespace,
+	ui5ConfigPath,
 	inverseResult = false,
 }: {
 	patterns: string[];
 	projectRootDir: string;
 	resourceReader: AbstractReader;
 	namespace?: string;
-	config: UI5LintConfigType,
-	ui5ConfigPath?: string,
+	ui5ConfigPath?: string;
 	inverseResult?: boolean;
 }) {
 	if (!patterns.length) {
