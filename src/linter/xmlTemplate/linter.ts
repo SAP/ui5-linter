@@ -17,7 +17,6 @@ export default async function lintXml({workspace, context}: LinterParameters) {
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
 		const jsPath = resourcePath.replace(/\.xml$/, ".js");
-		context.addPathToLint(jsPath);
 		await workspace.write(createResource({
 			path: jsPath,
 			string: source,

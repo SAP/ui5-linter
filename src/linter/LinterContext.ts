@@ -97,15 +97,12 @@ export default class LinterContext {
 	#metadata = new Map<ResourcePath, LintMetadata>();
 	#rootReader: AbstractReader | undefined;
 
-	#resourcePathsToLint: ResourcePath[] | undefined;
-
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
 
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#resourcePathsToLint = undefined; // TODO: Remove this one. Handled via files CLI functionality
 		this.#reportCoverage = !!options.reportCoverage;
 		this.#includeMessageDetails = !!options.includeMessageDetails;
 	}
@@ -137,10 +134,6 @@ export default class LinterContext {
 		return this.#namespace;
 	}
 
-	getPathsToLint(): ResourcePath[] | undefined {
-		return this.#resourcePathsToLint;
-	}
-
 	getReportCoverage(): boolean {
 		return this.#reportCoverage;
 	}
@@ -156,10 +149,6 @@ export default class LinterContext {
 			this.#metadata.set(resourcePath, metadata);
 		}
 		return metadata;
-	}
-
-	addPathToLint(resourcePath: ResourcePath) {
-		this.#resourcePathsToLint?.push(resourcePath);
 	}
 
 	getRawLintingMessages(resourcePath: ResourcePath): RawLintMessage[] {
