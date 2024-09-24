@@ -4,6 +4,7 @@ import lintJson from "./manifestJson/linter.js";
 import lintHtml from "./html/linter.js";
 import lintUI5Yaml from "./yaml/linter.js";
 import lintDotLibrary from "./dotLibrary/linter.js";
+import lintFileTypes from "./fileTypes/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
@@ -37,6 +38,7 @@ export default async function lintWorkspace(
 		lintHtml(params),
 		lintUI5Yaml(params),
 		lintDotLibrary(params),
+		lintFileTypes(params),
 	]);
 
 	const typeLinter = new TypeLinter(params);

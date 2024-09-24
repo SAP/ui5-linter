@@ -32,6 +32,7 @@ export enum MESSAGE {
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
+	DEPRECATED_VIEW_TYPE,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	NO_DIRECT_DATATYPE_ACCESS,
@@ -173,6 +174,15 @@ export const MESSAGE_INFO = {
 		message: ({propertyName}: {propertyName: string}) =>
 			`Use of deprecated property '${propertyName}'`,
 		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_VIEW_TYPE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({fileSuffix}: {fileSuffix: string}) =>
+			`Use of view type '${fileSuffix}' is deprecated. Use 'XML' instead.'`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.HTML_IN_XML]: {
