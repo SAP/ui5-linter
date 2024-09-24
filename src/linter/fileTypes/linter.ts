@@ -12,7 +12,7 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 			if (!resourcePath.endsWith(".view.json") && !resourcePath.endsWith(".view.html") &&
 				!resourcePath.endsWith(".view.js") && !resourcePath.endsWith(".view.tmpl") &&
 				!resourcePath.endsWith(".view.ts") && !resourcePath.endsWith(".fragment.html") &&
-				!resourcePath.endsWith(".fragment.js")
+				!resourcePath.endsWith(".fragment.js") && !resourcePath.endsWith(".fragment.ts")
 			) {
 				return;
 			}
@@ -23,7 +23,7 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 			xmlResources.push(resource);
 		}));
 	} else {
-		xmlResources = await workspace.byGlob("**/{*.view.json,*.view.html,*.view.js,*.view.tmpl,*.view.ts,*.fragment.html,*.fragment.js}");
+		xmlResources = await workspace.byGlob("**/{*.view.json,*.view.html,*.view.js,*.view.tmpl,*.view.ts,*.fragment.html,*.fragment.js,*fragment.ts}");
 	}
 
 	xmlResources.forEach((resource: Resource) => {
