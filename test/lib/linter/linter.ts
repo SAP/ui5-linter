@@ -149,7 +149,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ui5ConfigPath: "./configs/ui5-custom.yaml",
@@ -165,7 +165,7 @@ test.only("lint: com.ui5.troublesome.app with custom UI5 config which does NOT e
 
 	await t.throwsAsync(lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ui5ConfigPath,

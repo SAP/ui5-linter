@@ -198,64 +198,6 @@ async function getProjectGraph(rootDir: string, ui5ConfigPath?: string): Promise
 }
 
 /**
- * Resolve provided filePaths to absolute paths and ensure they are located within the project root.
- * Returned paths are absolute.
-*/
-function resolveFilePaths(rootDir: string, filePaths: string[]): string[] {
-	/* rootDir is always absolute, e.g. '/home/user/projects/com.ui5.troublesome.app/'
-
-		filePaths can be absolute, or relative to rootDir:
-			Absolute example:
-			'/home/user/projects/com.ui5.troublesome.app/webapp/model/formatter.js/webapp/controller/BaseController.js'
-			'/home/user/projects/com.ui5.troublesome.app/webapp/model/formatter.js/webapp/model/formatter.js'
-
-			Relative example:
-			'webapp/controller/BaseController.js'
-			'webapp/model/formatter.js'
-	*/
-	return filePaths.map((filePath) => {
-		if (!path.isAbsolute(filePath)) {
-			// Resolve relative filePaths
-			filePath = path.join(rootDir, filePath);
-		}
-		// Ensure file path is located within project root
-		if (!filePath.startsWith(rootDir)) {
-			throw new Error(
-				`File path ${filePath} is not located within project root ${rootDir}`);
-		}
-		return filePath;
-	});
-}
-
-function ensurePosix(inputPath: string) {
-	if (!inputPath.includes("\\")) {
-		return inputPath;
-	}
-	return inputPath.replace(/\\/g, "/");
-}
-
-/**
- * Normalize provided filePaths to virtual paths.
- * Returned paths are absolute, POSIX-style paths
- */
-function transformFilePathsToVirtualPaths(
-	filePaths: FilePath[],
-	srcFsBasePath: string, srcVirBasePath: string,
-	testFsBasePath?: string, testVirBasePath?: string
-): FilePath[] {
-	return filePaths.map((filePath) => {
-		if (filePath.startsWith(srcFsBasePath)) {
-			return posixPath.join(srcVirBasePath, ensurePosix(path.relative(srcFsBasePath, filePath)));
-		} else if (testFsBasePath && testVirBasePath && filePath.startsWith(testFsBasePath)) {
-			return posixPath.join(testVirBasePath, ensurePosix(path.relative(testFsBasePath, filePath)));
-		} else {
-			throw new Error(
-				`File path ${filePath} is not located within the detected source or test directories of the project`);
-		}
-	});
-}
-
-/**
  * Normalize provided virtual paths to the original file paths
  */
 function transformVirtualPathToFilePath(
