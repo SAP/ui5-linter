@@ -83,6 +83,12 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 		} else if (aliasToAttr.has(attributeName)) {
 			attributeName = aliasToAttr.get(attributeName)!;
 		}
+		if (attributes.has(attributeName)) {
+			report.addMessage(MESSAGE.DUPLICATE_BOOTSTRAP_PARAM, {
+				name: attributeName,
+				value: attr.name.value,
+			}, attr.name);
+		}
 		attributes.add(attributeName);
 		switch (attributeName) {
 			case "data-sap-ui-theme":

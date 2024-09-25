@@ -36,6 +36,7 @@ export enum MESSAGE {
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
 	DEPRECATED_BOOTSTRAP_PARAM,
+	DUPLICATE_BOOTSTRAP_PARAM,
 	REDUNDANT_BOOTSTRAP_PARAM,
 	ABANDONED_BOOTSTRAP_PARAM,
 	MISSING_BOOTSTRAP_PARAM,
@@ -219,6 +220,15 @@ export const MESSAGE_INFO = {
 		message: ({name, value}: {name: string; value: string}) =>
 			`Use of deprecated value '${value}' for bootstrap parameter '${name}'`,
 		details: ({details}: {details?: string}) => details,
+	},
+
+	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name, value}: {name: string; value: string}) =>
+			`Duplicate bootstrap parameter '${name}' with value '${value}'`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
