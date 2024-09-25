@@ -19,7 +19,7 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 	if (pathsToLint?.length) {
 		xmlResources = [];
 		await Promise.all(pathsToLint.map(async (resourcePath) => {
-			if (!deprecatedViewFileTypes.some(type => resourcePath.endsWith(type))) {
+			if (!deprecatedViewFileTypes.some((type) => resourcePath.endsWith(type))) {
 				return;
 			}
 			const resource = await workspace.byPath(resourcePath);
@@ -29,7 +29,7 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 			xmlResources.push(resource);
 		}));
 	} else {
-		xmlResources = await workspace.byGlob(`**/{${deprecatedViewFileTypes.map(type => `*${type}`).join(",")}}`);
+		xmlResources = await workspace.byGlob(`**/{${deprecatedViewFileTypes.map((type) => `*${type}`).join(",")}}`);
 	}
 
 	xmlResources.forEach((resource: Resource) => {
