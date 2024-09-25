@@ -28,6 +28,9 @@ test("Check config file auto discovery", async (t) => {
 	const config = await confManager.getConfiguration();
 
 	t.deepEqual(config, {
+		files: [
+			"webapp/**/*",
+		],
 		ignores: [
 			"test/**/*",
 			"!test/sap/m/visual/Wizard.spec.js",
@@ -61,6 +64,23 @@ test("Check config file with absolute path", async (t) => {
 		ignores: [
 			"webapp/test/**/*",
 			"!webapp/test/integration/opaTests.qunit.js",
+		],
+	}, "The configuration is derived from the provided custom config file");
+});
+
+test("Check files property", async (t) => {
+	const confManager = new ConfigManager(
+		path.join(fixturesProjectsPath, "com.ui5.troublesome.app"));
+
+	const config = await confManager.getConfiguration();
+
+	t.deepEqual(config, {
+		files: [
+			"webapp/**/*",
+		],
+		ignores: [
+			"test/**/*",
+			"!test/sap/m/visual/Wizard.spec.js",
 		],
 	}, "The configuration is derived from the provided custom config file");
 });
