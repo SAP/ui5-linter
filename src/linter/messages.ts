@@ -250,6 +250,15 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name, value}: {name: string; value: string}) =>
+			`Duplicate bootstrap parameter '${name}' with value '${value}'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
