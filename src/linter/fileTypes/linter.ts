@@ -34,6 +34,6 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 
 	xmlResources.forEach((resource: Resource) => {
 		const fileSuffix = resource.getPath().split(".").pop()!.toUpperCase();
-		context.addLintingMessage(resource.getPath(), MESSAGE.DEPRECATED_VIEW_TYPE, {fileSuffix});
+		context.addLintingMessage(resource.getPath(), MESSAGE.DEPRECATED_VIEW_TYPE, {viewType: fileSuffix});
 	});
 }
