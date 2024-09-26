@@ -250,6 +250,26 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () => `DeclarativeSupport is deprecated.`,
+		details: () =>
+			`Please consider using {@link sap.ui.core.mvc.XMLView XMLViews} or` +
+			` {@link topic:e6bb33d076dc4f23be50c082c271b9f0 Typed Views} instead. For more information,` +
+			` see the documentation on {@link topic:91f27e3e6f4d1014b6dd926db0e91070 View types}.`,
+	},
+
+	[MESSAGE.DEPRECATED_LESS_SUPPORT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () => `LessSupport is deprecated.`,
+		details: () =>
+			"Not needed anymore! Use UI5 Tooling to compile Les to CSS on the fly.",
+	},
+
 	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
 		severity: LintMessageSeverity.Warning,
 		ruleId: RULES["no-deprecated-api"],
