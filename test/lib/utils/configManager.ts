@@ -51,7 +51,7 @@ test("Resolves to an empty config if default module is not found", async (t) => 
 	t.deepEqual(config, {}, "An empty configuration gets returned");
 });
 
-test.only("Check config file with absolute path", async (t) => {
+test("Check config file with absolute path", async (t) => {
 	const confManager = new ConfigManager(
 		path.join(fixturesProjectsPath, "com.ui5.troublesome.app"), "ui5lint-custom.config.cjs");
 
