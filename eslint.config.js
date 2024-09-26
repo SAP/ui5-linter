@@ -1,6 +1,7 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
+import ava from "eslint-plugin-ava";
 
 export default tseslint.config(
 	{
@@ -33,7 +34,8 @@ export default tseslint.config(
 		arrowParens: true,
 		braceStyle: "1tbs",
 		blockSpacing: false,
-	}), {
+	}),
+	ava.configs["flat/recommended"], {
 		// Lint all JS files using the eslint parser
 		files: ["**/*.js"],
 		languageOptions: {
