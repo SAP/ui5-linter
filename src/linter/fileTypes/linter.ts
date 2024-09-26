@@ -14,10 +14,10 @@ const deprecatedViewFileTypes = [
 ];
 
 export default async function lintFileTypes({workspace, context}: LinterParameters) {
-	let xmlResources: Resource[];
+	let potentialDeprecatedResources: Resource[];
 	const pathsToLint = context.getPathsToLint();
 	if (pathsToLint?.length) {
-		xmlResources = [];
+		potentialDeprecatedResources = [];
 		await Promise.all(pathsToLint.map(async (resourcePath) => {
 			if (!deprecatedViewFileTypes.some((type) => resourcePath.endsWith(type))) {
 				return;
@@ -26,13 +26,14 @@ export default async function lintFileTypes({workspace, context}: LinterParamete
 			if (!resource) {
 				throw new Error(`Resource not found: ${resourcePath}`);
 			}
-			xmlResources.push(resource);
+			potentialDeprecatedResources.push(resource);
 		}));
 	} else {
-		xmlResources = await workspace.byGlob(`**/{${deprecatedViewFileTypes.map((type) => `*${type}`).join(",")}}`);
+		potentialDeprecatedResources =
+			await workspace.byGlob(`**/{${deprecatedViewFileTypes.map((type) => `*${type}`).join(",")}}`);
 	}
 
-	xmlResources.forEach((resource: Resource) => {
+	potentialDeprecatedResources.forEach((resource: Resource) => {
 		const fileSuffix = resource.getPath().split(".").pop()!.toUpperCase();
 		context.addLintingMessage(resource.getPath(), MESSAGE.DEPRECATED_VIEW_TYPE, {viewType: fileSuffix});
 	});
