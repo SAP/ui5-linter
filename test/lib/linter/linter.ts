@@ -158,7 +158,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
-test.only("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
+test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {lintProject} = t.context;
 	const ui5ConfigPath = "./configs/ui5-DOES-NOT-EXIST.yaml";
