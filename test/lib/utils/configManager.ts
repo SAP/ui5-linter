@@ -16,8 +16,8 @@ test("Check config file", async (t) => {
 
 	t.deepEqual(config, {
 		ignores: [
-			"!test/sap/m/visual/Magician.spec.js",
-			"test/**/*",
+			"webapp/test/**/*",
+			"!webapp/test/integration/opaTests.qunit.js",
 		],
 	}, "The configuration is derived from the provided custom config file");
 });
