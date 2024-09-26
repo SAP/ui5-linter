@@ -76,7 +76,7 @@ export const MESSAGE_INFO = {
 		details: ({componentFileName, asyncFlagMissingIn}: {componentFileName: string; asyncFlagMissingIn: string}) =>
 			`{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
 			`Implement sap.ui.core.IAsyncContentCreation interface in ${componentFileName}. ` +
-			`Alternatively, set the "async" flag to "true" in ${asyncFlagMissingIn} in the component manifest.`,
+			`Alternatively, set the 'async' flag to 'true' in ${asyncFlagMissingIn} in the component manifest.`,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION]: {
@@ -97,7 +97,7 @@ export const MESSAGE_INFO = {
 
 		message: ({asyncFlagLocation}: {asyncFlagLocation: string}) =>
 			`Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
-			`The redundant "async" flag at "${asyncFlagLocation}" should be removed from the component manifest`,
+			`The redundant 'async' flag at '${asyncFlagLocation}' should be removed from the component manifest`,
 		details: () =>
 			`{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 	},
@@ -227,8 +227,8 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({propertyName}: {propertyName: string}) =>
-			`Use of property '${propertyName}' is deprecated. ` +
-			`Use '${propertyName.substring(4).toLowerCase()}' instead.'`,
+			`Use of property deprecated property '${propertyName}'.` +
+			`Use '${propertyName.substring(4).toLowerCase()}' instead'`,
 		details: () => undefined,
 	},
 
@@ -237,7 +237,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({viewType}: {viewType: string}) =>
-			`Use of view type '${viewType}' is deprecated. Use 'XML' instead.'`,
+			`Use of deprecated view type '${viewType}'. Use 'XML' instead'`,
 		details: () => undefined,
 	},
 
@@ -263,7 +263,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({libInitFunction}: {libInitFunction: string}) =>
-			`Call to ${libInitFunction}() must be declared with property {apiVersion: 2}`,
+			`Deprecated call to ${libInitFunction}(). Use parameter {apiVersion: 2} instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
 	},
 
@@ -281,7 +281,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access to DataType pseudo module '${moduleName}'`,
+			`Deprecated access of DataType-pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -291,7 +291,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access to enum pseudo module '${moduleName}'`,
+			`Deprecated access of enum-pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -302,7 +302,9 @@ export const MESSAGE_INFO = {
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
-		details: () => undefined,
+		details: () =>
+			`Do not use global variables to access UI5 modules or API. ` +
+			`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
 	[MESSAGE.PARSING_ERROR]: {
@@ -311,7 +313,7 @@ export const MESSAGE_INFO = {
 		fatal: true,
 
 		message: ({message}: {message: string}) => message,
-		details: () => undefined,
+		details: () => `Check the source file for syntax errors`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
@@ -410,7 +412,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({oldName, newName}: {oldName: string; newName: string}) =>
-			`Outdated spelling of bootstrap parameter: '${oldName}' should be '${newName}'`,
+			`Outdated spelling of bootstrap parameter: '${oldName}' should be written as '${newName}'`,
 		details: () => undefined,
 	},
 
@@ -418,8 +420,8 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
 
-		message: () => `Usage of SVG in XML Views/Fragments is deprecated`,
-		details: () => undefined,
+		message: () => `Deprecated use of SVG in XML View or Fragment`,
+		details: () => `{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
 } as const;
