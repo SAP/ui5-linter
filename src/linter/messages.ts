@@ -32,6 +32,8 @@ export enum MESSAGE {
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_PROPERTY,
+	DEPRECATED_VIEW_CONFIG,
+	DEPRECATED_VIEW_TYPE,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	NO_DIRECT_DATATYPE_ACCESS,
@@ -44,6 +46,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
 	PARTIALLY_DEPRECATED_MOBILE_INIT,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
+	REDUNDANT_VIEW_CONFIG_PROPERTY,
 	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	PARSING_ERROR,
 	SVG_IN_XML,
@@ -175,6 +178,25 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
+	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({propertyName}: {propertyName: string}) =>
+			`Use of property '${propertyName}' is deprecated. ` +
+			`Use '${propertyName.substring(4).toLowerCase()}' instead.'`,
+		details: () => undefined,
+	},
+
+	[MESSAGE.DEPRECATED_VIEW_TYPE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({viewType}: {viewType: string}) =>
+			`Use of view type '${viewType}' is deprecated. Use 'XML' instead.'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.HTML_IN_XML]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -292,6 +314,15 @@ export const MESSAGE_INFO = {
 		details: () =>
 			`Parameter 'oConfig.async' must be set to true. ` +
 			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
+	},
+
+	[MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({propertyName}: {propertyName: string}) =>
+			`Redundant view configuration property '${propertyName}' can be omitted`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {

@@ -19,6 +19,8 @@ interface locType {
 	pos: number;
 }
 
+const deprecatedViewTypes = ["JSON", "HTML", "JS", "Template"];
+
 export type jsonMapPointers = Record<string, {key: locType; keyEnd: locType; value: locType; valueEnd: locType}>;
 
 export interface jsonSourceMapType {
@@ -55,7 +57,8 @@ export default class ManifestLinter {
 	}
 
 	#analyzeManifest(manifest: SAPJSONSchemaForWebApplicationManifestFile) {
-		const {resources, models, dependencies} = (manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
+		const {resources, models, dependencies, rootView, routing} =
+			(manifest["sap.ui5"] ?? {} as JSONSchemaForSAPUI5Namespace);
 		const {dataSources} = (manifest["sap.app"] ?? {} as JSONSchemaForSAPAPPNamespace);
 
 		// Detect deprecated libraries:
@@ -77,6 +80,49 @@ export default class ManifestLinter {
 				}, `/sap.ui5/dependencies/components/${componentKey}`);
 			}
 		});
+
+		// Detect deprecated type of rootView:
+		if (typeof rootView === "object" && rootView.type && deprecatedViewTypes.includes(rootView.type)) {
+			this.#reporter?.addMessage(MESSAGE.DEPRECATED_VIEW_TYPE, {
+				viewType: rootView.type,
+			}, "/sap.ui5/rootView/type");
+		}
+
+		// Detect deprecated view type in routing.config:
+		if (routing?.config && routing.config.viewType && deprecatedViewTypes.includes(routing.config.viewType)) {
+			this.#reporter?.addMessage(MESSAGE.DEPRECATED_VIEW_TYPE, {
+				viewType: routing.config.viewType,
+			}, "/sap.ui5/routing/config/viewType");
+		}
+		if (routing?.config) {
+			this.detectDeprecatedPropertyNames(routing.config, "/sap.ui5/routing/config");
+		}
+
+		// Detect deprecations in routing.targets:
+		const targets = routing?.targets;
+		if (targets) {
+			for (const [key, target] of Object.entries(targets)) {
+				// Check if name starts with module and viewType is defined:
+				const name = target.name || target.viewName;
+				if (name && (name as string).startsWith("module:")) {
+					if (target.viewType) {
+						this.#reporter?.addMessage(MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY, {
+							propertyName: "viewType",
+						}, `/sap.ui5/routing/targets/${key}/viewType`);
+					}
+				}
+
+				const pathToViewObject = `/sap.ui5/routing/targets/${key}`;
+				// Detect deprecated view type:
+				if (target.viewType && deprecatedViewTypes.includes(target.viewType)) {
+					this.#reporter?.addMessage(MESSAGE.DEPRECATED_VIEW_TYPE, {
+						viewType: target.viewType,
+					}, `${pathToViewObject}/viewType`);
+				}
+				// Detect deprecated property names:
+				this.detectDeprecatedPropertyNames(target, pathToViewObject);
+			}
+		}
 
 		if (resources?.js) {
 			this.#reporter?.addMessage(MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES, "/sap.ui5/resources/js");
@@ -118,5 +164,16 @@ export default class ManifestLinter {
 				}, `/sap.ui5/models/${modelKey}/settings/synchronizationMode`);
 			}
 		});
+	}
+
+	detectDeprecatedPropertyNames(viewObject: Record<string, unknown>, pathToViewObject: string) {
+		// Detect every property name starting with "view" except "viewType":
+		for (const key of Object.keys(viewObject)) {
+			if (key.startsWith("view") && key !== "viewType") {
+				this.#reporter?.addMessage(MESSAGE.DEPRECATED_VIEW_CONFIG, {
+					propertyName: key,
+				}, `${pathToViewObject}/${key}`);
+			}
+		}
 	}
 }

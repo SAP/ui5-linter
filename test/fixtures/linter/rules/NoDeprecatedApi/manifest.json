@@ -34,7 +34,7 @@
 	"sap.ui5": {
 		"rootView": {
 			"viewName": "com.ui5.troublesome.app.view.App",
-			"type": "XML",
+			"type": "JS",
 			"async": true,
 			"id": "app"
 		},
@@ -109,8 +109,10 @@
 		"routing": {
 			"config": {
 				"routerClass": "sap.m.routing.Router",
-				"viewType": "XML",
+				"viewType": "HTML",
 				"viewPath": "com.ui5.troublesome.app.view",
+				"viewLevel": 1,
+				"viewId": "deprecated",
 				"controlId": "app",
 				"controlAggregation": "pages",
 				"async": true
@@ -126,7 +128,29 @@
 				"main": {
 					"viewId": "main",
 					"viewName": "Main"
-				}
+				},
+				"myXML": {
+          			"name": "module:myapp/views/MyXML",
+					"viewType": "XML"
+        		},
+				"myHTML": {
+          			"name": "MyHTML",
+					"viewType": "HTML"
+        		},
+				"myJS": {
+          			"name": "MyJS",
+					"viewType": "JS"
+        		},
+				"myTemplate": {
+          			"name": "MyTemplate",
+					"viewType": "Template"
+        		},
+				"deprecatedProperties": {
+          			"viewName": "Deprecated",
+					"viewId": "deprecated",
+					"viewLevel": 1,
+					"viewType": "XML"
+        		}
 			}
 		}
 	}
