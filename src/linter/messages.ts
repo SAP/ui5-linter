@@ -191,8 +191,8 @@ export const MESSAGE_INFO = {
 			`Usage of deprecated parameter 'synchronizationMode' ` +
 			`of constructor 'sap/ui/model/odata/v4/ODataModel'${modelName ? ` (model: '${modelName}')` : ""}`,
 		details: () =>
-			`As of version 1.110.0, parameter 'synchronizationMode' is obsolete and must be omitted. ` +
-			`{@link sap/ui/model/odata/v4/ODataModel#constructor See API reference}`,
+			`As of version 1.110.0, the 'synchronizationMode' parameter is obsolete and must be omitted. ` +
+			`{@link sap/ui/model/odata/v4/ODataModel#constructor See the API reference}`,
 	},
 
 	[MESSAGE.DEPRECATED_PROPERTY]: {
@@ -227,7 +227,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({propertyName}: {propertyName: string}) =>
-			`Use of property deprecated property '${propertyName}'.` +
+			`Use of deprecated property '${propertyName}'.` +
 			`Use '${propertyName.substring(4).toLowerCase()}' instead'`,
 		details: () => undefined,
 	},
@@ -281,7 +281,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access of DataType-pseudo module '${moduleName}'`,
+			`Deprecated access of DataType pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -291,7 +291,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access of enum-pseudo module '${moduleName}'`,
+			`Deprecated access of enum pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -303,7 +303,7 @@ export const MESSAGE_INFO = {
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
 		details: () =>
-			`Do not use global variables to access UI5 modules or API. ` +
+			`Do not use global variables to access UI5 modules or APIs. ` +
 			`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
@@ -323,8 +323,8 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
 		details: () =>
-			`Parameter 'oConfig.async' must be set to true. ` +
-			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
+			`The 'oConfig.async' parameter must be set to true. ` +
+			`{@link sap/ui/core/routing/Router#constructor See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT]: {
@@ -333,8 +333,8 @@ export const MESSAGE_INFO = {
 
 		message: () =>
 			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
-		details: () => `Property 'async' must be either omitted or set to true. ` +
-			`{@link sap.ui.core.Component#createComponent See API reference}`,
+		details: () => `The 'async' property must be either omitted or set to true. ` +
+			`{@link sap.ui.core.Component#createComponent See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
@@ -365,8 +365,8 @@ export const MESSAGE_INFO = {
 
 		message: () =>
 			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
-		details: () => `Use parameter 'groupId' instead. ` +
-			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+		details: () => `Use the 'groupId' parameter instead. ` +
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
@@ -377,7 +377,7 @@ export const MESSAGE_INFO = {
 			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
 		details: () =>
 			`Passing a list of property names is deprecated. Pass the initial values as an object instead. ` +
-			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
@@ -412,7 +412,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({oldName, newName}: {oldName: string; newName: string}) =>
-			`Outdated spelling of bootstrap parameter: '${oldName}' should be written as '${newName}'`,
+			`Outdated spelling of bootstrap parameter: '${oldName}'; should be written as '${newName}'`,
 		details: () => undefined,
 	},
 
