@@ -4,7 +4,8 @@ import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 
 export default async function lintXml({workspace, context}: LinterParameters) {
-	const xmlResources = await workspace.byGlob("**/{*.view.xml,*.fragment.xml}");
+	const reader = context.getFilePathsReader() ?? workspace;
+	const xmlResources = await reader.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context);

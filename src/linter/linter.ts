@@ -11,45 +11,6 @@ import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
-async function lint(
-	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
-): Promise<LintResult[]> {
-	const lintEnd = taskStart("Linting");
-	let {ignorePattern, filePatterns} = options;
-	const {rootDir} = options;
-
-	// Resolve files to include
-	filePatterns = [
-		...(config.files ?? []),
-		...(filePatterns ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
-	let reader = await resolveReader({
-		patterns: filePatterns,
-		projectRootDir: rootDir,
-		resourceReader,
-		inverseResult: true,
-		namespace: options.namespace,
-	});
-
-	// Resolve ignores
-	ignorePattern = [
-		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
-	reader = await resolveReader({
-		patterns: ignorePattern,
-		projectRootDir: rootDir,
-		resourceReader: reader,
-		namespace: options.namespace,
-	});
-
-	const workspace = createWorkspace({reader});
-
-	const res = await lintWorkspace(workspace, options, config);
-	lintEnd();
-	return res;
-}
-
 export async function lintProject({
 	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
@@ -144,6 +105,55 @@ export async function lintFile({
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
 	sortLintResults(res);
+	return res;
+}
+
+async function lint(
+	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
+): Promise<LintResult[]> {
+	const lintEnd = taskStart("Linting");
+	let {ignorePattern, filePatterns} = options;
+	const {rootDir} = options;
+
+	// Resolve files to include
+	filePatterns = filePatterns ?? config.files ?? [];
+
+	// Resolve ignores
+	ignorePattern = [
+		...(config.ignores ?? []),
+		...(ignorePattern ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
+	// Apply ignores to the workspace reader.
+	// TypeScript needs the full context to provide correct analysis.
+	// so, we can do filtering later via the filePathsReader
+	const reader = await resolveReader({
+		patterns: ignorePattern,
+		projectRootDir: rootDir,
+		resourceReader,
+		namespace: options.namespace,
+	});
+
+	// Apply files + ignores over the filePaths reader
+	let filePathsReader = await resolveReader({
+		patterns: filePatterns,
+		projectRootDir: rootDir,
+		resourceReader,
+		inverseResult: true,
+		namespace: options.namespace,
+	});
+	filePathsReader = await resolveReader({
+		patterns: ignorePattern,
+		projectRootDir: rootDir,
+		resourceReader: filePathsReader,
+		namespace: options.namespace,
+	});
+
+	const workspace = createWorkspace({
+		reader,
+	});
+
+	const res = await lintWorkspace(workspace, filePathsReader, options, config);
+	lintEnd();
 	return res;
 }
 

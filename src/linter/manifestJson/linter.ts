@@ -5,7 +5,8 @@ import {LinterParameters} from "../LinterContext.js";
 
 export default async function lintJson({workspace, context}: LinterParameters) {
 	const lintingDone = taskStart("Linting manifest.json files");
-	const jsonResources = await workspace.byGlob("**/{manifest.json,manifest.appdescr_variant}");
+	const reader = context.getFilePathsReader() ?? workspace;
+	const jsonResources = await reader.byGlob("**/{manifest.json,manifest.appdescr_variant}");
 
 	await Promise.all(jsonResources.map(async (resource: Resource) => {
 		const linter = new ManifestLinter(resource.getPath(), await resource.getString(), context);

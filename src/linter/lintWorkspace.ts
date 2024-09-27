@@ -1,4 +1,4 @@
-import {AbstractAdapter} from "@ui5/fs";
+import {AbstractAdapter, AbstractReader} from "@ui5/fs";
 import lintXml from "./xmlTemplate/linter.js";
 import lintJson from "./manifestJson/linter.js";
 import lintHtml from "./html/linter.js";
@@ -13,11 +13,12 @@ import {resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
-	workspace: AbstractAdapter, options: LinterOptions, config: UI5LintConfigType
+	workspace: AbstractAdapter, filePathsReader: AbstractReader,
+	options: LinterOptions, config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
 
-	const context = new LinterContext(options);
+	const context = new LinterContext(options, filePathsReader);
 	let reader = await resolveReader({
 		patterns: options.filePatterns ?? [],
 		projectRootDir: options.rootDir,
@@ -39,7 +40,7 @@ export default async function lintWorkspace(
 	context.setRootReader(reader);
 
 	const params: LinterParameters = {
-		workspace, context,
+		workspace, filePathsReader, context,
 	};
 
 	await Promise.all([
