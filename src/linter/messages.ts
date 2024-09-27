@@ -2,15 +2,13 @@
 // Currently, it's done this way to avoid pollution of the test snapshots
 const RULES = {
 	"async-component-flags": "async-component-flags",
-	"no-deprecated-api": "no-deprecated-api",
-	"no-deprecated-parameter": "no-deprecated-parameter",
-	"no-deprecated-property": "no-deprecated-property",
-	"no-pseudo-modules": "no-pseudo-modules",
-	"no-globals": "no-globals",
-	"parsing-error": "parsing-error",
-	"no-deprecated-library": "no-deprecated-library",
-	"no-deprecated-component": "no-deprecated-component",
 	"csp-unsafe-inline-script": "csp-unsafe-inline-script",
+	"no-deprecated-api": "no-deprecated-api",
+	"no-deprecated-component": "no-deprecated-component",
+	"no-deprecated-library": "no-deprecated-library",
+	"no-globals": "no-globals",
+	"no-pseudo-modules": "no-pseudo-modules",
+	"parsing-error": "parsing-error",
 } as const;
 
 export enum LintMessageSeverity {
@@ -19,46 +17,55 @@ export enum LintMessageSeverity {
 }
 
 export enum MESSAGE {
+	ABANDONED_BOOTSTRAP_PARAM,
 	COMPONENT_MISSING_ASYNC_INTERFACE,
 	COMPONENT_MISSING_MANIFEST_DECLARATION,
 	COMPONENT_REDUNDANT_ASYNC_FLAG,
 	CSP_UNSAFE_INLINE_SCRIPT,
 	DEPRECATED_API_ACCESS,
+	DEPRECATED_BOOTSTRAP_PARAM,
 	DEPRECATED_CLASS,
 	DEPRECATED_COMPONENT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LIBRARY,
-	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_MANIFEST_JS_RESOURCES,
 	DEPRECATED_MODULE_IMPORT,
-	DEPRECATED_PROPERTY_OF_CLASS,
+	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	DEPRECATED_PROPERTY,
+	DEPRECATED_PROPERTY_OF_CLASS,
+	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
-	DEPRECATED_BOOTSTRAP_PARAM,
 	DUPLICATE_BOOTSTRAP_PARAM,
-	REDUNDANT_BOOTSTRAP_PARAM,
-	ABANDONED_BOOTSTRAP_PARAM,
-	MISSING_BOOTSTRAP_PARAM,
-	SPELLING_BOOTSTRAP_PARAM,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
+	MISSING_BOOTSTRAP_PARAM,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
-	PARTIALLY_DEPRECATED_PARAMETERS_GET,
+	PARSING_ERROR,
+	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
-	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
-	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
 	PARTIALLY_DEPRECATED_MOBILE_INIT,
-	PARTIALLY_DEPRECATED_CORE_ROUTER,
+	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
+	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
+	PARTIALLY_DEPRECATED_PARAMETERS_GET,
+	REDUNDANT_BOOTSTRAP_PARAM,
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
-	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
-	PARSING_ERROR,
+	SPELLING_BOOTSTRAP_PARAM,
 	SVG_IN_XML,
 }
 export const MESSAGE_INFO = {
+
+	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Abandoned bootstrap parameter '${name}' should be removed`,
+		details: () => undefined,
+	},
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
 		severity: LintMessageSeverity.Error,
@@ -69,7 +76,7 @@ export const MESSAGE_INFO = {
 		details: ({componentFileName, asyncFlagMissingIn}: {componentFileName: string; asyncFlagMissingIn: string}) =>
 			`{@link topic:676b636446c94eada183b1218a824717 Use Asynchronous Loading}. ` +
 			`Implement sap.ui.core.IAsyncContentCreation interface in ${componentFileName}. ` +
-			`Alternatively, set the "async" flag to "true" in ${asyncFlagMissingIn} in the component manifest.`,
+			`Alternatively, set the 'async' flag to 'true' in ${asyncFlagMissingIn} in the component manifest.`,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION]: {
@@ -90,7 +97,7 @@ export const MESSAGE_INFO = {
 
 		message: ({asyncFlagLocation}: {asyncFlagLocation: string}) =>
 			`Component implements the sap.ui.core.IAsyncContentCreation interface. ` +
-			`The redundant "async" flag at "${asyncFlagLocation}" should be removed from the component manifest`,
+			`The redundant 'async' flag at '${asyncFlagLocation}' should be removed from the component manifest`,
 		details: () =>
 			`{@link sap.ui.core.IAsyncContentCreation sap.ui.core.IAsyncContentCreation}`,
 	},
@@ -110,6 +117,15 @@ export const MESSAGE_INFO = {
 		message: ({apiName}: {apiName: string}) =>
 			`Use of deprecated API '${apiName}'`,
 		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name, value}: {name: string; value: string}) =>
+			`Use of deprecated value '${value}' for bootstrap parameter '${name}'`,
+		details: ({details}: {details?: string}) => details,
 	},
 
 	[MESSAGE.DEPRECATED_CLASS]: {
@@ -148,15 +164,6 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
-	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-library"],
-
-		message: ({themeName}: {themeName: string}) =>
-			`Use of deprecated theme '${themeName}'`,
-		details: () => undefined,
-	},
-
 	[MESSAGE.DEPRECATED_MANIFEST_JS_RESOURCES]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -176,6 +183,27 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
+	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({modelName}: {modelName?: string}) =>
+			`Usage of deprecated parameter 'synchronizationMode' ` +
+			`of constructor 'sap/ui/model/odata/v4/ODataModel'${modelName ? ` (model: '${modelName}')` : ""}`,
+		details: () =>
+			`As of version 1.110.0, the 'synchronizationMode' parameter is obsolete and must be omitted. ` +
+			`{@link sap/ui/model/odata/v4/ODataModel#constructor See the API reference}`,
+	},
+
+	[MESSAGE.DEPRECATED_PROPERTY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({propertyName}: {propertyName: string}) =>
+			`Use of deprecated property '${propertyName}'`,
+		details: ({details}: {details: string}) => details,
+	},
+
 	[MESSAGE.DEPRECATED_PROPERTY_OF_CLASS]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -185,13 +213,13 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
-	[MESSAGE.DEPRECATED_PROPERTY]: {
+	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-property"],
+		ruleId: RULES["no-deprecated-library"],
 
-		message: ({propertyName}: {propertyName: string}) =>
-			`Use of deprecated property '${propertyName}'`,
-		details: ({details}: {details: string}) => details,
+		message: ({themeName}: {themeName: string}) =>
+			`Use of deprecated theme '${themeName}'`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {
@@ -199,8 +227,8 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({propertyName}: {propertyName: string}) =>
-			`Use of property '${propertyName}' is deprecated. ` +
-			`Use '${propertyName.substring(4).toLowerCase()}' instead.'`,
+			`Use of deprecated property '${propertyName}'.` +
+			`Use '${propertyName.substring(4).toLowerCase()}' instead'`,
 		details: () => undefined,
 	},
 
@@ -209,17 +237,8 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({viewType}: {viewType: string}) =>
-			`Use of view type '${viewType}' is deprecated. Use 'XML' instead.'`,
+			`Use of deprecated view type '${viewType}'. Use 'XML' instead'`,
 		details: () => undefined,
-	},
-
-	[MESSAGE.DEPRECATED_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name, value}: {name: string; value: string}) =>
-			`Use of deprecated value '${value}' for bootstrap parameter '${name}'`,
-		details: ({details}: {details?: string}) => details,
 	},
 
 	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
@@ -228,42 +247,6 @@ export const MESSAGE_INFO = {
 
 		message: ({name, value}: {name: string; value: string}) =>
 			`Duplicate bootstrap parameter '${name}' with value '${value}'`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Missing bootstrap parameter '${name}'`,
-		details: ({details}: {details?: string}) => details,
-	},
-
-	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.SPELLING_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({oldName, newName}: {oldName: string; newName: string}) =>
-			`Outdated spelling of bootstrap parameter: '${oldName}' should be '${newName}'`,
 		details: () => undefined,
 	},
 
@@ -277,11 +260,20 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.LIB_INIT_API_VERSION]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({libInitFunction}: {libInitFunction: string}) =>
-			`Call to ${libInitFunction}() must be declared with property {apiVersion: 2}`,
+			`Deprecated call to ${libInitFunction}(). Use parameter {apiVersion: 2} instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
+	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Missing bootstrap parameter '${name}'`,
+		details: ({details}: {details?: string}) => details,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
@@ -289,7 +281,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access to DataType pseudo module '${moduleName}'`,
+			`Deprecated access of DataType pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -299,7 +291,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-pseudo-modules"],
 
 		message: ({moduleName}: {moduleName: string}) =>
-			`Deprecated access to enum pseudo module '${moduleName}'`,
+			`Deprecated access of enum pseudo module '${moduleName}'`,
 		details: () =>
 			"{@link topic:00737d6c1b864dc3ab72ef56611491c4 Migrating Access to Pseudo Modules}",
 	},
@@ -310,52 +302,44 @@ export const MESSAGE_INFO = {
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
-		details: () => undefined,
+		details: () =>
+			`Do not use global variables to access UI5 modules or APIs. ` +
+			`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
-	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
+	[MESSAGE.PARSING_ERROR]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["parsing-error"],
+		fatal: true,
+
+		message: ({message}: {message: string}) => message,
+		details: () => `Check the source file for syntax errors`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () =>
-			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
-		details: () => `{@link sap.ui.core.theming.Parameters#sap.ui.core.theming.Parameters.get Parameters.get}`,
+			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
+		details: () =>
+			`The 'oConfig.async' parameter must be set to true. ` +
+			`{@link sap/ui/core/routing/Router#constructor See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () =>
 			`Usage of deprecated value for parameter 'async' of 'sap/ui/core/Component#createComponent'`,
-		details: () => `Property 'async' must be either omitted or set to true. ` +
-			`{@link sap.ui.core.Component#createComponent See API reference}`,
-	},
-
-	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
-
-		message: () =>
-			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
-		details: () => `Use parameter 'groupId' instead. ` +
-			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
-	},
-
-	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
-
-		message: () =>
-			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
-		details: () =>
-			`Passing a list of property names is deprecated. Pass the initial values as an object instead. ` +
-			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See API reference}`,
+		details: () => `The 'async' property must be either omitted or set to true. ` +
+			`{@link sap.ui.core.Component#createComponent See the API reference}`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/model/json/JSONModel#loadData'`,
@@ -366,7 +350,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: ({paramName}: {paramName: string}) =>
 			`Usage of deprecated value for parameter '${paramName}' of 'sap/ui/util/Mobile#init'`,
@@ -375,15 +359,43 @@ export const MESSAGE_INFO = {
 			`{@link sap.ui.util.Mobile#init See API reference}`,
 	},
 
-	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
+	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+		ruleId: RULES["no-deprecated-api"],
 
 		message: () =>
-			`Usage of deprecated value for parameter 'oConfig.async' of constructor 'sap/ui/core/Router'`,
+			`Usage of deprecated parameter 'batchGroupId' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
+		details: () => `Use the 'groupId' parameter instead. ` +
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See the API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated value for parameter 'properties' in 'sap/ui/model/odata/v2/ODataModel#createEntry'`,
 		details: () =>
-			`Parameter 'oConfig.async' must be set to true. ` +
-			`{@link sap/ui/core/routing/Router#constructor See API reference}`,
+			`Passing a list of property names is deprecated. Pass the initial values as an object instead. ` +
+			`{@link sap.ui.model.odata.v2.ODataModel#createEntry See the API reference}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
+		details: () => `{@link sap.ui.core.theming.Parameters#sap.ui.core.theming.Parameters.get Parameters.get}`,
+	},
+
+	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Redundant bootstrap parameter '${name}' should be removed`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY]: {
@@ -395,24 +407,12 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
-	[MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-parameter"],
+	[MESSAGE.SPELLING_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
 
-		message: ({modelName}: {modelName?: string}) =>
-			`Usage of deprecated parameter 'synchronizationMode' ` +
-			`of constructor 'sap/ui/model/odata/v4/ODataModel'${modelName ? ` (model: '${modelName}')` : ""}`,
-		details: () =>
-			`As of version 1.110.0, parameter 'synchronizationMode' is obsolete and must be omitted. ` +
-			`{@link sap/ui/model/odata/v4/ODataModel#constructor See API reference}`,
-	},
-
-	[MESSAGE.PARSING_ERROR]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["parsing-error"],
-		fatal: true,
-
-		message: ({message}: {message: string}) => message,
+		message: ({oldName, newName}: {oldName: string; newName: string}) =>
+			`Outdated spelling of bootstrap parameter: '${oldName}'; should be written as '${newName}'`,
 		details: () => undefined,
 	},
 
@@ -420,8 +420,8 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
 
-		message: () => `Usage of SVG in XML Views/Fragments is deprecated`,
-		details: () => undefined,
+		message: () => `Deprecated use of SVG in XML View or Fragment`,
+		details: () => `{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
 } as const;
