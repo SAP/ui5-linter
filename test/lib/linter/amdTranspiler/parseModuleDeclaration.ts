@@ -206,6 +206,7 @@ test("All combinations", (t) => {
 	permutations.forEach(({args, expected}) => {
 		// Omit any parameters with "kind" set to null
 		const res = _matchArgumentsToParameters(args.filter((_) => _?.kind));
+		// eslint-disable-next-line ava/assertion-arguments -- https://github.com/avajs/eslint-plugin-ava/issues/332
 		t.deepEqual(
 			resolveSyntaxKind(res),
 			resolveSyntaxKind(expected),

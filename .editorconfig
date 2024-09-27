@@ -12,7 +12,7 @@ end_of_line = lf
 indent_size = 4
 insert_final_newline = true
 
-[*.{css,html,js,cjs,mjs,jsx,ts,tsx,less,txt,json,yml,md}]
+[*.{css,html,js,cjs,mjs,jsx,ts,cts,mts,tsx,less,txt,json,yml,md}]
 trim_trailing_whitespace = true
 end_of_line = lf
 indent_size = 4
