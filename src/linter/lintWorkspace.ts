@@ -1,4 +1,4 @@
-import {AbstractAdapter, AbstractReader} from "@ui5/fs";
+import {AbstractAdapter} from "@ui5/fs";
 import lintXml from "./xmlTemplate/linter.js";
 import lintJson from "./manifestJson/linter.js";
 import lintHtml from "./html/linter.js";
