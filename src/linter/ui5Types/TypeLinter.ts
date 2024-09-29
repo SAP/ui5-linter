@@ -5,7 +5,7 @@ import {taskStart} from "../../utils/perf.js";
 import {getLogger} from "@ui5/logger";
 import LinterContext, {LinterParameters} from "../LinterContext.js";
 import path from "node:path/posix";
-import {AbstractAdapter} from "@ui5/fs";
+import {AbstractAdapter, AbstractReader} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import fs from "node:fs/promises";
 
@@ -46,10 +46,12 @@ export default class TypeChecker {
 	#compilerOptions: ts.CompilerOptions;
 	#context: LinterContext;
 	#workspace: AbstractAdapter;
+	#filePathsReader: AbstractReader;
 
-	constructor({workspace, context}: LinterParameters) {
+	constructor({workspace, filePathsReader, context}: LinterParameters) {
 		this.#context = context;
 		this.#workspace = workspace;
+		this.#filePathsReader = filePathsReader;
 		this.#compilerOptions = {...DEFAULT_OPTIONS};
 
 		const namespace = context.getNamespace();
@@ -66,7 +68,7 @@ export default class TypeChecker {
 		const files: FileContents = new Map();
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 
-		const resources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
+		const resources = await (this.#filePathsReader ?? this.#workspace).byGlob("/**/{*.js,*.js.map,*.ts}");
 		const pathsToLint = resources.map((resource) => resource.getPath());
 
 		// Sort paths to ensure consistent order (helps with debugging and comparing verbose/silly logs)
