@@ -147,12 +147,13 @@ async function lint(
 		resourceReader: filePathsReader,
 		namespace: options.namespace,
 	});
+	const filePathsWorkspace = createWorkspace({reader: filePathsReader});
 
 	const workspace = createWorkspace({
 		reader,
 	});
 
-	const res = await lintWorkspace(workspace, filePathsReader, options, config);
+	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config);
 	lintEnd();
 	return res;
 }

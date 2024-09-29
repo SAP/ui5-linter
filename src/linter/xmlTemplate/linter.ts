@@ -3,9 +3,9 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 
-export default async function lintXml({workspace, context}: LinterParameters) {
-	const reader = context.getFilePathsReader() ?? workspace;
-	const xmlResources = await reader.byGlob("**/{*.view.xml,*.fragment.xml}");
+export default async function lintXml({workspace, filePathsReader, context}: LinterParameters) {
+	const resolvedWorkspace = filePathsReader ?? workspace;
+	const xmlResources = await resolvedWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context);
@@ -18,11 +18,11 @@ export default async function lintXml({workspace, context}: LinterParameters) {
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
 		const jsPath = resourcePath.replace(/\.xml$/, ".js");
-		await workspace.write(createResource({
+		await resolvedWorkspace.write(createResource({
 			path: jsPath,
 			string: source,
 		}));
-		await workspace.write(createResource({
+		await resolvedWorkspace.write(createResource({
 			path: jsPath + ".map",
 			string: map,
 		}));

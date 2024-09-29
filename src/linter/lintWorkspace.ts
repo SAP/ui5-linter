@@ -13,12 +13,12 @@ import {resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
-	workspace: AbstractAdapter, filePathsReader: AbstractReader,
+	workspace: AbstractAdapter, filePathsReader: AbstractAdapter,
 	options: LinterOptions, config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
 
-	const context = new LinterContext(options, filePathsReader);
+	const context = new LinterContext(options);
 	let reader = await resolveReader({
 		patterns: options.filePatterns ?? [],
 		projectRootDir: options.rootDir,

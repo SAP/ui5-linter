@@ -69,7 +69,7 @@ export interface LinterOptions {
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
-	filePathsReader: AbstractReader;
+	filePathsReader: AbstractAdapter;
 	context: LinterContext;
 }
 
@@ -98,18 +98,14 @@ export default class LinterContext {
 	#metadata = new Map<ResourcePath, LintMetadata>();
 	#rootReader: AbstractReader | undefined;
 
-	#pathsToLint: AbstractReader | undefined;
-
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
 
-	constructor(options: LinterOptions, filePathsReader?: AbstractReader) {
+	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
 		this.#reportCoverage = !!options.reportCoverage;
 		this.#includeMessageDetails = !!options.includeMessageDetails;
-
-		this.#pathsToLint = filePathsReader;
 	}
 
 	getRootDir(): string {
@@ -133,10 +129,6 @@ export default class LinterContext {
 			virBasePath: "/",
 		});
 		return this.#rootReader;
-	}
-
-	getFilePathsReader(): AbstractReader | undefined {
-		return this.#pathsToLint;
 	}
 
 	getNamespace(): string | undefined {
