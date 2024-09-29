@@ -49,9 +49,10 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 test.serial("lint: Some files of com.ui5.troublesome.app (without details / coverage)", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const filePaths = [
-		path.join("webapp", "controller", "BaseController.js"),
-		path.join("webapp", "controller", "App.controller.js"),
-		path.join("webapp", "Component.js"),
+		// Minimatch requires POSIX
+		path.posix.join("webapp", "controller", "BaseController.js"),
+		path.posix.join("webapp", "controller", "App.controller.js"),
+		path.posix.join("webapp", "Component.js"),
 	];
 	const {lintProject} = t.context;
 
@@ -62,7 +63,9 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 
 	assertExpectedLintResults(t, res, projectPath, [
 		path.join("webapp", "model", "models.js"),
-		...filePaths,
+		// Comparing files requires platform specific separators,
+		// so, translating POSIX to platform specific.
+		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
 	]);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
