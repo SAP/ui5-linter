@@ -37,6 +37,18 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 			.positional("files", {
 				describe: "List of patterns to lint",
 				type: "string",
+				array: true,
+			})
+			.coerce([
+				"files",
+			], (arg: LinterArg[]) => {
+				// Yargs will also provide --files option under the hood
+				// Enforce an array type
+				if (!Array.isArray(arg)) {
+					// If the option is specified multiple times, use the value of the last option
+					return [arg];
+				}
+				return arg;
 			})
 			.option("config", {
 				describe: "Load a custom config by file path",
@@ -93,7 +105,6 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 			})
 			.coerce([
-				// base.js
 				"log-level",
 			], (arg: LinterArg[]) => {
 				// If an option is specified multiple times, yargs creates an array for all the values,
