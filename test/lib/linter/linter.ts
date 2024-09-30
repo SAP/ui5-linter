@@ -71,6 +71,28 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: One file of com.ui5.troublesome.app (without details / coverage)", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const filePaths = [
+		// Minimatch requires POSIX
+		path.posix.join("webapp", "controller", "App.controller.js"),
+	];
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		filePatterns: filePaths,
+	});
+
+	assertExpectedLintResults(t, res, projectPath, [
+		// Comparing files requires platform specific separators,
+		// so, translating POSIX to platform specific.
+		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
+	]);
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
 	const {lintProject} = t.context;

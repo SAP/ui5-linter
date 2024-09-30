@@ -68,8 +68,9 @@ export default class TypeChecker {
 		const files: FileContents = new Map();
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 
-		const resources = await (this.#filePathsReader ?? this.#workspace).byGlob("/**/{*.js,*.js.map,*.ts}");
-		const pathsToLint = resources.map((resource) => resource.getPath());
+		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
+		const filteredResources = await this.#filePathsReader.byGlob("/**/{*.js,*.js.map,*.ts}");
+		const pathsToLint = filteredResources.map((resource) => resource.getPath());
 
 		// Sort paths to ensure consistent order (helps with debugging and comparing verbose/silly logs)
 		pathsToLint.sort((a, b) => a.localeCompare(b));
@@ -78,7 +79,7 @@ export default class TypeChecker {
 			log.silly(`pathsToLint: ${pathsToLint.join(", ")}`);
 		}
 
-		for (const resource of resources) {
+		for (const resource of allResources) {
 			const resourcePath = resource.getPath();
 			if (resourcePath.endsWith(".js.map")) {
 				sourceMaps.set(
