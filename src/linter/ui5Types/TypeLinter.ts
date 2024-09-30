@@ -5,7 +5,7 @@ import {taskStart} from "../../utils/perf.js";
 import {getLogger} from "@ui5/logger";
 import LinterContext, {LinterParameters} from "../LinterContext.js";
 import path from "node:path/posix";
-import {AbstractAdapter, AbstractReader} from "@ui5/fs";
+import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import fs from "node:fs/promises";
 
@@ -46,12 +46,12 @@ export default class TypeChecker {
 	#compilerOptions: ts.CompilerOptions;
 	#context: LinterContext;
 	#workspace: AbstractAdapter;
-	#filePathsReader: AbstractReader;
+	#filePathsWorkspace: AbstractAdapter;
 
-	constructor({workspace, filePathsReader, context}: LinterParameters) {
+	constructor({workspace, filePathsWorkspace, context}: LinterParameters) {
 		this.#context = context;
 		this.#workspace = workspace;
-		this.#filePathsReader = filePathsReader;
+		this.#filePathsWorkspace = filePathsWorkspace;
 		this.#compilerOptions = {...DEFAULT_OPTIONS};
 
 		const namespace = context.getNamespace();
@@ -69,7 +69,7 @@ export default class TypeChecker {
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 
 		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
-		const filteredResources = await this.#filePathsReader.byGlob("/**/{*.js,*.js.map,*.ts}");
+		const filteredResources = await this.#filePathsWorkspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const pathsToLint = filteredResources.map((resource) => resource.getPath());
 
 		// Sort paths to ensure consistent order (helps with debugging and comparing verbose/silly logs)

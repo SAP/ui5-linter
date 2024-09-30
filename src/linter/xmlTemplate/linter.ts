@@ -3,8 +3,8 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 
-export default async function lintXml({filePathsReader: filteredWorkspace, workspace, context}: LinterParameters) {
-	const xmlResources = await filteredWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
+export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
+	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context);
@@ -26,9 +26,9 @@ export default async function lintXml({filePathsReader: filteredWorkspace, works
 			string: map,
 		});
 
-		await filteredWorkspace.write(transpiledResource);
+		await filePathsWorkspace.write(transpiledResource);
 		await workspace.write(transpiledResource);
-		await filteredWorkspace.write(transpiledResourceSourceMap);
+		await filePathsWorkspace.write(transpiledResourceSourceMap);
 		await workspace.write(transpiledResourceSourceMap);
 	}));
 }

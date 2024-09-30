@@ -69,7 +69,7 @@ export interface LinterOptions {
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
-	filePathsReader: AbstractAdapter;
+	filePathsWorkspace: AbstractAdapter;
 	context: LinterContext;
 }
 
