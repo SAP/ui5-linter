@@ -9,6 +9,8 @@ import replaceNodeInParent, {NodeReplacement} from "./replaceNodeInParent.js";
 import {toPosStr, UnsupportedModuleError} from "./util.js";
 import rewriteExtendCall, {UnsupportedExtendCall} from "./rewriteExtendCall.js";
 import insertNodesInParent from "./insertNodesInParent.js";
+import LinterContext from "../../LinterContext.js";
+import {findDirectives} from "../directives.js";
 
 const log = getLogger("linter:ui5Types:amdTranspiler:TsTransformer");
 
@@ -44,21 +46,23 @@ function isBlockLike(node: ts.Node): node is ts.BlockLike {
  * error is thrown. In that case, the rest of the module is still processed. However it's possible that the result
  * will be equal to the input.
 */
-export function createTransformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
-	return function transformer(context: ts.TransformationContext) {
+export function createTransformer(
+	program: ts.Program, resourcePath: string, context: LinterContext
+): ts.TransformerFactory<ts.SourceFile> {
+	return function transformer(tContext: ts.TransformationContext) {
 		return (sourceFile: ts.SourceFile): ts.SourceFile => {
-			return transform(program, sourceFile, context);
+			return transform(program, sourceFile, tContext, resourcePath, context);
 		};
 	};
 }
 
 function transform(
-	program: ts.Program, sourceFile: ts.SourceFile, context: ts.TransformationContext
+	program: ts.Program, sourceFile: ts.SourceFile, tContext: ts.TransformationContext, resourcePath: string,
+	context: LinterContext
 ): ts.SourceFile {
-	const resourcePath = sourceFile.fileName;
 	log.verbose(`Transforming ${resourcePath}`);
 	const checker = program.getTypeChecker();
-	const {factory: nodeFactory} = context;
+	const {factory: nodeFactory} = tContext;
 	const moduleDefinitions: ModuleDefinition[] = [];
 	// TODO: Filter duplicate imports, maybe group by module definition
 	const requireImports: ts.ImportDeclaration[] = [];
@@ -96,9 +100,12 @@ function transform(
 		insertions.push(nodeToBeInserted);
 	}
 
+	const metadata = context.getMetadata(resourcePath);
+	findDirectives(sourceFile, metadata);
+
 	// Visit the AST depth-first and collect module definitions
 	function visit(nodeIn: ts.Node): ts.VisitResult<ts.Node> {
-		const node = ts.visitEachChild(nodeIn, visit, context);
+		const node = ts.visitEachChild(nodeIn, visit, tContext);
 		if (ts.isCallExpression(node) &&
 			ts.isPropertyAccessExpression(node.expression)) {
 			if (matchPropertyAccessExpression(node.expression, "sap.ui.define")) {
@@ -346,7 +353,7 @@ function transform(
 				node = replaceNodeInParent(node, replacement, nodeFactory);
 			}
 		}
-		return ts.visitEachChild(node, applyModifications, context);
+		return ts.visitEachChild(node, applyModifications, tContext);
 	}
 	processedSourceFile = ts.visitNode(processedSourceFile, applyModifications) as ts.SourceFile;
 

@@ -11,6 +11,7 @@ import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
+import {findDirectives} from "./directives.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -80,6 +81,12 @@ export default class SourceFileLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
+			const metadata = this.context.getMetadata(this.resourcePath);
+			if (!metadata.directives) {
+				// Directives might have already been extracted by the amd transpiler
+				// This is done since the transpile process might loose comments
+				findDirectives(this.sourceFile, metadata);
+			}
 			this.visitNode(this.sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {

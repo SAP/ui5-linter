@@ -4,7 +4,7 @@ import posixPath from "node:path/posix";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
-import {ResourcePath} from "../LinterContext.js";
+import LinterContext, {ResourcePath} from "../LinterContext.js";
 import {getLogger} from "@ui5/logger";
 const log = getLogger("linter:ui5Types:host");
 const require = createRequire(import.meta.url);
@@ -65,7 +65,8 @@ export type FileContents = Map<ResourcePath, string | (() => string)>;
 
 export async function createVirtualCompilerHost(
 	options: ts.CompilerOptions,
-	files: FileContents, sourceMaps: FileContents
+	files: FileContents, sourceMaps: FileContents,
+	context: LinterContext
 ): Promise<ts.CompilerHost> {
 	const silly = log.isLevelEnabled("silly");
 
@@ -113,25 +114,25 @@ export async function createVirtualCompilerHost(
 		}
 	}
 
-	function getFile(fileName: string): string | undefined {
+	function getFile(resourcePath: string): string | undefined {
 		// NOTE: This function should be kept in sync with "fileExists"
 
-		if (files.has(fileName)) {
-			let fileContent = files.get(fileName);
+		if (files.has(resourcePath)) {
+			let fileContent = files.get(resourcePath);
 			if (typeof fileContent === "function") {
 				fileContent = fileContent();
 			}
-			if (fileContent && fileName.endsWith(".js") && !sourceMaps.get(fileName)) {
+			if (fileContent && resourcePath.endsWith(".js") && !sourceMaps.get(resourcePath)) {
 				// No source map indicates no transpilation was done yet
-				const res = transpileAmdToEsm(path.basename(fileName), fileContent);
-				files.set(fileName, res.source);
-				sourceMaps.set(fileName, res.map);
+				const res = transpileAmdToEsm(resourcePath, fileContent, context);
+				files.set(resourcePath, res.source);
+				sourceMaps.set(resourcePath, res.map);
 				fileContent = res.source;
 			}
 			return fileContent;
 		}
-		if (fileName.startsWith("/types/")) {
-			const fsPath = mapToTypePath(fileName);
+		if (resourcePath.startsWith("/types/")) {
+			const fsPath = mapToTypePath(resourcePath);
 			if (fsPath) {
 				return ts.sys.readFile(fsPath);
 			}

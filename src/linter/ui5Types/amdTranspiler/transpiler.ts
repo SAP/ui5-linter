@@ -1,7 +1,8 @@
 import ts from "typescript";
+import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import {taskStart} from "../../../utils/perf.js";
-import {TranspileResult} from "../../LinterContext.js";
+import LinterContext, {TranspileResult} from "../../LinterContext.js";
 import {createTransformer} from "./tsTransformer.js";
 import {UnsupportedModuleError} from "./util.js";
 
@@ -49,9 +50,11 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 	return ts.createProgram(inputFileNames, compilerOptions, host);
 }
 
-export default function transpileAmdToEsm(fileName: string, content: string, strict?: boolean): TranspileResult {
+export default function transpileAmdToEsm(
+	resourcePath: string, content: string, context: LinterContext, strict?: boolean
+): TranspileResult {
 	// This is heavily inspired by the TypesScript "transpileModule" API
-
+	const fileName = path.basename(resourcePath);
 	const taskDone = taskStart("Transpiling AMD to ESM", fileName, true);
 	const sourceFile = ts.createSourceFile(
 		fileName,
@@ -71,7 +74,7 @@ export default function transpileAmdToEsm(fileName: string, content: string, str
 	const program = createProgram([fileName], compilerHost);
 
 	const transformers: ts.CustomTransformers = {
-		before: [createTransformer(program)],
+		before: [createTransformer(program, resourcePath, context)],
 	};
 
 	try {

@@ -92,7 +92,7 @@ export default class TypeChecker {
 			}
 		}
 
-		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps);
+		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
 
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
 		const program = ts.createProgram(
