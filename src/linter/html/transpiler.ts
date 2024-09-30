@@ -160,6 +160,14 @@ function checkLibraryAttr(attr: Attribute, report: HtmlReporter, modulesSyntax =
 				libraryName,
 			}, attr.value);
 		}
+
+		if (libraryName.includes("sap.ui.core.plugin.declarativesupport")) {
+			report.addMessage(MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT, attr.value);
+		}
+
+		if (libraryName.includes("sap.ui.core.plugin.lesssupport")) {
+			report.addMessage(MESSAGE.DEPRECATED_LESS_SUPPORT, attr.value);
+		}
 	}
 }
 
@@ -191,5 +199,9 @@ function checkOnInitAttr(attr: Attribute, report: HtmlReporter) {
 			value,
 			details: `{@link topic:91f2d03b6f4d1014b6dd926db0e91070 Configuration Options and URL Parameters}`,
 		}, attr.value);
+	}
+
+	if (value.includes("sap/ui/core/plugin/declarativesupport")) {
+		report.addMessage(MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT, attr.value);
 	}
 }
