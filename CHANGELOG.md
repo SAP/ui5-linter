@@ -2,27 +2,20 @@
 
 ## [1.0.0](https://github.com/SAP/ui5-linter/compare/v0.4.1...v1.0.0) (2024-09-30)
 
+### General
 
-### ⚠ BREAKING CHANGES
+* Usage of deprecated UI5 libraries
+* Usage of deprecated UI5 framework APIs
+* Usage of global variables
+* Possible CSP violations
+* Deprecated component and manifest configurations
 
-* **messages:** Merge no-deprecated-property/parameter into no-deprecated-api ([#324](https://github.com/SAP/ui5-linter/issues/324))
-
-### Features
+### New Features in this release
 
 * Allow usage of patterns in UI5 linter's file-paths config ([#312](https://github.com/SAP/ui5-linter/issues/312)) ([d7f1817](https://github.com/SAP/ui5-linter/commit/d7f18179600ed202742d80324e1eeaead25fc387))
 * Detect deprecated View file types ([#320](https://github.com/SAP/ui5-linter/issues/320)) ([a9c2467](https://github.com/SAP/ui5-linter/commit/a9c2467c53d171493d1172c260ac422be60930fd))
 * Detect sap/ui/core/plugin/DeclarativeSupport and sap/ui/core/plugin/LessSupport ([#328](https://github.com/SAP/ui5-linter/issues/328)) ([6545780](https://github.com/SAP/ui5-linter/commit/654578010990997396cce8ed1b73f7ee25c932f0))
 * **html:** Detect deprecated bootstrap parameters ([#316](https://github.com/SAP/ui5-linter/issues/316)) ([62489f7](https://github.com/SAP/ui5-linter/commit/62489f7a96fb627099f4ab026897578d8346817f))
-
-
-### Bug Fixes
-
-* Fatal error while analyzing JSONModel#loadData with 2 or 5 arguments ([8f99ebf](https://github.com/SAP/ui5-linter/commit/8f99ebf87261a1d5ad279266681332d0e1b8dbb0))
-
-
-### Code Refactoring
-
-* **messages:** Merge no-deprecated-property/parameter into no-deprecated-api ([#324](https://github.com/SAP/ui5-linter/issues/324)) ([d481334](https://github.com/SAP/ui5-linter/commit/d4813346e9419afb8a39a43c2ae3d67583ce0aa6))
 
 ## [0.4.1](https://github.com/SAP/ui5-linter/compare/v0.4.0...v0.4.1) (2024-09-23)
 
