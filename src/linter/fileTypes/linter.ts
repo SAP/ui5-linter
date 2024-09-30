@@ -13,10 +13,9 @@ const deprecatedViewFileTypes = [
 	".fragment.ts",
 ];
 
-export default async function lintFileTypes({workspace, filePathsReader, context}: LinterParameters) {
-	const reader = filePathsReader ?? workspace;
+export default async function lintFileTypes({filePathsReader, context}: LinterParameters) {
 	const potentialDeprecatedResources =
-			await reader.byGlob(`**/{${deprecatedViewFileTypes.map((type) => `*${type}`).join(",")}}`);
+			await filePathsReader.byGlob(`**/{${deprecatedViewFileTypes.map((type) => `*${type}`).join(",")}}`);
 
 	potentialDeprecatedResources.forEach((resource: Resource) => {
 		const fileSuffix = resource.getPath().split(".").pop()!.toUpperCase();
