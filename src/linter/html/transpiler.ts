@@ -161,11 +161,11 @@ function checkLibraryAttr(attr: Attribute, report: HtmlReporter, modulesSyntax =
 			}, attr.value);
 		}
 
-		if (libraryName.includes("sap/ui/core/plugin/declarativesupport")) {
+		if (libraryName.includes("sap.ui.core.plugin.declarativesupport")) {
 			report.addMessage(MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT, attr.value);
 		}
 
-		if (libraryName.includes("sap/ui/core/plugin/lesssupport")) {
+		if (libraryName.includes("sap.ui.core.plugin.lesssupport")) {
 			report.addMessage(MESSAGE.DEPRECATED_LESS_SUPPORT, attr.value);
 		}
 	}
@@ -203,9 +203,5 @@ function checkOnInitAttr(attr: Attribute, report: HtmlReporter) {
 
 	if (value.includes("sap/ui/core/plugin/declarativesupport")) {
 		report.addMessage(MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT, attr.value);
-	}
-
-	if (value.includes("sap/ui/core/plugin/lesssupport")) {
-		report.addMessage(MESSAGE.DEPRECATED_LESS_SUPPORT, attr.value);
 	}
 }
