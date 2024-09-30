@@ -3,24 +3,8 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 
-export default async function lintXml({workspace, context}: LinterParameters) {
-	let xmlResources: Resource[];
-	const pathsToLint = context.getPathsToLint();
-	if (pathsToLint?.length) {
-		xmlResources = [];
-		await Promise.all(pathsToLint.map(async (resourcePath) => {
-			if (!resourcePath.endsWith(".view.xml") && !resourcePath.endsWith(".fragment.xml")) {
-				return;
-			}
-			const resource = await workspace.byPath(resourcePath);
-			if (!resource) {
-				throw new Error(`Resource not found: ${resourcePath}`);
-			}
-			xmlResources.push(resource);
-		}));
-	} else {
-		xmlResources = await workspace.byGlob("**/{*.view.xml,*.fragment.xml}");
-	}
+export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
+	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context);
@@ -33,14 +17,18 @@ export default async function lintXml({workspace, context}: LinterParameters) {
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
 		const jsPath = resourcePath.replace(/\.xml$/, ".js");
-		context.addPathToLint(jsPath);
-		await workspace.write(createResource({
+		const transpiledResource = createResource({
 			path: jsPath,
 			string: source,
-		}));
-		await workspace.write(createResource({
+		});
+		const transpiledResourceSourceMap = createResource({
 			path: jsPath + ".map",
 			string: map,
-		}));
+		});
+
+		await filePathsWorkspace.write(transpiledResource);
+		await workspace.write(transpiledResource);
+		await filePathsWorkspace.write(transpiledResourceSourceMap);
+		await workspace.write(transpiledResourceSourceMap);
 	}));
 }

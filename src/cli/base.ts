@@ -13,6 +13,7 @@ import ConsoleWriter from "@ui5/logger/writers/Console";
 
 export interface LinterArg {
 	coverage: boolean;
+	files?: string[];
 	filePaths?: string[];
 	ignorePattern?: string[];
 	details: boolean;
@@ -21,18 +22,34 @@ export interface LinterArg {
 	ui5Config?: string;
 }
 
-// yargs type defition is missing the "middelwares" property for the CommandModule type
+// yargs type definition is missing the "middlewares" property for the CommandModule type
 interface FixedCommandModule<T, U> extends CommandModule<T, U> {
 	middlewares: MiddlewareFunction<U>[];
 }
 
 const lintCommand: FixedCommandModule<object, LinterArg> = {
-	command: "$0",
+	command: "$0 [files...]",
 	describe: "Runs linter",
 	handler: handleLint,
 	middlewares: [baseMiddleware],
 	builder: function (args: Argv<object>): Argv<LinterArg> {
-		args.usage("Usage: $0 [options]")
+		args.usage("Usage: $0 [files...] [options]")
+			.positional("files", {
+				describe: "List of patterns to lint",
+				type: "string",
+				array: true,
+			})
+			.coerce([
+				"files",
+			], (arg: LinterArg[]) => {
+				// Yargs will also provide --files option under the hood
+				// Enforce an array type
+				if (!Array.isArray(arg)) {
+					// If the option is specified multiple times, use the value of the last option
+					return [arg];
+				}
+				return arg;
+			})
 			.option("config", {
 				describe: "Load a custom config by file path",
 				type: "string",
@@ -44,11 +61,6 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 			})
 			.array("ignore-pattern")
-			.option("file-paths", {
-				describe: "",
-				type: "string",
-			})
-			.array("file-paths")
 			.option("coverage", {
 				describe: "Whether to provide a coverage report",
 				type: "boolean",
@@ -93,7 +105,6 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 			})
 			.coerce([
-				// base.js
 				"log-level",
 			], (arg: LinterArg[]) => {
 				// If an option is specified multiple times, yargs creates an array for all the values,
@@ -111,10 +122,10 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				}
 				return arg;
 			})
+			.example("ui5lint ./path/to/file ./path/**/*",
+				"Execute ui5lint with specified files or glob patterns to restrict linting to the selected files only")
 			.example("ui5lint --coverage",
-				"Execute ui5lint with coverage enabled")
-			.example("ui5lint --file-paths /path/to/resources",
-				"Execute command with scope of file-paths");
+				"Execute ui5lint with coverage enabled");
 
 		return args as Argv<LinterArg>;
 	},
@@ -122,8 +133,8 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 
 async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
+		files: filePatterns,
 		coverage,
-		filePaths,
 		ignorePattern,
 		details,
 		format,
@@ -142,7 +153,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
 		ignorePattern,
-		pathsToLint: filePaths?.map((filePath) => path.resolve(process.cwd(), filePath)),
+		filePatterns,
 		reportCoverage,
 		includeMessageDetails: details,
 		configPath: config,
