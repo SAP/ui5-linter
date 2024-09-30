@@ -9,27 +9,38 @@ import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
 import {createReader} from "@ui5/fs/resourceFactory";
-import {resolveIgnoresReader} from "./linter.js";
+import {resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
-	workspace: AbstractAdapter, options: LinterOptions, config: UI5LintConfigType
+	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
+	options: LinterOptions, config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
 
 	const context = new LinterContext(options);
-	context.setRootReader(await resolveIgnoresReader(
-		options.ignorePattern,
-		options.rootDir,
-		createReader({
+	let reader = await resolveReader({
+		patterns: options.filePatterns ?? [],
+		projectRootDir: options.rootDir,
+		ui5ConfigPath: config.ui5Config,
+		resourceReader: createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
 		}),
-		config
-	));
+		inverseResult: true,
+		namespace: options.namespace,
+	});
+	reader = await resolveReader({
+		patterns: options.ignorePattern ?? [],
+		projectRootDir: options.rootDir,
+		ui5ConfigPath: config.ui5Config,
+		resourceReader: reader,
+		namespace: options.namespace,
+	});
+	context.setRootReader(reader);
 
 	const params: LinterParameters = {
-		workspace, context,
+		workspace, filePathsWorkspace, context,
 	};
 
 	await Promise.all([

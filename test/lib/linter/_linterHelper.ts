@@ -69,10 +69,14 @@ export function assertExpectedLintResults(
 // Helper function to create linting tests for all files in a directory
 export function createTestsForFixtures(fixturesPath: string) {
 	try {
-		const testFiles = readdirSync(fixturesPath, {withFileTypes: true}).filter((dirEntries) => {
+		const testFiles = readdirSync(fixturesPath, {withFileTypes: true, recursive: true}).filter((dirEntries) => {
 			return dirEntries.isFile();
 		}).map((dirEntries) => {
-			return dirEntries.name;
+			return path.posix.join(
+				// Resolve relative path OS dependant, but do the join in POSIX format
+				path.relative(fixturesPath, dirEntries.path),
+				dirEntries.name
+			);
 		});
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
@@ -84,9 +88,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				namespace: "mycomp",
 				fileName: dirName,
 				fixturesPath,
-				// Needed, because without a namespace, TS's type definition detection
-				// does not function properly for the inheritance case
-				filePaths: testFiles.map((fileName) => path.join("resources", "mycomp", fileName)),
+				filePaths: testFiles,
 			});
 		} else {
 			for (const fileName of testFiles) {
@@ -139,11 +141,13 @@ function testDefinition(
 		const res = await lintFile({
 			rootDir: fixturesPath,
 			namespace,
-			pathsToLint: filePaths,
+			filePatterns: filePaths,
 			reportCoverage: true,
 			includeMessageDetails: true,
 		});
-		assertExpectedLintResults(t, res, fixturesPath, filePaths);
+		assertExpectedLintResults(t, res, fixturesPath,
+			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
+
 		res.forEach((result) => {
 			const resultFileName = path.basename(result.filePath);
 			if (resultFileName === fileName) {

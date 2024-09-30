@@ -4,6 +4,7 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 
+export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
 
@@ -58,8 +59,8 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	namespace?: string;
-	pathsToLint?: FilePath[];
-	ignorePattern?: string[];
+	filePatterns?: FilePattern[];
+	ignorePattern?: FilePattern[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;
@@ -68,6 +69,7 @@ export interface LinterOptions {
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
+	filePathsWorkspace: AbstractAdapter;
 	context: LinterContext;
 }
 
@@ -96,15 +98,12 @@ export default class LinterContext {
 	#metadata = new Map<ResourcePath, LintMetadata>();
 	#rootReader: AbstractReader | undefined;
 
-	#resourcePathsToLint: ResourcePath[] | undefined;
-
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
 
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#resourcePathsToLint = options.pathsToLint ? [...options.pathsToLint] : undefined;
 		this.#reportCoverage = !!options.reportCoverage;
 		this.#includeMessageDetails = !!options.includeMessageDetails;
 	}
@@ -136,10 +135,6 @@ export default class LinterContext {
 		return this.#namespace;
 	}
 
-	getPathsToLint(): ResourcePath[] | undefined {
-		return this.#resourcePathsToLint;
-	}
-
 	getReportCoverage(): boolean {
 		return this.#reportCoverage;
 	}
@@ -155,10 +150,6 @@ export default class LinterContext {
 			this.#metadata.set(resourcePath, metadata);
 		}
 		return metadata;
-	}
-
-	addPathToLint(resourcePath: ResourcePath) {
-		this.#resourcePathsToLint?.push(resourcePath);
 	}
 
 	getRawLintingMessages(resourcePath: ResourcePath): RawLintMessage[] {

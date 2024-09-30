@@ -38,7 +38,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -49,20 +49,45 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 test.serial("lint: Some files of com.ui5.troublesome.app (without details / coverage)", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const filePaths = [
-		path.join("webapp", "controller", "BaseController.js"),
-		path.join("webapp", "controller", "App.controller.js"),
-		path.join("webapp", "Component.js"),
+		// Minimatch requires POSIX
+		path.posix.join("webapp", "controller", "BaseController.js"),
+		path.posix.join("webapp", "controller", "App.controller.js"),
+		path.posix.join("webapp", "Component.js"),
 	];
 	const {lintProject} = t.context;
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: filePaths,
+		filePatterns: filePaths,
 	});
 
 	assertExpectedLintResults(t, res, projectPath, [
 		path.join("webapp", "model", "models.js"),
-		...filePaths,
+		// Comparing files requires platform specific separators,
+		// so, translating POSIX to platform specific.
+		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
+	]);
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
+test.serial("lint: One file of com.ui5.troublesome.app (without details / coverage)", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const filePaths = [
+		// Minimatch requires POSIX
+		path.posix.join("webapp", "controller", "App.controller.js"),
+	];
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		filePatterns: filePaths,
+	});
+
+	assertExpectedLintResults(t, res, projectPath, [
+		// Comparing files requires platform specific separators,
+		// so, translating POSIX to platform specific.
+		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
 	]);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -74,7 +99,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -88,7 +113,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ignorePattern: [
@@ -106,7 +131,7 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -120,7 +145,7 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});
@@ -134,7 +159,7 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		configPath: "./ui5lint-custom.config.cjs",
@@ -149,7 +174,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 
 	const res = await lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ui5ConfigPath: "./configs/ui5-custom.yaml",
@@ -158,14 +183,14 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
-test.only("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
+test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {lintProject} = t.context;
 	const ui5ConfigPath = "./configs/ui5-DOES-NOT-EXIST.yaml";
 
 	await t.throwsAsync(lintProject({
 		rootDir: projectPath,
-		pathsToLint: [],
+		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ui5ConfigPath,
