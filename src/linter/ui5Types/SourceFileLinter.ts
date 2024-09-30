@@ -10,6 +10,15 @@ import {getPropertyName} from "./utils.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
+/* Match things like:
+	ui5-lint-disable-next-line no-deprecated-api no-global
+	ui5-lint-disable
+		no-deprecated-api
+		no-global
+	ui5-lint-enable-next-line
+*/
+const disableCommentRegex = /\/[/*]\s*ui5lint-(enable|disable)((?:-next)?-line)?((?:\s+[\w-]+,)*(?:\s+[\w-]+))?\s*(?:\*\/|$)/mg;
+
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
@@ -72,6 +81,7 @@ export default class SourceFileLinter {
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
+			this.collectPossibleComments(this.#sourceFile);
 			this.visitNode(this.#sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
@@ -124,6 +134,22 @@ export default class SourceFileLinter {
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	collectPossibleComments(sourceFile: ts.SourceFile) {
+		const text = sourceFile.getFullText();
+		let match;
+		const comments = new Set();
+		while ((match = disableCommentRegex.exec(text)) !== null) {
+			const [, action, nextLineOrLine, rules] = match;
+			const pos = match.index;
+			const length = match[0].length;
+			const ruleNames = rules?.trim().split(",") ?? [];
+			const isLine = nextLineOrLine === "-line";
+			const isNextLine = nextLineOrLine === "-next-line";
+			comments.add({action, isLine, isNextLine, ruleNames, pos, length});
+		}
+		return comments;
 	}
 
 	analyzeIdentifier(node: ts.Identifier) {
