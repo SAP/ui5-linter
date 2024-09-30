@@ -16,6 +16,7 @@ export enum LintMessageSeverity {
 	Error = 2,
 }
 
+// Messages (sorted alphabetically)
 export enum MESSAGE {
 	ABANDONED_BOOTSTRAP_PARAM,
 	COMPONENT_MISSING_ASYNC_INTERFACE,
@@ -26,18 +27,18 @@ export enum MESSAGE {
 	DEPRECATED_BOOTSTRAP_PARAM,
 	DEPRECATED_CLASS,
 	DEPRECATED_COMPONENT,
+	DEPRECATED_DECLARATIVE_SUPPORT,
 	DEPRECATED_FUNCTION_CALL,
+	DEPRECATED_LESS_SUPPORT,
 	DEPRECATED_LIBRARY,
-	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_MANIFEST_JS_RESOURCES,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	DEPRECATED_PROPERTY,
 	DEPRECATED_PROPERTY_OF_CLASS,
+	DEPRECATED_THEME_LIBRARY,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
-	DEPRECATED_LESS_SUPPORT,
-	DEPRECATED_DECLARATIVE_SUPPORT,
 	DUPLICATE_BOOTSTRAP_PARAM,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
@@ -148,6 +149,17 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
+	[MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () => `DeclarativeSupport is deprecated.`,
+		details: () =>
+			`Please consider using {@link sap.ui.core.mvc.XMLView XMLViews} or` +
+			` {@link topic:e6bb33d076dc4f23be50c082c271b9f0 Typed Views} instead. For more information,` +
+			` see the documentation on {@link topic:91f27e3e6f4d1014b6dd926db0e91070 View types}.`,
+	},
+
 	[MESSAGE.DEPRECATED_FUNCTION_CALL]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -157,21 +169,21 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
+	[MESSAGE.DEPRECATED_LESS_SUPPORT]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () => `LessSupport is deprecated.`,
+		details: () =>
+			"Please consider using UI5 Tooling https://sap.github.io/ui5-tooling/stable/ to compile LESS to CSS on the fly.",
+	},
+
 	[MESSAGE.DEPRECATED_LIBRARY]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-library"],
 
 		message: ({libraryName}: {libraryName: string}) =>
 			`Use of deprecated library '${libraryName}'`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-library"],
-
-		message: ({themeName}: {themeName: string}) =>
-			`Use of deprecated theme '${themeName}'`,
 		details: () => undefined,
 	},
 
@@ -224,6 +236,15 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
+	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-library"],
+
+		message: ({themeName}: {themeName: string}) =>
+			`Use of deprecated theme '${themeName}'`,
+		details: () => undefined,
+	},
+
 	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -252,26 +273,6 @@ export const MESSAGE_INFO = {
 		details: () => undefined,
 	},
 
-	[MESSAGE.DEPRECATED_DECLARATIVE_SUPPORT]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: () => `DeclarativeSupport is deprecated.`,
-		details: () =>
-			`Please consider using {@link sap.ui.core.mvc.XMLView XMLViews} or` +
-			` {@link topic:e6bb33d076dc4f23be50c082c271b9f0 Typed Views} instead. For more information,` +
-			` see the documentation on {@link topic:91f27e3e6f4d1014b6dd926db0e91070 View types}.`,
-	},
-
-	[MESSAGE.DEPRECATED_LESS_SUPPORT]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: () => `LessSupport is deprecated.`,
-		details: () =>
-			"Please consider using UI5 Tooling https://sap.github.io/ui5-tooling/stable/ to compile LESS to CSS on the fly.",
-	},
-
 	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -294,7 +295,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({libInitFunction}: {libInitFunction: string}) =>
-			`Deprecated call to ${libInitFunction}(). Use parameter {apiVersion: 2} instead`,
+			`Deprecated call to ${libInitFunction}(). Use the {apiVersion: 2} parameter instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
 	},
 
