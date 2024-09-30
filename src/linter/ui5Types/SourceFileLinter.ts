@@ -1,11 +1,14 @@
 import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
+import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
+
+const log = getLogger("linter:ui5Types:SourceFileLinter");
 
 interface DeprecationInfo {
 	symbol: ts.Symbol;
@@ -73,6 +76,10 @@ export default class SourceFileLinter {
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
+			log.verbose(`Error while linting ${this.#resourcePath}: ${message}`);
+			if (err instanceof Error) {
+				log.verbose(`Call stack: ${err.stack}`);
+			}
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
@@ -497,7 +504,7 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeJsonModelLoadDataCall(node: ts.CallExpression) {
-		if (!node.arguments.length || node.arguments.length < 2) {
+		if (!node.arguments.length || node.arguments.length < 3) {
 			return;
 		}
 
@@ -508,7 +515,7 @@ export default class SourceFileLinter {
 			}, asyncArg);
 		}
 
-		if (node.arguments.length < 5) {
+		if (node.arguments.length < 6) {
 			return;
 		}
 		const cacheArg = node.arguments[5];
