@@ -36,6 +36,8 @@ export enum MESSAGE {
 	DEPRECATED_PROPERTY_OF_CLASS,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
+	DEPRECATED_LESS_SUPPORT,
+	DEPRECATED_DECLARATIVE_SUPPORT,
 	DUPLICATE_BOOTSTRAP_PARAM,
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
@@ -270,15 +272,6 @@ export const MESSAGE_INFO = {
 			"Not needed anymore! Use UI5 Tooling to compile Les to CSS on the fly.",
 	},
 
-	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name, value}: {name: string; value: string}) =>
-			`Duplicate bootstrap parameter '${name}' with value '${value}'`,
-		details: () => undefined,
-	},
-
 	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
@@ -286,33 +279,6 @@ export const MESSAGE_INFO = {
 		message: ({name}: {name: string}) =>
 			`Missing bootstrap parameter '${name}'`,
 		details: ({details}: {details?: string}) => details,
-	},
-
-	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({name}: {name: string}) =>
-			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.SPELLING_BOOTSTRAP_PARAM]: {
-		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({oldName, newName}: {oldName: string; newName: string}) =>
-			`Outdated spelling of bootstrap parameter: '${oldName}' should be '${newName}'`,
-		details: () => undefined,
 	},
 
 	[MESSAGE.HTML_IN_XML]: {
