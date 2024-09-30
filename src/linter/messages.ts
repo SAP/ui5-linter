@@ -269,7 +269,7 @@ export const MESSAGE_INFO = {
 
 		message: () => `LessSupport is deprecated.`,
 		details: () =>
-			"Not required anymore! Use UI5 Tooling https://sap.github.io/ui5-tooling/stable/ to compile LESS to CSS on the fly.",
+			"Please consider using UI5 Tooling https://sap.github.io/ui5-tooling/stable/ to compile LESS to CSS on the fly.",
 	},
 
 	[MESSAGE.MISSING_BOOTSTRAP_PARAM]: {
