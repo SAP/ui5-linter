@@ -15,6 +15,12 @@ export default async function transpileHtml(
 		const report = new HtmlReporter(resourcePath, context);
 		const jsScriptTags = await extractJSScriptTags(contentStream);
 
+		const bootstrapTag = findBootstrapTag(jsScriptTags);
+
+		if (bootstrapTag) {
+			lintBootstrapAttributes(bootstrapTag, report);
+		}
+
 		jsScriptTags.forEach((tag) => {
 			// Tags with src attribute do not parse and run inline code
 			const hasSrc = tag.attributes.some((attr) => {
@@ -22,8 +28,6 @@ export default async function transpileHtml(
 			});
 			if (!hasSrc && tag.textNodes?.length > 0) {
 				report.addMessage(MESSAGE.CSP_UNSAFE_INLINE_SCRIPT, tag);
-			} else if (isBootstrapTag(tag)) {
-				lintBootstrapAttributes(tag, report);
 			}
 		});
 
@@ -36,21 +40,29 @@ export default async function transpileHtml(
 	}
 }
 
-function isBootstrapTag(tag: Tag): boolean {
-	for (const attr of tag.attributes) {
-		if (attr.name.value.toLowerCase() === "id" &&
-			attr.value.value.toLowerCase() === "sap-ui-bootstrap") {
-			return true;
-		} else if (attr.name.value.toLowerCase() === "src") {
-			const url = attr.value.value.toLowerCase();
-			// RegEx from https://github.com/SAP/openui5/blob/661e5f4b6d5f1af9da2175e05f4a8217fbb22593/src/sap.ui.core/src/ui5loader-autoconfig.js#L78
-			const rBootScripts = /^([^?#]*\/)?(?:sap-ui-(?:core|custom|boot|merged)(?:-[^?#/]*)?|jquery.sap.global|ui5loader(?:-autoconfig)?)\.js(?:[?#]|$)/;
-			if (rBootScripts.exec(url)) {
-				return true;
+function findBootstrapTag(tags: Tag[]): Tag | undefined {
+	// First search for script tag with id "sap-ui-bootstrap"
+	for (const tag of tags) {
+		for (const attr of tag.attributes) {
+			if (attr.name.value.toLowerCase() === "id" &&
+				attr.value.value.toLowerCase() === "sap-ui-bootstrap") {
+				return tag;
 			}
 		}
 	}
-	return false;
+
+	// Fallback to script tag with src attribute pointing to bootstrap script
+	const rBootScripts = /^([^?#]*\/)?(?:sap-ui-(?:core|custom|boot|merged)(?:-[^?#/]*)?|jquery.sap.global|ui5loader(?:-autoconfig)?)\.js(?:[?#]|$)/;
+	for (const tag of tags) {
+		for (const attr of tag.attributes) {
+			if (attr.name.value.toLowerCase() === "src") {
+				const url = attr.value.value.toLowerCase();
+				if (rBootScripts.exec(url)) {
+					return tag;
+				}
+			}
+		}
+	}
 }
 
 const oldToNewAttr = new Map([
