@@ -33,7 +33,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `68` (0.19 MB)
-* Latest Result: `19 problems (19 errors, 0 warnings)`
+* Latest Result: `33 problems (26 errors, 7 warnings)`
 
 ## Medium library: OpenUI5 `sap.ui.layout`
 
@@ -42,7 +42,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `572` (2.4 MB)
-* Latest Result: `1313 problems (1313 errors, 0 warnings)`
+* Latest Result: `1421 problems (1333 errors, 88 warnings)`
 
 ## Large library: OpenUI5 `sap.m`
 
@@ -51,7 +51,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `5609` (25.67 MB)
-* Latest Result: `12053 problems (12053 errors, 1 warnings)`
+* Latest Result: `13516 problems (12335 errors, 1181 warnings)`
 
 ## Large library: OpenUI5 `sap.ui.core`
 
@@ -60,9 +60,51 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `4950` (45 MB)
-* Latest Result: `5035 problems (5029 errors, 6 warnings)` + `2 fatal errors`
+* Latest Result: `6141 problems (5520 errors, 621 warnings)` + `2 fatal errors`
 
 # Benchmark Runs
+
+## September 30, 2024
+
+* UI5 linter [`v1.0.0`](https://github.com/SAP/ui5-linter/commit/db5ad3302d62b3a168f92a82d55a3fa56c753d4f)
+* Node.js `v22.5.1`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 569.5 ± 9.9 | 555.5 | 586.4 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.027 ± 0.038 | 2.002 | 2.128 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.250 ± 0.069 | 3.174 | 3.389 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.006 ± 0.133 | 4.854 | 5.348 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 32.300 ± 0.369 | 31.891 | 32.942|
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 38.002 ± 0.690 | 37.093 | 38.696 |
 
 ## September 05, 2024
 
