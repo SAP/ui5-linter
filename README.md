@@ -80,14 +80,15 @@ You can provide multiple glob patterns as arguments after the `ui5lint` command 
 **Note**: Only POSIX separators are allowed, regardless of the target platform.
 
 ```sh
-> ui5lint "webapp/**/*.xml"
+> ui5lint "application/webapp/**/*.xml"
 
 UI5 linter report:
 
-webapp/view/App.view.xml
-  7:8 error Import of deprecated module 'sap/f/Avatar'
+/application/webapp/view/Main.view.xml
+  16:39 error Import of deprecated module 'sap/m/MessagePage'
+  22:5  error Use of deprecated property 'blocked' of class 'Button'
 
-1 problems (1 errors, 0 warnings)
+2 problems (2 errors, 0 warnings)
 
 Note: Use "ui5lint --details" to show more information about the findings
 ```
