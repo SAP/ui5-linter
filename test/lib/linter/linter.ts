@@ -102,8 +102,8 @@ test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) =
 		rootDir: projectPath,
 		configPath: "ui5lint.config.unmatched-patterns.mjs",
 	}), {
-		message:
-			`Patterns 'unmatched-pattern1', 'unmatched-pattern2', 'unmatched-pattern3' did not match any resource!`,
+		message: `Specified file patterns 'unmatched-pattern1', ` +
+			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
 	});
 });
 
