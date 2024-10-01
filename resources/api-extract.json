@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.20"
+    "version": "1.120.21"
   },
   "defaultAggregations": {
     "sap.ca.ui.CustomerControlListItem": "content",
