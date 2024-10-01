@@ -73,7 +73,7 @@ UI5 linter report:
 Note: Use "ui5lint --details" to show more information about the findings
 ```
 
-You can provide multiple glob patterns as arguments after the `ui5lint` command to filter and narrow down the linting results.
+You can provide multiple glob patterns as arguments after the `ui5lint` command to filter and narrow down the linting results. Note: this can't be used to include files that normally wouldn't be checked (e.g. files outside of `webapp` in application projects)
 
 ```sh
 > ui5lint webapp/**/*
