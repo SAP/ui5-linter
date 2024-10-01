@@ -14,7 +14,7 @@ import {Minimatch} from "minimatch";
 // Internal analytical variable that will store matchers' count.
 // We cannot predict the outcome of the matchers, so stash usage statistics
 // and later analyze the results from it.
-const patternsMatch = Object.create(null) as Record<string, number>;
+const matchedPatterns = new Set() as Set<string>;
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
@@ -136,6 +136,7 @@ async function lint(
 		projectRootDir: rootDir,
 		resourceReader,
 		namespace: options.namespace,
+		patternsMatch: matchedPatterns,
 	});
 
 	// Apply files + ignores over the filePaths reader
@@ -145,12 +146,14 @@ async function lint(
 		resourceReader,
 		inverseResult: true,
 		namespace: options.namespace,
+		patternsMatch: matchedPatterns,
 	});
 	filePathsReader = await resolveReader({
 		patterns: ignorePattern,
 		projectRootDir: rootDir,
 		resourceReader: filePathsReader,
 		namespace: options.namespace,
+		patternsMatch: matchedPatterns,
 	});
 	const filePathsWorkspace = createWorkspace({reader: filePathsReader});
 
@@ -158,8 +161,8 @@ async function lint(
 		reader,
 	});
 
-	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config);
-	checkUnmatchedPatterns(filePatterns);
+	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config, matchedPatterns);
+	checkUnmatchedPatterns(filePatterns, matchedPatterns);
 
 	lintEnd();
 	return res;
@@ -264,15 +267,15 @@ function sortLintResults(lintResults: LintResult[]) {
 	lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
 }
 
-function isFileIncluded(file: string, patterns: Minimatch[]) {
+function isFileIncluded(file: string, patterns: Minimatch[], patternsMatch: Set<string>) {
 	let include = true;
 
 	for (const pattern of patterns) {
 		if (pattern.negate && pattern.match(file)) {
-			patternMatched(pattern.pattern);
+			patternsMatch.add(pattern.pattern);
 			include = true; // re-include it
 		} else if (pattern.match(file)) { // Handle inclusion: exclude if it matches
-			patternMatched(pattern.pattern);
+			patternsMatch.add(pattern.pattern);
 			include = false;
 		}
 	}
@@ -305,6 +308,7 @@ export async function resolveReader({
 	namespace,
 	ui5ConfigPath,
 	inverseResult = false,
+	patternsMatch,
 }: {
 	patterns: string[];
 	projectRootDir: string;
@@ -312,6 +316,7 @@ export async function resolveReader({
 	namespace?: string;
 	ui5ConfigPath?: string;
 	inverseResult?: boolean;
+	patternsMatch: Set<string>;
 }) {
 	if (!patterns.length) {
 		return resourceReader;
@@ -355,19 +360,10 @@ export async function resolveReader({
 			return inverseResult ?
 					// When we work with files paths we actually need to limit the result to those
 					// matches, instead of allowing all except XYZ
-					!isFileIncluded(resPath, minimatchPatterns) :
-				isFileIncluded(resPath, minimatchPatterns);
+					!isFileIncluded(resPath, minimatchPatterns, patternsMatch) :
+				isFileIncluded(resPath, minimatchPatterns, patternsMatch);
 		},
 	});
-}
-
-/**
- * Stash patterns
- *
- * @param pattern Pattern to stash as matched
- */
-function patternMatched(pattern: FilePattern) {
-	patternsMatch[pattern] = patternsMatch[pattern] ? patternsMatch[pattern] + 1 : 1;
 }
 
 /**
@@ -376,9 +372,9 @@ function patternMatched(pattern: FilePattern) {
  * @param patterns Available patterns
  * @throws Error if an unmatched pattern is found
  */
-function checkUnmatchedPatterns(patterns: FilePattern[]) {
+function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>) {
 	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
-		if (!patternsMatch[pattern]) {
+		if (!patternsMatch.has(pattern)) {
 			acc.push(pattern);
 		}
 
