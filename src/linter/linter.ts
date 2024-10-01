@@ -14,7 +14,7 @@ import {Minimatch} from "minimatch";
 // Internal analytical variable that will store matchers' count.
 // We cannot predict the outcome of the matchers, so stash usage statistics
 // and later analyze the results from it.
-const matchedPatterns = new Set() as Set<string>;
+const matchedPatterns = new Set<string>();
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
