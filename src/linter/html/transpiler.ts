@@ -194,11 +194,19 @@ function checkCompatVersionAttr(attr: Attribute, report: HtmlReporter) {
 function checkOnInitAttr(attr: Attribute, report: HtmlReporter) {
 	const value = attr.value.value.toLowerCase().trim();
 	if (!value.startsWith("module:")) {
-		report.addMessage(MESSAGE.DEPRECATED_BOOTSTRAP_PARAM, {
-			name: "data-sap-ui-on-init",
-			value,
-			details: `{@link topic:91f2d03b6f4d1014b6dd926db0e91070 Configuration Options and URL Parameters}`,
-		}, attr.value);
+		// Check whether value is a valid function/variable name.
+		// Anything that can't be a global function (accessible via "window[value]")
+		// should be reported as deprecated. E.g. "my.init-function" or "alert('Hello')"
+		// This is a very basic check and might report false positives for function assigned the global scope using
+		// string literals, e.g. window["my.init.function"] = function() {}
+		const validFunctionName = /^[$_\p{ID_Start}][$_\p{ID_Continue}]*$/u;
+		if (!validFunctionName.test(value)) {
+			report.addMessage(MESSAGE.DEPRECATED_BOOTSTRAP_PARAM, {
+				name: "data-sap-ui-on-init",
+				value,
+				details: `{@link topic:91f2d03b6f4d1014b6dd926db0e91070 Configuration Options and URL Parameters}`,
+			}, attr.value);
+		}
 	}
 
 	if (value.includes("sap/ui/core/plugin/declarativesupport")) {
