@@ -227,7 +227,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({propertyName}: {propertyName: string}) =>
-			`Use of deprecated property '${propertyName}'.` +
+			`Use of deprecated property '${propertyName}'. ` +
 			`Use '${propertyName.substring(4).toLowerCase()}' instead'`,
 		details: () => undefined,
 	},
