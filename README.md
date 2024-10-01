@@ -46,10 +46,10 @@ npm install --save-dev @ui5/linter
 
 ## Usage
 
-Run the `ui5lint` command in your project root folder
+Run the `ui5lint [files...]` command in your project root folder
 
 ```sh
-ui5lint
+> ui5lint
 
 UI5 linter report:
 
@@ -73,16 +73,44 @@ UI5 linter report:
 Note: Use "ui5lint --details" to show more information about the findings
 ```
 
-### Options
+You can provide multiple glob patterns as arguments after the `ui5lint` command to filter and narrow down the linting results.
 
-#### `--file-paths`
-
-Specify which files to lint by providing a list of file paths.
-
-**Example:**
 ```sh
-ui5lint --file-paths webapp/controller/App.controller.js webapp/view/App.view.xml
+> ui5lint webapp/**/*
+
+UI5 linter report:
+
+/webapp/Component.js
+  3:9 error Component is not configured for asynchronous loading.
+
+/webapp/controller/App.controller.js
+    7:2  error Deprecated access of enum pseudo module 'sap/ui/core/BarColor'
+   26:22 error Access of global variable 'jQuery' (jQuery)
+   27:32 error Call to deprecated function 'control' (avatarDOM.control)
+   36:6  error Use of deprecated property 'tap' of class 'Button'
+  136:18 error Access of global variable 'sap' (sap.ui.getCore)
+  136:25 error Call to deprecated function 'getCore' (sap.ui.getCore)
+  136:35 error Call to deprecated function 'byId' of class 'Core'
+
+/webapp/index.html
+  13:3 warning Outdated spelling of bootstrap parameter: 'data-sap-ui-resourceRoots'; should be written as 'data-sap-ui-resource-roots'
+  16:3 warning Outdated spelling of bootstrap parameter: 'data-sap-ui-onInit'; should be written as 'data-sap-ui-on-init'
+  17:3 warning Outdated spelling of bootstrap parameter: 'data-sap-ui-compatVersion'; should be written as 'data-sap-ui-compat-version'
+
+/webapp/manifest.json
+  14:17 error Use of deprecated library 'sap.ui.commons'
+
+/webapp/view/App.view.xml
+  7:8 error Import of deprecated module 'sap/f/Avatar'
+
+13 problems (10 errors, 3 warnings)
+
+Note: Use "ui5lint --details" to show more information about the findings
 ```
+
+
+
+### Options
 
 #### `--details`
 
