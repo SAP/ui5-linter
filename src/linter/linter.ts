@@ -382,7 +382,7 @@ function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<stri
 	}, [] as FilePattern[]);
 
 	if (unmatchedPatterns.length) {
-		throw new Error(`${unmatchedPatterns.length === 1 ? "Pattern" : "Patterns"}` +
-			` '${unmatchedPatterns.join("', '")}' did not match any resource!`);
+		throw new Error(`Specified file ${unmatchedPatterns.length === 1 ? "pattern" : "patterns"}` +
+			` '${unmatchedPatterns.join("', '")}' did not match any resource`);
 	}
 }
