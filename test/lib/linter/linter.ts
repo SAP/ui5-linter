@@ -93,6 +93,20 @@ test.serial("lint: One file of com.ui5.troublesome.app (without details / covera
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+
+	const {lintProject} = t.context;
+
+	await t.throwsAsync(lintProject({
+		rootDir: projectPath,
+		configPath: "ui5lint.config.unmatched-patterns.mjs",
+	}), {
+		message: `Specified file patterns 'unmatched-pattern1', ` +
+			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
+	});
+});
+
 test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
 	const {lintProject} = t.context;

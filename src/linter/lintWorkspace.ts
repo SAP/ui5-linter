@@ -14,7 +14,7 @@ import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
-	options: LinterOptions, config: UI5LintConfigType
+	options: LinterOptions, config: UI5LintConfigType, patternsMatch: Set<string>
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
 
@@ -29,6 +29,7 @@ export default async function lintWorkspace(
 		}),
 		inverseResult: true,
 		namespace: options.namespace,
+		patternsMatch,
 	});
 	reader = await resolveReader({
 		patterns: options.ignorePattern ?? [],
@@ -36,6 +37,7 @@ export default async function lintWorkspace(
 		ui5ConfigPath: config.ui5Config,
 		resourceReader: reader,
 		namespace: options.namespace,
+		patternsMatch,
 	});
 	context.setRootReader(reader);
 

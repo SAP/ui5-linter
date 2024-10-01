@@ -1,10 +1,11 @@
 import path, {dirname} from "node:path";
 import {fileURLToPath} from "node:url";
+import {FilePattern} from "../linter/LinterContext.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface UI5LintConfigType {
-	files?: string[];
-	ignores?: string[];
+	files?: FilePattern[];
+	ignores?: FilePattern[];
 	ui5Config?: string;
 };
 
