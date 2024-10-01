@@ -1,6 +1,6 @@
 import {graphFromObject} from "@ui5/project/graph";
 import {createReader, createWorkspace, createReaderCollection, createFilterReader} from "@ui5/fs/resourceFactory";
-import {FilePath, LinterOptions, LintResult} from "./LinterContext.js";
+import {FilePath, FilePattern, LinterOptions, LintResult} from "./LinterContext.js";
 import lintWorkspace from "./lintWorkspace.js";
 import {taskStart} from "../utils/perf.js";
 import path from "node:path";
@@ -10,6 +10,11 @@ import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
+
+// Internal analytical variable that will store matchers' count.
+// We cannot predict the outcome of the matchers, so stash usage statistics
+// and later analyze the results from it.
+const patternsMatch = Object.create(null) as Record<string, number>;
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
@@ -154,6 +159,8 @@ async function lint(
 	});
 
 	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config);
+	checkUnmatchedPatterns(filePatterns);
+
 	lintEnd();
 	return res;
 }
@@ -262,8 +269,10 @@ function isFileIncluded(file: string, patterns: Minimatch[]) {
 
 	for (const pattern of patterns) {
 		if (pattern.negate && pattern.match(file)) {
+			patternMatched(pattern.pattern);
 			include = true; // re-include it
 		} else if (pattern.match(file)) { // Handle inclusion: exclude if it matches
+			patternMatched(pattern.pattern);
 			include = false;
 		}
 	}
@@ -350,4 +359,34 @@ export async function resolveReader({
 				isFileIncluded(resPath, minimatchPatterns);
 		},
 	});
+}
+
+/**
+ * Stash patterns
+ *
+ * @param pattern Pattern to stash as matched
+ */
+function patternMatched(pattern: FilePattern) {
+	patternsMatch[pattern] = patternsMatch[pattern] ? patternsMatch[pattern] + 1 : 1;
+}
+
+/**
+ * Checks which patterns were not matched during analysis
+ *
+ * @param patterns Available patterns
+ * @throws Error if an unmatched pattern is found
+ */
+function checkUnmatchedPatterns(patterns: FilePattern[]) {
+	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
+		if (!patternsMatch[pattern]) {
+			acc.push(pattern);
+		}
+
+		return acc;
+	}, [] as FilePattern[]);
+
+	if (unmatchedPatterns.length) {
+		throw new Error(`${unmatchedPatterns.length === 1 ? "Pattern" : "Patterns"}` +
+			` '${unmatchedPatterns.join("', '")}' did not match any resource!`);
+	}
 }
