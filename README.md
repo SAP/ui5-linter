@@ -122,7 +122,7 @@ ui5lint --config ./ui5lint-custom.config.js
 
 #### `--ui5-config`
 
-Set a custom path for the UI5 Config (default: `./ui5.yaml`).
+Set a path for the desired UI5 yaml config file (default: `./ui5.yaml`).
 
 **Example:**
 ```sh
