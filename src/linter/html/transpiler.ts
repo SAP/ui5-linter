@@ -160,6 +160,7 @@ function checkThemeAttr(attr: Attribute, report: HtmlReporter) {
 function checkLibraryAttr(attr: Attribute, report: HtmlReporter, modulesSyntax = false) {
 	const libraries = attr.value.value.toLowerCase().split(",");
 	for (let libraryName of libraries) {
+		libraryName = libraryName.trim();
 		if (modulesSyntax) {
 			// The syntax in data-sap-ui-modules is slightly different, the library name
 			// is always followed by ".library" to specify the "library module".
@@ -167,7 +168,7 @@ function checkLibraryAttr(attr: Attribute, report: HtmlReporter, modulesSyntax =
 			// sap.ui.commons.library => sap.ui.commons
 			libraryName = libraryName.replace(/\.library$/, "");
 		}
-		if (deprecatedLibraries.includes(libraryName.trim())) {
+		if (deprecatedLibraries.includes(libraryName)) {
 			report.addMessage(MESSAGE.DEPRECATED_LIBRARY, {
 				libraryName,
 			}, attr.value);
