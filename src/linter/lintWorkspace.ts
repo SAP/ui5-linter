@@ -20,7 +20,7 @@ export default async function lintWorkspace(
 
 	const context = new LinterContext(options);
 	let reader = await resolveReader({
-		patterns: options.filePatterns ?? [],
+		patterns: options.filePatterns ?? config.files ?? [],
 		projectRootDir: options.rootDir,
 		ui5ConfigPath: config.ui5Config,
 		resourceReader: createReader({
