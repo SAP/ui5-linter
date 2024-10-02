@@ -16,7 +16,7 @@ UI5 linter is a static code analysis tool for UI5 projects.
 It checks JavaScript, TypeScript, XML, JSON, and other files in your project and reports findings.
 
 ## Features
-UI5 linter scans your UI5 project ands detects code which won't work when running your project with [UI5 2.x](https://community.sap.com/t5/open-source-blogs/introducing-openui5-2-x/ba-p/13580633). 
+UI5 linter scans your UI5 project and detects problems that might cause it to not run smoothly with [UI5 2.x](https://community.sap.com/t5/open-source-blogs/introducing-openui5-2-x/ba-p/13580633). 
 
 * Usage of deprecated UI5 libraries 
 * Usage of deprecated UI5 framework APIs 
@@ -172,6 +172,20 @@ ignores: [
 ```
 
 In this way, you can control which files the UI5 linter should process and which it should ignore.
+
+## Internals
+
+UI5 linter makes use of the [TypeScript compiler](https://github.com/microsoft/TypeScript/) to parse and analyze the source code (both JavaScript as well as TypesScript) of a UI5 project. This allows a decent level of accuracy and performance.
+
+For this UI5 linter provides the TypeScript compiler with the SAPUI5 [type definitions](https://sap.github.io/ui5-typescript/), the compiler can then infer the usage of UI5 classes and modules in the code. UI5 linter only needs to ask the compiler whether a given function or property is deprecated and the compiler will provide it with the full deprecation text.
+
+In some cases UI5 linter will transpile some of the source files before analyzing them. For example the `sap.ui.require` syntax is transpiled to `import` statements (basically ESM) so that the TypeScript compiler can understand them.
+
+Similarly, UI5 XML views are transpiled to a JavaScript representation that can be analyzed in the same way as regular JavaScript code. In both cases, source maps are used to map any findings back to the correct line and column position in the original source code.
+
+There are additional checks build on top of the compiler API. For example the use of global variables provided by the UI5 framework (e.g. `sap.m.Button`), or for the correct usage of asynchronous component initialization.
+
+For some checks however, the TypeScript compiler approach is sadly not sufficient. In those cases, an extract of the data structure that powers the UI5 SDK is used (the so called "api.json").
 
 ## Support, Feedback, Contributing
 
