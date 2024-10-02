@@ -153,7 +153,7 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
 
-		message: () => `DeclarativeSupport is deprecated.`,
+		message: () => `DeclarativeSupport is deprecated`,
 		details: () =>
 			`Please consider using {@link sap.ui.core.mvc.XMLView XMLViews} or` +
 			` {@link topic:e6bb33d076dc4f23be50c082c271b9f0 Typed Views} instead. For more information,` +
@@ -173,7 +173,7 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
 
-		message: () => `LessSupport is deprecated.`,
+		message: () => `LessSupport is deprecated`,
 		details: () =>
 			"Please consider using UI5 Tooling https://sap.github.io/ui5-tooling/stable/ to compile LESS to CSS on the fly.",
 	},
