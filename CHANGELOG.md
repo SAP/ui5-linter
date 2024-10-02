@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.1](https://github.com/SAP/ui5-linter/compare/v1.0.0...v1.0.1) (2024-10-02)
+
+
+### Bug Fixes
+
+* Check unmatched patterns ([#334](https://github.com/SAP/ui5-linter/issues/334)) ([329f2cd](https://github.com/SAP/ui5-linter/commit/329f2cd5d002e6d808755c7eeb65ed6db226c067))
+* Consider config patterns in root level reader ([#346](https://github.com/SAP/ui5-linter/issues/346)) ([b54f553](https://github.com/SAP/ui5-linter/commit/b54f55300d275360d43621067694f26f8364a73c))
+* **html:** False positive for global function name in on-init bootstrap param ([2495cc0](https://github.com/SAP/ui5-linter/commit/2495cc03392d7dfac9171ad28724faa1560103e4))
+* **html:** False positive for multiple bootstrap script tags ([74ad824](https://github.com/SAP/ui5-linter/commit/74ad82440cf27173da889df3126660cc2be46d15))
+* **html:** Superfluous whitespace around deprecated library name ([cf8b99b](https://github.com/SAP/ui5-linter/commit/cf8b99b0bcfaa51f634744db09c2ee8990789068))
+* Update texts + test samples & the respective test snapshots ([#344](https://github.com/SAP/ui5-linter/issues/344)) ([5639a2f](https://github.com/SAP/ui5-linter/commit/5639a2ff8e1b2e27655359a2a5aacb3cd38e2218))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.21 ([#337](https://github.com/SAP/ui5-linter/issues/337)) ([41c60f4](https://github.com/SAP/ui5-linter/commit/41c60f4c7a19de9dcf8c4c5c221ad5ae43189381))
+
 ## [1.0.0](https://github.com/SAP/ui5-linter/compare/v0.4.1...v1.0.0) (2024-09-30)
 
 ### General
