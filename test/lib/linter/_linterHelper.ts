@@ -70,7 +70,7 @@ export function assertExpectedLintResults(
 export function createTestsForFixtures(fixturesPath: string) {
 	try {
 		const testFiles = readdirSync(fixturesPath, {withFileTypes: true, recursive: true}).filter((dirEntries) => {
-			return dirEntries.isFile();
+			return dirEntries.isFile() && dirEntries.name !== ".DS_Store";
 		}).map((dirEntries) => {
 			return path.posix.join(
 				// Resolve relative path OS dependant, but do the join in POSIX format
