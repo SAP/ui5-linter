@@ -46,10 +46,10 @@ npm install --save-dev @ui5/linter
 
 ## Usage
 
-Run the `ui5lint` command in your project root folder
+Run the `ui5lint [files...]` command in your project root folder
 
 ```sh
-ui5lint
+> ui5lint
 
 UI5 linter report:
 
@@ -73,16 +73,29 @@ UI5 linter report:
 Note: Use "ui5lint --details" to show more information about the findings
 ```
 
-### Options
+You can provide multiple glob patterns as arguments after the `ui5lint` command to filter and narrow down the linting results. 
 
-#### `--file-paths`
+**Note**: This option does not permit you to include files that normally wouldn't be checked (e.g. files outside of the `webapp` folder in application projects).
 
-Specify which files to lint by providing a list of file paths.
+**Note**: Only POSIX separators are allowed, regardless of the target platform.
 
-**Example:**
 ```sh
-ui5lint --file-paths webapp/controller/App.controller.js webapp/view/App.view.xml
+> ui5lint "application/webapp/**/*.xml"
+
+UI5 linter report:
+
+/application/webapp/view/Main.view.xml
+  16:39 error Import of deprecated module 'sap/m/MessagePage'
+  22:5  error Use of deprecated property 'blocked' of class 'Button'
+
+2 problems (2 errors, 0 warnings)
+
+Note: Use "ui5lint --details" to show more information about the findings
 ```
+
+
+
+### Options
 
 #### `--details`
 
