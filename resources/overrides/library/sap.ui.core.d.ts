@@ -314,7 +314,7 @@ declare module "sap/ui/core/MessageType" {
 	/**
 	 * Specifies possible message types.
 	 *
-	 * @deprecated (since 1.120) - Please use {@link sap.ui.core.message.MessageType} instead.
+	 * @deprecated (since 1.120) - Please use {@link module:sap/ui/core/message/MessageType} instead.
 	 * @public
 	*/
 	export default MessageType;
