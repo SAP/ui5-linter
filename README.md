@@ -133,6 +133,15 @@ Load a custom config by relative file path (default: `./ui5lint.config.js`).
 ui5lint --config ./ui5lint-custom.config.js
 ```
 
+#### `--ui5-config`
+
+Set a path for the desired UI5 yaml config file (default: `./ui5.yaml`).
+
+**Example:**
+```sh
+ui5lint --ui5-config ./configs/ui5-custom.yaml
+```
+
 ## Configuration
 
 The UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 
