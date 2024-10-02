@@ -107,6 +107,19 @@ test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) =
 	});
 });
 
+test.serial("lint: com.ui5.troublesome.app with files property in ui5lint.config", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		configPath: "ui5lint.config.matched-patterns.mjs",
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
 	const {lintProject} = t.context;
