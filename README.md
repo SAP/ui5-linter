@@ -185,7 +185,7 @@ Similarly, UI5 XML views are transpiled to a JavaScript representation that can 
 
 There are additional checks built on top of the compiler API. This applies, for example, to the usage of global variables provided by the UI5 framework (e.g. `sap.m.Button`), or to the correct usage of asynchronous component initialization.
 
-For some checks, however, the TypeScript compiler approach is insufficient. In such cases, an extract of the data structure that powers the UI5 SDK is used (the so-called "api.json").
+For some checks, however, the TypeScript compiler approach is insufficient. In some of those cases, an extract of the data structure that powers the UI5 SDK is used (the so-called "api.json"). In other cases, the checks are hard-coded in the linter itself. For example for checks in manifest.json and HTML files.
 
 ## Support, Feedback, Contributing
 
