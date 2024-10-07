@@ -136,6 +136,8 @@ export default class SourceFileLinter {
 			if (this.isUi5controlMetadataNode(node)) {
 				ts.forEachChild(node, visitMetadataNodes);
 			}
+		} else if (ts.isClassDeclaration(node) && this.isUi5controlClassDeclaration(node)) {
+			this.analyzeControlRendererDeclaration(node);
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -199,6 +201,87 @@ export default class SourceFileLinter {
 		const result = isObjectMetadataAncestor(parentNode as ts.ClassDeclaration);
 		metadataFound();
 		return result;
+	}
+
+	// NOTE: This function is copied from isUi5controlMetadataNode and slightly adjusted.
+	// TODO: Update this once the logic in isUi5controlMetadataNode has been refactored for re-use
+	isUi5controlClassDeclaration(node: ts.ClassDeclaration): boolean {
+		// Go up the hierarchy chain to find whether the class extends from "sap/ui/core/Control"
+		const isClassControlSubclass = (node: ts.ClassDeclaration): boolean => {
+			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
+				return parentClasses.types.flatMap((parentClass) => {
+					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
+
+					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+						if (ts.isClassDeclaration(declaration)) {
+							if (declaration.name?.getText() === "Control" &&
+								(
+									// Declaration via type definitions
+									(
+										declaration.parent.parent &&
+										ts.isModuleDeclaration(declaration.parent.parent) &&
+										declaration.parent.parent.name?.text === "sap/ui/core/Control"
+									) ||
+									// Declaration via real class (within sap.ui.core project)
+									(
+										ts.isSourceFile(declaration.parent) &&
+										declaration.parent.fileName === "/resources/sap/ui/core/Control.js"
+									)
+								)
+							) {
+								return true;
+							} else {
+								return isClassControlSubclass(declaration);
+							}
+						} else {
+							return false;
+						}
+					});
+				});
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+			}).reduce((acc, cur) => cur || acc, false) ?? false;
+		};
+
+		return isClassControlSubclass(node);
+	}
+
+	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
+		const rendererMember = node.members.find((member) => {
+			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
+				member.name.getText() === "renderer";
+		});
+
+		if (!rendererMember) {
+			// TODO: Handle this case. Having the list of parent classes would be helpful to perform this check
+			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
+			// - sap/ui/core/webc/WebComponent
+			// - sap/uxap/BlockBase
+
+			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, node);
+			return;
+		}
+
+		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
+			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+
+			if (initializerType.flags & ts.TypeFlags.Undefined ||
+				initializerType.flags & ts.TypeFlags.Null) {
+				// null / undefined can be used to declare that a control does not have a renderer
+				return;
+			}
+
+			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+				// Declaration as string requires sync loading of renderer module
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, rendererMember.initializer);
+			}
+		} else if (ts.isMethodDeclaration(rendererMember)) {
+			// Inline renderer function declaration:
+			// TODO: Is this deprecated or not?
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, rendererMember);
+			return;
+		}
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {

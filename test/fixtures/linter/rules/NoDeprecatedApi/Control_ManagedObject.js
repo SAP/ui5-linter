@@ -1,4 +1,4 @@
-sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiPage"], 
+sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiPage"],
 	function (Control, library, FancyMultiPage) {
 	var DateTimeInputType = library.DateTimeInputType;
 	var FrameType = library.FrameType;
@@ -66,6 +66,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 				},
 			},
 		},
+		renderer: null // No renderer
 	});
 
 	return FancyText;
