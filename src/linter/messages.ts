@@ -6,6 +6,7 @@ const RULES = {
 	"no-deprecated-api": "no-deprecated-api",
 	"no-deprecated-component": "no-deprecated-component",
 	"no-deprecated-library": "no-deprecated-library",
+	"no-deprecated-theme": "no-deprecated-theme",
 	"no-globals": "no-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
@@ -36,7 +37,7 @@ export enum MESSAGE {
 	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	DEPRECATED_PROPERTY,
 	DEPRECATED_PROPERTY_OF_CLASS,
-	DEPRECATED_THEME_LIBRARY,
+	DEPRECATED_THEME,
 	DEPRECATED_VIEW_CONFIG,
 	DEPRECATED_VIEW_TYPE,
 	DUPLICATE_BOOTSTRAP_PARAM,
@@ -236,13 +237,13 @@ export const MESSAGE_INFO = {
 		details: ({details}: {details: string}) => details,
 	},
 
-	[MESSAGE.DEPRECATED_THEME_LIBRARY]: {
+	[MESSAGE.DEPRECATED_THEME]: {
 		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-library"],
+		ruleId: RULES["no-deprecated-theme"],
 
 		message: ({themeName}: {themeName: string}) =>
 			`Use of deprecated theme '${themeName}'`,
-		details: () => undefined,
+		details: () => `{@link topic:a87ca843bcee469f82a9072927a7dcdb Deprecated Themes and Libraries}`,
 	},
 
 	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {

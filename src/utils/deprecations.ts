@@ -23,8 +23,29 @@ export const deprecatedLibraries: string[] = [
 ];
 
 export const deprecatedThemeLibraries: string[] = [
-	"themelib_sap_belize",
-	"themelib_sap_bluecrystal",
+	"themelib_sap_belize", // deprecated as of 1.120
+	"themelib_sap_bluecrystal", // deprecated as of 1.40
+];
+
+// Based on https://ui5.sap.com/#/topic/a87ca843bcee469f82a9072927a7dcdb
+export const deprecatedThemes: string[] = [
+
+	// Part of themelib_sap_belize, deprecated as of 1.120
+	"sap_belize",
+	"sap_belize_plus",
+	"sap_belize_hcb",
+	"sap_belize_hcw",
+
+	// Part of themelib_sap_bluecrystal, deprecated as of 1.40
+	"sap_bluecrystal",
+
+	// Legacy HCB theme, part of every library, deprecated as of 1.46
+	"sap_hcb",
+
+	// Legacy themes, removed with 1.48
+	"sap_goldreflection",
+	"sap_platinum",
+	"sap_ux",
 ];
 
 export const deprecatedComponents: string[] = [

@@ -5,7 +5,7 @@ import LinterContext, {ResourcePath, TranspileResult} from "../LinterContext.js"
 import {taskStart} from "../../utils/perf.js";
 import {MESSAGE} from "../messages.js";
 import {Tag, Attribute} from "sax-wasm";
-import {deprecatedLibraries, deprecatedThemeLibraries} from "../../utils/deprecations.js";
+import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
 
 export default async function transpileHtml(
 	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext
@@ -151,8 +151,8 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 
 function checkThemeAttr(attr: Attribute, report: HtmlReporter) {
 	const themeName = attr.value.value.toLowerCase();
-	if (deprecatedThemeLibraries.includes(`themelib_${themeName}`)) {
-		report.addMessage(MESSAGE.DEPRECATED_THEME_LIBRARY, {
+	if (deprecatedThemes.includes(themeName)) {
+		report.addMessage(MESSAGE.DEPRECATED_THEME, {
 			themeName,
 		}, attr.value);
 	}
