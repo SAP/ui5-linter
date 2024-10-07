@@ -80,32 +80,40 @@ function getClassBodyFromArguments(
 					prop.initializer.parameters,
 					undefined,
 					prop.initializer.body);
-			} else if (ts.isObjectLiteralExpression(prop.initializer) &&
-				ts.isIdentifier(prop.name) && prop.name.text === "metadata") {
-				// Transform to *static* property declaration?
-				// This would align it with how UI5 projects should declare metadata in TypeScript,
-				// however it's unclear whether this helps our static analysis
-				return nodeFactory.createPropertyDeclaration(
-					[nodeFactory.createToken(ts.SyntaxKind.StaticKeyword)],
-					prop.name,
-					undefined, undefined,
-					prop.initializer);
 			} else {
-				// Assign all other properties (including arrow functions) to the class prototype
-				// This transformation does not reflect the runtime behavior where
-				// properties are set on the Class's prototype. However, tsc won't derive *any*
-				// type information from Object.defineProperty(Class.prototype, "prob", ...)
-				// So the current approach works better for the static analysis
-				if (prop.initializer.kind === ts.SyntaxKind.NullKeyword ||
-					prop.initializer.kind === ts.SyntaxKind.UndefinedKeyword) {
+				const modifiers: ts.ModifierLike[] = [];
+
+				// Special handling:
+				// - metadata: *readonly static*
+				// - renderer: *static*
+				// This aligns it with how UI5 projects should declare those properties in TypeScript
+				if (
+					ts.isObjectLiteralExpression(prop.initializer) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "metadata"
+				) {
+					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.ReadonlyKeyword));
+					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.StaticKeyword));
+				} else if (ts.isIdentifier(prop.name) && prop.name.text === "renderer") {
+					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.StaticKeyword));
+				} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword ||
+					prop.initializer.kind === ts.SyntaxKind.UndefinedKeyword
+				) {
 					// Skip property assignments that declare a null value, in the hope
 					// that tsc can infer a more useful type based on other assignment
 					// in one of the methods. If we would define a class property, tsc
 					// would not attempt to infer more type information.
 					return;
 				}
+
+				// Assign all properties (including arrow functions) to the class prototype
+				// This transformation does not reflect the runtime behavior where
+				// properties are set on the Class's prototype. However, tsc won't derive *any*
+				// type information from Object.defineProperty(Class.prototype, "prob", ...)
+				// So the current approach works better for the static analysis
+
 				return nodeFactory.createPropertyDeclaration(
-					undefined,
+					modifiers,
 					prop.name,
 					undefined, undefined,
 					prop.initializer);

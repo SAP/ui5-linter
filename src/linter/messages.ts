@@ -5,6 +5,7 @@ const RULES = {
 	"csp-unsafe-inline-script": "csp-unsafe-inline-script",
 	"no-deprecated-api": "no-deprecated-api",
 	"no-deprecated-component": "no-deprecated-component",
+	"no-deprecated-control-renderer-declaration": "no-deprecated-control-renderer-declaration",
 	"no-deprecated-library": "no-deprecated-library",
 	"no-deprecated-theme": "no-deprecated-theme",
 	"no-globals": "no-globals",
@@ -30,6 +31,7 @@ export enum MESSAGE {
 	DEPRECATED_INTERFACE,
 	DEPRECATED_TYPE,
 	DEPRECATED_COMPONENT,
+	DEPRECATED_CONTROL_RENDERER_DECLARATION,
 	DEPRECATED_DECLARATIVE_SUPPORT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LESS_SUPPORT,
@@ -166,6 +168,15 @@ export const MESSAGE_INFO = {
 
 		message: ({componentName}: {componentName: string}) =>
 			`Use of deprecated component '${componentName}'`,
+		details: () => undefined,
+	},
+
+	[MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-control-renderer-declaration"],
+
+		message: () =>
+			`TBD`,
 		details: () => undefined,
 	},
 
