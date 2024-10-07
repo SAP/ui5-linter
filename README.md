@@ -185,7 +185,7 @@ module.exports = {
 
 - **ignores**: This option allows you to define glob patterns to ignore specific files or directories during linting. Patterns are relative to the root of the project. You can also un-ignore specific files by using the `!` prefix. The order of the patterns matters; later patterns override earlier ones.
 
-  Example:
+  **Example:**
   ```js
   ignores: [
     "webapp/test/**",               // Ignore all files in the test folder
