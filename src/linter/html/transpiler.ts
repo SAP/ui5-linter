@@ -140,7 +140,8 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			name: "data-sap-ui-async",
 			details: `{@link topic:91f2d03b6f4d1014b6dd926db0e91070 Configuration Options and URL Parameters}`,
 		}, tag);
-	} else if (!attributes.has("data-sap-ui-compat-version")) {
+	}
+	if (!attributes.has("data-sap-ui-compat-version")) {
 		report.addMessage(MESSAGE.MISSING_BOOTSTRAP_PARAM, {
 			name: "data-sap-ui-compat-version",
 			details: `{@link topic:9feb96da02c2429bb1afcf6534d77c79 Compatibility Version Information (deprecated)}`,
