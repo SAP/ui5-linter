@@ -185,15 +185,28 @@ module.exports = {
 
 - **ignores**: This option allows you to define glob patterns to ignore specific files or directories during linting. Patterns are relative to the root of the project. You can also un-ignore specific files by using the `!` prefix. The order of the patterns matters; later patterns override earlier ones.
 
-Example:
-```js
-ignores: [
-  "webapp/test/**",               // Ignore all files in the test folder
-  "!webapp/test/integration/**",  // Un-ignore files in a specific subdirectory
-];
-```
+  Example:
+  ```js
+  ignores: [
+    "webapp/test/**",               // Ignore all files in the test folder
+    "!webapp/test/integration/**",  // Un-ignore files in a specific subdirectory
+  ];
+  ```
 
-In this way, you can control which files the UI5 linter should process and which it should ignore.
+  In this way, you can control which files the UI5 linter should process and which it should ignore.
+
+- **files**: This option allows you to specify glob patterns to target particular files or directories for linting. However, it does not enable you to include files that are typically excluded from the process (e.g., files outside the `webapp` directory in application projects). Only POSIX path separators (`/`) are supported, irrespective of the platform you're using.
+
+  > **Note:** This option corresponds to the CLI command `ui5lint [files...]`. If CLI's `[files...]` are provided, the configuration gets ignored.
+
+  **Example:**
+
+  ```js
+  files: [
+    "webapp/index.html",
+    "webapp/**/*",        // Lint all files and subdirectories within "webapp/"
+  ];
+  ```
 
 ## Support, Feedback, Contributing
 
