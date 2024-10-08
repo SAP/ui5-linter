@@ -12,17 +12,19 @@ export interface ModuleDefinition {
 	name?: string;
 	body: ts.Statement[];
 	imports: ts.ImportDeclaration[];
+	oldFactoryBlock?: ts.Block;
 }
 
 export default function (
 	moduleDeclaration: ModuleDeclaration, sourceFile: ts.SourceFile, nodeFactory: ts.NodeFactory
 ): ModuleDefinition {
 	const {imports, identifiers: importIdentifiers} = collectImports(moduleDeclaration, nodeFactory);
-	const body = getModuleBody(moduleDeclaration, sourceFile, nodeFactory, importIdentifiers);
+	const {body, oldFactoryBlock} = getModuleBody(moduleDeclaration, sourceFile, nodeFactory, importIdentifiers);
 	/* Ignore module name and export flag for now */
 	return {
 		imports,
 		body,
+		oldFactoryBlock,
 	};
 }
 
@@ -129,10 +131,11 @@ function getModuleBody(
 	sourceFile: ts.SourceFile,
 	nodeFactory: ts.NodeFactory,
 	importIdentifiers: ts.Identifier[]
-): ts.Statement[] {
+): {body: ts.Statement[]; oldFactoryBlock?: ts.Block} {
 	if (!moduleDeclaration.factory) {
-		return [];
+		return {body: []};
 	}
+	let oldFactoryBlock: ts.Block | undefined;
 	let body: ts.Statement[];
 	if ((ts.isFunctionExpression(moduleDeclaration.factory) ||
 		ts.isArrowFunction(moduleDeclaration.factory) ||
@@ -141,6 +144,7 @@ function getModuleBody(
 			// Empty function body, no export
 			body = [];
 		} else if (ts.isBlock(moduleDeclaration.factory.body)) {
+			oldFactoryBlock = moduleDeclaration.factory.body;
 			const factoryBody = moduleDeclaration.factory.body.statements;
 			/* Convert factory to module body:
 				a) If body contains a single return statement, add all nodes to body but wrap
@@ -237,7 +241,7 @@ function getModuleBody(
 		throw new Error(`FIXME: Unsupported factory type ${ts.SyntaxKind[moduleDeclaration.factory.kind]} at ` +
 			toPosStr(moduleDeclaration.factory));
 	}
-	return body;
+	return {body, oldFactoryBlock};
 }
 
 /**

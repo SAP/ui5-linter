@@ -12,13 +12,15 @@ export class UnsupportedExtendCall extends Error {
  * Rewrite a UI5-typical `Class.extend("MyClass", {})` CallExpression to a ClassDeclaration
  */
 export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
-	callExp: ts.CallExpression, modifiers?: ts.ModifierLike[]): ts.ClassDeclaration {
+	callExp: ts.CallExpression, modifiers?: ts.ModifierLike[],
+	className?: string | ts.Identifier): ts.ClassDeclaration {
 	if (!(ts.isPropertyAccessExpression(callExp.expression) && ts.isIdentifier(callExp.expression.name) &&
 		callExp.expression.name.text === "extend")) {
 		throw new UnsupportedExtendCall(`Not a UI5 Class#extends call ${toPosStr(callExp.expression)}`);
 	}
-
-	const className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp.arguments));
+	if (!className) {
+		className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp.arguments));
+	}
 	const body = getClassBodyFromArguments(nodeFactory, callExp.arguments);
 	return nodeFactory.createClassDeclaration(modifiers,
 		className,
