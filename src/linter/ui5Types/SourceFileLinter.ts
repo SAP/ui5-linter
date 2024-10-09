@@ -146,12 +146,6 @@ export default class SourceFileLinter {
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
-		const deprecatedTypes = {
-			...this.#apiDeprecations.deprecations.classes,
-			...this.#apiDeprecations.deprecations.enums,
-			...this.#apiDeprecations.deprecations.typedefs,
-		} as Record<string, string>;
-
 		if (type === "interfaces") {
 			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
 			const appliedInterfaces = (ts.isArrayLiteralExpression(node.initializer) &&
@@ -172,6 +166,10 @@ export default class SourceFileLinter {
 				}, node);
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
+			const deprecatedTypes = {
+				...this.#apiDeprecations.deprecations.enums,
+				...this.#apiDeprecations.deprecations.typedefs,
+			};
 			node.initializer.elements.forEach((element) => {
 				const nodeType = ts.isStringLiteral(element) ? element.text : "";
 
@@ -183,6 +181,10 @@ export default class SourceFileLinter {
 				}
 			});
 		} else if (type === "defaultValue") {
+			const deprecatedTypes = {
+				...this.#apiDeprecations.deprecations.enums,
+				...this.#apiDeprecations.deprecations.typedefs,
+			};
 			const defaultValueType = ts.isStringLiteral(node.initializer) ?
 				node.initializer.text :
 				"";
@@ -206,6 +208,12 @@ export default class SourceFileLinter {
 		// This one is too generic and should always be at the last place
 		// It's for "types" and event arguments' types
 		} else if (ts.isStringLiteral(node.initializer)) {
+			const deprecatedTypes = {
+				...this.#apiDeprecations.deprecations.classes,
+				...this.#apiDeprecations.deprecations.enums,
+				...this.#apiDeprecations.deprecations.typedefs,
+			} as Record<string, string>;
+
 			let nodeType = node.initializer.text;
 			nodeType = nodeType.replace("Promise<", "").replace(">", ""); // Cleanup event types
 
