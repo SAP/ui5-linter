@@ -45,6 +45,7 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#dataTypes: Record<string, string>;
+	#apiDeprecations: Record<string, Record<string, Record<string, string>>>;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
@@ -53,7 +54,7 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, manifestContent?: string
+		dataTypes: Record<string, string> | undefined, manifestContent?: string, apiDeprecations?: Record<string, string>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -67,6 +68,7 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#dataTypes = dataTypes ?? {};
+		this.#apiDeprecations = apiDeprecations ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -120,10 +122,95 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
+		} else if (ts.isPropertyAssignment(node) && this.isPropertyInMetadata(node)) {
+			this.analyzeMetadataProperty(node.name.getText(), node);
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	// TODO: Determine correctly if it's a metadata from class extend call
+	isPropertyInMetadata(node: ts.Node): boolean {
+		while (node.parent) {
+			if (ts.isPropertyAssignment(node) &&
+				node.name.getText() === "metadata") {
+				return true;
+			}
+
+			node = node.parent;
+		}
+
+		return false;
+	}
+
+	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
+		const deprecatedTypes = {
+			...this.#apiDeprecations.deprecations.classes,
+			...this.#apiDeprecations.deprecations.enums,
+			...this.#apiDeprecations.deprecations.typedefs,
+		} as Record<string, string>;
+
+		if (type === "interfaces") {
+			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
+			const appliedInterfaces = (ts.isArrayLiteralExpression(node.initializer) &&
+				node.initializer.elements.map((elem) => elem.getText())) || [];
+
+			const hasDeprecatedInterfaces = appliedInterfaces.filter((acc, interfaceName) => {
+				if (deprecatedInterfaces[interfaceName]) {
+					acc.push(interfaceName);
+				}
+
+				return acc;
+			}, [] as string[]);
+
+			if (hasDeprecatedInterfaces.length) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+					propertyName: hasDeprecatedInterfaces.join(", "),
+					details: "",
+				}, node);
+			}
+		} else if (ts.isStringLiteral(node.initializer)) {
+			let nodeType = node.initializer.text;
+			nodeType = nodeType.replace("Promise<", "").replace(">", "");
+
+			if (deprecatedTypes[nodeType]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+					propertyName: nodeType,
+					details: "",
+				}, node.initializer);
+			}
+		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
+			node.initializer.elements.forEach((element) => {
+				const nodeType = ts.isStringLiteral(element) ? element.text : "";
+
+				if (deprecatedTypes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+						propertyName: nodeType,
+						details: "",
+					}, element);
+				}
+			});
+		} else if (type === "defaultValue") {
+			const nodeType = ts.isIdentifier(node.initializer) ? node.initializer.text : "";
+
+			const typeNode = node.parent.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) && prop.name.getText() === "type";
+			});
+
+			const fullyQuantifiedName = (typeNode &&
+				ts.isPropertyAssignment(typeNode) &&
+				ts.isIdentifier(typeNode.initializer)) ?
+				typeNode.initializer.text :
+				"";
+
+			if (deprecatedTypes[fullyQuantifiedName]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+					propertyName: nodeType,
+					details: "",
+				}, node);
+			}
+		}
 	}
 
 	analyzeIdentifier(node: ts.Identifier) {
