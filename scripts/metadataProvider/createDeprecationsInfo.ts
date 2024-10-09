@@ -29,7 +29,8 @@ export default async function createDeprecationsInfo(apiJsonsRoot: string, sapui
 
 		for (const [typeName, type] of Object.entries(model as Record<string, ui5UnionType>)) {
 			if (type?.deprecatedInfo?.isDeprecated) {
-				deprecations[modelName][typeName] = "deprecated";
+				deprecations[modelName][typeName] =
+					`Deprecated since ${type.deprecatedInfo.since}. ${type.deprecatedInfo.text}`;
 			}
 
 			if (hasFieldsProperty(type)) {
