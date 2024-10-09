@@ -1,5 +1,6 @@
 import createMetadataInfo from "./metadataProvider/createMetadataInfo.js";
 import createPseudoModulesInfo from "./metadataProvider/createPseudoModulesInfo.js";
+import createDeprecationsInfo from "./metadataProvider/createDeprecationsInfo.js";
 import {cleanup, fetchAndExtractApiJsons} from "./metadataProvider/helpers.js";
 import {promisify} from "node:util";
 import {execFile as execFileCb} from "node:child_process";
@@ -22,6 +23,7 @@ try {
 
 	await createMetadataInfo(apiJsonsRoot, version);
 	await createPseudoModulesInfo(apiJsonsRoot);
+	await createDeprecationsInfo(apiJsonsRoot, version);
 
 	await cleanup();
 
