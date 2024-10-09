@@ -94,9 +94,6 @@ export default class ManifestLinter {
 				viewType: routing.config.viewType,
 			}, "/sap.ui5/routing/config/viewType");
 		}
-		if (routing?.config) {
-			this.detectDeprecatedPropertyNames(routing.config, "/sap.ui5/routing/config");
-		}
 
 		// Detect deprecations in routing.targets:
 		const targets = routing?.targets;
@@ -119,8 +116,6 @@ export default class ManifestLinter {
 						viewType: target.viewType,
 					}, `${pathToViewObject}/viewType`);
 				}
-				// Detect deprecated property names:
-				this.detectDeprecatedPropertyNames(target, pathToViewObject);
 			}
 		}
 
@@ -164,16 +159,5 @@ export default class ManifestLinter {
 				}, `/sap.ui5/models/${modelKey}/settings/synchronizationMode`);
 			}
 		});
-	}
-
-	detectDeprecatedPropertyNames(viewObject: Record<string, unknown>, pathToViewObject: string) {
-		// Detect every property name starting with "view" except "viewType":
-		for (const key of Object.keys(viewObject)) {
-			if (key.startsWith("view") && key !== "viewType") {
-				this.#reporter?.addMessage(MESSAGE.DEPRECATED_VIEW_CONFIG, {
-					propertyName: key,
-				}, `${pathToViewObject}/${key}`);
-			}
-		}
 	}
 }

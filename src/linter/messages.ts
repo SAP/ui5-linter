@@ -246,16 +246,6 @@ export const MESSAGE_INFO = {
 		details: () => `{@link topic:a87ca843bcee469f82a9072927a7dcdb Deprecated Themes and Libraries}`,
 	},
 
-	[MESSAGE.DEPRECATED_VIEW_CONFIG]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-api"],
-
-		message: ({propertyName}: {propertyName: string}) =>
-			`Use of deprecated property '${propertyName}'. ` +
-			`Use '${propertyName.substring(4).toLowerCase()}' instead'`,
-		details: () => undefined,
-	},
-
 	[MESSAGE.DEPRECATED_VIEW_TYPE]: {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
