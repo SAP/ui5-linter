@@ -1,5 +1,17 @@
 import {writeFile} from "node:fs/promises";
 import MetadataProvider from "./MetadataProvider.js";
+import {
+	UI5Class,
+	UI5Enum,
+	UI5Namespace,
+	UI5Interface,
+	UI5Typedef,
+	UI5Function,
+} from "@ui5-language-assistant/semantic-model-types";
+type ui5UnionType = UI5Class | UI5Enum | UI5Namespace | UI5Interface | UI5Typedef | UI5Function;
+const hasFieldsProperty = function (type: unknown): type is UI5Class | UI5Enum | UI5Namespace {
+	return (type as UI5Class | UI5Enum | UI5Namespace).fields !== undefined;
+};
 
 export default async function createDeprecationsInfo(apiJsonsRoot: string, sapui5Version: string) {
 	const metadataProvider = new MetadataProvider();
@@ -8,17 +20,24 @@ export default async function createDeprecationsInfo(apiJsonsRoot: string, sapui
 	const semanticModel = metadataProvider.getModel();
 
 	const deprecations: Record<string, Record<string, string>> = {};
-	for (const [aaaaName, aaaa] of Object.entries(semanticModel)) {
-		if (typeof aaaa !== "object" || Array.isArray(aaaa)) {
+	for (const [modelName, model] of Object.entries(semanticModel)) {
+		if (typeof model !== "object" || Array.isArray(model)) {
 			continue;
 		}
 
-		deprecations[aaaaName] = deprecations[aaaaName] ?? {};
+		deprecations[modelName] = deprecations[modelName] ?? {};
 
-		// forEachSymbol(aaaa, (type, typeName) => {
-		for (const [typeName, type] of Object.entries(aaaa)) {
+		for (const [typeName, type] of Object.entries(model as Record<string, ui5UnionType>)) {
 			if (type?.deprecatedInfo?.isDeprecated) {
-				deprecations[aaaaName][typeName] = "deprecated";
+				deprecations[modelName][typeName] = "deprecated";
+			}
+
+			if (hasFieldsProperty(type)) {
+				type.fields?.forEach((field) => {
+					if (field?.deprecatedInfo?.isDeprecated) {
+						deprecations[modelName][typeName + "." + field.name] = "deprecated";
+					}
+				});
 			}
 		}
 	}
