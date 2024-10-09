@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.2](https://github.com/SAP/ui5-linter/compare/v1.0.1...v1.0.2) (2024-10-09)
+
+
+### Bug Fixes
+
+* **html:** Detect all missing bootstrap parameters ([6d51ec5](https://github.com/SAP/ui5-linter/commit/6d51ec58ce43d3dcd8d22e382d44d335af5a92ad))
+* **html:** Improve detection of deprecated themes ([1ca4210](https://github.com/SAP/ui5-linter/commit/1ca42105e4fe66a2a85bf9404b821d79a81daebd))
+* Remove checks for deprecated property names in manifest.json routing ([#356](https://github.com/SAP/ui5-linter/issues/356)) ([631e78a](https://github.com/SAP/ui5-linter/commit/631e78a88a50eb2709f9e7db3b92e2f4a907f9aa))
+
+
+### Dependencies
+
+* Bump typescript from 5.6.2 to 5.6.3 ([506b107](https://github.com/SAP/ui5-linter/commit/506b107c116c0cc08740ea5c3084a1f21681da08))
+
 ## [1.0.1](https://github.com/SAP/ui5-linter/compare/v1.0.0...v1.0.1) (2024-10-02)
 
 
