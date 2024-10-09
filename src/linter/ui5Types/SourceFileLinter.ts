@@ -160,10 +160,12 @@ export default class SourceFileLinter {
 			}, []);
 
 			if (hasDeprecatedInterfaces.length) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-					propertyName: hasDeprecatedInterfaces.join(", "),
-					details: "",
-				}, node);
+				hasDeprecatedInterfaces.forEach((interfaceName) => {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+						propertyName: interfaceName,
+						details: deprecatedInterfaces[interfaceName],
+					}, node);
+				});
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
 			const deprecatedTypes = {
@@ -176,7 +178,7 @@ export default class SourceFileLinter {
 				if (deprecatedTypes[nodeType]) {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 						propertyName: nodeType,
-						details: "",
+						details: deprecatedTypes[nodeType],
 					}, element);
 				}
 			});
@@ -196,13 +198,13 @@ export default class SourceFileLinter {
 			const fullyQuantifiedName = (typeNode &&
 				ts.isPropertyAssignment(typeNode) &&
 				ts.isStringLiteral(typeNode.initializer)) ?
-				typeNode.initializer.text :
+					[typeNode.initializer.text, defaultValueType].join(".") :
 				"";
 
-			if (deprecatedTypes[[fullyQuantifiedName, defaultValueType].join(".")]) {
+			if (deprecatedTypes[fullyQuantifiedName]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 					propertyName: defaultValueType,
-					details: "",
+					details: deprecatedTypes[fullyQuantifiedName],
 				}, node);
 			}
 		// This one is too generic and should always be at the last place
@@ -220,7 +222,7 @@ export default class SourceFileLinter {
 			if (deprecatedTypes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 					propertyName: nodeType,
-					details: "",
+					details: deprecatedTypes[nodeType],
 				}, node.initializer);
 			}
 		}
