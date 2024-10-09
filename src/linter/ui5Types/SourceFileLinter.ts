@@ -54,7 +54,8 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, manifestContent?: string, apiDeprecations?: Record<string, string>
+		dataTypes: Record<string, string> | undefined, manifestContent?: string,
+		apiDeprecations?: Record<string, Record<string, Record<string, string>>>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -154,31 +155,21 @@ export default class SourceFileLinter {
 		if (type === "interfaces") {
 			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
 			const appliedInterfaces = (ts.isArrayLiteralExpression(node.initializer) &&
-				node.initializer.elements.map((elem) => elem.getText())) || [];
+				node.initializer.elements.map((elem) => (elem as ts.StringLiteral).text)) || [];
 
-			const hasDeprecatedInterfaces = appliedInterfaces.filter((acc, interfaceName) => {
+			const hasDeprecatedInterfaces = appliedInterfaces.reduce((acc: string[], interfaceName) => {
 				if (deprecatedInterfaces[interfaceName]) {
 					acc.push(interfaceName);
 				}
 
 				return acc;
-			}, [] as string[]);
+			}, []);
 
 			if (hasDeprecatedInterfaces.length) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 					propertyName: hasDeprecatedInterfaces.join(", "),
 					details: "",
 				}, node);
-			}
-		} else if (ts.isStringLiteral(node.initializer)) {
-			let nodeType = node.initializer.text;
-			nodeType = nodeType.replace("Promise<", "").replace(">", "");
-
-			if (deprecatedTypes[nodeType]) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-					propertyName: nodeType,
-					details: "",
-				}, node.initializer);
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
 			node.initializer.elements.forEach((element) => {
@@ -192,7 +183,9 @@ export default class SourceFileLinter {
 				}
 			});
 		} else if (type === "defaultValue") {
-			const nodeType = ts.isIdentifier(node.initializer) ? node.initializer.text : "";
+			const defaultValueType = ts.isStringLiteral(node.initializer) ?
+				node.initializer.text :
+				"";
 
 			const typeNode = node.parent.properties.find((prop) => {
 				return ts.isPropertyAssignment(prop) && prop.name.getText() === "type";
@@ -200,15 +193,27 @@ export default class SourceFileLinter {
 
 			const fullyQuantifiedName = (typeNode &&
 				ts.isPropertyAssignment(typeNode) &&
-				ts.isIdentifier(typeNode.initializer)) ?
+				ts.isStringLiteral(typeNode.initializer)) ?
 				typeNode.initializer.text :
 				"";
 
-			if (deprecatedTypes[fullyQuantifiedName]) {
+			if (deprecatedTypes[[fullyQuantifiedName, defaultValueType].join(".")]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+					propertyName: defaultValueType,
+					details: "",
+				}, node);
+			}
+		// This one is too generic and should always be at the last place
+		// It's for "types" and event arguments' types
+		} else if (ts.isStringLiteral(node.initializer)) {
+			let nodeType = node.initializer.text;
+			nodeType = nodeType.replace("Promise<", "").replace(">", ""); // Cleanup event types
+
+			if (deprecatedTypes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 					propertyName: nodeType,
 					details: "",
-				}, node);
+				}, node.initializer);
 			}
 		}
 	}

@@ -112,7 +112,8 @@ export default class TypeChecker {
 			new URL("../../../resources/api-deprecations.json", import.meta.url),
 			{encoding: "utf-8"}
 		);
-		const apiDeprecations = JSON.parse(apiDeprecationsFile) as Record<string, string>;
+		const apiDeprecations = JSON.parse(apiDeprecationsFile) as
+			Record<string, Record<string, Record<string, string>>>;
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
