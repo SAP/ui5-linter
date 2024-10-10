@@ -7,6 +7,7 @@ import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
+import {taskStart} from "../../utils/perf.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -131,21 +132,65 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	// TODO: Determine correctly if it's a metadata from class extend call
 	isPropertyInMetadata(node: ts.Node): boolean {
+		// Go up the hierarchy chain to find whether the class extends from "sap/ui/base/ManagedObject"
+		const isObjectMetadataAncestor = (node: ts.ClassDeclaration): boolean => {
+			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
+				return parentClasses.types.flatMap((parentClass) => {
+					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
+
+					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+						if (ts.isClassDeclaration(declaration)) {
+							if (declaration.name?.getText() === "ManagedObject" &&
+								ts.isModuleDeclaration(declaration.parent.parent) &&
+								declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject") {
+								return true;
+							} else {
+								return isObjectMetadataAncestor(declaration);
+							}
+						} else {
+							return false;
+						}
+					});
+				});
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+			}).reduce((acc, cur) => cur || acc, false) ?? false;
+		};
+
+		const metadataFound = taskStart("isPropertyInMetadata", this.#resourcePath, true);
+		let isMetadataFound = false;
+
 		while (node.parent) {
-			if (ts.isPropertyAssignment(node) &&
+			if ((ts.isPropertyAssignment(node) || // Control.extend("sap.fancy.Text", {metadata: {....}})
+				ts.isPropertyDeclaration(node)) && // class FancyText extends Control { static metadata = {...}; }
 				node.name.getText() === "metadata") {
-				return true;
+				isMetadataFound = true;
+				break;
 			}
 
 			node = node.parent;
 		}
 
-		return false;
+		if (!isMetadataFound) {
+			metadataFound();
+			return false;
+		}
+
+		while (node && node.kind !== ts.SyntaxKind.ClassDeclaration) {
+			node = node.parent;
+		}
+
+		if (!node) {
+			return false;
+		}
+
+		const result = isObjectMetadataAncestor(node as ts.ClassDeclaration);
+		metadataFound();
+		return result;
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
+		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.#resourcePath, true);
 		if (type === "interfaces") {
 			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
 
@@ -224,6 +269,7 @@ export default class SourceFileLinter {
 				}, node.initializer);
 			}
 		}
+		analyzeMetadataDone();
 	}
 
 	analyzeIdentifier(node: ts.Identifier) {
