@@ -65,14 +65,14 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 		},
 	});
 
-	FancyText.prototype._getBeginColumn = function () {
-		return new FancyMultiPage({
-			metadata: {
-				aggregations: {
-					// sap.f.IllustratedMessage: deprecated
-					deprecatedPages: {type: "sap.f.IllustratedMessage", multiple: false, visibility: true},
-				},
-			},
-		});
-	};
+	// FancyText.prototype._getBeginColumn = function () {
+	// 	return new FancyMultiPage({
+	// 		metadata: {
+	// 			aggregations: {
+	// 				// sap.f.IllustratedMessage: deprecated
+	// 				deprecatedPages: {type: "sap.f.IllustratedMessage", multiple: false, visibility: true},
+	// 			},
+	// 		},
+	// 	});
+	// };
 });
