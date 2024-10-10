@@ -27,6 +27,8 @@ export enum MESSAGE {
 	DEPRECATED_API_ACCESS,
 	DEPRECATED_BOOTSTRAP_PARAM,
 	DEPRECATED_CLASS,
+	DEPRECATED_INTERFACE,
+	DEPRECATED_TYPE,
 	DEPRECATED_COMPONENT,
 	DEPRECATED_DECLARATIVE_SUPPORT,
 	DEPRECATED_FUNCTION_CALL,
@@ -137,6 +139,24 @@ export const MESSAGE_INFO = {
 
 		message: ({className}: {className: string}) =>
 			`Use of deprecated class '${className}'`,
+		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_INTERFACE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({interfaceName}: {interfaceName: string}) =>
+			`Use of deprecated interface '${interfaceName}'`,
+		details: ({details}: {details: string}) => details,
+	},
+
+	[MESSAGE.DEPRECATED_TYPE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({typeName}: {typeName: string}) =>
+			`Use of deprecated type '${typeName}'`,
 		details: ({details}: {details: string}) => details,
 	},
 

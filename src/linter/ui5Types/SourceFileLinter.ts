@@ -148,23 +148,17 @@ export default class SourceFileLinter {
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
 		if (type === "interfaces") {
 			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
-			const appliedInterfaces = (ts.isArrayLiteralExpression(node.initializer) &&
-				node.initializer.elements.map((elem) => (elem as ts.StringLiteral).text)) || [];
 
-			const hasDeprecatedInterfaces = appliedInterfaces.reduce((acc: string[], interfaceName) => {
-				if (deprecatedInterfaces[interfaceName]) {
-					acc.push(interfaceName);
-				}
+			if (ts.isArrayLiteralExpression(node.initializer)) {
+				node.initializer.elements.forEach((elem) => {
+					const interfaceName = (elem as ts.StringLiteral).text;
 
-				return acc;
-			}, []);
-
-			if (hasDeprecatedInterfaces.length) {
-				hasDeprecatedInterfaces.forEach((interfaceName) => {
-					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-						propertyName: interfaceName,
-						details: deprecatedInterfaces[interfaceName],
-					}, node);
+					if (deprecatedInterfaces[interfaceName]) {
+						this.#reporter.addMessage(MESSAGE.DEPRECATED_INTERFACE, {
+							interfaceName: interfaceName,
+							details: deprecatedInterfaces[interfaceName],
+						}, elem);
+					}
 				});
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
@@ -176,8 +170,8 @@ export default class SourceFileLinter {
 				const nodeType = ts.isStringLiteral(element) ? element.text : "";
 
 				if (deprecatedTypes[nodeType]) {
-					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-						propertyName: nodeType,
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+						typeName: nodeType,
 						details: deprecatedTypes[nodeType],
 					}, element);
 				}
@@ -202,8 +196,8 @@ export default class SourceFileLinter {
 				"";
 
 			if (deprecatedTypes[fullyQuantifiedName]) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-					propertyName: defaultValueType,
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+					typeName: defaultValueType,
 					details: deprecatedTypes[fullyQuantifiedName],
 				}, node);
 			}
@@ -211,7 +205,6 @@ export default class SourceFileLinter {
 		// It's for "types" and event arguments' types
 		} else if (ts.isStringLiteral(node.initializer)) {
 			const deprecatedTypes = {
-				...this.#apiDeprecations.deprecations.classes,
 				...this.#apiDeprecations.deprecations.enums,
 				...this.#apiDeprecations.deprecations.typedefs,
 			} as Record<string, string>;
@@ -219,9 +212,14 @@ export default class SourceFileLinter {
 			let nodeType = node.initializer.text;
 			nodeType = nodeType.replace("Promise<", "").replace(">", ""); // Cleanup event types
 
-			if (deprecatedTypes[nodeType]) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-					propertyName: nodeType,
+			if (this.#apiDeprecations.deprecations.classes[nodeType]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
+					className: nodeType,
+					details: deprecatedTypes[nodeType],
+				}, node.initializer);
+			} else if (deprecatedTypes[nodeType]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+					typeName: nodeType,
 					details: deprecatedTypes[nodeType],
 				}, node.initializer);
 			}
