@@ -215,7 +215,7 @@ export default class SourceFileLinter {
 			if (this.#apiDeprecations.deprecations.classes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
 					className: nodeType,
-					details: deprecatedTypes[nodeType],
+					details: this.#apiDeprecations.deprecations.classes[nodeType],
 				}, node.initializer);
 			} else if (deprecatedTypes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
