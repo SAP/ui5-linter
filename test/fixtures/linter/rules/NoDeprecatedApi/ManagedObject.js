@@ -2,7 +2,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 	function (Control, library, FancyMultiPage) {
 	var DateTimeInputType = library.DateTimeInputType;
 	var FrameType = library.FrameType;
-	var FancyText = Control.extend("sap.fancy.Text", {
+	return Control.extend("sap.fancy.Text", {
 		metadata: {
 			// sap.ui.commons.FormattedTextViewControl: deprecated
 			interfaces: ["sap.ui.commons.FormattedTextViewControl"],
