@@ -6,11 +6,15 @@ sap.ui.define(["library/with/custom/paths/library", "library/with/custom/paths/E
 
 	// create a new instance of the Example control and
 	// place it into the DOM element with the id "content"
-	new Example({
+	const exampleControlInstance = new Example({
 		text: "Example",
 		color: ExampleColor.Highlight,
 		press: function (event) {
 			alert(event.getSource());
 		}
-	}).placeAt("content");
+	});
+	exampleControlInstance.placeAt("content");
+
+	// Detection of deprecated control API usage on custom control
+	exampleControlInstance.getBlocked();
 });

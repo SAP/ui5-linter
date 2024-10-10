@@ -7,6 +7,8 @@ import {transformAsyncRequireCall, transformSyncRequireCall} from "./requireExpr
 import pruneNode, {UnsafeNodeRemoval} from "./pruneNode.js";
 import replaceNodeInParent, {NodeReplacement} from "./replaceNodeInParent.js";
 import {UnsupportedModuleError} from "./util.js";
+import rewriteExtendCall, {UnsupportedExtendCall} from "./rewriteExtendCall.js";
+import insertNodesInParent from "./insertNodesInParent.js";
 
 const log = getLogger("linter:ui5Types:amdTranspiler:TsTransformer");
 
@@ -47,6 +49,7 @@ function transform(
 	const requireImports: ts.ImportDeclaration[] = [];
 	const requireFunctions: ts.FunctionDeclaration[] = [];
 	const nodeReplacements = new Map<ts.Node, NodeReplacement[]>();
+	const nodeInsertions = new Map<ts.SourceFile | ts.Block, Map<ts.Statement, ts.Statement[]>>();
 
 	function replaceNode(node: ts.Node, substitute: ts.Node) {
 		let replacements = nodeReplacements.get(node.parent);
@@ -55,6 +58,23 @@ function transform(
 			nodeReplacements.set(node.parent, replacements);
 		}
 		replacements.push({original: node, substitute});
+	}
+
+	function insertNodeAfter(referenceNode: ts.Statement, nodeToBeInserted: ts.Statement) {
+		if (!ts.isBlock(referenceNode.parent)) {
+			return;
+		}
+		let insertionsMap = nodeInsertions.get(referenceNode.parent);
+		if (!insertionsMap) {
+			insertionsMap = new Map();
+			nodeInsertions.set(referenceNode.parent, insertionsMap);
+		}
+		let insertions = insertionsMap.get(referenceNode);
+		if (!insertions) {
+			insertions = [];
+			insertionsMap.set(referenceNode, insertions);
+		}
+		insertions.push(nodeToBeInserted);
 	}
 
 	// Visit the AST depth-first and collect module definitions
@@ -112,6 +132,41 @@ function transform(
 						throw err;
 					}
 				}
+			} else {
+				try {
+					let variableStatement: ts.VariableStatement | undefined;
+					let className: string | undefined;
+
+					// Check if class is assigned to a variable.
+					// If so, use the local variable name as class name and remove the variable declaration
+					if (
+						ts.isVariableDeclaration(node.parent) &&
+						ts.isVariableDeclarationList(node.parent.parent) &&
+						ts.isVariableStatement(node.parent.parent.parent)
+					) {
+						variableStatement = node.parent.parent.parent;
+						className = node.parent.name.getText();
+					}
+
+					// For now, only rewrite extend calls in expressions and variable statements
+					if (variableStatement || ts.isExpressionStatement(node.parent)) {
+						const classDeclaration = rewriteExtendCall(nodeFactory, node, undefined, className);
+						if (variableStatement) {
+							// We can't replace the variable declaration with the class declaration (not valid),
+							// so we remove it and insert the class declaration after the variable statement
+							pruneNode(node.parent);
+							insertNodeAfter(variableStatement, classDeclaration);
+						} else if (ts.isExpressionStatement(node.parent)) {
+							replaceNode(node.parent, classDeclaration);
+						}
+					}
+				} catch (err) {
+					if (err instanceof UnsupportedExtendCall) {
+						log.verbose(`Failed to transform extend call: ${err.message}`);
+					} else {
+						throw err;
+					}
+				}
 			}
 		}
 		return node;
@@ -133,22 +188,50 @@ function transform(
 	// Update the AST with extracted nodes from the module definitions and require expressions
 	processedSourceFile = nodeFactory.updateSourceFile(processedSourceFile, statements);
 
-	// Visit the AST breadth-first and remove nodes marked for remove as well as
-	// replacing nodes marked for replacement
-	function removeAndReplaceNodes(node: ts.Node): ts.VisitResult<ts.Node | undefined> {
+	// After updating the source file, the top level statements get a new parent.
+	// We need to update the insertions and replacements maps to reflect the new parent nodes.
+	moduleDefinitions.forEach(({oldFactoryBlock}) => {
+		if (!oldFactoryBlock) {
+			return;
+		}
+		const insertionsMap = nodeInsertions.get(oldFactoryBlock);
+		if (insertionsMap) {
+			nodeInsertions.set(processedSourceFile, insertionsMap);
+		}
+		const replacements = nodeReplacements.get(oldFactoryBlock);
+		if (replacements) {
+			nodeReplacements.set(processedSourceFile, replacements);
+		}
+	});
+
+	// Visit the AST breadth-first and apply all modifications (removal, replacement, insertion)
+	function applyModifications(node: ts.Node): ts.VisitResult<ts.Node | undefined> {
 		if (node._remove) {
 			// console.log(`Cleanup: Removing node ${ts.SyntaxKind[node.kind]}`);
 			return undefined;
 		}
+
+		// Lookup for replacements before applying insertions as the node will change
+		// and afterwards the replacements would not be found anymore
 		const replacements = nodeReplacements.get(node);
+
+		if (ts.isSourceFile(node) || ts.isBlock(node)) {
+			const insertionsMap = nodeInsertions.get(node);
+			if (insertionsMap) {
+				const updatedNode = insertNodesInParent(node, insertionsMap, nodeFactory);
+				if (updatedNode) {
+					node = updatedNode;
+				}
+			}
+		}
 		if (replacements) {
 			for (const replacement of replacements) {
 				node = replaceNodeInParent(node, replacement, nodeFactory);
 			}
 		}
-		return ts.visitEachChild(node, removeAndReplaceNodes, context);
+		return ts.visitEachChild(node, applyModifications, context);
 	}
-	processedSourceFile = ts.visitNode(processedSourceFile, removeAndReplaceNodes) as ts.SourceFile;
+	processedSourceFile = ts.visitNode(processedSourceFile, applyModifications) as ts.SourceFile;
 	return processedSourceFile;
 }
 

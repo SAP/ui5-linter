@@ -59,6 +59,9 @@ sap.ui.define(["./library", "sap/ui/core/Control", "./ExampleRenderer"], functio
 			renderer: ExampleRenderer,
 			onclick: function () {
 				this.firePress();
+
+				// Usage of deprecated control API
+				this.rerender();
 			}
 		}
 	);
