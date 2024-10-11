@@ -46,7 +46,7 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#dataTypes: Record<string, string>;
-	#apiDeprecations: Record<string, Record<string, Record<string, string>>>;
+	#apiExtract: Record<string, Record<string, Record<string, string>>>;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
@@ -56,7 +56,7 @@ export default class SourceFileLinter {
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
 		dataTypes: Record<string, string> | undefined, manifestContent?: string,
-		apiDeprecations?: Record<string, Record<string, Record<string, string>>>
+		apiExtract?: Record<string, Record<string, Record<string, string>>>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -70,7 +70,7 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#dataTypes = dataTypes ?? {};
-		this.#apiDeprecations = apiDeprecations ?? {};
+		this.#apiExtract = apiExtract ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -193,7 +193,7 @@ export default class SourceFileLinter {
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
 		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.#resourcePath, true);
 		if (type === "interfaces") {
-			const deprecatedInterfaces = this.#apiDeprecations.deprecations.interfaces;
+			const deprecatedInterfaces = this.#apiExtract.deprecations.interfaces;
 
 			if (ts.isArrayLiteralExpression(node.initializer)) {
 				node.initializer.elements.forEach((elem) => {
@@ -209,8 +209,8 @@ export default class SourceFileLinter {
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
 			const deprecatedTypes = {
-				...this.#apiDeprecations.deprecations.enums,
-				...this.#apiDeprecations.deprecations.typedefs,
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
 			};
 			node.initializer.elements.forEach((element) => {
 				const nodeType = ts.isStringLiteral(element) ? element.text : "";
@@ -224,8 +224,8 @@ export default class SourceFileLinter {
 			});
 		} else if (type === "defaultValue") {
 			const deprecatedTypes = {
-				...this.#apiDeprecations.deprecations.enums,
-				...this.#apiDeprecations.deprecations.typedefs,
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
 			};
 			const defaultValueType = ts.isStringLiteral(node.initializer) ?
 				node.initializer.text :
@@ -251,17 +251,17 @@ export default class SourceFileLinter {
 		// It's for "types" and event arguments' types
 		} else if (ts.isStringLiteral(node.initializer)) {
 			const deprecatedTypes = {
-				...this.#apiDeprecations.deprecations.enums,
-				...this.#apiDeprecations.deprecations.typedefs,
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
 			} as Record<string, string>;
 
 			let nodeType = node.initializer.text;
 			nodeType = nodeType.replace("Promise<", "").replace(">", ""); // Cleanup event types
 
-			if (this.#apiDeprecations.deprecations.classes[nodeType]) {
+			if (this.#apiExtract.deprecations.classes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
 					className: nodeType,
-					details: this.#apiDeprecations.deprecations.classes[nodeType],
+					details: this.#apiExtract.deprecations.classes[nodeType],
 				}, node.initializer);
 			} else if (deprecatedTypes[nodeType]) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
