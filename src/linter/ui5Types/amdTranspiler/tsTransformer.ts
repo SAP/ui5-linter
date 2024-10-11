@@ -19,6 +19,17 @@ declare module "typescript" {
 	}
 }
 
+interface NodeComments {
+	leading: ts.CommentRange[];
+	trailing: ts.CommentRange[];
+}
+
+function removeCommentFromSourceFile(sourceFile: ts.SourceFile, comment: ts.CommentRange) {
+	sourceFile.text =
+			sourceFile.text.slice(0, comment.pos).padEnd(comment.end, " ") +
+			sourceFile.text.slice(comment.end);
+}
+
 /**
  * Creates a TypeScript "transformer" that will be applied to each source file, doing the actual transpilation
  * The source file is expected to be classic UI5 JavaScript, using UI5s's AMD loader and other UI5 specific API.
@@ -50,6 +61,7 @@ function transform(
 	const requireFunctions: ts.FunctionDeclaration[] = [];
 	const nodeReplacements = new Map<ts.Node, NodeReplacement[]>();
 	const nodeInsertions = new Map<ts.SourceFile | ts.Block, Map<ts.Statement, ts.Statement[]>>();
+	const commentRemovals: ts.CommentRange[] = [];
 
 	function replaceNode(node: ts.Node, substitute: ts.Node) {
 		let replacements = nodeReplacements.get(node.parent);
@@ -154,8 +166,17 @@ function transform(
 						if (variableStatement) {
 							// We can't replace the variable declaration with the class declaration (not valid),
 							// so we remove it and insert the class declaration after the variable statement
-							pruneNode(node.parent);
-							insertNodeAfter(variableStatement, classDeclaration);
+
+							if (variableStatement.declarationList.declarations.length > 1) {
+								// The variable statement contains more than just our class variable,
+								// so we just remove the single declaration within it
+								pruneNode(node.parent);
+								insertNodeAfter(variableStatement, classDeclaration);
+							} else {
+								// The variable statement only contains our class variable, so we can replace the whole
+								// statement node with the new class declaration.
+								replaceNode(variableStatement, classDeclaration);
+							}
 						} else if (ts.isExpressionStatement(node.parent)) {
 							replaceNode(node.parent, classDeclaration);
 						}
@@ -204,6 +225,58 @@ function transform(
 		}
 	});
 
+	// Get full source text to find comments
+	const fullSourceText = processedSourceFile.getFullText();
+
+	function getCommentsFromNode(node: ts.Node): NodeComments {
+		const leadingComments = ts.getLeadingCommentRanges(fullSourceText, node.getFullStart()) ?? [];
+		const trailingComments = ts.getTrailingCommentRanges(fullSourceText, node.getEnd()) ?? [];
+		return {
+			leading: leadingComments,
+			trailing: trailingComments,
+		};
+	}
+
+	function getCommentText(comment: ts.CommentRange): string {
+		const fullCommentText = fullSourceText.substring(comment.pos, comment.end);
+		if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
+			// Remove leading "//"
+			return fullCommentText.replace(/^\/\//, "");
+		} else if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+			// Remove leading "/*" and trailing "*/"
+			return fullCommentText.replace(/^\/\*/, "").replace(/\*\/$/, "");
+		} else {
+			return fullCommentText;
+		}
+	}
+
+	function moveCommentsToNode(from: ts.Node, to: ts.Node) {
+		// TODO: Is this needed?
+		// ts.moveSyntheticComments(to, from);
+
+		const comments = getCommentsFromNode(from);
+		comments.leading.forEach((comment) => {
+			commentRemovals.push(comment);
+			const commentText = getCommentText(comment);
+			if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
+				// For now, do not move JSDoc comments as they might contribute invalid type information
+				// to the TypeScript type checker.
+				// Instead, the comments will be removed completely.
+				ts.addSyntheticLeadingComment(to, comment.kind, getCommentText(comment), comment.hasTrailingNewLine);
+			}
+		});
+		comments.trailing.forEach((comment) => {
+			commentRemovals.push(comment);
+			const commentText = getCommentText(comment);
+			if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
+				// For now, do not move JSDoc comments as they might contribute invalid type information
+				// to the TypeScript type checker.
+				// Instead, the comments will be removed completely.
+				ts.addSyntheticTrailingComment(to, comment.kind, getCommentText(comment), comment.hasTrailingNewLine);
+			}
+		});
+	}
+
 	// Visit the AST breadth-first and apply all modifications (removal, replacement, insertion)
 	function applyModifications(node: ts.Node): ts.VisitResult<ts.Node | undefined> {
 		if (node._remove) {
@@ -226,12 +299,22 @@ function transform(
 		}
 		if (replacements) {
 			for (const replacement of replacements) {
+				// Move comments to the new node
+				moveCommentsToNode(replacement.original, replacement.substitute);
+				// Replace it
 				node = replaceNodeInParent(node, replacement, nodeFactory);
 			}
 		}
 		return ts.visitEachChild(node, applyModifications, context);
 	}
 	processedSourceFile = ts.visitNode(processedSourceFile, applyModifications) as ts.SourceFile;
+
+	// Remove comments at the very end as the instance of processedSourceFile might change
+	// during applyModifications (e.g. when replacing a node)
+	for (const comment of commentRemovals) {
+		removeCommentFromSourceFile(processedSourceFile, comment);
+	}
+
 	return processedSourceFile;
 }
 
