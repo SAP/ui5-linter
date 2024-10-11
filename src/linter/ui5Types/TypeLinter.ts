@@ -108,11 +108,11 @@ export default class TypeChecker {
 		);
 		const dataTypes = JSON.parse(dataTypesFile) as Record<string, string>;
 
-		const apiDeprecationsFile = await fs.readFile(
-			new URL("../../../resources/api-deprecations.json", import.meta.url),
+		const apiExtractFile = await fs.readFile(
+			new URL("../../../resources/api-extract.json", import.meta.url),
 			{encoding: "utf-8"}
 		);
-		const apiDeprecations = JSON.parse(apiDeprecationsFile) as
+		const apiExtract = JSON.parse(apiExtractFile) as
 			Record<string, Record<string, Record<string, string>>>;
 
 		const reportCoverage = this.#context.getReportCoverage();
@@ -139,7 +139,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMap,
 					checker, reportCoverage, messageDetails, dataTypes,
-					manifestContent, apiDeprecations
+					manifestContent, apiExtract
 				);
 				await linter.lint();
 				linterDone();
