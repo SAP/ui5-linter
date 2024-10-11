@@ -181,6 +181,7 @@ export default class SourceFileLinter {
 		}
 
 		if (!node) {
+			metadataFound();
 			return false;
 		}
 
