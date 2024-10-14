@@ -246,16 +246,6 @@ function transform(
 						lastStatement, comment.kind, commentText, comment.hasTrailingNewLine);
 				}
 			});
-			// comments.trailing.forEach((comment) => {
-			// 	commentRemovals.push(comment);
-			// 	const commentText = getCommentText(comment, sourceFile);
-			// 	if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
-			// 	// For now, do not move JSDoc comments as they might contribute invalid type information
-			// 	// to the TypeScript type checker.
-			// 	// Instead, the comments will be removed completely.
-			// 		ts.addSyntheticTrailingComment(to, comment.kind, commentText, comment.hasTrailingNewLine);
-			// 	}
-			// });
 		}
 
 		// After updating the source file, the top level statements get a new parent.
@@ -295,8 +285,9 @@ function transform(
 	}
 
 	function moveCommentsToNode(from: ts.Node, to: ts.Node, sourceFile?: ts.SourceFile) {
-		// TODO: Is this needed?
-		// ts.moveSyntheticComments(to, from);
+		// Note: Moving synthetic comments becomes relevant when a newly created node is replaced with another new node.
+		// Currently this doesn't seem to be the case, but in future it might be.
+		ts.moveSyntheticComments(to, from);
 
 		const comments = getCommentsFromNode(from, sourceFile);
 		comments.leading.forEach((comment) => {
