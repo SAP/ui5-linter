@@ -171,7 +171,12 @@ function transform(
 								// The variable statement contains more than just our class variable,
 								// so we just remove the single declaration within it
 								pruneNode(node.parent);
+
+								// And insert the class declaration after the variable statement
 								insertNodeAfter(variableStatement, classDeclaration);
+
+								// Also: Move comments from the variable declaration to the class declaration
+								moveCommentsToNode(node.parent, classDeclaration, sourceFile);
 							} else {
 								// The variable statement only contains our class variable, so we can replace the whole
 								// statement node with the new class declaration.
@@ -228,17 +233,19 @@ function transform(
 	// Get full source text to find comments
 	const fullSourceText = processedSourceFile.getFullText();
 
-	function getCommentsFromNode(node: ts.Node): NodeComments {
-		const leadingComments = ts.getLeadingCommentRanges(fullSourceText, node.getFullStart()) ?? [];
-		const trailingComments = ts.getTrailingCommentRanges(fullSourceText, node.getEnd()) ?? [];
+	function getCommentsFromNode(node: ts.Node, sourceFile?: ts.SourceFile): NodeComments {
+		const sourceText = sourceFile?.getFullText() ?? fullSourceText;
+		const leadingComments = ts.getLeadingCommentRanges(sourceText, node.getFullStart()) ?? [];
+		const trailingComments = ts.getTrailingCommentRanges(sourceText, node.getEnd()) ?? [];
 		return {
 			leading: leadingComments,
 			trailing: trailingComments,
 		};
 	}
 
-	function getCommentText(comment: ts.CommentRange): string {
-		const fullCommentText = fullSourceText.substring(comment.pos, comment.end);
+	function getCommentText(comment: ts.CommentRange, sourceFile?: ts.SourceFile): string {
+		const sourceText = sourceFile?.getFullText() ?? fullSourceText;
+		const fullCommentText = sourceText.substring(comment.pos, comment.end);
 		if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
 			// Remove leading "//"
 			return fullCommentText.replace(/^\/\//, "");
@@ -250,29 +257,29 @@ function transform(
 		}
 	}
 
-	function moveCommentsToNode(from: ts.Node, to: ts.Node) {
+	function moveCommentsToNode(from: ts.Node, to: ts.Node, sourceFile?: ts.SourceFile) {
 		// TODO: Is this needed?
 		// ts.moveSyntheticComments(to, from);
 
-		const comments = getCommentsFromNode(from);
+		const comments = getCommentsFromNode(from, sourceFile);
 		comments.leading.forEach((comment) => {
 			commentRemovals.push(comment);
-			const commentText = getCommentText(comment);
+			const commentText = getCommentText(comment, sourceFile);
 			if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
 				// For now, do not move JSDoc comments as they might contribute invalid type information
 				// to the TypeScript type checker.
 				// Instead, the comments will be removed completely.
-				ts.addSyntheticLeadingComment(to, comment.kind, getCommentText(comment), comment.hasTrailingNewLine);
+				ts.addSyntheticLeadingComment(to, comment.kind, commentText, comment.hasTrailingNewLine);
 			}
 		});
 		comments.trailing.forEach((comment) => {
 			commentRemovals.push(comment);
-			const commentText = getCommentText(comment);
+			const commentText = getCommentText(comment, sourceFile);
 			if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
 				// For now, do not move JSDoc comments as they might contribute invalid type information
 				// to the TypeScript type checker.
 				// Instead, the comments will be removed completely.
-				ts.addSyntheticTrailingComment(to, comment.kind, getCommentText(comment), comment.hasTrailingNewLine);
+				ts.addSyntheticTrailingComment(to, comment.kind, commentText, comment.hasTrailingNewLine);
 			}
 		});
 	}
