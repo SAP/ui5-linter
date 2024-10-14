@@ -13,18 +13,21 @@ export interface ModuleDefinition {
 	body: ts.Statement[];
 	imports: ts.ImportDeclaration[];
 	oldFactoryBlock?: ts.Block;
+	moveComments: [ts.Node, ts.Node][];
 }
 
 export default function (
 	moduleDeclaration: ModuleDeclaration, sourceFile: ts.SourceFile, nodeFactory: ts.NodeFactory
 ): ModuleDefinition {
 	const {imports, identifiers: importIdentifiers} = collectImports(moduleDeclaration, nodeFactory);
-	const {body, oldFactoryBlock} = getModuleBody(moduleDeclaration, sourceFile, nodeFactory, importIdentifiers);
+	const {body, oldFactoryBlock, moveComments} =
+		getModuleBody(moduleDeclaration, sourceFile, nodeFactory, importIdentifiers);
 	/* Ignore module name and export flag for now */
 	return {
 		imports,
 		body,
 		oldFactoryBlock,
+		moveComments,
 	};
 }
 
@@ -131,12 +134,13 @@ function getModuleBody(
 	sourceFile: ts.SourceFile,
 	nodeFactory: ts.NodeFactory,
 	importIdentifiers: ts.Identifier[]
-): {body: ts.Statement[]; oldFactoryBlock?: ts.Block} {
+): {body: ts.Statement[]; oldFactoryBlock?: ts.Block; moveComments: [ts.Node, ts.Node][]} {
 	if (!moduleDeclaration.factory) {
-		return {body: []};
+		return {body: [], moveComments: []};
 	}
 	let oldFactoryBlock: ts.Block | undefined;
 	let body: ts.Statement[];
+	const moveComments: [ts.Node, ts.Node][] = [];
 	if ((ts.isFunctionExpression(moduleDeclaration.factory) ||
 		ts.isArrowFunction(moduleDeclaration.factory) ||
 		ts.isFunctionDeclaration(moduleDeclaration.factory))) {
@@ -185,6 +189,7 @@ function getModuleBody(
 										nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 									]);
 								body.push(classDeclaration);
+								moveComments.push([node, classDeclaration]);
 							} catch (err) {
 								if (err instanceof UnsupportedExtendCall) {
 									log.verbose(`Failed to transform extend call: ${err.message}`);
@@ -194,7 +199,9 @@ function getModuleBody(
 								}
 							}
 						} else {
-							body.push(createDefaultExport(nodeFactory, node.expression));
+							const defaultExport = createDefaultExport(nodeFactory, node.expression);
+							body.push(defaultExport);
+							moveComments.push([node, defaultExport]);
 							// body.push(factory.createExportAssignment(undefined, undefined,
 							// 	node.expression));
 						}
@@ -241,7 +248,7 @@ function getModuleBody(
 		throw new Error(`FIXME: Unsupported factory type ${ts.SyntaxKind[moduleDeclaration.factory.kind]} at ` +
 			toPosStr(moduleDeclaration.factory));
 	}
-	return {body, oldFactoryBlock};
+	return {body, oldFactoryBlock, moveComments};
 }
 
 /**

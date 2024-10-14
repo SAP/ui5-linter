@@ -214,12 +214,52 @@ function transform(
 	// Update the AST with extracted nodes from the module definitions and require expressions
 	processedSourceFile = nodeFactory.updateSourceFile(processedSourceFile, statements);
 
-	// After updating the source file, the top level statements get a new parent.
-	// We need to update the insertions and replacements maps to reflect the new parent nodes.
-	moduleDefinitions.forEach(({oldFactoryBlock}) => {
+	// Get full source text to find comments
+	const fullSourceText = processedSourceFile.getFullText();
+
+	moduleDefinitions.forEach(({oldFactoryBlock, moveComments}) => {
+		// Make sure to move comments from removed nodes to the new ones
+		// (e.g. when a "return" statement becomes a "export default class" statement)
+		if (moveComments) {
+			for (const [from, to] of moveComments) {
+				moveCommentsToNode(from, to);
+			}
+		}
 		if (!oldFactoryBlock) {
 			return;
 		}
+
+		const lastFactoryBlockChild = oldFactoryBlock.getChildren().slice(-1)[0];
+		if (lastFactoryBlockChild.kind === ts.SyntaxKind.CloseBraceToken) {
+			// Make sure that comments at the end of the factory block are preserved
+
+			const comments = getCommentsFromNode(lastFactoryBlockChild);
+			comments.leading.forEach((comment) => {
+				commentRemovals.push(comment);
+				const commentText = getCommentText(comment, sourceFile);
+				if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
+					// For now, do not move JSDoc comments as they might contribute invalid type information
+					// to the TypeScript type checker.
+					// Instead, the comments will be removed completely.
+					const lastStatement = processedSourceFile.statements[processedSourceFile.statements.length - 1];
+					ts.addSyntheticTrailingComment(
+						lastStatement, comment.kind, commentText, comment.hasTrailingNewLine);
+				}
+			});
+			// comments.trailing.forEach((comment) => {
+			// 	commentRemovals.push(comment);
+			// 	const commentText = getCommentText(comment, sourceFile);
+			// 	if (!(comment.kind === ts.SyntaxKind.MultiLineCommentTrivia && commentText.startsWith("*"))) {
+			// 	// For now, do not move JSDoc comments as they might contribute invalid type information
+			// 	// to the TypeScript type checker.
+			// 	// Instead, the comments will be removed completely.
+			// 		ts.addSyntheticTrailingComment(to, comment.kind, commentText, comment.hasTrailingNewLine);
+			// 	}
+			// });
+		}
+
+		// After updating the source file, the top level statements get a new parent.
+		// We need to update the insertions and replacements maps to reflect the new parent nodes.
 		const insertionsMap = nodeInsertions.get(oldFactoryBlock);
 		if (insertionsMap) {
 			nodeInsertions.set(processedSourceFile, insertionsMap);
@@ -229,9 +269,6 @@ function transform(
 			nodeReplacements.set(processedSourceFile, replacements);
 		}
 	});
-
-	// Get full source text to find comments
-	const fullSourceText = processedSourceFile.getFullText();
 
 	function getCommentsFromNode(node: ts.Node, sourceFile?: ts.SourceFile): NodeComments {
 		const sourceText = sourceFile?.getFullText() ?? fullSourceText;
