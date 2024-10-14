@@ -124,15 +124,27 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
-		} else if (ts.isPropertyAssignment(node) && this.isPropertyInMetadata(node)) {
-			this.analyzeMetadataProperty(node.name.getText(), node);
+		} else if ((ts.isPropertyAssignment(node) || // Control.extend("sap.fancy.Text", {metadata: {....}})
+			ts.isPropertyDeclaration(node)) && // class FancyText extends Control { static metadata = {...}; }
+			node.name.getText() === "metadata") {
+			const visitMetadataNodes = (childNode: ts.Node) => {
+				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
+					this.analyzeMetadataProperty(childNode.name.getText(), childNode);
+				}
+
+				ts.forEachChild(childNode, visitMetadataNodes);
+			};
+
+			if (this.isUi5controlMetadataNode(node)) {
+				ts.forEachChild(node, visitMetadataNodes);
+			}
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isPropertyInMetadata(node: ts.Node): boolean {
+	isUi5controlMetadataNode(node: ts.PropertyAssignment | ts.PropertyDeclaration): boolean {
 		// Go up the hierarchy chain to find whether the class extends from "sap/ui/base/ManagedObject"
 		const isObjectMetadataAncestor = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
@@ -158,34 +170,23 @@ export default class SourceFileLinter {
 		};
 
 		const metadataFound = taskStart("isPropertyInMetadata", this.#resourcePath, true);
-		let isMetadataFound = false;
 
-		while (node.parent) {
-			if ((ts.isPropertyAssignment(node) || // Control.extend("sap.fancy.Text", {metadata: {....}})
-				ts.isPropertyDeclaration(node)) && // class FancyText extends Control { static metadata = {...}; }
-				node.name.getText() === "metadata") {
-				isMetadataFound = true;
-				break;
-			}
-
-			node = node.parent;
-		}
-
-		if (!isMetadataFound) {
+		if (node.name.getText() !== "metadata") {
 			metadataFound();
 			return false;
 		}
 
-		while (node && node.kind !== ts.SyntaxKind.ClassDeclaration) {
-			node = node.parent;
+		let parentNode: ts.Node = node.parent;
+		while (parentNode && parentNode.kind !== ts.SyntaxKind.ClassDeclaration) {
+			parentNode = parentNode.parent;
 		}
 
-		if (!node) {
+		if (!parentNode) {
 			metadataFound();
 			return false;
 		}
 
-		const result = isObjectMetadataAncestor(node as ts.ClassDeclaration);
+		const result = isObjectMetadataAncestor(parentNode as ts.ClassDeclaration);
 		metadataFound();
 		return result;
 	}
