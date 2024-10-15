@@ -255,7 +255,7 @@ export default class SourceFileLinter {
 			} as Record<string, string>;
 
 			// Strip all the complex type definitions and create a list of "simple" types
-			// i.e. Record<string, Map<my.custom.type[], Record<another.type[], number[]>>>
+			// i.e. Record<string, Map<my.custom.type, Record<another.type, number[]>>>
 			// -> string, my.custom.type, another.type, number
 			const nodeTypes = node.initializer.text.replace(/\w+<|>|\[\]/gi, "")
 				.split(",").map((type) => type.trim());
