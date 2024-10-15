@@ -225,6 +225,12 @@ function getModuleBody(
 						nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 					]);
 				body = [classDeclaration];
+
+				if (ts.isArrowFunction(moduleDeclaration.factory)) {
+					// TODO: Comment in equalsGreaterThanToken is trailing, but it should be
+					// moved to classDeclaration as leading comment
+					moveComments.push([moduleDeclaration.factory.equalsGreaterThanToken, classDeclaration]);
+				}
 			} catch (err) {
 				if (err instanceof UnsupportedExtendCall) {
 					log.verbose(`Failed to transform extend call: ${err.message}`);
@@ -235,7 +241,9 @@ function getModuleBody(
 			}
 		} else {
 			// Export expression directly
-			body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
+			const defaultExport = createDefaultExport(nodeFactory, moduleDeclaration.factory.body);
+			body = [defaultExport];
+			moveComments.push([moduleDeclaration.factory.body, defaultExport]);
 		}
 	} else if (ts.isClassDeclaration(moduleDeclaration.factory) ||
 		ts.isLiteralExpression(moduleDeclaration.factory) ||
@@ -244,7 +252,9 @@ function getModuleBody(
 		ts.isPropertyAccessExpression(moduleDeclaration.factory) ||
 		ts.isIdentifier(moduleDeclaration.factory)) {
 		// Use factory directly
-		body = [createDefaultExport(nodeFactory, moduleDeclaration.factory)];
+		const defaultExport = createDefaultExport(nodeFactory, moduleDeclaration.factory);
+		body = [defaultExport];
+		moveComments.push([moduleDeclaration.factory, defaultExport]);
 	} else { // Identifier
 		throw new Error(`FIXME: Unsupported factory type ${ts.SyntaxKind[moduleDeclaration.factory.kind]} at ` +
 			toPosStr(moduleDeclaration.factory));
