@@ -6,7 +6,7 @@ import parseRequire from "./parseRequire.js";
 import {transformAsyncRequireCall, transformSyncRequireCall} from "./requireExpressionToTransformation.js";
 import pruneNode, {UnsafeNodeRemoval} from "./pruneNode.js";
 import replaceNodeInParent, {NodeReplacement} from "./replaceNodeInParent.js";
-import {UnsupportedModuleError} from "./util.js";
+import {toPosStr, UnsupportedModuleError} from "./util.js";
 import rewriteExtendCall, {UnsupportedExtendCall} from "./rewriteExtendCall.js";
 import insertNodesInParent from "./insertNodesInParent.js";
 
@@ -28,6 +28,10 @@ function removeCommentFromSourceFile(sourceFile: ts.SourceFile, comment: ts.Comm
 	sourceFile.text =
 			sourceFile.text.slice(0, comment.pos).padEnd(comment.end, " ") +
 			sourceFile.text.slice(comment.end);
+}
+
+function isBlockLike(node: ts.Node): node is ts.BlockLike {
+	return ts.isSourceFile(node) || ts.isBlock(node) || ts.isModuleBlock(node) || ts.isCaseOrDefaultClause(node);
 }
 
 /**
@@ -60,7 +64,7 @@ function transform(
 	const requireImports: ts.ImportDeclaration[] = [];
 	const requireFunctions: ts.FunctionDeclaration[] = [];
 	const nodeReplacements = new Map<ts.Node, NodeReplacement[]>();
-	const nodeInsertions = new Map<ts.SourceFile | ts.Block, Map<ts.Statement, ts.Statement[]>>();
+	const nodeInsertions = new Map<ts.BlockLike, Map<ts.Statement, ts.Statement[]>>();
 	const commentRemovals: ts.CommentRange[] = [];
 
 	function replaceNode(node: ts.Node, substitute: ts.Node) {
@@ -73,8 +77,11 @@ function transform(
 	}
 
 	function insertNodeAfter(referenceNode: ts.Statement, nodeToBeInserted: ts.Statement) {
-		if (!ts.isBlock(referenceNode.parent)) {
-			return;
+		if (!isBlockLike(referenceNode.parent)) {
+			// Only BlockLike nodes can have statements
+			throw new Error(
+				`Unsupported insertion of node into parent with type ${ts.SyntaxKind[referenceNode.parent.kind]} ` +
+				`at ${toPosStr(referenceNode.parent)}`);
 		}
 		let insertionsMap = nodeInsertions.get(referenceNode.parent);
 		if (!insertionsMap) {
@@ -164,15 +171,14 @@ function transform(
 					if (variableStatement || ts.isExpressionStatement(node.parent)) {
 						const classDeclaration = rewriteExtendCall(nodeFactory, node, undefined, className);
 						if (variableStatement) {
-							// We can't replace the variable declaration with the class declaration (not valid),
-							// so we remove it and insert the class declaration after the variable statement
-
 							if (variableStatement.declarationList.declarations.length > 1) {
-								// The variable statement contains more than just our class variable,
-								// so we just remove the single declaration within it
+								// The variable statement contains more than just our class variable
+								// and we can't replace the variable declaration with the class declaration (not valid).
+
+								// So we remove the single declaration within the variable statement...
 								pruneNode(node.parent);
 
-								// And insert the class declaration after the variable statement
+								// ... and insert the class declaration after the variable statement
 								insertNodeAfter(variableStatement, classDeclaration);
 
 								// Also: Move comments from the variable declaration to the class declaration

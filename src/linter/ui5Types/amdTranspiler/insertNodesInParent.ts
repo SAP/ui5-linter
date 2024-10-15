@@ -9,8 +9,8 @@ interface InsertOperation {
  * Inserts a node after the specified node in the parent block
  */
 export default function insertNodesInParent(
-	parentNode: ts.SourceFile | ts.Block, insertionsMap: Map<ts.Statement, ts.Statement[]>, nodeFactory: ts.NodeFactory
-): ts.SourceFile | ts.Block | undefined {
+	parentNode: ts.BlockLike, insertionsMap: Map<ts.Statement, ts.Statement[]>, nodeFactory: ts.NodeFactory
+): ts.BlockLike | undefined {
 	const insertOperations: InsertOperation[] = [];
 	for (const [referenceNode, nodesToBeInserted] of insertionsMap) {
 		const index = parentNode.statements.indexOf(referenceNode);
@@ -33,6 +33,12 @@ export default function insertNodesInParent(
 			return nodeFactory.updateBlock(parentNode, newStatements);
 		} else if (ts.isSourceFile(parentNode)) {
 			return nodeFactory.updateSourceFile(parentNode, newStatements);
+		} else if (ts.isModuleBlock(parentNode)) {
+			return nodeFactory.updateModuleBlock(parentNode, newStatements);
+		} else if (ts.isCaseClause(parentNode)) {
+			return nodeFactory.updateCaseClause(parentNode, parentNode.expression, newStatements);
+		} else if (ts.isDefaultClause(parentNode)) {
+			return nodeFactory.updateDefaultClause(parentNode, newStatements);
 		}
 	}
 }
