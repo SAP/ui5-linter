@@ -124,9 +124,7 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
-		} else if ((ts.isPropertyAssignment(node) || // Control.extend("sap.fancy.Text", {metadata: {....}})
-			ts.isPropertyDeclaration(node)) && // class FancyText extends Control { static metadata = {...}; }
-			node.name.getText() === "metadata") {
+		} else if (ts.isPropertyDeclaration(node) && node.name.getText() === "metadata") {
 			const visitMetadataNodes = (childNode: ts.Node) => {
 				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
 					this.analyzeMetadataProperty(childNode.name.getText(), childNode);
