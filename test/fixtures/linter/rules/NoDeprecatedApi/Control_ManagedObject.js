@@ -8,24 +8,53 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 			interfaces: ["sap.ui.commons.FormattedTextViewControl"],
 			library: "sap.fancy",
 			properties: {
-				text: {type: "string", group: "Data", defaultValue: "", bindable: "bindable"},
+				text: {
+					type: "string",
+					group: "Data",
+					defaultValue: "",
+					bindable: "bindable",
+				},
 				textShort: "sap.f.AvatarShape",
 				// sap.m.DateTimeInputType: deprecated, DateTimeInputType.DateTime: deprecated
-				textDirection: {type: "sap.m.DateTimeInputType", group: "Appearance", defaultValue: DateTimeInputType.DateTime},
+				textDirection: {
+					type: "sap.m.DateTimeInputType",
+					group: "Appearance",
+					defaultValue: DateTimeInputType.DateTime,
+				},
 				// sap.m.DateTimeInputType: deprecated, "Date": deprecated
-				textDirectionB: {type: "sap.m.DateTimeInputType", group: "Appearance", defaultValue: "Date"},
+				textDirectionB: {
+					type: "sap.m.DateTimeInputType",
+					group: "Appearance",
+					defaultValue: "Date",
+				},
 				// sap.m.FrameType: NOT deprecated, sap.m.FrameType.TwoThirds: deprecated
-				textAlign: {type: "sap.m.FrameType", group: "Appearance", defaultValue: FrameType.TwoThirds},
+				textAlign: {
+					type: "sap.m.FrameType",
+					group: "Appearance",
+					defaultValue: FrameType.TwoThirds,
+				},
 				// sap.m.FrameType: NOT deprecated, "TwoThirds": deprecated
-				textAlignB: {type: "sap.m.FrameType", group: "Appearance", defaultValue: "TwoThirds"},
+				textAlignB: {
+					type: "sap.m.FrameType",
+					group: "Appearance",
+					defaultValue: "TwoThirds",
+				},
 			},
 			aggregations: {
-				// ap.m.P13nColumnsItem: deprecated
-				myagg: {type: " sap.m.P13nColumnsItem[]", multiple: false, visibility: "hiddenDeprecated"},
+				// sap.f.Avatar: deprecated
+				myagg: {
+					type: "sap.f.Avatar",
+					multiple: false,
+					visibility: "hiddenDeprecated",
+				},
 				// sap.f.Avatar: deprecated
 				myaggShort: "sap.f.Avatar",
 				// sap.f.IllustratedMessageSize DataType: deprecated
-				tooltip: {type: "sap.ui.core.TooltipBase", altTypes: ["string", "sap.f.IllustratedMessageSize"], multiple: false},
+				tooltip: {
+					type: "sap.ui.core.TooltipBase",
+					altTypes: ["string", "sap.f.IllustratedMessageSize"],
+					multiple: false,
+				},
 				beginColumnPages: {
 					type: "sap.ui.core.Control",
 					multiple: true,
@@ -37,7 +66,10 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 			},
 			associations: {
 				// sap.f.Avatar: deprecated
-				initialBeginColumnPage: {type: "sap.f.Avatar", multiple: false},
+				initialBeginColumnPage: {
+					type: "sap.f.Avatar",
+					multiple: false,
+				},
 				// sap.f.Avatar: deprecated
 				initialBeginColumnPageShort: "sap.f.Avatar",
 			},
@@ -59,9 +91,13 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 				eventC: {
 					parameters: {
 						layout: "Promise<sap.f.AvatarShape>", // deprecated
+						newItems: {
+							type: "sap.m.P13nColumnsItem[]", // deprecated
+						},
 					},
 				},
 			},
 		},
 	});
+
 });

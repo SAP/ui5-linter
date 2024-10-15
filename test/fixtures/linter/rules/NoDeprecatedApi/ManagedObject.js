@@ -59,6 +59,9 @@ sap.ui.define(["sap/ui/base/ManagedObject", "sap/m/library", "mycustom/lib/Fancy
 				eventC: {
 					parameters: {
 						layout: "Promise<sap.f.AvatarShape>", // deprecated
+						newItems: {
+							type: "sap.m.P13nColumnsItem[]", // deprecated
+						},
 					},
 				},
 			},
