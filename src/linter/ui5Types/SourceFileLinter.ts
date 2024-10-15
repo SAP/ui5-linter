@@ -254,20 +254,23 @@ export default class SourceFileLinter {
 				...this.#apiExtract.deprecations.typedefs,
 			} as Record<string, string>;
 
-			let nodeType = node.initializer.text;
-			nodeType = nodeType.replace("Promise<", "").replace(">", ""); // Cleanup event types
+			// Strip all the complex type definitions and create a list of "simple" types
+			const nodeTypes = node.initializer.text.replace(/\w+<|>|\[\]/gi, "")
+				.split(",").map((type) => type.trim());
 
-			if (this.#apiExtract.deprecations.classes[nodeType]) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
-					className: nodeType,
-					details: this.#apiExtract.deprecations.classes[nodeType],
-				}, node.initializer);
-			} else if (deprecatedTypes[nodeType]) {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
-					typeName: nodeType,
-					details: deprecatedTypes[nodeType],
-				}, node.initializer);
-			}
+			nodeTypes.forEach((nodeType) => {
+				if (this.#apiExtract.deprecations.classes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
+						className: nodeType,
+						details: this.#apiExtract.deprecations.classes[nodeType],
+					}, node.initializer);
+				} else if (deprecatedTypes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+						typeName: nodeType,
+						details: deprecatedTypes[nodeType],
+					}, node.initializer);
+				}
+			});
 		}
 		analyzeMetadataDone();
 	}
