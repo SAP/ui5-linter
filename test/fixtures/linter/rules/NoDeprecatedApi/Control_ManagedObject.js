@@ -20,8 +20,8 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 				textAlignB: {type: "sap.m.FrameType", group: "Appearance", defaultValue: "TwoThirds"},
 			},
 			aggregations: {
-				// sap.f.Avatar: deprecated
-				myagg: {type: "sap.f.Avatar", multiple: false, visibility: "hiddenDeprecated"},
+				// ap.m.P13nColumnsItem: deprecated
+				myagg: {type: " sap.m.P13nColumnsItem[]", multiple: false, visibility: "hiddenDeprecated"},
 				// sap.f.Avatar: deprecated
 				myaggShort: "sap.f.Avatar",
 				// sap.f.IllustratedMessageSize DataType: deprecated
@@ -64,15 +64,4 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library", "mycustom/lib/FancyMultiP
 			},
 		},
 	});
-
-	// FancyText.prototype._getBeginColumn = function () {
-	// 	return new FancyMultiPage({
-	// 		metadata: {
-	// 			aggregations: {
-	// 				// sap.f.IllustratedMessage: deprecated
-	// 				deprecatedPages: {type: "sap.f.IllustratedMessage", multiple: false, visibility: true},
-	// 			},
-	// 		},
-	// 	});
-	// };
 });

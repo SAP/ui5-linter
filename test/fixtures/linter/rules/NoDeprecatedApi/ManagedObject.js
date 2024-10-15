@@ -64,15 +64,4 @@ sap.ui.define(["sap/ui/base/ManagedObject", "sap/m/library", "mycustom/lib/Fancy
 			},
 		},
 	});
-
-	// FancyText.prototype._getBeginColumn = function () {
-	// 	return new FancyMultiPage({
-	// 		metadata: {
-	// 			aggregations: {
-	// 				// sap.f.IllustratedMessage: deprecated
-	// 				deprecatedPages: {type: "sap.f.IllustratedMessage", multiple: false, visibility: true},
-	// 			},
-	// 		},
-	// 	});
-	// };
 });
