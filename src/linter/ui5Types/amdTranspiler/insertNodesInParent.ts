@@ -14,7 +14,7 @@ export default function insertNodesInParent(
 	const insertOperations: InsertOperation[] = [];
 	for (const [referenceNode, nodesToBeInserted] of insertionsMap) {
 		const index = parentNode.statements.indexOf(referenceNode);
-		if (index != -1) {
+		if (index !== -1) {
 			insertOperations.push({index, nodes: nodesToBeInserted});
 		}
 	}
