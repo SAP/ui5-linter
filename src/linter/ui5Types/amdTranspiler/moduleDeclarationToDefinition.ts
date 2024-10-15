@@ -241,7 +241,8 @@ function getModuleBody(
 		ts.isLiteralExpression(moduleDeclaration.factory) ||
 		ts.isArrayLiteralExpression(moduleDeclaration.factory) ||
 		ts.isObjectLiteralExpression(moduleDeclaration.factory) ||
-		ts.isPropertyAccessExpression(moduleDeclaration.factory)) {
+		ts.isPropertyAccessExpression(moduleDeclaration.factory) ||
+		ts.isIdentifier(moduleDeclaration.factory)) {
 		// Use factory directly
 		body = [createDefaultExport(nodeFactory, moduleDeclaration.factory)];
 	} else { // Identifier
