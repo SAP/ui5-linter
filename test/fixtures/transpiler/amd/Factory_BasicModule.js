@@ -2,6 +2,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/UIComponent", "sap/ui/
 	function (Controller, UIComponent, History, Button) {
 	"use strict";
 
+	/**
+	 * @class JSDoc comments should be removed, as it might have negative impact on the type detection
+	 */
 	return Controller.extend("com.ui5.troublesome.app.controller.BaseController", {
 
 		createButton: function() {
