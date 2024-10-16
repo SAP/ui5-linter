@@ -31,12 +31,13 @@ export async function esmockDeprecationText() {
 				reportCoverage: boolean | undefined = false,
 				messageDetails: boolean | undefined = false,
 				dataTypes: Record<string, string>,
-				manifestContent?: string
+				manifestContent?: string,
+				apiExtract?: Record<string, Record<string, Record<string, string>>>
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(
 					context, filePath, sourceFile, sourceMap, checker, reportCoverage,
-					messageDetails, dataTypes, manifestContent
+					messageDetails, dataTypes, manifestContent, apiExtract
 				);
 				linter.getDeprecationText = () => "Deprecated test message";
 				return linter;

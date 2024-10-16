@@ -7,6 +7,7 @@ import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
+import {taskStart} from "../../utils/perf.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -45,6 +46,7 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#dataTypes: Record<string, string>;
+	#apiExtract: Record<string, Record<string, Record<string, string>>>;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
@@ -53,7 +55,8 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, manifestContent?: string
+		dataTypes: Record<string, string> | undefined, manifestContent?: string,
+		apiExtract?: Record<string, Record<string, Record<string, string>>>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -67,6 +70,7 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#dataTypes = dataTypes ?? {};
+		this.#apiExtract = apiExtract ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -120,10 +124,157 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
+		} else if (ts.isPropertyDeclaration(node) && node.name.getText() === "metadata") {
+			const visitMetadataNodes = (childNode: ts.Node) => {
+				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
+					this.analyzeMetadataProperty(childNode.name.getText(), childNode);
+				}
+
+				ts.forEachChild(childNode, visitMetadataNodes);
+			};
+
+			if (this.isUi5controlMetadataNode(node)) {
+				ts.forEachChild(node, visitMetadataNodes);
+			}
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	isUi5controlMetadataNode(node: ts.PropertyAssignment | ts.PropertyDeclaration): boolean {
+		// Go up the hierarchy chain to find whether the class extends from "sap/ui/base/ManagedObject"
+		const isObjectMetadataAncestor = (node: ts.ClassDeclaration): boolean => {
+			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
+				return parentClasses.types.flatMap((parentClass) => {
+					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
+
+					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+						if (ts.isClassDeclaration(declaration)) {
+							if (declaration.name?.getText() === "ManagedObject" &&
+								ts.isModuleDeclaration(declaration.parent.parent) &&
+								declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject") {
+								return true;
+							} else {
+								return isObjectMetadataAncestor(declaration);
+							}
+						} else {
+							return false;
+						}
+					});
+				});
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+			}).reduce((acc, cur) => cur || acc, false) ?? false;
+		};
+
+		const metadataFound = taskStart("isPropertyInMetadata", this.#resourcePath, true);
+
+		if (node.name.getText() !== "metadata") {
+			metadataFound();
+			return false;
+		}
+
+		let parentNode: ts.Node = node.parent;
+		while (parentNode && parentNode.kind !== ts.SyntaxKind.ClassDeclaration) {
+			parentNode = parentNode.parent;
+		}
+
+		if (!parentNode) {
+			metadataFound();
+			return false;
+		}
+
+		const result = isObjectMetadataAncestor(parentNode as ts.ClassDeclaration);
+		metadataFound();
+		return result;
+	}
+
+	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
+		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.#resourcePath, true);
+		if (type === "interfaces") {
+			const deprecatedInterfaces = this.#apiExtract.deprecations.interfaces;
+
+			if (ts.isArrayLiteralExpression(node.initializer)) {
+				node.initializer.elements.forEach((elem) => {
+					const interfaceName = (elem as ts.StringLiteral).text;
+
+					if (deprecatedInterfaces[interfaceName]) {
+						this.#reporter.addMessage(MESSAGE.DEPRECATED_INTERFACE, {
+							interfaceName: interfaceName,
+							details: deprecatedInterfaces[interfaceName],
+						}, elem);
+					}
+				});
+			}
+		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
+			const deprecatedTypes = {
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
+			};
+			node.initializer.elements.forEach((element) => {
+				const nodeType = ts.isStringLiteral(element) ? element.text : "";
+
+				if (deprecatedTypes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+						typeName: nodeType,
+						details: deprecatedTypes[nodeType],
+					}, element);
+				}
+			});
+		} else if (type === "defaultValue") {
+			const deprecatedTypes = {
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
+			};
+			const defaultValueType = ts.isStringLiteral(node.initializer) ?
+				node.initializer.text :
+				"";
+
+			const typeNode = node.parent.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) && prop.name.getText() === "type";
+			});
+
+			const fullyQuantifiedName = (typeNode &&
+				ts.isPropertyAssignment(typeNode) &&
+				ts.isStringLiteral(typeNode.initializer)) ?
+					[typeNode.initializer.text, defaultValueType].join(".") :
+				"";
+
+			if (deprecatedTypes[fullyQuantifiedName]) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+					typeName: defaultValueType,
+					details: deprecatedTypes[fullyQuantifiedName],
+				}, node);
+			}
+		// This one is too generic and should always be at the last place
+		// It's for "types" and event arguments' types
+		} else if (ts.isStringLiteral(node.initializer)) {
+			const deprecatedTypes = {
+				...this.#apiExtract.deprecations.enums,
+				...this.#apiExtract.deprecations.typedefs,
+			} as Record<string, string>;
+
+			// Strip all the complex type definitions and create a list of "simple" types
+			// i.e. Record<string, Map<my.custom.type, Record<another.type, number[]>>>
+			// -> string, my.custom.type, another.type, number
+			const nodeTypes = node.initializer.text.replace(/\w+<|>|\[\]/gi, "")
+				.split(",").map((type) => type.trim());
+
+			nodeTypes.forEach((nodeType) => {
+				if (this.#apiExtract.deprecations.classes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
+						className: nodeType,
+						details: this.#apiExtract.deprecations.classes[nodeType],
+					}, node.initializer);
+				} else if (deprecatedTypes[nodeType]) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
+						typeName: nodeType,
+						details: deprecatedTypes[nodeType],
+					}, node.initializer);
+				}
+			});
+		}
+		analyzeMetadataDone();
 	}
 
 	analyzeIdentifier(node: ts.Identifier) {

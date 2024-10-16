@@ -108,6 +108,13 @@ export default class TypeChecker {
 		);
 		const dataTypes = JSON.parse(dataTypesFile) as Record<string, string>;
 
+		const apiExtractFile = await fs.readFile(
+			new URL("../../../resources/api-extract.json", import.meta.url),
+			{encoding: "utf-8"}
+		);
+		const apiExtract = JSON.parse(apiExtractFile) as
+			Record<string, Record<string, Record<string, string>>>;
+
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
 		const typeCheckDone = taskStart("Linting all transpiled resources");
@@ -132,7 +139,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMap,
 					checker, reportCoverage, messageDetails, dataTypes,
-					manifestContent
+					manifestContent, apiExtract
 				);
 				await linter.lint();
 				linterDone();
