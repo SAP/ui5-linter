@@ -297,7 +297,7 @@ function buildPatterns(patterns: string[]) {
 				`"${pattern}" defines an absolute path.`);
 		}
 
-		if (pattern.endsWith("/")) {
+		if (pattern.endsWith("/")) { // Match all files in a directory
 			pattern += "**/*";
 		}
 
@@ -384,7 +384,7 @@ export async function resolveReader({
  */
 function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>) {
 	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
-		if (pattern.endsWith("/")) {
+		if (pattern.endsWith("/")) { // Match all files in a directory
 			pattern += "**/*";
 		}
 		if (!patternsMatch.has(pattern)) {
