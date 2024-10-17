@@ -297,6 +297,10 @@ function buildPatterns(patterns: string[]) {
 				`"${pattern}" defines an absolute path.`);
 		}
 
+		if (pattern.endsWith("/")) {
+			pattern += "**/*";
+		}
+
 		return new Minimatch(pattern, {flipNegate: true});
 	});
 }
@@ -380,6 +384,9 @@ export async function resolveReader({
  */
 function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>) {
 	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
+		if (pattern.endsWith("/")) {
+			pattern += "**/*";
+		}
 		if (!patternsMatch.has(pattern)) {
 			acc.push(pattern);
 		}
