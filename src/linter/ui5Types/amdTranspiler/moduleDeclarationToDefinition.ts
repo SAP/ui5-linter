@@ -148,7 +148,6 @@ function getModuleBody(
 			// Empty function body, no export
 			body = [];
 		} else if (ts.isBlock(moduleDeclaration.factory.body)) {
-			oldFactoryBlock = moduleDeclaration.factory.body;
 			const factoryBody = moduleDeclaration.factory.body.statements;
 			/* Convert factory to module body:
 				a) If body contains a single return statement, add all nodes to body but wrap
@@ -177,6 +176,7 @@ function getModuleBody(
 				}
 				body = [createDefaultExport(nodeFactory, factoryCall)];
 			} else {
+				oldFactoryBlock = moduleDeclaration.factory.body;
 				body = [];
 				// One return statement in scope
 				for (const node of factoryBody) {
