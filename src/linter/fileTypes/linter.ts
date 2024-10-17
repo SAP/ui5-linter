@@ -5,12 +5,8 @@ import {MESSAGE} from "../messages.js";
 const deprecatedViewFileTypes = [
 	".view.json",
 	".view.html",
-	".view.js",
 	".view.tmpl",
-	".view.ts",
 	".fragment.html",
-	".fragment.js",
-	".fragment.ts",
 ];
 
 export default async function lintFileTypes({filePathsWorkspace, context}: LinterParameters) {
