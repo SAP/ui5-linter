@@ -297,6 +297,10 @@ function buildPatterns(patterns: string[]) {
 				`"${pattern}" defines an absolute path.`);
 		}
 
+		if (pattern.endsWith("/")) { // Match all files in a directory
+			pattern += "**/*";
+		}
+
 		return new Minimatch(pattern, {flipNegate: true});
 	});
 }
@@ -324,17 +328,18 @@ export async function resolveReader({
 
 	let fsBasePath = projectRootDir;
 	let fsBasePathTest = path.join(projectRootDir, "test");
-	let virBasePath = namespace ? `/resources/${namespace}/` : "/resources/";
-	let virBasePathTest = namespace ? `/test-resources/${namespace}/` : "/test-resources/";
+	let virBasePath = "/resources/";
+	let virBasePathTest = "/test-resources/";
 
+	let project;
 	try {
 		const graph = await getProjectGraph(projectRootDir, ui5ConfigPath);
-		const project = graph.getRoot();
+		project = graph.getRoot();
 		projectRootDir = project.getRootPath();
 		fsBasePath = project.getSourcePath();
 		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
 
-		if (!namespace && !project._isSourceNamespaced) {
+		if (!project._isSourceNamespaced) {
 			// Ensure the virtual filesystem includes the project namespace to allow relative imports
 			// of framework resources from the project
 			virBasePath += project.getNamespace() + "/";
@@ -342,6 +347,11 @@ export async function resolveReader({
 		}
 	} catch {
 		// Project is not resolved i.e. in tests
+	}
+
+	if (!project && namespace) {
+		virBasePath += namespace + "/";
+		virBasePathTest += namespace + "/";
 	}
 
 	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
@@ -374,6 +384,9 @@ export async function resolveReader({
  */
 function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>) {
 	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
+		if (pattern.endsWith("/")) { // Match all files in a directory
+			pattern += "**/*";
+		}
 		if (!patternsMatch.has(pattern)) {
 			acc.push(pattern);
 		}
