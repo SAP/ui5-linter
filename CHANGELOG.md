@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/SAP/ui5-linter/compare/v1.0.2...v1.1.0) (2024-10-17)
+
+
+### Features
+
+* Detect deprecations in ManagedObject metadata ([#349](https://github.com/SAP/ui5-linter/issues/349)) ([9cc1202](https://github.com/SAP/ui5-linter/commit/9cc1202241a3fbed642bb82349117ba1607a2eb9))
+* Improve code detection for UI5 classes (JavaScript) ([#358](https://github.com/SAP/ui5-linter/issues/358)) ([77b796e](https://github.com/SAP/ui5-linter/commit/77b796e923a6c2b234bd3ed79ef9dc0d5e95c39c))
+
+
+### Bug Fixes
+
+* False positive for deprecated JS view/fragment type ([63a12e2](https://github.com/SAP/ui5-linter/commit/63a12e2a1c1d35758ede799e62507af33edb06dd))
+
 ## [1.0.2](https://github.com/SAP/ui5-linter/compare/v1.0.1...v1.0.2) (2024-10-09)
 
 
