@@ -46,6 +46,7 @@ export enum MESSAGE {
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	MISSING_BOOTSTRAP_PARAM,
+	NO_DEPRECATED_RENDERER,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
@@ -310,6 +311,15 @@ export const MESSAGE_INFO = {
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Deprecated call to ${libInitFunction}(). Use the {apiVersion: 2} parameter instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
+	[MESSAGE.NO_DEPRECATED_RENDERER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`Use of deprecated renderer. Define explicitly {apiVersion: 2} parameter in renderer object`,
+		details: () => `"{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}",`,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {

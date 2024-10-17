@@ -138,10 +138,45 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
+		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) ||
+			ts.isMethodDeclaration(node) || ts.isArrowFunction(node)) &&
+			["renderer", "render"].includes(node.name?.getText())) {
+			this.analyzeControlRenderer(node);
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	analyzeControlRenderer(node: ts.PropertyAssignment |
+		ts.PropertyDeclaration | ts.MethodDeclaration | ts.ArrowFunction) {
+		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
+			node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
+			const apiVersionNode = node.initializer?.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "apiVersion";
+			});
+
+			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration | undefined = undefined;
+			if (!apiVersionNode) { // No 'apiVersion' property
+				nodeToHighlight = node;
+			} else if (ts.isPropertyAssignment(apiVersionNode) &&
+				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
+			}
+
+			if (nodeToHighlight) {
+				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
+			}
+		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
+			(ts.isMethodDeclaration(node.initializer) || ts.isArrowFunction(node.initializer)) &&
+			node.name?.getText() === "renderer") {
+			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
+		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
+			ts.isIdentifier(node.initializer)) {
+			// TODO: detect renderer variable that's been assigned a function
+		}
 	}
 
 	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
