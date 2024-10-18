@@ -17,27 +17,28 @@ export default async function lintWorkspace(
 	options: LinterOptions, config: UI5LintConfigType, patternsMatch: Set<string>
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
+	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
 	const context = new LinterContext(options);
-	let reader = await resolveReader({
+	let reader = resolveReader({
 		patterns: options.filePatterns ?? config.files ?? [],
-		projectRootDir: options.rootDir,
-		ui5ConfigPath: config.ui5Config,
+		relFsBasePath: relFsBasePath ?? "",
+		virBasePath: virBasePath ?? "/",
+		relFsBasePathTest, virBasePathTest,
 		resourceReader: createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
 		}),
 		inverseResult: true,
-		namespace: options.namespace,
 		patternsMatch,
 	});
-	reader = await resolveReader({
+	reader = resolveReader({
 		patterns: options.ignorePattern ?? [],
-		projectRootDir: options.rootDir,
-		ui5ConfigPath: config.ui5Config,
 		resourceReader: reader,
-		namespace: options.namespace,
 		patternsMatch,
+		relFsBasePath: relFsBasePath ?? "",
+		virBasePath: virBasePath ?? "/",
+		relFsBasePathTest, virBasePathTest,
 	});
 	context.setRootReader(reader);
 

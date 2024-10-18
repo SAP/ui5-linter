@@ -59,6 +59,9 @@ export async function lintProject({
 		});
 	}
 
+	const relFsBasePath = path.relative(rootDir, fsBasePath);
+	const relFsBasePathTest = fsBasePathTest ? path.relative(rootDir, fsBasePathTest) : undefined;
+
 	const res = await lint(reader, {
 		rootDir,
 		namespace: project.getNamespace(),
@@ -67,11 +70,9 @@ export async function lintProject({
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
-		ui5ConfigPath,
+		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	}, config);
 
-	const relFsBasePath = path.relative(rootDir, fsBasePath);
-	const relFsBasePathTest = fsBasePathTest ? path.relative(rootDir, fsBasePathTest) : undefined;
 	res.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath,
 			relFsBasePath, virBasePath,
@@ -89,9 +90,10 @@ export async function lintFile({
 	const configMngr = new ConfigManager(rootDir, configPath);
 	const config = await configMngr.getConfiguration();
 
+	const virBasePath = namespace ? `/resources/${namespace}/` : "/";
 	const reader = createReader({
 		fsBasePath: rootDir,
-		virBasePath: namespace ? `/resources/${namespace}/` : "/",
+		virBasePath,
 	});
 
 	const res = await lint(reader, {
@@ -102,6 +104,8 @@ export async function lintFile({
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
+		relFsBasePath: "",
+		virBasePath,
 	}, config);
 
 	res.forEach((result) => {
@@ -114,11 +118,12 @@ export async function lintFile({
 }
 
 async function lint(
-	resourceReader: AbstractReader, options: LinterOptions, config: UI5LintConfigType
+	resourceReader: AbstractReader, options: LinterOptions & {relFsBasePath: string; virBasePath: string},
+	config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
 	let {ignorePattern, filePatterns} = options;
-	const {rootDir} = options;
+	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
 	// Resolve files to include
 	filePatterns = filePatterns ?? config.files ?? [];
@@ -131,29 +136,26 @@ async function lint(
 	// Apply ignores to the workspace reader.
 	// TypeScript needs the full context to provide correct analysis.
 	// so, we can do filtering later via the filePathsReader
-	const reader = await resolveReader({
+	const reader = resolveReader({
 		patterns: ignorePattern,
-		projectRootDir: rootDir,
 		resourceReader,
-		namespace: options.namespace,
 		patternsMatch: matchedPatterns,
+		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	});
 
 	// Apply files + ignores over the filePaths reader
-	let filePathsReader = await resolveReader({
+	let filePathsReader = resolveReader({
 		patterns: filePatterns,
-		projectRootDir: rootDir,
 		resourceReader,
 		inverseResult: true,
-		namespace: options.namespace,
 		patternsMatch: matchedPatterns,
+		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	});
-	filePathsReader = await resolveReader({
+	filePathsReader = resolveReader({
 		patterns: ignorePattern,
-		projectRootDir: rootDir,
 		resourceReader: filePathsReader,
-		namespace: options.namespace,
 		patternsMatch: matchedPatterns,
+		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	});
 	const filePathsWorkspace = createWorkspace({reader: filePathsReader});
 
@@ -305,57 +307,22 @@ function buildPatterns(patterns: string[]) {
 	});
 }
 
-export async function resolveReader({
+export function resolveReader({
 	patterns,
-	projectRootDir,
 	resourceReader,
-	namespace,
-	ui5ConfigPath,
 	inverseResult = false,
 	patternsMatch,
+	relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 }: {
 	patterns: string[];
-	projectRootDir: string;
 	resourceReader: AbstractReader;
-	namespace?: string;
-	ui5ConfigPath?: string;
 	inverseResult?: boolean;
 	patternsMatch: Set<string>;
+	relFsBasePath: string; virBasePath: string; relFsBasePathTest?: string; virBasePathTest?: string;
 }) {
 	if (!patterns.length) {
 		return resourceReader;
 	}
-
-	let fsBasePath = projectRootDir;
-	let fsBasePathTest = path.join(projectRootDir, "test");
-	let virBasePath = "/resources/";
-	let virBasePathTest = "/test-resources/";
-
-	let project;
-	try {
-		const graph = await getProjectGraph(projectRootDir, ui5ConfigPath);
-		project = graph.getRoot();
-		projectRootDir = project.getRootPath();
-		fsBasePath = project.getSourcePath();
-		fsBasePathTest = path.join(projectRootDir, project._testPath ?? "test");
-
-		if (!project._isSourceNamespaced) {
-			// Ensure the virtual filesystem includes the project namespace to allow relative imports
-			// of framework resources from the project
-			virBasePath += project.getNamespace() + "/";
-			virBasePathTest += project.getNamespace() + "/";
-		}
-	} catch {
-		// Project is not resolved i.e. in tests
-	}
-
-	if (!project && namespace) {
-		virBasePath += namespace + "/";
-		virBasePathTest += namespace + "/";
-	}
-
-	const relFsBasePath = path.relative(projectRootDir, fsBasePath);
-	const relFsBasePathTest = fsBasePathTest ? path.relative(projectRootDir, fsBasePathTest) : undefined;
 
 	const minimatchPatterns = buildPatterns(patterns);
 
