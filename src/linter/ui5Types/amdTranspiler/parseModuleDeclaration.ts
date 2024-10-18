@@ -46,8 +46,13 @@ export default function parseModuleDeclaration(
 			const sym = checker.getSymbolAtLocation(arg);
 			if (sym?.declarations) {
 				for (const decl of sym.declarations) {
-					if (ts.isVariableDeclaration(decl)) {
-						if (decl.initializer) {
+					if (
+						ts.isVariableDeclaration(decl) && decl.initializer
+					) {
+						// Do not use the initializer of a let declaration, as the value might be changed later
+						if (ts.isVariableDeclarationList(decl.parent) && decl.parent.flags & ts.NodeFlags.Let) {
+							return arg;
+						} else {
 							return decl.initializer;
 						}
 					} else if (ts.isParameter(decl)) {
@@ -99,6 +104,7 @@ function assertSupportedTypes(args: (ts.Expression | ts.Declaration)[]): DefineC
 			case SyntaxKind.ClassDeclaration:
 			case SyntaxKind.NoSubstitutionTemplateLiteral:
 			case SyntaxKind.PropertyAccessExpression:
+			case SyntaxKind.Identifier:
 				return;
 			default:
 				throw new UnsupportedModuleError(
