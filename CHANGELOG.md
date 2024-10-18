@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/SAP/ui5-linter/compare/v1.1.0...v1.1.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Fix exception "Node not found in array" ([75d2aa8](https://github.com/SAP/ui5-linter/commit/75d2aa8346b6fffd5de1f7e0ce8a4dde4a70f65f))
+* Properly check UI5 class inheritance ([79f9123](https://github.com/SAP/ui5-linter/commit/79f912372828f47a3c0b10a916ca4f9e978b1037))
+
 ## [1.1.0](https://github.com/SAP/ui5-linter/compare/v1.0.2...v1.1.0) (2024-10-17)
 
 
