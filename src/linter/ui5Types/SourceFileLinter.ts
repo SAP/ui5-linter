@@ -152,8 +152,20 @@ export default class SourceFileLinter {
 					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
 						if (ts.isClassDeclaration(declaration)) {
 							if (declaration.name?.getText() === "ManagedObject" &&
-								ts.isModuleDeclaration(declaration.parent.parent) &&
-								declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject") {
+								(
+									// Declaration via type definitions
+									(
+										declaration.parent.parent &&
+										ts.isModuleDeclaration(declaration.parent.parent) &&
+										declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject"
+									) ||
+									// Declaration via real class (within sap.ui.core project)
+									(
+										ts.isSourceFile(declaration.parent) &&
+										declaration.parent.fileName === "/resources/sap/ui/base/ManagedObject.js"
+									)
+								)
+							) {
 								return true;
 							} else {
 								return isObjectMetadataAncestor(declaration);
