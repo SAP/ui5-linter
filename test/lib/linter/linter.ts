@@ -166,6 +166,24 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) => {
+	// This sap.ui.core library contains a minimal version of the base classes of UI5
+	// so that the linter can be tested with having them available in the project instead
+	// of just having the type definitions.
+
+	const projectPath = path.join(fixturesProjectsPath, "sap.ui.core");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		filePatterns: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: All files of library with sap.ui.suite namespace", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "sap.ui.suite");
 	const {lintProject} = t.context;
