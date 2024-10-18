@@ -66,6 +66,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/library"],
 				},
 			},
 		},
+		renderer: null // No renderer
 	});
 	return FancyText;
 });
