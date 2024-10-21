@@ -65,12 +65,14 @@ export interface LinterOptions {
 	configPath?: string;
 	ui5ConfigPath?: string;
 	namespace?: string;
+}
 
-	relFsBasePath?: string;
-	virBasePath?: string;
+export interface FSToVirtualPathOptions {
+	relFsBasePath: string;
+	virBasePath: string;
 	relFsBasePathTest?: string;
 	virBasePathTest?: string;
-}
+};
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;

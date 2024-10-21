@@ -7,14 +7,14 @@ import lintDotLibrary from "./dotLibrary/linter.js";
 import lintFileTypes from "./fileTypes/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
-import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
+import LinterContext, {LintResult, LinterParameters, LinterOptions, FSToVirtualPathOptions} from "./LinterContext.js";
 import {createReader} from "@ui5/fs/resourceFactory";
 import {resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
-	options: LinterOptions, config: UI5LintConfigType, patternsMatch: Set<string>
+	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
 	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;

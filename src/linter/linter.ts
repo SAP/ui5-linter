@@ -1,6 +1,6 @@
 import {graphFromObject} from "@ui5/project/graph";
 import {createReader, createWorkspace, createReaderCollection, createFilterReader} from "@ui5/fs/resourceFactory";
-import {FilePath, FilePattern, LinterOptions, LintResult} from "./LinterContext.js";
+import {FilePath, FilePattern, LinterOptions, FSToVirtualPathOptions, LintResult} from "./LinterContext.js";
 import lintWorkspace from "./lintWorkspace.js";
 import {taskStart} from "../utils/perf.js";
 import path from "node:path";
@@ -118,7 +118,7 @@ export async function lintFile({
 }
 
 async function lint(
-	resourceReader: AbstractReader, options: LinterOptions & {relFsBasePath: string; virBasePath: string},
+	resourceReader: AbstractReader, options: LinterOptions & FSToVirtualPathOptions,
 	config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
