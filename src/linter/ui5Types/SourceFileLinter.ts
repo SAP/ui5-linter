@@ -139,8 +139,9 @@ export default class SourceFileLinter {
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
 		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) ||
-			ts.isMethodDeclaration(node) || ts.isArrowFunction(node)) &&
+			ts.isVariableDeclaration(node) || ts.isShorthandPropertyAssignment(node)) &&
 			["renderer", "render"].includes(node.name?.getText())) {
+			// TODO: Analyze only metadata properties
 			this.analyzeControlRenderer(node);
 		}
 
@@ -149,8 +150,11 @@ export default class SourceFileLinter {
 	}
 
 	analyzeControlRenderer(node: ts.PropertyAssignment |
-		ts.PropertyDeclaration | ts.MethodDeclaration | ts.ArrowFunction) {
-		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
+		ts.PropertyDeclaration | ts.VariableDeclaration | ts.ShorthandPropertyAssignment,
+		rendererName = "renderer") {
+		// Analyze renderer property when it's an ObjectLiterExpression
+		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
 			node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
 			const apiVersionNode = node.initializer?.properties.find((prop) => {
 				return ts.isPropertyAssignment(prop) &&
@@ -158,7 +162,8 @@ export default class SourceFileLinter {
 					prop.name.text === "apiVersion";
 			});
 
-			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration | undefined = undefined;
+			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
+				ts.VariableDeclaration | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
 			} else if (ts.isPropertyAssignment(apiVersionNode) &&
@@ -169,13 +174,52 @@ export default class SourceFileLinter {
 			if (nodeToHighlight) {
 				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
 			}
-		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
-			(ts.isMethodDeclaration(node.initializer) || ts.isArrowFunction(node.initializer)) &&
-			node.name?.getText() === "renderer") {
+		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
+		} else if (
+			(ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
+			node.initializer &&
+			(ts.isMethodDeclaration(node.initializer) || ts.isArrowFunction(node.initializer) ||
+				ts.isFunctionExpression(node.initializer)) &&
+				node.name?.getText() === rendererName) {
 			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
-		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) && node.initializer &&
-			ts.isIdentifier(node.initializer)) {
-			// TODO: detect renderer variable that's been assigned a function
+		} else if (
+			((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
+				node.initializer && ts.isIdentifier(node.initializer)) ||
+				ts.isShorthandPropertyAssignment(node)) {
+			let renderInitializer = ts.isShorthandPropertyAssignment(node) ?
+				node.name.getText() :
+				node.initializer!.getText();
+
+			let useSource = false;
+			const sourceFile = node.getSourceFile();
+
+			const findRenderDeclaration = (potentialDeclarations: ts.Node) => {
+				useSource = false;
+				if (ts.isVariableStatement(potentialDeclarations)) {
+					for (const declaration of potentialDeclarations.declarationList.declarations) {
+						if (ts.isIdentifier(declaration.name) && declaration.name.text === renderInitializer) {
+							if (declaration.initializer && (
+								ts.isArrowFunction(declaration.initializer) ||
+								ts.isFunctionDeclaration(declaration.initializer) ||
+								ts.isFunctionExpression(declaration.initializer) ||
+								ts.isObjectLiteralExpression(declaration.initializer)
+							)) {
+								this.analyzeControlRenderer(declaration, renderInitializer);
+							} else if (declaration.initializer && ts.isIdentifier(declaration.initializer)) {
+								renderInitializer = declaration.initializer.getText();
+								// Another assignment found. We need to start over from the beginning
+								// of the SourceFile to find the actual declaration.
+								useSource = true;
+							}
+						}
+					}
+				}
+				ts.forEachChild(
+					(useSource ? sourceFile : potentialDeclarations), findRenderDeclaration); // Continue traversing AST
+			};
+
+			// Start looking for renderer declaration at the root of the AST (global scope)
+			findRenderDeclaration(sourceFile);
 		}
 	}
 
