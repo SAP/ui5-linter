@@ -31,7 +31,6 @@ export enum MESSAGE {
 	DEPRECATED_INTERFACE,
 	DEPRECATED_TYPE,
 	DEPRECATED_COMPONENT,
-	DEPRECATED_CONTROL_RENDERER_DECLARATION,
 	DEPRECATED_DECLARATIVE_SUPPORT,
 	DEPRECATED_FUNCTION_CALL,
 	DEPRECATED_LESS_SUPPORT,
@@ -62,6 +61,8 @@ export enum MESSAGE {
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
 	SPELLING_BOOTSTRAP_PARAM,
 	SVG_IN_XML,
+	MISSING_CONTROL_RENDERER_DECLARATION,
+	CONTROL_RENDERER_DECLARATION_STRING,
 }
 export const MESSAGE_INFO = {
 
@@ -168,15 +169,6 @@ export const MESSAGE_INFO = {
 
 		message: ({componentName}: {componentName: string}) =>
 			`Use of deprecated component '${componentName}'`,
-		details: () => undefined,
-	},
-
-	[MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION]: {
-		severity: LintMessageSeverity.Error,
-		ruleId: RULES["no-deprecated-control-renderer-declaration"],
-
-		message: () =>
-			`TBD`,
 		details: () => undefined,
 	},
 
@@ -466,6 +458,32 @@ export const MESSAGE_INFO = {
 
 		message: () => `Deprecated use of SVG in XML View or Fragment`,
 		details: () => `{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
+	},
+
+	[MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-control-renderer-declaration"],
+
+		message: ({className}: {className: string}) =>
+			`Control '${className}' is missing a renderer declaration`,
+		details: ({className}: {className: string}) => `Not defining a 'renderer' for the control '${className}' ` +
+			`may lead to synchronous loading of the '${className}Renderer' module. ` +
+			`If no renderer exists, set 'renderer: null'. Otherwise, either import the renderer module ` +
+			`and assign it to the 'renderer' property or implement the renderer inline.`,
+	},
+
+	[MESSAGE.CONTROL_RENDERER_DECLARATION_STRING]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-control-renderer-declaration"],
+
+		message: ({className, rendererName}: {className: string; rendererName: string | undefined}) =>
+			`Deprecated declaration of renderer ${rendererName ? `'${rendererName}' ` : ""}for Control '${className}'`,
+		details: ({className, rendererName}: {className: string; rendererName: string | undefined}) => {
+			const rendererModuleName = rendererName ? `'${rendererName.replace(/\./g, "/")}'` : "renderer";
+			return `Defining the 'renderer' for the control '${className}' as string may lead to synchronous loading ` +
+				`of the ${rendererModuleName} module. ` +
+				`Import the ${rendererModuleName} module and assign it to the 'renderer' property.`;
+		},
 	},
 
 } as const;

@@ -190,6 +190,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
+		const className = node.name?.getText() ?? "<unknown>";
 		const rendererMember = node.members.find((member) => {
 			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
 				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
@@ -208,7 +209,7 @@ export default class SourceFileLinter {
 				return;
 			}
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
-			this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, node);
+			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, node);
 			return;
 		}
 
@@ -222,8 +223,17 @@ export default class SourceFileLinter {
 			}
 
 			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+				let rendererName;
+				if (
+					ts.isStringLiteral(rendererMember.initializer) ||
+					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
+				) {
+					rendererName = rendererMember.initializer.text;
+				}
 				// Declaration as string requires sync loading of renderer module
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, rendererMember.initializer);
+				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
+					className, rendererName,
+				}, rendererMember.initializer);
 			}
 		}
 	}
