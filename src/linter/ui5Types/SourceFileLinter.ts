@@ -124,7 +124,10 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
-		} else if (ts.isPropertyDeclaration(node) && node.name.getText() === "metadata") {
+		} else if (
+			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&
+			ts.isClassDeclaration(node.parent) && this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
+		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
 				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
 					this.analyzeMetadataProperty(childNode.name.getText(), childNode);
@@ -132,11 +135,8 @@ export default class SourceFileLinter {
 
 				ts.forEachChild(childNode, visitMetadataNodes);
 			};
-
-			if (this.isUi5controlMetadataNode(node)) {
-				ts.forEachChild(node, visitMetadataNodes);
-			}
-		} else if (ts.isClassDeclaration(node) && this.isUi5controlClassDeclaration(node)) {
+			ts.forEachChild(node, visitMetadataNodes);
+		} else if (ts.isClassDeclaration(node) && this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
 		}
 
@@ -144,33 +144,35 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isUi5controlMetadataNode(node: ts.PropertyAssignment | ts.PropertyDeclaration): boolean {
-		// Go up the hierarchy chain to find whether the class extends from "sap/ui/base/ManagedObject"
-		const isObjectMetadataAncestor = (node: ts.ClassDeclaration): boolean => {
+	isUi5ClassDeclaration(node: ts.ClassDeclaration, baseClassModule: string): boolean {
+		const baseClassName = baseClassModule.split("/").pop();
+
+		// Go up the hierarchy chain to find whether the class extends from the provided base class
+		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
 				return parentClasses.types.flatMap((parentClass) => {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
 					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
 						if (ts.isClassDeclaration(declaration)) {
-							if (declaration.name?.getText() === "ManagedObject" &&
+							if (declaration.name?.getText() === baseClassName &&
 								(
 									// Declaration via type definitions
 									(
 										declaration.parent.parent &&
 										ts.isModuleDeclaration(declaration.parent.parent) &&
-										declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject"
+										declaration.parent.parent.name?.text === baseClassModule
 									) ||
 									// Declaration via real class (within sap.ui.core project)
 									(
 										ts.isSourceFile(declaration.parent) &&
-										declaration.parent.fileName === "/resources/sap/ui/base/ManagedObject.js"
+										declaration.parent.fileName === `/resources/${baseClassModule}.js`
 									)
 								)
 							) {
 								return true;
 							} else {
-								return isObjectMetadataAncestor(declaration);
+								return isClassUi5Subclass(declaration);
 							}
 						} else {
 							return false;
@@ -181,68 +183,7 @@ export default class SourceFileLinter {
 			}).reduce((acc, cur) => cur || acc, false) ?? false;
 		};
 
-		const metadataFound = taskStart("isPropertyInMetadata", this.#resourcePath, true);
-
-		if (node.name.getText() !== "metadata") {
-			metadataFound();
-			return false;
-		}
-
-		let parentNode: ts.Node = node.parent;
-		while (parentNode && parentNode.kind !== ts.SyntaxKind.ClassDeclaration) {
-			parentNode = parentNode.parent;
-		}
-
-		if (!parentNode) {
-			metadataFound();
-			return false;
-		}
-
-		const result = isObjectMetadataAncestor(parentNode as ts.ClassDeclaration);
-		metadataFound();
-		return result;
-	}
-
-	// NOTE: This function is copied from isUi5controlMetadataNode and slightly adjusted.
-	// TODO: Update this once the logic in isUi5controlMetadataNode has been refactored for re-use
-	isUi5controlClassDeclaration(node: ts.ClassDeclaration): boolean {
-		// Go up the hierarchy chain to find whether the class extends from "sap/ui/core/Control"
-		const isClassControlSubclass = (node: ts.ClassDeclaration): boolean => {
-			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.flatMap((parentClass) => {
-					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
-
-					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
-						if (ts.isClassDeclaration(declaration)) {
-							if (declaration.name?.getText() === "Control" &&
-								(
-									// Declaration via type definitions
-									(
-										declaration.parent.parent &&
-										ts.isModuleDeclaration(declaration.parent.parent) &&
-										declaration.parent.parent.name?.text === "sap/ui/core/Control"
-									) ||
-									// Declaration via real class (within sap.ui.core project)
-									(
-										ts.isSourceFile(declaration.parent) &&
-										declaration.parent.fileName === "/resources/sap/ui/core/Control.js"
-									)
-								)
-							) {
-								return true;
-							} else {
-								return isClassControlSubclass(declaration);
-							}
-						} else {
-							return false;
-						}
-					});
-				});
-			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-			}).reduce((acc, cur) => cur || acc, false) ?? false;
-		};
-
-		return isClassControlSubclass(node);
+		return isClassUi5Subclass(node);
 	}
 
 	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
