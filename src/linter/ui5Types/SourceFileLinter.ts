@@ -186,40 +186,19 @@ export default class SourceFileLinter {
 			((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
 				node.initializer && ts.isIdentifier(node.initializer)) ||
 				ts.isShorthandPropertyAssignment(node)) {
-			let renderInitializer = ts.isShorthandPropertyAssignment(node) ?
-				node.name.getText() :
-				node.initializer!.getText();
+			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
 
-			let useSource = false;
-			const sourceFile = node.getSourceFile();
-
-			const findRenderDeclaration = (potentialDeclarations: ts.Node) => {
-				useSource = false;
-				if (ts.isVariableStatement(potentialDeclarations)) {
-					for (const declaration of potentialDeclarations.declarationList.declarations) {
-						if (ts.isIdentifier(declaration.name) && declaration.name.text === renderInitializer) {
-							if (declaration.initializer && (
-								ts.isArrowFunction(declaration.initializer) ||
-								ts.isFunctionDeclaration(declaration.initializer) ||
-								ts.isFunctionExpression(declaration.initializer) ||
-								ts.isObjectLiteralExpression(declaration.initializer)
-							)) {
-								this.analyzeControlRenderer(declaration, renderInitializer);
-							} else if (declaration.initializer && ts.isIdentifier(declaration.initializer)) {
-								renderInitializer = declaration.initializer.getText();
-								// Another assignment found. We need to start over from the beginning
-								// of the SourceFile to find the actual declaration.
-								useSource = true;
-							}
-						}
-					}
+			declarations?.forEach((declaration) => {
+				if (
+					(ts.isArrowFunction(declaration) || ts.isFunctionExpression(declaration)) &&
+					declaration.parent && ts.isVariableDeclaration(declaration.parent)
+				) {
+					this.analyzeControlRenderer(declaration.parent, declaration.parent.name.getText());
+				} else if (ts.isFunctionDeclaration(declaration) &&
+					declaration.name && ts.isIdentifier(declaration.name)) {
+					this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
 				}
-				ts.forEachChild(
-					(useSource ? sourceFile : potentialDeclarations), findRenderDeclaration); // Continue traversing AST
-			};
-
-			// Start looking for renderer declaration at the root of the AST (global scope)
-			findRenderDeclaration(sourceFile);
+			});
 		}
 	}
 
