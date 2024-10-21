@@ -19,9 +19,9 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		throw new UnsupportedExtendCall(`Not a UI5 Class#extends call ${toPosStr(callExp.expression)}`);
 	}
 	if (!className) {
-		className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp.arguments));
+		className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp));
 	}
-	const body = getClassBodyFromArguments(nodeFactory, callExp.arguments);
+	const body = getClassBodyFromArguments(nodeFactory, callExp);
 	return nodeFactory.createClassDeclaration(modifiers,
 		className,
 		undefined,
@@ -34,8 +34,11 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		body);
 }
 
-function getClassNameFromArguments(args: ts.CallExpression["arguments"]): string {
-	const firstArg = args[0];
+function getClassNameFromArguments(callExp: ts.CallExpression): string {
+	const firstArg = callExp.arguments[0];
+	if (!firstArg) {
+		throw new UnsupportedExtendCall(`Missing extends argument at ${toPosStr(callExp)}`);
+	}
 	if (firstArg && !ts.isStringLiteralLike(firstArg)) {
 		throw new UnsupportedExtendCall(`Unexpected extends argument of type ${ts.SyntaxKind[firstArg.kind]} at ` +
 			toPosStr(firstArg));
@@ -46,7 +49,8 @@ function getClassNameFromArguments(args: ts.CallExpression["arguments"]): string
 }
 
 function getClassBodyFromArguments(
-	nodeFactory: ts.NodeFactory, args: ts.CallExpression["arguments"]): ts.ClassElement[] {
+	nodeFactory: ts.NodeFactory, callExp: ts.CallExpression): ts.ClassElement[] {
+	const args = callExp.arguments;
 	let classBody: ts.ObjectLiteralExpression | undefined;
 	for (let i = args.length - 1; i >= 0; i--) {
 		const arg = args[i];
@@ -56,7 +60,7 @@ function getClassBodyFromArguments(
 		}
 	}
 	if (!classBody) {
-		throw new UnsupportedExtendCall(`No class body found in extends call at ${toPosStr(args[0])}`);
+		throw new UnsupportedExtendCall(`No class body found in extends call at ${toPosStr(callExp)}`);
 	}
 	if (classBody.properties.find((prop) => ts.isSpreadAssignment(prop) || ts.isShorthandPropertyAssignment(prop))) {
 		// TODO: Support spread elements(?)
