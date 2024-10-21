@@ -198,7 +198,11 @@ export default class SourceFileLinter {
 
 		if (!rendererMember) {
 			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
-			if (this.isUi5ClassDeclaration(node, ["sap/ui/core/webc/WebComponent", "sap/uxap/BlockBase"])) {
+			if (this.isUi5ClassDeclaration(node, [
+				"sap/ui/core/mvc/View",
+				"sap/ui/core/webc/WebComponent",
+				"sap/uxap/BlockBase",
+			])) {
 				return;
 			}
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
