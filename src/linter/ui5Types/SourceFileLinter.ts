@@ -200,6 +200,8 @@ export default class SourceFileLinter {
 			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
 			if (this.isUi5ClassDeclaration(node, [
 				"sap/ui/core/mvc/View",
+				// XMLComposite is deprecated, but there still shouldn't be a false-positive about a missing renderer
+				"sap/ui/core/XMLComposite",
 				"sap/ui/core/webc/WebComponent",
 				"sap/uxap/BlockBase",
 			])) {

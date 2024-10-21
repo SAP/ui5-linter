@@ -1,7 +1,8 @@
 sap.ui.define([
 	"sap/ui/core/Control", "sap/m/Button", "sap/ui/core/webc/WebComponent",
-	"sap/uxap/BlockBase", "./NegativeExample1Renderer", "sap/ui/core/mvc/View"
-], function(Control, Button, WebComponent, BlockBase, NegativeExample1Renderer, View) {
+	"sap/uxap/BlockBase", "./NegativeExample1Renderer", "sap/ui/core/mvc/View",
+	"sap/ui/core/XMLComposite"
+], function(Control, Button, WebComponent, BlockBase, NegativeExample1Renderer, View, XMLComposite) {
 
 	const NegativeExample1 = Control.extend("sap.ui.demo.linter.controls.NegativeExample1", {
 		metadata: {},
@@ -67,7 +68,13 @@ sap.ui.define([
 
 	const NegativeExample11 = BlockBase.extend("sap.ui.demo.linter.controls.NegativeExample11", {
 		metadata: {},
-		// No deprecation: Uses sa.uxa.BlockBaseRenderer if no renderer is specified
+		// No deprecation: Uses sap.uxap.BlockBaseRenderer if no renderer is specified
+	});
+
+	const NegativeExample12 = XMLComposite.extend("sap.ui.demo.linter.controls.NegativeExample12", {
+		metadata: {},
+		// No deprecation: Uses inline renderer of XMLComposite if no renderer is specified
+		// Note: XMLComposite itself is deprecated, but there should not be a finding for a missing renderer
 	});
 
 });
