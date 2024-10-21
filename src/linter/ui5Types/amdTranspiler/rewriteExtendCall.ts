@@ -70,11 +70,40 @@ function getClassBodyFromArguments(
 		if (ts.isMethodDeclaration(prop)) {
 			// Use method declarations as-is
 			// e.g. "method() {}"
+
+			// Special handling:
+			// - renderer: *static*
+			// This aligns it with how UI5 projects should declare those properties in TypeScript
+
+			if (
+				ts.isIdentifier(prop.name) && prop.name.text === "renderer" &&
+				!prop.modifiers?.find((mod) => mod.kind === ts.SyntaxKind.StaticKeyword)
+			) {
+				// Add static modifier to renderer method
+				const staticModifier = nodeFactory.createToken(ts.SyntaxKind.StaticKeyword);
+				return nodeFactory.updateMethodDeclaration(prop,
+					prop.modifiers ? [...prop.modifiers, staticModifier] : [staticModifier],
+					prop.asteriskToken,
+					prop.name, prop.questionToken, prop.typeParameters, prop.parameters, prop.type, prop.body);
+			}
+
 			return prop;
 		} else if (ts.isPropertyAssignment(prop)) {
 			if (ts.isFunctionExpression(prop.initializer)) {
+				let modifiers: ts.ModifierLike[] | undefined;
+
+				// Special handling:
+				// - renderer: *static*
+				// This aligns it with how UI5 projects should declare those properties in TypeScript
+				if (
+					ts.isIdentifier(prop.name) && prop.name.text === "renderer" &&
+					!prop.initializer.modifiers?.find((mod) => mod.kind === ts.SyntaxKind.StaticKeyword)
+				) {
+					modifiers = [nodeFactory.createToken(ts.SyntaxKind.StaticKeyword)];
+				}
+
 				return nodeFactory.createMethodDeclaration(
-					undefined, undefined,
+					modifiers, undefined,
 					prop.name,
 					undefined, undefined,
 					prop.initializer.parameters,

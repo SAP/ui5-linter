@@ -18,7 +18,25 @@ sap.ui.define([
 		renderer: undefined
 	});
 
-	const NegativeExample4 = Button.extend("sap.ui.demo.linter.controls.NegativeExample4", {
+	const NegativeExample4 = Control.extend("sap.ui.demo.linter.controls.NegativeExample4", {
+		metadata: {},
+		renderer: function(oRm, oControl) {
+		}
+	});
+
+	const NegativeExample5 = Control.extend("sap.ui.demo.linter.controls.NegativeExample5", {
+		metadata: {},
+		renderer: (oRm, oControl) => {
+		}
+	});
+
+	const NegativeExample6 = Control.extend("sap.ui.demo.linter.controls.NegativeExample6", {
+		metadata: {},
+		renderer(oRm, oControl) {
+		}
+	});
+
+	const NegativeExample7 = Button.extend("sap.ui.demo.linter.controls.NegativeExample7", {
 		metadata: {},
 		renderer: {
 			apiVersion: 2,
@@ -27,16 +45,25 @@ sap.ui.define([
 		}
 	});
 
+	const NegativeExample8 = Button.extend("sap.ui.demo.linter.controls.NegativeExample8", {
+		metadata: {},
+		renderer: {
+			apiVersion: 4,
+			render: function(oRm, oControl) {
+			}
+		}
+	});
+
 	// Special cases:
 
-	// const NegativeExample5 = WebComponent.extend("sap.ui.demo.linter.controls.NegativeExample5", {
-	// 	metadata: {},
-	// 	// No deprecation: Uses sap.ui.core.webc.WebComponentRenderer if no renderer is specified
-	// });
+	const NegativeExample9 = WebComponent.extend("sap.ui.demo.linter.controls.NegativeExample9", {
+		metadata: {},
+		// No deprecation: Uses sap.ui.core.webc.WebComponentRenderer if no renderer is specified
+	});
 
-	// const NegativeExample6 = BlockBase.extend("sap.ui.demo.linter.controls.NegativeExample6", {
-	// 	metadata: {},
-	// 	// No deprecation: Uses the renderer from the parent base class if no renderer is specified
-	// });
+	const NegativeExample10 = BlockBase.extend("sap.ui.demo.linter.controls.NegativeExample10", {
+		metadata: {},
+		// No deprecation: Uses sa.uxa.BlockBaseRenderer if no renderer is specified
+	});
 
 });

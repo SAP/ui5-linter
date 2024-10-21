@@ -12,10 +12,4 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 		metadata: {},
 		// Missing renderer declaration (deprecated)
 	});
-	const Example4 = Control.extend("sap.ui.demo.linter.controls.Example4", {
-		metadata: {},
-		// TODO: Is this deprecated or not?
-		renderer: function(oRm, oControl) {
-		}
-	});
 });

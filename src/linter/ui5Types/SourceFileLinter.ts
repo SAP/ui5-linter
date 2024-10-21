@@ -144,8 +144,11 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isUi5ClassDeclaration(node: ts.ClassDeclaration, baseClassModule: string): boolean {
-		const baseClassName = baseClassModule.split("/").pop();
+	isUi5ClassDeclaration(node: ts.ClassDeclaration, baseClassModule: string | string[]): boolean {
+		const baseClassModules = Array.isArray(baseClassModule) ? baseClassModule : [baseClassModule];
+		const baseClasses = baseClassModules.map((baseClassModule) => {
+			return {module: baseClassModule, name: baseClassModule.split("/").pop()};
+		});
 
 		// Go up the hierarchy chain to find whether the class extends from the provided base class
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
@@ -154,29 +157,29 @@ export default class SourceFileLinter {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
 					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
-						if (ts.isClassDeclaration(declaration)) {
-							if (declaration.name?.getText() === baseClassName &&
+						if (!ts.isClassDeclaration(declaration)) {
+							return false;
+						}
+						for (const baseClass of baseClasses) {
+							if (declaration.name?.getText() === baseClass.name &&
 								(
-									// Declaration via type definitions
+								// Declaration via type definitions
 									(
 										declaration.parent.parent &&
 										ts.isModuleDeclaration(declaration.parent.parent) &&
-										declaration.parent.parent.name?.text === baseClassModule
+										declaration.parent.parent.name?.text === baseClass.module
 									) ||
 									// Declaration via real class (within sap.ui.core project)
 									(
 										ts.isSourceFile(declaration.parent) &&
-										declaration.parent.fileName === `/resources/${baseClassModule}.js`
+										declaration.parent.fileName === `/resources/${baseClass.module}.js`
 									)
 								)
 							) {
 								return true;
-							} else {
-								return isClassUi5Subclass(declaration);
 							}
-						} else {
-							return false;
 						}
+						return isClassUi5Subclass(declaration);
 					});
 				});
 			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -194,11 +197,10 @@ export default class SourceFileLinter {
 		});
 
 		if (!rendererMember) {
-			// TODO: Handle this case. Having the list of parent classes would be helpful to perform this check
 			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
-			// - sap/ui/core/webc/WebComponent
-			// - sap/uxap/BlockBase
-
+			if (this.isUi5ClassDeclaration(node, ["sap/ui/core/webc/WebComponent", "sap/uxap/BlockBase"])) {
+				return;
+			}
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, node);
 			return;
@@ -217,11 +219,6 @@ export default class SourceFileLinter {
 				// Declaration as string requires sync loading of renderer module
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, rendererMember.initializer);
 			}
-		} else if (ts.isMethodDeclaration(rendererMember)) {
-			// Inline renderer function declaration:
-			// TODO: Is this deprecated or not?
-			this.#reporter.addMessage(MESSAGE.DEPRECATED_CONTROL_RENDERER_DECLARATION, rendererMember);
-			return;
 		}
 	}
 
