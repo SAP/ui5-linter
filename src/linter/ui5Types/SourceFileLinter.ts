@@ -140,7 +140,7 @@ export default class SourceFileLinter {
 			this.analyzeControlRendererDeclaration(node);
 		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) ||
 			ts.isVariableDeclaration(node) || ts.isShorthandPropertyAssignment(node)) &&
-			["renderer", "render"].includes(node.name?.getText())) {
+			node.name?.getText() === "renderer") {
 			// TODO: Analyze only metadata properties
 			this.analyzeControlRenderer(node);
 		}
@@ -150,20 +150,38 @@ export default class SourceFileLinter {
 	}
 
 	analyzeControlRenderer(node: ts.PropertyAssignment |
-		ts.PropertyDeclaration | ts.VariableDeclaration | ts.ShorthandPropertyAssignment,
-		rendererName = "renderer") {
+		ts.PropertyDeclaration | ts.VariableDeclaration | ts.ShorthandPropertyAssignment) {
+		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
+			node.initializer) {
+			// Analyze renderer property when it's referenced by a variable or even another module
+			// i.e. { renderer: Renderer }
+			if (ts.isIdentifier(node.initializer)) {
+				const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
+				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+			} else {
+				// Analyze renderer property when it's directly embedded in the renderer object
+				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+				this.analyzeControlRendererInternals(node.initializer);
+			}
+		} else if (ts.isShorthandPropertyAssignment(node)) {
+			// Special case for shorthand property assignment. Basically the same as the Identifier case above
+			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
+			declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+		}
+	}
+
+	analyzeControlRendererInternals(node: ts.Node) {
 		// Analyze renderer property when it's an ObjectLiterExpression
 		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
-		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
-			node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
-			const apiVersionNode = node.initializer?.properties.find((prop) => {
+		if (node && ts.isObjectLiteralExpression(node)) {
+			const apiVersionNode = node.properties.find((prop) => {
 				return ts.isPropertyAssignment(prop) &&
 					ts.isIdentifier(prop.name) &&
 					prop.name.text === "apiVersion";
 			});
 
 			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
-				ts.VariableDeclaration | undefined = undefined;
+				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
 			} else if (ts.isPropertyAssignment(apiVersionNode) &&
@@ -175,30 +193,9 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
 			}
 		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
-		} else if (
-			(ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
-			node.initializer &&
-			(ts.isMethodDeclaration(node.initializer) || ts.isArrowFunction(node.initializer) ||
-				ts.isFunctionExpression(node.initializer)) &&
-				node.name?.getText() === rendererName) {
+		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
 			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
-		} else if (
-			((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
-				node.initializer && ts.isIdentifier(node.initializer)) ||
-				ts.isShorthandPropertyAssignment(node)) {
-			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
-
-			declarations?.forEach((declaration) => {
-				if (
-					(ts.isArrowFunction(declaration) || ts.isFunctionExpression(declaration)) &&
-					declaration.parent && ts.isVariableDeclaration(declaration.parent)
-				) {
-					this.analyzeControlRenderer(declaration.parent, declaration.parent.name.getText());
-				} else if (ts.isFunctionDeclaration(declaration) &&
-					declaration.name && ts.isIdentifier(declaration.name)) {
-					this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
-				}
-			});
 		}
 	}
 
