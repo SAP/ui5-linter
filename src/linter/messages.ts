@@ -466,7 +466,7 @@ export const MESSAGE_INFO = {
 
 		message: ({className}: {className: string}) =>
 			`Control '${className}' is missing a renderer declaration`,
-		details: ({className}: {className: string}) => `Not defining a 'renderer' for the control '${className}' ` +
+		details: ({className}: {className: string}) => `Not defining a 'renderer' for control '${className}' ` +
 			`may lead to synchronous loading of the '${className}Renderer' module. ` +
 			`If no renderer exists, set 'renderer: null'. Otherwise, either import the renderer module ` +
 			`and assign it to the 'renderer' property or implement the renderer inline.`,
@@ -480,8 +480,8 @@ export const MESSAGE_INFO = {
 			`Deprecated declaration of renderer ${rendererName ? `'${rendererName}' ` : ""}for Control '${className}'`,
 		details: ({className, rendererName}: {className: string; rendererName: string | undefined}) => {
 			const rendererModuleName = rendererName ? `'${rendererName.replace(/\./g, "/")}'` : "renderer";
-			return `Defining the 'renderer' for the control '${className}' as string may lead to synchronous loading ` +
-				`of the ${rendererModuleName} module. ` +
+			return `Defining the 'renderer' for control '${className}' as by its name may lead to synchronous ` +
+				`loading of the ${rendererModuleName} module. ` +
 				`Import the ${rendererModuleName} module and assign it to the 'renderer' property.`;
 		},
 	},

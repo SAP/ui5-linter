@@ -126,7 +126,7 @@ export default class SourceFileLinter {
 			});
 		} else if (
 			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&
-			ts.isClassDeclaration(node.parent) && this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
+			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
 		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
 				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
@@ -136,7 +136,7 @@ export default class SourceFileLinter {
 				ts.forEachChild(childNode, visitMetadataNodes);
 			};
 			ts.forEachChild(node, visitMetadataNodes);
-		} else if (ts.isClassDeclaration(node) && this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
+		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
 		}
 
@@ -144,7 +144,10 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isUi5ClassDeclaration(node: ts.ClassDeclaration, baseClassModule: string | string[]): boolean {
+	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
+		if (!ts.isClassDeclaration(node)) {
+			return false;
+		}
 		const baseClassModules = Array.isArray(baseClassModule) ? baseClassModule : [baseClassModule];
 		const baseClasses = baseClassModules.map((baseClassModule) => {
 			return {module: baseClassModule, name: baseClassModule.split("/").pop()};
@@ -169,10 +172,13 @@ export default class SourceFileLinter {
 										ts.isModuleDeclaration(declaration.parent.parent) &&
 										declaration.parent.parent.name?.text === baseClass.module
 									) ||
-									// Declaration via real class (within sap.ui.core project)
+									// Declaration via real class (e.g. within sap.ui.core project)
 									(
 										ts.isSourceFile(declaration.parent) &&
-										declaration.parent.fileName === `/resources/${baseClass.module}.js`
+										(
+											declaration.parent.fileName === `/resources/${baseClass.module}.js` ||
+											declaration.parent.fileName === `/resources/${baseClass.module}.ts`
+										)
 									)
 								)
 							) {
