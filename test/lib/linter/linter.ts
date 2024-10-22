@@ -71,6 +71,22 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: Only /webapp folder from com.ui5.troublesome.app (without details / coverage)", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const filePaths = [
+		// Minimatch requires POSIX
+		"webapp/",
+	];
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		filePatterns: filePaths,
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: One file of com.ui5.troublesome.app (without details / coverage)", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const filePaths = [
@@ -144,8 +160,8 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 		reportCoverage: true,
 		includeMessageDetails: true,
 		ignorePattern: [
-			"src/**/*",
-			"!src/main/**/*",
+			"src/",
+			"!src/main/",
 		],
 	});
 
@@ -177,6 +193,20 @@ test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) =
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
+		reportCoverage: true,
+		includeMessageDetails: true,
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
+test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "sap.ui.core");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+		filePatterns: ["src/ui5loader.js"],
 		reportCoverage: true,
 		includeMessageDetails: true,
 	});

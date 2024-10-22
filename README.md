@@ -80,7 +80,7 @@ You can provide multiple glob patterns as arguments after the `ui5lint` command 
 **Note**: Only POSIX separators are allowed, regardless of the target platform.
 
 ```sh
-> ui5lint "application/webapp/**/*.xml"
+> ui5lint "webapp/**/*.xml"
 
 UI5 linter report:
 

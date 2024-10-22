@@ -58,14 +58,21 @@ export interface TranspileResult {
 
 export interface LinterOptions {
 	rootDir: string;
-	namespace?: string;
 	filePatterns?: FilePattern[];
 	ignorePattern?: FilePattern[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;
 	ui5ConfigPath?: string;
+	namespace?: string;
 }
+
+export interface FSToVirtualPathOptions {
+	relFsBasePath: string;
+	virBasePath: string;
+	relFsBasePathTest?: string;
+	virBasePathTest?: string;
+};
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
