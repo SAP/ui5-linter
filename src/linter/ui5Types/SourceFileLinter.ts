@@ -124,7 +124,10 @@ export default class SourceFileLinter {
 				context: this.#context,
 				checker: this.#checker,
 			});
-		} else if (ts.isPropertyDeclaration(node) && node.name.getText() === "metadata") {
+		} else if (
+			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&
+			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
+		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
 				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
 					this.analyzeMetadataProperty(childNode.name.getText(), childNode);
@@ -132,73 +135,113 @@ export default class SourceFileLinter {
 
 				ts.forEachChild(childNode, visitMetadataNodes);
 			};
-
-			if (this.isUi5controlMetadataNode(node)) {
-				ts.forEachChild(node, visitMetadataNodes);
-			}
+			ts.forEachChild(node, visitMetadataNodes);
+		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
+			this.analyzeControlRendererDeclaration(node);
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isUi5controlMetadataNode(node: ts.PropertyAssignment | ts.PropertyDeclaration): boolean {
-		// Go up the hierarchy chain to find whether the class extends from "sap/ui/base/ManagedObject"
-		const isObjectMetadataAncestor = (node: ts.ClassDeclaration): boolean => {
+	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
+		if (!ts.isClassDeclaration(node)) {
+			return false;
+		}
+		const baseClassModules = Array.isArray(baseClassModule) ? baseClassModule : [baseClassModule];
+		const baseClasses = baseClassModules.map((baseClassModule) => {
+			return {module: baseClassModule, name: baseClassModule.split("/").pop()};
+		});
+
+		// Go up the hierarchy chain to find whether the class extends from the provided base class
+		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
 				return parentClasses.types.flatMap((parentClass) => {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
 					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
-						if (ts.isClassDeclaration(declaration)) {
-							if (declaration.name?.getText() === "ManagedObject" &&
+						if (!ts.isClassDeclaration(declaration)) {
+							return false;
+						}
+						for (const baseClass of baseClasses) {
+							if (declaration.name?.getText() === baseClass.name &&
 								(
-									// Declaration via type definitions
+								// Declaration via type definitions
 									(
 										declaration.parent.parent &&
 										ts.isModuleDeclaration(declaration.parent.parent) &&
-										declaration.parent.parent.name?.text === "sap/ui/base/ManagedObject"
+										declaration.parent.parent.name?.text === baseClass.module
 									) ||
-									// Declaration via real class (within sap.ui.core project)
+									// Declaration via real class (e.g. within sap.ui.core project)
 									(
 										ts.isSourceFile(declaration.parent) &&
-										declaration.parent.fileName === "/resources/sap/ui/base/ManagedObject.js"
+										(
+											declaration.parent.fileName === `/resources/${baseClass.module}.js` ||
+											declaration.parent.fileName === `/resources/${baseClass.module}.ts`
+										)
 									)
 								)
 							) {
 								return true;
-							} else {
-								return isObjectMetadataAncestor(declaration);
 							}
-						} else {
-							return false;
 						}
+						return isClassUi5Subclass(declaration);
 					});
 				});
 			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 			}).reduce((acc, cur) => cur || acc, false) ?? false;
 		};
 
-		const metadataFound = taskStart("isPropertyInMetadata", this.#resourcePath, true);
+		return isClassUi5Subclass(node);
+	}
 
-		if (node.name.getText() !== "metadata") {
-			metadataFound();
-			return false;
+	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
+		const className = node.name?.getText() ?? "<unknown>";
+		const rendererMember = node.members.find((member) => {
+			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
+				member.name.getText() === "renderer";
+		});
+
+		if (!rendererMember) {
+			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
+			if (this.isUi5ClassDeclaration(node, [
+				"sap/ui/core/mvc/View",
+				// XMLComposite is deprecated, but there still shouldn't be a false-positive about a missing renderer
+				"sap/ui/core/XMLComposite",
+				"sap/ui/core/webc/WebComponent",
+				"sap/uxap/BlockBase",
+			])) {
+				return;
+			}
+			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
+			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, node);
+			return;
 		}
 
-		let parentNode: ts.Node = node.parent;
-		while (parentNode && parentNode.kind !== ts.SyntaxKind.ClassDeclaration) {
-			parentNode = parentNode.parent;
-		}
+		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
+			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
 
-		if (!parentNode) {
-			metadataFound();
-			return false;
-		}
+			if (initializerType.flags & ts.TypeFlags.Undefined ||
+				initializerType.flags & ts.TypeFlags.Null) {
+				// null / undefined can be used to declare that a control does not have a renderer
+				return;
+			}
 
-		const result = isObjectMetadataAncestor(parentNode as ts.ClassDeclaration);
-		metadataFound();
-		return result;
+			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+				let rendererName;
+				if (
+					ts.isStringLiteral(rendererMember.initializer) ||
+					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
+				) {
+					rendererName = rendererMember.initializer.text;
+				}
+				// Declaration as string requires sync loading of renderer module
+				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
+					className, rendererName,
+				}, rendererMember.initializer);
+			}
+		}
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
