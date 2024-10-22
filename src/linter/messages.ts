@@ -477,7 +477,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-control-renderer-declaration"],
 
 		message: ({className, rendererName}: {className: string; rendererName: string | undefined}) =>
-			`Deprecated declaration of renderer ${rendererName ? `'${rendererName}' ` : ""}for Control '${className}'`,
+			`Deprecated declaration of renderer ${rendererName ? `'${rendererName}' ` : ""}for control '${className}'`,
 		details: ({className, rendererName}: {className: string; rendererName: string | undefined}) => {
 			const rendererModuleName = rendererName ? `'${rendererName.replace(/\./g, "/")}'` : "renderer";
 			return `Defining the 'renderer' for control '${className}' by its name may lead to synchronous ` +
