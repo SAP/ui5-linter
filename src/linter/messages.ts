@@ -480,7 +480,7 @@ export const MESSAGE_INFO = {
 			`Deprecated declaration of renderer ${rendererName ? `'${rendererName}' ` : ""}for Control '${className}'`,
 		details: ({className, rendererName}: {className: string; rendererName: string | undefined}) => {
 			const rendererModuleName = rendererName ? `'${rendererName.replace(/\./g, "/")}'` : "renderer";
-			return `Defining the 'renderer' for control '${className}' as by its name may lead to synchronous ` +
+			return `Defining the 'renderer' for control '${className}' by its name may lead to synchronous ` +
 				`loading of the ${rendererModuleName} module. ` +
 				`Import the ${rendererModuleName} module and assign it to the 'renderer' property.`;
 		},
