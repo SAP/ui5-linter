@@ -200,7 +200,7 @@ test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) =
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
-test.only("lint: File out of the namespace of sap.ui.core", async (t) => {
+test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "sap.ui.core");
 	const {lintProject} = t.context;
 
