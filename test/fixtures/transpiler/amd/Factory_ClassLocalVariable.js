@@ -22,7 +22,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 	 * JSDoc comments should be removed, as it might have negative impact on the type detection
 	 */
 	Control.extend("test.ExampleControl5", {
-		metadata: {},
+		"metadata": {}, // Quoted metadata property should be transformed to static property
 		renderer: (oRm, oControl) => {
 		}
 	});

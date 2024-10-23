@@ -125,7 +125,9 @@ function getClassBodyFromArguments(
 				// This aligns it with how UI5 projects should declare those properties in TypeScript
 				if (
 					ts.isObjectLiteralExpression(prop.initializer) &&
-					ts.isIdentifier(prop.name) &&
+					(
+						ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)
+					) &&
 					prop.name.text === "metadata"
 				) {
 					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.ReadonlyKeyword));
