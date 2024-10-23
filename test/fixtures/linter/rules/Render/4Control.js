@@ -6,11 +6,7 @@ sap.ui.define(["sap/ui/core/Control"], function (Control) {
 		oRm.close("div");
 	};
 	
-	const a = zzzz;
-	const b = a;
-	const c = b;
-	
-	var myControl = Control.extend("myControl", {
+	var myControl = Control.extend("mycomp.myControl", {
 		metadata: {},
 		renderer,
 	});

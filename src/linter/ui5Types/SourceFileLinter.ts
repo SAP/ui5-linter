@@ -156,7 +156,8 @@ export default class SourceFileLinter {
 			// Analyze renderer property when it's referenced by a variable or even another module
 			// i.e. { renderer: Renderer }
 			if (ts.isIdentifier(node.initializer)) {
-				const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
+				const {symbol} = this.#checker.getTypeAtLocation(node);
+				const {declarations} = symbol ?? {};
 				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
 			} else {
 				// Analyze renderer property when it's directly embedded in the renderer object
