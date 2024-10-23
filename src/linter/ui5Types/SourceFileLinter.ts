@@ -115,17 +115,20 @@ export default class SourceFileLinter {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
 			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
-		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments && this.#isComponent) {
+		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
 			analyzeComponentJson({
-				node: node as ts.ExpressionWithTypeArguments,
+				classDeclaration: node,
 				manifestContent: this.#manifestContent,
 				resourcePath: this.#resourcePath,
 				reporter: this.#reporter,
 				context: this.#context,
 				checker: this.#checker,
+				isUIComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
 		} else if (
-			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&
+			ts.isPropertyDeclaration(node) &&
+			(ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) &&
+			node.name.text === "metadata" &&
 			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
 		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
@@ -200,7 +203,7 @@ export default class SourceFileLinter {
 		const rendererMember = node.members.find((member) => {
 			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
 				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
-				member.name.getText() === "renderer";
+				(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) && member.name.text === "renderer";
 		});
 
 		if (!rendererMember) {

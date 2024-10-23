@@ -12,7 +12,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 	const Example3 = Control.extend("sap.ui.demo.linter.controls.Example3", {
 		metadata: {},
 		// Declaration of renderer module as template literal with substitution (deprecated)
-		renderer: `sap.ui.demo.linter.controls.Example${1+2}Renderer`
+		"renderer": `sap.ui.demo.linter.controls.Example${1+2}Renderer`
 	});
 	const Example4 = Control.extend("sap.ui.demo.linter.controls.Example4", {
 		metadata: {},
