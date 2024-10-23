@@ -138,66 +138,10 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
-		} else if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) ||
-			ts.isVariableDeclaration(node) || ts.isShorthandPropertyAssignment(node)) &&
-			node.name?.getText() === "renderer") {
-			// TODO: Analyze only metadata properties
-			this.analyzeControlRenderer(node);
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
-	}
-
-	analyzeControlRenderer(node: ts.PropertyAssignment |
-		ts.PropertyDeclaration | ts.VariableDeclaration | ts.ShorthandPropertyAssignment) {
-		if ((ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node) || ts.isVariableDeclaration(node)) &&
-			node.initializer) {
-			// Analyze renderer property when it's referenced by a variable or even another module
-			// i.e. { renderer: Renderer }
-			if (ts.isIdentifier(node.initializer)) {
-				const {symbol} = this.#checker.getTypeAtLocation(node);
-				const {declarations} = symbol ?? {};
-				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
-			} else {
-				// Analyze renderer property when it's directly embedded in the renderer object
-				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
-				this.analyzeControlRendererInternals(node.initializer);
-			}
-		} else if (ts.isShorthandPropertyAssignment(node)) {
-			// Special case for shorthand property assignment. Basically the same as the Identifier case above
-			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(node);
-			declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
-		}
-	}
-
-	analyzeControlRendererInternals(node: ts.Node) {
-		// Analyze renderer property when it's an ObjectLiterExpression
-		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
-		if (node && ts.isObjectLiteralExpression(node)) {
-			const apiVersionNode = node.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) &&
-					prop.name.text === "apiVersion";
-			});
-
-			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
-				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
-			if (!apiVersionNode) { // No 'apiVersion' property
-				nodeToHighlight = node;
-			} else if (ts.isPropertyAssignment(apiVersionNode) &&
-				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
-				nodeToHighlight = apiVersionNode;
-			}
-
-			if (nodeToHighlight) {
-				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
-			}
-		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
-		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
-			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
-			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
-		}
 	}
 
 	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
@@ -275,28 +219,76 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
-			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+		if ((ts.isPropertyAssignment(rendererMember) || ts.isPropertyDeclaration(rendererMember) ||
+			ts.isVariableDeclaration(rendererMember)) && rendererMember.initializer) {
+			if (ts.isPropertyDeclaration(rendererMember)) {
+				const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
 
-			if (initializerType.flags & ts.TypeFlags.Undefined ||
-				initializerType.flags & ts.TypeFlags.Null) {
-				// null / undefined can be used to declare that a control does not have a renderer
-				return;
-			}
-
-			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
-				let rendererName;
-				if (
-					ts.isStringLiteral(rendererMember.initializer) ||
-					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
-				) {
-					rendererName = rendererMember.initializer.text;
+				if (initializerType.flags & ts.TypeFlags.Undefined ||
+					initializerType.flags & ts.TypeFlags.Null) {
+					// null / undefined can be used to declare that a control does not have a renderer
+					return;
 				}
-				// Declaration as string requires sync loading of renderer module
-				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
-					className, rendererName,
-				}, rendererMember.initializer);
+
+				if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+					let rendererName;
+					if (
+						ts.isStringLiteral(rendererMember.initializer) ||
+						ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
+					) {
+						rendererName = rendererMember.initializer.text;
+					}
+					// Declaration as string requires sync loading of renderer module
+					this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
+						className, rendererName,
+					}, rendererMember.initializer);
+				}
 			}
+
+			// Analyze renderer property when it's referenced by a variable or even another module
+			// i.e. { renderer: Renderer }
+			if (ts.isIdentifier(rendererMember.initializer)) {
+				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
+				const {declarations} = symbol ?? {};
+				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+			} else {
+				// Analyze renderer property when it's directly embedded in the renderer object
+				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+				this.analyzeControlRendererInternals(rendererMember.initializer);
+			}
+		} else if (ts.isShorthandPropertyAssignment(rendererMember)) {
+			// Special case for shorthand property assignment. Basically the same as the Identifier case above
+			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(rendererMember);
+			declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+		}
+	}
+
+	analyzeControlRendererInternals(node: ts.Node) {
+		// Analyze renderer property when it's an ObjectLiterExpression
+		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+		if (node && ts.isObjectLiteralExpression(node)) {
+			const apiVersionNode = node.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "apiVersion";
+			});
+
+			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
+				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
+			if (!apiVersionNode) { // No 'apiVersion' property
+				nodeToHighlight = node;
+			} else if (ts.isPropertyAssignment(apiVersionNode) &&
+				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
+			}
+
+			if (nodeToHighlight) {
+				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
+			}
+		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
+		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
 		}
 	}
 
