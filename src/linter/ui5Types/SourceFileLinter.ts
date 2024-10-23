@@ -209,7 +209,7 @@ export default class SourceFileLinter {
 		const rendererMember = node.members.find((member) => {
 			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
 				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
-				member.name.getText() === "renderer";
+				(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) && member.name.text === "renderer";
 		});
 
 		if (!rendererMember) {
