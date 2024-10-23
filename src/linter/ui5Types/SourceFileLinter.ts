@@ -126,7 +126,9 @@ export default class SourceFileLinter {
 				isUIComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
 		} else if (
-			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&
+			ts.isPropertyDeclaration(node) &&
+			(ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) &&
+			node.name.text === "metadata" &&
 			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
 		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
