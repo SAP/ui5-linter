@@ -10,36 +10,5 @@
 		"applicationVersion": {
 			"version": "1.0.0"
 		}
-	},
-
-	"sap.ui5": {
-		"rootView": {
-			"viewName": "mycomp.view.App",
-			"type": "XML",
-			"id": "app"
-		},
-
-		"routing": {
-			"config": {
-				"routerClass": "sap.m.routing.Router",
-				"viewType": "XML",
-				"viewPath": "mycomp.view",
-				"controlId": "app",
-				"controlAggregation": "pages"
-			},
-			"routes": [
-				{
-					"pattern": "",
-					"name": "main",
-					"target": "main"
-				}
-			],
-			"targets": {
-				"main": {
-					"viewId": "main",
-					"viewName": "Main"
-				}
-			}
-		}
 	}
 }
