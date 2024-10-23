@@ -118,21 +118,21 @@ function getClassBodyFromArguments(
 					prop.initializer.body);
 			} else {
 				const modifiers: ts.ModifierLike[] = [];
-
+				let propertyName;
+				if (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) {
+					propertyName = prop.name.text;
+				}
 				// Special handling:
 				// - metadata: *readonly static*
 				// - renderer: *static*
 				// This aligns it with how UI5 projects should declare those properties in TypeScript
 				if (
 					ts.isObjectLiteralExpression(prop.initializer) &&
-					(
-						ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)
-					) &&
-					prop.name.text === "metadata"
+					propertyName === "metadata"
 				) {
 					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.ReadonlyKeyword));
 					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.StaticKeyword));
-				} else if (ts.isIdentifier(prop.name) && prop.name.text === "renderer") {
+				} else if (propertyName === "renderer") {
 					modifiers.push(nodeFactory.createToken(ts.SyntaxKind.StaticKeyword));
 				} else if (prop.initializer.kind === ts.SyntaxKind.NullKeyword ||
 					prop.initializer.kind === ts.SyntaxKind.UndefinedKeyword
