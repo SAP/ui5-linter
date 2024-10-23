@@ -1,15 +1,16 @@
 sap.ui.define(["sap/ui/core/Control"], function (Control) {
-	var myControl = Control.extend("myControl", {
+	var myControl = Control.extend("mycomp.myControl", {
 		metadata: {},
 		renderer: {
-			apiVersion: 2,
+			apiVersion: 1,
 			render: function (oRm, oMyControl) {
 				oRm.openStart("div", oMyControl);
-				oRm.icon("sap-icon://appointment", null, { title: null });
+				oRm.class("mycssclass");
 				oRm.openEnd();
 				oRm.close("div");
 			},
 		},
 	});
+	
 	return myControl;
 });
