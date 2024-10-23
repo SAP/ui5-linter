@@ -120,14 +120,15 @@ export default class SourceFileLinter {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
 			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
-		} else if (node.kind === ts.SyntaxKind.ExpressionWithTypeArguments && this.#isComponent) {
+		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
 			analyzeComponentJson({
-				node: node as ts.ExpressionWithTypeArguments,
+				classDeclaration: node,
 				manifestContent: this.#manifestContent,
 				resourcePath: this.#resourcePath,
 				reporter: this.#reporter,
 				context: this.#context,
 				checker: this.#checker,
+				isUIComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
 		} else if (
 			ts.isPropertyDeclaration(node) && node.name.getText() === "metadata" &&

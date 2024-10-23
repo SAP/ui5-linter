@@ -29,35 +29,37 @@ interface AsyncFlags {
 }
 
 export default function analyzeComponentJson({
-	node,
+	classDeclaration,
 	manifestContent,
 	resourcePath,
 	reporter,
 	context,
 	checker,
+	isUIComponent,
 }: {
-	node: ts.ExpressionWithTypeArguments;
+	classDeclaration: ts.ClassDeclaration;
 	manifestContent: string | undefined;
 	resourcePath: string;
 	reporter: SourceFileReporter;
 	context: LinterContext;
 	checker: ts.TypeChecker;
+
+	// Indication whether the class not only inherits from sap/ui/core/Component but also from sap/ui/core/UIComponent
+	isUIComponent: boolean;
 }) {
-	let classDesc = node.parent;
-	while (classDesc && classDesc.kind !== ts.SyntaxKind.ClassDeclaration) {
-		classDesc = classDesc.parent;
-	}
-
-	if (!classDesc || !ts.isClassDeclaration(classDesc)) {
-		return;
-	}
-
+	// FIXME: This does a lot more than needed when we only check a Component (not a UIComponent)
+	// but it requires some refactoring to only perform the "hasManifestDefinition" check in that case
 	const analysisResult = findAsyncInterface({
-		classDefinition: classDesc, manifestContent, checker,
+		classDeclaration, manifestContent, checker, isUIComponent,
 	});
 
 	if (analysisResult) {
-		reportResults({analysisResult, context, reporter, resourcePath, classDesc, manifestContent});
+		reportComponentResults({analysisResult, reporter, classDeclaration, manifestContent});
+		if (isUIComponent) {
+			reportUIComponentResults(
+				{analysisResult, context, reporter, resourcePath, classDeclaration, manifestContent}
+			);
+		}
 	}
 }
 function getHighestPropertyStatus(aProp: AsyncPropertyStatus, bProp: AsyncPropertyStatus): AsyncPropertyStatus {
@@ -76,10 +78,11 @@ function mergeAsyncFlags(a: AsyncFlags, b: AsyncFlags): AsyncFlags {
 /**
  * Search for the async interface in the class hierarchy
 */
-function findAsyncInterface({classDefinition, manifestContent, checker}: {
-	classDefinition: ts.ClassDeclaration;
+function findAsyncInterface({classDeclaration, manifestContent, checker, isUIComponent}: {
+	classDeclaration: ts.ClassDeclaration;
 	manifestContent: string | undefined;
 	checker: ts.TypeChecker;
+	isUIComponent: boolean;
 }): AsyncFlags | undefined {
 	const returnTypeTemplate = {
 		hasAsyncInterface: false,
@@ -89,13 +92,13 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 	} as AsyncFlags;
 
 	// Checks the interfaces and manifest of the class
-	const curClassAnalysis = classDefinition.members.reduce((acc, member) => {
+	const curClassAnalysis = classDeclaration.members.reduce((acc, member) => {
 		const checkResult = doPropsCheck(member as ts.PropertyDeclaration, manifestContent);
 		return mergeAsyncFlags(acc, checkResult);
 	}, {...returnTypeTemplate});
 
 	const heritageAnalysis =
-		classDefinition?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
+		classDeclaration?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
 			return parentClasses.types.flatMap((parentClass) => {
 				const parentClassType = checker.getTypeAtLocation(parentClass);
 
@@ -105,10 +108,11 @@ function findAsyncInterface({classDefinition, manifestContent, checker}: {
 					// the async interface or manifest flags
 					if (ts.isClassDeclaration(declaration)) {
 						result = findAsyncInterface({
-							classDefinition: declaration,
+							classDeclaration: declaration,
 							// We are unable to dynamically search for a parent-component's manifest.json
 							manifestContent: undefined,
 							checker,
+							isUIComponent,
 						}) ?? result;
 					} else if (ts.isInterfaceDeclaration(declaration)) {
 						result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
@@ -317,22 +321,31 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 	return properties;
 }
 
-function reportResults({
-	analysisResult, reporter, classDesc, manifestContent, resourcePath, context,
+function reportComponentResults({
+	analysisResult, reporter, classDeclaration, manifestContent,
+}: {
+	analysisResult: AsyncFlags;
+	reporter: SourceFileReporter;
+	classDeclaration: ts.ClassDeclaration;
+	manifestContent: string | undefined;
+}) {
+	if (!analysisResult.hasManifestDefinition && !!manifestContent) {
+		reporter.addMessage(MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION, classDeclaration);
+	}
+}
+
+function reportUIComponentResults({
+	analysisResult, reporter, classDeclaration, manifestContent, resourcePath, context,
 }: {
 	analysisResult: AsyncFlags;
 	reporter: SourceFileReporter;
 	context: LinterContext;
-	classDesc: ts.ClassDeclaration;
+	classDeclaration: ts.ClassDeclaration;
 	manifestContent: string | undefined;
 	resourcePath: string;
 }) {
-	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag, hasManifestDefinition} = analysisResult;
+	const {hasAsyncInterface, routingAsyncFlag, rootViewAsyncFlag} = analysisResult;
 	const componentFileName = path.basename(resourcePath);
-
-	if (!hasManifestDefinition && !!manifestContent) {
-		reporter.addMessage(MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION, classDesc);
-	}
 
 	if (hasAsyncInterface !== true) {
 		if ([AsyncPropertyStatus.propNotSet, AsyncPropertyStatus.false].includes(rootViewAsyncFlag) ||
@@ -351,7 +364,7 @@ function reportResults({
 			reporter.addMessage(MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE, {
 				componentFileName,
 				asyncFlagMissingIn,
-			}, classDesc);
+			}, classDeclaration);
 		}
 	} else {
 		const {pointers} = jsonMap.parse<jsonSourceMapType>(manifestContent ?? "{}");
@@ -368,7 +381,7 @@ function reportResults({
 			} else {
 				reporter.addMessage(MESSAGE.COMPONENT_REDUNDANT_ASYNC_FLAG, {
 					asyncFlagLocation: pointerKey,
-				}, classDesc);
+				}, classDeclaration);
 			}
 		};
 
