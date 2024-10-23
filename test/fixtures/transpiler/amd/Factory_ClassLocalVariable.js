@@ -23,7 +23,8 @@ sap.ui.define(["sap/ui/core/Control"], function(Control) {
 	 */
 	Control.extend("test.ExampleControl5", {
 		"metadata": {}, // Quoted metadata property should be transformed to static property
-		renderer: (oRm, oControl) => {
+		"renderer": (oRm, oControl) => {
+			// Quoted renderer property should be transformed to static property
 		}
 	});
 	/* This comment should be below the "class" statement of ExampleControl5 after transpiling */
