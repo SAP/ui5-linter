@@ -156,10 +156,10 @@ export default class SourceFileLinter {
 		// Go up the hierarchy chain to find whether the class extends from the provided base class
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.flatMap((parentClass) => {
+				return parentClasses.types.map((parentClass) => {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
-					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+					return parentClassType.symbol?.declarations?.some((declaration) => {
 						if (!ts.isClassDeclaration(declaration)) {
 							return false;
 						}
@@ -219,29 +219,167 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
-			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+		if ((ts.isPropertyAssignment(rendererMember) || ts.isPropertyDeclaration(rendererMember) ||
+			ts.isVariableDeclaration(rendererMember)) && rendererMember.initializer) {
+			if (ts.isPropertyDeclaration(rendererMember)) {
+				const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
 
-			if (initializerType.flags & ts.TypeFlags.Undefined ||
-				initializerType.flags & ts.TypeFlags.Null) {
-				// null / undefined can be used to declare that a control does not have a renderer
-				return;
+				if (initializerType.flags & ts.TypeFlags.Undefined ||
+					initializerType.flags & ts.TypeFlags.Null) {
+					// null / undefined can be used to declare that a control does not have a renderer
+					return;
+				}
+
+				if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+					let rendererName;
+					if (
+						ts.isStringLiteral(rendererMember.initializer) ||
+						ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
+					) {
+						rendererName = rendererMember.initializer.text;
+					}
+					// Declaration as string requires sync loading of renderer module
+					this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
+						className, rendererName,
+					}, rendererMember.initializer);
+				}
 			}
 
-			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
-				let rendererName;
-				if (
-					ts.isStringLiteral(rendererMember.initializer) ||
-					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
-				) {
-					rendererName = rendererMember.initializer.text;
+			// Analyze renderer property when it's referenced by a variable or even another module
+			// i.e. { renderer: Renderer }
+			if (ts.isIdentifier(rendererMember.initializer)) {
+				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
+				const {declarations} = symbol ?? {};
+				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+			} else {
+				// Analyze renderer property when it's directly embedded in the renderer object
+				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+				this.analyzeControlRendererInternals(rendererMember.initializer);
+			}
+		} else if (ts.isShorthandPropertyAssignment(rendererMember)) {
+			// Special case for shorthand property assignment. Basically the same as the Identifier case above
+			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(rendererMember);
+			declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+		}
+	}
+
+	analyzeControlRendererInternals(node: ts.Node) {
+		// Analyze renderer property when it's an ObjectLiterExpression
+		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+		if (node && ts.isObjectLiteralExpression(node)) {
+			const apiVersionNode = node.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "apiVersion";
+			});
+
+			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
+				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
+			if (!apiVersionNode) { // No 'apiVersion' property
+				nodeToHighlight = node;
+			} else if (ts.isPropertyAssignment(apiVersionNode) &&
+				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
+			}
+
+			if (nodeToHighlight) {
+				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
+			}
+		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
+		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
+		}
+
+		this.analyzeIconCallInRenderMethod(node);
+	}
+
+	// If there's an oRm.icon() call in the render method, we need to check if IconPool is imported.
+	// Currently, we're only able to analyze whether oRm.icon is called in the render method as
+	// there's no reliable way to find if the method icon() is actually a member of RenderManager in other places.
+	analyzeIconCallInRenderMethod(node: ts.Node) {
+		let renderMethodNode: ts.Node | undefined = node;
+
+		// When the render is a plain function
+		if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			renderMethodNode = node;
+		} else if (ts.isObjectLiteralExpression(node)) {
+			// When the render is embed into the renderer object
+			const renderProperty = node.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "render";
+			});
+			renderMethodNode = (renderProperty && ts.isPropertyAssignment(renderProperty)) ?
+				renderProperty.initializer :
+				undefined;
+
+			// When the renderer is a separate module and the render method is assigned
+			// to the renderer object later i.e. myControlRenderer.render = function (oRm, oMyControl) {}
+			if (!renderMethodNode) {
+				let rendererObjectName = null;
+				if ((ts.isPropertyAssignment(node.parent) || ts.isPropertyDeclaration(node.parent) ||
+					ts.isVariableDeclaration(node.parent)) && ts.isIdentifier(node.parent.name)) {
+					rendererObjectName = node.parent.name.getText();
 				}
-				// Declaration as string requires sync loading of renderer module
-				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
-					className, rendererName,
-				}, rendererMember.initializer);
+
+				const findRenderMethod = (childNode: ts.Node) => {
+					if (ts.isBinaryExpression(childNode)) {
+						if (ts.isPropertyAccessExpression(childNode.left)) {
+							const objectName = childNode.left.expression.getText(); // myControlRenderer
+							const propertyName = childNode.left.name.getText(); // render
+
+							if (objectName === rendererObjectName && propertyName === "render") {
+								renderMethodNode = childNode.right;
+							}
+						}
+					}
+
+					if (!renderMethodNode) { // If found, stop traversing
+						ts.forEachChild(childNode, findRenderMethod);
+					}
+				};
+
+				ts.forEachChild(node.getSourceFile(), findRenderMethod);
 			}
 		}
+
+		if (!renderMethodNode) {
+			return;
+		}
+
+		// If there's a dependency to IconPool from the Renderer,
+		// it's fine and we can skip the rest of the checks
+		const renderManagerSource = renderMethodNode.getSourceFile();
+		const hasIconPoolImport = renderManagerSource.statements.some((importNode: ts.Statement) => {
+			return ts.isImportDeclaration(importNode) &&
+				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				importNode.moduleSpecifier.text === "sap/ui/core/IconPool";
+		});
+
+		if (hasIconPoolImport) {
+			return;
+		}
+
+		// The only reliable way to find the RenderManager is the first argument of the render method.
+		let renderManagerName = "<unknown>";
+		if (ts.isFunctionLike(renderMethodNode) && renderMethodNode.parameters.length > 0) {
+			renderManagerName = renderMethodNode.parameters[0].name.getText();
+		}
+
+		const findIconCallExpression = (childNode: ts.Node) => {
+			if (ts.isCallExpression(childNode) &&
+				ts.isPropertyAccessExpression(childNode.expression) &&
+				childNode.expression.name.getText() === "icon" &&
+				childNode.expression.expression.getText() === renderManagerName
+			) {
+				this.#reporter.addMessage(MESSAGE.NO_ICON_POOL_RENDERER, childNode);
+			}
+			ts.forEachChild(childNode, findIconCallExpression);
+		};
+
+		ts.forEachChild(renderMethodNode, findIconCallExpression);
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
