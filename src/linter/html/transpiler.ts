@@ -1,5 +1,5 @@
 import {ReadStream} from "node:fs";
-import {extractJSScriptTags} from "./parser.js";
+import {extractHTMLTags} from "./parser.js";
 import HtmlReporter from "./HtmlReporter.js";
 import LinterContext, {ResourcePath, TranspileResult} from "../LinterContext.js";
 import {taskStart} from "../../utils/perf.js";
@@ -13,21 +13,33 @@ export default async function transpileHtml(
 	try {
 		const taskEnd = taskStart("Transpile HTML", resourcePath, true);
 		const report = new HtmlReporter(resourcePath, context);
-		const jsScriptTags = await extractJSScriptTags(contentStream);
+		const {scriptTags, stylesheetLinkTags} = await extractHTMLTags(contentStream);
 
-		const bootstrapTag = findBootstrapTag(jsScriptTags);
+		const bootstrapTag = findBootstrapTag(scriptTags);
 
 		if (bootstrapTag) {
 			lintBootstrapAttributes(bootstrapTag, report);
 		}
 
-		jsScriptTags.forEach((tag) => {
+		scriptTags.forEach((tag) => {
 			// Tags with src attribute do not parse and run inline code
 			const hasSrc = tag.attributes.some((attr) => {
 				return attr.name.value.toLowerCase() === "src";
 			});
 			if (!hasSrc && tag.textNodes?.length > 0) {
 				report.addMessage(MESSAGE.CSP_UNSAFE_INLINE_SCRIPT, tag);
+			}
+		});
+
+		stylesheetLinkTags.forEach((tag) => {
+			const href = tag.attributes.find((attr) =>
+				attr.name.value.toLowerCase() === "href");
+			if (href) {
+				deprecatedThemes.forEach((themeName) => {
+					if (href.value.value.includes(`/themes/${themeName}/`)) {
+						report.addMessage(MESSAGE.DEPRECATED_THEME, {themeName}, href.value);
+					}
+				});
 			}
 		});
 
