@@ -50,6 +50,7 @@ export enum MESSAGE {
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
+	NO_ICON_POOL_RENDERER,
 	PARSING_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
@@ -320,6 +321,15 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Use of deprecated renderer. Define explicitly {apiVersion: 2} parameter in renderer object`,
 		details: () => `"{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}",`,
+	},
+
+	[MESSAGE.NO_ICON_POOL_RENDERER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
+		details: () => `"{@link sap.ui.core.RenderManager#methods/icon RenderManager}",`,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
