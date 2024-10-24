@@ -12,6 +12,12 @@ sap.ui.define([], function () {
 	};
 
 	function renderIcon(oRm) {
+		// TODO: Should be Reported- IconPool is NOT declared as dependency
+		// Currently, not supported as we are not able to identify at the moment
+		// that the oRm is actually a RenderManager.
+		// This test case is rather an easy one, but in sap.m library for example,
+		// there are inheritance chains where RenderManager is passed down/up the chain
+		// and cannot be easily determined. Such scenario are controls inheriting from sap.m.InputBase
 		oRm.icon("sap-icon://appointment", null, { title: null });
 	}
 	return myControlRenderer;
