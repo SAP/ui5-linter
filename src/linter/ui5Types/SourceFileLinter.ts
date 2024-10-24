@@ -156,10 +156,10 @@ export default class SourceFileLinter {
 		// Go up the hierarchy chain to find whether the class extends from the provided base class
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.flatMap((parentClass) => {
+				return parentClasses.types.map((parentClass) => {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
-					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+					return parentClassType.symbol?.declarations?.some((declaration) => {
 						if (!ts.isClassDeclaration(declaration)) {
 							return false;
 						}
