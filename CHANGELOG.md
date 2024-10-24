@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/SAP/ui5-linter/compare/v1.1.1...v1.2.0) (2024-10-24)
+
+
+### Features
+
+* Check control renderer declaration ([#374](https://github.com/SAP/ui5-linter/issues/374)) ([0c9b3e8](https://github.com/SAP/ui5-linter/commit/0c9b3e8bf6e616fc4a497f662edef611367f325e))
+* **html:** Detect deprecated themes in 'href' attributes ([#382](https://github.com/SAP/ui5-linter/issues/382)) ([2d4bcfa](https://github.com/SAP/ui5-linter/commit/2d4bcfabd6ea7fe69ea6beedbf859a7a7b41bb37))
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Handle extend call without args ([f279771](https://github.com/SAP/ui5-linter/commit/f2797718a8b7288de9b3f281c1a392cc2f510a28))
+* Correctly handle namespace resolution in linting ([#367](https://github.com/SAP/ui5-linter/issues/367)) ([922e76b](https://github.com/SAP/ui5-linter/commit/922e76ba8b47f995043e9624926ce0eda3dc79fc))
+
 ## [1.1.1](https://github.com/SAP/ui5-linter/compare/v1.1.0...v1.1.1) (2024-10-18)
 
 
