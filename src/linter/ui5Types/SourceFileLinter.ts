@@ -688,6 +688,7 @@ export default class SourceFileLinter {
 			const symbolName = exprType.symbol.getName();
 			const moduleName = moduleDeclaration.name.text;
 
+			// TODO:
 			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 				// Check for sap/ui/core/Lib.init usages
 				this.#analyzeLibInitCall(node, exprNode);
