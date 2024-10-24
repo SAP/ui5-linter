@@ -2,12 +2,29 @@ import type {ReadStream} from "node:fs";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
 import {parseXML} from "../../utils/xmlParser.js";
 
-export async function extractJSScriptTags(contentStream: ReadStream) {
-	const scriptTags: SaxTag[] = [];
+interface ExtractedTags {
+	scriptTags: SaxTag[];
+	stylesheetLinkTags: SaxTag[];
+}
 
+export async function extractHTMLTags(contentStream: ReadStream) {
+	const extractedTags: ExtractedTags = {
+		scriptTags: [],
+		stylesheetLinkTags: [],
+	};
 	await parseXML(contentStream, (event, tag) => {
-		if (tag instanceof SaxTag &&
-			event === SaxEventType.CloseTag &&
+		if (!(tag instanceof SaxTag)) {
+			return;
+		}
+		if (event === SaxEventType.OpenTag &&
+			tag.value === "link") {
+			if (tag.attributes.some((attr) => {
+				return (attr.name.value === "rel" &&
+					attr.value.value === "stylesheet");
+			})) {
+				extractedTags.stylesheetLinkTags.push(tag);
+			};
+		} else if (event === SaxEventType.CloseTag &&
 			tag.value === "script") {
 			const isJSScriptTag = tag.attributes.every((attr) => {
 				// The "type" attribute of the script tag should be
@@ -23,12 +40,10 @@ export async function extractJSScriptTags(contentStream: ReadStream) {
 							"application/javascript", /* legacy */
 						].includes(attr.value.value.toLowerCase()));
 			});
-
 			if (isJSScriptTag) {
-				scriptTags.push(tag);
+				extractedTags.scriptTags.push(tag);
 			}
 		}
 	});
-
-	return scriptTags;
+	return extractedTags;
 }
