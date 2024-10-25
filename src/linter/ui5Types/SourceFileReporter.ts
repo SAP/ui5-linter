@@ -1,11 +1,6 @@
 import path from "node:path/posix";
 import ts from "typescript";
-import {
-	TraceMap,
-	originalPositionFor,
-	LEAST_UPPER_BOUND,
-	GREATEST_LOWER_BOUND,
-} from "@jridgewell/trace-mapping";
+import {TraceMap} from "@jridgewell/trace-mapping";
 import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 import LinterContext, {
@@ -15,6 +10,7 @@ import LinterContext, {
 } from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
+import {getPositionsForNode} from "../../utils/nodePosition.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
@@ -74,8 +70,8 @@ export default class SourceFileReporter {
 		if (node) {
 			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
-			position.line = start.line + 1;
-			position.column = start.column + 1;
+			position.line = start.line;
+			position.column = start.column;
 			// endLine = end.line + 1;
 			// endColumn = end.column + 1;
 		}
@@ -88,8 +84,8 @@ export default class SourceFileReporter {
 		const coverageInfo: CoverageInfo = {
 			category,
 			// One-based to be aligned with most IDEs
-			line: start.line + 1,
-			column: start.column + 1,
+			line: start.line,
+			column: start.column,
 			// endLine: end.line + 1,
 			// endColumn: end.column + 1,
 			message,
@@ -103,51 +99,12 @@ export default class SourceFileReporter {
 	}
 
 	#getPositionsForNode(node: ts.Node): PositionRange {
-		return {
-			start: this.#getPosition(node.getStart()),
-			// end: this.#getPosition(node.getEnd())
-		};
-	}
-
-	#getPosition(pos: number): PositionInfo {
-		if (!this.#sourceFile) {
-			throw new Error(`No source file available for file ${this.#resourcePath}`);
-		}
-		// Typescript positions are all zero-based
-		const {line, character: column} = this.#sourceFile.getLineAndCharacterOfPosition(pos);
-
-		if (this.#traceMap) {
-			// trace-mapping's originalPositionFor uses one-based lines and zero-based columns for input and output
-			let tracedPos = originalPositionFor(this.#traceMap, {
-				line: line + 1,
-				column,
-				bias: GREATEST_LOWER_BOUND,
-			});
-
-			if (tracedPos.line === null) {
-				// No source map found at or before the given position.
-				// Try again with the least upper bound (i.e. the first mapping after the given position)
-				tracedPos = originalPositionFor(this.#traceMap, {
-					line: line + 1,
-					column,
-					bias: LEAST_UPPER_BOUND,
-				});
-			}
-
-			if (tracedPos.line === null) {
-				throw new Error(
-					`Failed to map back to source: ${this.#sourceFile.fileName} ` +
-					`(line: ${line + 1}, column: ${column + 1})`);
-			}
-			return {
-				line: tracedPos.line - 1, // Subtract 1 again to restore zero-based lines to match TypeScript output
-				column: tracedPos.column,
-			};
-		}
-		return {
-			line,
-			column,
-		};
+		return getPositionsForNode({
+			node,
+			sourceFile: this.#sourceFile,
+			traceMap: this.#traceMap,
+			resourcePath: this.#resourcePath,
+		});
 	}
 
 	#getOriginalResourcePath(): ResourcePath | undefined {
