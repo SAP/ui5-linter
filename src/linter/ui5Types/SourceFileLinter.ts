@@ -288,6 +288,9 @@ export default class SourceFileLinter {
 			}
 
 			if (nodeToHighlight) {
+				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+				// The findings can be in different file i.e. Control being analyzed,
+				// but reporting might be in ControlRenderer
 				const nodeSourceFile = nodeToHighlight.getSourceFile();
 				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
 				this.#context.addLintingMessage(
@@ -302,6 +305,9 @@ export default class SourceFileLinter {
 		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
 		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
 			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+			// The findings can be in different file i.e. Control being analyzed,
+			// but reporting might be in ControlRenderer
 			const nodeSourceFile = node.getSourceFile();
 			const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
 			this.#context.addLintingMessage(
@@ -397,6 +403,9 @@ export default class SourceFileLinter {
 				childNode.expression.name.getText() === "icon" &&
 				childNode.expression.expression.getText() === renderManagerName
 			) {
+				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+				// The findings can be in different file i.e. Control being analyzed,
+				// but reporting might be in ControlRenderer
 				const nodeSourceFile = childNode.getSourceFile();
 				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
 				this.#context.addLintingMessage(
