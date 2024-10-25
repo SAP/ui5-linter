@@ -19,7 +19,7 @@ export function getPositionsForNode({node, sourceFile, traceMap, resourcePath}: 
 
 	// Typescript positions are all zero-based
 	const {line, character: column} = sourceFile.getLineAndCharacterOfPosition(node.getStart());
-	let returnStatement = {start: {line, column}};
+	const returnStatement = {start: {line, column}};
 
 	if (traceMap) {
 		// trace-mapping's originalPositionFor uses one-based lines and zero-based columns for input and output
