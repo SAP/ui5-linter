@@ -128,7 +128,7 @@ export default class SourceFileLinter {
 				reporter: this.#reporter,
 				context: this.#context,
 				checker: this.#checker,
-				isUIComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
+				isUiComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
 		} else if (
 			ts.isPropertyDeclaration(node) &&
