@@ -8,6 +8,8 @@ import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
+import {getPositionsForNode} from "../../utils/nodePosition.js";
+import {TraceMap} from "@jridgewell/trace-mapping";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -39,6 +41,7 @@ function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
+	#sourceMaps: Map<string, string> | undefined;
 	#checker: ts.TypeChecker;
 	#context: LinterContext;
 	#reporter: SourceFileReporter;
@@ -53,16 +56,18 @@ export default class SourceFileLinter {
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
+		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
 		dataTypes: Record<string, string> | undefined, manifestContent?: string,
 		apiExtract?: Record<string, Record<string, Record<string, string>>>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
+		this.#sourceMaps = sourceMaps;
 		this.#checker = checker;
 		this.#context = context;
-		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
+		this.#reporter = new SourceFileReporter(context, resourcePath,
+			sourceFile, sourceMaps?.get(sourceFile.fileName));
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
@@ -283,12 +288,30 @@ export default class SourceFileLinter {
 			}
 
 			if (nodeToHighlight) {
-				this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
+				const nodeSourceFile = nodeToHighlight.getSourceFile();
+				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+				this.#context.addLintingMessage(
+					nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
+					getPositionsForNode({
+						node: nodeToHighlight,
+						sourceFile: nodeSourceFile,
+						resourcePath: nodeSourceFile.fileName,
+						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+					}).start);
 			}
 		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
 		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
 			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
-			this.#reporter.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
+			const nodeSourceFile = node.getSourceFile();
+			const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+			this.#context.addLintingMessage(
+				nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
+				getPositionsForNode({
+					node,
+					sourceFile: nodeSourceFile,
+					resourcePath: nodeSourceFile.fileName,
+					traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+				}).start);
 		}
 
 		this.analyzeIconCallInRenderMethod(node);
@@ -374,7 +397,16 @@ export default class SourceFileLinter {
 				childNode.expression.name.getText() === "icon" &&
 				childNode.expression.expression.getText() === renderManagerName
 			) {
-				this.#reporter.addMessage(MESSAGE.NO_ICON_POOL_RENDERER, childNode);
+				const nodeSourceFile = childNode.getSourceFile();
+				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+				this.#context.addLintingMessage(
+					nodeSourceFile.fileName, MESSAGE.NO_ICON_POOL_RENDERER, undefined as never,
+					getPositionsForNode({
+						node: childNode,
+						sourceFile: nodeSourceFile,
+						resourcePath: nodeSourceFile.fileName,
+						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+					}).start);
 			}
 			ts.forEachChild(childNode, findIconCallExpression);
 		};
