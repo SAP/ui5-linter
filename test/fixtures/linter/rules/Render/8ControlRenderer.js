@@ -1,5 +1,3 @@
-// This file would be skipped from direct testing.
-// It would be tested via its Control
 sap.ui.define([], function () {
 	var myControlRenderer = {
 		apiVersion: 2,
@@ -12,6 +10,9 @@ sap.ui.define([], function () {
 	};
 
 	function renderIcon(oRm) {
+		// The line below is detected via normal rules, not through the context of the render method
+		var oProperties1 = jQuery.sap.properties(); // jQuery.sap.properties is deprecated
+
 		// TODO: Should be Reported- IconPool is NOT declared as dependency
 		// Currently, not supported as we are not able to identify at the moment
 		// that the oRm is actually a RenderManager.
