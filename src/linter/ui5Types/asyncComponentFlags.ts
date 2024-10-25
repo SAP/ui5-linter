@@ -35,7 +35,7 @@ export default function analyzeComponentJson({
 	reporter,
 	context,
 	checker,
-	isUIComponent,
+	isUiComponent,
 }: {
 	classDeclaration: ts.ClassDeclaration;
 	manifestContent: string | undefined;
@@ -45,18 +45,18 @@ export default function analyzeComponentJson({
 	checker: ts.TypeChecker;
 
 	// Indication whether the class not only inherits from sap/ui/core/Component but also from sap/ui/core/UIComponent
-	isUIComponent: boolean;
+	isUiComponent: boolean;
 }) {
 	// FIXME: This does a lot more than needed when we only check a Component (not a UIComponent)
 	// but it requires some refactoring to only perform the "hasManifestDefinition" check in that case
 	const analysisResult = findAsyncInterface({
-		classDeclaration, manifestContent, checker, isUIComponent,
+		classDeclaration, manifestContent, checker, isUiComponent,
 	});
 
 	if (analysisResult) {
 		reportComponentResults({analysisResult, reporter, classDeclaration, manifestContent});
-		if (isUIComponent) {
-			reportUIComponentResults(
+		if (isUiComponent) {
+			reportUiComponentResults(
 				{analysisResult, context, reporter, resourcePath, classDeclaration, manifestContent}
 			);
 		}
@@ -78,11 +78,11 @@ function mergeAsyncFlags(a: AsyncFlags, b: AsyncFlags): AsyncFlags {
 /**
  * Search for the async interface in the class hierarchy
 */
-function findAsyncInterface({classDeclaration, manifestContent, checker, isUIComponent}: {
+function findAsyncInterface({classDeclaration, manifestContent, checker, isUiComponent}: {
 	classDeclaration: ts.ClassDeclaration;
 	manifestContent: string | undefined;
 	checker: ts.TypeChecker;
-	isUIComponent: boolean;
+	isUiComponent: boolean;
 }): AsyncFlags | undefined {
 	const returnTypeTemplate = {
 		hasAsyncInterface: false,
@@ -112,7 +112,7 @@ function findAsyncInterface({classDeclaration, manifestContent, checker, isUICom
 							// We are unable to dynamically search for a parent-component's manifest.json
 							manifestContent: undefined,
 							checker,
-							isUIComponent,
+							isUiComponent,
 						}) ?? result;
 					} else if (ts.isInterfaceDeclaration(declaration)) {
 						result.hasAsyncInterface = doAsyncInterfaceChecks(parentClass) ?? result.hasAsyncInterface;
@@ -334,7 +334,7 @@ function reportComponentResults({
 	}
 }
 
-function reportUIComponentResults({
+function reportUiComponentResults({
 	analysisResult, reporter, classDeclaration, manifestContent, resourcePath, context,
 }: {
 	analysisResult: AsyncFlags;
