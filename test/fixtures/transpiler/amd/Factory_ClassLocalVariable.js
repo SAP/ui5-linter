@@ -1,4 +1,4 @@
-sap.ui.define(["sap/ui/core/Control"], function(Control) {
+sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button) {
 
 	/* This comment should be above the "class" statement of ExampleControl1 after transpiling */
 	const ExampleControl1 = Control.extend("test.ExampleControl1", {
@@ -43,6 +43,23 @@ sap.ui.define(["sap/ui/core/Control"], function(Control) {
 			}
 		});
 	})();
+	
+	const metadata = {};
+	const renderer = function (oRm, oMyControl) {};
+	const createButton = function() {
+		var btn = new Button({
+			blocked: true
+		});
+		btn.attachTap(function() {
+			console.log("Tapped");
+		});
+		return btn;
+	};
+	var myControl = Control.extend("myControl", {
+		metadata,
+		renderer,
+		createButton,
+	});
 
 	// This comment should be above the "class" statement of ExampleControl9 after transpiling
 	return Control.extend("test.ExampleControl9", {
