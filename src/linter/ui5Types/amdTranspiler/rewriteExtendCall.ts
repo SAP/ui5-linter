@@ -68,6 +68,7 @@ function getClassBodyFromArguments(
 	}
 	return classBody.properties.map((prop): ts.ClassElement | undefined => {
 		if (ts.isShorthandPropertyAssignment(prop)) {
+			// When a property is declared as a shorthand, create a property declaration to itself.
 			const staticModifier = (ts.isIdentifier(prop.name) && ["renderer", "metadata"].includes(prop.name.text)) ?
 					[nodeFactory.createToken(ts.SyntaxKind.StaticKeyword)] :
 					[];
