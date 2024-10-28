@@ -261,10 +261,6 @@ export default class SourceFileLinter {
 				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
 				this.analyzeControlRendererInternals(rendererMember.initializer);
 			}
-		} else if (ts.isShorthandPropertyAssignment(rendererMember)) {
-			// Special case for shorthand property assignment. Basically the same as the Identifier case above
-			const {symbol: {declarations}} = this.#checker.getTypeAtLocation(rendererMember);
-			declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
 		}
 	}
 
