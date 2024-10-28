@@ -82,7 +82,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
-		if (fixturesPath.includes("AsyncComponentFlags") || fixturesPath.includes("Render")) {
+		if (fixturesPath.includes("AsyncComponentFlags") || fixturesPath.includes("renderer")) {
 			const dirName = path.basename(fixturesPath);
 			testDefinition({
 				testName: dirName,

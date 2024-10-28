@@ -271,8 +271,8 @@ export default class SourceFileLinter {
 	analyzeControlRendererInternals(node: ts.Node) {
 		// Analyze renderer property when it's an ObjectLiterExpression
 		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
-		if (node && ts.isObjectLiteralExpression(node)) {
-			const apiVersionNode = node.properties.find((prop) => {
+		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
+			const apiVersionNode = ts.isObjectLiteralExpression(node) && node.properties.find((prop) => {
 				return ts.isPropertyAssignment(prop) &&
 					ts.isIdentifier(prop.name) &&
 					prop.name.text === "apiVersion";
