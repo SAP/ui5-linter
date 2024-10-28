@@ -8,7 +8,7 @@ sap.ui.define(["sap/ui/core/Control"], function (Control) {
 	
 	var myControl = Control.extend("mycomp.myControl", {
 		metadata: {},
-		renderer: renderer, // Deprecated declaration. {apiVersion: 2} must be provided.
+		renderer, // Deprecated declaration. {apiVersion: 2} must be provided.
 	});
 
 	return myControl;
