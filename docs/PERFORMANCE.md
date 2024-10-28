@@ -15,7 +15,7 @@ _Reference commit: [`c9a0f7c51`](https://github.com/SAP/openui5-sample-app/tree/
 **Metadata:**
 
 * Resources to lint: `17` (31.59 KB)
-* Latest Result: `0 problems (0 errors, 0 warnings)`
+* Latest Result: `3 problems (0 errors, 3 warnings)`
 
 ## Non-JS library with no findings: OpenUI5 `themelib_sap_horizon`
 
@@ -33,7 +33,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `68` (0.19 MB)
-* Latest Result: `33 problems (26 errors, 7 warnings)`
+* Latest Result: `29 problems (22 errors, 7 warnings)`
 
 ## Medium library: OpenUI5 `sap.ui.layout`
 
@@ -42,7 +42,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `572` (2.4 MB)
-* Latest Result: `1421 problems (1333 errors, 88 warnings)`
+* Latest Result: `1435 problems (1347 errors, 88 warnings)`
 
 ## Large library: OpenUI5 `sap.m`
 
@@ -51,7 +51,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `5609` (25.67 MB)
-* Latest Result: `13516 problems (12335 errors, 1181 warnings)`
+* Latest Result: `13732 problems (12551 errors, 1181 warnings)`
 
 ## Large library: OpenUI5 `sap.ui.core`
 
@@ -60,9 +60,51 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 **Metadata:**
 
 * Resources to lint: `4950` (45 MB)
-* Latest Result: `6141 problems (5520 errors, 621 warnings)` + `2 fatal errors`
+* Latest Result: `6287 problems (5658 errors, 629 warnings)` + `2 fatal errors`
 
 # Benchmark Runs
+
+## October 28, 2024
+
+* UI5 linter [`31432b0`](https://github.com/SAP/ui5-linter/commit/31432b050a5b4a1dc446923331efa11b97652ef2)
+* Node.js `v22.9.0`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 640.4 ± 27.8 | 592.6 | 692.3 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.255 ± 0.077 | 2.151 | 2.390 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.759 ± 0.159 | 3.499 | 3.966 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.754 ± 0.087 | 5.642 | 5.949 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 37.316 ± 0.751 | 36.290 | 39.059 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 40.927 ± 0.669 | 40.178 | 41.868 |
 
 ## September 30, 2024
 
