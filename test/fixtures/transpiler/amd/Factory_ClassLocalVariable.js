@@ -44,6 +44,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 		});
 	})();
 	
+	const metadata = {};
 	const renderer = function (oRm, oMyControl) {};
 	const createButton = function() {
 		var btn = new Button({
@@ -55,7 +56,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 		return btn;
 	};
 	var myControl = Control.extend("myControl", {
-		metadata: {},
+		metadata,
 		renderer,
 		createButton,
 	});

@@ -68,7 +68,7 @@ function getClassBodyFromArguments(
 	}
 	return classBody.properties.map((prop): ts.ClassElement | undefined => {
 		if (ts.isShorthandPropertyAssignment(prop)) {
-			const staticModifier = (ts.isIdentifier(prop.name) && prop.name.text === "renderer") ?
+			const staticModifier = (ts.isIdentifier(prop.name) && ["renderer", "metadata"].includes(prop.name.text)) ?
 					[nodeFactory.createToken(ts.SyntaxKind.StaticKeyword)] :
 					[];
 			return nodeFactory.createPropertyDeclaration(
