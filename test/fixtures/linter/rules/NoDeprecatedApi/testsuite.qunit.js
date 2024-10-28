@@ -17,12 +17,17 @@ sap.ui.define(function () {
 		},
 		tests: {
 			"unit/unitTests": {
+				theme: "sap_belize", // negative finding (wrong place)
 				title: "Unit tests for Todo App",
-				theme: "sap_belize_plus", // positive finding
+				ui5: {
+					theme: "sap_belize_plus", // positive finding
+				}
 			},
 			"integration/opaTests": {
 				title: "Integration tests for Todo App",
-				theme: "sap_belize_hcb", // positive finding
+				ui5: {
+					theme: "sap_belize_hcb", // positive finding
+				}
 			}
 		}
 	};

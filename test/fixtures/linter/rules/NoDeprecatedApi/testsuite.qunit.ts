@@ -1,3 +1,5 @@
+import { ui5 } from "sap/viz/library";
+
 export default {
 	name: "QUnit test suite with deprecated themes (TS)",
 	defaults: {
@@ -16,11 +18,15 @@ export default {
 	tests: {
 		"unit/unitTests": {
 			title: "UI5 TypeScript Walkthrough - Unit Tests",
-			theme: "sap_bluecrystal" // positive finding
+			ui5: {
+				theme: "sap_bluecrystal" // positive finding
+			}
 		},
 		"integration/opaTests": {
 			title: "Integration tests for Todo App",
-			theme: "sap_horizon", // negative finding
+			ui5: {
+				theme: "sap_horizon", // negative finding
+			}
 		}
 	}
 };
