@@ -62,12 +62,18 @@ function getClassBodyFromArguments(
 	if (!classBody) {
 		throw new UnsupportedExtendCall(`No class body found in extends call at ${toPosStr(callExp)}`);
 	}
-	if (classBody.properties.find((prop) => ts.isSpreadAssignment(prop) || ts.isShorthandPropertyAssignment(prop))) {
+	if (classBody.properties.find((prop) => ts.isSpreadAssignment(prop))) {
 		// TODO: Support spread elements(?)
 		throw new UnsupportedExtendCall(`Unsupported spread element in extends call body`);
 	}
 	return classBody.properties.map((prop): ts.ClassElement | undefined => {
-		if (ts.isMethodDeclaration(prop)) {
+		if (ts.isShorthandPropertyAssignment(prop)) {
+			const staticModifier = (ts.isIdentifier(prop.name) && prop.name.text === "renderer") ?
+					[nodeFactory.createToken(ts.SyntaxKind.StaticKeyword)] :
+					[];
+			return nodeFactory.createPropertyDeclaration(
+				staticModifier, prop.name, undefined, undefined, prop.name);
+		} else if (ts.isMethodDeclaration(prop)) {
 			// Use method declarations as-is
 			// e.g. "method() {}"
 
