@@ -272,14 +272,13 @@ export default class SourceFileLinter {
 				return ts.isPropertyAssignment(prop) &&
 					(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
 					prop.name.text === "apiVersion";
-			});
+			}) as ts.PropertyAssignment | undefined;
 
 			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
 				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
-			} else if (ts.isPropertyAssignment(apiVersionNode) &&
-				apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+			} else if (apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}
 
