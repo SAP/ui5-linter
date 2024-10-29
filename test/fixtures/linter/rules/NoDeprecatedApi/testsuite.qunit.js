@@ -26,7 +26,7 @@ sap.ui.define(function () {
 			"integration/opaTests": {
 				title: "Integration tests for Todo App",
 				ui5: {
-					theme: "sap_belize_hcb", // positive finding
+					"theme": "sap_belize_hcb", // positive finding
 				}
 			}
 		}

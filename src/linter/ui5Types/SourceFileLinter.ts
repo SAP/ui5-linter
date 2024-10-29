@@ -148,7 +148,8 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
-		} else if (ts.isPropertyAssignment(node) && node.name.getText() === "theme") {
+		} else if (ts.isPropertyAssignment(node) && (node.name.getText() === "theme" ||
+			node.name.getText() === "\"theme\"")) {
 			this.analyzeTestsuiteThemeProperty(node);
 		}
 
@@ -1213,11 +1214,11 @@ export default class SourceFileLinter {
 		// Therefore, we need checks (1.) and (2.) and set a flag to true afterwards.
 		let isTestStarterStructure = false;
 
-		// Check if "theme" property is inside "ui5: {...}" object
 		const oneLayerUp = node.parent.parent;
 		const twoLayersUp = oneLayerUp?.parent.parent;
 		const threeLayersUp = twoLayersUp?.parent.parent;
-		if (node.parent?.parent && ts.isObjectLiteralElement(oneLayerUp) &&
+		// Check if "theme" property is inside "ui5: {...}" object
+		if (oneLayerUp && ts.isObjectLiteralElement(oneLayerUp) &&
 			oneLayerUp.name?.getText() === "ui5") {
 			// (1.) check if "theme" property is in "defaults: {...}" context
 			if (ts.isObjectLiteralElement(twoLayersUp) &&
@@ -1225,16 +1226,14 @@ export default class SourceFileLinter {
 				isTestStarterStructure = true;
 			} // (2.) check if "theme" property is in "tests: {...}" context
 			else if (ts.isObjectLiteralElement(twoLayersUp) &&
-				twoLayersUp.name?.getText().startsWith("\"") &&
-				twoLayersUp.name?.getText().endsWith("\"")) {
-				if (ts.isObjectLiteralElement(threeLayersUp) &&
-					threeLayersUp.name?.getText() === "tests") {
-					isTestStarterStructure = true;
-				}
+				ts.isObjectLiteralElement(threeLayersUp) &&
+				threeLayersUp.name?.getText() === "tests") {
+				isTestStarterStructure = true;
 			}
 		}
 
-		const themeName = (node.initializer as ts.StringLiteral).text;
+		if (!ts.isStringLiteral(node.initializer)) return;
+		const themeName = node.initializer.text;
 		if (isTestStarterStructure && deprecatedThemes.includes(themeName)) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
 				themeName,

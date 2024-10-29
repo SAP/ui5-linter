@@ -27,6 +27,12 @@ export default {
 			ui5: {
 				theme: "sap_horizon", // negative finding
 			}
+		},
+		anythingHere: {
+			title: "Without string property name",
+			ui5: {
+				theme: "sap_belize_hcb", // positive finding
+			}
 		}
 	}
 };
