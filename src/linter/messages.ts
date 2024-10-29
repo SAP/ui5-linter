@@ -319,7 +319,8 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: () =>
-			`Use of deprecated renderer detected. Define explicitly the {apiVersion: 2} parameter in the renderer object`,
+			`Use of deprecated renderer detected. Define explicitly the {apiVersion: 2} parameter ` +
+			`in the renderer object`,
 		details: () => `"{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}",`,
 	},
 
