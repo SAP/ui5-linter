@@ -224,30 +224,27 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		if ((ts.isPropertyAssignment(rendererMember) || ts.isPropertyDeclaration(rendererMember) ||
-			ts.isVariableDeclaration(rendererMember)) && rendererMember.initializer) {
-			if (ts.isPropertyDeclaration(rendererMember)) {
-				const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
+			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
 
-				if (initializerType.flags & ts.TypeFlags.Undefined ||
-					initializerType.flags & ts.TypeFlags.Null) {
-					// null / undefined can be used to declare that a control does not have a renderer
-					return;
-				}
+			if (initializerType.flags & ts.TypeFlags.Undefined ||
+				initializerType.flags & ts.TypeFlags.Null) {
+				// null / undefined can be used to declare that a control does not have a renderer
+				return;
+			}
 
-				if (initializerType.flags & ts.TypeFlags.StringLiteral) {
-					let rendererName;
-					if (
-						ts.isStringLiteral(rendererMember.initializer) ||
-						ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
-					) {
-						rendererName = rendererMember.initializer.text;
-					}
-					// Declaration as string requires sync loading of renderer module
-					this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
-						className, rendererName,
-					}, rendererMember.initializer);
+			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
+				let rendererName;
+				if (
+					ts.isStringLiteral(rendererMember.initializer) ||
+					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
+				) {
+					rendererName = rendererMember.initializer.text;
 				}
+				// Declaration as string requires sync loading of renderer module
+				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
+					className, rendererName,
+				}, rendererMember.initializer);
 			}
 
 			// Analyze renderer property when it's referenced by a variable or even another module
