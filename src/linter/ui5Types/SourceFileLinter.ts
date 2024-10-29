@@ -270,7 +270,7 @@ export default class SourceFileLinter {
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
 			const apiVersionNode = ts.isObjectLiteralExpression(node) && node.properties.find((prop) => {
 				return ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) &&
+					(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
 					prop.name.text === "apiVersion";
 			});
 
