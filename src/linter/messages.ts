@@ -46,9 +46,11 @@ export enum MESSAGE {
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	MISSING_BOOTSTRAP_PARAM,
+	NO_DEPRECATED_RENDERER,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
+	NO_ICON_POOL_RENDERER,
 	PARSING_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
@@ -310,6 +312,25 @@ export const MESSAGE_INFO = {
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Deprecated call to ${libInitFunction}(). Use the {apiVersion: 2} parameter instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
+	[MESSAGE.NO_DEPRECATED_RENDERER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`Use of deprecated renderer detected. Define explicitly the {apiVersion: 2} parameter ` +
+			`in the renderer object`,
+		details: () => `"{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}",`,
+	},
+
+	[MESSAGE.NO_ICON_POOL_RENDERER]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: () =>
+			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
+		details: () => `"{@link sap.ui.core.RenderManager#methods/icon RenderManager}",`,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {

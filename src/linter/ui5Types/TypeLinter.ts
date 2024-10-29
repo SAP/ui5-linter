@@ -137,7 +137,7 @@ export default class TypeChecker {
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(
 					this.#context, sourceFile.fileName,
-					sourceFile, sourceMap,
+					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails, dataTypes,
 					manifestContent, apiExtract
 				);

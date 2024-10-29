@@ -27,7 +27,7 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/ui5Types/SourceFileLinter.js":
 			function (
 				context: LinterContext, filePath: string, sourceFile: SourceFile,
-				sourceMap: string | undefined, checker: TypeChecker,
+				sourceMaps: Map<string, string> | undefined, checker: TypeChecker,
 				reportCoverage: boolean | undefined = false,
 				messageDetails: boolean | undefined = false,
 				dataTypes: Record<string, string>,
@@ -36,7 +36,7 @@ export async function esmockDeprecationText() {
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(
-					context, filePath, sourceFile, sourceMap, checker, reportCoverage,
+					context, filePath, sourceFile, sourceMaps, checker, reportCoverage,
 					messageDetails, dataTypes, manifestContent, apiExtract
 				);
 				linter.getDeprecationText = () => "Deprecated test message";
@@ -82,7 +82,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 		if (!testFiles.length) {
 			throw new Error(`Failed to find any fixtures in directory ${fixturesPath}`);
 		}
-		if (fixturesPath.includes("AsyncComponentFlags")) {
+		if (fixturesPath.includes("AsyncComponentFlags") || fixturesPath.includes("renderer")) {
 			const dirName = path.basename(fixturesPath);
 			testDefinition({
 				testName: dirName,

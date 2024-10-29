@@ -8,6 +8,8 @@ import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
+import {getPositionsForNode} from "../../utils/nodePosition.js";
+import {TraceMap} from "@jridgewell/trace-mapping";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -39,6 +41,7 @@ function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
+	#sourceMaps: Map<string, string> | undefined;
 	#checker: ts.TypeChecker;
 	#context: LinterContext;
 	#reporter: SourceFileReporter;
@@ -53,16 +56,18 @@ export default class SourceFileLinter {
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined, checker: ts.TypeChecker,
+		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
 		dataTypes: Record<string, string> | undefined, manifestContent?: string,
 		apiExtract?: Record<string, Record<string, Record<string, string>>>
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
+		this.#sourceMaps = sourceMaps;
 		this.#checker = checker;
 		this.#context = context;
-		this.#reporter = new SourceFileReporter(context, resourcePath, sourceFile, sourceMap);
+		this.#reporter = new SourceFileReporter(context, resourcePath,
+			sourceFile, sourceMaps?.get(sourceFile.fileName));
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#reportCoverage = reportCoverage;
 		this.#messageDetails = messageDetails;
@@ -156,10 +161,10 @@ export default class SourceFileLinter {
 		// Go up the hierarchy chain to find whether the class extends from the provided base class
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.flatMap((parentClass) => {
+				return parentClasses.types.map((parentClass) => {
 					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
 
-					return parentClassType.symbol?.declarations?.flatMap((declaration) => {
+					return parentClassType.symbol?.declarations?.some((declaration) => {
 						if (!ts.isClassDeclaration(declaration)) {
 							return false;
 						}
@@ -241,6 +246,175 @@ export default class SourceFileLinter {
 					className, rendererName,
 				}, rendererMember.initializer);
 			}
+
+			// Analyze renderer property when it's referenced by a variable or even another module
+			// i.e. { renderer: Renderer }
+			if (ts.isIdentifier(rendererMember.initializer)) {
+				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
+				const {declarations} = symbol ?? {};
+				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+			} else {
+				// Analyze renderer property when it's directly embedded in the renderer object
+				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+				this.analyzeControlRendererInternals(rendererMember.initializer);
+			}
+		}
+	}
+
+	analyzeControlRendererInternals(node: ts.Node) {
+		// Analyze renderer property when it's an ObjectLiteralExpression
+		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
+		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
+			const apiVersionNode = ts.isObjectLiteralExpression(node) && node.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
+					prop.name.text === "apiVersion";
+			}) as ts.PropertyAssignment | undefined;
+
+			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
+				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
+			if (!apiVersionNode) { // No 'apiVersion' property
+				nodeToHighlight = node;
+			} else if (apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+				nodeToHighlight = apiVersionNode;
+			}
+
+			if (nodeToHighlight) {
+				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+				// The findings can be in different file i.e. Control being analyzed,
+				// but reporting might be in ControlRenderer
+				const nodeSourceFile = nodeToHighlight.getSourceFile();
+				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+				this.#context.addLintingMessage(
+					nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
+					getPositionsForNode({
+						node: nodeToHighlight,
+						sourceFile: nodeSourceFile,
+						resourcePath: nodeSourceFile.fileName,
+						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+					}).start);
+			}
+
+			this.analyzeIconCallInRenderMethod(node);
+		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
+		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+			// The findings can be in different file i.e. Control being analyzed,
+			// but reporting might be in ControlRenderer
+			const nodeSourceFile = node.getSourceFile();
+			const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+			this.#context.addLintingMessage(
+				nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
+				getPositionsForNode({
+					node,
+					sourceFile: nodeSourceFile,
+					resourcePath: nodeSourceFile.fileName,
+					traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+				}).start);
+
+			this.analyzeIconCallInRenderMethod(node);
+		}
+	}
+
+	// If there's an oRm.icon() call in the render method, we need to check if IconPool is imported.
+	// Currently, we're only able to analyze whether oRm.icon is called in the render method as
+	// there's no reliable way to find if the method icon() is actually a member of RenderManager in other places.
+	analyzeIconCallInRenderMethod(node: ts.Node) {
+		let renderMethodNode: ts.Node | undefined = node;
+
+		// When the render is a plain function
+		if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			renderMethodNode = node;
+		} else if (ts.isObjectLiteralExpression(node)) {
+			// When the render is embed into the renderer object
+			const renderProperty = node.properties.find((prop) => {
+				return ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					prop.name.text === "render";
+			});
+			renderMethodNode = (renderProperty && ts.isPropertyAssignment(renderProperty)) ?
+				renderProperty.initializer :
+				undefined;
+
+			// When the renderer is a separate module and the render method is assigned
+			// to the renderer object later i.e. myControlRenderer.render = function (oRm, oMyControl) {}
+			if (!renderMethodNode) {
+				let rendererObjectName = null;
+				if ((ts.isPropertyAssignment(node.parent) || ts.isPropertyDeclaration(node.parent) ||
+					ts.isVariableDeclaration(node.parent)) && ts.isIdentifier(node.parent.name)) {
+					rendererObjectName = node.parent.name.getText();
+				}
+
+				const findRenderMethod = (childNode: ts.Node) => {
+					if (ts.isBinaryExpression(childNode)) {
+						if (ts.isPropertyAccessExpression(childNode.left)) {
+							const objectName = childNode.left.expression.getText(); // myControlRenderer
+							const propertyName = childNode.left.name.getText(); // render
+
+							if (objectName === rendererObjectName && propertyName === "render") {
+								renderMethodNode = childNode.right;
+							}
+						}
+					}
+
+					if (!renderMethodNode) { // If found, stop traversing
+						ts.forEachChild(childNode, findRenderMethod);
+					}
+				};
+
+				ts.forEachChild(node.getSourceFile(), findRenderMethod);
+			}
+		}
+
+		if (!renderMethodNode) {
+			return;
+		}
+
+		// If there's a dependency to IconPool from the Renderer,
+		// it's fine and we can skip the rest of the checks
+		const rendererSource = renderMethodNode.getSourceFile();
+		const hasIconPoolImport = rendererSource.statements.some((importNode: ts.Statement) => {
+			return ts.isImportDeclaration(importNode) &&
+				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				importNode.moduleSpecifier.text === "sap/ui/core/IconPool";
+		});
+
+		if (hasIconPoolImport) {
+			return;
+		}
+
+		const findIconCallExpression = (childNode: ts.Node) => {
+			if (ts.isCallExpression(childNode) &&
+				ts.isPropertyAccessExpression(childNode.expression) &&
+				childNode.expression.name.getText() === "icon"
+			) {
+				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
+				// The findings can be in different file i.e. Control being analyzed,
+				// but reporting might be in ControlRenderer
+				const nodeSourceFile = childNode.getSourceFile();
+				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
+				this.#context.addLintingMessage(
+					nodeSourceFile.fileName, MESSAGE.NO_ICON_POOL_RENDERER, undefined as never,
+					getPositionsForNode({
+						node: childNode,
+						sourceFile: nodeSourceFile,
+						resourcePath: nodeSourceFile.fileName,
+						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+					}).start);
+			}
+			ts.forEachChild(childNode, findIconCallExpression);
+		};
+
+		// When the renderer is a separate module we can say with some certainty that the .icon() call
+		// is a RenderManager's
+		if (rendererSource.fileName !== this.#sourceFile.fileName) {
+			ts.forEachChild(rendererSource, findIconCallExpression);
+		} else {
+			// When the renderer is embedded in the control file, then we can analyze only the icon call
+			// within the render method.
+			ts.forEachChild(renderMethodNode, findIconCallExpression);
 		}
 	}
 
