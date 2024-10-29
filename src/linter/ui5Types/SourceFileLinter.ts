@@ -416,9 +416,6 @@ export default class SourceFileLinter {
 			// within the render method.
 			ts.forEachChild(renderMethodNode, findIconCallExpression);
 		}
-
-		// Remove duplicate findings
-		// this.#reporter.deduplicateMessages();
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {

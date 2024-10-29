@@ -1,6 +1,6 @@
 sap.ui.define([], function () {
 	var myControlRenderer = {
-		// apiVersion: 1, // Must be present
+		// apiVersion: 2, // apiVersion property must be present and to have value 2
 	};
 	myControlRenderer.render = function (oRm, oMyControl) {
 		oRm.openStart("div", oMyControl);
