@@ -294,6 +294,8 @@ export default class SourceFileLinter {
 						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
 					}).start);
 			}
+
+			this.analyzeIconCallInRenderMethod(node);
 		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
 		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
 			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
@@ -310,9 +312,9 @@ export default class SourceFileLinter {
 					resourcePath: nodeSourceFile.fileName,
 					traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
 				}).start);
-		}
 
-		this.analyzeIconCallInRenderMethod(node);
+			this.analyzeIconCallInRenderMethod(node);
+		}
 	}
 
 	// If there's an oRm.icon() call in the render method, we need to check if IconPool is imported.
@@ -383,17 +385,10 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		// The only reliable way to find the RenderManager is the first argument of the render method.
-		let renderManagerName = "<unknown>";
-		if (ts.isFunctionLike(renderMethodNode) && renderMethodNode.parameters.length > 0) {
-			renderManagerName = renderMethodNode.parameters[0].name.getText();
-		}
-
 		const findIconCallExpression = (childNode: ts.Node) => {
 			if (ts.isCallExpression(childNode) &&
 				ts.isPropertyAccessExpression(childNode.expression) &&
-				childNode.expression.name.getText() === "icon" &&
-				childNode.expression.expression.getText() === renderManagerName
+				childNode.expression.name.getText() === "icon"
 			) {
 				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 				// The findings can be in different file i.e. Control being analyzed,
@@ -412,7 +407,18 @@ export default class SourceFileLinter {
 			ts.forEachChild(childNode, findIconCallExpression);
 		};
 
-		ts.forEachChild(renderMethodNode, findIconCallExpression);
+		// When the renderer is a separate module we can say with some certainty that the .icon() call
+		// is a RenderManager's
+		if (rendererSource.fileName !== this.#sourceFile.fileName) {
+			ts.forEachChild(rendererSource, findIconCallExpression);
+		} else {
+			// When the renderer is embedded in the control file, then we can analyze only the icon call
+			// within the render method.
+			ts.forEachChild(renderMethodNode, findIconCallExpression);
+		}
+
+		// Remove duplicate findings
+		// this.#reporter.deduplicateMessages();
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
