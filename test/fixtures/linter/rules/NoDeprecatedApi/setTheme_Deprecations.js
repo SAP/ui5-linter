@@ -4,6 +4,6 @@ sap.ui.define([
 	Theming.setTheme("sap_belize"); // positive finding
 	Theming.setTheme("sap_bluecrystal"); // positive finding
 	Theming.setTheme("sap_hcb"); // positive finding
-    Theming.setTheme("sap_horizon"); // negative finding
+	Theming.setTheme("sap_horizon"); // negative finding
 });
 
