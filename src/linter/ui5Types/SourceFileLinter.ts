@@ -376,8 +376,8 @@ export default class SourceFileLinter {
 
 		// If there's a dependency to IconPool from the Renderer,
 		// it's fine and we can skip the rest of the checks
-		const renderManagerSource = renderMethodNode.getSourceFile();
-		const hasIconPoolImport = renderManagerSource.statements.some((importNode: ts.Statement) => {
+		const rendererSource = renderMethodNode.getSourceFile();
+		const hasIconPoolImport = rendererSource.statements.some((importNode: ts.Statement) => {
 			return ts.isImportDeclaration(importNode) &&
 				ts.isStringLiteral(importNode.moduleSpecifier) &&
 				importNode.moduleSpecifier.text === "sap/ui/core/IconPool";
