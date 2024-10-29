@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.2.0](https://github.com/SAP/ui5-linter/compare/v1.1.1...v1.2.0) (2024-10-29)
+
+
+### Features
+
+* Allow usage of shorthand properties in extend call ([#385](https://github.com/SAP/ui5-linter/issues/385)) ([64a27d8](https://github.com/SAP/ui5-linter/commit/64a27d87296f818d1e874aec2afed1b9642a447c))
+* Check control renderer declaration ([#374](https://github.com/SAP/ui5-linter/issues/374)) ([0c9b3e8](https://github.com/SAP/ui5-linter/commit/0c9b3e8bf6e616fc4a497f662edef611367f325e))
+* Detect deprecated renderer-API usage ([#366](https://github.com/SAP/ui5-linter/issues/366)) ([d4f682d](https://github.com/SAP/ui5-linter/commit/d4f682d1ce5f59a634507d1e5ecada38106836fc))
+* **html:** Detect deprecated themes in 'href' attributes ([#382](https://github.com/SAP/ui5-linter/issues/382)) ([2d4bcfa](https://github.com/SAP/ui5-linter/commit/2d4bcfabd6ea7fe69ea6beedbf859a7a7b41bb37))
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Handle extend call without args ([f279771](https://github.com/SAP/ui5-linter/commit/f2797718a8b7288de9b3f281c1a392cc2f510a28))
+* Control renderer check with quoted property ([540614f](https://github.com/SAP/ui5-linter/commit/540614f470730731a9cadad2d5d46345e3f1260b))
+* Correctly handle namespace resolution in linting ([#367](https://github.com/SAP/ui5-linter/issues/367)) ([922e76b](https://github.com/SAP/ui5-linter/commit/922e76ba8b47f995043e9624926ce0eda3dc79fc))
+* ManagedObject check with quoted "metadata" property ([90b1627](https://github.com/SAP/ui5-linter/commit/90b1627fbd9055580af4bc0d339dd6726027d0ac))
+* Parent class check for Component analysis ([9b41eb6](https://github.com/SAP/ui5-linter/commit/9b41eb6fe53a926eb0932e617557a4363459d428))
+
 ## [1.1.1](https://github.com/SAP/ui5-linter/compare/v1.1.0...v1.1.1) (2024-10-18)
 
 
