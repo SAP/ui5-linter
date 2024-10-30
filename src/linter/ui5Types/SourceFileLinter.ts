@@ -39,6 +39,19 @@ function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
 	return sourceFile.fileName.startsWith("/types/typescript/lib/");
 }
 
+/**
+ * Removes surrounding quote characters ("'`) from a string if they exist.
+ * @param {string} str
+ * @returns {string}
+ * @example removeQuotes("\"myString\"") -> "myString"
+ * @example removeQuotes("\'myString\'") -> "myString"
+ * @example removeQuotes("\`myString\`") -> "myString"
+ */
+function removeQuotes(str: string | undefined): string {
+	if (!str) return "";
+	return str.replace(/^['"`]|['"`]$/g, "");
+}
+
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
@@ -148,8 +161,7 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
-		} else if (ts.isPropertyAssignment(node) && (node.name.getText() === "theme" ||
-			node.name.getText() === "\"theme\"")) {
+		} else if (ts.isPropertyAssignment(node) && removeQuotes(node.name.getText()) === "theme") {
 			this.analyzeTestsuiteThemeProperty(node);
 		}
 
@@ -1219,21 +1231,20 @@ export default class SourceFileLinter {
 		const threeLayersUp = twoLayersUp?.parent.parent;
 		// Check if "theme" property is inside "ui5: {...}" object
 		if (oneLayerUp && ts.isObjectLiteralElement(oneLayerUp) &&
-			oneLayerUp.name?.getText() === "ui5") {
+			removeQuotes(oneLayerUp.name?.getText()) === "ui5") {
 			// (1.) check if "theme" property is in "defaults: {...}" context
 			if (ts.isObjectLiteralElement(twoLayersUp) &&
-				twoLayersUp.name?.getText() === "defaults") {
+				removeQuotes(twoLayersUp.name?.getText()) === "defaults") {
 				isTestStarterStructure = true;
 			} // (2.) check if "theme" property is in "tests: {...}" context
 			else if (ts.isObjectLiteralElement(twoLayersUp) &&
 				ts.isObjectLiteralElement(threeLayersUp) &&
-				threeLayersUp.name?.getText() === "tests") {
+				removeQuotes(threeLayersUp.name?.getText()) === "tests") {
 				isTestStarterStructure = true;
 			}
 		}
 
-		if (!ts.isStringLiteral(node.initializer)) return;
-		const themeName = node.initializer.text;
+		const themeName = removeQuotes(node.initializer.getText());
 		if (isTestStarterStructure && deprecatedThemes.includes(themeName)) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
 				themeName,
