@@ -339,7 +339,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({className}: {className?: string}) =>
-			`The control renderer ${className ? ("of '" + className + "'") : ""} must be a static object`,
+			`The control renderer ${className ? ("of '" + className + "'") : ""} must be a static property`,
 		details: () => "",
 	},
 
