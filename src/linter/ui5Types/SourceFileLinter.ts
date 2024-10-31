@@ -5,7 +5,7 @@ import SourceFileReporter from "./SourceFileReporter.js";
 import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
-import {deprecatedLibraries} from "../../utils/deprecations.js";
+import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
 import {getPropertyName} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -701,6 +701,8 @@ export default class SourceFileLinter {
 				this.#analyzeOdataModelV2CreateEntry(node);
 			} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
 				this.#analyzeMobileInit(node);
+			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
+				this.#analyzeThemingSetTheme(node);
 			}
 		}
 
@@ -938,6 +940,18 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
 				paramName: "homeIconPrecomposed",
 			}, homeIconPrecomposedArg);
+		}
+	}
+
+	#analyzeThemingSetTheme(node: ts.CallExpression) {
+		if (!node.arguments.length || !ts.isStringLiteral(node.arguments[0])) {
+			return;
+		}
+		const themeName = node.arguments[0].text;
+		if (deprecatedThemes.includes(themeName)) {
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
+				themeName,
+			}, node.arguments[0]);
 		}
 	}
 
