@@ -221,6 +221,7 @@ export default class SourceFileLinter {
 		const className = node.name?.getText() ?? "<unknown>";
 		const rendererMember = node.members.find((member) => {
 			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
 				(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) && member.name.text === "renderer";
 		});
 
@@ -235,6 +236,19 @@ export default class SourceFileLinter {
 			])) {
 				return;
 			}
+
+			const nonStaticRender = (node as ts.ClassDeclaration).members.find((member: ts.ClassElement) => {
+				return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+					(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) &&
+					member.name.text === "renderer";
+			});
+			if (nonStaticRender) {
+				// Renderer must be a static member
+				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
+					{className: (node as ts.ClassDeclaration).name?.getText()}, nonStaticRender);
+				return;
+			}
+
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
 			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, node);
 			return;
@@ -242,14 +256,6 @@ export default class SourceFileLinter {
 
 		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
 			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
-
-			const isStaticMember =
-				rendererMember.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword);
-			if (!isStaticMember) {
-				// Renderer must be a static member
-				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
-					{className: node.name?.getText()}, rendererMember);
-			}
 
 			if (initializerType.flags & ts.TypeFlags.Undefined ||
 				initializerType.flags & ts.TypeFlags.Null) {
