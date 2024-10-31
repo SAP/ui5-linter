@@ -51,6 +51,7 @@ export enum MESSAGE {
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
 	NO_ICON_POOL_RENDERER,
+	NOT_STATIC_CONTROL_RENDERER,
 	PARSING_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
@@ -331,6 +332,15 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
 		details: () => `"{@link sap.ui.core.RenderManager#methods/icon RenderManager}",`,
+	},
+
+	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({className}: {className?: string}) =>
+			`The control renderer ${className ? ("of '" + className + "'") : ""} must be a static object`,
+		details: () => "",
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {

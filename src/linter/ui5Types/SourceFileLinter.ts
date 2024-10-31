@@ -221,7 +221,6 @@ export default class SourceFileLinter {
 		const className = node.name?.getText() ?? "<unknown>";
 		const rendererMember = node.members.find((member) => {
 			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
-				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
 				(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) && member.name.text === "renderer";
 		});
 
@@ -243,6 +242,14 @@ export default class SourceFileLinter {
 
 		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
 			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+
+			const isStaticMember =
+				rendererMember.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword);
+			if (!isStaticMember) {
+				// Renderer must be a static member
+				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
+					{className: node.name?.getText()}, rendererMember);
+			}
 
 			if (initializerType.flags & ts.TypeFlags.Undefined ||
 				initializerType.flags & ts.TypeFlags.Null) {
