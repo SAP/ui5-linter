@@ -92,7 +92,7 @@
 		"@ui5-language-assistant/semantic-model-types": "^3.3.1",
 		"ava": "^6.2.0",
 		"depcheck": "^1.4.7",
-		"eslint": "^9.13.0",
+		"eslint": "^9.14.0",
 		"eslint-plugin-ava": "^15.0.1",
 		"esmock": "^2.6.9",
 		"husky": "^9.1.6",
