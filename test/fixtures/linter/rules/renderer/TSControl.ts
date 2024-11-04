@@ -1,6 +1,6 @@
 import Control from "sap/ui/core/Control";
 import RenderManager from "sap/ui/core/RenderManager";
-import type { MetadataOptions } from "sap/ui/core/Element";
+import type {MetadataOptions} from "sap/ui/core/Element";
 
 export class Test1 extends Control {
 	static readonly metadata: MetadataOptions = {
