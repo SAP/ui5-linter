@@ -369,7 +369,7 @@ export default class SourceFileLinter {
 				if (ts.isBinaryExpression(childNode)) {
 					if (ts.isPropertyAccessExpression(childNode.left)) {
 						const objectName = childNode.left.expression.getText(); // myControlRenderer
-						const propertyName = childNode.left.name.getText(); // render
+						const propertyName = childNode.left.name.getText(); // apiVersion
 
 						if (objectName === rendererObjectName && propertyName === "apiVersion") {
 							apiVersionNode = childNode.right;
