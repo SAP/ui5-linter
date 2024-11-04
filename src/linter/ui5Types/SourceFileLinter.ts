@@ -341,20 +341,65 @@ export default class SourceFileLinter {
 	}
 
 	analyzeControlRendererInternals(node: ts.Node) {
+		const findApiVersionNode = (potentialApiVersionNode: ts.Node) => {
+			let apiVersionNode: unknown;
+			// const myControlRenderer = {apiVersion: "2", render: () => {}}
+			apiVersionNode = ts.isObjectLiteralExpression(potentialApiVersionNode) &&
+				potentialApiVersionNode.properties.find((prop) => {
+					return ts.isPropertyAssignment(prop) &&
+						(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
+						prop.name.text === "apiVersion";
+				}) as ts.PropertyAssignment | undefined;
+
+			if (apiVersionNode) {
+				return apiVersionNode;
+			}
+
+			// const myControlRenderer = {}
+			// const myControlRenderer.apiVersion = 2;
+			let rendererObjectName = null;
+			if ((ts.isPropertyAssignment(potentialApiVersionNode.parent) ||
+				ts.isPropertyDeclaration(potentialApiVersionNode.parent) ||
+				ts.isVariableDeclaration(potentialApiVersionNode.parent)) &&
+				ts.isIdentifier(potentialApiVersionNode.parent.name)) {
+				rendererObjectName = potentialApiVersionNode.parent.name.getText();
+			}
+
+			const visitChildNodes = (childNode: ts.Node) => {
+				if (ts.isBinaryExpression(childNode)) {
+					if (ts.isPropertyAccessExpression(childNode.left)) {
+						const objectName = childNode.left.expression.getText(); // myControlRenderer
+						const propertyName = childNode.left.name.getText(); // render
+
+						if (objectName === rendererObjectName && propertyName === "apiVersion") {
+							apiVersionNode = childNode.right;
+						}
+					}
+				}
+
+				if (!apiVersionNode) { // If found, stop traversing
+					ts.forEachChild(childNode, visitChildNodes);
+				}
+			};
+
+			ts.forEachChild(potentialApiVersionNode.getSourceFile(), visitChildNodes);
+
+			return apiVersionNode;
+		};
+
 		// Analyze renderer property when it's an ObjectLiteralExpression
 		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
-			const apiVersionNode = ts.isObjectLiteralExpression(node) && node.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) &&
-					(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
-					prop.name.text === "apiVersion";
-			}) as ts.PropertyAssignment | undefined;
+			const apiVersionNode = findApiVersionNode(node) as ts.PropertyAssignment | ts.NumericLiteral | undefined;
 
 			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
-				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
+				ts.VariableDeclaration | ts.ObjectLiteralExpression |
+				ts.NumericLiteral | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
-			} else if (apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+			} else if ((ts.isNumericLiteral(apiVersionNode) && apiVersionNode.getText() !== "2") ||
+				(ts.isPropertyAssignment(apiVersionNode) && apiVersionNode.initializer.getText() !== "2")) {
+				// String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}
 
