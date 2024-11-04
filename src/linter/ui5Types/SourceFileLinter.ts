@@ -56,6 +56,7 @@ export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
 	#sourceMaps: Map<string, string> | undefined;
+	#program: ts.Program;
 	#checker: ts.TypeChecker;
 	#context: LinterContext;
 	#reporter: SourceFileReporter;
@@ -69,13 +70,15 @@ export default class SourceFileLinter {
 
 	constructor(
 		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
-		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		apiExtract: ApiExtract, manifestContent?: string
+		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, program: ts.Program,
+		checker: ts.TypeChecker, reportCoverage: boolean | undefined = false,
+		messageDetails: boolean | undefined = false, apiExtract: ApiExtract,
+		manifestContent?: string
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
 		this.#sourceMaps = sourceMaps;
+		this.#program = program;
 		this.#checker = checker;
 		this.#context = context;
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -281,8 +284,54 @@ export default class SourceFileLinter {
 			// i.e. { renderer: Renderer }
 			if (ts.isIdentifier(rendererMember.initializer)) {
 				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
-				const {declarations} = symbol ?? {};
-				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+
+				const originalDeclarations = symbol?.getDeclarations()?.filter((decl) =>
+					!decl.getSourceFile().isDeclarationFile);
+
+				// If the original raw render file is available, we can analyze it directly
+				if (originalDeclarations && originalDeclarations.length > 0) {
+					originalDeclarations.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+				} else {
+					// When there's an ambient module, then we need special handling.
+					// In case we have the raw file & typescript definitions for it, their types
+					// are being merged, creating an ambient module. We need to find the original
+					// raw file in order to analyze the renderer. Such special case, is for example
+					// any openui5 library when we analyze the openui5 repo- we have the TS definitions
+					// loaded in the TS compiler via @sapui5/types, but we actually want to analyze the
+					// source files of those types.
+					let importModuleString = "";
+
+					// Get the import string module from the current source file, so we can filter later
+					const importedRenderModule = this.#sourceFile.statements
+						.find((statement) => (ts.isImportDeclaration(statement) &&
+							statement.importClause?.name?.getText() === rendererMember.initializer?.getText()));
+
+					if (importedRenderModule &&
+						ts.isImportDeclaration(importedRenderModule) &&
+						ts.isStringLiteral(importedRenderModule.moduleSpecifier)) {
+						importModuleString = importedRenderModule.moduleSpecifier.text;
+					}
+
+					// Find the correct raw source file
+					const exportSourceFile = this.#program.getSourceFiles().find((sourceFile) =>
+						sourceFile.fileName.includes(importModuleString));
+
+					// Extract the exports from the source file
+					const exportFileSymbol = exportSourceFile && this.#checker.getSymbolAtLocation(exportSourceFile);
+					const moduleExportsSymbols = exportFileSymbol && this.#checker.getExportsOfModule(exportFileSymbol);
+
+					// Check all exports
+					moduleExportsSymbols?.forEach((exportSymbol) => {
+						// Export could be a "default", so we need to get the real reference of the export symbol
+						const exportSymbolAlias = this.#checker.getAliasedSymbol(exportSymbol);
+
+						exportSymbolAlias?.getDeclarations()?.forEach((declaration) => {
+							if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+								this.analyzeControlRendererInternals(declaration.initializer);
+							}
+						});
+					});
+				}
 			} else {
 				// Analyze renderer property when it's directly embedded in the renderer object
 				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
