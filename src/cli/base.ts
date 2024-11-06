@@ -157,7 +157,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		reportCoverage,
 		includeMessageDetails: details,
 		configPath: config,
-		ui5ConfigPath: ui5Config,
+		ui5Config,
 	});
 
 	if (reportCoverage) {

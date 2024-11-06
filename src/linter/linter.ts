@@ -17,16 +17,16 @@ import {Minimatch} from "minimatch";
 const matchedPatterns = new Set<string>();
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
+	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5Config,
 }: LinterOptions): Promise<LintResult[]> {
 	const configMngr = new ConfigManager(rootDir, configPath);
 	const config = await configMngr.getConfiguration();
 
 	// In case path is set both by CLI and config use CLI
-	ui5ConfigPath = ui5ConfigPath ?? config.ui5Config;
+	ui5Config = ui5Config ?? config.ui5Config;
 
 	const projectGraphDone = taskStart("Project Graph creation");
-	const graph = await getProjectGraph(rootDir, ui5ConfigPath);
+	const graph = await getProjectGraph(rootDir, ui5Config);
 	const project = graph.getRoot();
 	projectGraphDone();
 
@@ -170,13 +170,19 @@ async function lint(
 	return res;
 }
 
-async function getProjectGraph(rootDir: string, ui5ConfigPath?: string): Promise<ProjectGraph> {
+async function getProjectGraph(rootDir: string, ui5Config?: string | object): Promise<ProjectGraph> {
 	let rootConfigPath, rootConfiguration;
-	const ui5YamlPath = ui5ConfigPath ? path.join(rootDir, ui5ConfigPath) : path.join(rootDir, "ui5.yaml");
-	if (await fileExists(ui5YamlPath)) {
+	let ui5YamlPath;
+	if (typeof ui5Config !== "object") {
+		ui5YamlPath = ui5Config ? path.join(rootDir, ui5Config) : path.join(rootDir, "ui5.yaml");
+	}
+
+	if (typeof ui5Config === "object") {
+		rootConfiguration = ui5Config;
+	} else if (ui5YamlPath && await fileExists(ui5YamlPath)) {
 		rootConfigPath = ui5YamlPath;
 	} else {
-		if (ui5ConfigPath) throw new Error(`Unable to find UI5 config file '${ui5ConfigPath}'`);
+		if (ui5Config) throw new Error(`Unable to find UI5 config file '${ui5Config}'`);
 		const isApp = await dirExists(path.join(rootDir, "webapp"));
 		if (isApp) {
 			rootConfiguration = {
