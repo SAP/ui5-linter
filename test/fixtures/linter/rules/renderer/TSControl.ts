@@ -83,7 +83,7 @@ export class Test5 extends Control {
 		defaultAggregation: "children",
 	};
 
-	// Missing static keyword. Renderer won't be analyzed as such until
+	// Missing static keyword. Renderer won't be analyzed as such
 	// until its defined explicitly as static property.
 	renderer = ImportedRenderer;
 }
