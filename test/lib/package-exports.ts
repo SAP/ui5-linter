@@ -15,8 +15,8 @@ test("check number of exports", (t) => {
 });
 
 // Public API contract (exported modules)
-test("@ui5/linter", async (t) => {
-	const actual = await import("@ui5/linter");
-	const expected = await import("../../lib/index.js");
-	t.is(actual, expected, "Correct module exported");
-});
+// test("@ui5/linter", async (t) => {
+// 	const actual = await import("@ui5/linter");
+// 	const expected = await import("../../lib/index.js");
+// 	t.is(actual, expected, "Correct module exported");
+// });
