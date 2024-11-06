@@ -302,9 +302,8 @@ export default class SourceFileLinter {
 					let importModuleString = "";
 
 					// Get the import string module from the current source file, so we can filter later
-					const importedRenderModule = this.#sourceFile.statements
-						.find((statement) => (ts.isImportDeclaration(statement) &&
-							statement.importClause?.name?.getText() === rendererMember.initializer?.getText()));
+					const rendererSymbol = this.#checker.getSymbolAtLocation(rendererMember.initializer);
+					const importedRenderModule = rendererSymbol?.getDeclarations()?.[0]?.parent;
 
 					if (importedRenderModule &&
 						ts.isImportDeclaration(importedRenderModule) &&
