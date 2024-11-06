@@ -63,6 +63,7 @@ export interface LinterOptions {
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;
+	noConfig?: boolean;
 	ui5Config?: string | object;
 	namespace?: string;
 }

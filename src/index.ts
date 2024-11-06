@@ -10,10 +10,8 @@ export interface UI5LintOptions {
 	filePatterns?: string[];
 	ignorePatterns: string[];
 	details: boolean;
-	config: string | null; // (null | string (default: "ui5lint.config.{js,mjs,cjs}"; null should suppress reading the default config file, a string overwrites the default path)
-	// boolean | string (default / true: "ui5lint.config.{js,mjs,cjs}"; false should suppress reading the default config file)
-	// string (default: "ui5lint.config.{js,mjs,cjs}"; empty string should suppress reading the default config file)
-	// separate noConfig option to suppress reading the default config file
+	config?: string;
+	noConfig?: boolean;
 	coverage: boolean; // boolean(default: false)
 	ui5Config: string | object;
 	rootDir: string;
@@ -23,7 +21,7 @@ export async function ui5lint({
 	filePatterns,
 	ignorePatterns = [],
 	details = false,
-	config = null,
+	config,
 	coverage = false,
 	ui5Config = "./ui5.yaml",
 	rootDir = process.cwd(),
@@ -34,7 +32,7 @@ export async function ui5lint({
 		ignorePattern: ignorePatterns,
 		reportCoverage: coverage,
 		includeMessageDetails: details,
-		configPath: config ?? undefined,
+		configPath: config,
 		ui5Config,
 	});
 }

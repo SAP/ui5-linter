@@ -17,10 +17,13 @@ import {Minimatch} from "minimatch";
 const matchedPatterns = new Set<string>();
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5Config,
+	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
-	const configMngr = new ConfigManager(rootDir, configPath);
-	const config = await configMngr.getConfiguration();
+	let config: UI5LintConfigType = {};
+	if (noConfig !== true) {
+		const configMngr = new ConfigManager(rootDir, configPath);
+		config = await configMngr.getConfiguration();
+	}
 
 	// In case path is set both by CLI and config use CLI
 	ui5Config = ui5Config ?? config.ui5Config;
@@ -85,10 +88,13 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePatterns, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath,
+	rootDir, filePatterns, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
-	const configMngr = new ConfigManager(rootDir, configPath);
-	const config = await configMngr.getConfiguration();
+	let config: UI5LintConfigType = {};
+	if (noConfig !== true) {
+		const configMngr = new ConfigManager(rootDir, configPath);
+		config = await configMngr.getConfiguration();
+	}
 
 	const virBasePath = namespace ? `/resources/${namespace}/` : "/";
 	const reader = createReader({
