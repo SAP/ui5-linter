@@ -4,12 +4,11 @@ import {createRequire} from "node:module";
 // Using CommonsJS require since JSON module imports are still experimental
 const require = createRequire(import.meta.url);
 
-// package.json should be exported to allow reading version (e.g. from @ui5/cli)
 test("export of package.json", (t) => {
 	t.truthy(require("@ui5/linter/package.json").version);
 });
 
-// Check number of definied exports
+// Check number of defined exports
 test("check number of exports", (t) => {
 	const packageJson = require("@ui5/linter/package.json");
 	t.is(Object.keys(packageJson.exports).length, 2);
