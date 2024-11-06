@@ -22,7 +22,7 @@ function traverseAndFindDirectives(
 	});
 }
 
-export function findDirectivesAroundNode(
+function findDirectivesAroundNode(
 	node: ts.Node, sourceText: string, possibleDirectives: Set<Directive>, confirmedDirectives: Set<Directive>
 ) {
 	/*
@@ -33,7 +33,7 @@ export function findDirectivesAroundNode(
 		// This is a comment
 	*/
 	for (const directive of possibleDirectives) {
-		if (directive.pos >= node.getFullStart() && directive.pos + directive.length < node.getStart()) {
+		if (directive.pos >= node.getFullStart() && directive.pos + directive.length <= node.getStart()) {
 			const leadingComments = ts.getLeadingCommentRanges(sourceText, node.getFullStart());
 			if (leadingComments?.length) {
 				leadingComments.some((comment) => {
