@@ -1,7 +1,7 @@
 import Control from "sap/ui/core/Control";
 import RenderManager from "sap/ui/core/RenderManager";
 import type {MetadataOptions} from "sap/ui/core/Element";
-import ImportedRenderer from "./7ControlRenderer.js"
+import ImportedRenderer from "./TSControlRenderer.js";
 
 export class Test1 extends Control {
 	static readonly metadata: MetadataOptions = {
@@ -83,5 +83,22 @@ export class Test5 extends Control {
 		defaultAggregation: "children",
 	};
 
+	// Missing static keyword. Renderer won't be analyzed as such until
+	// until its defined explicitly as static property.
 	renderer = ImportedRenderer;
+}
+
+export class Test6 extends Control {
+	static readonly metadata: MetadataOptions = {
+		properties: {
+			text: "string",
+			tag: "string",
+		},
+		aggregations: {
+			children: { type: "sap.ui.core.Control", multiple: true },
+		},
+		defaultAggregation: "children",
+	};
+
+	static renderer = ImportedRenderer;
 }
