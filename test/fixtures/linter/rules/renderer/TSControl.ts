@@ -1,6 +1,7 @@
 import Control from "sap/ui/core/Control";
 import RenderManager from "sap/ui/core/RenderManager";
 import type {MetadataOptions} from "sap/ui/core/Element";
+import ImportedRenderer from "./7ControlRenderer.js"
 
 export class Test1 extends Control {
 	static readonly metadata: MetadataOptions = {
@@ -68,4 +69,19 @@ export class Test4 extends Control {
 		apiVersion: 2,
 		render: (rm: RenderManager, control: HTMLElement) => {},
 	};
+}
+
+export class Test5 extends Control {
+	static readonly metadata: MetadataOptions = {
+		properties: {
+			text: "string",
+			tag: "string",
+		},
+		aggregations: {
+			children: { type: "sap.ui.core.Control", multiple: true },
+		},
+		defaultAggregation: "children",
+	};
+
+	renderer = ImportedRenderer;
 }
