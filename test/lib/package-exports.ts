@@ -1,0 +1,23 @@
+import test from "ava";
+import {createRequire} from "node:module";
+
+// Using CommonsJS require since JSON module imports are still experimental
+const require = createRequire(import.meta.url);
+
+// package.json should be exported to allow reading version (e.g. from @ui5/cli)
+test("export of package.json", (t) => {
+	t.truthy(require("@ui5/linter/package.json").version);
+});
+
+// Check number of definied exports
+test("check number of exports", (t) => {
+	const packageJson = require("@ui5/linter/package.json");
+	t.is(Object.keys(packageJson.exports).length, 2);
+});
+
+// Public API contract (exported modules)
+test("@ui5/linter", async (t) => {
+	const actual = await import("@ui5/linter");
+	const expected = await import("../../lib/index.js");
+	t.is(actual, expected, "Correct module exported");
+});
