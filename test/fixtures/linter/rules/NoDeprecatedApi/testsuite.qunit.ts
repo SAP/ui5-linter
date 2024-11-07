@@ -1,5 +1,3 @@
-import { ui5 } from "sap/viz/library";
-
 export default {
 	name: "QUnit test suite with deprecated themes (TS)",
 	defaults: {

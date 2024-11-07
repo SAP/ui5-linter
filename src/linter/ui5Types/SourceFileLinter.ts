@@ -1,4 +1,3 @@
-/* eslint-disable @stylistic/brace-style */
 import ts, {Identifier} from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
@@ -1232,14 +1231,14 @@ export default class SourceFileLinter {
 		// Check if "theme" property is inside "ui5: {...}" object
 		if (oneLayerUp && ts.isObjectLiteralElement(oneLayerUp) &&
 			removeQuotes(oneLayerUp.name?.getText()) === "ui5") {
-			// (1.) check if "theme" property is in "defaults: {...}" context
 			if (ts.isObjectLiteralElement(twoLayersUp) &&
 				removeQuotes(twoLayersUp.name?.getText()) === "defaults") {
+				// (1.) set flag to true if "theme" property is in "defaults: {...}" context
 				isTestStarterStructure = true;
-			} // (2.) check if "theme" property is in "tests: {...}" context
-			else if (ts.isObjectLiteralElement(twoLayersUp) &&
+			} else if (ts.isObjectLiteralElement(twoLayersUp) &&
 				ts.isObjectLiteralElement(threeLayersUp) &&
 				removeQuotes(threeLayersUp.name?.getText()) === "tests") {
+				// (2.) set flag to true if "theme" property is in "tests: {...}" context
 				isTestStarterStructure = true;
 			}
 		}
