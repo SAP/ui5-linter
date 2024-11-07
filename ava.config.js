@@ -10,6 +10,7 @@ export default {
 	},
 	files: [
 		"test/lib/**/*.ts",
+		"test/fixtures/package-exports.ts",
 	],
 	watchMode: {
 		ignoreChanges: [
