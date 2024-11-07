@@ -19,6 +19,7 @@ export default tseslint.config(
 			"test/tmp/*",
 			"test/projects/*",
 			"test/fixtures/*",
+			"test/e2e/*",
 
 			// Exclude generated code
 			"lib/*",

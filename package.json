@@ -41,6 +41,7 @@
 		"prepare": "node ./.husky/skip.js || husky",
 		"test": "npm run lint && npm run build-test && npm run coverage && npm run depcheck",
 		"unit": "ava",
+		"e2e": "npm run build && ava --config ava-e2e.config.js",
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",

@@ -14,5 +14,6 @@
 		"test/tmp/**/*",
 		"test/projects/**/*",
 		"test/fixtures/**/*",
+		"test/e2e/**/*",
 	]
 }
