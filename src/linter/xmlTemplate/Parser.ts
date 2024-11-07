@@ -7,8 +7,8 @@ import LinterContext from "../LinterContext.js";
 import {TranspileResult} from "../LinterContext.js";
 import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
-import {ApiExtract} from "./transpiler.js";
 import {MESSAGE} from "../messages.js";
+import {ApiExtract} from "../../utils/ApiExtract.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -218,7 +218,7 @@ export default class Parser {
 	_addDefaultAggregation(
 		owner: ControlDeclaration, control: ControlDeclaration
 	) {
-		let aggregationName = this.#apiExtract.defaultAggregations[`${owner.namespace}.${owner.name}`];
+		let aggregationName = this.#apiExtract.getDefaultAggregation(`${owner.namespace}.${owner.name}`);
 
 		if (!aggregationName) {
 			log.verbose(`Failed to determine default aggregation for control ${owner.name} used in ` +
