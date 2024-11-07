@@ -31,7 +31,7 @@ jobs:
       run: npm run depcheck
 
     - name: Perform build
-      run: npm run build-test
+      run: npm run build
 
     - name: Run unit tests
       run: npm run coverage

@@ -40,7 +40,7 @@
 		"lint:commit": "commitlint -e",
 		"prepare": "node ./.husky/skip.js || husky",
 		"test": "npm run lint && npm run build && npm run coverage && npm run depcheck",
-		"unit": "ava",
+		"unit": "npm run build && ava",
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
