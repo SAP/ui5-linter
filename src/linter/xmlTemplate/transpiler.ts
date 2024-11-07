@@ -8,17 +8,10 @@ import Parser from "./Parser.js";
 import {getLogger} from "@ui5/logger";
 import {createRequire} from "node:module";
 import {MESSAGE} from "../messages.js";
+import {loadApiExtract, ApiExtract} from "../../utils/ApiExtract.js";
 const require = createRequire(import.meta.url);
 
 const log = getLogger("linter:xmlTemplate:transpiler");
-
-export interface ApiExtract {
-	framework: {
-		name: string;
-		version: string;
-	};
-	defaultAggregations: Record<string, string>;
-}
 
 let saxWasmBuffer: Buffer;
 let apiExtract: ApiExtract;
@@ -54,10 +47,10 @@ async function init() {
 
 	return initializing = Promise.all([
 		fs.readFile(saxPath),
-		fs.readFile(new URL("../../../resources/api-extract.json", import.meta.url), {encoding: "utf-8"}),
+		loadApiExtract(),
 	]).then((results) => {
 		saxWasmBuffer = results[0];
-		apiExtract = JSON.parse(results[1]) as ApiExtract;
+		apiExtract = results[1];
 		taskEnd();
 	});
 }

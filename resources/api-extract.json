@@ -440,7 +440,7 @@
     "sap.zen.dsh.ValueHelpDialog": "content"
   },
   "deprecations": {
-    "classes": {
+    "UI5Class": {
       "sap.ca.ui.AddPicture": "(since 1.26) As per central UX requirements, this control is replaced by sap.m.UploadCollection. Please use the new control if you start developing an application instead of using this AddPicture control.",
       "sap.ca.ui.charts.BarListItem": "(since 1.24) Sap.ca charts have been replaced with sap.viz and vizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
       "sap.ca.ui.charts.BubbleChart": "(since 1.24) Sap.ca charts have been replaced with sap.viz and vizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
@@ -1157,7 +1157,7 @@
       "sap.zen.dsh.ValueHelpDialog": "(since 1.89.0) Please use the WD Grid control instead.",
       "sap.zen.dsh.widgets.SDKModel": "(since 1.89.0) Please use the WD Grid control instead."
     },
-    "enums": {
+    "UI5Enum": {
       "sap.ca.ui.charts.ChartColor": "(since 1.24) Sap.ca charts have been replaced with sap.viz and VizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
       "sap.ca.ui.charts.ChartSelectionMode": "(since 1.24) Sap.ca charts have been replaced with sap.viz and VizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
       "sap.ca.ui.charts.ChartSemanticColor": "(since 1.24) Sap.ca charts have been replaced with sap.viz and VizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
@@ -1365,13 +1365,13 @@
       "sap.zen.commons.VAlign": "(since 1.89.0) Please use the WD Grid control instead.",
       "sap.zen.dsh.ValueHelpRangeOperation": "(since 1.89.0) Please use the WD Grid control instead."
     },
-    "functions": {
+    "UI5Function": {
       "module:sap/base/util/includes": "(since 1.90) Use the <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> instead, but note that <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> fail when called on null values.",
       "module:sap/base/util/mixedFetch": "(since 1.120) ",
       "module:sap/base/util/syncFetch": "(since 1.120) ",
       "module:sap/ui/core/getCompatibilityVersion": "(since 1.119) without a replacement. All features that have been controlled by a compatibility version in UI5 1.x will abandon their legacy behavior, starting with the next major version. In other words, they will behave as if compatibility version \"edge\" was configured. Due to this, no more access to the compatibility version will be required starting with the next major version."
     },
-    "namespaces": {
+    "UI5Namespace": {
       "sap.apf.constants": "(since 1.23.1) Use sap.apf.core.constants instead.",
       "sap.ca.ui": "(since 1.28) All controls and helpers in this library meanwhile have been deprecated. Check the individual classes or packages for actual replacements.",
       "sap.ca.ui.charts": "(since 1.24) Sap.ca charts have been replaced with sap.viz and VizFrame in 1.24. The UI5 control \"sap.viz.ui5.controls.VizFrame\" serves as a single point of entry for all the new charts. Now that 1.24 is available you are asked to use sap.viz charts and the VizFrame instead! This control will not be supported anymore from 1.24.",
@@ -1472,7 +1472,7 @@
       "sap.ushell.ui5service.UserStatus": "(since 1.70) Support for this service has been discontinued.",
       "sap.zen.crosstab": "(since 1.89.0) "
     },
-    "typedefs": {
+    "UI5Typedef": {
       "sap.f.AvatarColor": "(since 1.73) Use the {@link sap.m.AvatarColor} instead.",
       "sap.f.AvatarImageFitType": "(since 1.73) Use the {@link sap.m.AvatarImageFitType} instead.",
       "sap.f.AvatarShape": "(since 1.73) Use the {@link sap.m.AvatarShape} instead.",
@@ -1486,7 +1486,7 @@
       "module:sap/base/security/URLWhitelist.Entry": "(since 1.85) use {@link module:sap/base/security/URLListValidator.Entry} instead.",
       "sap.ui.table.TreeAutoExpandMode": "(since 1.120) "
     },
-    "interfaces": {
+    "UI5Interface": {
       "sap.ui.commons.FormattedTextViewControl": "(since 1.38) ",
       "sap.ui.commons.ToolbarItem": "(since 1.38) ",
       "jQuery.sap.storage.Storage": "(since 1.120) Use {@link module:sap/ui/util/Storage sap/ui/util/Storage} instead.",

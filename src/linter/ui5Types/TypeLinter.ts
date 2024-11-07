@@ -8,6 +8,7 @@ import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import fs from "node:fs/promises";
+import {loadApiExtract} from "../../utils/ApiExtract.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -108,12 +109,7 @@ export default class TypeChecker {
 		);
 		const dataTypes = JSON.parse(dataTypesFile) as Record<string, string>;
 
-		const apiExtractFile = await fs.readFile(
-			new URL("../../../resources/api-extract.json", import.meta.url),
-			{encoding: "utf-8"}
-		);
-		const apiExtract = JSON.parse(apiExtractFile) as
-			Record<string, Record<string, Record<string, string>>>;
+		const apiExtract = await loadApiExtract();
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
@@ -139,7 +135,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails, dataTypes,
-					manifestContent, apiExtract
+					apiExtract, manifestContent
 				);
 				await linter.lint();
 				linterDone();

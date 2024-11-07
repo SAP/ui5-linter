@@ -33,12 +33,12 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 	const semanticModel = metadataProvider.getModel();
 
 	const deprecations: Record<string, Record<string, string>> = {
-		classes: {},
-		enums: {},
-		functions: {},
-		namespaces: {},
-		typedefs: {},
-		interfaces: {},
+		UI5Class: {},
+		UI5Enum: {},
+		UI5Function: {},
+		UI5Namespace: {},
+		UI5Typedef: {},
+		UI5Interface: {},
 	};
 
 	const defaultAggregations: Record<string, string> = {};
@@ -48,42 +48,18 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 			defaultAggregations[symbolName] = defaultAggregation;
 		}
 
-		let modelName;
-		switch (symbol.kind) {
-			case "UI5Class":
-				modelName = "classes";
-				break;
-			case "UI5Enum":
-				modelName = "enums";
-				break;
-			case "UI5Interface":
-				modelName = "interfaces";
-				break;
-			case "UI5Namespace":
-				modelName = "namespaces";
-				break;
-			case "UI5Typedef":
-				modelName = "typedefs";
-				break;
-			case "UI5Function":
-				modelName = "functions";
-				break;
-			default:
-				modelName = "unknown-" + symbol.kind;
-		}
-
 		if (symbol.deprecatedInfo?.isDeprecated) {
 			const deprecationText = getDeprecationText(symbol.deprecatedInfo) ?? "deprecated";
-			deprecations[modelName] = deprecations[modelName] ?? {};
-			deprecations[modelName][symbolName] = deprecationText;
+			deprecations[symbol.kind] = deprecations[symbol.kind] ?? {};
+			deprecations[symbol.kind][symbolName] = deprecationText;
 		}
 
 		if (hasFieldsProperty(symbol)) {
 			symbol.fields?.forEach((field) => {
 				if (field?.deprecatedInfo?.isDeprecated) {
-					deprecations[modelName] = deprecations[modelName] ?? {};
+					deprecations[symbol.kind] = deprecations[symbol.kind] ?? {};
 					const deprecationText = getDeprecationText(field.deprecatedInfo) ?? "deprecated";
-					deprecations[modelName][symbolName + "." + field.name] = deprecationText;
+					deprecations[symbol.kind][symbolName + "." + field.name] = deprecationText;
 				}
 			});
 		}

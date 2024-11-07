@@ -10,6 +10,7 @@ import {getPropertyName} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
+import type {ApiExtract} from "../../utils/ApiExtract.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -62,7 +63,7 @@ export default class SourceFileLinter {
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
 	#dataTypes: Record<string, string>;
-	#apiExtract: Record<string, Record<string, Record<string, string>>>;
+	#apiExtract: ApiExtract;
 	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
@@ -71,8 +72,8 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, manifestContent?: string,
-		apiExtract?: Record<string, Record<string, Record<string, string>>>
+		dataTypes: Record<string, string> | undefined, apiExtract: ApiExtract,
+		manifestContent?: string
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -87,8 +88,8 @@ export default class SourceFileLinter {
 		this.#manifestContent = manifestContent;
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
+		this.#apiExtract = apiExtract;
 		this.#dataTypes = dataTypes ?? {};
-		this.#apiExtract = apiExtract ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -440,40 +441,30 @@ export default class SourceFileLinter {
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
 		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.#resourcePath, true);
 		if (type === "interfaces") {
-			const deprecatedInterfaces = this.#apiExtract.deprecations.interfaces;
-
 			if (ts.isArrayLiteralExpression(node.initializer)) {
 				node.initializer.elements.forEach((elem) => {
 					const interfaceName = (elem as ts.StringLiteral).text;
-
-					if (deprecatedInterfaces[interfaceName]) {
+					const deprecationInfo = this.#apiExtract.getDeprecationInfo(interfaceName);
+					if (deprecationInfo) {
 						this.#reporter.addMessage(MESSAGE.DEPRECATED_INTERFACE, {
 							interfaceName: interfaceName,
-							details: deprecatedInterfaces[interfaceName],
+							details: deprecationInfo.text,
 						}, elem);
 					}
 				});
 			}
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
-			const deprecatedTypes = {
-				...this.#apiExtract.deprecations.enums,
-				...this.#apiExtract.deprecations.typedefs,
-			};
 			node.initializer.elements.forEach((element) => {
 				const nodeType = ts.isStringLiteral(element) ? element.text : "";
-
-				if (deprecatedTypes[nodeType]) {
+				const deprecationInfo = this.#apiExtract.getDeprecationInfo(nodeType);
+				if (deprecationInfo) {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 						typeName: nodeType,
-						details: deprecatedTypes[nodeType],
+						details: deprecationInfo.text,
 					}, element);
 				}
 			});
 		} else if (type === "defaultValue") {
-			const deprecatedTypes = {
-				...this.#apiExtract.deprecations.enums,
-				...this.#apiExtract.deprecations.typedefs,
-			};
 			const defaultValueType = ts.isStringLiteral(node.initializer) ?
 				node.initializer.text :
 				"";
@@ -487,21 +478,16 @@ export default class SourceFileLinter {
 				ts.isStringLiteral(typeNode.initializer)) ?
 					[typeNode.initializer.text, defaultValueType].join(".") :
 				"";
-
-			if (deprecatedTypes[fullyQuantifiedName]) {
+			const deprecationInfo = this.#apiExtract.getDeprecationInfo(fullyQuantifiedName);
+			if (deprecationInfo) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 					typeName: defaultValueType,
-					details: deprecatedTypes[fullyQuantifiedName],
+					details: deprecationInfo.text,
 				}, node);
 			}
 		// This one is too generic and should always be at the last place
 		// It's for "types" and event arguments' types
 		} else if (ts.isStringLiteral(node.initializer)) {
-			const deprecatedTypes = {
-				...this.#apiExtract.deprecations.enums,
-				...this.#apiExtract.deprecations.typedefs,
-			} as Record<string, string>;
-
 			// Strip all the complex type definitions and create a list of "simple" types
 			// i.e. Record<string, Map<my.custom.type, Record<another.type, number[]>>>
 			// -> string, my.custom.type, another.type, number
@@ -509,15 +495,16 @@ export default class SourceFileLinter {
 				.split(",").map((type) => type.trim());
 
 			nodeTypes.forEach((nodeType) => {
-				if (this.#apiExtract.deprecations.classes[nodeType]) {
+				const deprecationInfo = this.#apiExtract.getDeprecationInfo(nodeType);
+				if (deprecationInfo?.symbolKind === "UI5Class") {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
 						className: nodeType,
-						details: this.#apiExtract.deprecations.classes[nodeType],
+						details: deprecationInfo.text,
 					}, node.initializer);
-				} else if (deprecatedTypes[nodeType]) {
+				} else if (deprecationInfo?.symbolKind === "UI5Typedef" || deprecationInfo?.symbolKind === "UI5Enum") {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 						typeName: nodeType,
-						details: deprecatedTypes[nodeType],
+						details: deprecationInfo.text,
 					}, node.initializer);
 				}
 			});
