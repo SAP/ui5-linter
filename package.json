@@ -33,7 +33,7 @@
 		"check-licenses": "licensee --errors-only",
 		"cleanup": "rimraf lib coverage",
 		"coverage": "nyc ava --node-arguments=\"--experimental-loader=@istanbuljs/esm-loader-hook\"",
-		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp",
+		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp,@ui5/linter",
 		"hooks:pre-push": "npm run lint:commit",
 		"lint": "eslint .",
 		"lint:commit": "commitlint -e",
