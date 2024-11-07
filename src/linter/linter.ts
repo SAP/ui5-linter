@@ -11,11 +11,6 @@ import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
-// Internal analytical variable that will store matchers' count.
-// We cannot predict the outcome of the matchers, so stash usage statistics
-// and later analyze the results from it.
-const matchedPatterns = new Set<string>();
-
 export async function lintProject({
 	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
 }: LinterOptions): Promise<LintResult[]> {
@@ -127,6 +122,11 @@ async function lint(
 
 	// Resolve files to include
 	filePatterns = filePatterns ?? config.files ?? [];
+
+	// We cannot predict the outcome of the matchers, so we remember the used patterns
+	// and later compare them against the provided filePatterns to find patterns
+	// that didn't match any file
+	const matchedPatterns = new Set<string>();
 
 	// Resolve ignores
 	ignorePattern = [
