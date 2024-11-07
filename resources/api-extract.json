@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.21"
+    "version": "1.120.23"
   },
   "defaultAggregations": {
     "sap.ca.ui.CustomerControlListItem": "content",
@@ -568,14 +568,14 @@
       "sap.m.MessagePage": "(since 1.112) Use the {@link sap.m.IllustratedMessage} instead.",
       "sap.m.MessagePopoverItem": "(since 1.46) use MessageItem instead",
       "sap.m.MultiEditField": "(since 1.120) ",
-      "sap.m.P13nColumnsItem": "(since 1.120) ",
+      "sap.m.P13nColumnsItem": "(since 1.120) replaced by the artifacts in {@link sap.m.p13n}.",
       "sap.m.P13nColumnsPanel": "(since 1.98) Use the {@link sap.m.p13n.SelectionPanel} instead.",
       "sap.m.P13nDialog": "(since 1.98) Use the {@link sap.m.p13n.Popup} instead.",
-      "sap.m.P13nDimMeasureItem": "(since 1.120) ",
-      "sap.m.P13nDimMeasurePanel": "(since 1.120) ",
-      "sap.m.P13nGroupItem": "(since 1.120) ",
+      "sap.m.P13nDimMeasureItem": "(since 1.120) replaced by the artifacts in {@link sap.m.p13n}.",
+      "sap.m.P13nDimMeasurePanel": "(since 1.120) replaced by the artifacts in {@link sap.m.p13n}.",
+      "sap.m.P13nGroupItem": "(since 1.120) replaced by the artifacts in {@link sap.m.p13n}.",
       "sap.m.P13nGroupPanel": "(since 1.98) Use the {@link sap.m.p13n.GroupPanel} instead.",
-      "sap.m.P13nSortItem": "sind 1.120",
+      "sap.m.P13nSortItem": "(since 1.120) replaced by the artifacts in {@link sap.m.p13n}.",
       "sap.m.P13nSortPanel": "(since 1.98) Use the {@link sap.m.p13n.SortPanel} instead.",
       "sap.m.routing.RouteMatchedHandler": "(since 1.28) use {@link sap.m.routing.Router} or {@link sap.m.routing.Targets} instead. The functionality of the routematched handler is built in into these two classes, there is no need to create this anymore.",
       "sap.m.StandardTile": "(since 1.50) replaced by {@link sap.m.GenericTile}",
