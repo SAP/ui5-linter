@@ -26,6 +26,7 @@
 		"ui5lint": "bin/ui5lint.js"
 	},
 	"type": "module",
+	"types": "lib/index.d.ts",
 	"scripts": {
 		"build": "npm run cleanup && tsc -p tsconfig.build.json",
 		"build-test": "tsc --noEmit -p .",
