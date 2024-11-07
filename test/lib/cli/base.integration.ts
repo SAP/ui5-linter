@@ -71,7 +71,7 @@ test.serial("ui5lint --format markdown", async (t) => {
 	process.exitCode = 0;
 
 	const resultProcessStdoutMarkdown = processStdoutWriteStub.firstCall.firstArg;
-	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 linter Report"),
+	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 Linter Report"),
 		"Output starts with the expected Markdown header");
 
 	const resultProcessStdoutNL = processStdoutWriteStub.secondCall.firstArg;

@@ -1,6 +1,6 @@
 ![UI5 logo](./docs/images/UI5_logo_wide.png)
 
-# UI5 linter
+# UI5 Linter
 
 > A static code analysis tool for UI5
 
@@ -144,7 +144,7 @@ ui5lint --ui5-config ./configs/ui5-custom.yaml
 
 ## Configuration
 
-The UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 
+UI5 linter can easily be configured with an external configuration file, allowing you to customize how the linter behaves. For example, you can tell it to ignore specific files or directories. 
 
 ### Configuration File Location
 The configuration file must be placed in the root directory of your project, alongside the `ui5.yaml` and `package.json` files. The linter will automatically detect and load the file when it runs.
@@ -193,7 +193,7 @@ module.exports = {
   ];
   ```
 
-  In this way, you can control which files the UI5 linter should process and which it should ignore.
+  In this way, you can control which files UI5 linter should process and which it should ignore.
 
 - **files**: This option allows you to specify glob patterns to target particular files or directories for linting. However, it does not enable you to include files that are typically excluded from the process (e.g., files outside the `webapp` directory in application projects). Only POSIX path separators (`/`) are supported, irrespective of the platform you're using.
 
