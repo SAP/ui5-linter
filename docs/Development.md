@@ -1,6 +1,6 @@
-# UI5 linter Development
+# UI5 Linter Development
 
-**Note:** This document is intended to support UI5 Linter developers and is not relevant for end users of the linter.
+**Note:** This document is intended to support UI5 linter developers and is not relevant for end users of the linter.
 
 ## Updating SAPUI5 types
 

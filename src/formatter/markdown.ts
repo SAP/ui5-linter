@@ -75,7 +75,7 @@ export class Markdown {
 			findings = `## Findings\n${findings}`;
 		}
 
-		let output = `# UI5 linter Report
+		let output = `# UI5 Linter Report
 ${summary}
 ${findings}`;
 

@@ -1,4 +1,4 @@
-# Contributing to UI5 linter
+# Contributing to UI5 Linter
 
 ## Content
 
@@ -68,9 +68,9 @@ GitHub offers labels to categorize issues. The labels can only be set and modifi
 
 ### Issue Reporting Disclaimer
 
-We want to improve the quality of the UI5 linter and good bug reports are welcome! But our capacity is limited, so we cannot handle questions or consultation requests, and we cannot afford to ask for required details.
+We want to improve the quality of UI5 linter and good bug reports are welcome! But our capacity is limited, so we cannot handle questions or consultation requests, and we cannot afford to ask for required details.
 
-Therefore, we reserve the right to close or to not process insufficient bug reports in favor of those which are clearly documented and easy to reproduce. Even though we would like to solve each well-documented issue, there is always the chance that it won't happen - please remember: The UI5 linter is Open Source and comes without warranty.
+Therefore, we reserve the right to close or to not process insufficient bug reports in favor of those which are clearly documented and easy to reproduce. Even though we would like to solve each well-documented issue, there is always the chance that it won't happen - please remember: UI5 linter is Open Source and comes without warranty.
 
 Bug report analysis support is always very welcome! See [Analyze Issues](#-analyzing-issues).
 
@@ -99,7 +99,7 @@ There are three important things to know:
 
 1. You must be aware of the Apache License (which describes contributions) and **agree to the Developer Certificate of Origin***. This is common practice in major Open Source projects. To make this process as simple as possible, we are using *[CLA assistant](https://cla-assistant.io/)* for individual contributions. CLA assistant is an open source tool that integrates with GitHub very well and enables a one-click experience for accepting the DCO. For company contributers, special rules apply. See the respective section below for details.
 2. Follow our **[Development Conventions and Guidelines](docs/Guidelines.md)**.
-3. **Not all proposed contributions can be accepted**. Some features may just fit a third-party add-on better. The code must match the overall direction of the UI5 linter and improve it. So there should be some "bang for the byte". For most bug fixes this is a given, but a major feature implementation first needs to be discussed with one of the committers. Possibly, one who touched the related code or module recently. The more effort you invest, the better you should clarify in advance whether the contribution will match the project's direction. The best way would be to just open an enhancement ticket in the issue tracker to discuss the feature you plan to implement (make it clear that you intend to contribute). We will then forward the proposal to the respective code owner. This avoids disappointment.
+3. **Not all proposed contributions can be accepted**. Some features may just fit a third-party add-on better. The code must match the overall direction of UI5 linter and improve it. So there should be some "bang for the byte". For most bug fixes this is a given, but a major feature implementation first needs to be discussed with one of the committers. Possibly, one who touched the related code or module recently. The more effort you invest, the better you should clarify in advance whether the contribution will match the project's direction. The best way would be to just open an enhancement ticket in the issue tracker to discuss the feature you plan to implement (make it clear that you intend to contribute). We will then forward the proposal to the respective code owner. This avoids disappointment.
 
 ### Developer Certificate of Origin (DCO)
 
@@ -111,7 +111,7 @@ This DCO replaces the previously used CLA ("Contributor License Agreement") as w
 ### How to Contribute
 
 1. Make sure the change is welcome (see [General Remarks](#general-remarks)).
-    - Also check on the [UI5 linter Task Board](https://github.com/orgs/SAP/projects/XX) whether related tasks are already being worked on, blocked, or in discussion.
+    - Also check on the [UI5 Linter Task Board](https://github.com/orgs/SAP/projects/110) whether related tasks are already being worked on, blocked, or in discussion.
 1. Create a branch by forking the relevant module repository and apply your change.
 1. Commit and push your change on that branch.
     - 👉 **Please follow our [Development Conventions and Guidelines](docs/Guidelines.md).**
