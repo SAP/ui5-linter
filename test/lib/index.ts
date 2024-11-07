@@ -89,3 +89,18 @@ test.serial("ui5lint API: com.ui5.troublesome.app with unmatched patterns", asyn
 			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
 	});
 });
+
+test.serial("ui5lint API: Simultaneously test different projects", async (t) => {
+	const appPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const libPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
+	const {ui5lint} = t.context;
+
+	const results = await Promise.all([
+		ui5lint({rootDir: appPath}),
+		ui5lint({rootDir: libPath}),
+	]);
+
+	results.forEach((res) => {
+		t.snapshot(preprocessLintResultsForSnapshot(res));
+	});
+});
