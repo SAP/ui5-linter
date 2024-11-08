@@ -15,7 +15,7 @@ export interface LinterArg {
 	coverage: boolean;
 	files?: string[];
 	filePaths?: string[];
-	ignorePatterns?: string[];
+	ignorePattern?: string[];
 	details: boolean;
 	format: string;
 	config?: string;
@@ -154,13 +154,13 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		rootDir: path.join(process.cwd()),
 		ignorePatterns,
 		filePatterns,
-		reportCoverage,
-		includeMessageDetails: details,
+		coverage: reportCoverage,
+		details,
 		configPath: config,
 		ui5Config,
 	});
 
-	if (reportCoverage) {
+	if (coverage) {
 		const coverageFormatter = new Coverage();
 		await writeFile("ui5lint-report.html", await coverageFormatter.format(res));
 	}

@@ -106,7 +106,7 @@ test.serial("ui5lint (default) ", async (t) => {
 	t.is(writeFile.callCount, 0, "Coverage was not called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
-		includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
+		details: false, coverage: false, ui5Config: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -120,7 +120,7 @@ test.serial("ui5lint --coverage ", async (t) => {
 	t.is(writeFile.callCount, 1, "Coverage was called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
-		includeMessageDetails: false, reportCoverage: true, ui5Config: undefined,
+		details: false, coverage: true, ui5Config: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -152,7 +152,7 @@ test.serial("ui5lint --ignore-pattern ", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: ["test/**/*"],
-		configPath: undefined, includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
+		configPath: undefined, details: false, coverage: false, ui5Config: undefined,
 	});
 });
 
@@ -173,7 +173,7 @@ test.serial("ui5lint --config", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: "config.js",
-		includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
+		details: false, coverage: false, ui5Config: undefined,
 	});
 });
 
@@ -185,7 +185,7 @@ test.serial("ui5lint --ui5-config", async (t) => {
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
-		includeMessageDetails: false, reportCoverage: false, ui5Config: "ui5.yaml",
+		details: false, coverage: false, ui5Config: "ui5.yaml",
 	});
 });
 
@@ -198,7 +198,7 @@ test.serial("ui5lint path/to/file.js glob/**/*", async (t) => {
 	t.deepEqual(lintProject.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: ["path/to/file.js", "glob/**/*"],
 		ignorePatterns: undefined, configPath: undefined,
-		includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
+		details: false, coverage: false, ui5Config: undefined,
 	});
 });
 

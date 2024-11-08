@@ -143,8 +143,8 @@ function testDefinition(
 			rootDir: fixturesPath,
 			namespace,
 			filePatterns: filePaths,
-			reportCoverage: true,
-			includeMessageDetails: true,
+			coverage: true,
+			details: true,
 		});
 		assertExpectedLintResults(t, res, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
