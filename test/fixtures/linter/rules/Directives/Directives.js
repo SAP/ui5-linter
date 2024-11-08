@@ -80,7 +80,13 @@ sap.ui.define([
 	({BarColor, MessageType: mt} = coreLib); // IGNORE: Enum "MessageType" is deprecated
 	mt.Error;
 
-	// ui5lint-disable-next-line no-deprecated-api
+	/*
+		ui5lint-disable-next-line no-deprecated-api
+
+		--
+
+		Descriptive comment
+	*/
 	mobileLib.InputType.Date; // IGNORE: Enum value "InputType.Date" is deprecated
 
 	const navigationHandler = new NavigationHandler({});

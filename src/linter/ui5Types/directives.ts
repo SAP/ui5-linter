@@ -73,13 +73,22 @@ function findDirectivesAroundNode(
 		no-deprecated-api,
 		no-global
 	*\/
-*/
-const disableCommentRegex = /\/[/*]\s*ui5lint-(enable|disable)((?:-next)?-line)?((?:\s+[\w-]+\s*,)*(?:\s*[\w-]+))?\s*(?:--.*)?(?:\*\/|$)/mg;
 
+	Must not match:
+
+*/
+/* eslint-disable max-len */
+const directiveRegex =
+/*  | ----------------------------------------------- Multi-line comments -------------------------------------------- | ------------------------------------------ Single-line comments ------------------------------------| */
+	/\/\*\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?((?:\s+[\w-]+\s*,)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?\*\/|\/\/\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?((?:\s+[\w-]+\s*,)*(?:\s*[\w-]+))?\s*,?\s*(?:--.*)?$/mg;
+/*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                 |Dangling,| Description      |               |CG #4: action |    | CG #5: scope    | CG #6: rules                  |Dangling,| Description | */
+/* eslint-enable max-len */
+
+export type DirectiveAction = "enable" | "disable";
+export type DirectiveScope = "line" | "next-line" | undefined;
 export interface Directive {
-	action: "enable" | "disable";
-	isLine: boolean;
-	isNextLine: boolean;
+	action: DirectiveAction;
+	scope: DirectiveScope;
 	ruleNames: string[];
 	pos: number;
 	length: number;
@@ -91,19 +100,20 @@ export function collectPossibleDirectives(sourceFile: ts.SourceFile) {
 	const text = sourceFile.getFullText();
 	let match;
 	const comments = new Set<Directive>();
-	while ((match = disableCommentRegex.exec(text)) !== null) {
-		const [, action, nextLineOrLine, rules] = match;
+	while ((match = directiveRegex.exec(text)) !== null) {
+		const action = (match[1] ?? match[4]) as DirectiveAction;
+		const scope = (match[2] ?? match[5]) as DirectiveScope;
+		const rules = match[3] ?? match[6];
+
 		const pos = match.index;
 		const length = match[0].length;
 		let ruleNames = rules?.split(",") ?? [];
 		ruleNames = ruleNames.map((rule) => rule.trim());
-		const isLine = nextLineOrLine === "-line";
-		const isNextLine = nextLineOrLine === "-next-line";
-		const {line, character: column} = sourceFile.getLineAndCharacterOfPosition(pos);
 
+		const {line, character: column} = sourceFile.getLineAndCharacterOfPosition(pos + length);
 		comments.add({
-			action: action as "enable" | "disable",
-			isLine, isNextLine, ruleNames,
+			action,
+			scope, ruleNames,
 			pos, length,
 			// Typescript positions are all zero-based
 			line: line + 1,

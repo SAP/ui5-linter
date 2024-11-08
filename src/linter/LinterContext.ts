@@ -269,10 +269,10 @@ export default class LinterContext {
 
 			directiveStack = directiveStack.filter((dir) => {
 				// Filter out line-based directives that are no longer relevant
-				if (dir.isLine && dir.line !== line) {
+				if (dir.scope === "line" && dir.line !== line) {
 					return false;
 				}
-				if (dir.isNextLine && dir.line !== line - 1) {
+				if (dir.scope === "next-line" && dir.line !== line - 1) {
 					return false;
 				}
 				return true;
@@ -282,14 +282,14 @@ export default class LinterContext {
 				if (dir.line > line) {
 					continue;
 				}
-				if (!dir.isLine && dir.line === line && dir.column > column) {
+				if (dir.scope !== "line" && dir.line === line && dir.column > column) {
 					continue;
 				}
 				directives.delete(dir);
-				if (dir.isLine && dir.line !== line) {
+				if (dir.scope === "line" && dir.line !== line) {
 					continue;
 				}
-				if (dir.isNextLine && dir.line !== line - 1) {
+				if (dir.scope === "next-line" && dir.line !== line - 1) {
 					continue;
 				}
 				directiveStack.push(dir);

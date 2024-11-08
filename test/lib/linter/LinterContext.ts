@@ -39,8 +39,7 @@ test("generateLintResult: Disable and enable", (t) => {
 	linterContext.getMetadata("/foo.js").directives = new Set([
 		{ // Ignore line 10 finding
 			action: "disable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -49,8 +48,7 @@ test("generateLintResult: Disable and enable", (t) => {
 		},
 		{ // Report line 20 finding
 			action: "enable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -59,8 +57,7 @@ test("generateLintResult: Disable and enable", (t) => {
 		},
 		{ // Ignore all other findings
 			action: "disable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -78,8 +75,7 @@ test("generateLintResult: Disable next line", (t) => {
 	linterContext.getMetadata("/foo.js").directives = new Set([
 		{ // Ignore line 10 finding
 			action: "disable",
-			isLine: false,
-			isNextLine: true,
+			scope: "next-line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -88,8 +84,7 @@ test("generateLintResult: Disable next line", (t) => {
 		},
 		{ // No finding in next line => should have no effect
 			action: "disable",
-			isLine: false,
-			isNextLine: true,
+			scope: "next-line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -98,8 +93,7 @@ test("generateLintResult: Disable next line", (t) => {
 		},
 		{ // No finding in next line => should have no effect
 			action: "disable",
-			isLine: false,
-			isNextLine: true,
+			scope: "next-line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -108,8 +102,7 @@ test("generateLintResult: Disable next line", (t) => {
 		},
 		{ // No finding in next line => should have no effect
 			action: "disable",
-			isLine: false,
-			isNextLine: true,
+			scope: "next-line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -118,8 +111,7 @@ test("generateLintResult: Disable next line", (t) => {
 		},
 		{ // No finding in next line (but in the same line) => should have no effect
 			action: "disable",
-			isLine: false,
-			isNextLine: true,
+			scope: "next-line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -137,8 +129,7 @@ test("generateLintResult: Disable line", (t) => {
 	linterContext.getMetadata("/foo.js").directives = new Set([
 		{ // Ignore line 10 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -147,8 +138,7 @@ test("generateLintResult: Disable line", (t) => {
 		},
 		{ // Ignore line 20 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -157,8 +147,7 @@ test("generateLintResult: Disable line", (t) => {
 		},
 		{ // Ignore line 30 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -167,8 +156,7 @@ test("generateLintResult: Disable line", (t) => {
 		},
 		{ // Ignore line 40 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -177,8 +165,7 @@ test("generateLintResult: Disable line", (t) => {
 		},
 		{ // Actually report line 40 finding
 			action: "enable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -196,8 +183,7 @@ test("generateLintResult: Multiple disables in same line", (t) => {
 	linterContext.getMetadata("/foo.js").directives = new Set([
 		{ // Ignore line 10 finding
 			action: "disable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -206,8 +192,7 @@ test("generateLintResult: Multiple disables in same line", (t) => {
 		},
 		{ // Actually report it
 			action: "enable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -216,8 +201,7 @@ test("generateLintResult: Multiple disables in same line", (t) => {
 		},
 		{ // Ignore everything after
 			action: "disable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -235,8 +219,7 @@ test("generateLintResult: Edge positions", (t) => {
 	linterContext.getMetadata("/foo.js").directives = new Set([
 		{ // Ignore line 10 finding
 			action: "disable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -245,8 +228,7 @@ test("generateLintResult: Edge positions", (t) => {
 		},
 		{ // Ignore line 10 finding
 			action: "enable",
-			isLine: false,
-			isNextLine: false,
+			scope: undefined,
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -255,8 +237,7 @@ test("generateLintResult: Edge positions", (t) => {
 		},
 		{ // Ignore line 20 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored
@@ -265,8 +246,7 @@ test("generateLintResult: Edge positions", (t) => {
 		},
 		{ // Ignore line 30 finding
 			action: "disable",
-			isLine: true,
-			isNextLine: false,
+			scope: "line",
 			ruleNames: ["no-deprecated-api"],
 			pos: -1, // Ignored
 			length: -1, // Ignored

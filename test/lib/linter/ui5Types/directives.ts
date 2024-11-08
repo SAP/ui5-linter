@@ -16,23 +16,21 @@ const foo = 'bar';
 	const d = Array.from(directives);
 	t.deepEqual(d[0], {
 		action: "disable",
-		isLine: false,
-		isNextLine: false,
+		scope: undefined,
 		ruleNames: ["no-deprecated-api"],
 		pos: 0,
 		length: 36,
 		line: 1,
-		column: 1,
+		column: 37,
 	});
 	t.deepEqual(d[1], {
 		action: "enable",
-		isLine: false,
-		isNextLine: false,
+		scope: undefined,
 		ruleNames: ["no-deprecated-api"],
 		pos: 56,
 		length: 37,
-		line: 3,
-		column: 1,
+		line: 4,
+		column: 2,
 	});
 });
 
@@ -46,23 +44,46 @@ test("collectPossibleDirectives should find same-line directives in source file"
 	const d = Array.from(directives);
 	t.deepEqual(d[0], {
 		action: "disable",
-		isLine: false,
-		isNextLine: false,
+		scope: undefined,
 		ruleNames: [],
 		pos: 0,
 		length: 21,
 		line: 1,
-		column: 1,
+		column: 22,
 	});
 	t.deepEqual(d[1], {
 		action: "enable",
-		isLine: false,
-		isNextLine: false,
+		scope: undefined,
 		ruleNames: [],
 		pos: 39,
 		length: 18,
 		line: 1,
-		column: 40,
+		column: 58,
+	});
+});
+test("collectPossibleDirectives should find multi-line directives in source file", (t) => {
+	const sourceCode =
+		`/*
+ui5lint-disable-next-line no-deprecated-api
+
+--
+
+De$criptive / comment *
+*/
+const foo = 'bar';`;
+	const sourceFile = ts.createSourceFile("test.ts", sourceCode, ts.ScriptTarget.ESNext, true);
+	const directives = collectPossibleDirectives(sourceFile);
+
+	t.is(directives.size, 1);
+	const d = Array.from(directives);
+	t.deepEqual(d[0], {
+		action: "disable",
+		scope: "next-line",
+		ruleNames: ["no-deprecated-api"],
+		pos: 0,
+		length: 78,
+		line: 7,
+		column: 3,
 	});
 });
 
@@ -256,6 +277,7 @@ function deprecatedFunction9() {
 
 	test(`findDirectives: Case 13 (${suffix})`, (t) => {
 		const sourceCode = `
+// ui5lint-disable-next-line no-deprecated-api,
 // ui5lint-disable no-deprecated-api,no-globals
 // ui5lint-enable no-deprecated-api ,no-globals
 // ui5lint-disable no-deprecated-api , no-globals
@@ -265,7 +287,7 @@ function deprecatedFunction9() {
 		const sourceFile = ts.createSourceFile(`test.${suffix}`, sourceCode, ts.ScriptTarget.ESNext, true);
 		const metadata = {} as LintMetadata;
 		findDirectives(sourceFile, metadata);
-		t.is(metadata.directives.size, 3);
+		t.is(metadata.directives.size, 4);
 		t.snapshot(metadata.directives);
 	});
 
@@ -286,19 +308,6 @@ function someFunction() {
 	});
 
 	test(`findDirectives: Negative case 2 (${suffix})`, (t) => {
-		// Dangling comma is invalid
-		const sourceCode = `
-// ui5lint-disable-next-line no-deprecated-api,
-function someFunction() {
-	someFunction2();
-}
-`;
-		const sourceFile = ts.createSourceFile(`test.${suffix}`, sourceCode, ts.ScriptTarget.ESNext, true);
-		const metadata = {} as LintMetadata;
-		findDirectives(sourceFile, metadata);
-		t.is(metadata.directives.size, 0);
-	});
-	test(`findDirectives: Negative case 3 (${suffix})`, (t) => {
 		// Three slashes are invalid
 		const sourceCode = `
 /// ui5lint-disable-next-line no-deprecated-api
