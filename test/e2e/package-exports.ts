@@ -1,5 +1,5 @@
 import test from "ava";
-import { createRequire } from "node:module";
+import {createRequire} from "node:module";
 
 // Using CommonsJS require since JSON module imports are still experimental
 const require = createRequire(import.meta.url);

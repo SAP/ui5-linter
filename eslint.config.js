@@ -19,7 +19,7 @@ export default tseslint.config(
 			"test/tmp/*",
 			"test/projects/*",
 			"test/fixtures/*",
-			"test/e2e/*",
+			"test/e2e/package-exports.ts",
 
 			// Exclude generated code
 			"lib/*",
