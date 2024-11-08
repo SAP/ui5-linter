@@ -1,4 +1,3 @@
-// Calculate nodeArguments based on the Node version
 const nodeArguments = [
 	"--import=tsx/esm",
 	"--no-warnings=ExperimentalWarning",
