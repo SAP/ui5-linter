@@ -19,7 +19,5 @@ The script updates multiple places where the corresponding SAPUI5 types are refe
   - This package contains the TypeScript definitions of all SAPUI5 libraries and is relevant for the general TypeScript based detection.
 - [`resources/api-extract.json`](../resources/api-extract.json)
   - This file contains additional information that is not available or accessible via the TypeScript definitions. It is an extract from the original `api.json` files of the SAPUI5 libraries.
-- [`resources/dataTypes.json`](../resources/dataTypes.json)
-  - This file is used to distinguish between data types and enumerations when analyzing pseudo modules.
 - [`resources/overrides/library`](../resources/overrides/library)
   - This folder contains additional module declarations that support detection of certain issues, for example usage of pseudo modules.
