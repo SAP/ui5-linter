@@ -19,6 +19,9 @@ export default tseslint.config(
 			"test/tmp/*",
 			"test/projects/*",
 			"test/fixtures/*",
+			// This file must be excluded as it tests the package exports by
+			// requiring the package itself, which causes a circular dependency
+			// and TypeScript/ESlint gets confused during compilation.
 			"test/e2e/package-exports.ts",
 
 			// Exclude generated code
