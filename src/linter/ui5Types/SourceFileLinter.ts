@@ -38,6 +38,19 @@ function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
 	return sourceFile.fileName.startsWith("/types/typescript/lib/");
 }
 
+/**
+ * Removes surrounding quote characters ("'`) from a string if they exist.
+ * @param {string} str
+ * @returns {string}
+ * @example removeQuotes("\"myString\"") -> "myString"
+ * @example removeQuotes("\'myString\'") -> "myString"
+ * @example removeQuotes("\`myString\`") -> "myString"
+ */
+function removeQuotes(str: string | undefined): string {
+	if (!str) return "";
+	return str.replace(/^['"`]|['"`]$/g, "");
+}
+
 export default class SourceFileLinter {
 	#resourcePath: ResourcePath;
 	#sourceFile: ts.SourceFile;
@@ -147,6 +160,8 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
+		} else if (ts.isPropertyAssignment(node) && removeQuotes(node.name.getText()) === "theme") {
+			this.analyzeTestsuiteThemeProperty(node);
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -1195,5 +1210,44 @@ export default class SourceFileLinter {
 		// such symbols (e.g. globals like 'Symbol', which might have dedicated types in UI5 thirdparty like JQuery)
 		return !declarations.some((declaration) => isSourceFileOfTypeScriptLib(declaration.getSourceFile())) &&
 			declarations.some((declaration) => checkFunction(declaration.getSourceFile()));
+	}
+
+	analyzeTestsuiteThemeProperty(node: ts.PropertyAssignment) {
+		// In a Test Starter testsuite file,
+		// themes can be defined as default (1.) or for test configs individually (2.).
+
+		// (1.) and (2.) are checks for these two possible structures,
+		// which use surrounding property names to determine the context.
+
+		// We cannot use the best practice file name "testsuite.qunit.js/ts",
+		// to determine if a file is a Test Starter testsuite file,
+		// because the file name can be arbitrary.
+		// Therefore, we need checks (1.) and (2.) and set a flag to true afterwards.
+		let isTestStarterStructure = false;
+
+		const oneLayerUp = node.parent.parent;
+		const twoLayersUp = oneLayerUp?.parent.parent;
+		const threeLayersUp = twoLayersUp?.parent.parent;
+		// Check if "theme" property is inside "ui5: {...}" object
+		if (oneLayerUp && ts.isObjectLiteralElement(oneLayerUp) &&
+			removeQuotes(oneLayerUp.name?.getText()) === "ui5") {
+			if (ts.isObjectLiteralElement(twoLayersUp) &&
+				removeQuotes(twoLayersUp.name?.getText()) === "defaults") {
+				// (1.) set flag to true if "theme" property is in "defaults: {...}" context
+				isTestStarterStructure = true;
+			} else if (ts.isObjectLiteralElement(twoLayersUp) &&
+				ts.isObjectLiteralElement(threeLayersUp) &&
+				removeQuotes(threeLayersUp.name?.getText()) === "tests") {
+				// (2.) set flag to true if "theme" property is in "tests: {...}" context
+				isTestStarterStructure = true;
+			}
+		}
+
+		const themeName = removeQuotes(node.initializer.getText());
+		if (isTestStarterStructure && deprecatedThemes.includes(themeName)) {
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
+				themeName,
+			}, node);
+		}
 	}
 }
