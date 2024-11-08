@@ -7,7 +7,7 @@ import {
 	esmockDeprecationText, preprocessLintResultsForSnapshot,
 } from "./linter/_linterHelper.js";
 import {LintResult} from "../../src/linter/LinterContext.js";
-import {UI5LintOptions} from "../../src/index.js";
+import {UI5LinerOptions} from "../../src/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "fixtures", "linter");
@@ -15,7 +15,7 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	ui5lint: SinonStub<[UI5LintOptions], Promise<LintResult[]>>;
+	ui5lint: SinonStub<[UI5LinerOptions], Promise<LintResult[]>>;
 }>;
 
 test.before(async (t) => {

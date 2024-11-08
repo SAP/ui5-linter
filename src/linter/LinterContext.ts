@@ -60,8 +60,8 @@ export interface LinterOptions {
 	rootDir: string;
 	filePatterns?: FilePattern[];
 	ignorePatterns?: FilePattern[];
-	reportCoverage?: boolean;
-	includeMessageDetails?: boolean;
+	coverage?: boolean;
+	details?: boolean;
 	configPath?: string;
 	noConfig?: boolean;
 	ui5Config?: string | object;
@@ -112,8 +112,8 @@ export default class LinterContext {
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#reportCoverage = !!options.reportCoverage;
-		this.#includeMessageDetails = !!options.includeMessageDetails;
+		this.#reportCoverage = !!options.coverage;
+		this.#includeMessageDetails = !!options.details;
 	}
 
 	getRootDir(): string {

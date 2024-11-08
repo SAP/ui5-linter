@@ -17,7 +17,7 @@ import {Minimatch} from "minimatch";
 const matchedPatterns = new Set<string>();
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePatterns, reportCoverage, includeMessageDetails, configPath, ui5Config, noConfig,
+	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
@@ -70,8 +70,8 @@ export async function lintProject({
 		namespace: project.getNamespace(),
 		filePatterns,
 		ignorePatterns,
-		reportCoverage,
-		includeMessageDetails,
+		coverage,
+		details,
 		configPath,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	}, config);
@@ -88,7 +88,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePatterns, ignorePatterns, namespace, reportCoverage, includeMessageDetails, configPath, noConfig,
+	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, configPath, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
@@ -107,8 +107,8 @@ export async function lintFile({
 		namespace,
 		filePatterns,
 		ignorePatterns,
-		reportCoverage,
-		includeMessageDetails,
+		coverage,
+		details,
 		configPath,
 		relFsBasePath: "",
 		virBasePath,
