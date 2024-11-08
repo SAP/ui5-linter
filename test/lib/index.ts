@@ -32,13 +32,12 @@ test.after.always((t) => {
 });
 
 // Test project fixtures individually
-test.serial("ui5lint API: All files of com.ui5.troublesome.app", async (t) => {
+test.serial("ui5lint API: Provide config as an object for com.ui5.troublesome.app", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {ui5lint} = t.context;
 
 	const res = await ui5lint({
 		rootDir: projectPath,
-		noConfig: true,
 		ui5Config: {
 			specVersion: "3.0",
 			metadata: {
@@ -60,7 +59,7 @@ test.serial("ui5lint API: All files of com.ui5.troublesome.app", async (t) => {
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
-test.serial("ui5lint API: Only /webapp folder from com.ui5.troublesome.app (without details / coverage)", async (t) => {
+test.serial("ui5lint API: Only /webapp folder from com.ui5.troublesome.app", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const filePaths = [
 		// Minimatch requires POSIX
@@ -88,6 +87,38 @@ test.serial("ui5lint API: com.ui5.troublesome.app with unmatched patterns", asyn
 		message: `Specified file patterns 'unmatched-pattern1', ` +
 			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
 	});
+});
+
+test.serial("ui5lint API: Ignore webapp/controller folder from com.ui5.troublesome.app (with details & coverage)",
+	async (t) => {
+		const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+		const ignorePatterns = [
+			// Minimatch requires POSIX
+			"webapp/controller/",
+		];
+		const {ui5lint} = t.context;
+
+		const res = await ui5lint({
+			rootDir: projectPath,
+			ignorePatterns,
+			coverage: true,
+			details: true,
+		});
+
+		t.snapshot(preprocessLintResultsForSnapshot(res));
+	});
+
+test.serial("ui5lint API: Ignore config file for com.ui5.troublesome.app", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const {ui5lint} = t.context;
+
+	const res = await ui5lint({
+		rootDir: projectPath,
+		noConfig: true,
+		config: "ui5lint.config.unmatched-patterns.mjs",
+	});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
 test.serial("ui5lint API: Simultaneously test different projects", async (t) => {

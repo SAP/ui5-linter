@@ -25,7 +25,7 @@ export interface UI5LinerOptions {
 	 */
 	config?: string;
 	/**
-	 * Whether to skip loading a config file
+	 * Whether to skip loading of the ui5lint.config.(cjs|mjs|js) config file
 	 * @default false
 	 */
 	noConfig?: boolean;
