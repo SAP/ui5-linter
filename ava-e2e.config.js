@@ -1,22 +1,6 @@
 // Calculate nodeArguments based on the Node version
-const nodeArguments = [
-	"--import=tsx/esm",
-	"--no-warnings=ExperimentalWarning",
-];
+import defaultAvaConfig from "./ava.config.js";
 
-export default {
-	extensions: {
-		ts: "module",
-	},
-	files: [
-		"test/e2e/**/*.ts",
-	],
-	watchMode: {
-		ignoreChanges: [
-			"test/tmp/**",
-			"lib/**",
-		],
-	},
-	nodeArguments,
-	workerThreads: false,
-};
+defaultAvaConfig.files = ["test/e2e/**/*.ts"];
+
+export default defaultAvaConfig;
