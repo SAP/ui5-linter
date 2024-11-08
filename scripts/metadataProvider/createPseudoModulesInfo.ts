@@ -113,13 +113,13 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 
 		indexFilesImports.push(`import "./${libName}";`);
 		await writeFile(
-			new URL(`../../resources/overrides/library/${libName}.d.ts`, import.meta.url),
+			new URL(`../../resources/overrides/pseudo-modules/${libName}.d.ts`, import.meta.url),
 			stringBuilder.join("\n")
 		);
 	}
 
 	await writeFile(
-		new URL(`../../resources/overrides/library/index.d.ts`, import.meta.url),
+		new URL(`../../resources/overrides/pseudo-modules/index.d.ts`, import.meta.url),
 		indexFilesImports.join("\n") + "\n"
 	);
 }
