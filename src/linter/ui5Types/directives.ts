@@ -27,9 +27,9 @@ function findDirectivesAroundNode(
 ) {
 	/*
 		// This is a comment
-		// ui5-lint-disable
+		// ui5lint-disable
 		myCallExpression()
-		// ui5-lint-enable
+		// ui5lint-enable
 		// This is a comment
 	*/
 	for (const directive of possibleDirectives) {
@@ -76,6 +76,13 @@ function findDirectivesAroundNode(
 
 	Must not match:
 
+	````
+	// ui5lint-disable-next-line -- my comment
+	and code
+	````
+	The above might incorrectly get matched when changing the below regex into a one that attempts
+	to match single- and multi-line comments at the same time. Therefore the two kinds are expressed
+	in individual regular expressions, combined with an OR operator.
 */
 /* eslint-disable max-len */
 const directiveRegex =
