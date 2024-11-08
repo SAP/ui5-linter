@@ -62,7 +62,6 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#reportCoverage: boolean;
 	#messageDetails: boolean;
-	#dataTypes: Record<string, string>;
 	#apiExtract: ApiExtract;
 	#manifestContent: string | undefined;
 	#fileName: string;
@@ -72,8 +71,7 @@ export default class SourceFileLinter {
 		context: LinterContext, resourcePath: ResourcePath,
 		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
 		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		dataTypes: Record<string, string> | undefined, apiExtract: ApiExtract,
-		manifestContent?: string
+		apiExtract: ApiExtract, manifestContent?: string
 	) {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
@@ -89,7 +87,6 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#apiExtract = apiExtract;
-		this.#dataTypes = dataTypes ?? {};
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -1152,17 +1149,30 @@ export default class SourceFileLinter {
 		}
 
 		if (this.isSymbolOfPseudoModuleType(symbol)) {
-			const moduleNamespaceName = moduleSpecifierNode.text.replaceAll("/", ".");
-			const isDataType = !!this.#dataTypes[moduleNamespaceName];
-			if (isDataType) {
+			let isEnum = false;
+			if (defaultExportSymbol) {
+				const declarations = defaultExportSymbol.getDeclarations();
+				if (declarations) {
+					declarations.forEach((declaration) => {
+						if (!ts.isExportAssignment(declaration)) {
+							return;
+						}
+						const type = this.#checker.getTypeAtLocation(declaration.expression);
+						if (type.symbol?.flags & ts.SymbolFlags.Enum) {
+							isEnum = true;
+						}
+					});
+				}
+			}
+			if (isEnum) {
 				this.#reporter.addMessage(
-					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
+					MESSAGE.NO_DIRECT_ENUM_ACCESS,
 					{moduleName: moduleSpecifierNode.text},
 					moduleSpecifierNode
 				);
-			} else { // Enum
+			} else { // Data Type
 				this.#reporter.addMessage(
-					MESSAGE.NO_DIRECT_ENUM_ACCESS,
+					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
 					{moduleName: moduleSpecifierNode.text},
 					moduleSpecifierNode
 				);

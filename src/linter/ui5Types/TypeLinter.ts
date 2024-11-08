@@ -7,7 +7,6 @@ import LinterContext, {LinterParameters} from "../LinterContext.js";
 import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
-import fs from "node:fs/promises";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
@@ -103,12 +102,6 @@ export default class TypeChecker {
 		const checker = program.getTypeChecker();
 		getTypeCheckerDone();
 
-		const dataTypesFile = await fs.readFile(
-			new URL("../../../resources/dataTypes.json", import.meta.url),
-			{encoding: "utf-8"}
-		);
-		const dataTypes = JSON.parse(dataTypesFile) as Record<string, string>;
-
 		const apiExtract = await loadApiExtract();
 
 		const reportCoverage = this.#context.getReportCoverage();
@@ -134,7 +127,7 @@ export default class TypeChecker {
 				const linter = new SourceFileLinter(
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
-					checker, reportCoverage, messageDetails, dataTypes,
+					checker, reportCoverage, messageDetails,
 					apiExtract, manifestContent
 				);
 				await linter.lint();

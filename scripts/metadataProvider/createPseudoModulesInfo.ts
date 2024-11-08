@@ -88,7 +88,6 @@ function buildJSDoc(entry: apiJson, indent = "") {
 
 async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 	const indexFilesImports: string[] = [];
-	const dataTypesMap = Object.create(null) as Record<string, string>;
 
 	for (const libName of Object.keys(ui5Types)) {
 		const pseudoModulesEntries = ui5Types[libName];
@@ -98,10 +97,6 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 			const exportName = record.export ?? record.name;
 			const exportNameChunks = exportName.split(".");
 			const name = exportNameChunks[0]; // Always import the first chunk and then export the whole thing
-
-			if (record?.["ui5-metadata"]?.stereotype === "datatype") {
-				dataTypesMap[`${libName}.${exportName}`] = exportName;
-			}
 
 			stringBuilder.push(`declare module "${libName.replaceAll(".", "/")}/${exportName.replaceAll(".", "/")}" {`);
 
@@ -126,10 +121,6 @@ async function addOverrides(ui5Types: Record<string, apiJson[]>) {
 	await writeFile(
 		new URL(`../../resources/overrides/library/index.d.ts`, import.meta.url),
 		indexFilesImports.join("\n") + "\n"
-	);
-	await writeFile(
-		new URL(`../../resources/dataTypes.json`, import.meta.url),
-		JSON.stringify(dataTypesMap)
 	);
 }
 
