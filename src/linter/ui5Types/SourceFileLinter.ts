@@ -32,7 +32,7 @@ function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {
 }
 
 function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/library/");
+	return sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/pseudo-modules/");
 }
 
 function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
