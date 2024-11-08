@@ -7,13 +7,42 @@ export type {UI5LintConfigType} from "./utils/ConfigManager.js";
 // Define a separate interface for the Node API as there could be some differences
 // in the options and behavior compared to LinterOptions internal type.
 export interface UI5LintOptions {
+	/**
+	 * List of patterns to lint.
+	 */
 	filePatterns?: string[];
+	/**
+	 * Pattern/files that will be ignored during linting.
+	 */
 	ignorePatterns?: string[];
+	/**
+	 * Provides complementary information for each finding, if available
+	 * @default false
+	 */
 	details?: boolean;
+	/**
+	 * Path to a ui5lint.config.(cjs|mjs|js) file
+	 */
 	config?: string;
+	/**
+	 * Whether to skip loading a config file
+	 * @default false
+	 */
 	noConfig?: boolean;
-	coverage?: boolean; // boolean(default: false)
+	/**
+	 * Whether to provide a coverage report
+	 * @default false
+	 */
+	coverage?: boolean;
+	/**
+	 * Path to a ui5.yaml file or an object representation of ui5.yaml
+	 * @default "./ui5.yaml"
+	 */
 	ui5Config?: string | object;
+	/**
+	 * Root directory of the project
+	 * @default process.cwd()
+	 */
 	rootDir?: string;
 }
 
