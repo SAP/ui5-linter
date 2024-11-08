@@ -135,7 +135,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		files: filePatterns,
 		coverage,
-		ignorePatterns,
+		ignorePattern: ignorePatterns,
 		details,
 		format,
 		config,

@@ -151,8 +151,8 @@ test.serial("ui5lint --ignore-pattern ", async (t) => {
 
 	t.true(lintProject.calledOnce, "Linter is called");
 	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: ["test/**/*"], configPath: undefined,
-		includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: ["test/**/*"],
+		configPath: undefined, includeMessageDetails: false, reportCoverage: false, ui5Config: undefined,
 	});
 });
 
