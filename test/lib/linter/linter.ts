@@ -159,7 +159,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 		filePatterns: [],
 		reportCoverage: true,
 		includeMessageDetails: true,
-		ignorePattern: [
+		ignorePatterns: [
 			"src/",
 			"!src/main/",
 		],

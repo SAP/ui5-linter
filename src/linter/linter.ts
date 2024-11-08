@@ -17,7 +17,7 @@ import {Minimatch} from "minimatch";
 const matchedPatterns = new Set<string>();
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5Config, noConfig,
+	rootDir, filePatterns, ignorePatterns, reportCoverage, includeMessageDetails, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
@@ -69,7 +69,7 @@ export async function lintProject({
 		rootDir,
 		namespace: project.getNamespace(),
 		filePatterns,
-		ignorePattern,
+		ignorePatterns,
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
@@ -88,7 +88,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePatterns, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath, noConfig,
+	rootDir, filePatterns, ignorePatterns, namespace, reportCoverage, includeMessageDetails, configPath, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
@@ -106,7 +106,7 @@ export async function lintFile({
 		rootDir,
 		namespace,
 		filePatterns,
-		ignorePattern,
+		ignorePatterns,
 		reportCoverage,
 		includeMessageDetails,
 		configPath,
@@ -128,22 +128,22 @@ async function lint(
 	config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	let {ignorePattern, filePatterns} = options;
+	let {ignorePatterns, filePatterns} = options;
 	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
 	// Resolve files to include
 	filePatterns = filePatterns ?? config.files ?? [];
 
 	// Resolve ignores
-	ignorePattern = [
+	ignorePatterns = [
 		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
+		...(ignorePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
 	// Apply ignores to the workspace reader.
 	// TypeScript needs the full context to provide correct analysis.
 	// so, we can do filtering later via the filePathsReader
 	const reader = resolveReader({
-		patterns: ignorePattern,
+		patterns: ignorePatterns,
 		resourceReader,
 		patternsMatch: matchedPatterns,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
@@ -158,7 +158,7 @@ async function lint(
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	});
 	filePathsReader = resolveReader({
-		patterns: ignorePattern,
+		patterns: ignorePatterns,
 		resourceReader: filePathsReader,
 		patternsMatch: matchedPatterns,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,

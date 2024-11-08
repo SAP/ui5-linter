@@ -59,7 +59,7 @@ export async function ui5lint({
 	return lintProject({
 		rootDir,
 		filePatterns,
-		ignorePattern: ignorePatterns,
+		ignorePatterns,
 		reportCoverage: coverage,
 		includeMessageDetails: details,
 		configPath: config,

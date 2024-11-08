@@ -33,7 +33,7 @@ export default async function lintWorkspace(
 		patternsMatch,
 	});
 	reader = resolveReader({
-		patterns: options.ignorePattern ?? [],
+		patterns: options.ignorePatterns ?? [],
 		resourceReader: reader,
 		patternsMatch,
 		relFsBasePath: relFsBasePath ?? "",

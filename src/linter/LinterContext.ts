@@ -59,7 +59,7 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	filePatterns?: FilePattern[];
-	ignorePattern?: FilePattern[];
+	ignorePatterns?: FilePattern[];
 	reportCoverage?: boolean;
 	includeMessageDetails?: boolean;
 	configPath?: string;

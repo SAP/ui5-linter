@@ -15,7 +15,7 @@ export interface LinterArg {
 	coverage: boolean;
 	files?: string[];
 	filePaths?: string[];
-	ignorePattern?: string[];
+	ignorePatterns?: string[];
 	details: boolean;
 	format: string;
 	config?: string;
@@ -135,7 +135,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		files: filePatterns,
 		coverage,
-		ignorePattern,
+		ignorePatterns,
 		details,
 		format,
 		config,
@@ -152,7 +152,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
-		ignorePattern,
+		ignorePatterns,
 		filePatterns,
 		reportCoverage,
 		includeMessageDetails: details,
