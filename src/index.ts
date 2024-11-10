@@ -2,7 +2,6 @@ import {lintProject} from "./linter/linter.js";
 import type {LintResult} from "./linter/LinterContext.js";
 
 export type {LintResult} from "./linter/LinterContext.js";
-export type {UI5LintConfigType} from "./utils/ConfigManager.js";
 
 // Define a separate interface for the Node API as there could be some differences
 // in the options and behavior compared to LinterOptions internal type.
