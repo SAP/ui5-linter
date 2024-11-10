@@ -6,7 +6,7 @@ export type {UI5LintConfigType} from "./utils/ConfigManager.js";
 
 // Define a separate interface for the Node API as there could be some differences
 // in the options and behavior compared to LinterOptions internal type.
-export interface UI5LinerOptions {
+export interface UI5LinterOptions {
 	/**
 	 * List of patterns to lint.
 	 */
@@ -55,7 +55,7 @@ export async function ui5lint({
 	coverage = false,
 	ui5Config = "./ui5.yaml",
 	rootDir = process.cwd(),
-}: UI5LinerOptions): Promise<LintResult[]> {
+}: UI5LinterOptions): Promise<LintResult[]> {
 	return lintProject({
 		rootDir,
 		filePatterns,
