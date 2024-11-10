@@ -121,6 +121,18 @@ test.serial("ui5lint API: Ignore config file for com.ui5.troublesome.app", async
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("ui5lint API: Use defaults", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const {ui5lint, sinon} = t.context;
+	// Stub process.cwd(), so we have some app to test
+	sinon.stub(process, "cwd").returns(projectPath);
+
+	const res = await ui5lint({});
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+	sinon.restore();
+});
+
 test.serial("ui5lint API: Simultaneously test different projects", async (t) => {
 	const appPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const libPath = path.join(fixturesProjectsPath, "library.with.custom.paths");

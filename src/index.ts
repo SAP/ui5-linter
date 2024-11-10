@@ -45,16 +45,18 @@ export interface UI5LinterOptions {
 	rootDir?: string;
 }
 
-export async function ui5lint({
-	filePatterns,
-	ignorePatterns = [],
-	details = false,
-	config,
-	noConfig,
-	coverage = false,
-	ui5Config = "./ui5.yaml",
-	rootDir = process.cwd(),
-}: UI5LinterOptions): Promise<LintResult[]> {
+export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]> {
+	const {
+		filePatterns,
+		ignorePatterns = [],
+		details = false,
+		config,
+		noConfig,
+		coverage = false,
+		ui5Config = "./ui5.yaml",
+		rootDir = process.cwd(),
+	} = options ?? {};
+
 	return lintProject({
 		rootDir,
 		filePatterns,
