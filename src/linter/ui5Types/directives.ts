@@ -67,22 +67,24 @@ function findDirectivesAroundNode(
 	// ui5lint-disable-next-line no-deprecated-api, no-global
 	// ui5lint-enable-next-line
 	// ui5lint-enable-line
-	// ui5lint-enable-line -- my comment
-	/* ui5lint-enable-line -- my comment *\/
+	// ui5lint-enable-line -- my description
+	/* ui5lint-enable-line -- my description *\/
 	/* ui5lint-disable
 		no-deprecated-api,
 		no-global
 	*\/
 
-	Must not match:
+	Must not match things like:
+	````
+	// ui5lint-disable-next-line -- my description
+	expression();
+	````
+	The above is a single line comment with a description followed by some code in the next line.
 
-	````
-	// ui5lint-disable-next-line -- my comment
-	and code
-	````
-	The above might incorrectly get matched when changing the below regex into a one that attempts
-	to match single- and multi-line comments at the same time. Therefore the two kinds are expressed
-	in individual regular expressions, combined with an OR operator.
+	The regex below is designed to match single- and multi-line comments, however it splits both
+	cases into basically two regex combined with an OR operator.
+	If we would try to match the above with a single regex instead (matching /* and // simultaneously),
+	it would be impossible to know whether the code in the second line is part of the directive's description or not.
 */
 /* eslint-disable max-len */
 const directiveRegex =
