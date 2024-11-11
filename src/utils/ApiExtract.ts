@@ -1,8 +1,8 @@
 import {readFile} from "node:fs/promises";
 
-type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
+export type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
 
-interface ApiExtractData {
+export interface ApiExtractJson {
 	framework: {
 		name: string;
 		version: string;
@@ -22,9 +22,9 @@ export interface ApiExtract {
 }
 
 class ApiExtractImpl implements ApiExtract {
-	private data: ApiExtractData;
+	private data: ApiExtractJson;
 
-	constructor(data: ApiExtractData) {
+	constructor(data: ApiExtractJson) {
 		this.data = data;
 	}
 
@@ -53,7 +53,7 @@ export async function loadApiExtract(): Promise<ApiExtract> {
 			const data = await readFile(
 				new URL("../../resources/api-extract.json", import.meta.url),
 				{encoding: "utf-8"});
-			return new ApiExtractImpl(JSON.parse(data) as ApiExtractData);
+			return new ApiExtractImpl(JSON.parse(data) as ApiExtractJson);
 		})();
 	}
 	return resolveWithSingleton;

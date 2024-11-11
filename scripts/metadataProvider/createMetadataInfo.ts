@@ -10,9 +10,14 @@ import type {
 	UI5Enum,
 	UI5Namespace,
 } from "@ui5-language-assistant/semantic-model-types";
+import {AllowedSymbolKind, ApiExtractJson} from "../../src/utils/ApiExtract.js";
 
 const hasFieldsProperty = function (type: unknown): type is UI5Class | UI5Enum | UI5Namespace {
 	return (type as UI5Class | UI5Enum | UI5Namespace).fields !== undefined;
+};
+
+const isAllowedSymbolKind = function (kind: string): kind is AllowedSymbolKind {
+	return ["UI5Class", "UI5Enum", "UI5Interface", "UI5Namespace", "UI5Typedef", "UI5Function"].includes(kind);
 };
 
 function getDeprecationText(deprecatedInfo: BaseUI5Node["deprecatedInfo"]): string | null {
@@ -32,47 +37,46 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 
 	const semanticModel = metadataProvider.getModel();
 
-	const deprecations: Record<string, Record<string, string>> = {
-		UI5Class: {},
-		UI5Enum: {},
-		UI5Function: {},
-		UI5Namespace: {},
-		UI5Typedef: {},
-		UI5Interface: {},
+	const apiExtract: ApiExtractJson = {
+		framework: {
+			name: "SAPUI5",
+			version: sapui5Version,
+		},
+		defaultAggregations: {},
+		deprecations: {
+			UI5Class: {},
+			UI5Enum: {},
+			UI5Function: {},
+			UI5Namespace: {},
+			UI5Typedef: {},
+			UI5Interface: {},
+		},
 	};
 
-	const defaultAggregations: Record<string, string> = {};
 	forEachSymbol(semanticModel, (symbol, symbolName) => {
 		const defaultAggregation = metadataProvider.getDefaultAggregationForSymbol(symbol);
 		if (defaultAggregation) {
-			defaultAggregations[symbolName] = defaultAggregation;
+			apiExtract.defaultAggregations[symbolName] = defaultAggregation;
 		}
 
 		if (symbol.deprecatedInfo?.isDeprecated) {
 			const deprecationText = getDeprecationText(symbol.deprecatedInfo) ?? "deprecated";
-			deprecations[symbol.kind] = deprecations[symbol.kind] ?? {};
-			deprecations[symbol.kind][symbolName] = deprecationText;
+			if (isAllowedSymbolKind(symbol.kind)) {
+				apiExtract.deprecations[symbol.kind] = apiExtract.deprecations[symbol.kind] ?? {};
+				apiExtract.deprecations[symbol.kind][symbolName] = deprecationText;
+			}
 		}
 
 		if (hasFieldsProperty(symbol)) {
 			symbol.fields?.forEach((field) => {
 				if (field?.deprecatedInfo?.isDeprecated) {
-					deprecations[symbol.kind] = deprecations[symbol.kind] ?? {};
+					apiExtract.deprecations[symbol.kind] = apiExtract.deprecations[symbol.kind] ?? {};
 					const deprecationText = getDeprecationText(field.deprecatedInfo) ?? "deprecated";
-					deprecations[symbol.kind][symbolName + "." + field.name] = deprecationText;
+					apiExtract.deprecations[symbol.kind][symbolName + "." + field.name] = deprecationText;
 				}
 			});
 		}
 	});
-
-	const apiExtract = {
-		framework: {
-			name: "SAPUI5",
-			version: sapui5Version,
-		},
-		defaultAggregations,
-		deprecations,
-	};
 
 	await writeFile(
 		new URL("../../resources/api-extract.json", import.meta.url),
