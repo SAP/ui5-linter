@@ -15,7 +15,7 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	ui5lint: SinonStub<[UI5LinterOptions], Promise<LintResult[]>>;
+	ui5lint: SinonStub<[UI5LinterOptions?], Promise<LintResult[]>>;
 }>;
 
 test.before(async (t) => {
@@ -127,7 +127,7 @@ test.serial("ui5lint API: Use defaults", async (t) => {
 	// Stub process.cwd(), so we have some app to test
 	sinon.stub(process, "cwd").returns(projectPath);
 
-	const res = await ui5lint({});
+	const res = await ui5lint();
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 	sinon.restore();
