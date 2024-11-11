@@ -34,6 +34,10 @@ function formatMessageDetails(msg: LintMessage, showDetails: boolean) {
 	return `. ${detailsHeader} ${chalk.italic(msg.messageDetails.replace(/\s\s+|\n/g, " "))}`;
 }
 
+function formatRule(ruleId: string) {
+	return chalk.dim(`  ${ruleId}`);
+}
+
 export class Text {
 	#buffer = "";
 
@@ -80,7 +84,8 @@ export class Text {
 					`${formatSeverity(msg.severity)} ` +
 					`${msg.fatal ? "Fatal error: " : ""}` +
 					`${msg.message}` +
-					`${formatMessageDetails(msg, showDetails)}`);
+					`${formatMessageDetails(msg, showDetails)}` +
+					`${formatRule(msg.ruleId)}`);
 			});
 
 			this.#writeln("");
