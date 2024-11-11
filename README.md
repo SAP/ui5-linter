@@ -93,8 +93,6 @@ UI5 linter report:
 Note: Use "ui5lint --details" to show more information about the findings
 ```
 
-
-
 ### Options
 
 #### `--details`
@@ -207,6 +205,28 @@ module.exports = {
     "webapp/**/*",        // Lint all files and subdirectories within "webapp/"
   ];
   ```
+
+## Directives
+
+The UI5 Linter supports directives similar to ESLint's configuration comments, allowing you to control linting rules in specific sections of your code.
+
+* ui5lint-disable: Disables all linting rules from the position of the comment. Use block comments only (e.g., `/* ui5lint-disable */`)
+* ui5lint-enable: Re-enables linting rules that were disabled by ui5lint-disable. Use block comments only (e.g., `/* ui5lint-enable */`)
+* ui5lint-disable-line: Disables all linting rules for the current line. Use block or line comments (e.g., `/* ui5lint-disable-line */` or `// ui5lint-disable-line`)
+* ui5lint-disable-next-line: Disables all linting rules for the next line. Use block or line comments (e.g., `/* ui5lint-disable-next-line */` or `// * ui5lint-disable-next-line`)
+
+### Specifying Rules
+
+You can disable specific rules by listing them after the directive, separated by commas:
+
+* `/* ui5lint-disable no-deprecated-api */`
+* `/* ui5lint-disable no-deprecated-api, no-deprecated-library */`
+* `// ui5lint-disable-line no-deprecated-api`
+* `// ui5lint-disable-next-line no-deprecated-api -- explanation`
+
+### Scope
+
+Directives are currently supported only in JavaScript and TypeScript files, **not** in XML, YAML, HTML, or other file types.
 
 ## Internals
 
