@@ -214,6 +214,18 @@ export default class SourceFileLinter {
 		});
 
 		if (!rendererMember) {
+			const nonStaticRender = node.members.find((member: ts.ClassElement) => {
+				return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+					(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) &&
+					member.name.text === "renderer";
+			});
+			if (nonStaticRender) {
+				// Renderer must be a static member
+				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
+					{className: node.name?.getText()}, nonStaticRender);
+				return;
+			}
+
 			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
 			if (this.isUi5ClassDeclaration(node, [
 				"sap/ui/core/mvc/View",
@@ -222,18 +234,6 @@ export default class SourceFileLinter {
 				"sap/ui/core/webc/WebComponent",
 				"sap/uxap/BlockBase",
 			])) {
-				return;
-			}
-
-			const nonStaticRender = (node as ts.ClassDeclaration).members.find((member: ts.ClassElement) => {
-				return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
-					(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) &&
-					member.name.text === "renderer";
-			});
-			if (nonStaticRender) {
-				// Renderer must be a static member
-				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
-					{className: (node as ts.ClassDeclaration).name?.getText()}, nonStaticRender);
 				return;
 			}
 
