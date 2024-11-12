@@ -64,6 +64,9 @@ sap.ui.define([
 	// ui5lint-disable-next-line no-deprecated-api
 	coreLib.MessageType; // IGNORE: Enum "MessageType" is deprecated
 
+	// ui5lint-disable-next-line no-deprecated-api
+	coreLib.MessageType; // ui5lint-enable-line -- REPORT: Enum "MessageType" is deprecated
+
 	// ui5lint-disable-next-line no-deprecated-api -- Followed by an intentionally Empty line
 
 	coreLib.MessageType; // REPORT: Enum "MessageType" is deprecated

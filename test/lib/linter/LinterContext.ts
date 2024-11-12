@@ -172,6 +172,24 @@ test("generateLintResult: Disable line", (t) => {
 			line: 40,
 			column: 2,
 		},
+		{ // Disable next-line before 50
+			action: "disable",
+			scope: "next-line",
+			ruleNames: ["no-deprecated-api"],
+			pos: -1, // Ignored
+			length: -1, // Ignored
+			line: 49,
+			column: 1,
+		},
+		{ // Enable in line 50
+			action: "enable",
+			scope: "line",
+			ruleNames: [],
+			pos: -1, // Ignored
+			length: -1, // Ignored
+			line: 50,
+			column: 100,
+		},
 	]);
 
 	const res = linterContext.generateLintResult("/foo.js");

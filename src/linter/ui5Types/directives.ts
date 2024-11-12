@@ -89,8 +89,8 @@ function findDirectivesAroundNode(
 /* eslint-disable max-len */
 const directiveRegex =
 /*  | ----------------------------------------------- Multi-line comments -------------------------------------------- | ------------------------------------------ Single-line comments ------------------------------------| */
-	/\/\*\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?((?:\s+[\w-]+\s*,)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?\*\/|\/\/\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?((?:\s+[\w-]+\s*,)*(?:\s*[\w-]+))?\s*,?\s*(?:--.*)?$/mg;
-/*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                 |Dangling,| Description      |               |CG #4: action |    | CG #5: scope    | CG #6: rules                  |Dangling,| Description | */
+	/\/\*\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?\*\/|\/\/\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?([ \t]+(?:[\w-]+[ \t]*,[ \t]*)*(?:[ \t]*[\w-]+))?[ \t]*,?[ \t]*(?:--.*)?$/mg;
+/*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                      |Dangling,| Description      |               |CG #4: action |    | CG #5: scope    | CG #6: rules                                       |Dangling,| Description | */
 /* eslint-enable max-len */
 
 export type DirectiveAction = "enable" | "disable";
