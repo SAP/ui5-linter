@@ -18,7 +18,7 @@ test.beforeEach((t) => {
 			messageDetails: "(since 1.118) - Please use {@link sap.ui.core.Core.ready Core.ready} instead.",
 		}],
 		coverageInfo: [],
-		errorCount: 0,
+		errorCount: 1,
 		fatalErrorCount: 0,
 		warningCount: 0,
 	}];
