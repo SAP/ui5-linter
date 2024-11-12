@@ -74,7 +74,7 @@ export async function lintProject({
 		details,
 		configPath,
 		noConfig,
-		ui5ConfigPath,
+		ui5Config,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	}, config);
 
