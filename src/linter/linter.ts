@@ -136,11 +136,8 @@ async function lint(
 	// that didn't match any file
 	const matchedPatterns = new Set<string>();
 
-	// Resolve ignores
-	ignorePatterns = [
-		...(config.ignores ?? []),
-		...(ignorePatterns ?? []), // CLI patterns go after config patterns
-	].filter(($) => $);
+	ignorePatterns = mergeIgnorePatterns(options, config);
+
 	// Apply ignores to the workspace reader.
 	// TypeScript needs the full context to provide correct analysis.
 	// so, we can do filtering later via the filePathsReader
@@ -379,4 +376,11 @@ function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<stri
 		throw new Error(`Specified file ${unmatchedPatterns.length === 1 ? "pattern" : "patterns"}` +
 			` '${unmatchedPatterns.join("', '")}' did not match any resource`);
 	}
+}
+
+export function mergeIgnorePatterns(options: LinterOptions, config: UI5LintConfigType): string[] {
+	return [
+		...(config.ignores ?? []),
+		...(options.ignorePatterns ?? []), // CLI patterns go after config patterns
+	].filter(($) => $);
 }

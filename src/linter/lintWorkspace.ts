@@ -9,7 +9,7 @@ import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions, FSToVirtualPathOptions} from "./LinterContext.js";
 import {createReader} from "@ui5/fs/resourceFactory";
-import {resolveReader} from "./linter.js";
+import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 
 export default async function lintWorkspace(
@@ -33,7 +33,7 @@ export default async function lintWorkspace(
 		patternsMatch,
 	});
 	reader = resolveReader({
-		patterns: options.ignorePatterns ?? [],
+		patterns: mergeIgnorePatterns(options, config),
 		resourceReader: reader,
 		patternsMatch,
 		relFsBasePath: relFsBasePath ?? "",
