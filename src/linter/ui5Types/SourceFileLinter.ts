@@ -67,9 +67,8 @@ export default class SourceFileLinter {
 		private checker: ts.TypeChecker,
 		private reportCoverage = false,
 		private messageDetails = false,
-		private dataTypes: Record<string, string> = {},
-		private manifestContent?: string,
-		private apiExtract: ApiExtract
+		private apiExtract: ApiExtract,
+		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
 			sourceFile, sourceMaps?.get(sourceFile.fileName));
@@ -1249,7 +1248,7 @@ export default class SourceFileLinter {
 						if (!ts.isExportAssignment(declaration)) {
 							return;
 						}
-						const type = this.#checker.getTypeAtLocation(declaration.expression);
+						const type = this.checker.getTypeAtLocation(declaration.expression);
 						if (type.symbol?.flags & ts.SymbolFlags.Enum) {
 							isEnum = true;
 						}
