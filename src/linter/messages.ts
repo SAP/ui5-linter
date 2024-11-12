@@ -11,6 +11,7 @@ const RULES = {
 	"no-globals": "no-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
+	"static-var-required": "static-var-required",
 } as const;
 
 export enum LintMessageSeverity {
@@ -336,11 +337,11 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
+		ruleId: RULES["static-var-required"],
 
 		message: ({className}: {className?: string}) =>
-			`The control renderer ${className ? ("of '" + className + "'") : ""} must be a static property`,
-		details: () => "",
+			`The control renderer${className ? (" of '" + className + "'") : ""} must be a static property`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {
