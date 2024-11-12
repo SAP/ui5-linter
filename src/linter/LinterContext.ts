@@ -93,9 +93,7 @@ export interface PositionRange {
 }
 
 export interface LintMetadata {
-	// TODO: Use this to store information shared across linters,
-	// such as the async flag state in manifest.json which might be relevant
-	// when parsing the Component.js
+	// The metadata holds information to be shared across linters
 	directives: Set<Directive>;
 }
 
