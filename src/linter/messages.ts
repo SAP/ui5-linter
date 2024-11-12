@@ -11,7 +11,7 @@ const RULES = {
 	"no-globals": "no-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
-	"static-var-required": "static-var-required",
+	"ui5-class-declaration": "ui5-class-declaration",
 } as const;
 
 export enum LintMessageSeverity {
@@ -337,7 +337,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["static-var-required"],
+		ruleId: RULES["ui5-class-declaration"],
 
 		message: ({className}: {className?: string}) =>
 			`The control renderer${className ? (" of '" + className + "'") : ""} must be a static property`,
