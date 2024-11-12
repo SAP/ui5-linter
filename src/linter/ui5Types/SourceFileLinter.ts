@@ -269,7 +269,13 @@ export default class SourceFileLinter {
 			if (ts.isIdentifier(rendererMember.initializer)) {
 				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
 				const {declarations} = symbol ?? {};
-				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+				declarations?.forEach((declaration) => {
+					if (declaration.getSourceFile().fileName.startsWith("/types/")) {
+						// Do not analyze declarations inside type definitions
+						return;
+					}
+					this.analyzeControlRendererInternals(declaration);
+				});
 			} else {
 				// Analyze renderer property when it's directly embedded in the renderer object
 				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
