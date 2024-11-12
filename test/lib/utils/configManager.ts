@@ -18,6 +18,7 @@ test("Check config file", async (t) => {
 		ignores: [
 			"webapp/test/**/*",
 			"!webapp/test/integration/opaTests.qunit.js",
+			"ui5.yaml",
 		],
 	}, "The configuration is derived from the provided custom config file");
 });
@@ -64,6 +65,7 @@ test("Check config file with absolute path", async (t) => {
 		ignores: [
 			"webapp/test/**/*",
 			"!webapp/test/integration/opaTests.qunit.js",
+			"ui5.yaml",
 		],
 	}, "The configuration is derived from the provided custom config file");
 });
