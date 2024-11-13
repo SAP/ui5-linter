@@ -54,19 +54,19 @@ Run the `ui5lint [files...]` command in your project root folder
 UI5 linter report:
 
 /application/webapp/controller/App.controller.js
-  10:4 error Call to deprecated function 'attachTap' of class 'Button'
+  10:4 error Call to deprecated function 'attachTap' of class 'Button'  no-deprecated-api
 
 /application/webapp/manifest.json
-  81:17 error Use of deprecated model type 'sap.ui5/models/odata/type="sap.ui.model.odata.ODataModel"'
+  81:17 error Use of deprecated model type 'sap.ui5/models/odata/type="sap.ui.model.odata.ODataModel"'  no-deprecated-api
 
 /application/webapp/test/unit/unitTests.qunit.js
-  6:1 error Call to deprecated function 'attachInit' of class 'Core'
-  6:1 error Call to deprecated function 'getCore' (sap.ui.getCore)
-  6:1 error Access of global variable 'sap' (sap.ui.getCore)
+  6:1 error Call to deprecated function 'attachInit' of class 'Core'  no-deprecated-api
+  6:1 error Call to deprecated function 'getCore' (sap.ui.getCore)  no-deprecated-api
+  6:1 error Access of global variable 'sap' (sap.ui.getCore)  no-globals
 
 /application/webapp/view/Main.view.xml
-  16:39 error Import of deprecated module 'sap/m/MessagePage'
-  22:5  error Use of deprecated property 'blocked' of class 'Button'
+  16:39 error Import of deprecated module 'sap/m/MessagePage'  no-deprecated-api
+  22:5  error Use of deprecated property 'blocked' of class 'Button'  no-deprecated-api
 
 7 problems (7 errors, 0 warnings)
 
@@ -85,8 +85,8 @@ You can provide multiple glob patterns as arguments after the `ui5lint` command 
 UI5 linter report:
 
 /application/webapp/view/Main.view.xml
-  16:39 error Import of deprecated module 'sap/m/MessagePage'
-  22:5  error Use of deprecated property 'blocked' of class 'Button'
+  16:39 error Import of deprecated module 'sap/m/MessagePage'  no-deprecated-api
+  22:5  error Use of deprecated property 'blocked' of class 'Button'  no-deprecated-api
 
 2 problems (2 errors, 0 warnings)
 
@@ -208,7 +208,7 @@ module.exports = {
 
 ## Directives
 
-The UI5 Linter supports directives similar to ESLint's configuration comments, allowing you to control linting rules in specific sections of your code.
+UI5 linter supports directives similar to ESLint's configuration comments, allowing you to control linting rules in specific sections of your code.
 
 * **ui5lint-disable**: Disables all linting rules from the position of the comment
 * **ui5lint-enable**: Re-enables linting rules that were disabled by ui5lint-disable
