@@ -14,6 +14,9 @@
 		// Allow JS in order to check the JSTokenizer
 		"allowJs": true,
 
+		// Generate d.ts files
+		"declaration": true,
+
 		// Limit the set of types since we don't want to validate the UI5 types required for linting
 		// (i.e. @sapui5/types, jquery, three). For the lack of an exclude option, we use include.
 		"types": [

@@ -38,3 +38,6 @@ jobs:
 
     - name: Send report to Coveralls for package @ui5/linter
       uses: coverallsapp/github-action@v2.3.4
+
+    - name: Run e2e tests
+      run: npm run e2e

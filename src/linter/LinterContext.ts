@@ -59,11 +59,12 @@ export interface TranspileResult {
 export interface LinterOptions {
 	rootDir: string;
 	filePatterns?: FilePattern[];
-	ignorePattern?: FilePattern[];
-	reportCoverage?: boolean;
-	includeMessageDetails?: boolean;
+	ignorePatterns?: FilePattern[];
+	coverage?: boolean;
+	details?: boolean;
 	configPath?: string;
-	ui5ConfigPath?: string;
+	noConfig?: boolean;
+	ui5Config?: string | object;
 	namespace?: string;
 }
 
@@ -111,8 +112,8 @@ export default class LinterContext {
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
-		this.#reportCoverage = !!options.reportCoverage;
-		this.#includeMessageDetails = !!options.includeMessageDetails;
+		this.#reportCoverage = !!options.coverage;
+		this.#includeMessageDetails = !!options.details;
 	}
 
 	getRootDir(): string {

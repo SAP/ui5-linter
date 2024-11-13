@@ -42,7 +42,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const fileStream = fs.createReadStream(filePath);
 				const context = new LinterContext({
 					rootDir: fixturesPath,
-					includeMessageDetails: true,
+					details: true,
 				});
 				const res = await transpileXml(testName, fileStream, context);
 				if (!res) {

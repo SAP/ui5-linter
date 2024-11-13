@@ -39,8 +39,8 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -143,8 +143,8 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -157,9 +157,9 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
-		ignorePattern: [
+		coverage: true,
+		details: true,
+		ignorePatterns: [
 			"src/",
 			"!src/main/",
 		],
@@ -175,8 +175,8 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -193,8 +193,8 @@ test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) =
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -207,8 +207,8 @@ test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: ["src/ui5loader.js"],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -221,8 +221,8 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -235,8 +235,8 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
+		coverage: true,
+		details: true,
 		configPath: "./ui5lint-custom.config.cjs",
 	});
 
@@ -250,9 +250,9 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
-		ui5ConfigPath: "./configs/ui5-custom.yaml",
+		coverage: true,
+		details: true,
+		ui5Config: "./configs/ui5-custom.yaml",
 	});
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
@@ -261,13 +261,13 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {lintProject} = t.context;
-	const ui5ConfigPath = "./configs/ui5-DOES-NOT-EXIST.yaml";
+	const ui5Config = "./configs/ui5-DOES-NOT-EXIST.yaml";
 
 	await t.throwsAsync(lintProject({
 		rootDir: projectPath,
 		filePatterns: [],
-		reportCoverage: true,
-		includeMessageDetails: true,
-		ui5ConfigPath,
-	}), {message: `Unable to find UI5 config file '${ui5ConfigPath}'`});
+		coverage: true,
+		details: true,
+		ui5Config,
+	}), {message: `Unable to find UI5 config file '${ui5Config}'`});
 });

@@ -135,7 +135,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	const {
 		files: filePatterns,
 		coverage,
-		ignorePattern,
+		ignorePattern: ignorePatterns,
 		details,
 		format,
 		config,
@@ -152,15 +152,15 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	const res = await lintProject({
 		rootDir: path.join(process.cwd()),
-		ignorePattern,
+		ignorePatterns,
 		filePatterns,
-		reportCoverage,
-		includeMessageDetails: details,
+		coverage: reportCoverage,
+		details,
 		configPath: config,
-		ui5ConfigPath: ui5Config,
+		ui5Config,
 	});
 
-	if (reportCoverage) {
+	if (coverage) {
 		const coverageFormatter = new Coverage();
 		await writeFile("ui5lint-report.html", await coverageFormatter.format(res));
 	}

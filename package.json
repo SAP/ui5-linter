@@ -26,6 +26,7 @@
 		"ui5lint": "bin/ui5lint.js"
 	},
 	"type": "module",
+	"types": "lib/index.d.ts",
 	"scripts": {
 		"build": "npm run cleanup && tsc -p tsconfig.build.json",
 		"build-test": "tsc --noEmit -p .",
@@ -33,13 +34,14 @@
 		"check-licenses": "licensee --errors-only",
 		"cleanup": "rimraf lib coverage",
 		"coverage": "nyc ava --node-arguments=\"--experimental-loader=@istanbuljs/esm-loader-hook\"",
-		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp",
+		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp,@ui5/linter",
 		"hooks:pre-push": "npm run lint:commit",
 		"lint": "eslint .",
 		"lint:commit": "commitlint -e",
 		"prepare": "node ./.husky/skip.js || husky",
-		"test": "npm run lint && npm run build-test && npm run coverage && npm run depcheck",
+		"test": "npm run lint && npm run build-test && npm run coverage && npm run e2e && npm run depcheck",
 		"unit": "ava",
+		"e2e": "npm run build && ava --config ava-e2e.config.js",
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
@@ -56,6 +58,10 @@
 	"engines": {
 		"node": "^20.11.0 || >=22.0.0",
 		"npm": ">= 8"
+	},
+	"exports": {
+		".": "./lib/index.js",
+		"./package.json": "./package.json"
 	},
 	"dependencies": {
 		"@jridgewell/sourcemap-codec": "^1.5.0",

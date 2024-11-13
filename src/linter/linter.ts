@@ -12,16 +12,19 @@ import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePattern, reportCoverage, includeMessageDetails, configPath, ui5ConfigPath,
+	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
-	const configMngr = new ConfigManager(rootDir, configPath);
-	const config = await configMngr.getConfiguration();
+	let config: UI5LintConfigType = {};
+	if (noConfig !== true) {
+		const configMngr = new ConfigManager(rootDir, configPath);
+		config = await configMngr.getConfiguration();
+	}
 
 	// In case path is set both by CLI and config use CLI
-	ui5ConfigPath = ui5ConfigPath ?? config.ui5Config;
+	ui5Config = ui5Config ?? config.ui5Config;
 
 	const projectGraphDone = taskStart("Project Graph creation");
-	const graph = await getProjectGraph(rootDir, ui5ConfigPath);
+	const graph = await getProjectGraph(rootDir, ui5Config);
 	const project = graph.getRoot();
 	projectGraphDone();
 
@@ -61,10 +64,12 @@ export async function lintProject({
 		rootDir,
 		namespace: project.getNamespace(),
 		filePatterns,
-		ignorePattern,
-		reportCoverage,
-		includeMessageDetails,
+		ignorePatterns,
+		coverage,
+		details,
 		configPath,
+		noConfig,
+		ui5Config,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	}, config);
 
@@ -80,10 +85,13 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePatterns, ignorePattern, namespace, reportCoverage, includeMessageDetails, configPath,
+	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, configPath, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
-	const configMngr = new ConfigManager(rootDir, configPath);
-	const config = await configMngr.getConfiguration();
+	let config: UI5LintConfigType = {};
+	if (noConfig !== true) {
+		const configMngr = new ConfigManager(rootDir, configPath);
+		config = await configMngr.getConfiguration();
+	}
 
 	const virBasePath = namespace ? `/resources/${namespace}/` : "/";
 	const reader = createReader({
@@ -95,9 +103,9 @@ export async function lintFile({
 		rootDir,
 		namespace,
 		filePatterns,
-		ignorePattern,
-		reportCoverage,
-		includeMessageDetails,
+		ignorePatterns,
+		coverage,
+		details,
 		configPath,
 		relFsBasePath: "",
 		virBasePath,
@@ -117,7 +125,7 @@ async function lint(
 	config: UI5LintConfigType
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
-	let {ignorePattern, filePatterns} = options;
+	let {ignorePatterns, filePatterns} = options;
 	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
 	// Resolve files to include
@@ -129,15 +137,15 @@ async function lint(
 	const matchedPatterns = new Set<string>();
 
 	// Resolve ignores
-	ignorePattern = [
+	ignorePatterns = [
 		...(config.ignores ?? []),
-		...(ignorePattern ?? []), // CLI patterns go after config patterns
+		...(ignorePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
 	// Apply ignores to the workspace reader.
 	// TypeScript needs the full context to provide correct analysis.
 	// so, we can do filtering later via the filePathsReader
 	const reader = resolveReader({
-		patterns: ignorePattern,
+		patterns: ignorePatterns,
 		resourceReader,
 		patternsMatch: matchedPatterns,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
@@ -152,7 +160,7 @@ async function lint(
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	});
 	filePathsReader = resolveReader({
-		patterns: ignorePattern,
+		patterns: ignorePatterns,
 		resourceReader: filePathsReader,
 		patternsMatch: matchedPatterns,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
@@ -170,13 +178,19 @@ async function lint(
 	return res;
 }
 
-async function getProjectGraph(rootDir: string, ui5ConfigPath?: string): Promise<ProjectGraph> {
+async function getProjectGraph(rootDir: string, ui5Config?: string | object): Promise<ProjectGraph> {
 	let rootConfigPath, rootConfiguration;
-	const ui5YamlPath = ui5ConfigPath ? path.join(rootDir, ui5ConfigPath) : path.join(rootDir, "ui5.yaml");
-	if (await fileExists(ui5YamlPath)) {
+	let ui5YamlPath;
+	if (typeof ui5Config !== "object") {
+		ui5YamlPath = ui5Config ? path.join(rootDir, ui5Config) : path.join(rootDir, "ui5.yaml");
+	}
+
+	if (typeof ui5Config === "object") {
+		rootConfiguration = ui5Config;
+	} else if (ui5YamlPath && await fileExists(ui5YamlPath)) {
 		rootConfigPath = ui5YamlPath;
 	} else {
-		if (ui5ConfigPath) throw new Error(`Unable to find UI5 config file '${ui5ConfigPath}'`);
+		if (ui5Config) throw new Error(`Unable to find UI5 config file '${ui5Config}'`);
 		const isApp = await dirExists(path.join(rootDir, "webapp"));
 		if (isApp) {
 			rootConfiguration = {
