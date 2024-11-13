@@ -163,7 +163,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	if (coverage) {
 		const coverageFormatter = new Coverage();
-		await writeFile("ui5lint-report.html", await coverageFormatter.format(res));
+		await writeFile("ui5lint-report.html", await coverageFormatter.format(res, new Date()));
 	}
 
 	if (format === "json") {

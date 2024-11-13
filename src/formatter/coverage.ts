@@ -1,10 +1,9 @@
-import path from "node:path";
 import {
 	LintResult,
 	CoverageInfo,
 	CoverageCategory,
 } from "../linter/LinterContext.js";
-import {readFile} from "fs/promises";
+import {readFile} from "node:fs/promises";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 const visualizedSpace = "\u00b7";
@@ -17,7 +16,7 @@ function formatSeverity(severity: LintMessageSeverity) {
 	} else if (severity === LintMessageSeverity.Warning) {
 		return "warning";
 	} else {
-		throw new Error(`Unknown severity: ${LintMessageSeverity[severity]}`);
+		throw new Error(`Unknown severity: ${severity as number}`);
 	}
 }
 
@@ -45,13 +44,13 @@ function escape(str: string) {
 export class Coverage {
 	#buffer = "";
 
-	async format(lintResults: LintResult[]) {
+	async format(lintResults: LintResult[], reportDate: Date) {
 		this.#writeln(`<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>UI5Lint Coverage Report ${new Date().toLocaleString()}</title>
+	<title>UI5Lint Coverage Report ${reportDate.toLocaleString("en-US")}</title>
 	<style>
 	html {
 		font-family: Arial, sans-serif;
@@ -97,9 +96,8 @@ export class Coverage {
 
 		for (const {filePath, messages, coverageInfo} of lintResults) {
 			const fileContent = await readFile(filePath, {encoding: "utf-8"});
-			const relativeFilePath = path.relative(process.cwd(), filePath);
 
-			this.#writeln(`<div class="file"><span>${escape(relativeFilePath)}</span>`);
+			this.#writeln(`<div class="file"><span>${escape(filePath)}</span>`);
 
 			fileContent.split("\n").forEach((code, i) => {
 				const line = i + 1;
