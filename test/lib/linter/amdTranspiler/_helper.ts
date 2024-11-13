@@ -5,6 +5,7 @@ import util from "util";
 import {readdirSync} from "node:fs";
 import fs from "node:fs/promises";
 import transpileAmdToEsm from "../../../../src/linter/ui5Types/amdTranspiler/transpiler.js";
+import LinterContext from "../../../../src/linter/LinterContext.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -41,7 +42,11 @@ export function createTestsForFixtures(fixturesPath: string) {
 			defineTest(`Transpile ${testName}`, async (t) => {
 				const filePath = path.join(fixturesPath, fileName);
 				const fileContent = await fs.readFile(filePath);
-				const {source, map} = transpileAmdToEsm(testName, fileContent.toString(), true);
+				const context = new LinterContext({
+					rootDir: "/",
+					namespace: "namespace",
+				});
+				const {source, map} = transpileAmdToEsm(testName, fileContent.toString(), context);
 				t.snapshot(source);
 				t.snapshot(map && JSON.parse(map));
 			});

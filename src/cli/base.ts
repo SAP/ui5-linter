@@ -1,5 +1,4 @@
 import {Argv, ArgumentsCamelCase, CommandModule, MiddlewareFunction} from "yargs";
-import path from "node:path";
 import {lintProject} from "../linter/linter.js";
 import {Text} from "../formatter/text.js";
 import {Json} from "../formatter/json.js";
@@ -148,10 +147,12 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		await profile.start();
 	}
 
+	const rootDir = process.cwd();
+
 	const reportCoverage = !!(process.env.UI5LINT_COVERAGE_REPORT ?? coverage);
 
 	const res = await lintProject({
-		rootDir: path.join(process.cwd()),
+		rootDir,
 		ignorePatterns,
 		filePatterns,
 		coverage: reportCoverage,
@@ -174,7 +175,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		process.stdout.write(markdownFormatter.format(res, details));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
-		const textFormatter = new Text();
+		const textFormatter = new Text(rootDir);
 		process.stderr.write(textFormatter.format(res, details));
 	}
 	// Stop profiling after CLI finished execution

@@ -3,6 +3,7 @@ import {createReader} from "@ui5/fs/resourceFactory";
 import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
+import {Directive} from "./ui5Types/directives.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
@@ -92,10 +93,8 @@ export interface PositionRange {
 }
 
 export interface LintMetadata {
-	// TODO: Use this to store information shared across linters,
-	// such as the async flag state in manifest.json which might be relevant
-	// when parsing the Component.js
-	_todo: string;
+	// The metadata holds information to be shared across linters
+	directives: Set<Directive>;
 }
 
 export default class LinterContext {
@@ -235,12 +234,99 @@ export default class LinterContext {
 		return message;
 	}
 
+	#getFilteredMessages(resourcePath: ResourcePath): RawLintMessage[] {
+		const rawMessages = this.#rawMessages.get(resourcePath);
+		if (!rawMessages) {
+			return [];
+		}
+		const metadata = this.#metadata.get(resourcePath);
+		if (!metadata?.directives?.size) {
+			return rawMessages;
+		}
+
+		const filteredMessages: RawLintMessage[] = [];
+		const directives = new Set(metadata.directives);
+		// Sort messages by position
+		const sortedMessages = rawMessages.filter((rawMessage) => {
+			if (!rawMessage.position) {
+				filteredMessages.push(rawMessage);
+				return false;
+			}
+			return true;
+		}).sort((a, b) => {
+			const aPos = a.position!;
+			const bPos = b.position!;
+			return aPos.line === bPos.line ? aPos.column - bPos.column : aPos.line - bPos.line;
+		});
+
+		// Filter messages based on directives
+		let directiveStack: Directive[] = [];
+		for (const rawMessage of sortedMessages) {
+			const {position} = rawMessage;
+			const {line, column} = position!; // Undefined positions are already filtered out above
+
+			directiveStack = directiveStack.filter((dir) => {
+				// Filter out line-based directives that are no longer relevant
+				if (dir.scope === "line" && dir.line !== line) {
+					return false;
+				}
+				if (dir.scope === "next-line" && dir.line !== line - 1) {
+					return false;
+				}
+				return true;
+			});
+
+			for (const dir of directives) {
+				if (dir.line > line) {
+					continue;
+				}
+				if (dir.scope !== "line" && dir.line === line && dir.column > column) {
+					continue;
+				}
+				directives.delete(dir);
+				if (dir.scope === "line" && dir.line !== line) {
+					continue;
+				}
+				if (dir.scope === "next-line" && dir.line !== line - 1) {
+					continue;
+				}
+				directiveStack.push(dir);
+			}
+
+			if (!directiveStack.length) {
+				filteredMessages.push(rawMessage);
+				continue;
+			}
+
+			const messageInfo = MESSAGE_INFO[rawMessage.id];
+			if (!messageInfo) {
+				throw new Error(`Invalid message id '${rawMessage.id}'`);
+			}
+
+			let disabled = false;
+			for (const dir of directiveStack) {
+				if (dir.action === "disable" &&
+					(!dir.ruleNames.length || dir.ruleNames.includes(messageInfo.ruleId))) {
+					disabled = true;
+				} else if (dir.action === "enable" &&
+					(!dir.ruleNames.length || dir.ruleNames.includes(messageInfo.ruleId))) {
+					disabled = false;
+				}
+			}
+			if (!disabled) {
+				filteredMessages.push(rawMessage);
+			}
+		}
+		return filteredMessages;
+	}
+
 	generateLintResult(resourcePath: ResourcePath): LintResult {
-		const rawMessages = this.#rawMessages.get(resourcePath) ?? [];
 		const coverageInfo = this.#coverageInfo.get(resourcePath) ?? [];
 		let errorCount = 0;
 		let warningCount = 0;
 		let fatalErrorCount = 0;
+
+		const rawMessages = this.#getFilteredMessages(resourcePath);
 
 		const messages: LintMessage[] = rawMessages.map((rawMessage) => {
 			const message = this.#getMessageFromRawMessage(rawMessage);

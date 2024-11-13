@@ -34,8 +34,15 @@ function formatMessageDetails(msg: LintMessage, showDetails: boolean) {
 	return `. ${detailsHeader} ${chalk.italic(msg.messageDetails.replace(/\s\s+|\n/g, " "))}`;
 }
 
+function formatRule(ruleId: string) {
+	return chalk.dim(`  ${ruleId}`);
+}
+
 export class Text {
 	#buffer = "";
+
+	constructor(private readonly cwd: string) {
+	}
 
 	format(lintResults: LintResult[], showDetails: boolean) {
 		this.#writeln(`UI5 linter report:`);
@@ -51,7 +58,7 @@ export class Text {
 			totalWarningCount += warningCount;
 			totalFatalErrorCount += fatalErrorCount;
 
-			this.#writeln(chalk.inverse(path.resolve(process.cwd(), filePath)));
+			this.#writeln(chalk.inverse(path.resolve(this.cwd, filePath)));
 
 			// Determine maximum line and column for position formatting
 			let maxLine = 0;
@@ -80,7 +87,8 @@ export class Text {
 					`${formatSeverity(msg.severity)} ` +
 					`${msg.fatal ? "Fatal error: " : ""}` +
 					`${msg.message}` +
-					`${formatMessageDetails(msg, showDetails)}`);
+					`${formatMessageDetails(msg, showDetails)}` +
+					`${formatRule(msg.ruleId)}`);
 			});
 
 			this.#writeln("");
