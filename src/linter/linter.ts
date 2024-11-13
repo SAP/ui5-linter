@@ -169,7 +169,7 @@ async function lint(
 	});
 
 	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config, matchedPatterns);
-	checkUnmatchedPatterns(filePatterns, matchedPatterns);
+	await checkUnmatchedPatterns(filePatterns, matchedPatterns, options);
 
 	lintEnd();
 	return res;
@@ -360,7 +360,7 @@ export function resolveReader({
  * @param patterns Available patterns
  * @throws Error if an unmatched pattern is found
  */
-function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>) {
+async function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<string>, options: LinterOptions) {
 	const unmatchedPatterns = patterns.reduce((acc, pattern) => {
 		if (pattern.endsWith("/")) { // Match all files in a directory
 			pattern += "**/*";
@@ -371,6 +371,33 @@ function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Set<stri
 
 		return acc;
 	}, [] as FilePattern[]);
+
+	// Check if the Glob pattern is actually a file that exists, but the linter is not able to process.
+	if (unmatchedPatterns.length) {
+		const notProcessedFiles = new Set<string>();
+		const rootFileReader = createReader({
+			fsBasePath: options.rootDir,
+			virBasePath: "/",
+		});
+		// TODO: Define a better way to get all files. Exclude node_modules, .git, etc.
+		const allFiles = await rootFileReader.byGlob("/**/*");
+		const filePaths = allFiles.map((file) => file.getPath());
+
+		for (const pattern of unmatchedPatterns) {
+			if (filePaths.some((filePath) => filePath.includes(pattern))) {
+				notProcessedFiles.add(pattern);
+				unmatchedPatterns.splice(unmatchedPatterns.indexOf(pattern), 1);
+			}
+		}
+
+		if (notProcessedFiles.size) {
+			// TODO: For files we need to just print a warning, but the reporter is not available here
+			console.log(
+				`Specified ${notProcessedFiles.size === 1 ? "file" : "files"} ` +
+				`'${[...notProcessedFiles].join("', '")}' ${notProcessedFiles.size === 1 ? "is" : "are"}` +
+				` not supporeted by the linter`);
+		}
+	}
 
 	if (unmatchedPatterns.length) {
 		throw new Error(`Specified file ${unmatchedPatterns.length === 1 ? "pattern" : "patterns"}` +
