@@ -210,10 +210,10 @@ module.exports = {
 
 The UI5 Linter supports directives similar to ESLint's configuration comments, allowing you to control linting rules in specific sections of your code.
 
-* ui5lint-disable: Disables all linting rules from the position of the comment. Use block comments only (e.g., `/* ui5lint-disable */`)
-* ui5lint-enable: Re-enables linting rules that were disabled by ui5lint-disable. Use block comments only (e.g., `/* ui5lint-enable */`)
-* ui5lint-disable-line: Disables all linting rules for the current line. Use block or line comments (e.g., `/* ui5lint-disable-line */` or `// ui5lint-disable-line`)
-* ui5lint-disable-next-line: Disables all linting rules for the next line. Use block or line comments (e.g., `/* ui5lint-disable-next-line */` or `// * ui5lint-disable-next-line`)
+* **ui5lint-disable**: Disables all linting rules from the position of the comment
+* **ui5lint-enable**: Re-enables linting rules that were disabled by ui5lint-disable
+* **ui5lint-disable-line**: Disables all linting rules for the current line
+* **ui5lint-disable-next-line**: Disables all linting rules for the next line
 
 ### Specifying Rules
 
@@ -222,6 +222,9 @@ You can disable specific rules by listing them after the directive, separated by
 * `/* ui5lint-disable no-deprecated-api */`
 * `/* ui5lint-disable no-deprecated-api, no-deprecated-library */`
 * `// ui5lint-disable-line no-deprecated-api`
+
+A description on why a rule is disabled can be added after the rule name, separated by two dashes:
+
 * `// ui5lint-disable-next-line no-deprecated-api -- explanation`
 
 ### Scope
