@@ -11,6 +11,7 @@ const RULES = {
 	"no-globals": "no-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
+	"ui5-class-declaration": "ui5-class-declaration",
 } as const;
 
 export enum LintMessageSeverity {
@@ -51,6 +52,7 @@ export enum MESSAGE {
 	NO_DIRECT_ENUM_ACCESS,
 	NO_GLOBALS,
 	NO_ICON_POOL_RENDERER,
+	NOT_STATIC_CONTROL_RENDERER,
 	PARSING_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
@@ -331,6 +333,15 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
 		details: () => `"{@link sap.ui.core.RenderManager#methods/icon RenderManager}",`,
+	},
+
+	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["ui5-class-declaration"],
+
+		message: ({className}: {className?: string}) =>
+			`The control renderer${className ? (" of '" + className + "'") : ""} must be a static property`,
+		details: () => undefined,
 	},
 
 	[MESSAGE.NO_DIRECT_DATATYPE_ACCESS]: {

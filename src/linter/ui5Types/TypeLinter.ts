@@ -95,7 +95,8 @@ export default class TypeChecker {
 		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps);
 
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
-		const program = ts.createProgram(pathsToLint, this.#compilerOptions, host);
+		const program = ts.createProgram(
+			allResources.map((resource) => resource.getPath()), this.#compilerOptions, host);
 		createProgramDone();
 
 		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
@@ -126,7 +127,7 @@ export default class TypeChecker {
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(
 					this.#context, sourceFile.fileName,
-					sourceFile, sourceMaps,
+					sourceFile, sourceMaps, program,
 					checker, reportCoverage, messageDetails,
 					apiExtract, manifestContent
 				);

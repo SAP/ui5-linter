@@ -5,7 +5,7 @@ import {readdirSync} from "node:fs";
 import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
-import {SourceFile, TypeChecker} from "typescript";
+import {Program, SourceFile, TypeChecker} from "typescript";
 import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
 
@@ -28,7 +28,8 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/ui5Types/SourceFileLinter.js":
 			function (
 				context: LinterContext, filePath: string, sourceFile: SourceFile,
-				sourceMaps: Map<string, string> | undefined, checker: TypeChecker,
+				sourceMaps: Map<string, string> | undefined, program: Program,
+				checker: TypeChecker,
 				reportCoverage: boolean | undefined = false,
 				messageDetails: boolean | undefined = false,
 				apiExtract: ApiExtract,
@@ -36,7 +37,7 @@ export async function esmockDeprecationText() {
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(
-					context, filePath, sourceFile, sourceMaps, checker, reportCoverage,
+					context, filePath, sourceFile, sourceMaps, program, checker, reportCoverage,
 					messageDetails, apiExtract, manifestContent
 				);
 				linter.getDeprecationText = () => "Deprecated test message";

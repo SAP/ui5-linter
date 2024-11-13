@@ -53,54 +53,42 @@ function removeQuotes(str: string | undefined): string {
 }
 
 export default class SourceFileLinter {
-	#resourcePath: ResourcePath;
-	#sourceFile: ts.SourceFile;
-	#sourceMaps: Map<string, string> | undefined;
-	#checker: ts.TypeChecker;
-	#context: LinterContext;
 	#reporter: SourceFileReporter;
 	#boundVisitNode: (node: ts.Node) => void;
-	#reportCoverage: boolean;
-	#messageDetails: boolean;
-	#apiExtract: ApiExtract;
-	#manifestContent: string | undefined;
 	#fileName: string;
 	#isComponent: boolean;
 
 	constructor(
-		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMaps: Map<string, string> | undefined, checker: ts.TypeChecker,
-		reportCoverage: boolean | undefined = false, messageDetails: boolean | undefined = false,
-		apiExtract: ApiExtract, manifestContent?: string
+		private context: LinterContext,
+		private resourcePath: ResourcePath,
+		private sourceFile: ts.SourceFile,
+		private sourceMaps: Map<string, string> | undefined,
+		private program: ts.Program,
+		private checker: ts.TypeChecker,
+		private reportCoverage = false,
+		private messageDetails = false,
+		private apiExtract: ApiExtract,
+		private manifestContent?: string
 	) {
-		this.#resourcePath = resourcePath;
-		this.#sourceFile = sourceFile;
-		this.#sourceMaps = sourceMaps;
-		this.#checker = checker;
-		this.#context = context;
 		this.#reporter = new SourceFileReporter(context, resourcePath,
 			sourceFile, sourceMaps?.get(sourceFile.fileName));
 		this.#boundVisitNode = this.visitNode.bind(this);
-		this.#reportCoverage = reportCoverage;
-		this.#messageDetails = messageDetails;
-		this.#manifestContent = manifestContent;
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
-		this.#apiExtract = apiExtract;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			this.visitNode(this.#sourceFile);
+			this.visitNode(this.sourceFile);
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			log.verbose(`Error while linting ${this.#resourcePath}: ${message}`);
+			log.verbose(`Error while linting ${this.resourcePath}: ${message}`);
 			if (err instanceof Error) {
 				log.verbose(`Call stack: ${err.stack}`);
 			}
-			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message});
+			this.context.addLintingMessage(this.resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 
@@ -108,7 +96,7 @@ export default class SourceFileLinter {
 		if (node.kind === ts.SyntaxKind.NewExpression) { // e.g. "new Button({\n\t\t\t\tblocked: true\n\t\t\t})"
 			this.analyzeNewExpression(node as ts.NewExpression);
 		} else if (node.kind === ts.SyntaxKind.CallExpression) { // ts.isCallLikeExpression too?
-			// const nodeType = this.#checker.getTypeAtLocation(node);
+			// const nodeType = this.checker.getTypeAtLocation(node);
 			this.analyzePropertyAccessExpression(node as ts.CallExpression); // Check for global
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
@@ -134,11 +122,11 @@ export default class SourceFileLinter {
 		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
 			analyzeComponentJson({
 				classDeclaration: node,
-				manifestContent: this.#manifestContent,
-				resourcePath: this.#resourcePath,
+				manifestContent: this.manifestContent,
+				resourcePath: this.resourcePath,
 				reporter: this.#reporter,
-				context: this.#context,
-				checker: this.#checker,
+				context: this.context,
+				checker: this.checker,
 				isUiComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
 		} else if (
@@ -179,7 +167,7 @@ export default class SourceFileLinter {
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
 			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
 				return parentClasses.types.map((parentClass) => {
-					const parentClassType = this.#checker.getTypeAtLocation(parentClass);
+					const parentClassType = this.checker.getTypeAtLocation(parentClass);
 
 					return parentClassType.symbol?.declarations?.some((declaration) => {
 						if (!ts.isClassDeclaration(declaration)) {
@@ -226,6 +214,18 @@ export default class SourceFileLinter {
 		});
 
 		if (!rendererMember) {
+			const nonStaticRender = node.members.find((member: ts.ClassElement) => {
+				return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
+					(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) &&
+					member.name.text === "renderer";
+			});
+			if (nonStaticRender) {
+				// Renderer must be a static member
+				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
+					{className: node.name?.getText()}, nonStaticRender);
+				return;
+			}
+
 			// Special cases: Some base classes do not require sub-classes to have a renderer defined:
 			if (this.isUi5ClassDeclaration(node, [
 				"sap/ui/core/mvc/View",
@@ -236,13 +236,14 @@ export default class SourceFileLinter {
 			])) {
 				return;
 			}
+
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
 			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, node);
 			return;
 		}
 
 		if (ts.isPropertyDeclaration(rendererMember) && rendererMember.initializer) {
-			const initializerType = this.#checker.getTypeAtLocation(rendererMember.initializer);
+			const initializerType = this.checker.getTypeAtLocation(rendererMember.initializer);
 
 			if (initializerType.flags & ts.TypeFlags.Undefined ||
 				initializerType.flags & ts.TypeFlags.Null) {
@@ -267,9 +268,54 @@ export default class SourceFileLinter {
 			// Analyze renderer property when it's referenced by a variable or even another module
 			// i.e. { renderer: Renderer }
 			if (ts.isIdentifier(rendererMember.initializer)) {
-				const {symbol} = this.#checker.getTypeAtLocation(rendererMember);
-				const {declarations} = symbol ?? {};
-				declarations?.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+				const {symbol} = this.checker.getTypeAtLocation(rendererMember);
+
+				const originalDeclarations = symbol?.getDeclarations()?.filter((decl) =>
+					!decl.getSourceFile().isDeclarationFile);
+
+				// If the original raw render file is available, we can analyze it directly
+				if (originalDeclarations && originalDeclarations.length > 0) {
+					originalDeclarations.forEach((declaration) => this.analyzeControlRendererInternals(declaration));
+				} else {
+					// When there's an ambient module, then we need special handling.
+					// In case we have the raw file & typescript definitions for it, their types
+					// are being merged, creating an ambient module. We need to find the original
+					// raw file in order to analyze the renderer. Such special case, is for example
+					// any openui5 library when we analyze the openui5 repo- we have the TS definitions
+					// loaded in the TS compiler via @sapui5/types, but we actually want to analyze the
+					// source files of those types.
+					let importModuleString = "";
+
+					// Get the import string module from the current source file, so we can filter later
+					const rendererSymbol = this.checker.getSymbolAtLocation(rendererMember.initializer);
+					const importedRenderModule = rendererSymbol?.getDeclarations()?.[0]?.parent;
+
+					if (importedRenderModule &&
+						ts.isImportDeclaration(importedRenderModule) &&
+						ts.isStringLiteral(importedRenderModule.moduleSpecifier)) {
+						importModuleString = importedRenderModule.moduleSpecifier.text;
+					}
+
+					// Find the correct raw source file
+					const exportSourceFile = this.program.getSourceFiles().find((sourceFile) =>
+						sourceFile.fileName.includes(importModuleString));
+
+					// Extract the exports from the source file
+					const exportFileSymbol = exportSourceFile && this.checker.getSymbolAtLocation(exportSourceFile);
+					const moduleExportsSymbols = exportFileSymbol && this.checker.getExportsOfModule(exportFileSymbol);
+
+					// Check all exports
+					moduleExportsSymbols?.forEach((exportSymbol) => {
+						// Export could be a "default", so we need to get the real reference of the export symbol
+						const exportSymbolAlias = this.checker.getAliasedSymbol(exportSymbol);
+
+						exportSymbolAlias?.getDeclarations()?.forEach((declaration) => {
+							if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+								this.analyzeControlRendererInternals(declaration.initializer);
+							}
+						});
+					});
+				}
 			} else {
 				// Analyze renderer property when it's directly embedded in the renderer object
 				// i.e. { renderer: {apiVersion: "2", render: () => {}} }
@@ -279,20 +325,65 @@ export default class SourceFileLinter {
 	}
 
 	analyzeControlRendererInternals(node: ts.Node) {
+		const findApiVersionNode = (potentialApiVersionNode: ts.Node) => {
+			let apiVersionNode: unknown;
+			// const myControlRenderer = {apiVersion: "2", render: () => {}}
+			apiVersionNode = ts.isObjectLiteralExpression(potentialApiVersionNode) &&
+				potentialApiVersionNode.properties.find((prop) => {
+					return ts.isPropertyAssignment(prop) &&
+						(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
+						prop.name.text === "apiVersion";
+				}) as ts.PropertyAssignment | undefined;
+
+			if (apiVersionNode) {
+				return apiVersionNode;
+			}
+
+			// const myControlRenderer = {}
+			// const myControlRenderer.apiVersion = 2;
+			let rendererObjectName = null;
+			if ((ts.isPropertyAssignment(potentialApiVersionNode.parent) ||
+				ts.isPropertyDeclaration(potentialApiVersionNode.parent) ||
+				ts.isVariableDeclaration(potentialApiVersionNode.parent)) &&
+				ts.isIdentifier(potentialApiVersionNode.parent.name)) {
+				rendererObjectName = potentialApiVersionNode.parent.name.getText();
+			}
+
+			const visitChildNodes = (childNode: ts.Node) => {
+				if (ts.isBinaryExpression(childNode)) {
+					if (ts.isPropertyAccessExpression(childNode.left)) {
+						const objectName = childNode.left.expression.getText(); // myControlRenderer
+						const propertyName = childNode.left.name.getText(); // apiVersion
+
+						if (objectName === rendererObjectName && propertyName === "apiVersion") {
+							apiVersionNode = childNode.right;
+						}
+					}
+				}
+
+				if (!apiVersionNode) { // If found, stop traversing
+					ts.forEachChild(childNode, visitChildNodes);
+				}
+			};
+
+			ts.forEachChild(potentialApiVersionNode.getSourceFile(), visitChildNodes);
+
+			return apiVersionNode;
+		};
+
 		// Analyze renderer property when it's an ObjectLiteralExpression
 		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
-			const apiVersionNode = ts.isObjectLiteralExpression(node) && node.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) &&
-					(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
-					prop.name.text === "apiVersion";
-			}) as ts.PropertyAssignment | undefined;
+			const apiVersionNode = findApiVersionNode(node) as ts.PropertyAssignment | ts.NumericLiteral | undefined;
 
 			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
-				ts.VariableDeclaration | ts.ObjectLiteralExpression | undefined = undefined;
+				ts.VariableDeclaration | ts.ObjectLiteralExpression |
+				ts.NumericLiteral | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
-			} else if (apiVersionNode.initializer.getText() !== "2") { // String value would be "\"2\""
+			} else if ((ts.isNumericLiteral(apiVersionNode) && apiVersionNode.getText() !== "2") ||
+				(ts.isPropertyAssignment(apiVersionNode) && apiVersionNode.initializer.getText() !== "2")) {
+				// String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}
 
@@ -301,8 +392,8 @@ export default class SourceFileLinter {
 				// The findings can be in different file i.e. Control being analyzed,
 				// but reporting might be in ControlRenderer
 				const nodeSourceFile = nodeToHighlight.getSourceFile();
-				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
-				this.#context.addLintingMessage(
+				const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
+				this.context.addLintingMessage(
 					nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
 					getPositionsForNode({
 						node: nodeToHighlight,
@@ -320,8 +411,8 @@ export default class SourceFileLinter {
 			// The findings can be in different file i.e. Control being analyzed,
 			// but reporting might be in ControlRenderer
 			const nodeSourceFile = node.getSourceFile();
-			const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
-			this.#context.addLintingMessage(
+			const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
+			this.context.addLintingMessage(
 				nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
 				getPositionsForNode({
 					node,
@@ -411,8 +502,8 @@ export default class SourceFileLinter {
 				// The findings can be in different file i.e. Control being analyzed,
 				// but reporting might be in ControlRenderer
 				const nodeSourceFile = childNode.getSourceFile();
-				const nodeSourceMap = this.#sourceMaps?.get(nodeSourceFile.fileName);
-				this.#context.addLintingMessage(
+				const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
+				this.context.addLintingMessage(
 					nodeSourceFile.fileName, MESSAGE.NO_ICON_POOL_RENDERER, undefined as never,
 					getPositionsForNode({
 						node: childNode,
@@ -426,7 +517,7 @@ export default class SourceFileLinter {
 
 		// When the renderer is a separate module we can say with some certainty that the .icon() call
 		// is a RenderManager's
-		if (rendererSource.fileName !== this.#sourceFile.fileName) {
+		if (rendererSource.fileName !== this.sourceFile.fileName) {
 			ts.forEachChild(rendererSource, findIconCallExpression);
 		} else {
 			// When the renderer is embedded in the control file, then we can analyze only the icon call
@@ -436,12 +527,12 @@ export default class SourceFileLinter {
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {
-		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.#resourcePath, true);
+		const analyzeMetadataDone = taskStart(`analyzeMetadataProperty: ${type}`, this.resourcePath, true);
 		if (type === "interfaces") {
 			if (ts.isArrayLiteralExpression(node.initializer)) {
 				node.initializer.elements.forEach((elem) => {
 					const interfaceName = (elem as ts.StringLiteral).text;
-					const deprecationInfo = this.#apiExtract.getDeprecationInfo(interfaceName);
+					const deprecationInfo = this.apiExtract.getDeprecationInfo(interfaceName);
 					if (deprecationInfo) {
 						this.#reporter.addMessage(MESSAGE.DEPRECATED_INTERFACE, {
 							interfaceName: interfaceName,
@@ -453,7 +544,7 @@ export default class SourceFileLinter {
 		} else if (type === "altTypes" && ts.isArrayLiteralExpression(node.initializer)) {
 			node.initializer.elements.forEach((element) => {
 				const nodeType = ts.isStringLiteral(element) ? element.text : "";
-				const deprecationInfo = this.#apiExtract.getDeprecationInfo(nodeType);
+				const deprecationInfo = this.apiExtract.getDeprecationInfo(nodeType);
 				if (deprecationInfo) {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 						typeName: nodeType,
@@ -475,7 +566,7 @@ export default class SourceFileLinter {
 				ts.isStringLiteral(typeNode.initializer)) ?
 					[typeNode.initializer.text, defaultValueType].join(".") :
 				"";
-			const deprecationInfo = this.#apiExtract.getDeprecationInfo(fullyQuantifiedName);
+			const deprecationInfo = this.apiExtract.getDeprecationInfo(fullyQuantifiedName);
 			if (deprecationInfo) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 					typeName: defaultValueType,
@@ -492,7 +583,7 @@ export default class SourceFileLinter {
 				.split(",").map((type) => type.trim());
 
 			nodeTypes.forEach((nodeType) => {
-				const deprecationInfo = this.#apiExtract.getDeprecationInfo(nodeType);
+				const deprecationInfo = this.apiExtract.getDeprecationInfo(nodeType);
 				if (deprecationInfo?.symbolKind === "UI5Class") {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
 						className: nodeType,
@@ -510,7 +601,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeIdentifier(node: ts.Identifier) {
-		const type = this.#checker.getTypeAtLocation(node);
+		const type = this.checker.getTypeAtLocation(node);
 		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
 			return;
 		}
@@ -524,7 +615,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeImportSpecifier(node: ts.ImportSpecifier) {
-		const type = this.#checker.getTypeAtLocation(node);
+		const type = this.checker.getTypeAtLocation(node);
 		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
 			return;
 		}
@@ -563,11 +654,11 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
-		const nodeType = this.#checker.getTypeAtLocation(node); // checker.getContextualType(node);
+		const nodeType = this.checker.getTypeAtLocation(node); // checker.getContextualType(node);
 		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
 			return;
 		}
-		const classType = this.#checker.getTypeAtLocation(node.expression);
+		const classType = this.checker.getTypeAtLocation(node.expression);
 
 		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
 		if (moduleDeclaration?.name.text === "sap/ui/core/routing/Router") {
@@ -588,7 +679,7 @@ export default class SourceFileLinter {
 						const propText = propNameIdentifier.escapedText || propNameIdentifier.text;
 						const propertySymbol = argumentType.getProperty(propText);
 
-						// this.#checker.getContextualType(arg) // same as nodeType
+						// this.checker.getContextualType(arg) // same as nodeType
 						// const propertySymbol = allProps.find((symbol) => {
 						// 	return symbol.escapedName === propNameIdentifier;
 						// });
@@ -598,7 +689,7 @@ export default class SourceFileLinter {
 								this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
 									{
 										propertyName: propertySymbol.escapedName as string,
-										className: this.#checker.typeToString(nodeType),
+										className: this.checker.typeToString(nodeType),
 										details: deprecationInfo.messageDetails,
 									},
 									prop
@@ -638,13 +729,13 @@ export default class SourceFileLinter {
 
 	getDeprecationInfo(symbol: ts.Symbol | undefined): DeprecationInfo | null {
 		if (symbol && this.isSymbolOfUi5Type(symbol)) {
-			const jsdocTags = symbol.getJsDocTags(this.#checker);
+			const jsdocTags = symbol.getJsDocTags(this.checker);
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 			if (deprecatedTag) {
 				const deprecationInfo: DeprecationInfo = {
 					symbol, messageDetails: "",
 				};
-				if (this.#messageDetails) {
+				if (this.messageDetails) {
 					deprecationInfo.messageDetails = this.getDeprecationText(deprecatedTag);
 				}
 				return deprecationInfo;
@@ -655,9 +746,9 @@ export default class SourceFileLinter {
 
 	analyzeCallExpression(node: ts.CallExpression) {
 		const exprNode = node.expression;
-		const exprType = this.#checker.getTypeAtLocation(exprNode);
+		const exprType = this.checker.getTypeAtLocation(exprNode);
 		if (!exprType?.symbol || !this.isSymbolOfUi5OrThirdPartyType(exprType.symbol)) {
-			if (this.#reportCoverage) {
+			if (this.reportCoverage) {
 				this.handleCallExpressionUnknownType(exprType, node);
 			}
 			return;
@@ -724,14 +815,14 @@ export default class SourceFileLinter {
 			exprNode.kind === ts.SyntaxKind.ElementAccessExpression) {
 			// Get the type to the left of the call expression (i.e. what the function is being called on)
 			const lhsExpr = exprNode.expression;
-			const lhsExprType = this.#checker.getTypeAtLocation(lhsExpr);
+			const lhsExprType = this.checker.getTypeAtLocation(lhsExpr);
 			if (lhsExprType.isClassOrInterface()) {
 				// left-hand-side is an instance of a class, e.g. "instance.deprecatedMethod()"
-				additionalMessage = `of class '${this.#checker.typeToString(lhsExprType)}'`;
+				additionalMessage = `of class '${this.checker.typeToString(lhsExprType)}'`;
 			} else if (ts.isCallExpression(lhsExpr)) {
 				// left-hand-side is a function call, e.g. "function().deprecatedMethod()"
 				// Use the (return) type of that function call
-				additionalMessage = `of module '${this.#checker.typeToString(lhsExprType)}'`;
+				additionalMessage = `of module '${this.checker.typeToString(lhsExprType)}'`;
 			} else if (ts.isPropertyAccessExpression(exprNode)) {
 				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
 				additionalMessage = `(${this.extractNamespace(exprNode)})`;
@@ -1003,9 +1094,9 @@ export default class SourceFileLinter {
 	getDeprecationInfoForAccess(node: ts.AccessExpression): DeprecationInfo | null {
 		let symbol;
 		if (ts.isPropertyAccessExpression(node)) {
-			symbol = this.#checker.getSymbolAtLocation(node.name);
+			symbol = this.checker.getSymbolAtLocation(node.name);
 		} else { // ElementAccessExpression
-			symbol = this.#checker.getSymbolAtLocation(node.argumentExpression);
+			symbol = this.checker.getSymbolAtLocation(node.argumentExpression);
 		}
 		return this.getDeprecationInfo(symbol);
 	}
@@ -1037,7 +1128,7 @@ export default class SourceFileLinter {
 	}
 
 	handleCallExpressionUnknownType(nodeType: ts.Type, node: ts.CallExpression) {
-		const typeString = this.#checker.typeToString(nodeType);
+		const typeString = this.checker.typeToString(nodeType);
 		let identifier;
 		if (ts.isPropertyAccessExpression(node.expression)) {
 			identifier = node.expression.name;
@@ -1071,20 +1162,20 @@ export default class SourceFileLinter {
 			let symbol;
 
 			// Get the NodeType in order to check whether this is indirect global access via Window
-			const nodeType = this.#checker.getTypeAtLocation(exprNode);
-			if (this.isGlobalThis(this.#checker.typeToString(nodeType))) {
+			const nodeType = this.checker.getTypeAtLocation(exprNode);
+			if (this.isGlobalThis(this.checker.typeToString(nodeType))) {
 				// In case of Indirect global access we need to check for
 				// a global UI5 variable on the right side of the expression instead of left
 				if (ts.isPropertyAccessExpression(node)) {
-					symbol = this.#checker.getSymbolAtLocation(node.name);
+					symbol = this.checker.getSymbolAtLocation(node.name);
 				} else if (ts.isElementAccessExpression(node)) {
-					symbol = this.#checker.getSymbolAtLocation(node.argumentExpression);
+					symbol = this.checker.getSymbolAtLocation(node.argumentExpression);
 				} else { // Identifier
-					symbol = this.#checker.getSymbolAtLocation(node);
+					symbol = this.checker.getSymbolAtLocation(node);
 				}
 			} else {
 				// No access via Window. Check the left side of the expression
-				symbol = this.#checker.getSymbolAtLocation(exprNode);
+				symbol = this.checker.getSymbolAtLocation(exprNode);
 			}
 
 			// If a symbol could be determined, check whether it is a symbol of a UI5 Type.
@@ -1132,7 +1223,7 @@ export default class SourceFileLinter {
 			// So we ignore such cases here.
 			return;
 		}
-		const symbol = this.#checker.getSymbolAtLocation(moduleSpecifierNode);
+		const symbol = this.checker.getSymbolAtLocation(moduleSpecifierNode);
 		if (!symbol) {
 			return;
 		}
@@ -1157,7 +1248,7 @@ export default class SourceFileLinter {
 						if (!ts.isExportAssignment(declaration)) {
 							return;
 						}
-						const type = this.#checker.getTypeAtLocation(declaration.expression);
+						const type = this.checker.getTypeAtLocation(declaration.expression);
 						if (type.symbol?.flags & ts.SymbolFlags.Enum) {
 							isEnum = true;
 						}
