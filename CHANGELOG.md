@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.3.0](https://github.com/SAP/ui5-linter/compare/v1.2.0...v1.3.0) (2024-11-13)
+
+
+### Features
+
+* Add ui5lint-disable directives ([#327](https://github.com/SAP/ui5-linter/issues/327)) ([3c29e52](https://github.com/SAP/ui5-linter/commit/3c29e52d9eacd7b3472e0af718399f05e91f5536))
+* Detect deprecated themes set by Theming.setTheme() API ([#389](https://github.com/SAP/ui5-linter/issues/389)) ([83b295f](https://github.com/SAP/ui5-linter/commit/83b295f80146cab9352cd9ad32c49d2ed5096e5e))
+* Node API in ui5 linter ([#400](https://github.com/SAP/ui5-linter/issues/400)) ([626f022](https://github.com/SAP/ui5-linter/commit/626f0225ab718afcf396a5641857d642a8b077c0))
+* **Test Starter:** Detect deprecations in 'theme' property of test configuration ([#387](https://github.com/SAP/ui5-linter/issues/387)) ([619457f](https://github.com/SAP/ui5-linter/commit/619457f540eb00145f4d8f89f6be409d75301215))
+
+
+### Bug Fixes
+
+* Allow ignoring ui5.yaml files via config ([a024d44](https://github.com/SAP/ui5-linter/commit/a024d44ca045127c998d291c4c2fdcf30e3d34b6))
+* Improve Control Renderer lint ([#392](https://github.com/SAP/ui5-linter/issues/392)) ([8a3976f](https://github.com/SAP/ui5-linter/commit/8a3976f84bbd20b8c35a821bc3492772cf1e71a5))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.23 ([96b46ca](https://github.com/SAP/ui5-linter/commit/96b46cab1bcb230eb007fc654a0e18cf9480199b))
+
 ## [1.2.0](https://github.com/SAP/ui5-linter/compare/v1.1.1...v1.2.0) (2024-10-29)
 
 
