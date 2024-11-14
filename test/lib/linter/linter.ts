@@ -123,6 +123,20 @@ test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) =
 	});
 });
 
+test.serial("lint: com.ui5.troublesome.app with unmatched files", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		filePatterns: ["webapp/i18n/*"],
+		rootDir: projectPath,
+	});
+
+	// TODO: when logging is implemented, check for log messages.
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: com.ui5.troublesome.app with files property in ui5lint.config", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 
