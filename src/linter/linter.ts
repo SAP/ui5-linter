@@ -399,6 +399,7 @@ async function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Se
 
 		if (notProcessedFiles.size) {
 			// TODO: For files we need to just print a warning, but the reporter is not available here
+			// eslint-disable-next-line no-console
 			console.log(
 				`Specified ${notProcessedFiles.size === 1 ? "file" : "files"} ` +
 				`'${[...notProcessedFiles].join("', '")}' ${notProcessedFiles.size === 1 ? "is" : "are"}` +
