@@ -1,7 +1,7 @@
 sap.ui.define(function () {
 	"use strict";
 	return {
-		name: "QUnit test suite with deprecated themes (JS) - Property names are surrounded by quotes",
+		name: "QUnit test suite with deprecated themes (JS) - Special Cases: Property names are surrounded by quotes",
 		"defaults": {
 			page: "ui5://test-resources/sap/ui/demo/todo/Test.qunit.html?testsuite={suite}&test={name}",
 			qunit: {
