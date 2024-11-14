@@ -378,6 +378,7 @@ async function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Se
 		const rootFileReader = createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
+			excludes: [""]
 		});
 		// TODO: Define a better way to get all files. Exclude node_modules, .git, etc.
 		const allFiles = await rootFileReader.byGlob("/**/*");
