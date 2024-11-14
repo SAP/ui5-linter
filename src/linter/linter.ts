@@ -378,16 +378,22 @@ async function checkUnmatchedPatterns(patterns: FilePattern[], patternsMatch: Se
 		const rootFileReader = createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
-			excludes: [""]
+			excludes: [
+				"/node_modules/**/*",
+				"/.*",
+				"/.*/**/*",
+			],
 		});
-		// TODO: Define a better way to get all files. Exclude node_modules, .git, etc.
-		const allFiles = await rootFileReader.byGlob("/**/*");
-		const filePaths = allFiles.map((file) => file.getPath());
 
-		for (const pattern of unmatchedPatterns) {
-			if (filePaths.some((filePath) => filePath.includes(pattern))) {
-				notProcessedFiles.add(pattern);
-				unmatchedPatterns.splice(unmatchedPatterns.indexOf(pattern), 1);
+		const allFiles = await rootFileReader.byGlob("/**/*");
+		const filePaths = allFiles.map((file) => file.getPath().substring(1));
+		const patterns = buildPatterns(unmatchedPatterns);
+
+		for (const pattern of patterns) {
+			const matchedFilePaths = filePaths.filter((filePath) => pattern.match(filePath));
+			if (matchedFilePaths.length) {
+				matchedFilePaths.forEach((filePath) => notProcessedFiles.add(filePath));
+				unmatchedPatterns.splice(unmatchedPatterns.indexOf(pattern.pattern), 1);
 			}
 		}
 
