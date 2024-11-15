@@ -1,4 +1,4 @@
-import ts, {Identifier} from "typescript";
+import ts, {Identifier, SymbolFlags} from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
@@ -313,12 +313,18 @@ export default class SourceFileLinter {
 
 					// Check all exports
 					moduleExportsSymbols?.forEach((exportSymbol) => {
-						// Export could be a "default", so we need to get the real reference of the export symbol
-						const exportSymbolAlias = this.checker.getAliasedSymbol(exportSymbol);
+						// Note: getAliasedSymbol fails when called with a symbol that isn't an alias
+						let symbol = exportSymbol;
+						if (exportSymbol.flags & SymbolFlags.TypeAlias) {
+							// Export could be a "default", so we need to get the real reference of the export symbol
+							symbol = this.checker.getAliasedSymbol(exportSymbol);
+						}
 
-						exportSymbolAlias?.getDeclarations()?.forEach((declaration) => {
+						symbol?.getDeclarations()?.forEach((declaration) => {
 							if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
 								this.analyzeControlRendererInternals(declaration.initializer);
+							} else if (ts.isExportAssignment(declaration) && declaration.expression) {
+								this.analyzeControlRendererInternals(declaration.expression);
 							}
 						});
 					});
