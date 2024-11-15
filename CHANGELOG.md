@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/SAP/ui5-linter/compare/v1.3.0...v1.3.1) (2024-11-15)
+
+
+### Bug Fixes
+
+* Properly check directly exported renderer ([91ddd39](https://github.com/SAP/ui5-linter/commit/91ddd39ebb5045bbb84b9a4e36f49a92a25b255c))
+* **Test Starter Configs:** Fix false-positive findings ([#409](https://github.com/SAP/ui5-linter/issues/409)) ([cf6907c](https://github.com/SAP/ui5-linter/commit/cf6907c54eef58d5a68dcd3d5cb3ad15b2f7fe35))
+
 ## [1.3.0](https://github.com/SAP/ui5-linter/compare/v1.2.0...v1.3.0) (2024-11-13)
 
 
