@@ -1308,21 +1308,26 @@ export default class SourceFileLinter {
 	}
 
 	analyzeTestsuiteThemeProperty(node: ts.PropertyAssignment) {
+		// Check if the node is part of a testsuite config file by its file name.
+		// This is the same check as in the framework and prevents false-positives
+		// https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
+		const validTestSuiteName = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
+		if (!validTestSuiteName.test(node.getSourceFile().fileName)) return;
+
 		// In a Test Starter testsuite file,
 		// themes can be defined as default (1.) or for test configs individually (2.).
+		// The schema for these files can be found here (under 'The UI5 Test Suite Module'):
+		// https://ui5.sap.com/#/topic/22f50c0f0b104bf3ba84620880793d3f
 
 		// (1.) and (2.) are checks for these two possible structures,
-		// which use surrounding property names to determine the context.
-
-		// We cannot use the best practice file name "testsuite.qunit.js/ts",
-		// to determine if a file is a Test Starter testsuite file,
-		// because the file name can be arbitrary.
-		// Therefore, we need checks (1.) and (2.) and set a flag to true afterwards.
+		// which use surrounding property names to determine the context
+		// and set the flag 'isTestStarterStructure' to true afterwards.
 		let isTestStarterStructure = false;
 
-		const oneLayerUp = node.parent.parent;
-		const twoLayersUp = oneLayerUp?.parent.parent;
-		const threeLayersUp = twoLayersUp?.parent.parent;
+		const oneLayerUp = node.parent?.parent;
+		const twoLayersUp = oneLayerUp?.parent?.parent;
+		const threeLayersUp = twoLayersUp?.parent?.parent;
+
 		// Check if "theme" property is inside "ui5: {...}" object
 		if (oneLayerUp && ts.isObjectLiteralElement(oneLayerUp) &&
 			removeQuotes(oneLayerUp.name?.getText()) === "ui5") {
