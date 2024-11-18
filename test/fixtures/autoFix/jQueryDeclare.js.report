@@ -1,0 +1,37 @@
+[
+    {
+        "id": 5,
+        "args": {
+            "apiName": "jQuery.sap.declare",
+            "details": ""
+        },
+        "position": {
+            "line": 2,
+            "column": 1
+        }
+    },
+    {
+        "id": 5,
+        "args": {
+            "apiName": "jQuery.sap.require",
+            "details": ""
+        },
+        "position": {
+            "line": 5,
+            "column": 1
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.m.Button",
+            "moduleName": "sap/m/Button",
+            "propertyAccess": "sap.m.Button"
+        },
+        "position": {
+            "line": 8,
+            "column": 20
+        }
+    }
+]

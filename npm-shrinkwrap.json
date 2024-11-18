@@ -20,6 +20,7 @@
 				"figures": "^6.1.0",
 				"he": "^1.2.0",
 				"json-source-map": "^0.6.1",
+				"magic-string": "^0.30.13",
 				"minimatch": "^10.0.1",
 				"sax-wasm": "^2.2.4",
 				"typescript": "^5.6.3",
@@ -7151,10 +7152,10 @@
 			}
 		},
 		"node_modules/magic-string": {
-			"version": "0.30.12",
-			"resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.12.tgz",
-			"integrity": "sha512-Ea8I3sQMVXr8JhN4z+H/d8zwo+tYDgHE9+5G4Wnrwhs0gaK9fXTKx0Tw5Xwsd/bCPTTZNRAdpyzvoeORe9LYpw==",
-			"dev": true,
+			"version": "0.30.13",
+			"resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.13.tgz",
+			"integrity": "sha512-8rYBO+MsWkgjDSOvLomYnzhdwEG51olQ4zL5KXnNJWV5MNmrb4rTZdrtkhxjnD/QyZUqR/Z/XDsUs/4ej2nx0g==",
+			"license": "MIT",
 			"dependencies": {
 				"@jridgewell/sourcemap-codec": "^1.5.0"
 			}
