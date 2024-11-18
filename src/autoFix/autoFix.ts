@@ -154,7 +154,7 @@ function applyFixes(
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet);
 	}
-	// content = applyChanges(content, changeSet);
+	content = applyChanges(content, changeSet);
 
 	return content;
 }
