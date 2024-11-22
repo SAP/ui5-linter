@@ -5,6 +5,7 @@ import util from "util";
 import fs from "node:fs";
 import LinterContext from "../../../../src/linter/LinterContext.js";
 import transpileXml from "../../../../src/linter/xmlTemplate/transpiler.js";
+import ControllerByIdInfo from "../../../../src/linter/xmlTemplate/ControllerByIdInfo.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -44,15 +45,17 @@ export function createTestsForFixtures(fixturesPath: string) {
 					rootDir: fixturesPath,
 					details: true,
 				});
-				const res = await transpileXml(testName, fileStream, context);
+				const controllerByIdInfo = new ControllerByIdInfo();
+				const res = await transpileXml(testName, fileStream, context, controllerByIdInfo);
 				if (!res) {
 					t.fail("Transpile result is undefined");
 					return;
 				}
 				const {source, map} = res;
-				t.snapshot(source);
-				t.snapshot(map && JSON.parse(map));
-				t.snapshot(context.generateLintResult(testName).messages);
+				t.snapshot(source, "source");
+				t.snapshot(map && JSON.parse(map), "map");
+				t.snapshot(context.generateLintResult(testName).messages, "messages");
+				t.snapshot(controllerByIdInfo.getMappings(), "controllerByIdInfo");
 			});
 		}
 	} catch (err) {

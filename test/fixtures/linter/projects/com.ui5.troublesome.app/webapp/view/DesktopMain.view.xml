@@ -1,0 +1,17 @@
+<!--
+	This file is a partial copy of Main.view.xml but uses other controls.
+	Its purpose is to cover the case where multiple views refer to
+	the same controller (controllerName) and contain controls with
+	the same ID but a different type. The resulting type for the
+	controller byId() call should be the union of the types.
+-->
+<mvc:View
+	controllerName="com.ui5.troublesome.app.controller.Main"
+	displayBlock="true"
+	xmlns="sap.ui.commons"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core">
+
+	<Button id="testButton" />
+
+</mvc:View>

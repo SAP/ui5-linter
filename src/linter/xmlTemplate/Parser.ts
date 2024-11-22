@@ -9,6 +9,7 @@ import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
 import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
+import ControllerByIdInfo from "./ControllerByIdInfo.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -133,7 +134,9 @@ export default class Parser {
 	#generator: AbstractGenerator;
 	#apiExtract: ApiExtract;
 
-	constructor(resourceName: string, apiExtract: ApiExtract, context: LinterContext) {
+	constructor(
+		resourceName: string, apiExtract: ApiExtract, context: LinterContext, controllerByIdInfo: ControllerByIdInfo
+	) {
 		const xmlDocumentKind = determineDocumentKind(resourceName);
 		if (xmlDocumentKind === null) {
 			throw new Error(`Unknown document type for resource ${resourceName}`);
@@ -141,8 +144,8 @@ export default class Parser {
 		this.#resourceName = resourceName;
 		this.#xmlDocumentKind = xmlDocumentKind;
 		this.#generator = xmlDocumentKind === DocumentKind.View ?
-			new ViewGenerator(resourceName) :
-			new FragmentGenerator(resourceName);
+			new ViewGenerator(resourceName, controllerByIdInfo) :
+			new FragmentGenerator(resourceName, controllerByIdInfo);
 
 		this.#apiExtract = apiExtract;
 		this.#context = context;

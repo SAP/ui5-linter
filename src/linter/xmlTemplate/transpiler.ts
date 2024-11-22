@@ -9,6 +9,7 @@ import {getLogger} from "@ui5/logger";
 import {createRequire} from "node:module";
 import {MESSAGE} from "../messages.js";
 import {loadApiExtract, ApiExtract} from "../../utils/ApiExtract.js";
+import ControllerByIdInfo from "./ControllerByIdInfo.js";
 const require = createRequire(import.meta.url);
 
 const log = getLogger("linter:xmlTemplate:transpiler");
@@ -17,12 +18,12 @@ let saxWasmBuffer: Buffer;
 let apiExtract: ApiExtract;
 
 export default async function transpileXml(
-	resourcePath: string, contentStream: ReadStream, context: LinterContext
+	resourcePath: string, contentStream: ReadStream, context: LinterContext, controllerByIdInfo: ControllerByIdInfo
 ): Promise<TranspileResult | undefined> {
 	await init();
 	try {
 		const taskEnd = taskStart("Transpile XML", resourcePath, true);
-		const res = await transpileXmlToJs(resourcePath, contentStream, context);
+		const res = await transpileXmlToJs(resourcePath, contentStream, context, controllerByIdInfo);
 		taskEnd();
 		if (!res.source) {
 			log.verbose(`XML transpiler returned no result for ${resourcePath}`);
@@ -56,9 +57,9 @@ async function init() {
 }
 
 async function transpileXmlToJs(
-	resourcePath: string, contentStream: ReadStream, context: LinterContext
+	resourcePath: string, contentStream: ReadStream, context: LinterContext, controllerByIdInfo: ControllerByIdInfo
 ): Promise<TranspileResult> {
-	const parser = new Parser(resourcePath, apiExtract, context);
+	const parser = new Parser(resourcePath, apiExtract, context, controllerByIdInfo);
 
 	// Initialize parser
 	const options = {highWaterMark: 32 * 1024}; // 32k chunks
