@@ -39,10 +39,11 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 	// Generate dts file with specific byId signatures for controllers based on view IDs
 	const controllerByIdDtsGenerator = new ControllerByIdDtsGenerator(controllerByIdInfo);
 	const controllerByIdDts = controllerByIdDtsGenerator.generate();
-
-	const dtsResource = createResource({
-		path: "/types/@ui5/linter/virtual/ControllerById.d.ts",
-		string: controllerByIdDts,
-	});
-	await workspace.write(dtsResource);
+	if (controllerByIdDts) {
+		const dtsResource = createResource({
+			path: "/types/@ui5/linter/virtual/ControllerById.d.ts",
+			string: controllerByIdDts,
+		});
+		await workspace.write(dtsResource);
+	}
 }

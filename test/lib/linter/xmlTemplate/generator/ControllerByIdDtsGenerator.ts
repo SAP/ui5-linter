@@ -21,5 +21,11 @@ test("ControllerByIdDtsGenerator: generate", (t) => {
 	const generator = new ControllerByIdDtsGenerator(controllerByIdInfo);
 	const result = generator.generate();
 	t.snapshot(result);
-}
-);
+});
+
+test("ControllerByIdDtsGenerator: generate with empty info should return null", (t) => {
+	const controllerByIdInfo = new ControllerByIdInfo();
+	const generator = new ControllerByIdDtsGenerator(controllerByIdInfo);
+	const result = generator.generate();
+	t.is(result, null);
+});

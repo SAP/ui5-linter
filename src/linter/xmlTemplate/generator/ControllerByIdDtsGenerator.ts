@@ -1,16 +1,17 @@
 import ControllerByIdInfo, {IdModulesMap} from "../ControllerByIdInfo.js";
 
-interface Import {
-	localName: string;
-	moduleName: string;
-}
 export class ControllerByIdDtsGenerator {
-	private imports = new Set<Import>();
+	// Maps module names to local names
+	private imports = new Map<string, string>();
 
 	constructor(private controllerByIdInfo: ControllerByIdInfo) {
 	}
 
 	generate() {
+		const mappings = this.controllerByIdInfo.getMappings();
+		if (mappings.size === 0) {
+			return null;
+		}
 		let out = "";
 		this.controllerByIdInfo.getMappings().forEach((idToModules, controllerName) => {
 			out += this.generateModuleDeclaration(controllerName, idToModules);
@@ -20,8 +21,8 @@ export class ControllerByIdDtsGenerator {
 
 	generateCollectedImports() {
 		let out = "";
-		this.imports.forEach((moduleImport) => {
-			out += `import ${moduleImport.localName} from "${moduleImport.moduleName}";\n`;
+		this.imports.forEach((localName, moduleName) => {
+			out += `import ${localName} from "${moduleName}";\n`;
 		});
 		out += "\n";
 		return out;
@@ -34,7 +35,9 @@ export class ControllerByIdDtsGenerator {
 			modules.forEach((moduleName) => {
 				const localName = this.getLocalModuleName(moduleName);
 				localNames.push(localName);
-				this.imports.add({localName, moduleName});
+				if (!this.imports.has(moduleName)) {
+					this.imports.set(moduleName, localName);
+				}
 			});
 			out += `\t\t"${id}": ${localNames.join(" | ")};\n`;
 		});
