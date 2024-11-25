@@ -1,3 +1,4 @@
+import ControllerByIdInfo from "../ControllerByIdInfo.js";
 import {
 	ControlDeclaration, RequireExpression, Position,
 } from "../Parser.js";
@@ -17,10 +18,13 @@ export default abstract class AbstractGenerator {
 	_imports = new Set<ImportStatement>();
 	_variableNames = new Set<string>();
 	_body: Writer;
+	_idToModule = new Map<string, string>();
+	_controllerByIdInfo: ControllerByIdInfo;
 
-	constructor(filePath: string) {
+	constructor(filePath: string, controllerByIdInfo: ControllerByIdInfo) {
 		const fileName = path.basename(filePath, ".xml");
 		this._body = new Writer(fileName + ".js", fileName + ".xml");
+		this._controllerByIdInfo = controllerByIdInfo;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -31,9 +35,11 @@ export default abstract class AbstractGenerator {
 	writeControl(controlDeclaration: ControlDeclaration) {
 		const importVariableName = this._getUniqueVariableName(controlDeclaration.name);
 
+		const moduleName = controlDeclaration.namespace.replaceAll(".", "/") + `/${controlDeclaration.name}`;
+
 		// Add import
 		this._imports.add({
-			moduleName: controlDeclaration.namespace.replaceAll(".", "/") + `/${controlDeclaration.name}`,
+			moduleName,
 			variableName: importVariableName,
 			start: controlDeclaration.start,
 			end: controlDeclaration.end,
@@ -46,6 +52,13 @@ export default abstract class AbstractGenerator {
 		this._body.writeln(`new ${importVariableName}({`, controlDeclaration.start, controlDeclaration.end);
 		// Write properties
 		controlDeclaration.properties.forEach((attribute) => {
+			// Add mapping of id to module name so that specific byId lookup for controllers can be generated.
+			// This information can only be added to the ControllerByIdInfo once the controllerName is known,
+			// which happens last as outer nodes are visited last.
+			if (attribute.name === "id") {
+				this._idToModule.set(attribute.value, moduleName);
+			}
+
 			// TODO: Determine attribute type based on metadata and parse/write value accordingly
 			this._body.write(`    `);
 			this._body.writeln(

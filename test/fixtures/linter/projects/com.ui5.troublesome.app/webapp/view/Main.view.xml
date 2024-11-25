@@ -23,4 +23,6 @@
 		</buttons>
 	</MessagePage>
 
+	<Button id="testButton" />
+
 </mvc:View>

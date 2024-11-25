@@ -8,6 +8,7 @@ import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
+import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -151,13 +152,22 @@ export default class TypeChecker {
 						resourcePath, fileContent, sourceMap);
 				}
 			}
+			// Although not being a typical transformed source, write out the byId dts file for debugging purposes
+			let byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
+			if (byIdDts) {
+				if (typeof byIdDts === "function") {
+					byIdDts = byIdDts();
+				}
+				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
+					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
+			}
 		}
 	}
 }
 
 async function writeTransformedSources(fsBasePath: string,
 	originalResourcePath: string,
-	source: string, map: string | undefined) {
+	source: string, map?: string) {
 	const transformedWriter = createAdapter({
 		fsBasePath,
 		virBasePath: "/",
@@ -165,7 +175,7 @@ async function writeTransformedSources(fsBasePath: string,
 
 	await transformedWriter.write(
 		createResource({
-			path: originalResourcePath + ".ui5lint.transformed.js",
+			path: originalResourcePath,
 			string: source,
 		})
 	);
@@ -173,7 +183,7 @@ async function writeTransformedSources(fsBasePath: string,
 	if (map) {
 		await transformedWriter.write(
 			createResource({
-				path: originalResourcePath + ".ui5lint.transformed.js.map",
+				path: originalResourcePath + ".map",
 				string: JSON.stringify(JSON.parse(map), null, "\t"),
 			})
 		);
