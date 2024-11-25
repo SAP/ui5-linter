@@ -46,9 +46,9 @@ export class ControllerByIdDtsGenerator {
 		out += this.generateByIdMapping(idToModules);
 		out += `\ttype ByIdFunction = {\n`;
 		out += `\t\t<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];\n`;
-		out += `\t\t(sId: string): sap_ui_core_Element;\n`; // Fallback signature for unknown IDs
+		out += `\t\t(sId: string): ${this.imports.get("sap/ui/core/Element")};\n`; // Fallback signature for unknown IDs
 		out += `\t}\n`;
-		out += `\tinterface ControllerView extends sap_ui_core_mvc_View {\n`;
+		out += `\tinterface ControllerView extends ${this.imports.get("sap/ui/core/mvc/View")} {\n`;
 		out += `\t\tbyId: ByIdFunction;\n`;
 		out += `\t}\n`;
 		// The interface name does not matter as the declaration refers to the default export.
