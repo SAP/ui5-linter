@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/SAP/ui5-linter/compare/v1.3.1...v1.4.0) (2024-11-25)
+
+
+### Features
+
+* Add type support for "byId" in controllers ([#423](https://github.com/SAP/ui5-linter/issues/423)) ([cc2cf60](https://github.com/SAP/ui5-linter/commit/cc2cf60b9290c564e1ba6a66f47e6e9a8009d264))
+
 ## [1.3.1](https://github.com/SAP/ui5-linter/compare/v1.3.0...v1.3.1) (2024-11-15)
 
 
