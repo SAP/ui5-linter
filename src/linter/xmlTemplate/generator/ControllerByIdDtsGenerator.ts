@@ -13,7 +13,7 @@ export class ControllerByIdDtsGenerator {
 			return null;
 		}
 		let out = "";
-		this.controllerByIdInfo.getMappings().forEach((idToModules, controllerName) => {
+		mappings.forEach((idToModules, controllerName) => {
 			out += this.generateModuleDeclaration(controllerName, idToModules);
 		});
 		return this.generateCollectedImports() + out;
