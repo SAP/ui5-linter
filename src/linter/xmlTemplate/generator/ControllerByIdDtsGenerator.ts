@@ -47,17 +47,17 @@ export class ControllerByIdDtsGenerator {
 		out += `\ttype ByIdFunction = {\n`;
 		out += `\t\t<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];\n`;
 		out += `\t\t(sId: string): sap_ui_core_Element;\n`; // Fallback signature for unknown IDs
-		out += `\t};\n`;
+		out += `\t}\n`;
 		out += `\tinterface ControllerView extends sap_ui_core_mvc_View {\n`;
 		out += `\t\tbyId: ByIdFunction;\n`;
-		out += `\t};\n`;
+		out += `\t}\n`;
 		// The interface name does not matter as the declaration refers to the default export.
 		// To avoid name clashes we are just using "Controller" here.
 		out += `\texport default interface Controller {\n`;
 		out += `\t\tbyId: ByIdFunction;\n`;
 		out += `\t\tgetView(): ControllerView;\n`;
-		out += `\t};\n`;
-		out += `};\n\n`;
+		out += `\t}\n`;
+		out += `}\n\n`;
 		return out;
 	}
 
