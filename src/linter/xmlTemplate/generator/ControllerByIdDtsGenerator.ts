@@ -20,45 +20,40 @@ export class ControllerByIdDtsGenerator {
 	}
 
 	private generateCollectedImports() {
-		let out = "";
-		this.imports.forEach((localName, moduleName) => {
-			out += `import ${localName} from "${moduleName}";\n`;
-		});
-		out += "\n";
-		return out;
+		return Array.from(this.imports.entries())
+			.map(([moduleName, localName]) => `import ${localName} from "${moduleName}";`)
+			.join("\n") + "\n";
 	}
 
 	private generateByIdMapping(idToModules: IdModulesMap) {
-		let out = "\tinterface ByIdMapping {\n";
+		let out = "interface ByIdMapping {\n";
 		idToModules.forEach((modules, id) => {
-			const localNames: string[] = [];
-			modules.forEach((moduleName) => localNames.push(this.addImport(moduleName)));
+			const localNames = Array.from(modules).map((moduleName: string) => this.addImport(moduleName));
 			out += `\t\t"${id}": ${localNames.join(" | ")};\n`;
 		});
-		out += "\t}\n";
+		out += "\t}";
 		return out;
 	}
 
 	private generateModuleDeclaration(controllerName: string, idToModules: IdModulesMap) {
 		const moduleName = controllerName.replace(/\./g, "/") + ".controller";
 
-		let out = `declare module "${moduleName}" {\n`;
-		out += this.generateByIdMapping(idToModules);
-		out += `\ttype ByIdFunction = {\n`;
-		out += `\t\t<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];\n`;
-		out += `\t\t(sId: string): ${this.imports.get("sap/ui/core/Element")};\n`; // Fallback signature for unknown IDs
-		out += `\t}\n`;
-		out += `\tinterface ControllerView extends ${this.imports.get("sap/ui/core/mvc/View")} {\n`;
-		out += `\t\tbyId: ByIdFunction;\n`;
-		out += `\t}\n`;
-		// The interface name does not matter as the declaration refers to the default export.
-		// To avoid name clashes we are just using "Controller" here.
-		out += `\texport default interface Controller {\n`;
-		out += `\t\tbyId: ByIdFunction;\n`;
-		out += `\t\tgetView(): ControllerView;\n`;
-		out += `\t}\n`;
-		out += `}\n\n`;
-		return out;
+		return `
+declare module "${moduleName}" {
+	${this.generateByIdMapping(idToModules)}
+	type ByIdFunction = {
+		<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];
+		(sId: string): ${this.imports.get("sap/ui/core/Element")};
+	}
+	interface ControllerView extends ${this.imports.get("sap/ui/core/mvc/View")} {
+		byId: ByIdFunction;
+	}
+	export default interface Controller {
+		byId: ByIdFunction;
+		getView(): ControllerView;
+	}
+}
+`;
 	}
 
 	private addImport(moduleName: string) {
