@@ -18,14 +18,14 @@ test("ControllerByIdDtsGenerator: generate", (t) => {
 		["button", "sap/ui/commons/Button"],
 	]));
 
-	const generator = new ControllerByIdDtsGenerator(controllerByIdInfo);
-	const result = generator.generate();
+	const generator = new ControllerByIdDtsGenerator();
+	const result = generator.generate(controllerByIdInfo);
 	t.snapshot(result);
 });
 
 test("ControllerByIdDtsGenerator: generate with empty info should return null", (t) => {
 	const controllerByIdInfo = new ControllerByIdInfo();
-	const generator = new ControllerByIdDtsGenerator(controllerByIdInfo);
-	const result = generator.generate();
+	const generator = new ControllerByIdDtsGenerator();
+	const result = generator.generate(controllerByIdInfo);
 	t.is(result, null);
 });

@@ -4,14 +4,14 @@ export class ControllerByIdDtsGenerator {
 	// Maps module names to local names
 	private imports = new Map<string, string>();
 
-	constructor(private controllerByIdInfo: ControllerByIdInfo) {
-	}
-
-	generate() {
-		const mappings = this.controllerByIdInfo.getMappings();
+	generate(controllerByIdInfo: ControllerByIdInfo) {
+		const mappings = controllerByIdInfo.getMappings();
 		if (mappings.size === 0) {
 			return null;
 		}
+		this.imports = new Map<string, string>();
+		this.addImport("sap/ui/core/mvc/View"); // View is needed for interface ControllerView
+		this.addImport("sap/ui/core/Element"); // Element is needed for byId fallback signature
 		let out = "";
 		mappings.forEach((idToModules, controllerName) => {
 			out += this.generateModuleDeclaration(controllerName, idToModules);
@@ -19,7 +19,7 @@ export class ControllerByIdDtsGenerator {
 		return this.generateCollectedImports() + out;
 	}
 
-	generateCollectedImports() {
+	private generateCollectedImports() {
 		let out = "";
 		this.imports.forEach((localName, moduleName) => {
 			out += `import ${localName} from "${moduleName}";\n`;
@@ -28,38 +28,48 @@ export class ControllerByIdDtsGenerator {
 		return out;
 	}
 
-	generateByIdMapping(idToModules: IdModulesMap) {
+	private generateByIdMapping(idToModules: IdModulesMap) {
 		let out = "\tinterface ByIdMapping {\n";
 		idToModules.forEach((modules, id) => {
 			const localNames: string[] = [];
-			modules.forEach((moduleName) => {
-				const localName = this.getLocalModuleName(moduleName);
-				localNames.push(localName);
-				if (!this.imports.has(moduleName)) {
-					this.imports.set(moduleName, localName);
-				}
-			});
+			modules.forEach((moduleName) => localNames.push(this.addImport(moduleName)));
 			out += `\t\t"${id}": ${localNames.join(" | ")};\n`;
 		});
 		out += "\t}\n";
 		return out;
 	}
 
-	generateModuleDeclaration(controllerName: string, idToModules: IdModulesMap) {
+	private generateModuleDeclaration(controllerName: string, idToModules: IdModulesMap) {
 		const moduleName = controllerName.replace(/\./g, "/") + ".controller";
-		// The interface name actually does not really matter as the declaration refers to the default export
-		const controllerClassName = controllerName.split(".").pop();
+
 		let out = `declare module "${moduleName}" {\n`;
 		out += this.generateByIdMapping(idToModules);
-		out += `\texport default interface ${controllerClassName} {\n`;
-		out += `\t\tbyId<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];\n`;
-		out += `\t\tbyId(sId: string): UI5Element;\n`;
+		out += `\ttype ByIdFunction = {\n`;
+		out += `\t\t<T extends keyof ByIdMapping>(sId: T): ByIdMapping[T];\n`;
+		out += `\t\t(sId: string): sap_ui_core_Element;\n`; // Fallback signature for unknown IDs
+		out += `\t};\n`;
+		out += `\tinterface ControllerView extends sap_ui_core_mvc_View {\n`;
+		out += `\t\tbyId: ByIdFunction;\n`;
+		out += `\t};\n`;
+		// The interface name does not matter as the declaration refers to the default export.
+		// To avoid name clashes we are just using "Controller" here.
+		out += `\texport default interface Controller {\n`;
+		out += `\t\tbyId: ByIdFunction;\n`;
+		out += `\t\tgetView(): ControllerView;\n`;
 		out += `\t};\n`;
 		out += `};\n\n`;
 		return out;
 	}
 
-	getLocalModuleName(moduleName: string) {
+	private addImport(moduleName: string) {
+		const localName = this.getLocalModuleName(moduleName);
+		if (!this.imports.has(moduleName)) {
+			this.imports.set(moduleName, localName);
+		}
+		return localName;
+	}
+
+	private getLocalModuleName(moduleName: string) {
 		return moduleName.replace(/[/.]/g, "_");
 	}
 }
