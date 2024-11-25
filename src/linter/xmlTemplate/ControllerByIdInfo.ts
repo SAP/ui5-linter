@@ -17,6 +17,10 @@ export default class ControllerByIdInfo {
 	}
 
 	public addMappings(controllerName: string, idModuleMap: Map<string, string>) {
+		// Do not add empty mappings
+		if (!idModuleMap.size) {
+			return;
+		}
 		const controllerMapping = this.getControllerMapping(controllerName);
 		for (const [id, module] of idModuleMap) {
 			let existingModules = controllerMapping.get(id);

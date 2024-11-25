@@ -6,7 +6,7 @@ export class ControllerByIdDtsGenerator {
 
 	generate(controllerByIdInfo: ControllerByIdInfo) {
 		const mappings = controllerByIdInfo.getMappings();
-		if (mappings.size === 0) {
+		if (!mappings.size) {
 			return null;
 		}
 		this.imports = new Map<string, string>();

@@ -1,7 +1,7 @@
 import test from "ava";
 import ControllerByIdInfo from "../../../../src/linter/xmlTemplate/ControllerByIdInfo.js";
 
-test("ControllerByIdInfo: Empty mappings", (t) => {
+test("ControllerByIdInfo: No mappings", (t) => {
 	const controllerByIdInfo = new ControllerByIdInfo();
 	const mappings = controllerByIdInfo.getMappings();
 	t.deepEqual(mappings, new Map());
@@ -35,4 +35,12 @@ test("ControllerByIdInfo: Mappings", (t) => {
 			["input", new Set(["sap/m/Input"])],
 		])],
 	]));
+});
+
+test("ControllerByIdInfo: Should not add empty mappings", (t) => {
+	const controllerByIdInfo = new ControllerByIdInfo();
+	controllerByIdInfo.addMappings("com.myapp.controller.App", new Map([]));
+
+	const mappings = controllerByIdInfo.getMappings();
+	t.deepEqual(mappings, new Map());
 });
