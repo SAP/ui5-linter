@@ -5,6 +5,9 @@ import {LinterParameters} from "../LinterContext.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import {ControllerByIdDtsGenerator} from "./generator/ControllerByIdDtsGenerator.js";
 
+// For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
+export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
+
 export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
 	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
@@ -41,7 +44,7 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 	const controllerByIdDts = controllerByIdDtsGenerator.generate(controllerByIdInfo);
 	if (controllerByIdDts) {
 		const dtsResource = createResource({
-			path: "/types/@ui5/linter/virtual/ControllerById.d.ts",
+			path: CONTROLLER_BY_ID_DTS_PATH,
 			string: controllerByIdDts,
 		});
 		await workspace.write(dtsResource);
