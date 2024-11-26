@@ -119,7 +119,7 @@ Pattern/files that will be ignored during linting. Can also be defined in `ui5li
 
 **Example:**
 ```sh
-ui5lint --ignore-pattern "webapp/thirdparty/**"
+ui5lint --ignore-pattern "webapp/thirdparty/**" "webapp/test/e2e/**"
 ```
 
 #### `--config`
