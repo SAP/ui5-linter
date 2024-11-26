@@ -6,7 +6,7 @@ import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
-import {getPropertyName, getSymbolForPropertyInConstructSignatures} from "./utils.js";
+import {findClassInstanceMethod, getPropertyName, getSymbolForPropertyInConstructSignatures} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
@@ -153,6 +153,7 @@ export default class SourceFileLinter {
 			ts.forEachChild(node, visitMetadataNodes);
 		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
+			this.analyzeControlRerenderMethod(node);
 		} else if (ts.isPropertyAssignment(node) && removeQuotes(node.name.getText()) === "theme") {
 			this.analyzeTestsuiteThemeProperty(node);
 		}
@@ -537,6 +538,15 @@ export default class SourceFileLinter {
 			// within the render method.
 			ts.forEachChild(renderMethodNode, findIconCallExpression);
 		}
+	}
+
+	analyzeControlRerenderMethod(node: ts.ClassDeclaration) {
+		const className = node.name?.getText() ?? "<unknown>";
+		const rerenderMethod = findClassInstanceMethod(node, "rerender", this.checker);
+		if (!rerenderMethod) {
+			return;
+		}
+		this.#reporter.addMessage(MESSAGE.NO_CONTROL_RERENDER_OVERRIDE, {className}, rerenderMethod);
 	}
 
 	analyzeMetadataProperty(type: string, node: ts.PropertyAssignment) {

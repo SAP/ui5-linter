@@ -23,3 +23,35 @@ export function getSymbolForPropertyInConstructSignatures(
 	}
 	return undefined;
 }
+
+export function findClassInstanceMethod(
+	node: ts.ClassDeclaration, methodName: string, checker: ts.TypeChecker
+): ts.ClassElement | undefined {
+	return node.members.find((member) => {
+		if (!member.name) {
+			return false;
+		}
+		const name = getPropertyName(member.name);
+		if (name !== methodName) {
+			return false;
+		}
+		if (ts.isMethodDeclaration(member)) {
+			return true;
+		}
+		if (ts.isPropertyDeclaration(member)) {
+			if (!member.initializer) {
+				return false;
+			}
+			if (ts.isFunctionExpression(member.initializer) || ts.isArrowFunction(member.initializer)) {
+				return true;
+			};
+			if (ts.isIdentifier(member.initializer)) {
+				const symbol = checker.getSymbolAtLocation(member.initializer);
+				if (symbol?.valueDeclaration && ts.isFunctionDeclaration(symbol.valueDeclaration)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	});
+}

@@ -47,6 +47,7 @@ export enum MESSAGE {
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	MISSING_BOOTSTRAP_PARAM,
+	NO_CONTROL_RERENDER_OVERRIDE,
 	NO_DEPRECATED_RENDERER,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
@@ -314,6 +315,16 @@ export const MESSAGE_INFO = {
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Deprecated call to ${libInitFunction}(). Use the {apiVersion: 2} parameter instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
+	[MESSAGE.NO_CONTROL_RERENDER_OVERRIDE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+		message: ({className}: {className: string}) =>
+			`Override of deprecated method 'rerender' in control '${className}'`,
+		details: () => `Starting from UI5 1.121 the framework no longer calls 'rerender', ` +
+			`so there is no point in overriding it. ` +
+			`Move any rendering related code to the renderer or into onBeforeRendering/onAfterRendering.`,
 	},
 
 	[MESSAGE.NO_DEPRECATED_RENDERER]: {
