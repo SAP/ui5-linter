@@ -7,6 +7,9 @@ sap.ui.define(["../base/ManagedObject"], function(ManagedObject) {
 			library : "sap.ui.core"
 		},
 
+		// Should not be detected as declaration / override of a deprecated method
+		rerender: function() {},
+
 		renderer : null // Element has no renderer
 	});
 	return Element;
