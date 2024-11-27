@@ -21,11 +21,11 @@ interface DeprecationInfo {
 }
 
 function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
-	return /@openui5|@sapui5|@ui5/.test(sourceFile.fileName);
+	return /\/types\/(@openui5|@sapui5|@ui5\/linter\/overrides)\//.test(sourceFile.fileName);
 }
 
 function isSourceFileOfUi5OrThirdPartyType(sourceFile: ts.SourceFile) {
-	return /@openui5|@sapui5|@ui5|@types\/jquery/.test(sourceFile.fileName);
+	return isSourceFileOfUi5Type(sourceFile) || /\/types\/(@types\/jquery)\//.test(sourceFile.fileName);
 }
 
 function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {

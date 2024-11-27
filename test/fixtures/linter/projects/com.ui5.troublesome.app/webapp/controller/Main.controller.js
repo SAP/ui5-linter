@@ -1,7 +1,7 @@
 sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController, MessageBox) {
 	"use strict";
 
-	return BaseController.extend("com.ui5.troublesome.app.controller.Main", {
+	const MainController = BaseController.extend("com.ui5.troublesome.app.controller.Main", {
 		sayHello: function () {
 			MessageBox.show("Hello World!");
 		},
@@ -32,4 +32,16 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 			this.getView().byId("unknown").prop("foo", "bar");
 		}
 	});
+
+	// Note: Accessing the controller prototype should not cause a false positive for global variables,
+	// which was appearing in combination with the declaration merging for the byId type support.
+	MainController.prototype.doSomething = function () {
+
+		// byId type support should also work within methods attached to the prototype
+		this.byId("helloButton").attachTap(function() {
+			console.log("Tapped");
+		});
+	};
+
+	return MainController;
 });
