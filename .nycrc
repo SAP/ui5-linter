@@ -8,10 +8,10 @@
 		"src/linter/xmlTemplate/lib/JSTokenizer.js"
 	],
 	"check-coverage": true,
-	"statements": 82,
-	"branches": 74,
-	"functions": 89,
-	"lines": 82,
+	"statements": 87,
+	"branches": 79,
+	"functions": 94,
+	"lines": 87,
 	"watermarks": {
 		"statements": [70, 90],
 		"branches": [70, 90],
