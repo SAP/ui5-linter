@@ -6,7 +6,7 @@ import {taskStart} from "../utils/perf.js";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
-import {ProjectGraph} from "@ui5/project";
+import {Project, ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
@@ -29,12 +29,32 @@ export async function lintProject({
 	projectGraphDone();
 
 	let virBasePath = "/resources/";
+	let fsBasePath, namespace;
+	if (project.getType() === "module") {
+		// For now, we only support one path mapping.
+		// This is mainly an internal limitation that requires a potential larger refactoring of the linter code.
+		const firstMapping = getFirstModulePathMapping(project);
+		if (firstMapping?.virBasePath?.startsWith("/resources/") && firstMapping?.fsBasePath) {
+			fsBasePath = firstMapping.fsBasePath;
+			if (firstMapping.virBasePath.endsWith("/")) {
+				// Cut off trailing slash
+				firstMapping.virBasePath = firstMapping.virBasePath.slice(0, -1);
+			}
+			namespace = firstMapping.virBasePath.substring("/resources/".length);
+		} else {
+			throw new Error("No paths configuration found in project with type ''module''");
+		}
+	} else {
+		fsBasePath = project.getSourcePath();
+		namespace = project.getNamespace();
+	}
+
 	if (!project._isSourceNamespaced) {
 		// Ensure the virtual filesystem includes the project namespace to allow relative imports
 		// of framework resources from the project
-		virBasePath += project.getNamespace() + "/";
+		virBasePath += namespace + "/";
 	}
-	const fsBasePath = project.getSourcePath();
+
 	let reader = createReader({
 		fsBasePath,
 		virBasePath,
@@ -47,7 +67,7 @@ export async function lintProject({
 		if (!project._isSourceNamespaced) {
 			// Dynamically add namespace if the physical project structure does not include it
 			// This logic is identical to the specification implementation in ui5-project
-			virBasePathTest += project.getNamespace() + "/";
+			virBasePathTest += namespace + "/";
 		}
 		reader = createReaderCollection({
 			readers: [reader, createReader({
@@ -62,7 +82,7 @@ export async function lintProject({
 
 	const res = await lint(reader, {
 		rootDir,
-		namespace: project.getNamespace(),
+		namespace,
 		filePatterns,
 		ignorePatterns,
 		coverage,
@@ -383,4 +403,15 @@ export function mergeIgnorePatterns(options: LinterOptions, config: UI5LintConfi
 		...(config.ignores ?? []),
 		...(options.ignorePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
+}
+
+function getFirstModulePathMapping(project: Project) {
+	const pathMapping = project._config?.resources?.configuration?.paths;
+	if (pathMapping && Object.keys(pathMapping).length > 0) {
+		const virBasePath = Object.keys(pathMapping)[0];
+		const fsBasePath = pathMapping[virBasePath];
+		return {virBasePath, fsBasePath};
+	} else {
+		return null;
+	}
 }
