@@ -18,10 +18,10 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		callExp.expression.name.text === "extend")) {
 		throw new UnsupportedExtendCall(`Not a UI5 Class#extends call ${toPosStr(callExp.expression)}`);
 	}
+	const [extractedClassName, body] = extractInfoFromArguments(nodeFactory, callExp);
 	if (!className) {
-		className = nodeFactory.createUniqueName(getClassNameFromArguments(callExp));
+		className = nodeFactory.createUniqueName(extractedClassName);
 	}
-	const body = getClassBodyFromArguments(nodeFactory, callExp);
 	return nodeFactory.createClassDeclaration(modifiers,
 		className,
 		undefined,
@@ -34,33 +34,33 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		body);
 }
 
-function getClassNameFromArguments(callExp: ts.CallExpression): string {
-	const firstArg = callExp.arguments[0];
-	if (!firstArg) {
-		throw new UnsupportedExtendCall(`Missing extends argument at ${toPosStr(callExp)}`);
+function extractInfoFromArguments(
+	nodeFactory: ts.NodeFactory, callExp: ts.CallExpression
+): [string, ts.ClassElement[]] {
+	const args = callExp.arguments;
+	if (args.length === 0) {
+		throw new UnsupportedExtendCall(`Missing arguments at ${toPosStr(callExp)}`);
 	}
-	if (firstArg && !ts.isStringLiteralLike(firstArg)) {
-		throw new UnsupportedExtendCall(`Unexpected extends argument of type ${ts.SyntaxKind[firstArg.kind]} at ` +
-			toPosStr(firstArg));
+	const className = getClassNameFromArgument(args[0]);
+	// Class body is optional
+	const classBody: ts.ClassElement[] = args.length > 1 ? getClassBodyFromArgument(nodeFactory, args[1]) : [];
+	return [className, classBody];
+}
+
+function getClassNameFromArgument(className: ts.Expression): string {
+	if (!ts.isStringLiteralLike(className)) {
+		throw new UnsupportedExtendCall(`Unexpected extends argument of type ${ts.SyntaxKind[className.kind]} at ` +
+			toPosStr(className));
 	}
 	// Just like OpenUI5's ObjectPath...
-	const nameSegments = firstArg.text.split(".");
+	const nameSegments = className.text.split(".");
 	return nameSegments[nameSegments.length - 1];
 }
 
-function getClassBodyFromArguments(
-	nodeFactory: ts.NodeFactory, callExp: ts.CallExpression): ts.ClassElement[] {
-	const args = callExp.arguments;
-	let classBody: ts.ObjectLiteralExpression | undefined;
-	for (let i = args.length - 1; i >= 0; i--) {
-		const arg = args[i];
-		if (ts.isObjectLiteralExpression(arg)) {
-			classBody = arg;
-			break;
-		}
-	}
-	if (!classBody) {
-		throw new UnsupportedExtendCall(`No class body found in extends call at ${toPosStr(callExp)}`);
+function getClassBodyFromArgument(nodeFactory: ts.NodeFactory, classBody: ts.Expression): ts.ClassElement[] {
+	if (!ts.isObjectLiteralExpression(classBody)) {
+		throw new UnsupportedExtendCall(`Unexpected extends argument of type ${ts.SyntaxKind[classBody.kind]} at ` +
+			toPosStr(classBody));
 	}
 	if (classBody.properties.find((prop) => ts.isSpreadAssignment(prop))) {
 		// TODO: Support spread elements(?)
