@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/SAP/ui5-linter/compare/v1.4.0...v1.4.1) (2024-11-28)
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Extend call without classInfo ([b90b9e0](https://github.com/SAP/ui5-linter/commit/b90b9e00c9300a8055acb234097cc243bf6184ad))
+* False-positive global findings in controllers ([b48a2dc](https://github.com/SAP/ui5-linter/commit/b48a2dc78ac1e15fd9d04ea426cffd13857dd513))
+
 ## [1.4.0](https://github.com/SAP/ui5-linter/compare/v1.3.1...v1.4.0) (2024-11-25)
 
 
