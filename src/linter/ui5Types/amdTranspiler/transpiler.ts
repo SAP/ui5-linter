@@ -103,17 +103,19 @@ export default function transpileAmdToEsm(
 		if (strict) {
 			throw err;
 		}
+		// Usually the UnsupportedModuleError is already caught inside and not thrown, but this is a safety net
+		// in case it is thrown anyway.
 		if (err instanceof UnsupportedModuleError) {
 			log.verbose(`Failed to transform module ${fileName}: ${err.message}`);
-			if (err.stack && log.isLevelEnabled("verbose")) {
+			if (err.stack) {
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);
 			}
 			return {source: content, map: ""};
 		} else if (err instanceof Error && err.message.startsWith("Debug Failure")) {
-			// We probably failed to create a valid AST
+			// We probably failed to create a valid AST. The error is thrown by TypeScript itself.
 			log.verbose(`AST transformation failed for module ${fileName}: ${err.message}`);
-			if (err.stack && log.isLevelEnabled("verbose")) {
+			if (err.stack) {
 				log.verbose(`Stack trace:`);
 				log.verbose(err.stack);
 			}

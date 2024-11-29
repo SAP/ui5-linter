@@ -1,9 +1,7 @@
 import anyTest, {TestFn} from "ava";
 import sinonGlobal from "sinon";
 import path from "node:path";
-// import fs from "node:fs/promises";
 import {fileURLToPath} from "node:url";
-// import {amdToEsm} from "../../../../../src/detectors/transpilers/amd/transpiler.js";
 import {createTestsForFixtures} from "./_helper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
