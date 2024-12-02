@@ -314,6 +314,11 @@ function buildPatterns(patterns: string[]) {
 			pattern += "**/*";
 		}
 
+		// Remove leading "./" from the pattern, as it otherwise would not match
+		if (pattern.startsWith("./")) {
+			pattern = pattern.slice(2);
+		}
+
 		return new Minimatch(pattern, {flipNegate: true});
 	});
 }

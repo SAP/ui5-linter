@@ -162,7 +162,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 		ignorePatterns: [
 			"src/",
 			"!src/main/",
-			"ui5.yaml",
+			"./ui5.yaml", // Relative paths starting with "./" should match the same as without it
 		],
 	});
 
