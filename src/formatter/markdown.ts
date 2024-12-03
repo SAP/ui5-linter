@@ -21,11 +21,11 @@ export class Markdown {
 			// Add the file path as a section header
 			findings += `### ${filePath}\n\n`;
 			if (showDetails === true) {
-				findings += `| Severity | Line | Message | Details |\n`;
-				findings += `|----------|------|---------|---------|\n`;
+				findings += `| Severity | Rule | Location | Message | Details |\n`;
+				findings += `|----------|------|----------|---------|---------|\n`;
 			} else {
-				findings += `| Severity | Line | Message |\n`;
-				findings += `|----------|------|---------|\n`;
+				findings += `| Severity | Rule | Location | Message |\n`;
+				findings += `|----------|------|----------|---------|\n`;
 			}
 
 			// Sort messages by severity  (sorting order: fatal-errors, errors, warnings)
@@ -50,6 +50,7 @@ export class Markdown {
 			messages.forEach((msg) => {
 				const severity = this.formatSeverity(msg.severity, msg.fatal);
 				const location = this.formatLocation(msg.line, msg.column);
+				const rule = msg.ruleId ?? "n/a";
 				let details;
 				if (showDetails) {
 					details = ` ${this.formatMessageDetails(msg)} |`;
@@ -57,7 +58,7 @@ export class Markdown {
 					details = "";
 				}
 
-				findings += `| ${severity} | \`${location}\` | ${msg.message} |${details}\n`;
+				findings += `| ${severity} | ${rule} | \`${location}\` | ${msg.message} |${details}\n`;
 			});
 
 			findings += "\n";
