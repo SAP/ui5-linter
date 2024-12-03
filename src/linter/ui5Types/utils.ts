@@ -7,3 +7,19 @@ export function getPropertyName(node: ts.PropertyName | ts.Expression): string {
 		return node.getText();
 	}
 }
+
+export function getSymbolForPropertyInConstructSignatures(
+	constructSignatures: readonly ts.Signature[],
+	argumentPosition: number,
+	propertyName: string
+): ts.Symbol | undefined {
+	for (const constructSignature of constructSignatures) {
+		const propertySymbol = constructSignature
+			.getTypeParameterAtPosition(argumentPosition)
+			.getProperty(propertyName);
+		if (propertySymbol) {
+			return propertySymbol;
+		}
+	}
+	return undefined;
+}

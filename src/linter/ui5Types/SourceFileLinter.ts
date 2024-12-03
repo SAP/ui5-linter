@@ -1,4 +1,4 @@
-import ts, {Identifier, SymbolFlags} from "typescript";
+import ts, {SymbolFlags} from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
@@ -6,7 +6,7 @@ import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
-import {getPropertyName} from "./utils.js";
+import {getPropertyName, getSymbolForPropertyInConstructSignatures} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
@@ -680,38 +680,47 @@ export default class SourceFileLinter {
 			this.#analyzeNewOdataModelV4(node);
 		}
 
+		if (!node.arguments?.length) {
+			// Nothing to check
+			return;
+		}
+
 		// There can be multiple and we need to find the right one
-		const [constructSignature] = classType.getConstructSignatures();
+		const allConstructSignatures = classType.getConstructSignatures();
+		// We can ignore all signatures that have a different number of parameters
+		const possibleConstructSignatures = allConstructSignatures.filter((constructSignature) => {
+			return constructSignature.getParameters().length === node.arguments?.length;
+		});
 
-		node.arguments?.forEach((arg, argIdx) => {
-			const argumentType = constructSignature.getTypeParameterAtPosition(argIdx);
-			if (ts.isObjectLiteralExpression(arg)) {
-				arg.properties.forEach((prop) => {
-					if (ts.isPropertyAssignment(prop)) { // TODO: Necessary?
-						const propNameIdentifier = prop.name as Identifier;
-						const propText = propNameIdentifier.escapedText || propNameIdentifier.text;
-						const propertySymbol = argumentType.getProperty(propText);
-
-						// this.checker.getContextualType(arg) // same as nodeType
-						// const propertySymbol = allProps.find((symbol) => {
-						// 	return symbol.escapedName === propNameIdentifier;
-						// });
-						if (propertySymbol) {
-							const deprecationInfo = this.getDeprecationInfo(propertySymbol);
-							if (deprecationInfo) {
-								this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
-									{
-										propertyName: propertySymbol.escapedName as string,
-										className: this.checker.typeToString(nodeType),
-										details: deprecationInfo.messageDetails,
-									},
-									prop
-								);
-							}
-						}
-					}
-				});
+		node.arguments.forEach((arg, argIdx) => {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				return;
 			}
+			arg.properties.forEach((prop) => {
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+				const propertyName = getPropertyName(prop.name);
+				const propertySymbol = getSymbolForPropertyInConstructSignatures(
+					possibleConstructSignatures, argIdx, propertyName
+				);
+				if (!propertySymbol) {
+					return;
+				}
+				const deprecationInfo = this.getDeprecationInfo(propertySymbol);
+				if (!deprecationInfo) {
+					return;
+				}
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
+					{
+						propertyName: propertySymbol.escapedName as string,
+						className: this.checker.typeToString(nodeType),
+						details: deprecationInfo.messageDetails,
+					},
+					prop
+				);
+			});
 		});
 	}
 
