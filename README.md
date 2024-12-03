@@ -10,6 +10,35 @@
 [![npm Package Version](https://badge.fury.io/js/%40ui5%2Flinter.svg)](https://www.npmjs.com/package/@ui5/linter)
 [![Coverage Status](https://coveralls.io/repos/github/SAP/ui5-linter/badge.svg)](https://coveralls.io/github/SAP/ui5-linter)
 
+- [UI5 Linter](#ui5-linter)
+	- [Description](#description)
+	- [Features](#features)
+	- [Rules](#rules)
+	- [Requirements](#requirements)
+	- [Installation](#installation)
+	- [Usage](#usage)
+		- [Options](#options)
+			- [`--details`](#--details)
+			- [`--format`](#--format)
+			- [`--ignore-pattern`](#--ignore-pattern)
+			- [`--config`](#--config)
+			- [`--ui5-config`](#--ui5-config)
+	- [Configuration](#configuration)
+		- [Configuration File Location](#configuration-file-location)
+		- [Supported Configuration File Names](#supported-configuration-file-names)
+		- [Configuration File Format](#configuration-file-format)
+			- [ESM (ECMAScript Modules):](#esm-ecmascript-modules)
+			- [CommonJS:](#commonjs)
+		- [Configuration Options](#configuration-options)
+	- [Directives](#directives)
+		- [Specifying Rules](#specifying-rules)
+		- [Scope](#scope)
+	- [Internals](#internals)
+	- [Support, Feedback, Contributing](#support-feedback-contributing)
+	- [Security / Disclosure](#security--disclosure)
+	- [Code of Conduct](#code-of-conduct)
+	- [Licensing](#licensing)
+
 ## Description
 
 UI5 linter is a static code analysis tool for UI5 projects.
@@ -26,6 +55,12 @@ UI5 linter scans your UI5 project and detects issues that might interfere with i
 
 > [!NOTE]
 > While UI5 linter already provides many detection features, it is not yet covering all aspects and best practices for UI5 2.x. The intention of UI5 linter is to detect as many issues as possible that a project running with UI5 2.x might be facing. However, you'll still need to test your UI5 project with UI5 2.x as soon as it is made available. To reveal additional issues, the UI5 team plans to release more versions of UI5 linter over the next months. 
+
+## Rules
+
+UI5 linter comes with a set of predefined rules that are enabled by default. You can disable specific rules in the code via [Directives](#directives).
+
+A list of all available rules can be found on the [Rules](./docs/Rules.md) page.
 
 ## Requirements
 
