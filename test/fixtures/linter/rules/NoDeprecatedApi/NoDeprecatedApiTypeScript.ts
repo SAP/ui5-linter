@@ -12,7 +12,7 @@ import {InputType} from "sap/m/library";
 var dateTimeInput = new DateTimeInput(); // Control is deprecated. A finding only appears for the module dependency, not for the usage.
 
 var btn = new Button({
-    blocked: true, // Property "blocked" is deprecated
+    "blocked": true, // Property "blocked" is deprecated
     tap: () => console.log("Tapped") // Event "tap" is deprecated
 });
 
@@ -43,3 +43,11 @@ InputType.Date; // Enum value "InputType.Date" is deprecated
 
 const navigationHandler = new NavigationHandler({});
 navigationHandler.storeInnerAppState({}); // Method "storeInnerAppState" is deprecated
+
+// Detection of deprecated API in constructor when an ID is passed as first argument
+var btn2 = new Button("btn2", {
+	blocked: true, // Property "blocked" is deprecated
+	"tap": () => console.log("Tapped"), // Event "tap" is deprecated
+
+	...moreArgs // Should be ignored
+});

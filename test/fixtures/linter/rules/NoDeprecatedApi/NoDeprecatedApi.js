@@ -48,4 +48,12 @@ sap.ui.define([
 
 	const navigationHandler = new NavigationHandler({});
 	navigationHandler.storeInnerAppState({}); // Method "storeInnerAppState" is deprecated
+
+	// Detection of deprecated API in constructor when an ID is passed as first argument
+	var btn2 = new Button("btn2", {
+		blocked: true, // Property "blocked" is deprecated
+		tap: () => console.log("Tapped"), // Event "tap" is deprecated
+
+		...moreArgs // Should be ignored
+	});
 });
