@@ -50,7 +50,7 @@ export class Markdown {
 			messages.forEach((msg) => {
 				const severity = this.formatSeverity(msg.severity, msg.fatal);
 				const location = this.formatLocation(msg.line, msg.column);
-				const rule = msg.ruleId ?? "n/a";
+				const rule = msg.ruleId;
 				let details;
 				if (showDetails) {
 					details = ` ${this.formatMessageDetails(msg)} |`;
