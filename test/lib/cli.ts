@@ -17,7 +17,8 @@ const test = anyTest as TestFn<{
 		argv: () => unknown;
 	};
 	yargs: SinonStub;
-	setVersion: SinonStub;
+	setVersionInfo: SinonStub;
+	getFormattedVersion: SinonStub;
 	cliBase: SinonStub;
 	readdir: SinonStub;
 	cli: MockFunction;
@@ -44,13 +45,15 @@ test.beforeEach(async (t) => {
 
 	t.context.yargs = sinon.stub().returns(t.context.yargsInstance).named("yargs");
 
-	t.context.setVersion = sinon.stub().named("setVersion");
+	t.context.setVersionInfo = sinon.stub().named("setVersionInfo");
+	t.context.getFormattedVersion = sinon.stub().returns("1.2.3 (from /path/to/cli.js)").named("getFormattedVersion");
 	t.context.cliBase = sinon.stub().named("cliBase");
 
 	t.context.cli = await esmock.p("../../src/cli.js", {
 		"yargs": t.context.yargs,
 		"../../src/cli/version.js": {
-			setVersion: t.context.setVersion,
+			setVersionInfo: t.context.setVersionInfo,
+			getFormattedVersion: t.context.getFormattedVersion,
 		},
 		"../../src/cli/base.js": t.context.cliBase,
 		"module": {
@@ -68,7 +71,7 @@ test.afterEach.always((t) => {
 test.serial("CLI", async (t) => {
 	const {
 		cli, argvGetter, yargsInstance, yargs,
-		setVersion, cliBase,
+		setVersionInfo, cliBase, getFormattedVersion,
 	} = t.context;
 
 	await cli("module");
@@ -81,14 +84,17 @@ test.serial("CLI", async (t) => {
 		"parse-numbers": false,
 	}]);
 
-	t.is(setVersion.callCount, 1);
-	t.deepEqual(setVersion.getCall(0).args, [
-		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`,
+	t.is(setVersionInfo.callCount, 1);
+	t.deepEqual(setVersionInfo.getCall(0).args, [
+		pkg.version, fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url)),
 	]);
+
+	t.is(getFormattedVersion.callCount, 1);
+	t.deepEqual(getFormattedVersion.getCall(0).args, []);
 
 	t.is(yargsInstance.version.callCount, 1);
 	t.deepEqual(yargsInstance.version.getCall(0).args, [
-		`${pkg.version} (from ${fileURLToPath(new URL("../../bin/ui5lint.js", import.meta.url))})`,
+		getFormattedVersion.getCall(0).returnValue,
 	]);
 
 	t.is(yargsInstance.scriptName.callCount, 1);
@@ -111,7 +117,7 @@ test.serial("CLI", async (t) => {
 	sinon.assert.callOrder(
 		yargs,
 		yargsInstance.parserConfiguration,
-		setVersion,
+		setVersionInfo,
 		yargsInstance.version,
 		yargsInstance.scriptName,
 		cliBase,
