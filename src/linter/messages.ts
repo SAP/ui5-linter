@@ -10,6 +10,7 @@ const RULES = {
 	"no-deprecated-theme": "no-deprecated-theme",
 	"no-globals": "no-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
+	"no-redundancy": "no-redundancy",
 	"parsing-error": "parsing-error",
 	"ui5-class-declaration": "ui5-class-declaration",
 } as const;
@@ -283,7 +284,7 @@ export const MESSAGE_INFO = {
 
 	[MESSAGE.DUPLICATE_BOOTSTRAP_PARAM]: {
 		severity: LintMessageSeverity.Warning,
-		ruleId: RULES["no-deprecated-api"],
+		ruleId: RULES["no-redundancy"],
 
 		message: ({name, value}: {name: string; value: string}) =>
 			`Duplicate bootstrap parameter '${name}' with value '${value}'`,
