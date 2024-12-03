@@ -6,7 +6,7 @@ const test = anyTest as TestFn<{
 	verboseLogStub: SinonStub;
 	setLogLevelStub: SinonStub;
 	isLogLevelEnabledStub: SinonStub;
-	getVersionStub: SinonStub;
+	getFormattedVersionStub: SinonStub;
 	logger: MockFunction & {
 		initLogger: (args:
 		{loglevel?: string; verbose?: boolean; perf?: boolean; silent?: boolean}) => Promise<void> | void;
@@ -17,10 +17,10 @@ test.beforeEach(async (t) => {
 	t.context.verboseLogStub = sinon.stub();
 	t.context.setLogLevelStub = sinon.stub();
 	t.context.isLogLevelEnabledStub = sinon.stub().returns(true);
-	t.context.getVersionStub = sinon.stub().returns("1.0.0");
+	t.context.getFormattedVersionStub = sinon.stub().returns("1.0.0");
 	t.context.logger = await esmock("../../../../src/cli/middlewares/logger.js", {
 		"../../../../src/cli/version.js": {
-			getVersion: t.context.getVersionStub,
+			getFormattedVersion: t.context.getFormattedVersionStub,
 		},
 		"@ui5/logger": {
 			getLogger: () => ({
@@ -33,13 +33,13 @@ test.beforeEach(async (t) => {
 });
 
 test.serial("init logger", async (t) => {
-	const {logger, setLogLevelStub, isLogLevelEnabledStub, verboseLogStub, getVersionStub} = t.context;
+	const {logger, setLogLevelStub, isLogLevelEnabledStub, verboseLogStub, getFormattedVersionStub} = t.context;
 	await logger.initLogger({});
 	t.is(setLogLevelStub.callCount, 0, "setLevel has not been called");
 	t.is(isLogLevelEnabledStub.callCount, 1, "isLogLevelEnabled has been called once");
 	t.is(isLogLevelEnabledStub.firstCall.firstArg, "verbose",
 		"isLogLevelEnabled has been called with expected argument");
-	t.is(getVersionStub.callCount, 1, "getVersion has been called once");
+	t.is(getFormattedVersionStub.callCount, 1, "getFormattedVersion has been called once");
 	t.is(verboseLogStub.callCount, 2, "log.verbose has been called twice");
 	t.is(verboseLogStub.firstCall.firstArg, "using ui5lint version 1.0.0",
 		"log.verbose has been called with expected argument on first call");

@@ -1,6 +1,6 @@
 import {setLogLevel, isLogLevelEnabled, getLogger} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
-import {getVersion} from "../version.js";
+import {getFormattedVersion} from "../version.js";
 import type {ArgumentsCamelCase} from "yargs";
 /**
  * Logger middleware to enable logging capabilities
@@ -28,7 +28,7 @@ export async function initLogger(argv: ArgumentsCamelCase) {
 	ConsoleWriter.init();
 	if (isLogLevelEnabled("verbose")) {
 		const log = getLogger("cli:middlewares:base");
-		log.verbose(`using ui5lint version ${getVersion()}`);
+		log.verbose(`using ui5lint version ${getFormattedVersion()}`);
 		log.verbose(`using node version ${process.version}`);
 	}
 }
