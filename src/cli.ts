@@ -2,7 +2,7 @@ import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
 import base from "./cli/base.js";
 import {fileURLToPath} from "node:url";
-import {setVersion} from "./cli/version.js";
+import {getFormattedVersion, setVersionInfo} from "./cli/version.js";
 import {createRequire} from "module";
 
 export default async function () {
@@ -17,10 +17,9 @@ export default async function () {
 	const require = createRequire(import.meta.url);
 	const pkg = require("../package.json") as {version: string};
 	const ui5LintJsPath = fileURLToPath(new URL("../bin/ui5lint.js", import.meta.url));
-	const pkgVersion = `${pkg.version} (from ${ui5LintJsPath})`;
 
-	setVersion(pkgVersion);
-	cli.version(pkgVersion);
+	setVersionInfo(pkg.version, ui5LintJsPath);
+	cli.version(getFormattedVersion());
 
 	// Explicitly set script name to prevent windows from displaying "ui5-linter.js"
 	cli.scriptName("ui5lint");

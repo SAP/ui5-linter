@@ -1,12 +1,19 @@
 import test from "ava";
-import {setVersion, getVersion} from "../../../src/cli/version.js";
+import {setVersionInfo, getFormattedVersion, getVersion} from "../../../src/cli/version.js";
 
 test("Set and get version", (t) => {
+	const sampleVersion = "1.2.3";
+	const sampleVersion2 = "4.5.6-foo.bar";
+	const samplePath = "/path/to/cli.js";
+
+	t.is(getFormattedVersion(), "");
 	t.is(getVersion(), "");
 
-	setVersion("1.2.3");
-	t.is(getVersion(), "1.2.3");
+	setVersionInfo(sampleVersion, samplePath);
+	t.is(getFormattedVersion(), `${sampleVersion} (from ${samplePath})`);
+	t.is(getVersion(), sampleVersion);
 
-	setVersion("4.5.6-foo.bar");
-	t.is(getVersion(), "4.5.6-foo.bar");
+	setVersionInfo(sampleVersion2, samplePath);
+	t.is(getFormattedVersion(), `${sampleVersion2} (from ${samplePath})`);
+	t.is(getVersion(), sampleVersion2);
 });

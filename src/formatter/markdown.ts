@@ -2,7 +2,7 @@ import {LintResult, LintMessage} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Markdown {
-	format(lintResults: LintResult[], showDetails: boolean): string {
+	format(lintResults: LintResult[], showDetails: boolean, version: string): string {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
@@ -50,7 +50,7 @@ export class Markdown {
 			messages.forEach((msg) => {
 				const severity = this.formatSeverity(msg.severity, msg.fatal);
 				const location = this.formatLocation(msg.line, msg.column);
-				const rule = msg.ruleId;
+				const rule = this.formatRuleId(msg.ruleId, version);
 				let details;
 				if (showDetails) {
 					details = ` ${this.formatMessageDetails(msg)} |`;
@@ -113,5 +113,10 @@ ${findings}`;
 		}
 		// Replace multiple spaces or newlines with a single space for clean output
 		return `${msg.messageDetails.replace(/\s\s+|\n/g, " ")}`;
+	}
+
+	// Formats the rule of the lint message (ruleId and link to rules.md)
+	private formatRuleId(ruleId: string, version: string): string {
+		return `[${ruleId}](https://github.com/SAP/ui5-linter/blob/v${version}/docs/Rules.md#${ruleId})`;
 	}
 }
