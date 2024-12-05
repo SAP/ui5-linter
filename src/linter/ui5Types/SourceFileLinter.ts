@@ -385,6 +385,9 @@ export default class SourceFileLinter {
 			return apiVersionNode;
 		};
 
+		const nodeType = this.checker.getTypeAtLocation(node);
+		const nodeValueDeclaration = nodeType.getSymbol()?.valueDeclaration;
+
 		// Analyze renderer property when it's an ObjectLiteralExpression
 		// i.e. { renderer: {apiVersion: "2", render: () => {}} }
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
@@ -420,7 +423,13 @@ export default class SourceFileLinter {
 			this.analyzeIconCallInRenderMethod(node);
 		// Analyze renderer property when it's a function i.e. { renderer: () => {} }
 		} else if (ts.isMethodDeclaration(node) || ts.isArrowFunction(node) ||
-			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node)) {
+			ts.isFunctionExpression(node) || ts.isFunctionDeclaration(node) || (
+			nodeValueDeclaration && (
+				ts.isFunctionExpression(nodeValueDeclaration) ||
+				ts.isFunctionDeclaration(nodeValueDeclaration) ||
+				ts.isArrowFunction(nodeValueDeclaration)
+			)
+		)) {
 			// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 			// The findings can be in different file i.e. Control being analyzed,
 			// but reporting might be in ControlRenderer
