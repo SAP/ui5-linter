@@ -47,17 +47,26 @@ async function collectSapui5TypesFiles() {
 	return typesFiles;
 }
 
-function addSapui5TypesMappingToCompilerOptions(sapui5TypesFiles: string[], options: ts.CompilerOptions) {
+function addSapui5TypesMappingToCompilerOptions(
+	sapui5TypesFiles: string[], options: ts.CompilerOptions, projectNamespace?: string
+) {
 	const paths = options.paths ?? (options.paths = {});
 	sapui5TypesFiles.forEach((fileName) => {
-		if (fileName === "sap.ui.core.d.ts") {
-			// No need to add a mapping for sap.ui.core, as it is loaded by default
-			return;
-		}
+		const dtsPath = `/types/@sapui5/types/types/${fileName}`;
 		const libraryName = posixPath.basename(fileName, ".d.ts");
-		const namespace = libraryName.replace(/\./g, "/") + "/*";
-		const pathsEntry = paths[namespace] ?? (paths[namespace] = []);
-		pathsEntry.push(`/types/@sapui5/types/types/${fileName}`);
+		const libraryNamespace = libraryName.replace(/\./g, "/");
+		if (libraryNamespace === "sap/ui/core" || libraryNamespace === projectNamespace) {
+			// Special cases:
+			// - sap.ui.core needs to be loaded by default as it provides general API that must always be available
+			// - When linting a framework library, the corresponding types should be loaded by default as they
+			//   might not get loaded by the compiler otherwise, as the actual sources are available in the project.
+			options.types?.push(dtsPath);
+		} else {
+			// For other framework libraries we can add a paths mapping to load them on demand
+			const mappingNamespace = libraryNamespace + "/*";
+			const pathsEntry = paths[mappingNamespace] ?? (paths[mappingNamespace] = []);
+			pathsEntry.push(dtsPath);
+		}
 	});
 }
 
@@ -69,6 +78,9 @@ export async function createVirtualCompilerHost(
 	context: LinterContext
 ): Promise<ts.CompilerHost> {
 	const silly = log.isLevelEnabled("silly");
+
+	options.typeRoots = ["/types"];
+	options.types = [];
 
 	const typePathMappings = new Map<string, string>();
 	addPathMappingForPackage("typescript", typePathMappings);
@@ -85,16 +97,11 @@ export async function createVirtualCompilerHost(
 		require.resolve("../../../resources/overrides/package.json")
 	));
 
-	options.typeRoots = ["/types"];
-	options.types = [
-		// Request compiler to only use sap.ui.core types by default - other types will be loaded on demand
-		// (see addSapui5TypesMappingToCompilerOptions)
-		...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"),
-		"/types/@sapui5/types/types/sap.ui.core.d.ts",
-	];
+	// Add all types except @sapui5/types which will be handled below
+	options.types.push(...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"));
 
-	// Adds mappings for all other sapui5 types, so that they are only loaded once a module is imported
-	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options);
+	// Adds types / mappings for all @sapui5/types
+	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options, context.getNamespace());
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(

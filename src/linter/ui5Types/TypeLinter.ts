@@ -59,7 +59,12 @@ export default class TypeChecker {
 		if (namespace) {
 			// Map namespace used in imports (without /resources) to /resources paths
 			this.#compilerOptions.paths = {
-				[`${namespace}/*`]: [`/resources/${namespace}/*`],
+				[`${namespace}/*`]: [
+					// Enforce that the compiler also tries to resolve imports with a .js extension.
+					// With this mapping, the compiler still first tries to resolve the .ts, .tsx and .d.ts extensions
+					// but then falls back to .js
+					`/resources/${namespace}/*.js`,
+				],
 			};
 		}
 	}
