@@ -3,7 +3,7 @@ sap.ui.define([], function () {
 
 	myControlRenderer.apiVersion = 1; // Deprecated
 
-	myControlRenderer.render = function (oRm, oMyControl) {};
+	myControlRenderer.render = (oRm, oMyControl) => {};
 
 	return myControlRenderer;
 });
