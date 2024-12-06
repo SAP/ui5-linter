@@ -63,6 +63,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_PARAMETERS_GET,
 	REDUNDANT_BOOTSTRAP_PARAM,
+	REDUNDANT_BOOTSTRAP_PARAM_ERROR,
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
 	REPLACED_BOOTSTRAP_PARAM,
 	SPELLING_BOOTSTRAP_PARAM,
@@ -78,7 +79,7 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({message}: {message?: string}) => message,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
@@ -475,7 +476,16 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
+	},
+
+	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Redundant bootstrap parameter '${name}' should be removed`,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY]: {
