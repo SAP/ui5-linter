@@ -81,4 +81,4 @@ Syntax/parsing errors that appear during the linting process are reported with t
 
 ## ui5-class-declaration
 
-Checks whether the declaration of UI5 classes is correct. This rule only applies to TypeScript code where native ECMAScript classes are used instead of an `.extend()` call.
+Checks whether the declaration of UI5 classes is correct. This rule only applies to TypeScript code where built-in ECMAScript classes are used instead of an `.extend()` call.
