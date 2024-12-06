@@ -146,6 +146,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkPreloadAttr(attr, report);
 				break;
 			case "data-sap-ui-no-duplicate-ids":
+			case "data-sap-ui-auto-aria-body-role":
 				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
 				}, attr.name);
@@ -153,7 +154,6 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			case "data-sap-ui-xx-no-less":
 			case "data-sap-ui-areas":
 			case "data-sap-ui-trace":
-			case "data-sap-ui-auto-aria-body-role":
 				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
 					name: attr.name.value,
 				}, attr.name);
