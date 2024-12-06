@@ -79,7 +79,7 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: ({message}: {message?: string}) => message,
+		details: () => undefined,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
@@ -476,7 +476,7 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
+		details: () => undefined,
 	},
 
 	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR]: {
