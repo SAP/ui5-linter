@@ -6,7 +6,6 @@ import {taskStart} from "../../utils/perf.js";
 import {MESSAGE} from "../messages.js";
 import {Tag, Attribute} from "sax-wasm";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
-import { check } from "yargs";
 
 export default async function transpileHtml(
 	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext
@@ -147,7 +146,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkPreloadAttr(attr, report);
 				break;
 			case "data-sap-ui-no-duplicate-ids":
-				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
 				}, attr.name);
 				break;
@@ -168,7 +167,10 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				}, attr.name);
 				break;
 			case "data-sap-ui-manifest-first":
-				// TODO
+				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+					name: attr.name.value,
+					messageDetails: "Set the manifest parameter in component factory call",
+				}, attr.name);
 				break;
 		}
 	}
@@ -188,14 +190,18 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 }
 
 function checkPreloadAttr(attr: Attribute, report: HtmlReporter) {
-	report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
-		name: attr.name.value,
-	}, attr.name);
+	const value = attr.value.value.toLowerCase();
+	if (value && !["auto", "async", "sync"].includes(value)) {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+			messageDetails: "Use sap-ui-debug=true to suppress library preload requests",
+		}, attr.name);
+	}
 }
 
 function checkOriginInfoAttr(attr: Attribute, report: HtmlReporter) {
 	if (attr.value.value.toLowerCase() === "true") {
-		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 			name: attr.name.value,
 		}, attr.name);
 	} else {
@@ -211,7 +217,7 @@ function checkBindingSyntaxAttr(attr: Attribute, report: HtmlReporter) {
 			name: attr.name.value,
 		}, attr.name);
 	} else {
-		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 			name: attr.name.value,
 		}, attr.name);
 	}
