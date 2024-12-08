@@ -92,7 +92,7 @@ test("Default", (t) => {
 	const {lintResults} = t.context;
 
 	const markdownFormatter = new Markdown();
-	const markdownResult = markdownFormatter.format(lintResults, false);
+	const markdownResult = markdownFormatter.format(lintResults, false, "1.2.3");
 
 	t.snapshot(markdownResult);
 });
@@ -101,14 +101,14 @@ test("Details", (t) => {
 	const {lintResults} = t.context;
 
 	const markdownFormatter = new Markdown();
-	const markdownResult = markdownFormatter.format(lintResults, true);
+	const markdownResult = markdownFormatter.format(lintResults, true, "1.2.3");
 
 	t.snapshot(markdownResult);
 });
 
 test("No findings", (t) => {
 	const markdownFormatter = new Markdown();
-	const markdownResult = markdownFormatter.format([], true);
+	const markdownResult = markdownFormatter.format([], true, "1.2.3");
 
 	t.snapshot(markdownResult);
 });

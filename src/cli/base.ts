@@ -9,6 +9,7 @@ import baseMiddleware from "./middlewares/base.js";
 import chalk from "chalk";
 import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
+import {getVersion} from "./version.js";
 
 export interface LinterArg {
 	coverage: boolean;
@@ -172,7 +173,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
-		process.stdout.write(markdownFormatter.format(res, details));
+		process.stdout.write(markdownFormatter.format(res, details, getVersion()));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
