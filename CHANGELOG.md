@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.5.0](https://github.com/SAP/ui5-linter/compare/v1.4.1...v1.5.0) (2024-12-08)
+
+
+### Features
+
+* Detect override of control "rerender" ([f416a0c](https://github.com/SAP/ui5-linter/commit/f416a0ccd0ddeab49c31d911977853c41908fb50))
+
+
+### Bug Fixes
+
+* Detect deprecations in new expressions with ID ([156e747](https://github.com/SAP/ui5-linter/commit/156e7470c0fb2665b97319f89a6a076548a7bd5f))
+* Detect more deprecated renderer declarations ([74f65bf](https://github.com/SAP/ui5-linter/commit/74f65bf78a79f373dd628b64e0dd19ca3a44db3a))
+* Match ignore-pattern starting with "./" ([4eb2758](https://github.com/SAP/ui5-linter/commit/4eb27583d26bc4da2ec9ca5ca908bc23214339ca))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.24 ([d0760c9](https://github.com/SAP/ui5-linter/commit/d0760c9518c8c7ade894471d32e5466a02dcfe7f))
+
 ## [1.4.1](https://github.com/SAP/ui5-linter/compare/v1.4.0...v1.4.1) (2024-11-28)
 
 
