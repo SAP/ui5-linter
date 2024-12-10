@@ -43,7 +43,7 @@ export default class ConfigManager {
 			// If it's an relative path, transform to POSIX format
 			const configFilePath = path.isAbsolute(this.#configFile) ?
 				this.#configFile :
-				this.#resolveModulePaths(this.#configFile);
+					this.#resolveModulePaths(this.#configFile);
 
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
