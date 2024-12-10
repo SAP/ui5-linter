@@ -175,7 +175,8 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			case "data-sap-ui-manifest-first":
 				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
-					messageDetails: "Set the manifest parameter in component factory call",
+					messageDetails: "Set the manifest parameter in component factory call" +
+						" {@link sap.ui.core.Component#sap.ui.core.Component.create}",
 				}, attr.name);
 				break;
 		}
