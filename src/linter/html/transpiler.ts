@@ -146,9 +146,15 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkPreloadAttr(attr, report);
 				break;
 			case "data-sap-ui-no-duplicate-ids":
-			case "data-sap-ui-auto-aria-body-role":
 				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
+				}, attr.name);
+				break;
+			case "data-sap-ui-auto-aria-body-role":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
+					name: attr.name.value,
+					messageDetails: "Avoid assigning a role=\"application\" to the body element, as doing so " +
+						"would make screen readers interpret the entire application as a single custom control",
 				}, attr.name);
 				break;
 			case "data-sap-ui-xx-no-less":
