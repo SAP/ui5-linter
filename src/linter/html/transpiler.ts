@@ -84,6 +84,9 @@ const oldToNewAttr = new Map([
 	["data-sap-ui-evt-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-resourceroots", "data-sap-ui-resource-roots"],
+	["data-sap-ui-legacy-date-format", "data-sap-ui-a-b-a-p-date-format"],
+	["data-sap-ui-legacy-time-format", "data-sap-ui-a-b-a-p-time-format"],
+	["data-sap-ui-legacy-number-format", "data-sap-ui-a-b-a-p-number-format"],
 ]);
 
 const aliasToAttr = new Map([
@@ -134,14 +137,39 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkOnInitAttr(attr, report);
 				break;
 			case "data-sap-ui-binding-syntax":
+				checkBindingSyntaxAttr(attr, report);
+				break;
+			case "data-sap-ui-origin-info":
+				checkOriginInfoAttr(attr, report);
+				break;
 			case "data-sap-ui-preload":
-				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+				checkPreloadAttr(attr, report);
+				break;
+			case "data-sap-ui-no-duplicate-ids":
+			case "data-sap-ui-auto-aria-body-role":
+				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
 				}, attr.name);
 				break;
 			case "data-sap-ui-xx-no-less":
+			case "data-sap-ui-areas":
+			case "data-sap-ui-trace":
 				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
 					name: attr.name.value,
+				}, attr.name);
+				break;
+			case "data-sap-ui-animation":
+				report.addMessage(MESSAGE.REPLACED_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+					replacement: "data-sap-ui-animation-mode",
+					messageDetails: "Migrate to 'data-sap-ui-animation-mode' attribute " +
+						"{@link module:sap/ui/core/AnimationMode AnimationMode}",
+				}, attr.name);
+				break;
+			case "data-sap-ui-manifest-first":
+				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+					name: attr.name.value,
+					messageDetails: "Set the manifest parameter in component factory call",
 				}, attr.name);
 				break;
 		}
@@ -158,6 +186,40 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			name: "data-sap-ui-compat-version",
 			details: `{@link topic:9feb96da02c2429bb1afcf6534d77c79 Compatibility Version Information (deprecated)}`,
 		}, tag);
+	}
+}
+
+function checkPreloadAttr(attr: Attribute, report: HtmlReporter) {
+	const value = attr.value.value.toLowerCase();
+	if (value && !["auto", "async", "sync"].includes(value)) {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+			messageDetails: "Use sap-ui-debug=true to suppress library preload requests",
+		}, attr.name);
+	}
+}
+
+function checkOriginInfoAttr(attr: Attribute, report: HtmlReporter) {
+	if (attr.value.value.toLowerCase() === "true") {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+		}, attr.name);
+	} else {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+			name: attr.name.value,
+		}, attr.name);
+	}
+}
+
+function checkBindingSyntaxAttr(attr: Attribute, report: HtmlReporter) {
+	if (attr.value.value.toLowerCase() === "complex") {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+			name: attr.name.value,
+		}, attr.name);
+	} else {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+		}, attr.name);
 	}
 }
 
