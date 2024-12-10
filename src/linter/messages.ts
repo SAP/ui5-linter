@@ -22,6 +22,7 @@ export enum LintMessageSeverity {
 // Messages (sorted alphabetically)
 export enum MESSAGE {
 	ABANDONED_BOOTSTRAP_PARAM,
+	ABANDONED_BOOTSTRAP_PARAM_ERROR,
 	COMPONENT_MISSING_ASYNC_INTERFACE,
 	COMPONENT_MISSING_MANIFEST_DECLARATION,
 	COMPONENT_REDUNDANT_ASYNC_FLAG,
@@ -80,6 +81,15 @@ export const MESSAGE_INFO = {
 		message: ({name}: {name: string}) =>
 			`Abandoned bootstrap parameter '${name}' should be removed`,
 		details: () => undefined,
+	},
+
+	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Abandoned bootstrap parameter '${name}' should be removed`,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
