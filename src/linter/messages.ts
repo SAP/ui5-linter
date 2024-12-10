@@ -545,7 +545,7 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-deprecated-api"],
 
 		message: ({name, replacement}: {name: string; replacement: string}) =>
-			`Bootstrap parameter '${name}' should be replaced with ${replacement}`,
+			`Bootstrap parameter '${name}' should be replaced with '${replacement}'`,
 		details: ({messageDetails}: {messageDetails: string}) => messageDetails,
 	},
 
