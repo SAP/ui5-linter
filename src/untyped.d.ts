@@ -3,18 +3,32 @@
 
 declare module "@ui5/project" {
 	type ProjectNamespace = string;
+
+	// Note: This is only a partial definition with required fields for type module
+	interface ProjectConfig {
+		resources: {
+			configuration: {
+				paths: Record<string, string>;
+			};
+		};
+	}
+
 	interface Project {
-		getNamespace: () => ProjectNamespace;
-		getReader: (options: import("@ui5/fs").ReaderOptions) => import("@ui5/fs").AbstractReader;
-		getRootReader: () => import("@ui5/fs").AbstractReader;
-		getRootPath: () => string;
-		getSourcePath: () => string;
-		_testPath: string; // TODO UI5 Tooling: Expose API for optional test path
+		getNamespace(): ProjectNamespace;
+		getReader(options: import("@ui5/fs").ReaderOptions): import("@ui5/fs").AbstractReader;
+		getRootReader(): import("@ui5/fs").AbstractReader;
+		getRootPath(): string;
+		getSourcePath(): string;
+		getType(): "application" | "library" | "module";
+
+		// TODO UI5 Tooling: Expose required information as API
+		_testPath: string;
 		_testPathExists: string;
 		_isSourceNamespaced: boolean;
+		_config: ProjectConfig; // Needed to read the paths configuration of projects with type module
 	}
 	interface ProjectGraph {
-		getRoot: () => Project;
+		getRoot(): Project;
 	}
 	interface DependencyTreeNode {
 		id: string;
@@ -70,13 +84,13 @@ declare module "@ui5/fs" {
 		contentModified: boolean;
 	}
 	interface Resource {
-		getBuffer: () => Promise<Buffer>;
-		getString: () => Promise<string>;
-		getStream: () => import("node:fs").ReadStream;
-		getName: () => string;
-		getPath: () => ResourcePath;
-		getProject: () => import("@ui5/project").Project;
-		getSourceMetadata: () => ResourceSourceMetadata;
+		getBuffer(): Promise<Buffer>;
+		getString(): Promise<string>;
+		getStream(): import("node:fs").ReadStream;
+		getName(): string;
+		getPath(): ResourcePath;
+		getProject(): import("@ui5/project").Project;
+		getSourceMetadata(): ResourceSourceMetadata;
 	}
 	type ReaderStyles = "buildtime" | "dist" | "runtime" | "flat";
 
@@ -89,11 +103,11 @@ declare module "@ui5/fs" {
 	type Filter = (resource: Resource) => boolean;
 
 	export interface AbstractReader {
-		byGlob: (virPattern: string | string[], options?: GlobOptions) => Promise<Resource[]>;
-		byPath: (path: string) => Promise<Resource>;
+		byGlob(virPattern: string | string[], options?: GlobOptions): Promise<Resource[]>;
+		byPath(path: string): Promise<Resource>;
 	}
 	export interface AbstractAdapter extends AbstractReader {
-		write: (resource: Resource) => Promise<void>;
+		write(resource: Resource): Promise<void>;
 	}
 }
 
@@ -133,13 +147,13 @@ declare module "@ui5/fs/resourceFactory" {
 
 declare module "@ui5/logger" {
 	interface Logger {
-		silly: (message: string) => void;
-		verbose: (message: string) => void;
-		perf: (message: string) => void;
-		info: (message: string) => void;
-		warn: (message: string) => void;
-		error: (message: string) => void;
-		isLevelEnabled: (level: string) => boolean;
+		silly(message: string): void;
+		verbose(message: string): void;
+		perf(message: string): void;
+		info(message: string): void;
+		warn(message: string): void;
+		error(message: string): void;
+		isLevelEnabled(level: string): boolean;
 	}
 
 	export function isLogLevelEnabled(logLevel: string): boolean;
