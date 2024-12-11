@@ -346,13 +346,16 @@ export default class SourceFileLinter {
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
 			const apiVersionNode = findApiVersionNode(node) as ts.PropertyAssignment | ts.NumericLiteral | undefined;
 
+			const availableApiVersions = ["2", "4"];
 			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
 				ts.VariableDeclaration | ts.ObjectLiteralExpression |
 				ts.NumericLiteral | undefined = undefined;
 			if (!apiVersionNode) { // No 'apiVersion' property
 				nodeToHighlight = node;
-			} else if ((ts.isNumericLiteral(apiVersionNode) && apiVersionNode.getText() !== "2") ||
-				(ts.isPropertyAssignment(apiVersionNode) && apiVersionNode.initializer.getText() !== "2")) {
+			} else if ((ts.isNumericLiteral(apiVersionNode) &&
+				!availableApiVersions.includes(apiVersionNode.getText())) ||
+				(ts.isPropertyAssignment(apiVersionNode) &&
+					!availableApiVersions.includes(apiVersionNode.initializer.getText()))) {
 				// String value would be "\"2\""
 				nodeToHighlight = apiVersionNode;
 			}

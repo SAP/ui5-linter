@@ -354,7 +354,7 @@ export function resolveReader({
 					// When we work with files paths we actually need to limit the result to those
 					// matches, instead of allowing all except XYZ
 					!isFileIncluded(resPath, minimatchPatterns, patternsMatch) :
-					isFileIncluded(resPath, minimatchPatterns, patternsMatch);
+				isFileIncluded(resPath, minimatchPatterns, patternsMatch);
 		},
 	});
 }
