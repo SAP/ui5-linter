@@ -113,7 +113,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 		if (attributes.has(attributeName)) {
 			report.addMessage(MESSAGE.DUPLICATE_BOOTSTRAP_PARAM, {
 				name: attributeName,
-				value: attr.name.value,
+				value: attr.value.toString(),
 			}, attr.name);
 		}
 		attributes.add(attributeName);
