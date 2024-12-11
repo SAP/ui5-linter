@@ -146,8 +146,9 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkPreloadAttr(attr, report);
 				break;
 			case "data-sap-ui-no-duplicate-ids":
-				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
+					messageDetails: "Duplicate id checks are enforced with UI5 2.X",
 				}, attr.name);
 				break;
 			case "data-sap-ui-auto-aria-body-role":
