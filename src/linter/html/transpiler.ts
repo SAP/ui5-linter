@@ -113,7 +113,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 		if (attributes.has(attributeName)) {
 			report.addMessage(MESSAGE.DUPLICATE_BOOTSTRAP_PARAM, {
 				name: attributeName,
-				value: attr.value.toString(),
+				value: attr.value.value,
 			}, attr.name);
 		}
 		attributes.add(attributeName);
@@ -179,7 +179,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				}, attr.name);
 				break;
 			case "data-sap-ui-manifest-first":
-				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
 					messageDetails: "Set the manifest parameter in component factory call" +
 						" {@link sap.ui.core.Component#sap.ui.core.Component.create}",
