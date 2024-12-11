@@ -486,7 +486,7 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR]: {
