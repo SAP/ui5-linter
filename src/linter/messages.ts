@@ -80,7 +80,7 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR]: {

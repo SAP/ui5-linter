@@ -158,10 +158,15 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				}, attr.name);
 				break;
 			case "data-sap-ui-xx-no-less":
-			case "data-sap-ui-areas":
 			case "data-sap-ui-trace":
 				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
 					name: attr.name.value,
+				}, attr.name);
+				break;
+			case "data-sap-ui-areas":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+					messageDetails: "No longer supported. UI areas are created on request by calling Control.placeAt",
 				}, attr.name);
 				break;
 			case "data-sap-ui-animation":
