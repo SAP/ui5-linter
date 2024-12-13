@@ -188,26 +188,38 @@ async function getProjectGraph(rootDir: string, ui5Config?: string | object): Pr
 		rootConfigPath = ui5YamlPath;
 	} else {
 		if (ui5Config) throw new Error(`Unable to find UI5 config file '${ui5Config}'`);
-		const isApp = await dirExists(path.join(rootDir, "webapp"));
-		if (isApp) {
-			rootConfiguration = {
-				specVersion: "3.0",
-				type: "application",
-				metadata: {
-					name: "ui5-linter-target",
-				},
-			};
-		} else {
-			const isLibrary = await dirExists(path.join(rootDir, "src"));
-			if (isLibrary) {
-				rootConfiguration = {
-					specVersion: "3.0",
-					type: "library",
-					metadata: {
-						name: "ui5-linter-target",
-					},
-				};
-			}
+
+		const dirChecks = await Promise.all([
+			dirExists(path.join(rootDir, "webapp")),
+			dirExists(path.join(rootDir, "src", "main", "webapp")),
+			dirExists(path.join(rootDir, "WebContent")),
+			dirExists(path.join(rootDir, "src", "main", "jslib")),
+			dirExists(path.join(rootDir, "src", "main", "js")),
+			dirExists(path.join(rootDir, "src", "main", "uilib")),
+			dirExists(path.join(rootDir, "src")),
+		]);
+
+		if (dirChecks[0]) {
+			// Common app with webapp folder
+			rootConfiguration = createProjectConfig("application", "webapp");
+		} else if (dirChecks[1]) {
+			// Legacy app with src/main/webapp folder
+			rootConfiguration = createProjectConfig("application", "src/main/webapp");
+		} else if (dirChecks[2]) {
+			// Legacy app with WebContent folder
+			rootConfiguration = createProjectConfig("application", "WebContent");
+		} else if (dirChecks[3]) {
+			// Library with src/main/jslib folder
+			rootConfiguration = createProjectConfig("library", "src/main/jslib", "src/test/jslib");
+		} else if (dirChecks[4]) {
+			// Library with src/main/js folder
+			rootConfiguration = createProjectConfig("library", "src/main/js", "src/test/js");
+		} else if (dirChecks[5]) {
+			// Library with src/main/uilib folder
+			rootConfiguration = createProjectConfig("library", "src/main/uilib", "src/test/uilib");
+		} else if (dirChecks[6]) {
+			// Library with src folder
+			rootConfiguration = createProjectConfig("library", "src", "test");
 		}
 	}
 
@@ -231,6 +243,47 @@ async function getProjectGraph(rootDir: string, ui5Config?: string | object): Pr
 	});
 }
 
+interface ProjectConfig {
+	specVersion: string;
+	type: string;
+	metadata: {
+		name: string;
+	};
+	resources?: {
+		configuration: {
+			paths: {
+				webapp?: string;
+				src?: string;
+				test?: string;
+			};
+		};
+	};
+}
+
+function createProjectConfig(projectType: string, projectSrcPath?: string, projectTestPath?: string): ProjectConfig {
+	let resourcesConfig: ProjectConfig["resources"] = {
+		configuration: {
+			paths: {},
+		},
+	};
+	if (projectType === "application") {
+		resourcesConfig.configuration.paths.webapp = projectSrcPath ?? "webapp";
+	} else if (projectType === "library") {
+		resourcesConfig.configuration.paths.src = projectSrcPath ?? "src";
+		resourcesConfig.configuration.paths.test = projectTestPath ?? "test";
+	} else {
+		// Do not set a resources configuration for other project types
+		resourcesConfig = undefined;
+	}
+	return {
+		specVersion: "4.0",
+		type: projectType,
+		metadata: {
+			name: "ui5-linter-project",
+		},
+		resources: resourcesConfig,
+	};
+}
 /**
  * Normalize provided virtual paths to the original file paths
  */
@@ -389,3 +442,8 @@ export function mergeIgnorePatterns(options: LinterOptions, config: UI5LintConfi
 		...(options.ignorePatterns ?? []), // CLI patterns go after config patterns
 	].filter(($) => $);
 }
+
+// Export local function for testing only
+export const __localFunctions__ = (process.env.NODE_ENV === "test") ?
+		{getProjectGraph} :
+	/* istanbul ignore next */ undefined;

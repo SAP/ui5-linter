@@ -2,6 +2,7 @@ import anyTest, {TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
+import esmock from "esmock";
 import {
 	createTestsForFixtures, assertExpectedLintResults,
 	esmockDeprecationText, preprocessLintResultsForSnapshot,
@@ -28,7 +29,7 @@ test.after.always((t) => {
 	t.context.sinon.restore();
 });
 
-// Define tests for reach file in the fixtures/linter/general directory
+// Define tests for each file in the fixtures/linter/general directory
 createTestsForFixtures(fixturesGeneralPath);
 
 // Test project fixtures individually
@@ -271,4 +272,155 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT
 		details: true,
 		ui5Config,
 	}), {message: `Unable to find UI5 config file '${ui5Config}'`});
+});
+
+test.serial("lint: getProjectGraph with different directory structures", async (t) => {
+	const graphFromObjectStub = t.context.sinon.stub().resolves();
+	const {__localFunctions__} = await esmock("../../../src/linter/linter.js", {
+		"@ui5/project/graph": {
+			graphFromObject: graphFromObjectStub,
+		},
+	});
+
+	const {getProjectGraph} = __localFunctions__;
+
+	const basePath = path.join(fixturesProjectsPath, "legacy-dirs");
+
+	// Legacy app structures
+	const appA = path.join(basePath, "legacy.app.a");
+	const appB = path.join(basePath, "legacy.app.b");
+	const libA = path.join(basePath, "legacy.lib.a");
+	const libB = path.join(basePath, "legacy.lib.b");
+	const libC = path.join(basePath, "legacy.lib.c");
+
+	await getProjectGraph(appA);
+	await getProjectGraph(appB);
+	await getProjectGraph(libA);
+	await getProjectGraph(libB);
+	await getProjectGraph(libC);
+
+	t.is(graphFromObjectStub.callCount, 5);
+	t.deepEqual(graphFromObjectStub.getCall(0).args[0], {
+		dependencyTree: {
+			dependencies: [],
+			id: "ui5-linter-target",
+			path: appA,
+			version: "1.0.0",
+		},
+		resolveFrameworkDependencies: false,
+		rootConfigPath: undefined,
+		rootConfiguration: {
+			metadata: {
+				name: "ui5-linter-project",
+			},
+			resources: {
+				configuration: {
+					paths: {
+						webapp: "WebContent",
+					},
+				},
+			},
+			specVersion: "4.0",
+			type: "application",
+		},
+	});
+	t.deepEqual(graphFromObjectStub.getCall(1).args[0], {
+		dependencyTree: {
+			dependencies: [],
+			id: "ui5-linter-target",
+			path: appB,
+			version: "1.0.0",
+		},
+		resolveFrameworkDependencies: false,
+		rootConfigPath: undefined,
+		rootConfiguration: {
+			metadata: {
+				name: "ui5-linter-project",
+			},
+			resources: {
+				configuration: {
+					paths: {
+						webapp: "src/main/webapp",
+					},
+				},
+			},
+			specVersion: "4.0",
+			type: "application",
+		},
+	});
+	t.deepEqual(graphFromObjectStub.getCall(2).args[0], {
+		dependencyTree: {
+			dependencies: [],
+			id: "ui5-linter-target",
+			path: libA,
+			version: "1.0.0",
+		},
+		resolveFrameworkDependencies: false,
+		rootConfigPath: undefined,
+		rootConfiguration: {
+			metadata: {
+				name: "ui5-linter-project",
+			},
+			resources: {
+				configuration: {
+					paths: {
+						src: "src/main/jslib",
+						test: "src/test/jslib",
+					},
+				},
+			},
+			specVersion: "4.0",
+			type: "library",
+		},
+	});
+	t.deepEqual(graphFromObjectStub.getCall(3).args[0], {
+		dependencyTree: {
+			dependencies: [],
+			id: "ui5-linter-target",
+			path: libB,
+			version: "1.0.0",
+		},
+		resolveFrameworkDependencies: false,
+		rootConfigPath: undefined,
+		rootConfiguration: {
+			metadata: {
+				name: "ui5-linter-project",
+			},
+			resources: {
+				configuration: {
+					paths: {
+						src: "src/main/uilib",
+						test: "src/test/uilib",
+					},
+				},
+			},
+			specVersion: "4.0",
+			type: "library",
+		},
+	});
+	t.deepEqual(graphFromObjectStub.getCall(4).args[0], {
+		dependencyTree: {
+			dependencies: [],
+			id: "ui5-linter-target",
+			path: libC,
+			version: "1.0.0",
+		},
+		resolveFrameworkDependencies: false,
+		rootConfigPath: undefined,
+		rootConfiguration: {
+			metadata: {
+				name: "ui5-linter-project",
+			},
+			resources: {
+				configuration: {
+					paths: {
+						src: "src/main/js",
+						test: "src/test/js",
+					},
+				},
+			},
+			specVersion: "4.0",
+			type: "library",
+		},
+	});
 });
