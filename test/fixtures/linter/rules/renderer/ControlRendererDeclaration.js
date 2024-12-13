@@ -1,3 +1,5 @@
+const { default: Renderer } = require("sap/ui/core/Renderer");
+
 sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button) {
 	const Example1 = Control.extend("sap.ui.demo.linter.controls.Example1", {
 		metadata: {},
@@ -21,5 +23,12 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Button"], function(Control, Button)
 	const Example5 = Button.extend("sap.ui.demo.linter.controls.Example5", {
 		metadata: {},
 		// Missing renderer declaration (deprecated)
+	});
+	const Example6 = Button.extend("sap.ui.demo.linter.controls.Example6", {
+		metadata: {},
+		renderer: {
+			apiVersion: 3, // Invalid API version
+			render: function(oRm, oControl) {}
+		}
 	});
 });
