@@ -40,7 +40,7 @@
 		"lint": "eslint .",
 		"lint:commit": "commitlint -e",
 		"prepare": "node ./.husky/skip.js || husky",
-		"test": "npm run lint && npm run build-test && npm run coverage && npm run e2e && npm run depcheck",
+		"test": "npm run lint && npm run build-test && npm run coverage && npm run e2e && npm run depcheck && npm run check-licenses",
 		"unit": "ava",
 		"e2e": "npm run build && ava --config ava-e2e.config.js",
 		"unit-debug": "ava debug",
@@ -108,7 +108,7 @@
 		"rimraf": "^6.0.1",
 		"sinon": "^19.0.2",
 		"tsx": "^4.19.2",
-		"typescript-eslint": "^8.18.0",
+		"typescript-eslint": "^8.17.0",
 		"yauzl-promise": "^4.0.0"
 	}
 }
