@@ -12,6 +12,7 @@ const RULES = {
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
 	"ui5-class-declaration": "ui5-class-declaration",
+	"prefer-test-starter": "prefer-test-starter",
 } as const;
 
 export enum LintMessageSeverity {
@@ -63,6 +64,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_PARAMETERS_GET,
+	PREFER_TEST_STARTER,
 	REDUNDANT_BOOTSTRAP_PARAM,
 	REDUNDANT_BOOTSTRAP_PARAM_ERROR,
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
@@ -548,6 +550,14 @@ export const MESSAGE_INFO = {
 				`loading of the ${rendererModuleName} module. ` +
 				`Import the ${rendererModuleName} module and assign it to the 'renderer' property.`;
 		},
+	},
+
+	[MESSAGE.PREFER_TEST_STARTER]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["prefer-test-starter"],
+
+		message: ({message}: {message?: string}) => message,
+		details: () => undefined,
 	},
 
 	[MESSAGE.REPLACED_BOOTSTRAP_PARAM]: {
