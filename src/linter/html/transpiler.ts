@@ -29,6 +29,8 @@ export default async function transpileHtml(
 			if (!hasSrc && tag.textNodes?.length > 0) {
 				report.addMessage(MESSAGE.CSP_UNSAFE_INLINE_SCRIPT, tag);
 			}
+
+			detectTestStarter(resourcePath, tag, context);
 		});
 
 		stylesheetLinkTags.forEach((tag) => {
@@ -49,6 +51,28 @@ export default async function transpileHtml(
 		const message = err instanceof Error ? err.message : String(err);
 		context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 		return;
+	}
+}
+
+function detectTestStarter(resourcePath: ResourcePath, tag: Tag, context: LinterContext) {
+	if (resourcePath.includes("testsuite.qunit.html")) {
+		const hasCreateSuite = tag.attributes.some((attr) => {
+			return attr.name.value.toLowerCase() === "src" &&
+				attr.value.value.includes("resources/sap/ui/test/starter/createSuite.js");
+		});
+
+		if (!hasCreateSuite) {
+			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, {message: "Prefer test starter"});
+		}
+	} else if (resourcePath.includes("qunit.html")) {
+		// resources/sap/ui/test/starter/runTest.js
+		const hasRunTest = tag.attributes.some((attr) => {
+			return attr.name.value.toLowerCase() === "src" &&
+				attr.value.value.includes("resources/sap/ui/test/starter/runTest.js");
+		});
+		if (!hasRunTest) {
+			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, {message: "Prefer test starter"});
+		}
 	}
 }
 
