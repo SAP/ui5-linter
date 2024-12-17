@@ -228,7 +228,7 @@ function checkBindingSyntaxAttr(attr: Attribute, report: HtmlReporter) {
 	if (attr.value.value.toLowerCase() === "complex") {
 		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
 			name: attr.name.value,
-			messageDetails: "Only 'complex' is supported with UI5 2.X and automatically" +
+			messageDetails: "Only 'complex' is supported with UI5 2.x and automatically" +
 				" enforced by the UI5 runtime. Complex binding parser supports simple binding syntax per default.",
 		}, attr.name);
 	} else {
