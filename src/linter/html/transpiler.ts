@@ -62,7 +62,7 @@ function detectTestStarter(resourcePath: ResourcePath, tag: Tag, context: Linter
 		});
 
 		if (!hasCreateSuite) {
-			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, {message: "Prefer test starter"});
+			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, undefined as never);
 		}
 	} else if (resourcePath.includes("qunit.html")) {
 		// resources/sap/ui/test/starter/runTest.js
@@ -71,7 +71,7 @@ function detectTestStarter(resourcePath: ResourcePath, tag: Tag, context: Linter
 				attr.value.value.includes("resources/sap/ui/test/starter/runTest.js");
 		});
 		if (!hasRunTest) {
-			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, {message: "Prefer test starter"});
+			context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, undefined as never);
 		}
 	}
 }
