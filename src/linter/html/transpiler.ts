@@ -234,7 +234,7 @@ function checkBindingSyntaxAttr(attr: Attribute, report: HtmlReporter) {
 	} else {
 		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
 			name: attr.name.value,
-			messageDetails: "Only 'complex' is supported with UI5 2.X and automatically" +
+			messageDetails: "Only 'complex' is supported with UI5 2.x and automatically" +
 				" enforced by the UI5 runtime. Check all bindings whether they will be " +
 				"misinterpreted in 2.0 with binding syntax 'complex'.",
 		}, attr.name);
