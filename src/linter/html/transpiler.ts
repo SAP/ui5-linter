@@ -214,11 +214,11 @@ function checkPreloadAttr(attr: Attribute, report: HtmlReporter) {
 
 function checkOriginInfoAttr(attr: Attribute, report: HtmlReporter) {
 	if (attr.value.value.toLowerCase() === "true") {
-		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
 			name: attr.name.value,
 		}, attr.name);
 	} else {
-		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
 			name: attr.name.value,
 		}, attr.name);
 	}
