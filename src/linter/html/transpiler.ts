@@ -148,7 +148,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			case "data-sap-ui-no-duplicate-ids":
 				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
-					messageDetails: "Duplicate id checks are enforced with UI5 2.X",
+					messageDetails: "Duplicate ID checks are enforced with UI5 2.x",
 				}, attr.name);
 				break;
 			case "data-sap-ui-auto-aria-body-role":
