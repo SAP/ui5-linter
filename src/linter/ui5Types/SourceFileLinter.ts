@@ -790,6 +790,11 @@ export default class SourceFileLinter {
 				this.#analyzeMobileInit(node);
 			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
 				this.#analyzeThemingSetTheme(node);
+			} else if (this.sourceFile.fileName.includes(".qunit.js") &&
+				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
+				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, {
+					message: "Prefer test starter",
+				}, node);
 			}
 		}
 
@@ -826,11 +831,19 @@ export default class SourceFileLinter {
 			}
 		}
 
+		const propName = getPropertyName(reportNode);
+
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
-			functionName: getPropertyName(reportNode),
+			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
+
+		if (propName === "attachInit" && this.sourceFile.fileName.includes(".qunit.js")) {
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, {
+				message: "Prefer test starter",
+			}, reportNode);
+		}
 	}
 
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
