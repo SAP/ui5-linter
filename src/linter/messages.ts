@@ -556,8 +556,9 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Warning,
 		ruleId: RULES["prefer-test-starter"],
 
-		message: ({message}: {message?: string}) => message,
-		details: () => undefined,
+		message: () => "To save boilerplate code and ensure compliance with UI5 2.x best practices," +
+			" please migrate to the Test Starter concept",
+		details: () => "{@link topic:032be2cb2e1d4115af20862673bedcdb Test Starter}",
 	},
 
 	[MESSAGE.REPLACED_BOOTSTRAP_PARAM]: {

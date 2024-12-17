@@ -792,9 +792,7 @@ export default class SourceFileLinter {
 				this.#analyzeThemingSetTheme(node);
 			} else if (this.sourceFile.fileName.includes(".qunit.js") &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
-				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, {
-					message: "Prefer test starter",
-				}, node);
+				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
 			}
 		}
 
@@ -840,9 +838,7 @@ export default class SourceFileLinter {
 		}, reportNode);
 
 		if (propName === "attachInit" && this.sourceFile.fileName.includes(".qunit.js")) {
-			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, {
-				message: "Prefer test starter",
-			}, reportNode);
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, reportNode);
 		}
 	}
 
