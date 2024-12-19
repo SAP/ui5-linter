@@ -283,7 +283,9 @@ function transform(
 			metadata.transformedImports = new Map<string, Set<string>>();
 		}
 		const curResource = metadata.transformedImports.get(importType) ?? new Set<string>();
-		curResource.add(importStatement.moduleSpecifier.getText());
+		if (ts.isStringLiteral(importStatement.moduleSpecifier)) {
+			curResource.add(importStatement.moduleSpecifier.text);
+		}
 		metadata.transformedImports.set(importType, curResource);
 	}
 
