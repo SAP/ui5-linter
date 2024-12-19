@@ -88,6 +88,12 @@ export default class SourceFileLinter {
 				findDirectives(this.sourceFile, metadata);
 			}
 			this.visitNode(this.sourceFile);
+
+			if (this.sourceFile.fileName.includes(".qunit.js") &&
+				!metadata?.transformedImports?.get("sap.ui.define")?.size) {
+				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, this.sourceFile);
+			}
+
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -642,6 +648,13 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
+		if (this.sourceFile.fileName.includes(".qunit.js") &&
+			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.getText() === "jsUnitTestSuite") ||
+				(ts.isIdentifier(node.expression) && node.expression.getText() === "jsUnitTestSuite")
+			)) {
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+		}
+
 		const nodeType = this.checker.getTypeAtLocation(node); // checker.getContextualType(node);
 		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
 			return;
