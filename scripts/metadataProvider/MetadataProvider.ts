@@ -5,6 +5,7 @@ import {
 } from "@ui5-language-assistant/semantic-model";
 import {
 	BaseUI5Node,
+	UI5Aggregation,
 	UI5Class,
 	UI5SemanticModel,
 } from "@ui5-language-assistant/semantic-model-types";
@@ -44,5 +45,27 @@ export default class MetadataProvider {
 		}
 		// console.timeEnd("getDefaultAggregationForSymbol");
 		return classMetadata.defaultAggregation?.name;
+	}
+
+	// TODO: Add collection logic for associations, events, methods, properties (also inherited ones)
+	// + Use only one loop for all collections to save performance
+	getAggregationsForSymbol(symbol: BaseUI5Node): UI5Aggregation[] | undefined {
+		if (symbol.kind !== "UI5Class") {
+			return undefined;
+		}
+		let classMetadata = symbol as UI5Class;
+		// Collect own aggregations:
+		const ownAndBorrowedAggregations: UI5Aggregation[] = [];
+		ownAndBorrowedAggregations.push(...classMetadata.aggregations);
+
+		// Go up the inheritance chain and collect aggregations from all parent objects:
+		while (classMetadata.extends) {
+			classMetadata = classMetadata.extends;
+			if (classMetadata.aggregations) {
+				ownAndBorrowedAggregations.push(...classMetadata.aggregations);
+			}
+		}
+
+		return ownAndBorrowedAggregations;
 	}
 }

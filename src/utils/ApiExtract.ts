@@ -1,13 +1,15 @@
 import {readFile} from "node:fs/promises";
 
 export type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
+export type AllowedMetadataOptions = "aggregation" | "association" | "defaultAggregation" | "event" |
+	"method" | "property";
 
 export interface ApiExtractJson {
 	framework: {
 		name: string;
 		version: string;
 	};
-	defaultAggregations: Record<string, string>;
+	metadata: Record<string, Record<string, AllowedMetadataOptions>>;
 	deprecations: Record<AllowedSymbolKind, Record<string, string>>;
 }
 
@@ -29,7 +31,9 @@ class ApiExtractImpl implements ApiExtract {
 	}
 
 	getDefaultAggregation(className: string): string {
-		return this.data.defaultAggregations[className];
+		// TODO: Implement this method with some clever logic
+		// (Don't loop through entire metadata and check each symbol's default aggregation)
+		return className;
 	}
 
 	getDeprecationInfo(symbolName: string): DeprecationInfo | undefined {
