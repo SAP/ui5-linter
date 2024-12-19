@@ -84,6 +84,9 @@ const oldToNewAttr = new Map([
 	["data-sap-ui-evt-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-resourceroots", "data-sap-ui-resource-roots"],
+	["data-sap-ui-legacy-date-format", "data-sap-ui-a-b-a-p-date-format"],
+	["data-sap-ui-legacy-time-format", "data-sap-ui-a-b-a-p-time-format"],
+	["data-sap-ui-legacy-number-format", "data-sap-ui-a-b-a-p-number-format"],
 ]);
 
 const aliasToAttr = new Map([
@@ -110,7 +113,7 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 		if (attributes.has(attributeName)) {
 			report.addMessage(MESSAGE.DUPLICATE_BOOTSTRAP_PARAM, {
 				name: attributeName,
-				value: attr.name.value,
+				value: attr.value.value,
 			}, attr.name);
 		}
 		attributes.add(attributeName);
@@ -134,14 +137,52 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 				checkOnInitAttr(attr, report);
 				break;
 			case "data-sap-ui-binding-syntax":
+				checkBindingSyntaxAttr(attr, report);
+				break;
+			case "data-sap-ui-origin-info":
+				checkOriginInfoAttr(attr, report);
+				break;
 			case "data-sap-ui-preload":
-				report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+				checkPreloadAttr(attr, report);
+				break;
+			case "data-sap-ui-no-duplicate-ids":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
 					name: attr.name.value,
+					messageDetails: "Duplicate ID checks are enforced with UI5 2.x",
+				}, attr.name);
+				break;
+			case "data-sap-ui-auto-aria-body-role":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
+					name: attr.name.value,
+					messageDetails: "Avoid assigning a role=\"application\" to the body element, as doing so " +
+						"would make screen readers interpret the entire application as a single custom control",
 				}, attr.name);
 				break;
 			case "data-sap-ui-xx-no-less":
+			case "data-sap-ui-trace":
 				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
 					name: attr.name.value,
+				}, attr.name);
+				break;
+			case "data-sap-ui-areas":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+					messageDetails: "No longer supported. UI areas are created on request by calling Control.placeAt",
+				}, attr.name);
+				break;
+			case "data-sap-ui-animation":
+				report.addMessage(MESSAGE.REPLACED_BOOTSTRAP_PARAM, {
+					name: attr.name.value,
+					replacement: "data-sap-ui-animation-mode",
+					messageDetails: "Migrate to 'data-sap-ui-animation-mode' attribute " +
+						"{@link module:sap/ui/core/AnimationMode AnimationMode}",
+				}, attr.name);
+				break;
+			case "data-sap-ui-manifest-first":
+				report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
+					name: attr.name.value,
+					messageDetails: "Set the manifest parameter in component factory call" +
+						" {@link sap.ui.core.Component#sap.ui.core.Component.create}",
 				}, attr.name);
 				break;
 		}
@@ -158,6 +199,45 @@ function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
 			name: "data-sap-ui-compat-version",
 			details: `{@link topic:9feb96da02c2429bb1afcf6534d77c79 Compatibility Version Information (deprecated)}`,
 		}, tag);
+	}
+}
+
+function checkPreloadAttr(attr: Attribute, report: HtmlReporter) {
+	const value = attr.value.value.toLowerCase();
+	if (value && !["auto", "async", "sync"].includes(value)) {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+			messageDetails: "Use sap-ui-debug=true to suppress library preload requests",
+		}, attr.name);
+	}
+}
+
+function checkOriginInfoAttr(attr: Attribute, report: HtmlReporter) {
+	if (attr.value.value.toLowerCase() === "true") {
+		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+		}, attr.name);
+	} else {
+		report.addMessage(MESSAGE.ABANDONED_BOOTSTRAP_PARAM, {
+			name: attr.name.value,
+		}, attr.name);
+	}
+}
+
+function checkBindingSyntaxAttr(attr: Attribute, report: HtmlReporter) {
+	if (attr.value.value.toLowerCase() === "complex") {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM, {
+			name: attr.name.value,
+			messageDetails: "Only 'complex' is supported with UI5 2.x and automatically" +
+				" enforced by the UI5 runtime. Complex binding parser supports simple binding syntax per default.",
+		}, attr.name);
+	} else {
+		report.addMessage(MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR, {
+			name: attr.name.value,
+			messageDetails: "Only 'complex' is supported with UI5 2.x and automatically" +
+				" enforced by the UI5 runtime. Check all bindings whether they will be " +
+				"misinterpreted in 2.x with binding syntax 'complex'.",
+		}, attr.name);
 	}
 }
 

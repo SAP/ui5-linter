@@ -22,6 +22,7 @@ export enum LintMessageSeverity {
 // Messages (sorted alphabetically)
 export enum MESSAGE {
 	ABANDONED_BOOTSTRAP_PARAM,
+	ABANDONED_BOOTSTRAP_PARAM_ERROR,
 	COMPONENT_MISSING_ASYNC_INTERFACE,
 	COMPONENT_MISSING_MANIFEST_DECLARATION,
 	COMPONENT_REDUNDANT_ASYNC_FLAG,
@@ -63,7 +64,9 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_PARAMETERS_GET,
 	REDUNDANT_BOOTSTRAP_PARAM,
+	REDUNDANT_BOOTSTRAP_PARAM_ERROR,
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
+	REPLACED_BOOTSTRAP_PARAM,
 	SPELLING_BOOTSTRAP_PARAM,
 	SVG_IN_XML,
 	MISSING_CONTROL_RENDERER_DECLARATION,
@@ -77,7 +80,16 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Abandoned bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
+	},
+
+	[MESSAGE.ABANDONED_BOOTSTRAP_PARAM_ERROR]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Abandoned bootstrap parameter '${name}' should be removed`,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE]: {
@@ -474,7 +486,16 @@ export const MESSAGE_INFO = {
 
 		message: ({name}: {name: string}) =>
 			`Redundant bootstrap parameter '${name}' should be removed`,
-		details: () => undefined,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
+	},
+
+	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM_ERROR]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name}: {name: string}) =>
+			`Redundant bootstrap parameter '${name}' should be removed`,
+		details: ({messageDetails}: {messageDetails?: string}) => messageDetails,
 	},
 
 	[MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY]: {
@@ -527,6 +548,15 @@ export const MESSAGE_INFO = {
 				`loading of the ${rendererModuleName} module. ` +
 				`Import the ${rendererModuleName} module and assign it to the 'renderer' property.`;
 		},
+	},
+
+	[MESSAGE.REPLACED_BOOTSTRAP_PARAM]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({name, replacement}: {name: string; replacement: string}) =>
+			`Bootstrap parameter '${name}' should be replaced with '${replacement}'`,
+		details: ({messageDetails}: {messageDetails: string}) => messageDetails,
 	},
 
 } as const;
