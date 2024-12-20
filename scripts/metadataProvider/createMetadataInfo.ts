@@ -56,23 +56,17 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 	forEachSymbol(semanticModel, (symbol, symbolName) => {
 		apiExtract.metadata[symbolName] = {};
 
-		// TODO: Add metadata generation for associations, events, methods, properties
-
-		// Aggregations:
-		const aggregations = metadataProvider.getAggregationsForSymbol(symbol);
-		if (aggregations) {
-			aggregations.forEach((aggregation) => {
-				apiExtract.metadata[symbolName][aggregation.name] = "aggregation";
-			});
+		// Generate metadata:
+		if (isAllowedSymbolKind(symbol.kind)) {
+			const symbolOptionValues = metadataProvider.collectOptionValuesForSymbol(symbol);
+			if (symbolOptionValues) {
+				Object.entries(symbolOptionValues).forEach(([optionName, optionValue]) => {
+					apiExtract.metadata[symbolName][optionName] = optionValue;
+				});
+			}
 		}
 
-		// Default aggregation:
-		const defaultAggregation = metadataProvider.getDefaultAggregationForSymbol(symbol);
-		if (defaultAggregation) {
-			apiExtract.metadata[symbolName][defaultAggregation] = "defaultAggregation";
-		}
-
-		// Deprecation:
+		// deprecations:
 		if (symbol.deprecatedInfo?.isDeprecated) {
 			const deprecationText = getDeprecationText(symbol.deprecatedInfo) ?? "deprecated";
 			if (isAllowedSymbolKind(symbol.kind)) {
