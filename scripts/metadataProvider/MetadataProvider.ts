@@ -6,8 +6,14 @@ import {
 import {
 	BaseUI5Node,
 	UI5Class,
+	UI5Namespace,
+	UI5Typedef,
+	UI5Interface,
 	UI5SemanticModel,
 } from "@ui5-language-assistant/semantic-model-types";
+
+type SymbolOption = "aggregation" | "association" | "defaultAggregation" | "event" | "property";
+type SymbolOptionValues = Record<string, SymbolOption>;
 
 export default class MetadataProvider {
 	#model: UI5SemanticModel | null = null;
@@ -44,5 +50,69 @@ export default class MetadataProvider {
 		}
 		// console.timeEnd("getDefaultAggregationForSymbol");
 		return classMetadata.defaultAggregation?.name;
+	}
+
+	/**
+	 * Collects all option values (aggregation, association, defaultAggregation, event, method, property)
+	 * for a given symbol (incl. borrowed ones).
+	 * @param {BaseUI5Node} symbol
+	 * @returns {SymbolOptionValues}
+	 */
+	collectOptionValuesForSymbol(symbol: BaseUI5Node): SymbolOptionValues | undefined {
+		const symbolOptionValues: SymbolOptionValues = {};
+		let symbolMetadata;
+
+		switch (symbol.kind) {
+			case "UI5Class":
+				symbolMetadata = symbol as UI5Class;
+				// Collect own and borrowed option values:
+				while (symbolMetadata.extends) {
+					symbolMetadata.aggregations.forEach((aggregation) => {
+						symbolOptionValues[aggregation.name] = "aggregation";
+					});
+					symbolMetadata.associations.forEach((association) => {
+						symbolOptionValues[association.name] = "association";
+					});
+					if (symbolMetadata.defaultAggregation) {
+						symbolOptionValues[symbolMetadata.defaultAggregation.name] = "defaultAggregation";
+					}
+					symbolMetadata.events.forEach((event) => {
+						symbolOptionValues[event.name] = "event";
+					});
+					symbolMetadata.properties.forEach((property) => {
+						symbolOptionValues[property.name] = "property";
+					});
+					symbolMetadata = symbolMetadata.extends;
+				}
+				break;
+			/* case "UI5Enum": // Disabled because UI5Enum does not contain any option values
+				symbolMetadata = symbol as UI5Enum;
+				break;
+			case "UI5Function": // Disabled because UI5Function does not contain any option values
+				symbolMetadata = symbol as UI5Function;
+				break; */
+			case "UI5Namespace":
+				symbolMetadata = symbol as UI5Namespace;
+				symbolMetadata.events.forEach((event) => {
+					symbolOptionValues[event.name] = "event";
+				});
+				break;
+			case "UI5Typedef":
+				symbolMetadata = symbol as UI5Typedef;
+				// NPM package "@ui5-language-assistant/semantic-model-types" was not updated:
+				// symbolMetadata.properties.forEach((property) => {
+				// 	symbolOptionValues[property.name] = "property";
+				// });
+				break;
+			case "UI5Interface":
+				symbolMetadata = symbol as UI5Interface;
+				symbolMetadata.events.forEach((event) => {
+					symbolOptionValues[event.name] = "event";
+				});
+				break;
+			default:
+				return undefined;
+		}
+		return symbolOptionValues;
 	}
 }
