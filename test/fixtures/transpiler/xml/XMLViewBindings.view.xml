@@ -1,0 +1,41 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	controllerName="com.myapp.controller.Main"
+>
+	<!-- text: Deprecated reference of global formatter and binding event handler function -->
+	<!-- tooltip: Aggregation with a 0..1 aggregation and "string" alt type can be used like a property -->
+	<!-- formatError: Control event handlers should be ignored for now -->
+	<ObjectStatus
+		text="{
+			path: 'invoice>Status',
+			formatter: 'ui5.walkthrough.model.formatter.statusText',
+			events: {
+				dataRequested: 'global.onMyDataRequested'
+			}
+		}"
+
+		tooltip="{
+			path: 'invoice>StatusDetails',
+			formatter: 'globalTooltipFormatter'
+		}"
+
+		formatError="global.handleEvent"
+	/>
+
+	<!-- Correct import of formatter and event handler modules -->
+	<ObjectStatus
+		core:require="{
+			Formatter: 'ui5/walkthrough/model/formatter',
+			EventHandler: 'my/event/handler'
+		}"
+		text="{
+			path: 'invoice>Status',
+			formatter: 'Formatter.statusText.bind($controller)',
+			events: {
+				dataRequested: 'EventHandler.onMyDataRequested'
+			}
+		}"
+	/>
+
+</mvc:View>

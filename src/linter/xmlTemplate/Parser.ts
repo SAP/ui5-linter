@@ -10,6 +10,7 @@ import {getLogger} from "@ui5/logger";
 import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
+import BindingLinter from "../binding/BindingLinter.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -81,7 +82,7 @@ export interface RequireExpression extends AttributeDeclaration {
 
 export interface RequireDeclaration {
 	moduleName: string;
-	variableName?: string;
+	variableName: string;
 }
 
 interface NamespaceStackEntry {
@@ -104,13 +105,13 @@ const enum DocumentKind {
 	Fragment,
 }
 
-function determineDocumentKind(resourceName: string): DocumentKind | null {
-	if (/\.view.xml$/.test(resourceName)) {
+function determineDocumentKind(resourcePath: string): DocumentKind | null {
+	if (/\.view.xml$/.test(resourcePath)) {
 		return DocumentKind.View;
-	} else if (/\.fragment.xml$/.test(resourceName)) {
+	} else if (/\.fragment.xml$/.test(resourcePath)) {
 		return DocumentKind.Fragment;
-	} else if (/\.control.xml$/.test(resourceName)) {
-		throw new Error(`Control XML analysis is currently not supported for resource ${resourceName}`);
+	} else if (/\.control.xml$/.test(resourcePath)) {
+		throw new Error(`Control XML analysis is currently not supported for resource ${resourcePath}`);
 	} else {
 		return null;
 	}
@@ -124,31 +125,39 @@ function toPosition(saxPos: SaxPosition): Position {
 }
 
 export default class Parser {
-	#resourceName: string;
+	#resourcePath: string;
 	#xmlDocumentKind: DocumentKind;
 
 	#context: LinterContext;
 	#namespaceStack: NamespaceStackEntry[] = [];
 	#nodeStack: NodeDeclaration[] = [];
 
+	// For now, gather all require declarations, independent of the scope
+	// This might not always be correct, but for now we usually only care about whether
+	// there is a require declaration for a given string or not.
+	#requireDeclarations: RequireDeclaration[] = [];
+	#bindingLinter: BindingLinter;
+
 	#generator: AbstractGenerator;
 	#apiExtract: ApiExtract;
 
 	constructor(
-		resourceName: string, apiExtract: ApiExtract, context: LinterContext, controllerByIdInfo: ControllerByIdInfo
+		resourcePath: string, apiExtract: ApiExtract, context: LinterContext, controllerByIdInfo: ControllerByIdInfo
 	) {
-		const xmlDocumentKind = determineDocumentKind(resourceName);
+		const xmlDocumentKind = determineDocumentKind(resourcePath);
 		if (xmlDocumentKind === null) {
-			throw new Error(`Unknown document type for resource ${resourceName}`);
+			throw new Error(`Unknown document type for resource ${resourcePath}`);
 		}
-		this.#resourceName = resourceName;
+		this.#resourcePath = resourcePath;
 		this.#xmlDocumentKind = xmlDocumentKind;
 		this.#generator = xmlDocumentKind === DocumentKind.View ?
-			new ViewGenerator(resourceName, controllerByIdInfo) :
-			new FragmentGenerator(resourceName, controllerByIdInfo);
+			new ViewGenerator(resourcePath, controllerByIdInfo) :
+			new FragmentGenerator(resourcePath, controllerByIdInfo);
 
 		this.#apiExtract = apiExtract;
 		this.#context = context;
+
+		this.#bindingLinter = new BindingLinter(resourcePath, context);
 	}
 
 	pushTag(tag: SaxTag) {
@@ -225,7 +234,7 @@ export default class Parser {
 
 		if (!aggregationName) {
 			log.verbose(`Failed to determine default aggregation for control ${owner.name} used in ` +
-				`resource ${this.#resourceName}. Falling back to 'dependents'`);
+				`resource ${this.#resourcePath}. Falling back to 'dependents'`);
 			// In case the default aggregation is unknown (e.g. in case of custom controls),
 			// fallback to use the generic "dependents" aggregation
 			// This is not correct at runtime, but it's the best we can do for linting purposes
@@ -258,7 +267,7 @@ export default class Parser {
 				};
 			});
 		} catch (_) {
-			throw new Error(`Failed to parse require attribute value ${attrValue} in resource ${this.#resourceName}`);
+			throw new Error(`Failed to parse require attribute value ${attrValue} in resource ${this.#resourcePath}`);
 		}
 	}
 
@@ -318,10 +327,10 @@ export default class Parser {
 		// by one of them
 		let namespace = this._resolveNamespace(tagNamespace);
 		if (!namespace) {
-			throw new Error(`Unknown namespace ${tagNamespace} for tag ${tagName} in resource ${this.#resourceName}`);
+			throw new Error(`Unknown namespace ${tagNamespace} for tag ${tagName} in resource ${this.#resourcePath}`);
 		} else if (namespace === SVG_NAMESPACE) {
 			// Ignore SVG nodes
-			this.#context.addLintingMessage(this.#resourceName,
+			this.#context.addLintingMessage(this.#resourcePath,
 				MESSAGE.SVG_IN_XML,
 				undefined as never,
 				{
@@ -338,7 +347,7 @@ export default class Parser {
 			};
 		} else if (namespace === XHTML_NAMESPACE) {
 			// Ignore XHTML nodes for now
-			this.#context.addLintingMessage(this.#resourceName,
+			this.#context.addLintingMessage(this.#resourcePath,
 				MESSAGE.HTML_IN_XML,
 				undefined as never,
 				{
@@ -393,7 +402,7 @@ export default class Parser {
 				const resolvedNamespace = this._resolveNamespace(attr.localNamespace);
 				if (!resolvedNamespace) {
 					throw new Error(`Unknown namespace ${attr.localNamespace} for attribute ${attr.name} ` +
-						`in resource ${this.#resourceName}`);
+						`in resource ${this.#resourcePath}`);
 				}
 				if ((resolvedNamespace === CORE_NAMESPACE ||
 					resolvedNamespace === TEMPLATING_NAMESPACE) && attr.name === "require") {
@@ -419,7 +428,8 @@ export default class Parser {
 							});
 						});
 					} else {
-						// Common case: JSON-like representation
+						// Most common case: JSON-like representation
+						// e.g. core:require="{Helper: 'sap/ui/demo/todo/util/Helper'}"
 						requireDeclarations = this._parseRequireAttribute(attr.value);
 					}
 					const requireExpression = {
@@ -430,6 +440,7 @@ export default class Parser {
 						end: attr.end,
 					} as RequireExpression;
 
+					this.#requireDeclarations.push(...requireDeclarations);
 					this.#generator.writeRequire(requireExpression);
 				} else if (resolvedNamespace === FESR_NAMESPACE ||
 					resolvedNamespace === SAP_BUILD_NAMESPACE || resolvedNamespace === SAP_UI_DT_NAMESPACE) {
@@ -464,7 +475,7 @@ export default class Parser {
 					this.#generator.writeControl(customData);
 				} else {
 					log.verbose(`Ignoring unknown namespaced attribute ${attr.localNamespace}:${attr.name} ` +
-						`for ${moduleName} in resource ${this.#resourceName}`);
+						`for ${moduleName} in resource ${this.#resourcePath}`);
 				}
 			} else {
 				controlProperties.add(attr);
@@ -482,7 +493,7 @@ export default class Parser {
 			if (!parentNode || parentNode.kind === NodeKind.FragmentDefinition) {
 				if (this.#xmlDocumentKind !== DocumentKind.Fragment) {
 					throw new Error(`Unexpected top-level aggregation declaration: ` +
-						`${aggregationName} in resource ${this.#resourceName}`);
+						`${aggregationName} in resource ${this.#resourcePath}`);
 				}
 				// In case of top-level aggregations in fragments, generate an sap.ui.core.Control instance and
 				// add the aggregation's content to it's dependents aggregation
@@ -498,7 +509,7 @@ export default class Parser {
 				return coreControl;
 			} else if (parentNode.kind === NodeKind.Aggregation) {
 				throw new Error(`Unexpected aggregation ${aggregationName} within aggregation ${parentNode.name} ` +
-					`in resource ${this.#resourceName}`);
+					`in resource ${this.#resourcePath}`);
 			}
 			const owner = parentNode as ControlDeclaration;
 
@@ -531,10 +542,16 @@ export default class Parser {
 			};
 
 			if (parentNode) {
-				throw new Error(`Unexpected nested FragmentDefiniton in resource ${this.#resourceName}`);
+				throw new Error(`Unexpected nested FragmentDefiniton in resource ${this.#resourcePath}`);
 			}
 			return node;
 		} else {
+			for (const prop of controlProperties) {
+				// Check whether prop is of type "property" (indicating that it can have a binding)
+				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, prop.start);
+				}
+			}
 			// This node declares a control
 			// Or a fragment definition in case of a fragment
 			const node: ControlDeclaration = {
@@ -569,7 +586,7 @@ export default class Parser {
 					// Add the control to the fragment definition
 					(parentNode as FragmentDefinitionDeclaration).controls.add(node);
 				} else {
-					throw new Error(`Unexpected node kind ${parentNode.kind} in resource ${this.#resourceName}`);
+					throw new Error(`Unexpected node kind ${parentNode.kind} in resource ${this.#resourcePath}`);
 				}
 			}
 			return node;

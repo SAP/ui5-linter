@@ -61,12 +61,10 @@
 	JSTokenizer.prototype.error = function(m) {
 
 		// Call error when something is wrong.
-		throw {
-			name: 'SyntaxError',
-			message: m,
-			at: this.at,
-			text: this.text
-		};
+		const err = new SyntaxError(m);
+		err.at = this.at;
+		err.text = this.text;
+		throw err;
 	};
 
 	JSTokenizer.prototype.next = function(c) {
@@ -175,7 +173,7 @@
 		if (allowed(this.ch)) {
 			name += this.ch;
 		} else {
-			this.error("Bad name");
+			this.error("Bad name: " + this.ch);
 		}
 
 		while (this.next()) {
@@ -189,7 +187,7 @@
 			if (allowed(this.ch)) {
 				name += this.ch;
 			} else {
-				this.error("Bad name");
+				this.error("Bad name: " + this.ch);
 			}
 		}
 		this.error("Bad name");
