@@ -86,7 +86,7 @@
 		"@commitlint/cli": "^19.6.1",
 		"@commitlint/config-conventional": "^19.6.0",
 		"@eslint/js": "^9.15.0",
-		"@istanbuljs/esm-loader-hook": "^0.2.0",
+		"@istanbuljs/esm-loader-hook": "^0.3.0",
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin": "^2.12.1",
 		"@types/he": "^1.2.3",
