@@ -33,6 +33,31 @@ Copyright: 2009-2024 SAP SE or an SAP affiliate company
 License: Apache-2.0
 Comment: This file is a copy of sap/base/util/JSTokenizer.js from the OpenUI5 project.
 
+Files: src/linter/binding/lib/BindingParser.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/ui/base/BindingParser.js from the OpenUI5 project.
+
+Files: src/linter/binding/lib/ExpressionParser.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/ui/base/ExpressionParser.js from the OpenUI5 project.
+
+Files: src/linter/binding/lib/BindingMode.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/ui/model/BindingMode.js from the OpenUI5 project.
+
+Files: src/linter/binding/lib/util/deepEqual.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/base/util/deepEqual.js from the OpenUI5 project.
+
+Files: src/linter/binding/lib/strings/escapeRegExp.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/base/strings/escapeRegExp.js from the OpenUI5 project.
+
 Files: src/formatter/lib/resolveLinks.ts
 Copyright: 2009-2024 SAP SE or an SAP affiliate company
 License: Apache-2.0
