@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import {readFile} from "node:fs/promises";
 
 export type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
+export type AllowedMetadataOptions = "aggregation" | "association" | "defaultAggregation" | "event" |
+	"method" | "property" | string;
 
 export interface ApiExtractJson {
 	framework: {
 		name: string;
 		version: string;
 	};
-	defaultAggregations: Record<string, string>;
+	metadata: Record<string, Record<string, AllowedMetadataOptions>>;
 	deprecations: Record<AllowedSymbolKind, Record<string, string>>;
 }
 
@@ -29,7 +32,9 @@ class ApiExtractImpl implements ApiExtract {
 	}
 
 	getDefaultAggregation(className: string): string {
-		return this.data.defaultAggregations[className];
+		// return this.data.defaultAggregations[className];
+		// TODO: Implement this method
+		return "";
 	}
 
 	getDeprecationInfo(symbolName: string): DeprecationInfo | undefined {
