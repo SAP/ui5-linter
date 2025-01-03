@@ -54,15 +54,11 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 	};
 
 	forEachSymbol(semanticModel, (symbol, symbolName) => {
-		apiExtract.metadata[symbolName] = {};
-
 		// Generate metadata:
 		if (isAllowedSymbolKind(symbol.kind)) {
-			const symbolOptionValues = metadataProvider.collectOptionValuesForSymbol(symbol);
+			const symbolOptionValues = metadataProvider.collectOptionValuesForSymbol(symbol, false);// Toggle true/false
 			if (symbolOptionValues) {
-				Object.entries(symbolOptionValues).forEach(([optionName, optionValue]) => {
-					apiExtract.metadata[symbolName][optionName] = optionValue;
-				});
+				apiExtract.metadata[symbolName] = symbolOptionValues;
 			}
 		}
 
