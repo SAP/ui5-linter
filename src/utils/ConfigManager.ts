@@ -1,5 +1,5 @@
 import path, {dirname} from "node:path";
-import {fileURLToPath} from "node:url";
+import {fileURLToPath, pathToFileURL} from "node:url";
 import {FilePattern} from "../linter/LinterContext.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -28,12 +28,8 @@ export default class ConfigManager {
 	}
 
 	#resolveModulePaths(fileName: string): string {
-		// Node on Windows behaves strange, does not work with absolute paths
-		// and modifies files extensions in tests i.e. js -> ts, mjs -> tjs
-		// Keeping the relative path in POSIX format resolves those issues.
-		return path.posix.join(
-			path.relative(__dirname, this.#projectRootDir).replaceAll(path.win32.sep, path.posix.sep),
-			fileName);
+		const resolvedPath = path.join(this.#projectRootDir, fileName);
+		return pathToFileURL(resolvedPath).toString();
 	}
 
 	async getConfiguration(): Promise<UI5LintConfigType> {
@@ -41,9 +37,7 @@ export default class ConfigManager {
 
 		if (this.#configFile) {
 			// If it's an relative path, transform to POSIX format
-			const configFilePath = path.isAbsolute(this.#configFile) ?
-				this.#configFile :
-					this.#resolveModulePaths(this.#configFile);
+			const configFilePath = this.#resolveModulePaths(this.#configFile);
 
 			({default: config} = await import(configFilePath) as {default: UI5LintConfigType});
 		} else {
