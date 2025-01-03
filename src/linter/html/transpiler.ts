@@ -21,6 +21,8 @@ export default async function transpileHtml(
 			lintBootstrapAttributes(bootstrapTag, report);
 		}
 
+		detectTestStarter(resourcePath, scriptTags, context);
+
 		scriptTags.forEach((tag) => {
 			// Tags with src attribute do not parse and run inline code
 			const hasSrc = tag.attributes.some((attr) => {
@@ -49,6 +51,23 @@ export default async function transpileHtml(
 		const message = err instanceof Error ? err.message : String(err);
 		context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 		return;
+	}
+}
+
+function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], context: LinterContext) {
+	const shouldBeMigrated = scriptTags.some((tag) => {
+		return (resourcePath.includes("testsuite.qunit.html") && !tag.attributes.some((attr) => {
+			return attr.name.value.toLowerCase() === "src" &&
+				attr.value.value.includes("resources/sap/ui/test/starter/createSuite.js");
+		})) ||
+		(resourcePath.includes("qunit.html") && !tag.attributes.some((attr) => {
+			return attr.name.value.toLowerCase() === "src" &&
+				attr.value.value.includes("resources/sap/ui/test/starter/runTest.js");
+		}));
+	});
+
+	if (shouldBeMigrated) {
+		context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, undefined as never);
 	}
 }
 
