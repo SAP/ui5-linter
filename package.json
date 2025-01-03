@@ -90,7 +90,7 @@
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin": "^2.12.1",
 		"@types/he": "^1.2.3",
-		"@types/node": "^20.17.10",
+		"@types/node": "^20.17.11",
 		"@types/sinon": "^17.0.3",
 		"@types/update-notifier": "^6.0.8",
 		"@types/yargs": "^17.0.33",
