@@ -14,6 +14,9 @@ import {Minimatch} from "minimatch";
 export async function lintProject({
 	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
+	if (!path.isAbsolute(rootDir)) {
+		throw new Error(`rootDir must be an absolute path. Received: ${rootDir}`);
+	}
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
 		const configMngr = new ConfigManager(rootDir, configPath);

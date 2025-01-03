@@ -424,3 +424,18 @@ test.serial("lint: getProjectGraph with different directory structures", async (
 		},
 	});
 });
+
+// Test project fixtures individually
+test.serial("lint: Relative rootDir path throws an exception", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
+	const {lintProject} = t.context;
+
+	await t.throwsAsync(() => {
+		return lintProject({
+			rootDir: path.relative(__dirname, projectPath),
+			filePatterns: [],
+			coverage: true,
+			details: true,
+		});
+	});
+});
