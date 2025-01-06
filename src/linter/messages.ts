@@ -346,7 +346,7 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Use of deprecated renderer detected. Define explicitly the {apiVersion: 2} parameter ` +
 			`in the renderer object`,
-		details: () => `"{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}",`,
+		details: () => `{@link topic:c9ab34570cc14ea5ab72a6d1a4a03e3f Renderer Object}`,
 	},
 
 	[MESSAGE.NO_ICON_POOL_RENDERER]: {
@@ -355,7 +355,7 @@ export const MESSAGE_INFO = {
 
 		message: () =>
 			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
-		details: () => `"{@link sap.ui.core.RenderManager#methods/icon RenderManager}",`,
+		details: () => `{@link sap.ui.core.RenderManager#methods/icon RenderManager}`,
 	},
 
 	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
