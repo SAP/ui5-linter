@@ -15,6 +15,10 @@ import {findDirectives} from "./directives.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
+// This is the same check as in the framework and prevents false-positives
+// https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
+const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
+
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
@@ -89,7 +93,8 @@ export default class SourceFileLinter {
 			}
 			this.visitNode(this.sourceFile);
 
-			if (this.sourceFile.fileName.includes(".qunit.js") &&
+			if (VALID_TESTSUITE.test(this.sourceFile.fileName) &&
+				this.sourceFile.fileName.endsWith(".js") && // JS files are transformed
 				!metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, this.sourceFile);
 			}
@@ -648,7 +653,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
-		if (this.sourceFile.fileName.includes(".qunit.js") &&
+		if (VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.getText() === "jsUnitTestSuite") ||
 				(ts.isIdentifier(node.expression) && node.expression.getText() === "jsUnitTestSuite")
 			)) {
@@ -803,7 +808,7 @@ export default class SourceFileLinter {
 				this.#analyzeMobileInit(node);
 			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
 				this.#analyzeThemingSetTheme(node);
-			} else if (this.sourceFile.fileName.includes(".qunit.js") &&
+			} else if (VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
 			}
@@ -850,7 +855,7 @@ export default class SourceFileLinter {
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
 
-		if (propName === "attachInit" && this.sourceFile.fileName.includes(".qunit.js")) {
+		if (propName === "attachInit" && VALID_TESTSUITE.test(this.sourceFile.fileName)) {
 			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, reportNode);
 		}
 	}
@@ -1321,10 +1326,7 @@ export default class SourceFileLinter {
 
 	analyzeTestsuiteThemeProperty(node: ts.PropertyAssignment) {
 		// Check if the node is part of a testsuite config file by its file name.
-		// This is the same check as in the framework and prevents false-positives
-		// https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
-		const validTestSuiteName = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
-		if (!validTestSuiteName.test(node.getSourceFile().fileName)) return;
+		if (!VALID_TESTSUITE.test(node.getSourceFile().fileName)) return;
 
 		// In a Test Starter testsuite file,
 		// themes can be defined as default (1.) or for test configs individually (2.).
