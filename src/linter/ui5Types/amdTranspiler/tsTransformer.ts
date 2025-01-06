@@ -113,8 +113,13 @@ function transform(
 					const moduleDeclaration = parseModuleDeclaration(node.arguments, checker);
 					const moduleDefinition = moduleDeclarationToDefinition(moduleDeclaration, sourceFile, nodeFactory);
 					moduleDefinitions.push(moduleDefinition);
-					moduleDefinition.imports.forEach((importStatement) =>
-						addModuleMetadata(metadata, "sap.ui.define", importStatement));
+					if (moduleDefinition.imports.length) {
+						moduleDefinition.imports.forEach((importStatement) =>
+							addModuleMetadata(metadata, "sap.ui.define", importStatement));
+					} else {
+						// Empty sap.ui.define (no imports, no body)
+						addModuleMetadata(metadata, "sap.ui.define");
+					}
 					pruneNode(node); // Mark the define call for removal
 				} catch (err) {
 					if (err instanceof UnsupportedModuleError) {
@@ -278,12 +283,12 @@ function transform(
 		}
 	});
 
-	function addModuleMetadata(metadata: LintMetadata, importType: string, importStatement: ts.ImportDeclaration) {
+	function addModuleMetadata(metadata: LintMetadata, importType: string, importStatement?: ts.ImportDeclaration) {
 		if (!metadata.transformedImports) {
 			metadata.transformedImports = new Map<string, Set<string>>();
 		}
 		const curResource = metadata.transformedImports.get(importType) ?? new Set<string>();
-		if (ts.isStringLiteral(importStatement.moduleSpecifier)) {
+		if (importStatement && ts.isStringLiteral(importStatement.moduleSpecifier)) {
 			curResource.add(importStatement.moduleSpecifier.text);
 		}
 		metadata.transformedImports.set(importType, curResource);

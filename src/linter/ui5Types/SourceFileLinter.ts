@@ -90,7 +90,7 @@ export default class SourceFileLinter {
 			this.visitNode(this.sourceFile);
 
 			if (this.sourceFile.fileName.includes(".qunit.js") &&
-				!metadata?.transformedImports?.get("sap.ui.define")?.size) {
+				!metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, this.sourceFile);
 			}
 
