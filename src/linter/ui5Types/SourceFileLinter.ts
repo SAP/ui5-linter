@@ -62,6 +62,7 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#fileName: string;
 	#isComponent: boolean;
+	#hasTestStarterFindings: boolean;
 
 	constructor(
 		private context: LinterContext,
@@ -80,6 +81,7 @@ export default class SourceFileLinter {
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
+		this.#hasTestStarterFindings = false;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -95,7 +97,7 @@ export default class SourceFileLinter {
 
 			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
 				!metadata?.transformedImports?.get("sap.ui.define")) {
-				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, this.sourceFile);
+				this.#reportTestStarter(this.sourceFile);
 			}
 
 			this.#reporter.deduplicateMessages();
@@ -656,7 +658,7 @@ export default class SourceFileLinter {
 			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.getText() === "jsUnitTestSuite") ||
 				(ts.isIdentifier(node.expression) && node.expression.getText() === "jsUnitTestSuite")
 			)) {
-			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+			this.#reportTestStarter(node);
 		}
 
 		const nodeType = this.checker.getTypeAtLocation(node); // checker.getContextualType(node);
@@ -809,7 +811,7 @@ export default class SourceFileLinter {
 				this.#analyzeThemingSetTheme(node);
 			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
-				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+				this.#reportTestStarter(node);
 			}
 		}
 
@@ -855,7 +857,7 @@ export default class SourceFileLinter {
 		}, reportNode);
 
 		if (propName === "attachInit" && /\.qunit\.(js|ts)$/.test(this.sourceFile.fileName)) {
-			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, reportNode);
+			this.#reportTestStarter(reportNode);
 		}
 	}
 
@@ -939,6 +941,13 @@ export default class SourceFileLinter {
 				}, dependency);
 			}
 		});
+	}
+
+	#reportTestStarter(node: ts.Node) {
+		if (!this.#hasTestStarterFindings) {
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+			this.#hasTestStarterFindings = true;
+		}
 	}
 
 	#analyzeParametersGetCall(node: ts.CallExpression) {
