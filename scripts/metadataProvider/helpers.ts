@@ -12,7 +12,11 @@ const RAW_API_JSON_FILES_FOLDER = fileURLToPath(new URL(`../../tmp/apiJson`, imp
 export async function fetchAndExtractApiJsons(url: string) {
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error(`Unexpected response ${response.statusText}`);
+		if (response.status === 404) {
+			throw new Error(`The requested version does not exist`);
+		} else {
+			throw new Error(`Unexpected response ${response.status}: ${response.statusText}`);
+		}
 	}
 
 	if (response.body && response.body instanceof ReadableStream) {
