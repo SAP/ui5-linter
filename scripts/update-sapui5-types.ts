@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import createMetadataInfo from "./metadataProvider/createMetadataInfo.js";
 import createPseudoModulesInfo from "./metadataProvider/createPseudoModulesInfo.js";
 import {cleanup, fetchAndExtractApiJsons} from "./metadataProvider/helpers.js";
@@ -28,6 +29,6 @@ try {
 	// Update @sapui5/types npm package
 	await execFile("npm", ["install", "-E", `@sapui5/types@${version}`]);
 } catch (err) {
-	process.stderr.write(String(err));
+	console.log(err);
 	process.exit(1);
 }
