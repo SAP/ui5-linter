@@ -56,14 +56,15 @@ export default async function transpileHtml(
 
 function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], context: LinterContext) {
 	const shouldBeMigrated = scriptTags.some((tag) => {
-		return (resourcePath.includes("testsuite.qunit.html") && !tag.attributes.some((attr) => {
+		return (/^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.html$/.test(resourcePath) && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
 				(attr.value.value.endsWith("/resources/sap/ui/test/starter/createSuite.js") ||
 					attr.value.value === "resources/sap/ui/test/starter/createSuite.js");
 		})) ||
 		(resourcePath.endsWith("qunit.html") && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
-				attr.value.value.includes("resources/sap/ui/test/starter/runTest.js");
+				(attr.value.value.endsWith("/resources/sap/ui/test/starter/runTest.js") ||
+					attr.value.value === "resources/sap/ui/test/starter/runTest.js");
 		}));
 	});
 
