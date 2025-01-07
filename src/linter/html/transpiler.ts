@@ -58,9 +58,10 @@ function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], contex
 	const shouldBeMigrated = scriptTags.some((tag) => {
 		return (resourcePath.includes("testsuite.qunit.html") && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
-				attr.value.value.includes("resources/sap/ui/test/starter/createSuite.js");
+				(attr.value.value.endsWith("/resources/sap/ui/test/starter/createSuite.js") ||
+					attr.value.value === "resources/sap/ui/test/starter/createSuite.js");
 		})) ||
-		(resourcePath.includes("qunit.html") && !tag.attributes.some((attr) => {
+		(resourcePath.endsWith("qunit.html") && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
 				attr.value.value.includes("resources/sap/ui/test/starter/runTest.js");
 		}));
