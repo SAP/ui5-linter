@@ -56,7 +56,7 @@ export default async function transpileHtml(
 
 function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], context: LinterContext) {
 	const shouldBeMigrated = scriptTags.some((tag) => {
-		const isTestsuiteQunitFile = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.html$/.test(resourcePath);
+		const isTestsuiteQunitFile = /testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.html$/.test(resourcePath);
 		return (isTestsuiteQunitFile && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
 				(attr.value.value.endsWith("/resources/sap/ui/test/starter/createSuite.js") ||
