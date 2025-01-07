@@ -93,7 +93,7 @@ export default class SourceFileLinter {
 			}
 			this.visitNode(this.sourceFile);
 
-			if (this.sourceFile.fileName.endsWith("qunit.js") &&
+			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
 				!metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, this.sourceFile);
 			}
@@ -652,7 +652,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
-		if (this.sourceFile.fileName.endsWith("qunit.js") &&
+		if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.getText() === "jsUnitTestSuite") ||
 				(ts.isIdentifier(node.expression) && node.expression.getText() === "jsUnitTestSuite")
 			)) {
@@ -807,7 +807,7 @@ export default class SourceFileLinter {
 				this.#analyzeMobileInit(node);
 			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
 				this.#analyzeThemingSetTheme(node);
-			} else if (this.sourceFile.fileName.endsWith("qunit.js") &&
+			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
 			}
@@ -854,7 +854,7 @@ export default class SourceFileLinter {
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
 
-		if (propName === "attachInit" && this.sourceFile.fileName.endsWith("qunit.js")) {
+		if (propName === "attachInit" && /\.qunit\.(js|ts)$/.test(this.sourceFile.fileName)) {
 			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, reportNode);
 		}
 	}
