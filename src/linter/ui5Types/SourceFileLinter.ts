@@ -6,7 +6,15 @@ import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
-import {findClassInstanceMethod, getPropertyName, getSymbolForPropertyInConstructSignatures} from "./utils.js";
+import {
+	findClassInstanceMethod,
+	getPropertyName,
+	getSymbolForPropertyInConstructSignatures,
+	getIdentifierOrStringLiteralText,
+	getPropertyAssignmentInObjectLiteralExpression,
+	getPropertyAssignmentsInObjectLiteralExpression,
+	findClassMember,
+} from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
@@ -69,7 +77,6 @@ export default class SourceFileLinter {
 		private resourcePath: ResourcePath,
 		private sourceFile: ts.SourceFile,
 		private sourceMaps: Map<string, string> | undefined,
-		private program: ts.Program,
 		private checker: ts.TypeChecker,
 		private reportCoverage = false,
 		private messageDetails = false,
@@ -150,8 +157,7 @@ export default class SourceFileLinter {
 			});
 		} else if (
 			ts.isPropertyDeclaration(node) &&
-			(ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) &&
-			node.name.text === "metadata" &&
+			getIdentifierOrStringLiteralText(node.name) === "metadata" &&
 			node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
 			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
 		) {
@@ -227,18 +233,10 @@ export default class SourceFileLinter {
 
 	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
 		const className = node.name?.getText() ?? "<unknown>";
-		const rendererMember = node.members.find((member) => {
-			return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
-				member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
-				(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) && member.name.text === "renderer";
-		});
+		const rendererMember = findClassMember(node, "renderer", [ts.SyntaxKind.StaticKeyword]);
 
 		if (!rendererMember) {
-			const nonStaticRender = node.members.find((member: ts.ClassElement) => {
-				return (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member)) &&
-					(ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) &&
-					member.name.text === "renderer";
-			});
+			const nonStaticRender = findClassMember(node, "renderer");
 			if (nonStaticRender) {
 				// Renderer must be a static member
 				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER,
@@ -307,12 +305,10 @@ export default class SourceFileLinter {
 		const findApiVersionNode = (potentialApiVersionNode: ts.Node) => {
 			let apiVersionNode: unknown;
 			// const myControlRenderer = {apiVersion: "2", render: () => {}}
-			apiVersionNode = ts.isObjectLiteralExpression(potentialApiVersionNode) &&
-				potentialApiVersionNode.properties.find((prop) => {
-					return ts.isPropertyAssignment(prop) &&
-						(ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) &&
-						prop.name.text === "apiVersion";
-				}) as ts.PropertyAssignment | undefined;
+
+			if (ts.isObjectLiteralExpression(potentialApiVersionNode)) {
+				apiVersionNode = getPropertyAssignmentInObjectLiteralExpression("apiVersion", potentialApiVersionNode);
+			}
 
 			if (apiVersionNode) {
 				return apiVersionNode;
@@ -428,11 +424,7 @@ export default class SourceFileLinter {
 			renderMethodNode = node;
 		} else if (ts.isObjectLiteralExpression(node)) {
 			// When the render is embed into the renderer object
-			const renderProperty = node.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) &&
-					prop.name.text === "render";
-			});
+			const renderProperty = getPropertyAssignmentInObjectLiteralExpression("render", node);
 			renderMethodNode = (renderProperty && ts.isPropertyAssignment(renderProperty)) ?
 				renderProperty.initializer :
 				undefined;
@@ -557,9 +549,7 @@ export default class SourceFileLinter {
 				node.initializer.text :
 				"";
 
-			const typeNode = node.parent.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) && prop.name.getText() === "type";
-			});
+			const typeNode = getPropertyAssignmentInObjectLiteralExpression("type", node.parent);
 
 			const fullyQuantifiedName = (typeNode &&
 				ts.isPropertyAssignment(typeNode) &&
@@ -881,11 +871,7 @@ export default class SourceFileLinter {
 		if (!initArg) {
 			nodeToHighlight = node;
 		} else {
-			const apiVersionNode = initArg.properties.find((prop) => {
-				return ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) &&
-					prop.name.text === "apiVersion";
-			});
+			const apiVersionNode = getPropertyAssignmentInObjectLiteralExpression("apiVersion", initArg);
 
 			if (!apiVersionNode) { // No arguments or no 'apiVersion' property
 				nodeToHighlight = node;
@@ -914,11 +900,9 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeLibInitDeprecatedLibs(initArg: ts.ObjectLiteralExpression) {
-		const dependenciesNode = initArg.properties.find((prop) => {
-			return ts.isPropertyAssignment(prop) &&
-				ts.isIdentifier(prop.name) &&
-				prop.name.text === "dependencies";
-		});
+		const dependenciesNode = getPropertyAssignmentInObjectLiteralExpression(
+			"dependencies", initArg
+		);
 
 		if (!dependenciesNode ||
 			!ts.isPropertyAssignment(dependenciesNode) ||
@@ -963,23 +947,13 @@ export default class SourceFileLinter {
 		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
 			return;
 		}
-		const firstArg = node.arguments[0];
-		let asyncFalseNode;
-		for (const prop of firstArg.properties) {
-			if (!ts.isPropertyAssignment(prop)) {
-				continue;
-			}
-			if (prop.name.getText() !== "async") {
-				continue;
-			}
-			if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-				asyncFalseNode = prop;
-				break;
-			}
-		}
 
-		if (asyncFalseNode) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, asyncFalseNode);
+		const asyncNode = getPropertyAssignmentInObjectLiteralExpression(
+			"async", node.arguments[0]
+		);
+
+		if (asyncNode?.initializer.kind === ts.SyntaxKind.FalseKeyword) {
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, asyncNode);
 		}
 	}
 
@@ -987,20 +961,10 @@ export default class SourceFileLinter {
 		if (!node.arguments.length || node.arguments.length < 2 || !ts.isObjectLiteralExpression(node.arguments[1])) {
 			return;
 		}
-		const secondArg = node.arguments[1];
-		let batchGroupId;
-		let properties;
-		for (const prop of secondArg.properties) {
-			if (!ts.isPropertyAssignment(prop)) {
-				continue;
-			}
-			if (prop.name.getText() === "batchGroupId") {
-				batchGroupId = prop;
-			}
-			if (prop.name.getText() === "properties") {
-				properties = prop;
-			}
-		}
+
+		const [batchGroupId, properties] = getPropertyAssignmentsInObjectLiteralExpression(
+			["batchGroupId", "properties"], node.arguments[1]
+		);
 
 		if (batchGroupId) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, batchGroupId);
@@ -1038,20 +1002,10 @@ export default class SourceFileLinter {
 		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
 			return;
 		}
-		const configArg = node.arguments[0];
-		let homeIconArg;
-		let homeIconPrecomposedArg;
-		for (const prop of configArg.properties) {
-			if (!ts.isPropertyAssignment(prop)) {
-				continue;
-			}
-			const propName = prop.name.getText();
-			if (propName === "homeIcon") {
-				homeIconArg = prop;
-			} else if (propName === "homeIconPrecomposed") {
-				homeIconPrecomposedArg = prop;
-			}
-		}
+
+		const [homeIconArg, homeIconPrecomposedArg] = getPropertyAssignmentsInObjectLiteralExpression(
+			["homeIcon", "homeIconPrecomposed"], node.arguments[0]
+		);
 
 		if (homeIconArg) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
@@ -1082,18 +1036,9 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const configArg = node.arguments[1];
-
-		let asyncProb;
-		for (const prop of configArg.properties) {
-			if (!ts.isPropertyAssignment(prop)) {
-				continue;
-			}
-			if (prop.name.getText() === "async") {
-				asyncProb = prop;
-				break;
-			}
-		}
+		const asyncProb = getPropertyAssignmentInObjectLiteralExpression(
+			"async", node.arguments[1]
+		);
 
 		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, node);
@@ -1105,18 +1050,9 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const configArg = node.arguments[0];
-
-		let synchronizationModeProb;
-		for (const prop of configArg.properties) {
-			if (!ts.isPropertyAssignment(prop)) {
-				continue;
-			}
-			if (prop.name.getText() === "synchronizationMode") {
-				synchronizationModeProb = prop;
-				break;
-			}
-		}
+		const synchronizationModeProb = getPropertyAssignmentInObjectLiteralExpression(
+			"synchronizationMode", node.arguments[0]
+		);
 
 		if (synchronizationModeProb) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, synchronizationModeProb);
