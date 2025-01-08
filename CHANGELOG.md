@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.1](https://github.com/SAP/ui5-linter/compare/v1.6.0...v1.6.1) (2025-01-08)
+
+
+### Bug Fixes
+
+* **linter:** Prefer 'webapp' and 'src' directories for init fallbacks ([a56db27](https://github.com/SAP/ui5-linter/commit/a56db27ddf00e400e86e5473ee2d1c8d44a3da78))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.25 ([4096664](https://github.com/SAP/ui5-linter/commit/40966640485a75226665da7e86e8e065041291d5))
+
 ## [1.6.0](https://github.com/SAP/ui5-linter/compare/v1.5.0...v1.6.0) (2025-01-08)
 
 
