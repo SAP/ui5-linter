@@ -195,11 +195,11 @@ async function getProjectGraph(rootDir: string, ui5Config?: string | object): Pr
 		const dirChecks = await Promise.all([
 			dirExists(path.join(rootDir, "webapp")),
 			dirExists(path.join(rootDir, "src", "main", "webapp")),
-			dirExists(path.join(rootDir, "WebContent")),
 			dirExists(path.join(rootDir, "src", "main", "jslib")),
 			dirExists(path.join(rootDir, "src", "main", "js")),
 			dirExists(path.join(rootDir, "src", "main", "uilib")),
 			dirExists(path.join(rootDir, "src")),
+			dirExists(path.join(rootDir, "WebContent")),
 		]);
 
 		if (dirChecks[0]) {
@@ -209,20 +209,20 @@ async function getProjectGraph(rootDir: string, ui5Config?: string | object): Pr
 			// Legacy app with src/main/webapp folder
 			rootConfiguration = createProjectConfig("application", "src/main/webapp");
 		} else if (dirChecks[2]) {
-			// Legacy app with WebContent folder
-			rootConfiguration = createProjectConfig("application", "WebContent");
-		} else if (dirChecks[3]) {
 			// Library with src/main/jslib folder
 			rootConfiguration = createProjectConfig("library", "src/main/jslib", "src/test/jslib");
-		} else if (dirChecks[4]) {
+		} else if (dirChecks[3]) {
 			// Library with src/main/js folder
 			rootConfiguration = createProjectConfig("library", "src/main/js", "src/test/js");
-		} else if (dirChecks[5]) {
+		} else if (dirChecks[4]) {
 			// Library with src/main/uilib folder
 			rootConfiguration = createProjectConfig("library", "src/main/uilib", "src/test/uilib");
-		} else if (dirChecks[6]) {
+		} else if (dirChecks[5]) {
 			// Library with src folder
 			rootConfiguration = createProjectConfig("library", "src", "test");
+		} else if (dirChecks[6]) {
+			// Legacy app with WebContent folder
+			rootConfiguration = createProjectConfig("application", "WebContent");
 		}
 	}
 
