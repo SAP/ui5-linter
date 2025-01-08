@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.24"
+    "version": "1.120.25"
   },
   "defaultAggregations": {
     "sap.ca.ui.CustomerControlListItem": "content",
@@ -1251,9 +1251,9 @@
       "jQuery.sap.log.LogLevel": "(since 1.1.2) To streamline the Logging API a bit, the separation between Level and LogLevel has been given up. Use the (enriched) enumeration {@link jQuery.sap.log.Level} instead.",
       "jQuery.sap.storage.Type": "(since 1.120) Use {@link module:sap/ui/util/Storage.Type sap/ui/util/Storage.Type} instead.",
       "module:sap/base/config.Type.Code": "(since 1.120) ",
-      "sap.ui.core.CalendarType": "(since 1.120) Please use {@link module:sap/base/18n/date/CalendarType} instead.",
+      "sap.ui.core.CalendarType": "(since 1.120) Please use {@link module:sap/base/i18n/date/CalendarType} instead.",
       "sap.ui.core.Configuration.AnimationMode": "(since 1.120) Please use module {@link module:sap/ui/core/AnimationMode AnimationMode} instead.",
-      "sap.ui.core.date.CalendarWeekNumbering": "(since 1.120) Please use {@link module:sap/base/18n/date/CalendarWeekNumbering} instead.",
+      "sap.ui.core.date.CalendarWeekNumbering": "(since 1.120) Please use {@link module:sap/base/i18n/date/CalendarWeekNumbering} instead.",
       "sap.ui.core.format.DateFormatTimezoneDisplay": "(since 1.101) replaced by <code>DateFormat#getDateTimeWithTimezoneInstance</code> with the <code>showDate</code>, <code>showTime</code> and <code>showTimezone</code> format options.",
       "sap.ui.core.MessageType": "(since 1.120) Please use {@link module:sap/ui/core/message/MessageType} instead.",
       "sap.ui.core.mvc.ViewType.HTML": "(since 1.108) Consider using {@link sap.ui.core.mvx.XMLView XMLViews} or \"typed views\" (view classes written in JavaScript) instead.",
