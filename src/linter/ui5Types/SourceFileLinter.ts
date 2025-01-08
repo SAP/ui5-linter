@@ -15,6 +15,10 @@ import {findDirectives} from "./directives.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
+// This is the same check as in the framework and prevents false-positives
+// https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
+const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
+
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
@@ -58,6 +62,7 @@ export default class SourceFileLinter {
 	#boundVisitNode: (node: ts.Node) => void;
 	#fileName: string;
 	#isComponent: boolean;
+	#hasTestStarterFindings: boolean;
 
 	constructor(
 		private context: LinterContext,
@@ -76,6 +81,7 @@ export default class SourceFileLinter {
 		this.#boundVisitNode = this.visitNode.bind(this);
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
+		this.#hasTestStarterFindings = false;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -88,6 +94,12 @@ export default class SourceFileLinter {
 				findDirectives(this.sourceFile, metadata);
 			}
 			this.visitNode(this.sourceFile);
+
+			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
+				!metadata?.transformedImports?.get("sap.ui.define")) {
+				this.#reportTestStarter(this.sourceFile);
+			}
+
 			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -642,6 +654,13 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
+		if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
+			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.getText() === "jsUnitTestSuite") ||
+				(ts.isIdentifier(node.expression) && node.expression.getText() === "jsUnitTestSuite")
+			)) {
+			this.#reportTestStarter(node);
+		}
+
 		const nodeType = this.checker.getTypeAtLocation(node); // checker.getContextualType(node);
 		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
 			return;
@@ -790,6 +809,9 @@ export default class SourceFileLinter {
 				this.#analyzeMobileInit(node);
 			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
 				this.#analyzeThemingSetTheme(node);
+			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
+				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
+				this.#reportTestStarter(node);
 			}
 		}
 
@@ -826,11 +848,17 @@ export default class SourceFileLinter {
 			}
 		}
 
+		const propName = getPropertyName(reportNode);
+
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
-			functionName: getPropertyName(reportNode),
+			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
+
+		if (propName === "attachInit" && /\.qunit\.(js|ts)$/.test(this.sourceFile.fileName)) {
+			this.#reportTestStarter(reportNode);
+		}
 	}
 
 	getSymbolModuleDeclaration(symbol: ts.Symbol) {
@@ -913,6 +941,13 @@ export default class SourceFileLinter {
 				}, dependency);
 			}
 		});
+	}
+
+	#reportTestStarter(node: ts.Node) {
+		if (!this.#hasTestStarterFindings) {
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+			this.#hasTestStarterFindings = true;
+		}
 	}
 
 	#analyzeParametersGetCall(node: ts.CallExpression) {
@@ -1299,10 +1334,7 @@ export default class SourceFileLinter {
 
 	analyzeTestsuiteThemeProperty(node: ts.PropertyAssignment) {
 		// Check if the node is part of a testsuite config file by its file name.
-		// This is the same check as in the framework and prevents false-positives
-		// https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
-		const validTestSuiteName = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
-		if (!validTestSuiteName.test(node.getSourceFile().fileName)) return;
+		if (!VALID_TESTSUITE.test(node.getSourceFile().fileName)) return;
 
 		// In a Test Starter testsuite file,
 		// themes can be defined as default (1.) or for test configs individually (2.).

@@ -9,7 +9,7 @@ import replaceNodeInParent, {NodeReplacement} from "./replaceNodeInParent.js";
 import {toPosStr, UnsupportedModuleError} from "./util.js";
 import rewriteExtendCall, {UnsupportedExtendCall} from "./rewriteExtendCall.js";
 import insertNodesInParent from "./insertNodesInParent.js";
-import LinterContext from "../../LinterContext.js";
+import LinterContext, {LintMetadata} from "../../LinterContext.js";
 import {findDirectives} from "../directives.js";
 
 const log = getLogger("linter:ui5Types:amdTranspiler:TsTransformer");
@@ -113,6 +113,13 @@ function transform(
 					const moduleDeclaration = parseModuleDeclaration(node.arguments, checker);
 					const moduleDefinition = moduleDeclarationToDefinition(moduleDeclaration, sourceFile, nodeFactory);
 					moduleDefinitions.push(moduleDefinition);
+					if (moduleDefinition.imports.length) {
+						moduleDefinition.imports.forEach((importStatement) =>
+							addModuleMetadata(metadata, "sap.ui.define", importStatement));
+					} else {
+						// Empty sap.ui.define (no imports, no body)
+						addModuleMetadata(metadata, "sap.ui.define");
+					}
 					pruneNode(node); // Mark the define call for removal
 				} catch (err) {
 					if (err instanceof UnsupportedModuleError) {
@@ -127,6 +134,8 @@ function transform(
 					if (requireExpression.async) {
 						const res = transformAsyncRequireCall(node, requireExpression, nodeFactory);
 						requireImports.push(...res.imports);
+						res.imports.forEach((importStatement) =>
+							addModuleMetadata(metadata, "sap.ui.require", importStatement));
 						if (res.callback) {
 							replaceNode(node, res.callback);
 							if (res.errback) {
@@ -149,6 +158,7 @@ function transform(
 					} else {
 						const res = transformSyncRequireCall(node, requireExpression, nodeFactory);
 						requireImports.push(res.import);
+						addModuleMetadata(metadata, "sap.ui.require", res.import);
 						replaceNode(node, res.requireStatement);
 					}
 				} catch (err) {
@@ -272,6 +282,17 @@ function transform(
 			nodeReplacements.set(processedSourceFile, replacements);
 		}
 	});
+
+	function addModuleMetadata(metadata: LintMetadata, importType: string, importStatement?: ts.ImportDeclaration) {
+		if (!metadata.transformedImports) {
+			metadata.transformedImports = new Map<string, Set<string>>();
+		}
+		const curResource = metadata.transformedImports.get(importType) ?? new Set<string>();
+		if (importStatement && ts.isStringLiteral(importStatement.moduleSpecifier)) {
+			curResource.add(importStatement.moduleSpecifier.text);
+		}
+		metadata.transformedImports.set(importType, curResource);
+	}
 
 	function getCommentsFromNode(node: ts.Node, sourceFile?: ts.SourceFile): NodeComments {
 		const sourceText = sourceFile?.getFullText() ?? fullSourceText;
