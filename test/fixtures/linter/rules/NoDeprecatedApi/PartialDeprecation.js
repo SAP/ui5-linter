@@ -33,7 +33,7 @@ sap.ui.define([
 		synchronizationMode: "None" // Parameter "synchronizationMode" is deprecated since 1.110
 	});
 	var v4Model = new ODataModelV4({
-		synchronizationMode: true // Parameter "synchronizationMode" is deprecated since 1.110
+		"synchronizationMode": true // Parameter "synchronizationMode" is deprecated since 1.110
 	});
 	var v4Model = new ODataModelV4({
 		serviceUrl: "my-service" // Negative test: Deprecated parameter is omitted
