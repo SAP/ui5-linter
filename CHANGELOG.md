@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.6.0](https://github.com/SAP/ui5-linter/compare/v1.5.0...v1.6.0) (2025-01-08)
+
+
+### Features
+
+* Add further deprecated configuration option detection ([#357](https://github.com/SAP/ui5-linter/issues/357)) ([28e60a0](https://github.com/SAP/ui5-linter/commit/28e60a09ee05974dc2971554ced627663f741719))
+* Detect non-Test Starter test setups ([#448](https://github.com/SAP/ui5-linter/issues/448)) ([8d7442f](https://github.com/SAP/ui5-linter/commit/8d7442faba475a8e818defb376872a55cb7db333))
+* **linter:** Extend project initialization fallbacks ([f9b0f96](https://github.com/SAP/ui5-linter/commit/f9b0f966bb5458f1cdf39f027204381d75de1768))
+
+
+### Bug Fixes
+
+* Allow renderer v4 ([#443](https://github.com/SAP/ui5-linter/issues/443)) ([2e2d8d2](https://github.com/SAP/ui5-linter/commit/2e2d8d22dae64a148624eda8475b20d6fda4d775))
+* **ConfigManager:** Resolve ESM import exception on Windows ([87c21e6](https://github.com/SAP/ui5-linter/commit/87c21e6414a80293b66a3863b15d56f07307d029))
+* **messages:** Remove superfluous quotes and comma around message details ([49ff2f8](https://github.com/SAP/ui5-linter/commit/49ff2f8c8d82e6cc242f05e9c08f4a015642b550))
+
+
+### Dependencies
+
+* Bump chalk from 5.3.0 to 5.4.0 ([2adeea4](https://github.com/SAP/ui5-linter/commit/2adeea4027ee5c3626b26709cbaa3768c52577fd))
+* **sax-wasm:** Pin dependency to v2.2.4 ([d595b4f](https://github.com/SAP/ui5-linter/commit/d595b4f43efa462f50fe7dbc009c5c76afdbea7c))
+
 ## [1.5.0](https://github.com/SAP/ui5-linter/compare/v1.4.1...v1.5.0) (2024-12-10)
 
 
