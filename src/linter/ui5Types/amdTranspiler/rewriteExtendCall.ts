@@ -1,5 +1,6 @@
 import ts from "typescript";
 import {toPosStr} from "./util.js";
+import {getPropertyNameText} from "../utils.js";
 
 export class UnsupportedExtendCall extends Error {
 	constructor(message: string) {
@@ -118,10 +119,7 @@ function getClassBodyFromArgument(nodeFactory: ts.NodeFactory, classBody: ts.Exp
 					prop.initializer.body);
 			} else {
 				const modifiers: ts.ModifierLike[] = [];
-				let propertyName;
-				if (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) {
-					propertyName = prop.name.text;
-				}
+				const propertyName = getPropertyNameText(prop.name);
 				// Special handling:
 				// - metadata: *readonly static*
 				// - renderer: *static*
