@@ -101,7 +101,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				choices: ["stylish", "json", "markdown"],
 			})
 			.option("ui5-config", {
-				describe: "Set a custom path for the UI5 Config (default: './ui5.yaml')",
+				describe: "Set a custom path for the UI5 Config (default: './ui5.yaml' if that file exists)",
 				type: "string",
 			})
 			.coerce([

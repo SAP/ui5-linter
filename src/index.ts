@@ -35,7 +35,7 @@ export interface UI5LinterOptions {
 	coverage?: boolean;
 	/**
 	 * Path to a ui5.yaml file or an object representation of ui5.yaml
-	 * @default "./ui5.yaml"
+	 * @default "./ui5.yaml" (if that file exists)
 	 */
 	ui5Config?: string | object;
 	/**
@@ -53,7 +53,7 @@ export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]>
 		config,
 		noConfig,
 		coverage = false,
-		ui5Config = "./ui5.yaml",
+		ui5Config,
 		rootDir = process.cwd(),
 	} = options ?? {};
 
