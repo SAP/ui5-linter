@@ -299,6 +299,7 @@ function createDefaultExport(factory: ts.NodeFactory, node: ts.Node): ts.Stateme
 		case SyntaxKind.ArrowFunction:
 		case SyntaxKind.Identifier:
 		case SyntaxKind.PropertyAccessExpression:
+		case SyntaxKind.NewExpression:
 			return factory.createExportAssignment(undefined, undefined, node as ts.Expression);
 		case SyntaxKind.ClassDeclaration:
 			return factory.updateClassDeclaration(
