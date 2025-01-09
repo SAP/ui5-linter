@@ -1224,7 +1224,14 @@ export default class SourceFileLinter {
 					ts.isStringLiteral(importNode.moduleSpecifier) && importNode.moduleSpecifier.text === moduleName);
 
 		if (isRegisteredAsUi5Module && !hasAmbientModuleExplicitImport) {
-			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, node.name);
+			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
+				module: [
+					exprNode?.getText(),
+					...namespace,
+					node.name.text,
+				].join("/"),
+				namespace: moduleName,
+			}, node.name);
 		}
 	}
 

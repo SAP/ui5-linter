@@ -576,8 +576,9 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-implicit-globals"],
 
-		message: () => "Access of a module not exported by a library",
-		details: () => "Please import the module itself because it is no longer exported by the library",
+		message: ({module}: {module: string}) => `Access of a module (${module}) not exported by a library`,
+		details: ({namespace}: {namespace: string}) =>
+			`Please import the module itself (${namespace}) because it is no longer exported by the library`,
 	},
 
 } as const;
