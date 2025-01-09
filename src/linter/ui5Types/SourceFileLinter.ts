@@ -1193,7 +1193,7 @@ export default class SourceFileLinter {
 
 		const exprNode = node.expression;
 		const exprType = this.checker.getTypeAtLocation(exprNode);
-		const potentialLibImport = exprType.symbol?.name.replaceAll("\"", "") ?? "";
+		const potentialLibImport = exprType.symbol?.getName().replaceAll("\"", "") ?? "";
 
 		// Checks if the left hand side is a library import.
 		// It's sufficient just to check for "/library" as the end of the string by convention
