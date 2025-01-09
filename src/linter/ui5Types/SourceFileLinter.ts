@@ -124,6 +124,7 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
+			this.analyzeExportedValuesByLib(node as ts.PropertyAccessExpression);
 		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
 			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
 			// e.g. `const { Button } = sap.m;`
@@ -1185,8 +1186,43 @@ export default class SourceFileLinter {
 		].includes(nodeType);
 	}
 
+	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression) {
+		if (node.name.kind !== ts.SyntaxKind.Identifier) {
+			return;
+		}
+
+		const exprNode = node.expression;
+		const exprType = this.checker.getTypeAtLocation(exprNode);
+		const potentialLibImport = exprType.symbol?.name.replaceAll("\"", "") ?? "";
+
+		// Checks if the left hand side is a library import.
+		// It's sufficient just to check for "/library" as the end of the string by convention
+		if (!potentialLibImport.endsWith("/library")) {
+			return;
+		}
+
+		const namespace = potentialLibImport.replace("/library", "");
+		const moduleName = `${namespace}/${node.name.text}`;
+
+		// Check if the module is registered within ambient modules
+		const ambientModules = this.checker.getAmbientModules();
+		const isRegisteredAsUi5Module = ambientModules.some((module) =>
+			module.name === `"${moduleName}"`);
+
+		// Check if it has been imported as UI5 module
+		const hasAmbientModuleExplicitImport =
+			this.sourceFile.statements.filter(ts.isImportDeclaration)
+				.some((importNode) =>
+					ts.isStringLiteral(importNode.moduleSpecifier) && importNode.moduleSpecifier.text === moduleName);
+
+		if (isRegisteredAsUi5Module && !hasAmbientModuleExplicitImport) {
+			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, node.name);
+		}
+	}
+
 	analyzePropertyAccessExpression(node: ts.AccessExpression | ts.CallExpression) {
 		const exprNode = node.expression;
+
 		if (ts.isIdentifier(exprNode)) {
 			// The expression being an identifier indicates that this is the first access
 			// in a possible chain. E.g. the "sap" in "sap.ui.getCore()"
