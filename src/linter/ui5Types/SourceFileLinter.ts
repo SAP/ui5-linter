@@ -1187,7 +1187,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression) {
-		if (node.name.kind !== ts.SyntaxKind.Identifier) {
+		if (node.name?.kind !== ts.SyntaxKind.Identifier) {
 			return;
 		}
 
