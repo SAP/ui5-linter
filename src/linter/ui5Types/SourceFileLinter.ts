@@ -1191,7 +1191,12 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const exprNode = node.expression;
+		let exprNode = node.expression;
+		const namespace: string[] = [];
+		while (ts.isPropertyAccessExpression(exprNode)) {
+			namespace.unshift(exprNode.name.text);
+			exprNode = exprNode.expression;
+		}
 		const exprType = this.checker.getTypeAtLocation(exprNode);
 		const potentialLibImport = exprType.symbol?.getName().replaceAll("\"", "") ?? "";
 
@@ -1201,8 +1206,11 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const namespace = potentialLibImport.replace("/library", "");
-		const moduleName = `${namespace}/${node.name.text}`;
+		const moduleName = [
+			potentialLibImport.replace("/library", ""),
+			...namespace,
+			node.name.text,
+		].join("/");
 
 		// Check if the module is registered within ambient modules
 		const ambientModules = this.checker.getAmbientModules();
