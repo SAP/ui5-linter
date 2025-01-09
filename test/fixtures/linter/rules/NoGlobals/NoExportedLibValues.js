@@ -1,9 +1,9 @@
-sap.ui.define(["sap/ui/unified/library", "sap/ui/mdc/library"],
-	function (unifiedLibrary, mdcLibrary) {
+sap.ui.define(["sap/ui/unified/library", "sap/ui/core/library"],
+	function (unifiedLibrary, coreLibrary) {
 	"use strict";
 	
 	var CalendarDayType = unifiedLibrary.CalendarDayType,
 		DateRange = unifiedLibrary.DateRange,
 		DateTypeRange = unifiedLibrary.DateTypeRange,
-		FilterItemLayout = mdcLibrary.filterbar.aligned.FilterItemLayout;
+		FilterItemLayout = coreLibrary.tmpl.DOMAttribute;
 });
