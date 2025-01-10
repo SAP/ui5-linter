@@ -1238,6 +1238,7 @@ export default class SourceFileLinter {
 					varName,
 				].join("/"),
 				namespace: moduleName,
+				libraryName: potentialLibImport,
 			},
 			(ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression));
 		}
