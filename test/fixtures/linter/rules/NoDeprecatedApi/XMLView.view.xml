@@ -18,4 +18,18 @@
 		<Button tap=".onButtonTap"/> <!-- Event "tap" is deprecated -->
 	</SegmentedButton>
 
+	<mvc:View type="JS" viewName="myapp.view.Home"/>
+	<mvc:View type="JSON" viewName="myapp.view.Home"/>
+	<mvc:View type="HTML" viewName="myapp.view.Home"/>
+	<mvc:View type="Template" viewName="myapp.view.Home"/>
+
+	<mvc:JSView viewName="myapp.view.Home"/>
+	<mvc:JSONView viewName="myapp.view.Home"/>
+	<mvc:HTMLView viewName="myapp.view.Home"/>
+	<mvc:TemplateView viewName="myapp.view.Home"/>
+
+	<!-- Negative test: XML view -->
+	<mvc:View type="XML" viewName="myapp.view.Home"/>
+	<mvc:XMLView viewName="myapp.view.Home"/>
+
 </mvc:View>
