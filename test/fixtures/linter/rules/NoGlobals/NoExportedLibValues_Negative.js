@@ -10,7 +10,7 @@ sap.ui.define([
 	"use strict";
 	
 	var CalendarDayTypeLib = unifiedLibrary.CalendarDayType,
-		DateRangeLib = unifiedLibrary.DateRange,
+		DateRange = unifiedLibrary["DateRange"],
 		DateTypeRangeLib = unifiedLibrary.DateTypeRange,
 		DOMAttribute = coreLibrary.tmpl.DOMAttribute;
 });

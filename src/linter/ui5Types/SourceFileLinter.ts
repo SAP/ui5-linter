@@ -124,7 +124,7 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
-			this.analyzeExportedValuesByLib(node as ts.PropertyAccessExpression);
+			this.analyzeExportedValuesByLib(node as (ts.PropertyAccessExpression | ts.ElementAccessExpression));
 		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
 			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
 			// e.g. `const { Button } = sap.m;`
@@ -1186,22 +1186,32 @@ export default class SourceFileLinter {
 		].includes(nodeType);
 	}
 
-	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression) {
-		if (node.name?.kind !== ts.SyntaxKind.Identifier) {
+	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
+		if (!ts.isElementAccessExpression(node) &&
+			node.name?.kind !== ts.SyntaxKind.Identifier) {
 			return;
 		}
 
+		const extractVarName = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression) => {
+			const nodeName = ts.isPropertyAccessExpression(node) ?
+					node.name.getText() :
+					node.argumentExpression.getText();
+
+			return nodeName.replaceAll("\"", "");
+		};
+
 		let exprNode = node.expression;
 		const namespace: string[] = [];
-		while (ts.isPropertyAccessExpression(exprNode)) {
-			namespace.unshift(exprNode.name.text);
+		while (ts.isPropertyAccessExpression(exprNode) ||
+			ts.isElementAccessExpression(exprNode)) {
+			namespace.unshift(extractVarName(exprNode));
 			exprNode = exprNode.expression;
 		}
 		const exprType = this.checker.getTypeAtLocation(exprNode);
 		const potentialLibImport = exprType.symbol?.getName().replaceAll("\"", "") ?? "";
 
 		// Checks if the left hand side is a library import.
-		// It's sufficient just to check for "/library" as the end of the string by convention
+		// It's sufficient just to check for "/library" at the end of the string by convention
 		if (!potentialLibImport.endsWith("/library")) {
 			return;
 		}
@@ -1209,7 +1219,7 @@ export default class SourceFileLinter {
 		const moduleName = [
 			potentialLibImport.replace("/library", ""),
 			...namespace,
-			node.name.text,
+			extractVarName(node),
 		].join("/");
 
 		// Check if the module is registered within ambient modules
@@ -1228,10 +1238,11 @@ export default class SourceFileLinter {
 				module: [
 					exprNode?.getText(),
 					...namespace,
-					node.name.text,
+					extractVarName(node),
 				].join("/"),
 				namespace: moduleName,
-			}, node.name);
+			},
+			(ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression));
 		}
 	}
 
