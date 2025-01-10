@@ -1,6 +1,6 @@
 import path from "node:path/posix";
 import ts from "typescript";
-import {TraceMap} from "@jridgewell/trace-mapping";
+import {EncodedSourceMap, TraceMap} from "@jridgewell/trace-mapping";
 import {resolveLinks} from "../../formatter/lib/resolveLinks.js";
 
 import LinterContext, {
@@ -37,7 +37,12 @@ export default class SourceFileReporter {
 		this.#resourcePath = resourcePath;
 		this.#sourceFile = sourceFile;
 		if (sourceMap) {
-			this.#traceMap = new TraceMap(sourceMap);
+			const parsedSourceMap = JSON.parse(sourceMap) as EncodedSourceMap;
+			if (parsedSourceMap.mappings !== "") {
+				// Only create a trace map if there are mappings.
+				// Otherwise, it will be useless and causes errors in some cases (Failed to map back to source).
+				this.#traceMap = new TraceMap(parsedSourceMap);
+			}
 		}
 
 		this.#originalResourcePath = this.#getOriginalResourcePath() ?? resourcePath;
