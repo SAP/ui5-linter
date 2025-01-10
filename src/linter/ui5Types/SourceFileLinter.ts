@@ -1232,12 +1232,12 @@ export default class SourceFileLinter {
 
 		if (isRegisteredAsUi5Module && !libAmbientModule?.exports?.has(varName as ts.__String)) {
 			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
-				module: [
+				module: moduleName,
+				namespace: [
 					exprNode?.getText(),
 					...namespace,
 					varName,
-				].join("/"),
-				namespace: moduleName,
+				].join("."),
 				libraryName: potentialLibImport,
 			},
 			(ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression));
