@@ -1227,7 +1227,7 @@ export default class SourceFileLinter {
 		const isRegisteredAsUi5Module = ambientModules.some((module) =>
 			module.name === `"${moduleName}"`);
 
-		// Check if it has been imported as UI5 module
+		// Check if it has been imported as a module explicitly
 		const hasAmbientModuleExplicitImport =
 			this.sourceFile.statements.filter(ts.isImportDeclaration)
 				.some((importNode) =>
