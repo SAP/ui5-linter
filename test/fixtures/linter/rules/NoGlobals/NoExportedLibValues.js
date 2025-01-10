@@ -5,5 +5,8 @@ sap.ui.define(["sap/ui/unified/library", "sap/ui/core/library"],
 	var CalendarDayType = unifiedLibrary.CalendarDayType,
 		DateRange = unifiedLibrary["DateRange"],
 		DateTypeRange = unifiedLibrary.DateTypeRange,
-		FilterItemLayout = coreLibrary.tmpl.DOMAttribute;
+		DOMAttribute = coreLibrary.tmpl.DOMAttribute,
+		DOMAttribute2 = coreLibrary["tmpl"].DOMAttribute,
+		DOMAttribute3 = coreLibrary["tmpl"]["DOMAttribute"],
+		DOMAttribute4 = coreLibrary.tmpl["DOMAttribute"];
 });
