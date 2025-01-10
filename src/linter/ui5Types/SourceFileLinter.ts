@@ -1227,13 +1227,7 @@ export default class SourceFileLinter {
 		const isRegisteredAsUi5Module = ambientModules.some((module) =>
 			module.name === `"${moduleName}"`);
 
-		// Check if it has been imported as a module explicitly
-		const hasAmbientModuleExplicitImport =
-			this.sourceFile.statements.filter(ts.isImportDeclaration)
-				.some((importNode) =>
-					ts.isStringLiteral(importNode.moduleSpecifier) && importNode.moduleSpecifier.text === moduleName);
-
-		if (isRegisteredAsUi5Module && !hasAmbientModuleExplicitImport) {
+		if (isRegisteredAsUi5Module) {
 			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
 				module: [
 					exprNode?.getText(),
