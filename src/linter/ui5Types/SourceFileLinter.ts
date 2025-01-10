@@ -1216,23 +1216,26 @@ export default class SourceFileLinter {
 			return;
 		}
 
+		const varName = extractVarName(node);
 		const moduleName = [
 			potentialLibImport.replace("/library", ""),
 			...namespace,
-			extractVarName(node),
+			varName,
 		].join("/");
 
 		// Check if the module is registered within ambient modules
 		const ambientModules = this.checker.getAmbientModules();
+		const libAmbientModule = ambientModules.find((module) =>
+			module.name === `"${potentialLibImport}"`);
 		const isRegisteredAsUi5Module = ambientModules.some((module) =>
 			module.name === `"${moduleName}"`);
 
-		if (isRegisteredAsUi5Module) {
+		if (isRegisteredAsUi5Module && !libAmbientModule?.exports?.has(varName as ts.__String)) {
 			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
 				module: [
 					exprNode?.getText(),
 					...namespace,
-					extractVarName(node),
+					varName,
 				].join("/"),
 				namespace: moduleName,
 			},
