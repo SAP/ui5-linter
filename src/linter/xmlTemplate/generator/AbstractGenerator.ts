@@ -32,7 +32,7 @@ export default abstract class AbstractGenerator {
 		throw new Error("Not implemented");
 	}
 
-	writeControl(controlDeclaration: ControlDeclaration) {
+	writeControl(controlDeclaration: ControlDeclaration, rootControl = false) {
 		const importVariableName = this._getUniqueVariableName(controlDeclaration.name);
 
 		const moduleName = controlDeclaration.namespace.replaceAll(".", "/") + `/${controlDeclaration.name}`;
@@ -49,7 +49,18 @@ export default abstract class AbstractGenerator {
 
 		// Create the control
 		this._body.write(`const ${controlDeclaration.variableName} = `);
-		this._body.writeln(`new ${importVariableName}({`, controlDeclaration.start, controlDeclaration.end);
+
+		// Special case: Use View.create for nested views
+		if (!rootControl && moduleName === "sap/ui/core/mvc/View") {
+			this._body.writeln(
+				`await ${importVariableName}.create({`, controlDeclaration.start, controlDeclaration.end
+			);
+		} else {
+			this._body.writeln(
+				`new ${importVariableName}({`, controlDeclaration.start, controlDeclaration.end
+			);
+		}
+
 		// Write properties
 		controlDeclaration.properties.forEach((attribute) => {
 			// Add mapping of id to module name so that specific byId lookup for controllers can be generated.
