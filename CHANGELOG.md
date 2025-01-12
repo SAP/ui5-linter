@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.2](https://github.com/SAP/ui5-linter/compare/v1.6.1...v1.6.2) (2025-01-12)
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Handle NewExpression ([4988013](https://github.com/SAP/ui5-linter/commit/49880130229cf2bd115da29c5c857a2d043947aa))
+* **API:** Remove ui5Config parameter defaulting ([e31d89e](https://github.com/SAP/ui5-linter/commit/e31d89ec67b9081a006fdd34d1c5e0d97169063a))
+* **parsing-error:** Failed to map back to source ([2876f35](https://github.com/SAP/ui5-linter/commit/2876f35c68586bc51ee6ac7172fc9a6e1fe2eb6e))
+
+
+### Dependencies
+
+* Bump typescript from 5.7.2 to 5.7.3 ([d3f0471](https://github.com/SAP/ui5-linter/commit/d3f0471b49e03a2103cb9783f5d5029fe99712c5))
+
 ## [1.6.1](https://github.com/SAP/ui5-linter/compare/v1.6.0...v1.6.1) (2025-01-08)
 
 
