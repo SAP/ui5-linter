@@ -92,7 +92,7 @@ test("XML Binding: Expression Binding", (t) => {
 	t.snapshot(res);
 });
 
-test("XML Binding: Complex Expression Binding", (t) => {
+test("XML Binding: Expression Binding with an embedded composite binding", (t) => {
 	const {parse} = t.context;
 
 	const res = parse(`{= %{/data/message}.length < 20

@@ -37,83 +37,9 @@ var rFragments = /(\\[\\\{\}])|(\{)/g;
  */
 var rBindingChars = /([\\\{\}])/g;
 
-/**
- * Creates a composite formatter which calls <code>fnRootFormatter</code> on the results of the
- * given formatters, which in turn are called on the original arguments.
- *
- * @param {function[]} aFormatters
- *   list of leaf-level formatters
- * @param {function} [fnRootFormatter]
- *   root level formatter; default: <code>Array.prototype.join(., " ")</code>
- * @return {function}
- *   a composite formatter
- */
-function composeFormatters(aFormatters, fnRootFormatter) {
-	var bRequiresIContext = aFormatters.some(function (fnFormatter) {
-			return fnFormatter.requiresIContext; // Note: it's either true or missing here
-		});
-
-	function formatter(oInterface) {
-		var i,
-			n = aFormatters.length,
-			aArguments = arguments,
-			aResults = new Array(n);
-
-		for (i = 0; i < n; i += 1) {
-			if (aFormatters[i].requiresIContext) {
-				aArguments = arguments;
-			} else if (bRequiresIContext) { // drop oInterface
-				aArguments = Array.prototype.slice.call(arguments, 1);
-			}
-			aResults[i] = aFormatters[i].apply(this, aArguments);
-		}
-
-		if (fnRootFormatter) {
-			return fnRootFormatter.apply(this, aResults);
-		}
-		// @see sap.ui.model.CompositeBinding#getExternalValue
-		// "default: multiple values are joined together as space separated list if no
-		//  formatter or type specified"
-		return n > 1 ? aResults.join(" ") : aResults[0];
-	}
-
-	if (bRequiresIContext) {
-		formatter.requiresIContext = true;
-	}
-	// @see sap.ui.base.ManagedObject#_bindProperty
-	formatter.textFragments = fnRootFormatter && fnRootFormatter.textFragments
-		|| "sap.ui.base.BindingParser: composeFormatters";
-	return formatter;
-}
-
-/**
- * Helper to create a formatter function. Only used to reduce the closure size of the formatter
- *
- * @param {number[]|string[]} aFragments
- *   array of fragments, either a literal text or the index of the binding's part
- * @returns {function}
- *   a formatter function
- */
-function makeFormatter(aFragments) {
-	var fnFormatter = function() {
-			var aResult = [],
-				l = aFragments.length,
-				i;
-
-			for (i = 0; i < l; i++) {
-				if ( typeof aFragments[i] === "number" ) {
-					// a numerical fragment references the part with the same number
-					aResult.push(arguments[aFragments[i]]);
-				} else {
-					// anything else is a string fragment
-					aResult.push(aFragments[i]);
-				}
-			}
-			return aResult.join('');
-		};
-	fnFormatter.textFragments = aFragments;
-	return fnFormatter;
-}
+/* UI5 LINTER MODIFICATION:
+	Removed function implementations "composeFormatters" and "makeFormatter" since they are unused here.
+*/
 
 /**
  * Creates a binding info object with the given path.
@@ -157,7 +83,8 @@ function mergeParts(oBindingInfo, sBinding) {
 	try {
 		BindingParser.mergeParts(oBindingInfo);
 	} catch (e) {
-		future.errorThrows(`sap.ui.base.BindingParser: Cannot merge parts for binding "${sBinding}"`, { cause: e });
+		/* UI5 LINTER MODIFICATION: "future.errorThrows" => "throw new Error" */
+		throw new Error(`sap.ui.base.BindingParser: Cannot merge parts for binding "${sBinding}"`, { cause: e });
 	}
 }
 
@@ -684,77 +611,87 @@ BindingParser.mergeParts = function (oBindingInfo) {
 	var aFormatters = [],
 		aParts = [];
 
-	oBindingInfo.parts.forEach(function (vEmbeddedBinding) {
-		var iEnd,
-			fnFormatter = function () {
-				return vEmbeddedBinding; // just return constant value
-			},
-			sName,
-			iStart = aParts.length;
-
-		/*
-		 * Selects the overall argument corresponding to the current part.
-		 *
-		 * @returns {any}
-		 *   the argument at index <code>iStart</code>
-		 */
-		function select() {
-			return arguments[iStart];
+	/* UI5 LINTER MODIFICATION START */
+	if (oBindingInfo.formatter) {
+		aFormatters.push(oBindingInfo.formatter);
+	}
+	oBindingInfo.formatter = aFormatters;
+	for (const vEmbeddedBinding of oBindingInfo.parts) {
+		if (typeof vEmbeddedBinding === "object" && vEmbeddedBinding.formatter) {
+			aFormatters.push(vEmbeddedBinding.formatter);
 		}
+	}
+	/* UI5 LINTER MODIFICATION END */
 
-		// @see sap.ui.base.ManagedObject#extractBindingInfo
-		if (vEmbeddedBinding && typeof vEmbeddedBinding === "object") {
-			if (vEmbeddedBinding.parts) {
-				for (sName in vEmbeddedBinding) {
-					if (sName !== "formatter" && sName !== "parts") {
-						throw new Error("Unsupported property: " + sName);
-					}
-				}
+	/* UI5 LINTER MODIFICATION: Disabled the remainder of the function */
 
-				aParts = aParts.concat(vEmbeddedBinding.parts);
-				iEnd = aParts.length;
-				if (vEmbeddedBinding.formatter) {
-					if (vEmbeddedBinding.formatter.requiresIContext === true) {
-						fnFormatter = function (oInterface) {
-							// old formatter needs to operate on its own slice of overall args
-							var aArguments
-								= Array.prototype.slice.call(arguments, iStart + 1, iEnd + 1);
+	// oBindingInfo.parts.forEach(function (vEmbeddedBinding) {
+	// 	var iEnd,
+	// 		fnFormatter = function () {
+	// 			return vEmbeddedBinding; // just return constant value
+	// 		},
+	// 		sName,
+	// 		iStart = aParts.length;
 
-							aArguments.unshift(oInterface._slice(iStart, iEnd));
+	// 	/*
+	// 	 * Selects the overall argument corresponding to the current part.
+	// 	 *
+	// 	 * @returns {any}
+	// 	 *   the argument at index <code>iStart</code>
+	// 	 */
+	// 	function select() {
+	// 		return arguments[iStart];
+	// 	}
 
-							return vEmbeddedBinding.formatter.apply(this, aArguments);
-						};
-						fnFormatter.requiresIContext = true;
-					} else {
-						fnFormatter = function () {
-							// old formatter needs to operate on its own slice of overall args
-							return vEmbeddedBinding.formatter.apply(this,
-								Array.prototype.slice.call(arguments, iStart, iEnd));
-						};
-					}
-				} else if (iEnd - iStart > 1) {
-					fnFormatter = function () {
-						// @see sap.ui.model.CompositeBinding#getExternalValue
-						// "default: multiple values are joined together as space separated
-						//  list if no formatter or type specified"
-						return Array.prototype.slice.call(arguments, iStart, iEnd).join(" ");
-					};
-				} else {
-					fnFormatter = select;
-				}
-			} else if ("path" in vEmbeddedBinding) {
-				aParts.push(vEmbeddedBinding);
-				fnFormatter = select;
-			}
-		}
-		aFormatters.push(fnFormatter);
-	});
+	// 	// @see sap.ui.base.ManagedObject#extractBindingInfo
+	// 	if (vEmbeddedBinding && typeof vEmbeddedBinding === "object") {
+	// 		if (vEmbeddedBinding.parts) {
+	// 			for (sName in vEmbeddedBinding) {
+	// 				if (sName !== "formatter" && sName !== "parts") {
+	// 					throw new Error("Unsupported property: " + sName);
+	// 				}
+	// 			}
 
-	oBindingInfo.parts = aParts;
-	/* UI5 LINTER MODIFICATION:
-		Disabled next line to prevent creation of formatter function.
-		We are only interested in the property access string.
-	*/
+	// 			aParts = aParts.concat(vEmbeddedBinding.parts);
+	// 			iEnd = aParts.length;
+	// 			if (vEmbeddedBinding.formatter) {
+	// 				if (vEmbeddedBinding.formatter.requiresIContext === true) {
+	// 					fnFormatter = function (oInterface) {
+	// 						// old formatter needs to operate on its own slice of overall args
+	// 						var aArguments
+	// 							= Array.prototype.slice.call(arguments, iStart + 1, iEnd + 1);
+
+	// 						aArguments.unshift(oInterface._slice(iStart, iEnd));
+
+	// 						return vEmbeddedBinding.formatter.apply(this, aArguments);
+	// 					};
+	// 					fnFormatter.requiresIContext = true;
+	// 				} else {
+	// 					fnFormatter = function () {
+	// 						// old formatter needs to operate on its own slice of overall args
+	// 						return vEmbeddedBinding.formatter.apply(this,
+	// 							Array.prototype.slice.call(arguments, iStart, iEnd));
+	// 					};
+	// 				}
+	// 			} else if (iEnd - iStart > 1) {
+	// 				fnFormatter = function () {
+	// 					// @see sap.ui.model.CompositeBinding#getExternalValue
+	// 					// "default: multiple values are joined together as space separated
+	// 					//  list if no formatter or type specified"
+	// 					return Array.prototype.slice.call(arguments, iStart, iEnd).join(" ");
+	// 				};
+	// 			} else {
+	// 				fnFormatter = select;
+	// 			}
+	// 		} else if ("path" in vEmbeddedBinding) {
+	// 			aParts.push(vEmbeddedBinding);
+	// 			fnFormatter = select;
+	// 		}
+	// 	}
+	// 	aFormatters.push(fnFormatter);
+	// });
+
+	// oBindingInfo.parts = aParts;
 	// oBindingInfo.formatter = composeFormatters(aFormatters, oBindingInfo.formatter);
 };
 

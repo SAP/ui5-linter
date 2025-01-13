@@ -915,19 +915,26 @@ export default {
 		// Measurement.end(sPerformanceParse);
 		if (!oTokens.parts.length) {
 			return {
-				constant: oResult.formatter(),
+				/* UI5 LINTER MODIFICATION:
+					Disabled next line. ExpressionParser formatter functions are not required and shouldn't be executed
+				*/
+				// constant: oResult.formatter(),
 				at: oResult.at || oTokens.at
 			};
 		}
 
-		function formatter() {
-			//turn separate parameters for parts into one (array like) parameter
-			return oResult.formatter(arguments);
-		}
-		formatter.textFragments = true; //use CompositeBinding even if there is only one part
+		/* UI5 LINTER MODIFICATION:
+			Disabled the next few formatter-related lines.
+			The ExpressionParser formatter function is not required for linting purposes
+		*/
+		// function formatter() {
+		// 	//turn separate parameters for parts into one (array like) parameter
+		// 	return oResult.formatter(arguments);
+		// }
+		// formatter.textFragments = true; //use CompositeBinding even if there is only one part
 		return {
 			result: {
-				formatter: formatter,
+				// formatter: formatter,
 				parts: oTokens.parts
 			},
 			at: oResult.at || oTokens.at
