@@ -82,7 +82,7 @@ export interface RequireExpression extends AttributeDeclaration {
 
 export interface RequireDeclaration {
 	moduleName: string;
-	variableName?: string;
+	variableName: string;
 }
 
 interface NamespaceStackEntry {
@@ -428,7 +428,8 @@ export default class Parser {
 							});
 						});
 					} else {
-						// Common case: JSON-like representation
+						// Most common case: JSON-like representation
+						// e.g. core:require="{Helper: 'sap/ui/demo/todo/util/Helper'}"
 						requireDeclarations = this._parseRequireAttribute(attr.value);
 					}
 					const requireExpression = {
