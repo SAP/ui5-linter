@@ -42,7 +42,7 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 			name: "SAPUI5",
 			version: sapui5Version,
 		},
-		defaultAggregations: {},
+		metadata: {},
 		deprecations: {
 			UI5Class: {},
 			UI5Enum: {},
@@ -54,11 +54,15 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 	};
 
 	forEachSymbol(semanticModel, (symbol, symbolName) => {
-		const defaultAggregation = metadataProvider.getDefaultAggregationForSymbol(symbol);
-		if (defaultAggregation) {
-			apiExtract.defaultAggregations[symbolName] = defaultAggregation;
+		// Generate metadata:
+		if (isAllowedSymbolKind(symbol.kind)) {
+			const symbolRecord = metadataProvider.collectOptionsForSymbol(symbol, true);// Toggle true/false
+			if (symbolRecord) {
+				apiExtract.metadata[symbolName] = symbolRecord;
+			}
 		}
 
+		// Generate deprecations:
 		if (symbol.deprecatedInfo?.isDeprecated) {
 			const deprecationText = getDeprecationText(symbol.deprecatedInfo) ?? "deprecated";
 			if (isAllowedSymbolKind(symbol.kind)) {
@@ -66,7 +70,6 @@ export default async function createMetadataInfo(apiJsonsRoot: string, sapui5Ver
 				apiExtract.deprecations[symbol.kind][symbolName] = deprecationText;
 			}
 		}
-
 		if (hasFieldsProperty(symbol)) {
 			symbol.fields?.forEach((field) => {
 				if (field?.deprecatedInfo?.isDeprecated) {
