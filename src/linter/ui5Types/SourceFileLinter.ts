@@ -678,6 +678,9 @@ export default class SourceFileLinter {
 			this.#analyzeNewCoreRouter(node);
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
+		} else if (nodeType.symbol.declarations?.some(
+			(declarartion) => this.isUi5ClassDeclaration(declarartion, "sap/ui/core/Control"))) {
+			this.#analyzeModelDataTypes(node);
 		}
 
 		if (!node.arguments?.length) {
@@ -1141,6 +1144,59 @@ export default class SourceFileLinter {
 					}, node);
 				}
 			}
+		}
+	}
+
+	#analyzeModelDataTypes(node: ts.NewExpression) {
+		node.arguments?.forEach((arg, argIdx) => {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				return;
+			}
+			arg.properties.forEach((prop) => {
+				// TODO:
+				// 1. Check if prop is a bindable property
+				// 2. Analyze if there's a type prop and check it
+				// 	2.1 Check if the type is imported
+				// 	2.2 In case of complex/build type, resolve and check it.
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+
+				// TODO: Check if it's bindable property
+
+				// Get the type property
+				if (ts.isObjectLiteralExpression(prop.initializer)) {
+					const typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
+						return ts.isPropertyAssignment(prop) &&
+							ts.isIdentifier(prop.name) &&
+							prop.name.text === "type";
+					});
+
+					if (typeField && ts.isPropertyAssignment(typeField)) {
+						this.#analyzeModelTypeField(typeField.initializer);
+					}
+				}
+			});
+		});
+	}
+
+	#analyzeModelTypeField(node: ts.Expression) {
+		if (!ts.isStringLiteral(node)) {
+			return;
+		}
+
+		const typeModule = node.text.replaceAll(".", "/");
+		const hasModuleImported = this.sourceFile.statements.filter(ts.isImportDeclaration)
+			.some((importNode) =>
+				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				importNode.moduleSpecifier.text === typeModule);
+
+		if (!hasModuleImported) {
+			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
+				variableName: node.text,
+				namespace: typeModule,
+			}, node);
 		}
 	}
 
