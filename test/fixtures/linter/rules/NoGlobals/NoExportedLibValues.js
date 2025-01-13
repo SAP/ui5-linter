@@ -1,9 +1,7 @@
 sap.ui.define(
-	["sap/ui/unified/library", "sap/ui/core/library", "sap/ui/comp/library"],
-	function (unifiedLibrary, coreLibrary, compLibrary) {
+	["sap/ui/unified/library", "sap/ui/core/library"],
+	function (unifiedLibrary, coreLibrary) {
 		"use strict";
-
-		var SelectOptionSign = compLibrary.smartfilterbar.SelectOptionSign;
 
 		var CalendarDayType = unifiedLibrary.CalendarDayType,
 			DateRange = unifiedLibrary["DateRange"],
