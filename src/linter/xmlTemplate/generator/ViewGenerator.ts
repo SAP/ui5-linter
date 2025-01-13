@@ -11,6 +11,6 @@ export default class ViewGenerator extends AbstractGenerator {
 			}
 		});
 		this._body.write(`export default `);
-		this.writeControl(controlInfo);
+		this.writeControl(controlInfo, true);
 	}
 }

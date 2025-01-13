@@ -19,6 +19,8 @@ const log = getLogger("linter:ui5Types:SourceFileLinter");
 // https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
 const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
 
+const DEPRECATED_VIEW_TYPES = ["JS", "JSON", "HTML", "Template"];
+
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
@@ -809,6 +811,8 @@ export default class SourceFileLinter {
 				this.#analyzeMobileInit(node);
 			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
 				this.#analyzeThemingSetTheme(node);
+			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
+				this.#analyzeViewCreate(node);
 			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
@@ -1120,6 +1124,42 @@ export default class SourceFileLinter {
 
 		if (synchronizationModeProb) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, synchronizationModeProb);
+		}
+	}
+
+	#analyzeViewCreate(node: ts.CallExpression) {
+		if (!node.arguments?.length) {
+			return;
+		}
+
+		const optionsArg = node.arguments[0];
+
+		if (!ts.isObjectLiteralExpression(optionsArg)) {
+			return;
+		}
+
+		// Find "type" property
+		let typeProperty;
+		for (const property of optionsArg.properties) {
+			if (!ts.isPropertyAssignment(property)) {
+				continue;
+			}
+			if (
+				(ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+				property.name.text === "type"
+			) {
+				typeProperty = property;
+				break;
+			}
+		}
+
+		if (typeProperty && ts.isStringLiteralLike(typeProperty.initializer)) {
+			const typeValue = typeProperty.initializer.text;
+			if (DEPRECATED_VIEW_TYPES.includes(typeValue)) {
+				this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_VIEW_CREATE, {
+					typeValue,
+				}, node);
+			}
 		}
 	}
 

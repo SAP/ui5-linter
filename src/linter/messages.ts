@@ -64,6 +64,7 @@ export enum MESSAGE {
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY,
 	PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
 	PARTIALLY_DEPRECATED_PARAMETERS_GET,
+	PARTIALLY_DEPRECATED_VIEW_CREATE,
 	PREFER_TEST_STARTER,
 	REDUNDANT_BOOTSTRAP_PARAM,
 	REDUNDANT_BOOTSTRAP_PARAM_ERROR,
@@ -480,6 +481,15 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`Usage of deprecated variant of 'sap/ui/core/theming/Parameters.get'`,
 		details: () => `{@link sap.ui.core.theming.Parameters#sap.ui.core.theming.Parameters.get Parameters.get}`,
+	},
+
+	[MESSAGE.PARTIALLY_DEPRECATED_VIEW_CREATE]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({typeValue}: {typeValue: string}) =>
+			`Usage of deprecated value '${typeValue}' for parameter 'type' in 'sap/ui/core/mvc/View.create'`,
+		details: () => `{@link sap.ui.core.mvc.View#sap.ui.core.mvc.View.create View.create}`,
 	},
 
 	[MESSAGE.REDUNDANT_BOOTSTRAP_PARAM]: {

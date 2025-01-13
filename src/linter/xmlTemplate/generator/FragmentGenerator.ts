@@ -6,7 +6,7 @@ export default class FragmentGenerator extends AbstractGenerator {
 		let returnVal;
 
 		if (controlInfo.kind === NodeKind.Control) {
-			this.writeControl(controlInfo);
+			this.writeControl(controlInfo, true);
 			returnVal = controlInfo.variableName;
 		} else if (controlInfo.kind === NodeKind.FragmentDefinition) {
 			const variables = Array.from(controlInfo.controls.values()).map((control) => {

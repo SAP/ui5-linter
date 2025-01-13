@@ -5,8 +5,10 @@ sap.ui.define([
 	"sap/ui/model/odata/v2/ODataModel",
 	"sap/ui/core/Component",
 	"sap/ui/core/routing/Router",
-	"sap/ui/util/Mobile"
-], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router, Mobile) {
+	"sap/ui/util/Mobile",
+	"sap/ui/core/mvc/View",
+	"sap/ui/core/mvc/ViewType"
+], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router, Mobile, View, ViewType) {
 
 	Parameters.get(); // (deprecated since 1.92) If no parameter is given
 	Parameters.get("sapUiParam1"); // (deprecated since 1.94) If a string is given as first parameter
@@ -75,4 +77,54 @@ sap.ui.define([
 		homeIconPrecomposed: true, // Deprecated
 	});
 	Mobile.init({}); // Negative test: No deprecated parameters
+
+	View.create({
+		type: "JS", // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+	View.create({
+		type: ViewType.JS, // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+
+	View.create({
+		type: "JSON", // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+	View.create({
+		type: ViewType.JSON, // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+
+	View.create({
+		type: "HTML", // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+	View.create({
+		type: ViewType.HTML, // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+
+	View.create({
+		type: "Template", // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+	View.create({
+		type: ViewType.Template, // Deprecated type
+		viewName: "myapp.view.Home"
+	});
+
+	// Negative tests: No deprecated types
+	View.create({
+		viewName: "module:myapp.view.Home"
+	});
+	View.create({
+		type: "XML",
+		viewName: "myapp.view.Home"
+	});
+	View.create({
+		type: ViewType.XML,
+		viewName: "myapp.view.Home"
+	});
+
 });

@@ -1,0 +1,18 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	controllerName="com.myapp.controller.Main"
+>
+
+	<mvc:View type="XML" viewName="com.myapp.view.Home"/>
+	<mvc:View type="JS" viewName="com.myapp.view.Home"/>
+	<mvc:View type="JSON" viewName="com.myapp.view.Home"/>
+	<mvc:View type="HTML" viewName="com.myapp.view.Home"/>
+	<mvc:View type="Template" viewName="com.myapp.view.Home"/>
+
+	<mvc:XMLView viewName="com.myapp.view.Home"/>
+	<mvc:JSView viewName="com.myapp.view.Home"/>
+	<mvc:JSONView viewName="com.myapp.view.Home"/>
+	<mvc:HTMLView viewName="com.myapp.view.Home"/>
+	<mvc:TemplateView viewName="com.myapp.view.Home"/>
+
+</mvc:View>
