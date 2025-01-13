@@ -1230,7 +1230,19 @@ export default class SourceFileLinter {
 		const isRegisteredAsUi5Module = ambientModules.some((module) =>
 			module.name === `"${moduleName}"`);
 
-		if (isRegisteredAsUi5Module && !libAmbientModule?.exports?.has(varName as ts.__String)) {
+		let isModuleExported = true;
+		let libExports = libAmbientModule?.exports ?? new Map();
+		for (const moduleChunk of [...namespace, varName]) {
+			if (!libExports.has(moduleChunk)) {
+				isModuleExported = false;
+				break;
+			}
+
+			const exportMap = libExports.get(moduleChunk) as ts.Symbol | undefined;
+			libExports = exportMap?.exports ?? new Map();
+		}
+
+		if (isRegisteredAsUi5Module && !isModuleExported) {
 			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
 				module: moduleName,
 				namespace: [
