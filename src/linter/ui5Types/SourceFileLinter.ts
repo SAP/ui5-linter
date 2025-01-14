@@ -833,6 +833,8 @@ export default class SourceFileLinter {
 				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
+			} else if (symbolName === "bindProperty" && moduleName === "sap/ui/base/ManagedObject") {
+				this.#analyzeModelDataTypes(node);
 			}
 		}
 
@@ -1147,8 +1149,8 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeModelDataTypes(node: ts.NewExpression) {
-		node.arguments?.forEach((arg, argIdx) => {
+	#analyzeModelDataTypes(node: ts.NewExpression | ts.CallExpression) {
+		node.arguments?.forEach((arg) => {
 			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
 			if (!ts.isObjectLiteralExpression(arg)) {
 				return;
@@ -1166,16 +1168,20 @@ export default class SourceFileLinter {
 				// TODO: Check if it's bindable property
 
 				// Get the type property
+				let typeField;
 				if (ts.isObjectLiteralExpression(prop.initializer)) {
-					const typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
+					typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
 						return ts.isPropertyAssignment(prop) &&
 							ts.isIdentifier(prop.name) &&
 							prop.name.text === "type";
 					});
+				} else if (ts.isStringLiteral(prop.initializer) &&
+					ts.isIdentifier(prop.name) && prop.name.text === "type") {
+					typeField = prop;
+				}
 
-					if (typeField && ts.isPropertyAssignment(typeField)) {
-						this.#analyzeModelTypeField(typeField.initializer);
-					}
+				if (typeField && ts.isPropertyAssignment(typeField)) {
+					this.#analyzeModelTypeField(typeField.initializer);
 				}
 			});
 		});
