@@ -3,7 +3,7 @@ import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
 import JSTokenizer from "./lib/JSTokenizer.js";
-import LinterContext from "../LinterContext.js";
+import LinterContext, {PositionInfo} from "../LinterContext.js";
 import {TranspileResult} from "../LinterContext.js";
 import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
@@ -82,7 +82,7 @@ export interface RequireExpression extends AttributeDeclaration {
 }
 
 export interface RequireDeclaration {
-	moduleName: string;
+	moduleName?: string;
 	variableName: string;
 }
 
@@ -285,7 +285,7 @@ export default class Parser {
 			[tagNamespace, tagName] = tagName.split(":");
 		}
 
-		const attributes = new Set<AttributeDeclaration>();
+		const attributes = new Map<string, AttributeDeclaration>();
 		tag.attributes.forEach((attr) => {
 			const attrName = attr.name.value;
 			const attrValue = he.decode(attr.value.value);
@@ -305,7 +305,7 @@ export default class Parser {
 			} else if (attrName.includes(":")) {
 				// Namespaced attribute
 				const [attrNamespace, attrLocalName] = attrName.split(":");
-				attributes.add({
+				attributes.set(attrName, {
 					name: attrLocalName,
 					value: attrValue,
 					localNamespace: attrNamespace,
@@ -316,7 +316,7 @@ export default class Parser {
 					}),
 				});
 			} else {
-				attributes.add({
+				attributes.set(attrName, {
 					name: attrName,
 					value: attrValue,
 					start: toPosition(attr.name.start),
@@ -368,13 +368,7 @@ export default class Parser {
 				end: toPosition(tag.openEnd),
 			};
 		} else if (namespace === TEMPLATING_NAMESPACE) {
-			return {
-				kind: NodeKind.Template,
-				name: tagName,
-				namespace,
-				start: toPosition(tag.openStart),
-				end: toPosition(tag.openEnd),
-			};
+			return this._handleTemplatingNamespace(tagName, namespace, attributes, tag);
 		} else if (PATTERN_LIBRARY_NAMESPACES.test(namespace)) {
 			const lastIdx = tagName.lastIndexOf(".");
 			if (lastIdx !== -1) {
@@ -396,7 +390,7 @@ export default class Parser {
 	}
 
 	_handleUi5LibraryNamespace(
-		moduleName: string, namespace: Namespace, attributes: Set<AttributeDeclaration>,
+		moduleName: string, namespace: Namespace, attributes: Map<string, AttributeDeclaration>,
 		tag: SaxTag
 	): ControlDeclaration | AggregationDeclaration | FragmentDefinitionDeclaration {
 		const controlProperties = new Set<PropertyDeclaration>();
@@ -605,5 +599,52 @@ export default class Parser {
 			}
 			return node;
 		}
+	}
+
+	_handleTemplatingNamespace(
+		tagName: string, namespace: Namespace, attributes: Map<string, AttributeDeclaration>, tag: SaxTag
+	): NodeDeclaration {
+		let globalReferenceCheckAttribute: AttributeDeclaration | undefined;
+		if (tagName === "alias") {
+			const aliasName = attributes.get("name");
+			if (aliasName) {
+				// Add alias to list of local names so that the global check takes them into account
+				this.#requireDeclarations.push({
+					variableName: aliasName.value,
+				});
+			}
+			globalReferenceCheckAttribute = attributes.get("value");
+		} else if (tagName === "with") {
+			globalReferenceCheckAttribute = attributes.get("helper");
+		} else if (tagName === "if" || tagName === "elseif") {
+			const testAttribute = attributes.get("test");
+			if (testAttribute) {
+				// template:if/elseif test attribute is handled like a property binding in XMLPreprocessor
+				this.#bindingLinter.lintPropertyBinding(testAttribute.value, this.#requireDeclarations, {
+					line: testAttribute.start.line + 1, // Add one to align with IDEs
+					column: testAttribute.start.column + 1,
+				});
+			}
+		}
+
+		if (globalReferenceCheckAttribute) {
+			this._checkGlobalReference(globalReferenceCheckAttribute.value, globalReferenceCheckAttribute.start);
+		}
+
+		return {
+			kind: NodeKind.Template,
+			name: tagName,
+			namespace,
+			start: toPosition(tag.openStart),
+			end: toPosition(tag.openEnd),
+		};
+	}
+
+	_checkGlobalReference(value: string, {line, column}: PositionInfo) {
+		this.#bindingLinter.checkForGlobalReference(value, this.#requireDeclarations, {
+			// Add one to align with IDEs
+			line: line + 1,
+			column: column + 1,
+		});
 	}
 }

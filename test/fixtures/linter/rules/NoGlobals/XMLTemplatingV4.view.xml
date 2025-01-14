@@ -1,0 +1,50 @@
+<mvc:View
+	controllerName="sap.ui.core.sample.ViewTemplate.types.Template"
+	template:require="{AH: 'sap/ui/model/odata/v4/AnnotationHelper'}"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:template="http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1"
+	width="100%">
+	<form:SimpleForm columnsM="1" editable="true" id="simpleForm" labelSpanL="12"
+			labelSpanM="12" layout="ResponsiveGridLayout">
+		<core:Title text="com.sap.vocabularies.UI.v1.Identification"/>
+		<template:repeat list="{meta>@com.sap.vocabularies.UI.v1.Identification}" var="field">
+			<template:with path="field>Value/$Path" var="target">
+
+			<!-- Global access via computed annotation - no arguments, expression binding template:if -->
+			<template:if test="{= ${target>@@sap.ui.model.odata.v4.AnnotationHelper.getValueListType} !== 'None' }">
+
+				<template:then>
+
+					<!-- Global access via computed annotation -->
+					<Input id="Identification::{field>Value/$Path}"
+						value="{field>Value@@sap.ui.model.odata.v4.AnnotationHelper.format(null,$(style:'short'$))}" />
+
+				</template:then>
+				<!-- Global access via computed annotation - no arguments, template:elseif -->
+				<template:elseif test="{target>@@sap.ui.model.odata.v4.AnnotationHelper.format}">
+
+					<!-- Global access via computed annotation - no arguments -->
+					<Input id="Identification::{field>Value/$Path}"
+						value="{ path: 'field>Value@@sap.ui.model.odata.v4.AnnotationHelper.value' }" />
+
+				</template:elseif>
+				<template:else>
+
+					<!-- Global access via computed annotation - no arguments, composite binding -->
+					<Text text="ValueListType: {field>@@sap.ui.model.odata.v4.AnnotationHelper.getValueListType}" />
+
+				</template:else>
+
+			</template:if>
+			</template:with>
+
+			<!-- Negative test: Local access via computed annotation -->
+			<Input id="Identification::{field>Value/$Path}"
+				value="{field>Value@@AH.format(null,$(style:'short'$))}" />
+
+		</template:repeat>
+	</form:SimpleForm>
+</mvc:View>
