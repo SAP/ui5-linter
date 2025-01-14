@@ -16,8 +16,7 @@ const mockApiJSON = `
 			"properties": ["autoFocus"],
 			"defaultAggregation": "pages",
 			"extends": "sap.ui.core.Control"
-		},
-		"sap.ui.base.Object": {}
+		}
 	},
 	"deprecations": {
 		"UI5Class": {
@@ -29,6 +28,9 @@ const mockApiJSON = `
 const apiExtract = new ApiExtractImpl(JSON.parse(mockApiJSON));
 
 test("Test getAllOptionsByType()", (t) => {
+	t.deepEqual(apiExtract.getAllOptionsByType("sap.m.App", "properties"),
+		["backgroundColor", "backgroundImage"],
+		"All properties of 'sap.m.App' should be returned as an array");
 	t.deepEqual(apiExtract.getAllOptionsByType("sap.m.App", "properties", false),
 		["backgroundColor", "backgroundImage"],
 		"All properties of 'sap.m.App' should be returned as an array");
@@ -37,8 +39,6 @@ test("Test getAllOptionsByType()", (t) => {
 		"All properties of 'sap.m.App' and its borrowed ones should be returned as an array");
 	t.deepEqual(apiExtract.getAllOptionsByType("sap.m.NavContainer", "properties", false), ["autoFocus"],
 		"All properties of 'sap.m.NavContainer' should be returned as an array");
-	t.deepEqual(apiExtract.getAllOptionsByType("sap.ui.base.Object", "properties", false), [],
-		"If no option values could be found, an empty array should be returned");
 	t.is(apiExtract.getAllOptionsByType("sap.xyz.notExistingSymbol", "properties", false), undefined,
 		"If the symbol can't be found, undefined should be returned");
 	t.is(apiExtract.getAllOptionsByType("sap.xyz.notExistingSymbol", "properties", true), undefined,
@@ -46,6 +46,8 @@ test("Test getAllOptionsByType()", (t) => {
 });
 
 test("Test getTypeByOption()", (t) => {
+	t.is(apiExtract.getTypeByOption("sap.m.App", "backgroundColor"), "properties",
+		"'backgroundColor' is a property of 'sap.m.App'");
 	t.is(apiExtract.getTypeByOption("sap.m.App", "backgroundColor", false), "properties",
 		"'backgroundColor' is a property of 'sap.m.App'");
 	t.is(apiExtract.getTypeByOption("sap.m.App", "pages", true), "defaultAggregation",

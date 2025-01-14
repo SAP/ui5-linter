@@ -49,17 +49,15 @@ export class ApiExtractImpl implements ApiExtract {
 
 	/**
 	 * Returns all options of a given option type in a UI5 symbol.
-	 * (resolving borrowed ones is optional)
+	 * (including borrowed ones is optional)
 	 * @example getAllOptionsByType("sap.m.App", "properties", false)
 	 * 	returns ["backgroundColor", "backgroundImage", "backgroundRepeat", *etc.*]
-	 * @example getAllOptionsByType("sap.ui.base.Object", "properties")
+	 * @example getAllOptionsByType("sap.m.App", "notExistingOptionType")
 	 * 	returns []
-	 * @example getAllOptionsByType("sap.m.App", "notExistingOption")
-	 * 	returns undefined
-	 * @example getAllOptionsByType("sap.xyz.NotExistingSymbol", "properties")
+	 * @example getAllOptionsByType("sap.xyz.notExistingSymbol", "properties")
 	 * 	returns undefined
 	 */
-	getAllOptionsByType(symbolName: string, optionType: AllowedMetadataOptionType, resolveBorrowed = false):
+	getAllOptionsByType(symbolName: string, optionType: AllowedMetadataOptionType, includeBorrowed = false):
 		string[] | undefined {
 		const values: string[] = [];
 		let foundSymbolRecord = this.data.metadata[symbolName];
@@ -71,7 +69,7 @@ export class ApiExtractImpl implements ApiExtract {
 			if (foundSymbolRecord[optionType]) {
 				values.push(...foundSymbolRecord[optionType]);
 			}
-			if (resolveBorrowed && foundSymbolRecord.extends) {
+			if (includeBorrowed && foundSymbolRecord.extends) {
 				foundSymbolRecord = this.data.metadata[foundSymbolRecord.extends];
 			} else {
 				break;
@@ -83,17 +81,17 @@ export class ApiExtractImpl implements ApiExtract {
 	/**
 	 * Returns the type of a given option in a UI5 symbol record.
 	 * (resolving borrowed ones is optional)
-	 * @example getTypeByOption("sap.m.App", "backgroundColor", false)
+	 * @example getTypeByOption("sap.m.App", "backgroundColor")
 	 * 	returns "properties"
 	 * @example getTypeByOption("sap.m.App", "notExistingOption")
 	 * 	returns undefined
 	 * @example getTypeByOption("sap.xyz.notExistingSymbol", "backgroundColor")
 	 * 	returns undefined
 	 */
-	getTypeByOption(symbolName: string, optionName: string, resolveBorrowed = false):
+	getTypeByOption(symbolName: string, optionName: string, includeBorrowed = false):
 		AllowedMetadataOptionType | string | undefined {
 		let foundSymbolRecord = this.data.metadata[symbolName];
-		// Check own type and resolve borrowed types with "extends":
+		// Check own types and resolve borrowed types with "extends":
 		while (foundSymbolRecord) {
 			// Loop through all keys of the symbol record:
 			for (const [key, value] of Object.entries(foundSymbolRecord)) {
@@ -101,7 +99,7 @@ export class ApiExtractImpl implements ApiExtract {
 					return key;
 				}
 			}
-			if (resolveBorrowed && foundSymbolRecord.extends) {
+			if (includeBorrowed && foundSymbolRecord.extends) {
 				foundSymbolRecord = this.data.metadata[foundSymbolRecord.extends];
 			} else {
 				break;
@@ -110,9 +108,15 @@ export class ApiExtractImpl implements ApiExtract {
 		return undefined;
 	};
 
+	/**
+	 * Returns the default aggregation of a given UI5 class.
+	 * (returns a borrowed one too)
+	 * @example getDefaultAggregation("sap.m.App")
+	 * 	returns "pages"
+	 */
 	getDefaultAggregation(symbolName: string): string | undefined {
 		let foundSymbolRecord = this.data.metadata[symbolName];
-		// Check own options and resolve borrowed options with "extends":
+		// Check own defaultAggregation and resolve borrowed one with "extends":
 		while (foundSymbolRecord) {
 			if (foundSymbolRecord.defaultAggregation) {
 				return foundSymbolRecord.defaultAggregation;

@@ -160,6 +160,7 @@ export default class MetadataProvider {
 			default:
 				return undefined;
 		}
-		return outputSymbolRecord;
+		// Check if symbol has any options and return undefined if not:
+		return Object.keys(outputSymbolRecord).length === 0 ? undefined : outputSymbolRecord;
 	}
 }
