@@ -122,10 +122,17 @@ export default class SourceFileLinter {
 			this.analyzeCallExpression(node as ts.CallExpression); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.PropertyAccessExpression ||
 			node.kind === ts.SyntaxKind.ElementAccessExpression) {
-			this.analyzePropertyAccessExpression(
-				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
-			this.analyzePropertyAccessExpressionForDeprecation(
-				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
+			// First, check for deprecation
+			const deprecationMessageReported = this.analyzePropertyAccessExpressionForDeprecation(
+				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression));
+
+			// If not deprecated, check for global.
+			// We prefer the deprecation message over the global one as it contains more information.
+			if (!deprecationMessageReported) {
+				this.analyzePropertyAccessExpression(
+					node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
+			}
+
 			this.analyzeExportedValuesByLib(node as (ts.PropertyAccessExpression | ts.ElementAccessExpression));
 		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
 			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
@@ -1212,30 +1219,33 @@ export default class SourceFileLinter {
 		return this.getDeprecationInfo(symbol);
 	}
 
-	analyzePropertyAccessExpressionForDeprecation(node: ts.AccessExpression) {
-		if (ts.isCallExpression(node.parent)) {
-			// TODO: Swap with call expression check?
-			return; // Already analyzed in context of call expression
+	analyzePropertyAccessExpressionForDeprecation(node: ts.AccessExpression): boolean {
+		if (ts.isCallExpression(node.parent) && node.parent.expression === node) {
+			// If this AccessExpression is the expression of a CallExpression, we can ignore it here.
+			// It will be analyzed in context of the CallExpression.
+			return false;
 		}
-
 		const deprecationInfo = this.getDeprecationInfoForAccess(node);
-		if (deprecationInfo) {
-			if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-				let namespace;
-				if (ts.isPropertyAccessExpression(node)) {
-					namespace = this.extractNamespace(node);
-				}
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
-					apiName: namespace ?? "jQuery.sap",
-					details: deprecationInfo.messageDetails,
-				}, node);
-			} else {
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
-					propertyName: deprecationInfo.symbol.escapedName as string,
-					details: deprecationInfo.messageDetails,
-				}, node);
-			}
+		if (!deprecationInfo) {
+			return false;
 		}
+		let namespace;
+		if (ts.isPropertyAccessExpression(node)) {
+			namespace = this.extractNamespace(node);
+		}
+		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
+				apiName: namespace ?? "jQuery.sap",
+				details: deprecationInfo.messageDetails,
+			}, node);
+		} else {
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
+				propertyName: deprecationInfo.symbol.escapedName as string,
+				namespace,
+				details: deprecationInfo.messageDetails,
+			}, node);
+		}
+		return true;
 	}
 
 	handleCallExpressionUnknownType(nodeType: ts.Type, node: ts.CallExpression) {
