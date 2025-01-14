@@ -65,14 +65,11 @@ export default class MetadataProvider {
 
 	/**
 	 * Collects all options for a given UI5 symbol.
-	 * By providing usePlaceholder = true, borrowed options from parent classes are NOT included in the result
-	 * and an "extends" placeholder with the parent symbolname is added instead.
+	 * Borrowed options from parent classes are NOT included in the result
+	 * but an "extends" placeholder with the parent symbolname is added instead.
 	 * (e.g. "sap.m.App": {..., "extends": "sap.m.NavContainer"})
-	 * @param {BaseUI5Node} symbol
-	 * @param {boolean} usePlaceholder
-	 * @returns {UI5SymbolRecord}
 	 */
-	collectOptionsForSymbol(symbol: BaseUI5Node, usePlaceholder = false): UI5SymbolRecord | undefined {
+	collectOptionsForSymbol(symbol: BaseUI5Node): UI5SymbolRecord | undefined {
 		const outputSymbolRecord: UI5SymbolRecord = {};
 		let symbolMetadata;
 
@@ -104,7 +101,7 @@ export default class MetadataProvider {
 							if (!outputSymbolRecord.methods) outputSymbolRecord.methods = [];
 							outputSymbolRecord.methods.push(method.name);
 						}); */
-					if (usePlaceholder && symbolMetadata.extends) {
+					if (symbolMetadata.extends) {
 						/* The following is necessary because some libraries (e.g. "sap.ui.core")
 						have more than one namespace. Hence, we have to traverse the parent tree
 						and collect each "name" property to get the correct "extends" name: */
