@@ -64,7 +64,7 @@ export async function createSemanticModel(apiJsonsRoot: string, sapui5Version: s
 	/* eslint-disable no-console */
 	let originalConsoleError;
 	if (!isLogLevelEnabled("verbose")) {
-		// Overwrite console.error with a noop since #generate produces a lot of messages error messages
+		// Overwrite console.error with a noop since #generate produces a lot of error messages
 		// that we don't want to deal with right now
 		originalConsoleError = console.error;
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
