@@ -2,19 +2,28 @@
 import {readFile} from "node:fs/promises";
 
 export type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
+
 export type AllowedMetadataOptionType = "aggregations" | "associations" | "defaultAggregation" | "events" |
 	"methods" | "properties";
 /** @example "sap.m.Button" | "jQuery.sap" | "module:sap/base/Event" | "sap.ui.base.Object" */
 type UI5SymbolName = string;
 /** @example "sap.m.App": { "properties": ["backgroundColor", ...], ..., "extends": "sap.m.NavContainer" } */
 export interface MetadataRecord {
+	kind: AllowedSymbolKind;
+
+	// ManagedObject properties:
+	properties?: string[];
 	aggregations?: string[];
 	defaultAggregation?: string;
 	associations?: string[];
 	events?: string[];
-	methods?: string[];
-	properties?: string[];
+
+	// Inheritance:
 	extends?: UI5SymbolName;
+
+	methods?: string[];
+
+	deprecations?: Record<string, string>;
 };
 
 export interface ApiExtractJson {
@@ -23,7 +32,6 @@ export interface ApiExtractJson {
 		version: string;
 	};
 	metadata: Record<string, MetadataRecord>;
-	deprecations: Record<AllowedSymbolKind, Record<string, string>>;
 }
 
 interface DeprecationInfo {
@@ -131,15 +139,17 @@ export class ApiExtractImpl implements ApiExtract {
 	}
 
 	getDeprecationInfo(symbolName: string): DeprecationInfo | undefined {
-		for (const [kind, list] of Object.entries(this.data.deprecations)) {
-			if (list[symbolName]) {
-				const symbolKind = kind as AllowedSymbolKind;
-				return {
-					symbolKind,
-					text: list[symbolName],
-				};
-			}
+		const foundSymbolRecord = this.data.metadata[symbolName];
+		if (!foundSymbolRecord) {
+			return undefined;
 		}
+		if (!foundSymbolRecord.deprecations) {
+			return undefined;
+		}
+		return {
+			symbolKind: foundSymbolRecord.kind,
+			text: foundSymbolRecord.deprecations[""],
+		};
 	}
 }
 

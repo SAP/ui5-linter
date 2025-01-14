@@ -10,21 +10,27 @@ import {
 	UI5Typedef,
 	UI5Interface,
 	UI5SemanticModel,
+	UI5Enum,
+	UI5Function,
 } from "@ui5-language-assistant/semantic-model-types";
+import {MetadataRecord} from "../../src/utils/ApiExtract.js";
 
-/** @example "press" | "text" | "items" | "firePress" */
-type UI5OptionValue = string;
-/** @example "sap.m.Button" | "jQuery.sap" | "module:sap/base/Event" | "sap.ui.base.Object" */
-type UI5SymbolName = string;
-export interface UI5SymbolRecord {
-	aggregations?: UI5OptionValue[];
-	defaultAggregation?: UI5OptionValue;
-	associations?: UI5OptionValue[];
-	events?: UI5OptionValue[];
-	methods?: UI5OptionValue[];
-	properties?: UI5OptionValue[];
-	extends?: UI5SymbolName;
+function getDeprecationText(deprecatedInfo: BaseUI5Node["deprecatedInfo"]): string | null {
+	if (!deprecatedInfo?.isDeprecated) {
+		return null;
+	}
+	const text = (deprecatedInfo.since ? `(since ${deprecatedInfo.since}) ` : "") +
+		(deprecatedInfo.text ? `${deprecatedInfo.text}` : "");
+
+	// If the text is empty, return null so that a default value can be used
+	return text || null;
+}
+
+const hasFieldsProperty = function (type: unknown): type is UI5Class | UI5Enum | UI5Namespace {
+	return (type as UI5Class | UI5Enum | UI5Namespace).fields !== undefined;
 };
+
+export type AllowedSymbol = UI5Class | UI5Enum | UI5Interface | UI5Namespace | UI5Typedef | UI5Function;
 
 export default class MetadataProvider {
 	#model: UI5SemanticModel | null = null;
@@ -69,13 +75,16 @@ export default class MetadataProvider {
 	 * but an "extends" placeholder with the parent symbolname is added instead.
 	 * (e.g. "sap.m.App": {..., "extends": "sap.m.NavContainer"})
 	 */
-	collectOptionsForSymbol(symbol: BaseUI5Node): UI5SymbolRecord | undefined {
-		const outputSymbolRecord: UI5SymbolRecord = {};
+	collectOptionsForSymbol(symbol: AllowedSymbol): MetadataRecord | undefined {
+		const outputSymbolRecord: MetadataRecord = {
+			kind: symbol.kind,
+		};
 		let symbolMetadata;
 
 		switch (symbol.kind) {
 			case "UI5Class":
-				symbolMetadata = symbol as UI5Class;
+				outputSymbolRecord.kind = symbol.kind;
+				symbolMetadata = symbol;
 				while (symbolMetadata) {
 					symbolMetadata.aggregations.forEach((aggregation) => {
 						if (!outputSymbolRecord.aggregations) outputSymbolRecord.aggregations = [];
@@ -124,7 +133,7 @@ export default class MetadataProvider {
 				symbolMetadata = symbol as UI5Function;
 				break; */
 			case "UI5Namespace":
-				symbolMetadata = symbol as UI5Namespace;
+				symbolMetadata = symbol;
 				/* Disabled, as "UI5Namespace" not being required:
 				symbolMetadata.events.forEach((event) => {
 					if (!outputSymbolRecord.events) outputSymbolRecord.events = [];
@@ -136,14 +145,14 @@ export default class MetadataProvider {
 				}); */
 				break;
 			case "UI5Typedef":
-				symbolMetadata = symbol as UI5Typedef;
+				symbolMetadata = symbol;
 				/* Disabled, as "UI5Typedef" not being required:
 				symbolMetadata.fields.forEach((field) => {
 				 	outputSymbolRecord[field.name] = "field";
 				}); */
 				break;
 			case "UI5Interface":
-				symbolMetadata = symbol as UI5Interface;
+				symbolMetadata = symbol;
 				/* Disabled, as "UI5Interface" not being required:
 				symbolMetadata.events.forEach((event) => {
 					if (!outputSymbolRecord.events) outputSymbolRecord.events = [];
@@ -157,7 +166,31 @@ export default class MetadataProvider {
 			default:
 				return undefined;
 		}
-		// Check if symbol has any options and return undefined if not:
-		return Object.keys(outputSymbolRecord).length === 0 ? undefined : outputSymbolRecord;
+
+		// Symbol deprecation:
+		if (symbol.deprecatedInfo?.isDeprecated) {
+			const deprecationText = getDeprecationText(symbol.deprecatedInfo) ?? "deprecated";
+			outputSymbolRecord.deprecations = {
+				"": deprecationText,
+			};
+		}
+
+		// Fields deprecation:
+		if (hasFieldsProperty(symbol)) {
+			symbol.fields?.forEach((field) => {
+				if (field?.deprecatedInfo?.isDeprecated) {
+					outputSymbolRecord.deprecations ??= {};
+					const deprecationText = getDeprecationText(field.deprecatedInfo) ?? "deprecated";
+					outputSymbolRecord.deprecations[field.name] = deprecationText;
+				}
+			});
+		}
+
+		// Check if symbol has any information other than "kind" and return undefined if not:
+		if (Object.keys(outputSymbolRecord).length < 2) {
+			return undefined;
+		} else {
+			return outputSymbolRecord;
+		}
 	}
 }
