@@ -9,6 +9,7 @@ const RULES = {
 	"no-deprecated-library": "no-deprecated-library",
 	"no-deprecated-theme": "no-deprecated-theme",
 	"no-globals": "no-globals",
+	"no-implicit-globals": "no-implicit-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
 	"ui5-class-declaration": "ui5-class-declaration",
@@ -53,6 +54,7 @@ export enum MESSAGE {
 	NO_DEPRECATED_RENDERER,
 	NO_DIRECT_DATATYPE_ACCESS,
 	NO_DIRECT_ENUM_ACCESS,
+	NO_EXPORTED_VALUES_BY_LIB,
 	NO_GLOBALS,
 	NO_ICON_POOL_RENDERER,
 	NOT_STATIC_CONTROL_RENDERER,
@@ -578,6 +580,16 @@ export const MESSAGE_INFO = {
 		message: ({name, replacement}: {name: string; replacement: string}) =>
 			`Bootstrap parameter '${name}' should be replaced with '${replacement}'`,
 		details: ({messageDetails}: {messageDetails: string}) => messageDetails,
+	},
+
+	[MESSAGE.NO_EXPORTED_VALUES_BY_LIB]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-implicit-globals"],
+
+		message: ({module, namespace, libraryName}: {module: string; namespace: string; libraryName: string}) =>
+			`Access of module '${module}' (${namespace}) not exported by library '${libraryName}'`,
+		details: () =>
+			`Please import the module itself directly instead of accessing it via the library module.`,
 	},
 
 } as const;

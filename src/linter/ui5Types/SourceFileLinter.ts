@@ -126,6 +126,7 @@ export default class SourceFileLinter {
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for global
 			this.analyzePropertyAccessExpressionForDeprecation(
 				node as (ts.PropertyAccessExpression | ts.ElementAccessExpression)); // Check for deprecation
+			this.analyzeExportedValuesByLib(node as (ts.PropertyAccessExpression | ts.ElementAccessExpression));
 		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
 			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
 			// e.g. `const { Button } = sap.m;`
@@ -1225,8 +1226,79 @@ export default class SourceFileLinter {
 		].includes(nodeType);
 	}
 
+	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
+		if (!ts.isElementAccessExpression(node) &&
+			node.name?.kind !== ts.SyntaxKind.Identifier) {
+			return;
+		}
+
+		const extractVarName = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression) => {
+			const nodeName = ts.isPropertyAccessExpression(node) ?
+					node.name.getText() :
+					node.argumentExpression.getText();
+
+			return nodeName.replaceAll("\"", "");
+		};
+
+		let exprNode = node.expression;
+		const namespace: string[] = [];
+		while (ts.isPropertyAccessExpression(exprNode) ||
+			ts.isElementAccessExpression(exprNode)) {
+			namespace.unshift(extractVarName(exprNode));
+			exprNode = exprNode.expression;
+		}
+		const exprType = this.checker.getTypeAtLocation(exprNode);
+		const potentialLibImport = exprType.symbol?.getName().replaceAll("\"", "") ?? "";
+
+		// Checks if the left hand side is a library import.
+		// It's sufficient just to check for "/library" at the end of the string by convention
+		if (!potentialLibImport.endsWith("/library")) {
+			return;
+		}
+
+		const varName = extractVarName(node);
+		const moduleName = [
+			potentialLibImport.replace("/library", ""),
+			...namespace,
+			varName,
+		].join("/");
+
+		// Check if the module is registered within ambient modules
+		const ambientModules = this.checker.getAmbientModules();
+		const libAmbientModule = ambientModules.find((module) =>
+			module.name === `"${potentialLibImport}"`);
+		const isRegisteredAsUi5Module = ambientModules.some((module) =>
+			module.name === `"${moduleName}"`);
+
+		let isModuleExported = true;
+		let libExports = libAmbientModule?.exports ?? new Map();
+		for (const moduleChunk of [...namespace, varName]) {
+			if (!libExports.has(moduleChunk)) {
+				isModuleExported = false;
+				break;
+			}
+
+			const exportMap = libExports.get(moduleChunk) as ts.Symbol | undefined;
+			libExports = exportMap?.exports ?? new Map();
+		}
+
+		if (isRegisteredAsUi5Module && !isModuleExported) {
+			this.#reporter.addMessage(MESSAGE.NO_EXPORTED_VALUES_BY_LIB, {
+				module: moduleName,
+				namespace: [
+					exprNode?.getText(),
+					...namespace,
+					varName,
+				].join("."),
+				libraryName: potentialLibImport,
+			},
+			(ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression));
+		}
+	}
+
 	analyzePropertyAccessExpression(node: ts.AccessExpression | ts.CallExpression) {
 		const exprNode = node.expression;
+
 		if (ts.isIdentifier(exprNode)) {
 			// The expression being an identifier indicates that this is the first access
 			// in a possible chain. E.g. the "sap" in "sap.ui.getCore()"
