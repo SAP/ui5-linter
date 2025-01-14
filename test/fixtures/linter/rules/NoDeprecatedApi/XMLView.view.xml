@@ -1,5 +1,6 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
 	xmlns:table="sap.ui.table"
 	xmlns:tablePlugins="sap.ui.table.plugins"
 >
@@ -31,5 +32,13 @@
 	<!-- Negative test: XML view -->
 	<mvc:View type="XML" viewName="myapp.view.Home"/>
 	<mvc:XMLView viewName="myapp.view.Home"/>
+
+
+	<core:Fragment type="HTML" fragmentName="myapp.fragment.Details" />
+
+	<!-- Negative test: XML/JS fragment -->
+	<core:Fragment fragmentName="myapp.fragment.Details" /> <!-- type defaults to XML -->
+	<core:Fragment type="XML" fragmentName="myapp.fragment.Details" />
+	<core:Fragment type="JS" fragmentName="myapp.fragment.Details" />
 
 </mvc:View>

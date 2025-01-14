@@ -48,18 +48,7 @@ export default abstract class AbstractGenerator {
 		controlDeclaration.variableName = this._getUniqueVariableName(`o${controlDeclaration.name}`);
 
 		// Create the control
-		this._body.write(`const ${controlDeclaration.variableName} = `);
-
-		// Special case: Use View.create for nested views
-		if (!rootControl && moduleName === "sap/ui/core/mvc/View") {
-			this._body.writeln(
-				`await ${importVariableName}.create({`, controlDeclaration.start, controlDeclaration.end
-			);
-		} else {
-			this._body.writeln(
-				`new ${importVariableName}({`, controlDeclaration.start, controlDeclaration.end
-			);
-		}
+		this._writeControlFactoryCall(moduleName, importVariableName, controlDeclaration, rootControl);
 
 		// Write properties
 		controlDeclaration.properties.forEach((attribute) => {
@@ -138,5 +127,31 @@ export default abstract class AbstractGenerator {
 		}
 		this._variableNames.add(variableNameCandidate);
 		return variableNameCandidate;
+	}
+
+	_writeControlFactoryCall(
+		moduleName: string, importVariableName: string, controlDeclaration: ControlDeclaration, rootControl: boolean
+	) {
+		this._body.write(`const ${controlDeclaration.variableName} = `);
+		if (!rootControl) {
+			// Special case: Use View.create for nested views
+			if (moduleName === "sap/ui/core/mvc/View") {
+				this._body.writeln(
+					`await ${importVariableName}.create({`, controlDeclaration.start, controlDeclaration.end
+				);
+				return;
+			}
+			// Special case: Use Fragment.load for nested fragments
+			if (moduleName === "sap/ui/core/Fragment") {
+				this._body.writeln(
+					`await ${importVariableName}.load({`, controlDeclaration.start, controlDeclaration.end
+				);
+				return;
+			}
+		}
+		// Default case: Use new for controls
+		this._body.writeln(
+			`new ${importVariableName}({`, controlDeclaration.start, controlDeclaration.end
+		);
 	}
 }

@@ -1,5 +1,6 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
 	controllerName="com.myapp.controller.Main"
 >
 
@@ -14,5 +15,10 @@
 	<mvc:JSONView viewName="com.myapp.view.Home"/>
 	<mvc:HTMLView viewName="com.myapp.view.Home"/>
 	<mvc:TemplateView viewName="com.myapp.view.Home"/>
+
+	<core:Fragment fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="XML" fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="JS" fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="HTML" fragmentName="com.myapp.fragment.Details" />
 
 </mvc:View>

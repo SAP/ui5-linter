@@ -7,8 +7,9 @@ sap.ui.define([
 	"sap/ui/core/routing/Router",
 	"sap/ui/util/Mobile",
 	"sap/ui/core/mvc/View",
-	"sap/ui/core/mvc/ViewType"
-], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router, Mobile, View, ViewType) {
+	"sap/ui/core/mvc/ViewType",
+	"sap/ui/core/Fragment",
+], function(Parameters, JSONModel, ODataModelV4, ODataModelV2, Component, Router, Mobile, View, ViewType, Fragment) {
 
 	Parameters.get(); // (deprecated since 1.92) If no parameter is given
 	Parameters.get("sapUiParam1"); // (deprecated since 1.94) If a string is given as first parameter
@@ -125,6 +126,27 @@ sap.ui.define([
 	View.create({
 		type: ViewType.XML,
 		viewName: "myapp.view.Home"
+	});
+
+
+	Fragment.load({
+		type: "HTML", // Deprecated type HTML
+		name: "myapp.fragment.Details"
+	});
+
+	// Negative test: Default type is XML
+	Fragment.load({
+		name: "myapp.fragment.Details"
+	});
+	// Negative test: XML
+	Fragment.load({
+		type: "XML",
+		name: "myapp.fragment.Details"
+	});
+	// Negative test: JS
+	Fragment.load({
+		type: "JS",
+		name: "myapp.fragment.Details"
 	});
 
 });

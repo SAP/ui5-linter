@@ -813,6 +813,8 @@ export default class SourceFileLinter {
 				this.#analyzeThemingSetTheme(node);
 			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
 				this.#analyzeViewCreate(node);
+			} else if (symbolName === "load" && moduleName === "sap/ui/core/Fragment") {
+				this.#analyzeFragmentLoad(node);
 			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
@@ -1157,6 +1159,42 @@ export default class SourceFileLinter {
 			const typeValue = typeProperty.initializer.text;
 			if (DEPRECATED_VIEW_TYPES.includes(typeValue)) {
 				this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_VIEW_CREATE, {
+					typeValue,
+				}, node);
+			}
+		}
+	}
+
+	#analyzeFragmentLoad(node: ts.CallExpression) {
+		if (!node.arguments?.length) {
+			return;
+		}
+
+		const optionsArg = node.arguments[0];
+
+		if (!ts.isObjectLiteralExpression(optionsArg)) {
+			return;
+		}
+
+		// Find "type" property
+		let typeProperty;
+		for (const property of optionsArg.properties) {
+			if (!ts.isPropertyAssignment(property)) {
+				continue;
+			}
+			if (
+				(ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)) &&
+				property.name.text === "type"
+			) {
+				typeProperty = property;
+				break;
+			}
+		}
+
+		if (typeProperty && ts.isStringLiteralLike(typeProperty.initializer)) {
+			const typeValue = typeProperty.initializer.text;
+			if (typeValue === "HTML") {
+				this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_FRAGMENT_LOAD, {
 					typeValue,
 				}, node);
 			}

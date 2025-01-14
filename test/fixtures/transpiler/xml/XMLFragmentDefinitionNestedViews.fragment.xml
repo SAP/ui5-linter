@@ -15,4 +15,9 @@
 	<mvc:HTMLView viewName="com.myapp.view.Home"/>
 	<mvc:TemplateView viewName="com.myapp.view.Home"/>
 
+	<core:Fragment fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="XML" fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="JS" fragmentName="com.myapp.fragment.Details" />
+	<core:Fragment type="HTML" fragmentName="com.myapp.fragment.Details" />
+
 </core:FragmentDefinition>
