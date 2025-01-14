@@ -29,10 +29,21 @@ export default class BindingLinter {
 
 	#analyzeCommonBindingParts(
 		bindingInfo: BindingInfo, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		const {events} = bindingInfo;
+		const {events, path} = bindingInfo;
 		if (events && typeof events === "object") {
 			for (const eventHandler of Object.values(events)) {
-				this.#checkForGlobalReference(eventHandler, requireDeclarations, position);
+				this.checkForGlobalReference(eventHandler, requireDeclarations, position);
+			}
+		}
+		if (path) {
+			// Check for computed annotations (@@ syntax)
+			const atAtIndex = path.indexOf("@@");
+			if (atAtIndex >= 0) {
+				const openingBracketIndex = path.indexOf("(", atAtIndex); // opening bracket is optional
+				const computationFunction = path.slice(
+					atAtIndex + 2, openingBracketIndex !== -1 ? openingBracketIndex : undefined
+				);
+				this.checkForGlobalReference(computationFunction, requireDeclarations, position);
 			}
 		}
 	}
@@ -44,14 +55,14 @@ export default class BindingLinter {
 		if (formatter) {
 			if (Array.isArray(formatter)) {
 				formatter.forEach((formatterItem) => {
-					this.#checkForGlobalReference(formatterItem, requireDeclarations, position);
+					this.checkForGlobalReference(formatterItem, requireDeclarations, position);
 				});
 			} else {
-				this.#checkForGlobalReference(formatter, requireDeclarations, position);
+				this.checkForGlobalReference(formatter, requireDeclarations, position);
 			}
 		}
 		if (type) {
-			this.#checkForGlobalReference(type, requireDeclarations, position);
+			this.checkForGlobalReference(type, requireDeclarations, position);
 		}
 	}
 
@@ -60,10 +71,10 @@ export default class BindingLinter {
 		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
 		const {factory, groupHeaderFactory, filters, sorter} = bindingInfo;
 		if (factory) {
-			this.#checkForGlobalReference(factory, requireDeclarations, position);
+			this.checkForGlobalReference(factory, requireDeclarations, position);
 		}
 		if (groupHeaderFactory) {
-			this.#checkForGlobalReference(groupHeaderFactory, requireDeclarations, position);
+			this.checkForGlobalReference(groupHeaderFactory, requireDeclarations, position);
 		}
 		if (filters) {
 			this.#analyzeFilters(filters, requireDeclarations, position);
@@ -83,7 +94,7 @@ export default class BindingLinter {
 		}
 		const {test, filters: nestedFilters, condition} = filters;
 		if (test) {
-			this.#checkForGlobalReference(test, requireDeclarations, position);
+			this.checkForGlobalReference(test, requireDeclarations, position);
 		}
 		if (nestedFilters) {
 			this.#analyzeFilters(nestedFilters, requireDeclarations, position);
@@ -103,14 +114,14 @@ export default class BindingLinter {
 		}
 		const {group, comparator} = sorter;
 		if (group && typeof group !== "boolean") {
-			this.#checkForGlobalReference(group, requireDeclarations, position);
+			this.checkForGlobalReference(group, requireDeclarations, position);
 		}
 		if (comparator) {
-			this.#checkForGlobalReference(comparator, requireDeclarations, position);
+			this.checkForGlobalReference(comparator, requireDeclarations, position);
 		}
 	}
 
-	#checkForGlobalReference(ref: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+	checkForGlobalReference(ref: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
 		if (ref.startsWith(".")) {
 			// Ignore empty reference or reference to the controller (as indicated by the leading dot)
 			return false;

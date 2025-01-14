@@ -1,0 +1,56 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:template="http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1">
+	<columns>
+		<template:repeat list="{target>}" var="field">
+			<template:if test="{field>Value}">
+				<Column>
+					<Text text="{path: 'field>Label', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}"/>
+				</Column>
+			</template:if>
+			<template:if test="{field>Action}">
+				<Column demandPopin="true" minScreenWidth="1800px" popinDisplay="WithoutHeader">
+					<Text text="{path: 'field>Label', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}"/>
+				</Column>
+			</template:if>
+		</template:repeat>
+	</columns>
+	<ColumnListItem>
+		<template:repeat list="{target>}" var="field">
+			<template:if test="{field>Value}">
+				<template:if test="{field>Target}">
+					<template:then>
+						<template:with path="field>Target" helper="sap.ui.model.odata.AnnotationHelper.resolvePath" var="entityType">
+							<Link text="{path: 'field>Value', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}" press="onDetailsPressed">
+								<dependents>
+									<template:with path="entityType>com.sap.vocabularies.UI.v1.HeaderInfo" var="headerInfo">
+										<Popover binding="{path: 'field>Target', formatter: 'sap.ui.model.odata.AnnotationHelper.getNavigationPath'}"
+												title="{path: 'headerInfo>Title/Value', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}">
+										</Popover>
+									</template:with>
+								</dependents>
+							</Link>
+						</template:with>
+					</template:then>
+					<template:else>
+						<Text text="{path: 'field>Value', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}" />
+					</template:else>
+				</template:if>
+			</template:if>
+			<template:if test="{field>Action}">
+				<template:with path="field>Action" helper="sap.ui.model.odata.AnnotationHelper.gotoFunctionImport" var="function">
+					<template:if test="{function>com.sap.vocabularies.Common.v1.IsActionCritical}">
+						<template:then>
+							<Button text="{path: 'field>Label', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}"
+								icon="{= ${function>com.sap.vocabularies.Common.v1.IsActionCritical/Bool} !== 'false' ? 'sap-icon://notification' : ''}" />
+						</template:then>
+						<template:else>
+							<Button text="{path: 'field>Label', formatter: 'sap.ui.model.odata.AnnotationHelper.format'}" />
+						</template:else>
+					</template:if>
+				</template:with>
+			</template:if>
+		</template:repeat>
+	</ColumnListItem>
+</core:FragmentDefinition>

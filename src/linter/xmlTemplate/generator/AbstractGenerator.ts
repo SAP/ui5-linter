@@ -85,6 +85,10 @@ export default abstract class AbstractGenerator {
 
 	writeRequire(requireExpression: RequireExpression) {
 		requireExpression.declarations.forEach((declaration) => {
+			if (!declaration.moduleName) {
+				// Module name might be missing, e.g. when a variable is declared via template:alias
+				return;
+			}
 			if (!declaration.variableName) {
 				// Side effect require?
 				declaration.variableName = "_";
