@@ -268,8 +268,8 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-deprecated-api"],
 
-		message: ({propertyName}: {propertyName: string}) =>
-			`Use of deprecated property '${propertyName}'`,
+		message: ({propertyName, namespace}: {propertyName: string; namespace?: string}) =>
+			`Use of deprecated property '${propertyName}'${namespace ? ` (${namespace})` : ""}`,
 		details: ({details}: {details: string}) => details,
 	},
 
