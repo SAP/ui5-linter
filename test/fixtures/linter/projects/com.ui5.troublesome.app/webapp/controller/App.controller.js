@@ -10,6 +10,11 @@ sap.ui.define(["./BaseController", "sap/m/BackgroundDesign"],
 			this.createButton().attachTap(function() {
 				console.log("Tapped");
 			});
+
+			this.loadFragment({
+				type: "HTML", // Deprecated type "HTML"
+				name: "com.ui5.troublesome.app.view.MyFragment"
+			});
 		}
 	});
 });

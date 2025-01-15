@@ -821,8 +821,12 @@ export default class SourceFileLinter {
 				this.#analyzeThemingSetTheme(node);
 			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
 				this.#analyzeViewCreate(node);
-			} else if (symbolName === "load" && moduleName === "sap/ui/core/Fragment") {
-				this.#analyzeFragmentLoad(node);
+			} else if (
+				(symbolName === "load" && moduleName === "sap/ui/core/Fragment") ||
+				// Controller#loadFragment calls Fragment.load internally
+				(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
+			) {
+				this.#analyzeFragmentLoad(node, symbolName);
 			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
@@ -1173,7 +1177,11 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeFragmentLoad(node: ts.CallExpression) {
+	#analyzeFragmentLoad(node: ts.CallExpression, symbolName: "load" | "loadFragment") {
+		// Note: This method is called for:
+		// - sap/ui/core/Fragment.load
+		// - sap/ui/core/mvc/Controller#loadFragment
+
 		if (!node.arguments?.length) {
 			return;
 		}
@@ -1202,9 +1210,15 @@ export default class SourceFileLinter {
 		if (typeProperty && ts.isStringLiteralLike(typeProperty.initializer)) {
 			const typeValue = typeProperty.initializer.text;
 			if (typeValue === "HTML") {
-				this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_FRAGMENT_LOAD, {
-					typeValue,
-				}, node);
+				if (symbolName === "load") {
+					this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_FRAGMENT_LOAD, {
+						typeValue,
+					}, node);
+				} else {
+					this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CONTROLLER_LOAD_FRAGMENT, {
+						typeValue,
+					}, node);
+				}
 			}
 		}
 	}
