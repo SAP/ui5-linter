@@ -1175,18 +1175,16 @@ export default class SourceFileLinter {
 					typeField = prop;
 				}
 
-
-				const type = this.checker.getTypeAtLocation(prop);
-				if (type.isUnion()) {
-					const hasPropertyBindingType = type.types.some((t) => {
-						const symbol = t.getSymbol();
-						return symbol && symbol.getName() === "PropertyBinding";
-					});
-					if (hasPropertyBindingType) {
-						this.#analyzeModelTypeField(typeField.initializer);
-					}
-				}
-
+				// const type = this.checker.getTypeAtLocation(prop);
+				// if (type.isUnion()) {
+				// 	const hasPropertyBindingType = type.types.some((t) => {
+				// 		const symbol = t.getSymbol();
+				// 		return symbol && symbol.getName() === "PropertyBinding";
+				// 	});
+				// 	if (hasPropertyBindingType) {
+				// 		this.#analyzeModelTypeField(typeField.initializer);
+				// 	}
+				// }
 
 				if (typeField && ts.isPropertyAssignment(typeField)) {
 					this.#analyzeModelTypeField(typeField.initializer);
