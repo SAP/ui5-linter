@@ -1,0 +1,13 @@
+<Input 
+    value="{
+    path: 'amount',
+    type: 'Integer',
+    formatOptions: {
+      minIntegerDigits: 3
+    },
+    constraints: {
+      maximum: 1000
+  }}" 
+  core:require="{
+    Integer: 'sap/ui/model/type/Integer'
+}"/>
