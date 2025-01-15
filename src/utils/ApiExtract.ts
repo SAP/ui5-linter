@@ -31,6 +31,8 @@ interface DeprecationInfo {
 }
 
 export interface ApiExtract {
+	doesOptionExist(symbolName: string, optionName: string, optionType: AllowedMetadataOptionType,
+		checkBorrowed?: boolean): boolean;
 	getAllOptionsByType(symbolName: string, option: AllowedMetadataOptionType, includeBorrowed?: boolean):
 		string[] | undefined;
 	getTypeByOption(symbolName: string, optionName: string, checkBorrowed?: boolean):
@@ -49,6 +51,30 @@ export class ApiExtractImpl implements ApiExtract {
 
 	constructor(data: ApiExtractJson) {
 		this.data = data;
+	}
+
+	/**
+	 * Checks whether a given option is part of a UI5 symbol.
+	 * @example doesOptionExist("sap.m.App", "backgroundColor", "property")
+	 * 	returns true
+	 * @example doesOptionExist("sap.m.App", "pages", "property") // pages is an aggregation
+	 * 	returns false
+	 */
+	doesOptionExist(symbolName: string, optionName: string, optionType: AllowedMetadataOptionType,
+		checkBorrowed = true): boolean {
+		let foundSymbolRecord = this.data.metadata[symbolName];
+		// Check own options and resolve borrowed options with "extends":
+		while (foundSymbolRecord) {
+			if (foundSymbolRecord[optionType]?.includes(optionName)) {
+				return true;
+			}
+			if (checkBorrowed && foundSymbolRecord.extends) {
+				foundSymbolRecord = this.data.metadata[foundSymbolRecord.extends];
+			} else {
+				break;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -121,8 +147,7 @@ export class ApiExtractImpl implements ApiExtract {
 	 * 	returns false
 	 */
 	isAggregation(symbolName: string, aggregationName: string, checkBorrowed = true): boolean {
-		return this.getAllOptionsByType(symbolName, "aggregation",
-			checkBorrowed)?.includes(aggregationName) ?? false;
+		return this.doesOptionExist(symbolName, aggregationName, "aggregation", checkBorrowed);
 	}
 
 	/**
@@ -133,8 +158,7 @@ export class ApiExtractImpl implements ApiExtract {
 	 * 	returns false
 	 */
 	isAssociation(symbolName: string, associationName: string, checkBorrowed = true): boolean {
-		return this.getAllOptionsByType(symbolName, "association",
-			checkBorrowed)?.includes(associationName) ?? false;
+		return this.doesOptionExist(symbolName, associationName, "association", checkBorrowed);
 	}
 
 	/**
@@ -145,8 +169,7 @@ export class ApiExtractImpl implements ApiExtract {
 	 * 	returns false
 	 */
 	isProperty(symbolName: string, propertyName: string, checkBorrowed = true): boolean {
-		return this.getAllOptionsByType(symbolName, "property",
-			checkBorrowed)?.includes(propertyName) ?? false;
+		return this.doesOptionExist(symbolName, propertyName, "property", checkBorrowed);
 	}
 
 	/**
@@ -157,8 +180,7 @@ export class ApiExtractImpl implements ApiExtract {
 	 * 	returns false
 	 */
 	isEvent(symbolName: string, eventName: string, checkBorrowed = true): boolean {
-		return this.getAllOptionsByType(symbolName, "event",
-			checkBorrowed)?.includes(eventName) ?? false;
+		return this.doesOptionExist(symbolName, eventName, "event", checkBorrowed);
 	}
 
 	/**
@@ -169,8 +191,7 @@ export class ApiExtractImpl implements ApiExtract {
 	 * 	returns false
 	 */
 	isMethod(symbolName: string, methodName: string, checkBorrowed = true): boolean {
-		return this.getAllOptionsByType(symbolName, "method",
-			checkBorrowed)?.includes(methodName) ?? false;
+		return this.doesOptionExist(symbolName, methodName, "method", checkBorrowed);
 	}
 
 	/**

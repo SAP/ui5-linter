@@ -39,6 +39,23 @@ const apiExtract = new ApiExtractImpl(JSON.parse(`
 }`)); */
 const apiExtract = await loadApiExtract();
 
+test("Test doesOptionExist()", (t) => {
+	t.is(apiExtract.doesOptionExist("sap.m.App", "pages", "aggregation"), true,
+		"'pages' is a borrowed aggregation of 'sap.m.NavContainer'");
+	t.is(apiExtract.doesOptionExist("sap.m.NavContainer", "pages", "aggregation"), true,
+		"'pages' is an aggregation of 'sap.m.NavContainer'");
+	t.is(apiExtract.doesOptionExist("sap.m.NavContainer", "pages", "aggregation", false), true,
+		"'pages' is an aggregation of 'sap.m.NavContainer'");
+	t.is(apiExtract.doesOptionExist("sap.m.App", "backgroundColor", "aggregation"), false,
+		"'backgroundColor' is a property and not an aggregation of 'sap.m.App'");
+	t.is(apiExtract.doesOptionExist("sap.m.App", "tooltip", "aggregation"), true,
+		"'tooltip' is an aggregation of 'sap.ui.core.Element'");
+	t.is(apiExtract.doesOptionExist("sap.xyz.notExistingSymbol", "backgroundColor", "property"), false,
+		"If the symbol can't be found, false should be returned");
+	t.is(apiExtract.doesOptionExist("sap.m.App", "notExistingOption", "property"), false,
+		"If the option can't be found, false should be returned");
+});
+
 test("Test getAllOptionsByType()", (t) => {
 	const result = apiExtract.getAllOptionsByType("sap.m.App", "property", false);
 	const result2 = apiExtract.getAllOptionsByType("sap.m.App", "property");
@@ -59,7 +76,7 @@ test("Test getAllOptionsByType()", (t) => {
 		"If the symbol can't be found, undefined should be returned");
 });
 
-test("Test getting option types by option name", (t) => {
+test("Test option type-specific methods", (t) => {
 	t.is(apiExtract.isAggregation("sap.m.App", "pages"), true,
 		"'pages' is a borrowed aggregation of 'sap.m.NavContainer'");
 	t.is(apiExtract.isAggregation("sap.m.NavContainer", "pages"), true,
