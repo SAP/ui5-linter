@@ -1160,8 +1160,6 @@ export default class SourceFileLinter {
 					return;
 				}
 
-				// TODO: Check if it's bindable property
-
 				// Get the type property
 				let typeField;
 				if (ts.isObjectLiteralExpression(prop.initializer)) {
@@ -1175,21 +1173,39 @@ export default class SourceFileLinter {
 					typeField = prop;
 				}
 
-				// const type = this.checker.getTypeAtLocation(prop);
-				// if (type.isUnion()) {
-				// 	const hasPropertyBindingType = type.types.some((t) => {
-				// 		const symbol = t.getSymbol();
-				// 		return symbol && symbol.getName() === "PropertyBinding";
-				// 	});
-				// 	if (hasPropertyBindingType) {
-				// 		this.#analyzeModelTypeField(typeField.initializer);
-				// 	}
-				// }
-
-				if (typeField && ts.isPropertyAssignment(typeField)) {
+				if (typeField && ts.isPropertyAssignment(typeField) &&
+					(!ts.isNewExpression(node) /* bindProperty() */ ||
+						this.#isPropertyBindingType(node, prop.name.getText()) /* new Control() */)) {
 					this.#analyzeModelTypeField(typeField.initializer);
 				}
 			});
+		});
+	}
+
+	/**
+	 * Identify if a constructor argument property is bindable
+	 *
+	 * Get the class declaration by going up the chain and then find the argument property
+	 * from there. Directly finding the type of the property is not possible from here as it's
+	 * missing some context.
+	*/
+	#isPropertyBindingType(node: ts.NewExpression, propName: string) {
+		const controlAmbientModule =
+			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
+		const classArg = (controlAmbientModule?.body as ts.ModuleBlock)?.statements
+			?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
+			?.members.find((m): m is ts.ConstructorDeclaration => ts.isConstructorDeclaration(m));
+
+		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
+		const argProperty = constructorArgType?.getProperties()
+			.find((p: ts.Symbol) => p.name === propName);
+
+		const argPropType = argProperty?.declarations?.[0] &&
+			this.checker.getTypeAtLocation(argProperty.declarations[0]);
+
+		return argPropType?.isUnion() && argPropType.types.some((t) => {
+			return t?.getSymbol()?.getName() === "PropertyBindingInfo" ||
+				t.aliasSymbol?.getName() === "PropertyBindingInfo";
 		});
 	}
 
