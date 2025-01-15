@@ -1,19 +1,18 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import {readFile} from "node:fs/promises";
 
 export type AllowedSymbolKind = "UI5Class" | "UI5Enum" | "UI5Interface" | "UI5Namespace" | "UI5Typedef" | "UI5Function";
-export type AllowedMetadataOptionType = "aggregations" | "associations" | "defaultAggregation" | "events" |
-	"methods" | "properties";
+export type AllowedMetadataOptionType = "aggregation" | "association" | "defaultAggregation" | "event" |
+	"method" | "property";
 /** @example "sap.m.Button" | "jQuery.sap" | "module:sap/base/Event" | "sap.ui.base.Object" */
 type UI5SymbolName = string;
 /** @example "sap.m.App": { "properties": ["backgroundColor", ...], ..., "extends": "sap.m.NavContainer" } */
 export interface MetadataRecord {
-	aggregations?: string[];
+	aggregation?: string[];
 	defaultAggregation?: string;
-	associations?: string[];
-	events?: string[];
-	methods?: string[];
-	properties?: string[];
+	association?: string[];
+	event?: string[];
+	method?: string[];
+	property?: string[];
 	extends?: UI5SymbolName;
 };
 
@@ -32,12 +31,19 @@ interface DeprecationInfo {
 }
 
 export interface ApiExtract {
+	doesOptionExist(symbolName: string, optionName: string, optionType: AllowedMetadataOptionType,
+		checkBorrowed?: boolean): boolean;
 	getAllOptionsByType(symbolName: string, option: AllowedMetadataOptionType, includeBorrowed?: boolean):
 		string[] | undefined;
-	getTypeByOption(symbolName: string, optionName: string, includeBorrowed?: boolean):
-		AllowedMetadataOptionType | string | undefined;
+	getTypeByOption(symbolName: string, optionName: string, checkBorrowed?: boolean):
+		AllowedMetadataOptionType | undefined;
 	getDefaultAggregation(className: string): string | undefined;
 	getDeprecationInfo(symbolName: string): DeprecationInfo | undefined;
+	isAggregation(symbolName: string, aggregationName: string, checkBorrowed?: boolean): boolean;
+	isAssociation(symbolName: string, associationName: string, checkBorrowed?: boolean): boolean;
+	isEvent(symbolName: string, eventName: string, checkBorrowed?: boolean): boolean;
+	isMethod(symbolName: string, methodName: string, checkBorrowed?: boolean): boolean;
+	isProperty(symbolName: string, propertyName: string, checkBorrowed?: boolean): boolean;
 }
 
 export class ApiExtractImpl implements ApiExtract {
@@ -48,16 +54,40 @@ export class ApiExtractImpl implements ApiExtract {
 	}
 
 	/**
+	 * Checks whether a given option is part of a UI5 symbol.
+	 * @example doesOptionExist("sap.m.App", "backgroundColor", "property")
+	 * 	returns true
+	 * @example doesOptionExist("sap.m.App", "pages", "property") // pages is an aggregation
+	 * 	returns false
+	 */
+	doesOptionExist(symbolName: string, optionName: string, optionType: AllowedMetadataOptionType,
+		checkBorrowed = true): boolean {
+		let foundSymbolRecord = this.data.metadata[symbolName];
+		// Check own options and resolve borrowed options with "extends":
+		while (foundSymbolRecord) {
+			if (foundSymbolRecord[optionType]?.includes(optionName)) {
+				return true;
+			}
+			if (checkBorrowed && foundSymbolRecord.extends) {
+				foundSymbolRecord = this.data.metadata[foundSymbolRecord.extends];
+			} else {
+				break;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Returns all options of a given option type in a UI5 symbol.
-	 * (including borrowed ones is optional)
-	 * @example getAllOptionsByType("sap.m.App", "properties", false)
+	 * (not including borrowed ones is optional)
+	 * @example getAllOptionsByType("sap.m.App", "property", false)
 	 * 	returns ["backgroundColor", "backgroundImage", "backgroundRepeat", *etc.*]
 	 * @example getAllOptionsByType("sap.m.App", "notExistingOptionType")
 	 * 	returns []
-	 * @example getAllOptionsByType("sap.xyz.notExistingSymbol", "properties")
+	 * @example getAllOptionsByType("sap.xyz.notExistingSymbol", "property")
 	 * 	returns undefined
 	 */
-	getAllOptionsByType(symbolName: string, optionType: AllowedMetadataOptionType, includeBorrowed = false):
+	getAllOptionsByType(symbolName: string, optionType: AllowedMetadataOptionType, includeBorrowed = true):
 		string[] | undefined {
 		const values: string[] = [];
 		let foundSymbolRecord = this.data.metadata[symbolName];
@@ -80,7 +110,7 @@ export class ApiExtractImpl implements ApiExtract {
 
 	/**
 	 * Returns the type of a given option in a UI5 symbol record.
-	 * (resolving borrowed ones is optional)
+	 * (not checking borrowed ones is optional)
 	 * @example getTypeByOption("sap.m.App", "backgroundColor")
 	 * 	returns "properties"
 	 * @example getTypeByOption("sap.m.App", "notExistingOption")
@@ -88,18 +118,19 @@ export class ApiExtractImpl implements ApiExtract {
 	 * @example getTypeByOption("sap.xyz.notExistingSymbol", "backgroundColor")
 	 * 	returns undefined
 	 */
-	getTypeByOption(symbolName: string, optionName: string, includeBorrowed = false):
-		AllowedMetadataOptionType | string | undefined {
+	getTypeByOption(symbolName: string, optionName: string, checkBorrowed = true):
+		AllowedMetadataOptionType | undefined {
 		let foundSymbolRecord = this.data.metadata[symbolName];
 		// Check own types and resolve borrowed types with "extends":
 		while (foundSymbolRecord) {
 			// Loop through all keys of the symbol record:
 			for (const [key, value] of Object.entries(foundSymbolRecord)) {
-				if ((Array.isArray(value) && value.includes(optionName)) || value === optionName) {
-					return key;
+				if (key !== "extends" &&
+					((Array.isArray(value) && value.includes(optionName)) || value === optionName)) {
+					return key as AllowedMetadataOptionType;
 				}
 			}
-			if (includeBorrowed && foundSymbolRecord.extends) {
+			if (checkBorrowed && foundSymbolRecord.extends) {
 				foundSymbolRecord = this.data.metadata[foundSymbolRecord.extends];
 			} else {
 				break;
@@ -107,6 +138,61 @@ export class ApiExtractImpl implements ApiExtract {
 		}
 		return undefined;
 	};
+
+	/**
+	 * Checks whether a given aggregation is part of a UI5 symbol.
+	 * @example isAggregation("sap.m.NavContainer", "pages")
+	 * 	returns true
+	 * @example isAggregation("sap.m.App", "pages", false) // pages is a borrowed aggregation of "sap.m.NavContainer"
+	 * 	returns false
+	 */
+	isAggregation(symbolName: string, aggregationName: string, checkBorrowed = true): boolean {
+		return this.doesOptionExist(symbolName, aggregationName, "aggregation", checkBorrowed);
+	}
+
+	/**
+	 * Checks whether a given association is part of a UI5 symbol.
+	 * @example isAssociation("sap.m.NavContainer", "initialPage")
+	 * 	returns true
+	 * @example isAssociation("sap.m.App", "initialPage", false) // initialPage is borrowed from "sap.m.NavContainer"
+	 * 	returns false
+	 */
+	isAssociation(symbolName: string, associationName: string, checkBorrowed = true): boolean {
+		return this.doesOptionExist(symbolName, associationName, "association", checkBorrowed);
+	}
+
+	/**
+	 * Checks whether a given property is part of a UI5 symbol.
+	 * @example isProperty("sap.m.App", "backgroundColor")
+	 * 	returns true
+	 * @example isProperty("sap.m.App", "pages") // pages is a borrowed default aggregation of "sap.m.NavContainer"
+	 * 	returns false
+	 */
+	isProperty(symbolName: string, propertyName: string, checkBorrowed = true): boolean {
+		return this.doesOptionExist(symbolName, propertyName, "property", checkBorrowed);
+	}
+
+	/**
+	 * Checks whether a given event is part of a UI5 symbol.
+	 * @example isEvent("sap.m.NavContainer", "afterNavigate")
+	 * 	returns true
+	 * @example isEvent("sap.m.App", "afterNavigate", false) // afterNavigate is borrowed from "sap.m.NavContainer"
+	 * 	returns false
+	 */
+	isEvent(symbolName: string, eventName: string, checkBorrowed = true): boolean {
+		return this.doesOptionExist(symbolName, eventName, "event", checkBorrowed);
+	}
+
+	/**
+	 * Checks whether a given method is part of a UI5 symbol.
+	 * @example isMethod("sap.m.App", "getBackgroundColor")
+	 * 	returns true
+	 * @example isMethod("sap.m.App", "addPage", false) // addPage is borrowed from "sap.m.NavContainer"
+	 * 	returns false
+	 */
+	isMethod(symbolName: string, methodName: string, checkBorrowed = true): boolean {
+		return this.doesOptionExist(symbolName, methodName, "method", checkBorrowed);
+	}
 
 	/**
 	 * Returns the default aggregation of a given UI5 class.

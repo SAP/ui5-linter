@@ -17,12 +17,12 @@ type UI5OptionValue = string;
 /** @example "sap.m.Button" | "jQuery.sap" | "module:sap/base/Event" | "sap.ui.base.Object" */
 type UI5SymbolName = string;
 export interface UI5SymbolRecord {
-	aggregations?: UI5OptionValue[];
+	aggregation?: UI5OptionValue[];
 	defaultAggregation?: UI5OptionValue;
-	associations?: UI5OptionValue[];
-	events?: UI5OptionValue[];
-	methods?: UI5OptionValue[];
-	properties?: UI5OptionValue[];
+	association?: UI5OptionValue[];
+	event?: UI5OptionValue[];
+	method?: UI5OptionValue[];
+	property?: UI5OptionValue[];
 	extends?: UI5SymbolName;
 };
 
@@ -78,23 +78,30 @@ export default class MetadataProvider {
 				symbolMetadata = symbol as UI5Class;
 				while (symbolMetadata) {
 					symbolMetadata.aggregations.forEach((aggregation) => {
-						if (!outputSymbolRecord.aggregations) outputSymbolRecord.aggregations = [];
-						outputSymbolRecord.aggregations.push(aggregation.name);
+						if (!outputSymbolRecord.aggregation) outputSymbolRecord.aggregation = [];
+						outputSymbolRecord.aggregation.push(aggregation.name);
+						/* The following is necessary because some aggregations in UI5 can be defined as properties too,
+						if they have a cardinality of "0..1" and define alternative types.
+						E.g. "tooltip" of "sap.ui.core.Element" meets this criteria. */
+						if (aggregation.cardinality === "0..1" && aggregation.altTypes.length) {
+							if (!outputSymbolRecord.property) outputSymbolRecord.property = [];
+							outputSymbolRecord.property.push(aggregation.name);
+						}
 					});
 					symbolMetadata.associations.forEach((association) => {
-						if (!outputSymbolRecord.associations) outputSymbolRecord.associations = [];
-						outputSymbolRecord.associations.push(association.name);
+						if (!outputSymbolRecord.association) outputSymbolRecord.association = [];
+						outputSymbolRecord.association.push(association.name);
 					});
 					if (symbolMetadata.defaultAggregation) {
 						outputSymbolRecord.defaultAggregation = symbolMetadata.defaultAggregation.name;
 					}
 					symbolMetadata.events.forEach((event) => {
-						if (!outputSymbolRecord.events) outputSymbolRecord.events = [];
-						outputSymbolRecord.events.push(event.name);
+						if (!outputSymbolRecord.event) outputSymbolRecord.event = [];
+						outputSymbolRecord.event.push(event.name);
 					});
 					symbolMetadata.properties.forEach((property) => {
-						if (!outputSymbolRecord.properties) outputSymbolRecord.properties = [];
-						outputSymbolRecord.properties.push(property.name);
+						if (!outputSymbolRecord.property) outputSymbolRecord.property = [];
+						outputSymbolRecord.property.push(property.name);
 					});
 					/* Disabled, as "methods" not being required:
 						symbolMetadata.methods.forEach((method) => {
