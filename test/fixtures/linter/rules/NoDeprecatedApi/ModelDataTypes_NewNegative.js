@@ -10,6 +10,14 @@ sap.ui.define(
 				formatOptions: { minIntegerDigits: 3 },
 				constraints: { maximum: 1000 },
 			},
+			// This prop should not be analyzed at all as it's not existent
+			// and does not have the 'PropertyBindingInfo' type
+			nonExistentProperty: {
+				path: "/names/0/amount",
+				type: "sap.ui.model.type.Integer",
+				formatOptions: { minIntegerDigits: 3 },
+				constraints: { maximum: 1000 },
+			},
 		});
 	}
 );
