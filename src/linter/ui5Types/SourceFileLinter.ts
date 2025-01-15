@@ -1156,11 +1156,6 @@ export default class SourceFileLinter {
 				return;
 			}
 			arg.properties.forEach((prop) => {
-				// TODO:
-				// 1. Check if prop is a bindable property
-				// 2. Analyze if there's a type prop and check it
-				// 	2.1 Check if the type is imported
-				// 	2.2 In case of complex/build type, resolve and check it.
 				if (!ts.isPropertyAssignment(prop)) {
 					return;
 				}
@@ -1179,6 +1174,19 @@ export default class SourceFileLinter {
 					ts.isIdentifier(prop.name) && prop.name.text === "type") {
 					typeField = prop;
 				}
+
+
+				const type = this.checker.getTypeAtLocation(prop);
+				if (type.isUnion()) {
+					const hasPropertyBindingType = type.types.some((t) => {
+						const symbol = t.getSymbol();
+						return symbol && symbol.getName() === "PropertyBinding";
+					});
+					if (hasPropertyBindingType) {
+						this.#analyzeModelTypeField(typeField.initializer);
+					}
+				}
+
 
 				if (typeField && ts.isPropertyAssignment(typeField)) {
 					this.#analyzeModelTypeField(typeField.initializer);
