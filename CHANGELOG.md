@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.7.0](https://github.com/SAP/ui5-linter/compare/v1.6.1...v1.7.0) (2025-01-15)
+
+
+### Features
+
+* Detect deprecated 'type' in `Controller#loadFragment` ([61fa2c2](https://github.com/SAP/ui5-linter/commit/61fa2c2e5d4ec480661dac4914277df7ebbe72ec))
+* Detect deprecated 'type' in `Fragment.load` / `&lt;core:Fragment&gt;` ([16e3f94](https://github.com/SAP/ui5-linter/commit/16e3f94842680f535311fc5a051f9106a6add414))
+* Detect deprecated 'type' in `View.create` / `&lt;mvc:View&gt;` ([14667aa](https://github.com/SAP/ui5-linter/commit/14667aabd73b331121ccb09a8ddda09efc3b0e16))
+* Detect usage of non exported values by library.js ([#468](https://github.com/SAP/ui5-linter/issues/468)) ([be2cbb7](https://github.com/SAP/ui5-linter/commit/be2cbb7378dbe394633e6c1cbb9b2570ac462380))
+* Improve deprecation detection of property accesses ([42fb8a5](https://github.com/SAP/ui5-linter/commit/42fb8a54c96e9cd8e1bb8f3903835cb6feae7ab8))
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Handle NewExpression ([4988013](https://github.com/SAP/ui5-linter/commit/49880130229cf2bd115da29c5c857a2d043947aa))
+* **API:** Remove ui5Config parameter defaulting ([e31d89e](https://github.com/SAP/ui5-linter/commit/e31d89ec67b9081a006fdd34d1c5e0d97169063a))
+* **parsing-error:** Failed to map back to source ([2876f35](https://github.com/SAP/ui5-linter/commit/2876f35c68586bc51ee6ac7172fc9a6e1fe2eb6e))
+
+
+### Dependencies
+
+* Bump typescript from 5.7.2 to 5.7.3 ([d3f0471](https://github.com/SAP/ui5-linter/commit/d3f0471b49e03a2103cb9783f5d5029fe99712c5))
+
 ## [1.6.1](https://github.com/SAP/ui5-linter/compare/v1.6.0...v1.6.1) (2025-01-08)
 
 
