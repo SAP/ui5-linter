@@ -120,10 +120,12 @@ var fnUndefined = CONSTANT.bind(null, undefined),
 			led: unexpected, // Note: cannot happen due to lbp: 0
 			nud: function (oToken, oParser) {
 				if (!(oToken.value in oParser.globals)) {
-					log.warn("Unsupported global identifier '" + oToken.value
-							+ "' in expression parser input '" + oParser.input + "'",
-						undefined,
-						sExpressionParser);
+					/* UI5 LINTER MODIFICATION: Do not log warning for globals.
+						UI5 linter does not provide the ExpressionParser with a list of variables */
+					// log.warn("Unsupported global identifier '" + oToken.value
+					// 		+ "' in expression parser input '" + oParser.input + "'",
+					// 	undefined,
+					// 	sExpressionParser);
 				}
 				return CONSTANT.bind(null, oParser.globals[oToken.value]);
 			}
