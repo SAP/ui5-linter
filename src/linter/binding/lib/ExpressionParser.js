@@ -705,9 +705,9 @@ function tokenize(fnResolveBinding, sInput, iStart) {
 	oTokenizer.init(sInput, iStart);
 
 	try {
-		/* eslint-disable no-empty */
+		/* eslint -disable no-empty */
 		while (consumeToken()) { /* deliberately empty */ }
-		/* eslint-enable no-empty */
+		/* eslint -enable no-empty */
 	} catch (e) {
 		// Note: new SyntaxError().name === "SyntaxError"
 		if (e.name === "SyntaxError") { // remember tokenizer error

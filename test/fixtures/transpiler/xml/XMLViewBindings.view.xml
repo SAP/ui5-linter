@@ -7,8 +7,7 @@
 	<!-- tooltip: Aggregation with a 0..1 aggregation and "string" alt type can be used like a property -->
 	<!-- customData: Aggregation with factory and nested filter -->
 	<!-- formatError: Control event handlers should be ignored for now -->
-	<ObjectStatus
-		text="{
+	<ObjectStatus text="{
 			path: 'invoice>Status',
 			formatter: 'ui5.walkthrough.model.formatter.statusText',
 			events: {
