@@ -1,9 +1,39 @@
-export interface BindingInfo {
+export type FunctionReference = string;
+
+export interface FilterInfo {
+	path?: string;
+	test?: FunctionReference;
+	filters?: FilterInfo | FilterInfo[];
+	condition?: FilterInfo | FilterInfo[];
+	// ... more properties currently not relevant to UI5 linter
+}
+
+export interface SorterInfo {
+	path?: string;
+	descending?: boolean;
+	group?: FunctionReference | boolean;
+	comparator?: FunctionReference;
+}
+
+export interface BindingInfoBase {
 	path?: string;
 	model?: string;
-	formatter?: string;
-	events?: Record<string, string>;
+	events?: Record<string, FunctionReference>;
 }
+
+export interface PropertyBindingInfo extends BindingInfoBase {
+	formatter?: FunctionReference;
+	type?: FunctionReference;
+}
+
+export interface AggregationBindingInfo extends BindingInfoBase {
+	filters?: FilterInfo | FilterInfo[];
+	sorter?: SorterInfo | SorterInfo[];
+	factory?: FunctionReference;
+	groupHeaderFactory?: FunctionReference;
+}
+
+export type BindingInfo = PropertyBindingInfo | AggregationBindingInfo;
 
 interface BindingParser {
 	complexParser: (
