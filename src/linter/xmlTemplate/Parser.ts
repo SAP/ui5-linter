@@ -548,8 +548,12 @@ export default class Parser {
 		} else {
 			for (const prop of controlProperties) {
 				// Check whether prop is of type "property" (indicating that it can have a binding)
+				// Note that some aggregations are handled like properties (0..n + alt type). Therefore check
+				// whether this is a property first. Additional aggregation-specific checks are not needed in that case
 				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
 					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, prop.start);
+				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
+					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, prop.start);
 				}
 			}
 			// This node declares a control

@@ -5,6 +5,7 @@
 >
 	<!-- text: Deprecated reference of global formatter and binding event handler function -->
 	<!-- tooltip: Aggregation with a 0..1 aggregation and "string" alt type can be used like a property -->
+	<!-- customData: Aggregation with factory and nested filter -->
 	<!-- formatError: Control event handlers should be ignored for now -->
 	<ObjectStatus
 		text="{
@@ -20,14 +21,39 @@
 			formatter: 'globalTooltipFormatter'
 		}"
 
+		customData="{
+			path: 'invoice>StatusDetails',
+			factory: 'global.factoryFunction',
+			filters: [{
+				test: 'global.testMethod'
+			}, {
+				filters: [{
+					path: 'ReturnFlag',
+					operator: 'EQ',
+					value1: 'Y'
+				}, {
+					test: 'global.testMethod'
+				}]
+			}]
+		}"
 		formatError="global.handleEvent"
 	/>
 
-	<!-- Correct import of formatter and event handler modules -->
+	<!-- Use of global JS function 'parseInt' -->
+	<ObjectStatus
+		text="{
+			path: 'invoice>Status',
+			formatter: 'parseInt'
+		}"
+	/>
+
+	<!-- Correct import and use of required modules -->
 	<ObjectStatus
 		core:require="{
 			Formatter: 'ui5/walkthrough/model/formatter',
-			EventHandler: 'my/event/handler'
+			EventHandler: 'my/event/handler',
+			Factory: 'my/factory',
+			FilterTest: 'my/filterTest'
 		}"
 		text="{
 			path: 'invoice>Status',
@@ -35,6 +61,21 @@
 			events: {
 				dataRequested: 'EventHandler.onMyDataRequested'
 			}
+		}"
+		customData="{
+			path: 'invoice>StatusDetails',
+			factory: 'Factory',
+			filters: [{
+				test: 'FilterTest.testMethod'
+			}, {
+				filters: [{
+					path: 'ReturnFlag',
+					operator: 'EQ',
+					value1: 'Y'
+				}, {
+					test: 'FilterTest.testMethod'
+				}]
+			}]
 		}"
 	/>
 
