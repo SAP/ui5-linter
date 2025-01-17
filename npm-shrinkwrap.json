@@ -21,7 +21,7 @@
 				"he": "^1.2.0",
 				"json-source-map": "^0.6.1",
 				"minimatch": "^10.0.1",
-				"sax-wasm": "2.2.4",
+				"sax-wasm": "^3.0.0",
 				"typescript": "^5.7.3",
 				"update-notifier": "^7.3.1",
 				"yargs": "^17.7.2"
@@ -11166,9 +11166,13 @@
 			"integrity": "sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg=="
 		},
 		"node_modules/sax-wasm": {
-			"version": "2.2.4",
-			"resolved": "https://registry.npmjs.org/sax-wasm/-/sax-wasm-2.2.4.tgz",
-			"integrity": "sha512-KreOdNF02zEEDUyqLZjWQTMf+ev/6gEzp2ZT8w2xvqfHO/DRPL4RBYYeiXQpYEGD+1oZ81pjc3fPG5NLDh5ICg=="
+			"version": "3.0.0",
+			"resolved": "https://registry.npmjs.org/sax-wasm/-/sax-wasm-3.0.0.tgz",
+			"integrity": "sha512-8Dn91vhGZ0LxSosVyPv4zcgZDOX0qyFxpTLlW8rb1L9kP3l0yXk5fXv3X86MPgk9hgJbajAGKuOXkhUQSTetWQ==",
+			"license": "MIT",
+			"engines": {
+				"node": ">=18.20.5"
+			}
 		},
 		"node_modules/semver": {
 			"version": "7.6.3",
