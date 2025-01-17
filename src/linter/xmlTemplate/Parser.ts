@@ -551,9 +551,15 @@ export default class Parser {
 				// Note that some aggregations are handled like properties (0..n + alt type). Therefore check
 				// whether this is a property first. Additional aggregation-specific checks are not needed in that case
 				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, prop.start);
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1, // Add one to align with IDEs
+						column: prop.start.column,
+					});
 				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, prop.start);
+					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1, // Add one to align with IDEs
+						column: prop.start.column,
+					});
 				}
 			}
 			// This node declares a control
