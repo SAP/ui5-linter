@@ -22,7 +22,7 @@ export interface BindingInfoBase {
 }
 
 export interface PropertyBindingInfo extends BindingInfoBase {
-	formatter?: FunctionReference;
+	formatter?: FunctionReference | FunctionReference[];
 	type?: FunctionReference;
 }
 

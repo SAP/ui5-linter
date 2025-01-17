@@ -309,3 +309,40 @@ test("XML Aggregation Binding: Imported Group Header Factory", (t) => {
 
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
+
+test("XML Property Binding: Composite Binding with single Formatter and trailing space", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{
+			parts:[{
+				path: 'entityDetailsModel>/AdditionalMeasures'
+			}, {
+				path: 'entityDetailsModel>/DataSource/AllProperties'
+			}],
+			formatter: 'global.formatter'
+		} `,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Expression Binding", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= formatMessage(${i18n>SELECT_ALL},${local>/sections/selectCount}, ${local>/sections/totalCount})}",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("Error Testing: XML Property Binding missing closing bracket", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{ type: 'sap.ui.model.odata.type.DateTime', constraints: { displayFormat: 'Date', nullable: false }`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
