@@ -1183,7 +1183,6 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
-					const bindingLinter = new BindingLinter(this.resourcePath, this.context);
 					const imports = this.sourceFile.statements
 						.filter((stmnt): stmnt is ts.ImportDeclaration =>
 							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
@@ -1195,12 +1194,20 @@ export default class SourceFileLinter {
 						});
 
 					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
+					const originalFilename = traceMap?.sources[0] ?? traceMap?.file;
+					let resourcePath = this.resourcePath;
+					if (originalFilename) {
+						resourcePath = resourcePath.split("/").splice(0, -1).join("/") + "/" + originalFilename;
+					}
+
 					const {start: nodePos} = getPositionsForNode({
 						node,
 						sourceFile: this.sourceFile,
 						resourcePath: this.resourcePath,
-						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+						traceMap: traceMap,
 					});
+					const bindingLinter = new BindingLinter(resourcePath, this.context);
 					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
 				}
 			});
