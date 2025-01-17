@@ -18,7 +18,7 @@ export default class BindingLinter {
 	}
 
 	#analyzeBinding(bindingInfo: BindingInfo, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		const {formatter, events} = bindingInfo;
+		const {formatter, events, type} = bindingInfo;
 		if (formatter) {
 			this.#checkForGlobalReference(formatter, requireDeclarations, position);
 		}
@@ -26,6 +26,9 @@ export default class BindingLinter {
 			for (const eventHandler of Object.values(events)) {
 				this.#checkForGlobalReference(eventHandler, requireDeclarations, position);
 			}
+		}
+		if (type) {
+			this.#checkForGlobalReference(type, requireDeclarations, position);
 		}
 	}
 
@@ -41,7 +44,9 @@ export default class BindingLinter {
 		} else {
 			variableName = ref;
 		}
-		const requireDeclaration = requireDeclarations.find((decl) => decl.variableName === variableName);
+		const requireDeclaration = requireDeclarations.find((decl) =>
+			decl.variableName === variableName ||
+			decl.moduleName === parts.join("/"));
 		if (requireDeclaration) {
 			return false;
 		}
