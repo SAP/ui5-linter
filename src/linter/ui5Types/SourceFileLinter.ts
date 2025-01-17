@@ -19,6 +19,8 @@ import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
+import BindingLinter from "../binding/BindingLinter.js";
+import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -1177,6 +1179,29 @@ export default class SourceFileLinter {
 					(!ts.isNewExpression(node) /* bindProperty() */ ||
 						this.#isPropertyBindingType(node, prop.name.getText()) /* new Control() */)) {
 					this.#analyzeModelTypeField(typeField.initializer);
+				} else if (ts.isStringLiteral(prop.initializer) &&
+					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
+					ts.isNewExpression(node) &&
+					this.#isPropertyBindingType(node, prop.name.getText())) {
+					const bindingLinter = new BindingLinter(this.resourcePath, this.context);
+					const imports = this.sourceFile.statements
+						.filter((stmnt): stmnt is ts.ImportDeclaration =>
+							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
+						.map((importNode) => {
+							return {
+								moduleName: (importNode.moduleSpecifier as ts.StringLiteral).text,
+								variableName: importNode.importClause?.name?.text,
+							} as RequireDeclaration;
+						});
+
+					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+					const {start: nodePos} = getPositionsForNode({
+						node,
+						sourceFile: this.sourceFile,
+						resourcePath: this.resourcePath,
+						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+					});
+					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
 				}
 			});
 		});
