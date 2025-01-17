@@ -34,7 +34,13 @@ export default class BindingLinter {
 		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
 		const {formatter, type} = bindingInfo;
 		if (formatter) {
-			this.#checkForGlobalReference(formatter, requireDeclarations, position);
+			if (Array.isArray(formatter)) {
+				formatter.forEach((formatterItem) => {
+					this.#checkForGlobalReference(formatterItem, requireDeclarations, position);
+				});
+			} else {
+				this.#checkForGlobalReference(formatter, requireDeclarations, position);
+			}
 		}
 		if (type) {
 			this.#checkForGlobalReference(type, requireDeclarations, position);

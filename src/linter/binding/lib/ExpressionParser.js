@@ -9,6 +9,8 @@
 import JSTokenizer from "../../xmlTemplate/lib/JSTokenizer.js";
 import escapeRegExp from "./strings/escapeRegExp.js";
 import deepEqual from "./util/deepEqual.js";
+import {getLogger} from "@ui5/logger";
+const log = getLogger("linter:binding:lib:ExpressionParser");
 /* eslint-disable */
 
 //SAP's Independent Implementation of "Top Down Operator Precedence" by Vaughan R. Pratt,
@@ -118,7 +120,7 @@ var fnUndefined = CONSTANT.bind(null, undefined),
 			led: unexpected, // Note: cannot happen due to lbp: 0
 			nud: function (oToken, oParser) {
 				if (!(oToken.value in oParser.globals)) {
-					Log.warning("Unsupported global identifier '" + oToken.value
+					log.warn("Unsupported global identifier '" + oToken.value
 							+ "' in expression parser input '" + oParser.input + "'",
 						undefined,
 						sExpressionParser);
@@ -534,7 +536,7 @@ function error(sMessage, sInput, iAt) {
 	if (iAt !== undefined) {
 		sMessage += " at position " + iAt;
 	}
-	Log.error(sMessage, sInput, sExpressionParser);
+	log.error(sMessage, sInput, sExpressionParser);
 	throw oError;
 }
 
@@ -737,7 +739,7 @@ function tryCatch(fnFormatter, sInput) {
 		try {
 			return fnFormatter.apply(this, arguments);
 		} catch (ex) {
-			Log.warning(String(ex), sInput, sExpressionParser);
+			log.warn(String(ex), sInput, sExpressionParser);
 		}
 	};
 }
