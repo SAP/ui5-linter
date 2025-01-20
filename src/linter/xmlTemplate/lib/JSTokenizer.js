@@ -272,13 +272,26 @@
 					key = this.number();
 				} else if (this.ch === '"' || this.ch === '\'') {
 					key = this.string();
-				} else {
+				} else if (this.ch === "_" || this.ch === "$" ||
+					(this.ch >= "0" && this.ch <= "9") ||
+					(this.ch >= "a" && this.ch <= "z") ||
+					(this.ch >= "A" && this.ch <= "Z")) {
 					key = this.name();
+				} else {
+					const contextStart = Math.max(0, this.at - 10);
+					const context = this.text.substring(contextStart, this.at + 10);
+					const positionInContext = this.at - contextStart;
+					this.error(`Syntax error: Unexpected character '${this.ch}'.
+
+${context}
+${' '.repeat(positionInContext - 1)}^`);
 				}
 				this.white();
 				this.next(':');
 				if (Object.hasOwnProperty.call(object, key)) {
 					this.error('Duplicate key "' + key + '"');
+				} else if (key === "__proto__" || key === "constructor") {
+					this.error('Illegal key "' + key + '"');
 				}
 				object[key] = this.value();
 				this.white();
