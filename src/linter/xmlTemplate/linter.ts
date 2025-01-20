@@ -37,6 +37,11 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		await workspace.write(transpiledResource);
 		await filePathsWorkspace.write(transpiledResourceSourceMap);
 		await workspace.write(transpiledResourceSourceMap);
+
+		// Stash information that this .js file is actually a transpiled XML.
+		const contextMeta = context.getMetadata(jsPath);
+		contextMeta.xmlCompiledResources = contextMeta.xmlCompiledResources ?? new Set();
+		contextMeta.xmlCompiledResources.add(resourcePath);
 	}));
 
 	// Generate dts file with specific byId signatures for controllers based on view IDs
