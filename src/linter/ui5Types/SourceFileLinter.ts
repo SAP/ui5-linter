@@ -1183,6 +1183,18 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
+					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
+					const originalFilename = traceMap?.sources[0] ?? traceMap?.file;
+					let resourcePath = this.resourcePath;
+					if (originalFilename) {
+						if ([".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
+							// Do not process xml-s. This case would be handled separately withing the BindingParser
+							return;
+						}
+						resourcePath = resourcePath.split("/").splice(0, -1).join("/") + "/" + originalFilename;
+					}
+
 					const imports = this.sourceFile.statements
 						.filter((stmnt): stmnt is ts.ImportDeclaration =>
 							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
@@ -1192,14 +1204,6 @@ export default class SourceFileLinter {
 								variableName: importNode.importClause?.name?.text,
 							} as RequireDeclaration;
 						});
-
-					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
-					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
-					const originalFilename = traceMap?.sources[0] ?? traceMap?.file;
-					let resourcePath = this.resourcePath;
-					if (originalFilename) {
-						resourcePath = resourcePath.split("/").splice(0, -1).join("/") + "/" + originalFilename;
-					}
 
 					const {start: nodePos} = getPositionsForNode({
 						node: prop,
