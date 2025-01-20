@@ -1183,9 +1183,8 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
-					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
-					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
-					const originalFilename = traceMap?.sources[0] ?? traceMap?.file;
+					const originalFilename = Array.from(
+						this.context.getMetadata(this.resourcePath)?.xmlCompiledResources ?? [])[0];
 					let resourcePath = this.resourcePath;
 					if (originalFilename) {
 						if ([".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
@@ -1205,6 +1204,8 @@ export default class SourceFileLinter {
 							} as RequireDeclaration;
 						});
 
+					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
 					const {start: nodePos} = getPositionsForNode({
 						node: prop,
 						sourceFile: this.sourceFile,
