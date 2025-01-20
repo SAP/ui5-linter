@@ -2,6 +2,7 @@ import {Tag as SaxTag, Text as SaxText, Position as SaxPosition} from "sax-wasm"
 import LinterContext, {CoverageInfo, ResourcePath} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
+import {isSaxParserToJSON} from "../../utils/xmlParser.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: SaxTag;
@@ -25,7 +26,7 @@ export default class HtmlReporter {
 			throw new Error("Invalid arguments: Missing second argument");
 		}
 		let args: MessageArgs[M];
-		if (argsOrNode instanceof SaxTag) {
+		if (isSaxParserToJSON(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
 		} else if (argsOrNode instanceof SaxText) {
@@ -38,7 +39,7 @@ export default class HtmlReporter {
 		}
 
 		let startPos: SaxPosition;
-		if (node instanceof SaxTag) {
+		if (isSaxParserToJSON(node)) {
 			startPos = node.openStart;
 		} else {
 			startPos = node.start;

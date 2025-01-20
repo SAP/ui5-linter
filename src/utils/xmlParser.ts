@@ -32,8 +32,15 @@ export interface SaxParserToJSON {
 	selfClosing: boolean;
 };
 
-export function isSaxParserToJSON(tag: any): tag is SaxParserToJSON {
-	return tag && typeof tag === "object" && !!tag.name && !!tag.attributes && !!tag.textNodes;
+export function isSaxParserToJSON(tag: unknown): tag is SaxParserToJSON {
+	const tagAsSaxParserToJSON = tag as SaxParserToJSON;
+	return !!tag &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "openStart") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "openEnd") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "closeStart") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "closeEnd") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "attributes") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "textNodes");
 }
 
 let saxWasmBuffer: Buffer;
