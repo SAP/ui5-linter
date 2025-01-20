@@ -335,7 +335,7 @@ export default class Parser {
 				undefined as never,
 				{
 					line: tag.openStart.line + 1, // Add one to align with IDEs
-					column: tag.openStart.character,
+					column: tag.openStart.character + 1,
 				}
 			);
 			return {
@@ -352,7 +352,7 @@ export default class Parser {
 				undefined as never,
 				{
 					line: tag.openStart.line + 1, // Add one to align with IDEs
-					column: tag.openStart.character,
+					column: tag.openStart.character + 1,
 				}
 			);
 			return {
@@ -553,12 +553,12 @@ export default class Parser {
 				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
 					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, {
 						line: prop.start.line + 1, // Add one to align with IDEs
-						column: prop.start.column,
+						column: prop.start.column + 1,
 					});
 				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, {
 						line: prop.start.line + 1, // Add one to align with IDEs
-						column: prop.start.column,
+						column: prop.start.column + 1,
 					});
 				}
 			}
