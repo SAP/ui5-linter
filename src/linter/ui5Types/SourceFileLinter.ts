@@ -1281,7 +1281,7 @@ export default class SourceFileLinter {
 					}
 
 					const {start: nodePos} = getPositionsForNode({
-						node,
+						node: prop,
 						sourceFile: this.sourceFile,
 						resourcePath: this.resourcePath,
 						traceMap: traceMap,

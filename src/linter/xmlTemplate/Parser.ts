@@ -549,7 +549,10 @@ export default class Parser {
 			for (const prop of controlProperties) {
 				// Check whether prop is of type "property" (indicating that it can have a binding)
 				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, prop.start);
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1,
+						column: prop.start.column + 1,
+					});
 				}
 			}
 			// This node declares a control
