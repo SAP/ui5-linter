@@ -4,6 +4,8 @@ sap.ui.define(
 		"use strict";
 
 		const input = new Input();
+		input.bindProperty("type", "MyType");
+
 		input.bindProperty("value", {
 			path: "/age",
 			type: "sap.ui.model.type.Integer",
