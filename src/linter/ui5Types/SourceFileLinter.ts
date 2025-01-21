@@ -1204,13 +1204,10 @@ export default class SourceFileLinter {
 							} as RequireDeclaration;
 						});
 
-					const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
-					const traceMap = nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined;
 					const {start: nodePos} = getPositionsForNode({
 						node: prop,
 						sourceFile: this.sourceFile,
 						resourcePath: this.resourcePath,
-						traceMap: traceMap,
 					});
 					const bindingLinter = new BindingLinter(resourcePath, this.context);
 					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
