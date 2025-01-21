@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
+import LinterContext, {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -12,6 +12,8 @@ import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
+import BindingLinter from "../binding/BindingLinter.js";
+import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -65,6 +67,7 @@ export default class SourceFileLinter {
 	#fileName: string;
 	#isComponent: boolean;
 	#hasTestStarterFindings: boolean;
+	#metadata: LintMetadata;
 
 	constructor(
 		private context: LinterContext,
@@ -84,21 +87,21 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#hasTestStarterFindings = false;
+		this.#metadata = this.context.getMetadata(this.resourcePath);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			const metadata = this.context.getMetadata(this.resourcePath);
-			if (!metadata.directives) {
+			if (!this.#metadata.directives) {
 				// Directives might have already been extracted by the amd transpiler
 				// This is done since the transpile process might loose comments
-				findDirectives(this.sourceFile, metadata);
+				findDirectives(this.sourceFile, this.#metadata);
 			}
 			this.visitNode(this.sourceFile);
 
 			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
-				!metadata?.transformedImports?.get("sap.ui.define")) {
+				!this.#metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reportTestStarter(this.sourceFile);
 			}
 
@@ -682,6 +685,15 @@ export default class SourceFileLinter {
 			this.#analyzeNewCoreRouter(node);
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
+		} else if (nodeType.symbol.declarations?.some(
+			(declarartion) => this.isUi5ClassDeclaration(declarartion, "sap/ui/core/Control"))) {
+			const originalFilename = this.#metadata?.xmlCompiledResource;
+			// Do not process xml-s. This case would be handled separately withing the BindingParser
+			if (!originalFilename ||
+				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
+				this.#analyzeModelDataTypes(node);
+				this.#analyzeModelDataTypesBinding(node);
+			}
 		}
 
 		if (!node.arguments?.length) {
@@ -830,6 +842,8 @@ export default class SourceFileLinter {
 			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
+			} else if (symbolName === "bindProperty" && moduleName === "sap/ui/base/ManagedObject") {
+				this.#analyzeModelDataTypes(node);
 			}
 		}
 
@@ -1220,6 +1234,125 @@ export default class SourceFileLinter {
 					}, node);
 				}
 			}
+		}
+	}
+
+	#analyzeModelDataTypes(node: ts.NewExpression | ts.CallExpression) {
+		node.arguments?.forEach((arg) => {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				return;
+			}
+			arg.properties.forEach((prop) => {
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+
+				// Get the type property
+				let typeField;
+				if (ts.isObjectLiteralExpression(prop.initializer)) {
+					typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
+						return ts.isPropertyAssignment(prop) &&
+							ts.isIdentifier(prop.name) &&
+							prop.name.text === "type";
+					});
+				} else if (ts.isStringLiteral(prop.initializer) &&
+					ts.isIdentifier(prop.name) && prop.name.text === "type" &&
+					// Whether it's a direct property, named "type" of the Control
+					// or type in property binding
+					!ts.isNewExpression(prop.parent.parent)) {
+					typeField = prop;
+				}
+
+				if (typeField && ts.isPropertyAssignment(typeField) &&
+					(!ts.isNewExpression(node) /* bindProperty() */ ||
+						this.#isPropertyBindingType(node, prop.name.getText()) /* new Control() */)) {
+					this.#analyzeModelTypeField(typeField.initializer);
+				}
+			});
+		});
+	}
+
+	#analyzeModelDataTypesBinding(node: ts.NewExpression) {
+		node.arguments?.forEach((arg) => {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				return;
+			}
+			arg.properties.forEach((prop) => {
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+
+				if (ts.isStringLiteral(prop.initializer) &&
+					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
+					ts.isNewExpression(node) &&
+					this.#isPropertyBindingType(node, prop.name.getText())) {
+					const imports = this.sourceFile.statements
+						.filter((stmnt): stmnt is ts.ImportDeclaration =>
+							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
+						.map((importNode) => {
+							return {
+								moduleName: (importNode.moduleSpecifier as ts.StringLiteral).text,
+								variableName: importNode.importClause?.name?.text,
+							} as RequireDeclaration;
+						});
+
+					const {start: nodePos} = getPositionsForNode({
+						node: prop,
+						sourceFile: this.sourceFile,
+						resourcePath: this.resourcePath,
+					});
+					const bindingLinter = new BindingLinter(this.resourcePath, this.context);
+					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
+				}
+			});
+		});
+	}
+
+	/**
+	 * Identify if a constructor argument property is bindable
+	 *
+	 * Get the class declaration by going up the chain and then find the argument property
+	 * from there. Directly finding the type of the property is not possible from here as it's
+	 * missing some context.
+	*/
+	#isPropertyBindingType(node: ts.NewExpression, propName: string) {
+		const controlAmbientModule =
+			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
+		const classArg = (controlAmbientModule?.body as ts.ModuleBlock)?.statements
+			?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
+			?.members.find((m): m is ts.ConstructorDeclaration => ts.isConstructorDeclaration(m));
+
+		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
+		const argProperty = constructorArgType?.getProperties()
+			.find((p: ts.Symbol) => p.name === propName);
+
+		const argPropType = argProperty?.declarations?.[0] &&
+			this.checker.getTypeAtLocation(argProperty.declarations[0]);
+
+		return argPropType?.isUnion() && argPropType.types.some((t) => {
+			return t?.getSymbol()?.getName() === "PropertyBindingInfo" ||
+				t.aliasSymbol?.getName() === "PropertyBindingInfo";
+		});
+	}
+
+	#analyzeModelTypeField(node: ts.Expression) {
+		if (!ts.isStringLiteral(node)) {
+			return;
+		}
+
+		const typeModule = node.text.replaceAll(".", "/");
+		const hasModuleImported = this.sourceFile.statements.filter(ts.isImportDeclaration)
+			.some((importNode) =>
+				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				importNode.moduleSpecifier.text === typeModule);
+
+		if (!hasModuleImported) {
+			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
+				variableName: node.text,
+				namespace: typeModule,
+			}, node);
 		}
 	}
 
