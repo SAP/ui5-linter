@@ -1177,7 +1177,10 @@ export default class SourceFileLinter {
 							prop.name.text === "type";
 					});
 				} else if (ts.isStringLiteral(prop.initializer) &&
-					ts.isIdentifier(prop.name) && prop.name.text === "type") {
+					ts.isIdentifier(prop.name) && prop.name.text === "type" &&
+					// Whether it's a direct property, named "type" of the Control
+					// or type in property binding
+					!ts.isNewExpression(prop.parent.parent)) {
 					typeField = prop;
 				}
 
@@ -1189,11 +1192,6 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
-					let resourcePath = this.resourcePath;
-					if (originalFilename) {
-						resourcePath = resourcePath.split("/").splice(0, -1).join("/") + "/" + originalFilename;
-					}
-
 					const imports = this.sourceFile.statements
 						.filter((stmnt): stmnt is ts.ImportDeclaration =>
 							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
@@ -1209,7 +1207,7 @@ export default class SourceFileLinter {
 						sourceFile: this.sourceFile,
 						resourcePath: this.resourcePath,
 					});
-					const bindingLinter = new BindingLinter(resourcePath, this.context);
+					const bindingLinter = new BindingLinter(this.resourcePath, this.context);
 					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
 				}
 			});
