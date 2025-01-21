@@ -1,4 +1,4 @@
-import {Attribute as SaxAttribute, Tag as SaxTag, Position as SaxPosition} from "sax-wasm";
+import {PositionDetail as SaxPosition} from "sax-wasm";
 import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
@@ -11,6 +11,7 @@ import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
+import {SaxParserToJSON} from "../../utils/xmlParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -160,11 +161,11 @@ export default class Parser {
 		this.#bindingLinter = new BindingLinter(resourcePath, context);
 	}
 
-	pushTag(tag: SaxTag) {
+	pushTag(tag: SaxParserToJSON) {
 		this.#nodeStack.push(this._createNode(tag));
 	}
 
-	popTag(_tag: SaxTag) { // No need to use the parsed tag, we rely on our nodeStack
+	popTag(_tag: SaxParserToJSON) { // No need to use the parsed tag, we rely on our nodeStack
 		const level = this.#nodeStack.length;
 		const closingNode = this.#nodeStack.pop();
 
@@ -271,7 +272,7 @@ export default class Parser {
 		}
 	}
 
-	_createNode(tag: SaxTag): NodeDeclaration {
+	_createNode(tag: SaxParserToJSON): NodeDeclaration {
 		let tagName = tag.name;
 		let tagNamespace = null; // default namespace
 
@@ -281,7 +282,7 @@ export default class Parser {
 		}
 
 		const attributes = new Set<AttributeDeclaration>();
-		tag.attributes.forEach((attr: SaxAttribute) => {
+		tag.attributes.forEach((attr) => {
 			const attrName = attr.name.value;
 			const attrValue = he.decode(attr.value.value);
 			// Extract namespaces immediately so we can resolve namespaced attributes in the next go
@@ -392,7 +393,7 @@ export default class Parser {
 
 	_handleUi5LibraryNamespace(
 		moduleName: string, namespace: Namespace, attributes: Set<AttributeDeclaration>,
-		tag: SaxTag
+		tag: SaxParserToJSON
 	): ControlDeclaration | AggregationDeclaration | FragmentDefinitionDeclaration {
 		const controlProperties = new Set<PropertyDeclaration>();
 		const customDataElements: ControlDeclaration[] = [];
