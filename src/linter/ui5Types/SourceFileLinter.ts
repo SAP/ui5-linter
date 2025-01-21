@@ -1153,6 +1153,11 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeModelDataTypes(node: ts.NewExpression | ts.CallExpression) {
+		const originalFilename = this.#metadata?.xmlCompiledResource;
+		// Do not process xml-s. This case would be handled separately withing the BindingParser
+		if (originalFilename && [".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
+			return;
+		}
 		node.arguments?.forEach((arg) => {
 			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
 			if (!ts.isObjectLiteralExpression(arg)) {
@@ -1184,13 +1189,8 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
-					const originalFilename = this.#metadata?.xmlCompiledResource;
 					let resourcePath = this.resourcePath;
 					if (originalFilename) {
-						if ([".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
-							// Do not process xml-s. This case would be handled separately withing the BindingParser
-							return;
-						}
 						resourcePath = resourcePath.split("/").splice(0, -1).join("/") + "/" + originalFilename;
 					}
 
