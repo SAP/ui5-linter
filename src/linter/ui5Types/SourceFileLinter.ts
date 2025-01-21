@@ -7,12 +7,12 @@ import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
 import {
-	findClassInstanceMethod,
 	getPropertyNameText,
 	getSymbolForPropertyInConstructSignatures,
 	getPropertyAssignmentInObjectLiteralExpression,
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
+	isClassMethod,
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -229,7 +229,7 @@ export default class SourceFileLinter {
 
 	analyzeControlRendererDeclaration(node: ts.ClassDeclaration) {
 		const className = node.name?.text ?? "<unknown>";
-		const rendererMember = findClassMember(node, "renderer", [ts.SyntaxKind.StaticKeyword]);
+		const rendererMember = findClassMember(node, "renderer", [{modifier: ts.SyntaxKind.StaticKeyword}]);
 
 		if (!rendererMember) {
 			const nonStaticRender = findClassMember(node, "renderer");
@@ -516,11 +516,12 @@ export default class SourceFileLinter {
 
 	analyzeControlRerenderMethod(node: ts.ClassDeclaration) {
 		const className = node.name?.text ?? "<unknown>";
-		const rerenderMethod = findClassInstanceMethod(node, "rerender", this.checker);
-		if (!rerenderMethod) {
+		// Search for the rerender instance method
+		const rerenderMember = findClassMember(node, "rerender", [{not: true, modifier: ts.SyntaxKind.StaticKeyword}]);
+		if (!rerenderMember || !isClassMethod(rerenderMember, this.checker)) {
 			return;
 		}
-		this.#reporter.addMessage(MESSAGE.NO_CONTROL_RERENDER_OVERRIDE, {className}, rerenderMethod);
+		this.#reporter.addMessage(MESSAGE.NO_CONTROL_RERENDER_OVERRIDE, {className}, rerenderMember);
 	}
 
 	analyzeMetadataProperty(node: ts.PropertyAssignment) {

@@ -6,7 +6,7 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	getSymbolForPropertyInConstructSignatures,
-	findClassInstanceMethod,
+	isClassMethod,
 } from "../../../../src/linter/ui5Types/utils.js";
 
 function createProgram(code: string) {
@@ -150,11 +150,32 @@ test("findClassMember - with modifiers", (t) => {
 		factory.createToken(ts.SyntaxKind.StaticKeyword),
 	], "foo", undefined, undefined, undefined);
 	const classNode = factory.createClassDeclaration([], "Test", [], [], [propertyDeclaration]);
-	const result = findClassMember(classNode, "foo", [ts.SyntaxKind.StaticKeyword]);
+	const result = findClassMember(classNode, "foo", [{modifier: ts.SyntaxKind.StaticKeyword}]);
 	t.is(result, propertyDeclaration);
 });
 
-test("findClassInstanceMethod - MethodDeclaration found", (t) => {
+test("findClassMember - with modifiers (not)", (t) => {
+	const propertyDeclaration = factory.createPropertyDeclaration([
+		factory.createToken(ts.SyntaxKind.StaticKeyword),
+	], "foo", undefined, undefined, undefined);
+	const classNode = factory.createClassDeclaration([], "Test", [], [], [propertyDeclaration]);
+	const result = findClassMember(classNode, "foo", [{not: true, modifier: ts.SyntaxKind.StaticKeyword}]);
+	t.is(result, undefined);
+});
+
+test("findClassMember - with modifiers (mixed)", (t) => {
+	const propertyDeclaration = factory.createPropertyDeclaration([
+		factory.createToken(ts.SyntaxKind.StaticKeyword),
+	], "foo", undefined, undefined, undefined);
+	const classNode = factory.createClassDeclaration([], "Test", [], [], [propertyDeclaration]);
+	const result = findClassMember(classNode, "foo", [
+		{modifier: ts.SyntaxKind.StaticKeyword},
+		{modifier: ts.SyntaxKind.AbstractKeyword, not: true},
+	]);
+	t.is(result, propertyDeclaration);
+});
+
+test("isClassMethod - MethodDeclaration", (t) => {
 	const program = createProgram(`
 		class Foo {
 			bar() {
@@ -164,13 +185,12 @@ test("findClassInstanceMethod - MethodDeclaration found", (t) => {
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker) as ts.MethodDeclaration;
-	t.truthy(method);
-	t.true(ts.isMethodDeclaration(method));
+	t.true(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - PropertyDeclaration (FunctionExpression) found", (t) => {
+test("isClassMethod - PropertyDeclaration (FunctionExpression)", (t) => {
 	const program = createProgram(`
 		class Foo {
 			bar = function() {}
@@ -179,14 +199,12 @@ test("findClassInstanceMethod - PropertyDeclaration (FunctionExpression) found",
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker) as ts.PropertyDeclaration;
-	t.truthy(method);
-	t.true(ts.isPropertyDeclaration(method));
-	t.true(method.initializer && ts.isFunctionExpression(method.initializer));
+	t.true(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - PropertyDeclaration (ArrayFunction) found", (t) => {
+test("isClassMethod - PropertyDeclaration (ArrayFunction)", (t) => {
 	const program = createProgram(`
 		class Foo {
 			bar = () => "abc"
@@ -195,14 +213,12 @@ test("findClassInstanceMethod - PropertyDeclaration (ArrayFunction) found", (t) 
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker) as ts.PropertyDeclaration;
-	t.truthy(method);
-	t.true(ts.isPropertyDeclaration(method));
-	t.true(method.initializer && ts.isArrowFunction(method.initializer));
+	t.true(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - PropertyDeclaration (Identifier) found", (t) => {
+test("isClassMethod - PropertyDeclaration (Identifier)", (t) => {
 	const program = createProgram(`
 		function barFunction() {}
 		class Foo {
@@ -212,29 +228,27 @@ test("findClassInstanceMethod - PropertyDeclaration (Identifier) found", (t) => 
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[1] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker) as ts.PropertyDeclaration;
-	t.truthy(method);
-	t.true(ts.isPropertyDeclaration(method));
-	t.true(method.initializer && ts.isIdentifier(method.initializer));
+	t.true(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - not found", (t) => {
+test("isClassMethod - static method", (t) => {
 	const program = createProgram(`
 		class Foo {
-			bar() {
+			static bar() {
 			}
 		}
 	`);
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "foo", checker);
-	t.is(method, undefined);
+	t.true(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - no initializer", (t) => {
+test("isClassMethod - no initializer", (t) => {
 	const program = createProgram(`
 		class Foo {
 			bar
@@ -243,12 +257,12 @@ test("findClassInstanceMethod - no initializer", (t) => {
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker);
-	t.is(method, undefined);
+	t.false(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - no MethodDeclaration or PropertyDeclaration (GetAccessor)", (t) => {
+test("isClassMethod - no MethodDeclaration or PropertyDeclaration (GetAccessor)", (t) => {
 	const program = createProgram(`
 		class Foo {
 			get bar() {
@@ -259,12 +273,12 @@ test("findClassInstanceMethod - no MethodDeclaration or PropertyDeclaration (Get
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker);
-	t.is(method, undefined);
+	t.false(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - no function (PropertyDeclaration with Identifier)", (t) => {
+test("isClassMethod - no function (PropertyDeclaration with Identifier)", (t) => {
 	const program = createProgram(`
 		const barValue = "abc";
 		class Foo {
@@ -274,12 +288,12 @@ test("findClassInstanceMethod - no function (PropertyDeclaration with Identifier
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[1] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker);
-	t.is(method, undefined);
+	t.false(isClassMethod(classMember, checker));
 });
 
-test("findClassInstanceMethod - no function (PropertyDeclaration with StringLiteral)", (t) => {
+test("isClassMethod - no function (PropertyDeclaration with StringLiteral)", (t) => {
 	const program = createProgram(`
 		class Foo {
 			bar = "abc"
@@ -288,9 +302,9 @@ test("findClassInstanceMethod - no function (PropertyDeclaration with StringLite
 	const checker = program.getTypeChecker();
 
 	const classDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.ClassDeclaration;
+	const classMember = classDeclaration.members[0];
 
-	const method = findClassInstanceMethod(classDeclaration, "bar", checker);
-	t.is(method, undefined);
+	t.false(isClassMethod(classMember, checker));
 });
 
 test("getPropertyAssignmentInObjectLiteralExpression - property found", (t) => {
