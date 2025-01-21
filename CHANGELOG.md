@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/SAP/ui5-linter/compare/v1.7.0...v1.8.0) (2025-01-21)
+
+
+### Features
+
+* **binding:** Detect global formatter notation in bindings ([0845caf](https://github.com/SAP/ui5-linter/commit/0845cafbbfc2daebfdf6d821cb0703c34e9c01c3))
+
 ## [1.7.0](https://github.com/SAP/ui5-linter/compare/v1.6.1...v1.7.0) (2025-01-15)
 
 
