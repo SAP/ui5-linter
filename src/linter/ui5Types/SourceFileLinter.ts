@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
+import LinterContext, {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -65,6 +65,7 @@ export default class SourceFileLinter {
 	#fileName: string;
 	#isComponent: boolean;
 	#hasTestStarterFindings: boolean;
+	#metadata: LintMetadata;
 
 	constructor(
 		private context: LinterContext,
@@ -83,21 +84,21 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#hasTestStarterFindings = false;
+		this.#metadata = this.context.getMetadata(this.resourcePath);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			const metadata = this.context.getMetadata(this.resourcePath);
-			if (!metadata.directives) {
+			if (!this.#metadata.directives) {
 				// Directives might have already been extracted by the amd transpiler
 				// This is done since the transpile process might loose comments
-				findDirectives(this.sourceFile, metadata);
+				findDirectives(this.sourceFile, this.#metadata);
 			}
 			this.visitNode(this.sourceFile);
 
 			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
-				!metadata?.transformedImports?.get("sap.ui.define")) {
+				!this.#metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reportTestStarter(this.sourceFile);
 			}
 
@@ -1183,7 +1184,7 @@ export default class SourceFileLinter {
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
-					const originalFilename = this.context.getMetadata(this.resourcePath)?.xmlCompiledResource;
+					const originalFilename = this.#metadata?.xmlCompiledResource;
 					let resourcePath = this.resourcePath;
 					if (originalFilename) {
 						if ([".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
