@@ -20,13 +20,13 @@ sap.ui.define(function () {
 				theme: "sap_belize", // negative finding (wrong place)
 				title: "Unit tests for Todo App",
 				ui5: {
-					theme: "sap_belize_plus", // positive finding
+					theme: 'sap_belize_plus', // positive finding
 				}
 			},
 			"integration/opaTests": {
 				title: "Integration tests for Todo App",
 				ui5: {
-					theme: "sap_belize_hcb", // positive finding
+					theme: `sap_belize_hcb`, // positive finding
 				}
 			}
 		}

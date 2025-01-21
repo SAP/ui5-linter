@@ -6,7 +6,7 @@ import LinterContext from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 import {MESSAGE} from "../messages.js";
-import {getPropertyName} from "./utils.js";
+import {getPropertyNameText} from "./utils.js";
 
 type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
 type propsRecord = Record<string, {
@@ -188,7 +188,7 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 			if (!prop.name) {
 				return;
 			}
-			const propText = getPropertyName(prop.name);
+			const propText = getPropertyNameText(prop.name);
 
 			if (propText === "interfaces") {
 				classInterfaces = prop;
@@ -273,7 +273,8 @@ function doPropsCheck(metadata: ts.PropertyDeclaration, manifestContent: string 
 
 		hasManifestDefinition = !!(componentManifest &&
 			ts.isPropertyAssignment(componentManifest) &&
-			getPropertyName(componentManifest.initializer) === "json");
+			ts.isPropertyName(componentManifest.initializer) &&
+			getPropertyNameText(componentManifest.initializer) === "json");
 	}
 
 	return {
@@ -288,11 +289,13 @@ function extractPropsRecursive(node: ts.ObjectLiteralExpression) {
 	const properties = Object.create(null) as propsRecord;
 
 	node.properties?.forEach((prop) => {
-		if (!ts.isPropertyAssignment(prop) || !prop.name) {
+		if (!ts.isPropertyAssignment(prop)) {
 			return;
 		}
-
-		const key = getPropertyName(prop.name);
+		const key = getPropertyNameText(prop.name);
+		if (!key) {
+			return;
+		}
 		if (prop.initializer.kind === ts.SyntaxKind.TrueKeyword) {
 			properties[key] = {value: true, node: prop.initializer};
 		} else if (prop.initializer.kind === ts.SyntaxKind.FalseKeyword) {
