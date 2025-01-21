@@ -683,7 +683,13 @@ export default class SourceFileLinter {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
 			(declarartion) => this.isUi5ClassDeclaration(declarartion, "sap/ui/core/Control"))) {
-			this.#analyzeModelDataTypes(node);
+			const originalFilename = this.#metadata?.xmlCompiledResource;
+			// Do not process xml-s. This case would be handled separately withing the BindingParser
+			if (!originalFilename ||
+				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
+				this.#analyzeModelDataTypes(node);
+				this.#analyzeModelDataTypesBinding(node);
+			}
 		}
 
 		if (!node.arguments?.length) {
@@ -1153,11 +1159,6 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeModelDataTypes(node: ts.NewExpression | ts.CallExpression) {
-		const originalFilename = this.#metadata?.xmlCompiledResource;
-		// Do not process xml-s. This case would be handled separately withing the BindingParser
-		if (originalFilename && [".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
-			return;
-		}
 		node.arguments?.forEach((arg) => {
 			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
 			if (!ts.isObjectLiteralExpression(arg)) {
@@ -1188,7 +1189,23 @@ export default class SourceFileLinter {
 					(!ts.isNewExpression(node) /* bindProperty() */ ||
 						this.#isPropertyBindingType(node, prop.name.getText()) /* new Control() */)) {
 					this.#analyzeModelTypeField(typeField.initializer);
-				} else if (ts.isStringLiteral(prop.initializer) &&
+				}
+			});
+		});
+	}
+
+	#analyzeModelDataTypesBinding(node: ts.NewExpression) {
+		node.arguments?.forEach((arg) => {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				return;
+			}
+			arg.properties.forEach((prop) => {
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+
+				if (ts.isStringLiteral(prop.initializer) &&
 					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
 					ts.isNewExpression(node) &&
 					this.#isPropertyBindingType(node, prop.name.getText())) {
