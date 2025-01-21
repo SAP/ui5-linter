@@ -124,3 +124,225 @@ test("XML Property Binding: Imported Event Handler", (t) => {
 
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
+
+test("XML Aggregation Binding: Global Sorter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		sorter: {
+			group: 'global.method'
+		}
+	}`, [], {line: 1, column: 1});
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		sorter: [{
+			group: 'global.method'
+		}, {
+			comparator: 'global.method'
+		}, {
+			group: true
+		}]
+	}`, [], {line: 20, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Controller Sorter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		sorter: {
+			group: '.method'
+		}
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Imported Sorter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		sorter: {
+			group: 'Handler.method'
+		}
+	}`, [{
+		moduleName: "some/event/handler",
+		variableName: "Handler",
+	}], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Global Filter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		filters: {
+			test: 'global.method'
+		}
+	}`, [], {line: 1, column: 1});
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		filters: [{
+			test: 'global.method'
+		}, {
+			filters: [{
+				test: 'global.method',
+				condition: [{
+					test: 'global.method'
+				}, {
+					filters: [{
+						test: 'global.method'
+					}]
+				}]
+			}]
+		}]
+	}`, [], {line: 20, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Controller Filter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		filters: {
+			test: '.method'
+		}
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Imported Filter", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		filters: {
+			test: 'Handler.method'
+		}
+	}`, [{
+		moduleName: "some/event/handler",
+		variableName: "Handler",
+	}], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Global Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		factory: 'global.method'
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Controller Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		factory: '.method'
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Imported Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		factory: 'Handler.method'
+	}`, [{
+		moduleName: "some/event/handler",
+		variableName: "Handler",
+	}], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Global Group Header Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		groupHeaderFactory: 'global.method'
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Controller Group Header Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		groupHeaderFactory: '.method'
+	}`, [], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Aggregation Binding: Imported Group Header Factory", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintAggregationBinding(`{
+		path: '/firstName',
+		groupHeaderFactory: 'Handler.method'
+	}`, [{
+		moduleName: "some/event/handler",
+		variableName: "Handler",
+	}], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Property Binding: Composite Binding with single Formatter and trailing space", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{
+			parts:[{
+				path: 'entityDetailsModel>/AdditionalMeasures'
+			}, {
+				path: 'entityDetailsModel>/DataSource/AllProperties'
+			}],
+			formatter: 'global.formatter'
+		} `,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Expression Binding", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= formatMessage(${i18n>SELECT_ALL},${local>/sections/selectCount}, ${local>/sections/totalCount})}",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("Error Testing: XML Property Binding missing closing bracket", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{ type: 'sap.ui.model.odata.type.DateTime', constraints: { displayFormat: 'Date', nullable: false }`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});

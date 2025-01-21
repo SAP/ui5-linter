@@ -335,7 +335,7 @@ export default class Parser {
 				undefined as never,
 				{
 					line: tag.openStart.line + 1, // Add one to align with IDEs
-					column: tag.openStart.character,
+					column: tag.openStart.character + 1,
 				}
 			);
 			return {
@@ -352,7 +352,7 @@ export default class Parser {
 				undefined as never,
 				{
 					line: tag.openStart.line + 1, // Add one to align with IDEs
-					column: tag.openStart.character,
+					column: tag.openStart.character + 1,
 				}
 			);
 			return {
@@ -548,8 +548,18 @@ export default class Parser {
 		} else {
 			for (const prop of controlProperties) {
 				// Check whether prop is of type "property" (indicating that it can have a binding)
+				// Note that some aggregations are handled like properties (0..n + alt type). Therefore check
+				// whether this is a property first. Additional aggregation-specific checks are not needed in that case
 				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, prop.start);
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1, // Add one to align with IDEs
+						column: prop.start.column + 1,
+					});
+				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
+					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1, // Add one to align with IDEs
+						column: prop.start.column + 1,
+					});
 				}
 			}
 			// This node declares a control
