@@ -687,8 +687,18 @@ export default class SourceFileLinter {
 			// Do not process xml-s. This case would be handled separately withing the BindingParser
 			if (!originalFilename ||
 				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
-				this.#analyzeModelDataTypes(node);
-				this.#analyzeModelDataTypesBinding(node);
+				node?.arguments?.filter((arg) => ts.isObjectLiteralExpression(arg))
+					.flatMap((arg) => arg.properties)
+					.forEach((prop) => {
+						if (ts.isPropertyAssignment(prop) &&
+							this.#isPropertyBindingType(node, prop.name.getText())) {
+							if (ts.isObjectLiteralExpression(prop.initializer)) {
+								this.#analyzeModelDataTypes(prop.initializer);
+							} else {
+								this.#analyzeModelDataTypesBinding(prop);
+							}
+						}
+					});
 			}
 		}
 
@@ -843,11 +853,12 @@ export default class SourceFileLinter {
 				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
+			} else if (symbolName.startsWith("bindProperty") && moduleName === "sap/ui/base/ManagedObject") {
+				this.#analyzeModelDataTypes(node.arguments[1] as ts.ObjectLiteralExpression);
 			} else if (symbolName.startsWith("bind") &&
-				(moduleName === "sap/ui/base/ManagedObject" ||
-					nodeType.symbol.declarations?.some((declaration) =>
-						this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")))) {
-				this.#analyzeModelDataTypes(node);
+				nodeType.symbol.declarations?.some((declaration) =>
+					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+				this.#analyzeModelDataTypes(node.arguments[0] as ts.ObjectLiteralExpression);
 			}
 		}
 
@@ -1162,77 +1173,58 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeModelDataTypes(node: ts.NewExpression | ts.CallExpression) {
-		node.arguments?.forEach((arg) => {
-			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
-			if (!ts.isObjectLiteralExpression(arg)) {
+	#analyzeModelDataTypes(node: ts.ObjectLiteralExpression) {
+		node?.properties.forEach((prop) => {
+			if (!ts.isPropertyAssignment(prop)) {
 				return;
 			}
-			arg.properties.forEach((prop) => {
-				if (!ts.isPropertyAssignment(prop)) {
-					return;
-				}
 
-				// Get the type property
-				let typeField;
-				if (ts.isObjectLiteralExpression(prop.initializer)) {
-					typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
-						return ts.isPropertyAssignment(prop) &&
-							ts.isIdentifier(prop.name) &&
-							prop.name.text === "type";
-					});
-				} else if (ts.isStringLiteral(prop.initializer) &&
-					ts.isIdentifier(prop.name) && prop.name.text === "type" &&
-					// Whether it's a direct property, named "type" of the Control
-					// or type in property binding
-					!ts.isNewExpression(prop.parent.parent)) {
-					typeField = prop;
-				}
+			// Get the type property
+			let typeField;
+			if (ts.isObjectLiteralExpression(prop.initializer)) {
+				typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
+					return ts.isPropertyAssignment(prop) &&
+						ts.isIdentifier(prop.name) &&
+						prop.name.text === "type";
+				});
+			} else if (ts.isStringLiteral(prop.initializer) &&
+				ts.isIdentifier(prop.name) && prop.name.text === "type" &&
+				// Whether it's a direct property, named "type" of the Control
+				// or type in property binding
+				!ts.isNewExpression(prop.parent.parent)) {
+				typeField = prop;
+			}
 
-				if (typeField && ts.isPropertyAssignment(typeField) &&
-					(!ts.isNewExpression(node) /* bindProperty() */ ||
-						this.#isPropertyBindingType(node, prop.name.getText()) /* new Control() */)) {
-					this.#analyzeModelTypeField(typeField.initializer);
-				}
-			});
+			if (typeField && ts.isPropertyAssignment(typeField)) {
+				this.#analyzeModelTypeField(typeField.initializer);
+			}
 		});
+		// });
 	}
 
-	#analyzeModelDataTypesBinding(node: ts.NewExpression) {
-		node.arguments?.forEach((arg) => {
-			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
-			if (!ts.isObjectLiteralExpression(arg)) {
-				return;
-			}
-			arg.properties.forEach((prop) => {
-				if (!ts.isPropertyAssignment(prop)) {
-					return;
-				}
+	#analyzeModelDataTypesBinding(node: ts.PropertyAssignment) {
+		if (ts.isStringLiteral(node.initializer) &&
+			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
+			// ts.isNewExpression(node) &&
+			// this.#isPropertyBindingType(node, prop.name.getText())) {
+			const imports = this.sourceFile.statements
+				.filter((stmnt): stmnt is ts.ImportDeclaration =>
+					stmnt.kind === ts.SyntaxKind.ImportDeclaration)
+				.map((importNode) => {
+					return {
+						moduleName: (importNode.moduleSpecifier as ts.StringLiteral).text,
+						variableName: importNode.importClause?.name?.text,
+					} as RequireDeclaration;
+				});
 
-				if (ts.isStringLiteral(prop.initializer) &&
-					prop.initializer.text.startsWith("{") && prop.initializer.text.endsWith("}") &&
-					ts.isNewExpression(node) &&
-					this.#isPropertyBindingType(node, prop.name.getText())) {
-					const imports = this.sourceFile.statements
-						.filter((stmnt): stmnt is ts.ImportDeclaration =>
-							stmnt.kind === ts.SyntaxKind.ImportDeclaration)
-						.map((importNode) => {
-							return {
-								moduleName: (importNode.moduleSpecifier as ts.StringLiteral).text,
-								variableName: importNode.importClause?.name?.text,
-							} as RequireDeclaration;
-						});
-
-					const {start: nodePos} = getPositionsForNode({
-						node: prop,
-						sourceFile: this.sourceFile,
-						resourcePath: this.resourcePath,
-					});
-					const bindingLinter = new BindingLinter(this.resourcePath, this.context);
-					bindingLinter.lintPropertyBinding(prop.initializer.text, imports, nodePos);
-				}
+			const {start: nodePos} = getPositionsForNode({
+				node: node,
+				sourceFile: this.sourceFile,
+				resourcePath: this.resourcePath,
 			});
-		});
+			const bindingLinter = new BindingLinter(this.resourcePath, this.context);
+			bindingLinter.lintPropertyBinding(node.initializer.text, imports, nodePos);
+		}
 	}
 
 	/**
