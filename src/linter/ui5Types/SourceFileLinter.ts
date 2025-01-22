@@ -1199,7 +1199,6 @@ export default class SourceFileLinter {
 				this.#analyzeModelTypeField(typeField.initializer);
 			}
 		});
-		// });
 	}
 
 	#analyzeModelDataTypesBinding(node: ts.PropertyAssignment) {
