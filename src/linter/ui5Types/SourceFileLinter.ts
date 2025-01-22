@@ -28,6 +28,8 @@ const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
 
 const DEPRECATED_VIEW_TYPES = ["JS", "JSON", "HTML", "Template"];
 
+const ALLOWED_RENDERER_API_VERSIONS = ["2", "4"];
+
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
@@ -298,15 +300,13 @@ export default class SourceFileLinter {
 
 	analyzeControlRendererInternals(node: ts.Node) {
 		const findApiVersionNode = (potentialApiVersionNode: ts.Node) => {
-			let apiVersionNode: unknown;
 			// const myControlRenderer = {apiVersion: 2, render: () => {}}
 
 			if (ts.isObjectLiteralExpression(potentialApiVersionNode)) {
-				apiVersionNode = getPropertyAssignmentInObjectLiteralExpression("apiVersion", potentialApiVersionNode);
-			}
-
-			if (apiVersionNode) {
-				return apiVersionNode;
+				const foundNode = getPropertyAssignmentInObjectLiteralExpression("apiVersion", potentialApiVersionNode);
+				if (foundNode) {
+					return foundNode;
+				}
 			}
 
 			// const myControlRenderer = {}
@@ -318,6 +318,8 @@ export default class SourceFileLinter {
 				ts.isIdentifier(potentialApiVersionNode.parent.name)) {
 				rendererObjectName = potentialApiVersionNode.parent.name.text;
 			}
+
+			let apiVersionNode: ts.Expression | undefined;
 
 			const visitChildNodes = (childNode: ts.Node) => {
 				if (ts.isBinaryExpression(childNode)) {
@@ -346,28 +348,30 @@ export default class SourceFileLinter {
 			return apiVersionNode;
 		};
 
+		const getNodeToHighlight = (apiVersionNode: ts.Node | undefined) => {
+			if (!apiVersionNode) { // No 'apiVersion' property
+				return node;
+			}
+			if (ts.isPropertyAssignment(apiVersionNode)) {
+				apiVersionNode = apiVersionNode.initializer;
+			}
+			if (!ts.isNumericLiteral(apiVersionNode)) {
+				return apiVersionNode;
+			}
+			if (!ALLOWED_RENDERER_API_VERSIONS.includes(apiVersionNode.text)) {
+				return apiVersionNode;
+			}
+			return undefined;
+		};
+
 		const nodeType = this.checker.getTypeAtLocation(node);
 		const nodeValueDeclaration = nodeType.getSymbol()?.valueDeclaration;
 
 		// Analyze renderer property when it's an ObjectLiteralExpression
 		// i.e. { renderer: {apiVersion: 2, render: () => {}} }
 		if (node && (ts.isObjectLiteralExpression(node) || ts.isVariableDeclaration(node))) {
-			const apiVersionNode = findApiVersionNode(node) as ts.PropertyAssignment | ts.NumericLiteral | undefined;
-
-			const availableApiVersions = ["2", "4"];
-			let nodeToHighlight: ts.PropertyAssignment | ts.PropertyDeclaration |
-				ts.VariableDeclaration | ts.ObjectLiteralExpression |
-				ts.NumericLiteral | undefined = undefined;
-			if (!apiVersionNode) { // No 'apiVersion' property
-				nodeToHighlight = node;
-			} else if ((ts.isNumericLiteral(apiVersionNode) &&
-				!availableApiVersions.includes(apiVersionNode.text)) ||
-				(ts.isPropertyAssignment(apiVersionNode) &&
-					ts.isNumericLiteral(apiVersionNode.initializer) && // Must be a number, not a string
-					!availableApiVersions.includes(apiVersionNode.initializer.text))) {
-				nodeToHighlight = apiVersionNode;
-			}
-
+			const apiVersionNode = findApiVersionNode(node);
+			const nodeToHighlight = getNodeToHighlight(apiVersionNode);
 			if (nodeToHighlight) {
 				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 				// The findings can be in different file i.e. Control being analyzed,
