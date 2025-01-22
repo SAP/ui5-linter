@@ -20,8 +20,8 @@ sap.ui.define([
 			"sap.ui.vtm",
 			"sap.uiext.inbox",
 			"sap.webanalytics.core",
-			"sap.zen.commons",
-			"sap.zen.crosstab",
+			'sap.zen.commons',
+			`sap.zen.crosstab`,
 		]
 	});
 	Library.init({
@@ -46,7 +46,7 @@ sap.ui.define([
 			"sap.zen.crosstab",
 		]
 	});
-	
+
 	const LibInit = Library.init;
 	LibInit({
 		apiVersion: 1,
