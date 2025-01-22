@@ -38,6 +38,8 @@ export function createTestsForFixtures(fixturesPath: string) {
 				testName = fileName.slice(5);
 			}
 
+			const shouldFail = testName.startsWith("error_");
+
 			defineTest(`Transpile ${testName}`, async (t) => {
 				const filePath = path.join(fixturesPath, fileName);
 				const fileStream = fs.createReadStream(filePath);
@@ -48,14 +50,22 @@ export function createTestsForFixtures(fixturesPath: string) {
 				const controllerByIdInfo = new ControllerByIdInfo();
 				const res = await transpileXml(testName, fileStream, context, controllerByIdInfo);
 				if (!res) {
-					t.fail("Transpile result is undefined");
-					return;
+					if (shouldFail) {
+						t.snapshot(context.generateLintResult(testName).messages, "messages");
+					} else {
+						t.fail("Transpile result is expected to be defined");
+					}
+				} else {
+					if (shouldFail) {
+						t.fail("Transpile result is expected to be undefined");
+					} else {
+						const {source, map} = res;
+						t.snapshot(source, "source");
+						t.snapshot(map && JSON.parse(map), "map");
+						t.snapshot(context.generateLintResult(testName).messages, "messages");
+						t.snapshot(controllerByIdInfo.getMappings(), "controllerByIdInfo");
+					}
 				}
-				const {source, map} = res;
-				t.snapshot(source, "source");
-				t.snapshot(map && JSON.parse(map), "map");
-				t.snapshot(context.generateLintResult(testName).messages, "messages");
-				t.snapshot(controllerByIdInfo.getMappings(), "controllerByIdInfo");
 			});
 		}
 	} catch (err) {

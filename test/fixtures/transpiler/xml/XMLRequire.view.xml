@@ -9,4 +9,10 @@
 > <!-- sap/ui/core/Message is deprecated -->
 	<Label text="{path: 'badge>SecondaryInfo/Label', formatter: 'Helper.format'}"/>
 	<Button text="Press Me!" press="Box.show('Hello!', {verticalScrolling: true})"/> <!-- verticalScrolling property is deprecated -->
+
+	<!-- Empty core:require attribute should be silently ignored -->
+	<Button core:require="" />
+
+	<!-- Empty object in core:require attribute should be silently ignored -->
+	<Button core:require="{}" />
 </mvc:View>

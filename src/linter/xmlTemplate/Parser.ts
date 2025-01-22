@@ -257,6 +257,10 @@ export default class Parser {
 	}
 
 	_parseRequireAttribute(attrValue: string): RequireDeclaration[] {
+		if (!attrValue) {
+			// Runtime allows empty require attributes, so we do too
+			return [];
+		}
 		try {
 			// This is no well-formed JSON, therefore we have to parse it manually
 			const requireMap = JSTokenizer.parseJS(attrValue);
@@ -267,7 +271,7 @@ export default class Parser {
 				};
 			});
 		} catch (_) {
-			throw new Error(`Failed to parse require attribute value ${attrValue} in resource ${this.#resourcePath}`);
+			throw new Error(`Failed to parse require attribute value '${attrValue}' in resource ${this.#resourcePath}`);
 		}
 	}
 
@@ -483,7 +487,8 @@ export default class Parser {
 		});
 
 		const parentNode = this._findParentNode(
-			NodeKind.Control | NodeKind.Aggregation | NodeKind.FragmentDefinition);
+			NodeKind.Control | NodeKind.Aggregation | NodeKind.FragmentDefinition
+		) as ControlDeclaration | AggregationDeclaration | FragmentDefinitionDeclaration;
 
 		if (/^[a-z]/.exec(moduleName)) {
 			const aggregationName = moduleName;
@@ -511,7 +516,7 @@ export default class Parser {
 				throw new Error(`Unexpected aggregation ${aggregationName} within aggregation ${parentNode.name} ` +
 					`in resource ${this.#resourcePath}`);
 			}
-			const owner = parentNode as ControlDeclaration;
+			const owner = parentNode;
 
 			let ownerAggregation = owner.aggregations.get(aggregationName);
 			if (!ownerAggregation) {
@@ -521,7 +526,7 @@ export default class Parser {
 					kind: NodeKind.Aggregation,
 					name: aggregationName,
 					namespace,
-					owner: parentNode as ControlDeclaration,
+					owner: parentNode,
 					controls: [],
 					start: toPosition(tag.openStart),
 					end: toPosition(tag.openEnd),
@@ -542,7 +547,7 @@ export default class Parser {
 			};
 
 			if (parentNode) {
-				throw new Error(`Unexpected nested FragmentDefiniton in resource ${this.#resourcePath}`);
+				throw new Error(`Unexpected nested FragmentDefinition in resource ${this.#resourcePath}`);
 			}
 			return node;
 		} else {
@@ -588,15 +593,13 @@ export default class Parser {
 			if (parentNode) {
 				if (parentNode.kind === NodeKind.Control) {
 					// Insert the current control in the default aggregation of the last control
-					this._addDefaultAggregation(parentNode as ControlDeclaration, node);
+					this._addDefaultAggregation(parentNode, node);
 				} else if (parentNode.kind === NodeKind.Aggregation) {
-					const aggregationNode = parentNode as AggregationDeclaration;
+					const aggregationNode = parentNode;
 					aggregationNode.controls.push(node);
 				} else if (parentNode.kind === NodeKind.FragmentDefinition) {
 					// Add the control to the fragment definition
-					(parentNode as FragmentDefinitionDeclaration).controls.add(node);
-				} else {
-					throw new Error(`Unexpected node kind ${parentNode.kind} in resource ${this.#resourcePath}`);
+					parentNode.controls.add(node);
 				}
 			}
 			return node;
