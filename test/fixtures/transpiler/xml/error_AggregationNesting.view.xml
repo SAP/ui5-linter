@@ -1,0 +1,12 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+>
+
+	<VBox>
+		<items>
+			<content>
+			</content>
+		</items>
+	</VBox>
+
+</mvc:View>

@@ -1,0 +1,4 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	core:require=""
+>
+</mvc:View>
