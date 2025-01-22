@@ -682,7 +682,7 @@ export default class SourceFileLinter {
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
-			(declarartion) => this.isUi5ClassDeclaration(declarartion, "sap/ui/core/Control"))) {
+			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
 			const originalFilename = this.#metadata?.xmlCompiledResource;
 			// Do not process xml-s. This case would be handled separately withing the BindingParser
 			if (!originalFilename ||
@@ -814,6 +814,7 @@ export default class SourceFileLinter {
 		if (exprType.symbol && moduleDeclaration) {
 			const symbolName = exprType.symbol.getName();
 			const moduleName = moduleDeclaration.name.text;
+			const nodeType = this.checker.getTypeAtLocation(node);
 
 			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 				// Check for sap/ui/core/Lib.init usages
@@ -842,7 +843,10 @@ export default class SourceFileLinter {
 				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
-			} else if (symbolName === "bindProperty" && moduleName === "sap/ui/base/ManagedObject") {
+			} else if (symbolName.startsWith("bind") &&
+				(moduleName === "sap/ui/base/ManagedObject" ||
+					nodeType.symbol.declarations?.some((declaration) =>
+						this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")))) {
 				this.#analyzeModelDataTypes(node);
 			}
 		}

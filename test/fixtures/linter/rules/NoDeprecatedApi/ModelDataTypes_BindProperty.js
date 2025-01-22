@@ -10,5 +10,12 @@ sap.ui.define(
 			formatOptions: { minIntegerDigits: 2 },
 			constraints: { maximum: 1000 },
 		});
+		
+		input.bindValue({
+			path: "/age",
+			type: "sap.ui.model.type.Integer",
+			formatOptions: { minIntegerDigits: 2 },
+			constraints: { maximum: 1000 },
+		});
 	}
 );
