@@ -5,7 +5,7 @@ import {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import parseModuleDeclaration, {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import pruneNode from "../linter/ui5Types/amdTranspiler/pruneNode.js";
-import {getPropertyName} from "../linter/ui5Types/utils.js";
+import {getPropertyNameText} from "../linter/ui5Types/utils.js";
 
 export interface AutofixResource {
 	content: string;
@@ -85,9 +85,10 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 	return ts.createProgram(inputFileNames, compilerOptions, host);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export default async function ({
-	rootDir,
-	namespace,
+	rootDir: _unused1,
+	namespace: _unused2,
 	resources,
 }: AutofixOptions): Promise<AutofixResult> {
 	const sourceFiles: SourceFiles = new Map();
@@ -433,9 +434,16 @@ function findGreatestAccessExpression(node: ts.Identifier, matchPropertyAccess?:
 
 			let propName;
 			if (ts.isPropertyAccessExpression(scanNode)) {
-				propName = getPropertyName(scanNode.name);
+				propName = getPropertyNameText(scanNode.name);
 			} else {
-				propName = getPropertyName(scanNode.argumentExpression);
+				if (
+					ts.isStringLiteralLike(scanNode.argumentExpression) ||
+					ts.isNumericLiteral(scanNode.argumentExpression)
+				) {
+					propName = scanNode.argumentExpression.text;
+				} else {
+					propName = scanNode.argumentExpression.getText();
+				}
 			}
 			if (propName !== nextPropertyAccess) {
 				throw new Error(`Expected node to be ${nextPropertyAccess} but got ${propName}`);

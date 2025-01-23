@@ -1,10 +1,10 @@
-import anyTest, {ExecutionContext, TestFn} from "ava";
+import anyTest, {TestFn} from "ava";
 import sinonGlobal from "sinon";
 import path from "node:path";
 import {readdirSync} from "node:fs";
 import {readFile} from "node:fs/promises";
 import {fileURLToPath} from "node:url";
-import autofix, {AutofixResource, AutofixResult} from "../../../src/autofix/autofix.js";
+import autofix, {AutofixResource} from "../../../src/autofix/autofix.js";
 import {RawLintMessage, ResourcePath} from "../../../src/linter/LinterContext.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesPath = path.join(__dirname, "..", "..", "fixtures", "autofix");
