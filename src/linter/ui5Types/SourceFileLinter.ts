@@ -1630,9 +1630,14 @@ export default class SourceFileLinter {
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
+				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
+				const {moduleName, exportName, propertyAccess} = this.getImportFromGlobal(namespace);
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
-					namespace: this.extractNamespace((node as ts.PropertyAccessExpression)),
+					namespace,
+					moduleName, // TODO: move to separate "Fix hints" parameter
+					exportName,
+					propertyAccess, // TODO: Provide end position instead?
 				}, node);
 			}
 		}
@@ -1819,5 +1824,67 @@ export default class SourceFileLinter {
 
 	hasQUnitFileExtension() {
 		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
+	}
+
+	findModuleForName(moduleName: string): ts.Symbol | undefined {
+		const modules = this.checker.getAmbientModules();
+		const moduleSymbol = modules.find((m) => m.getName() === `"${moduleName}"`);
+
+		if (!moduleSymbol) {
+			return;
+		}
+		const declarations = moduleSymbol.getDeclarations();
+		if (!declarations) {
+			throw new Error(`Could not find declarations for module: ${moduleName}`);
+		}
+		for (const decl of declarations) {
+			const sourceFile = decl.getSourceFile();
+			if (isSourceFileOfTypeScriptLib(sourceFile)) {
+				// Ignore any non-UI5 symbols
+				return;
+			}
+			if (isSourceFileOfPseudoModuleType(sourceFile)) {
+				// Ignore pseudo modules, we rather find them via probing for the library module
+				return;
+			}
+		}
+		return moduleSymbol;
+	}
+
+	getImportFromGlobal(namespace: string): {moduleName?: string; exportName?: string; propertyAccess?: string} {
+		if (namespace === "jQuery") {
+			return {moduleName: "sap/ui/thirdparty/jquery"};
+		} else if (namespace === "sap.ui.getCore") {
+			return {moduleName: "sap/ui/core/Core"};
+		} else if (namespace === "sap.ui.controller") {
+			return {moduleName: "sap/ui/core/mvc/Controller"};
+		}
+		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
+		let moduleSymbol;
+		const parts = namespace.split(".");
+		const searchStack = [...parts];
+		let exportName;
+		while (!moduleSymbol && searchStack.length) {
+			const moduleName = searchStack.join("/");
+			moduleSymbol = this.findModuleForName(moduleName);
+			if (!moduleSymbol) {
+				const libraryModuleName = `${moduleName}/library`;
+				moduleSymbol = this.findModuleForName(libraryModuleName);
+				if (moduleSymbol) {
+					exportName = parts[searchStack.length];
+					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
+						throw new Error(`Could not find export ${exportName} in module: ${namespace}`);
+					}
+					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
+				}
+			}
+			if (!moduleSymbol) {
+				searchStack.pop();
+			}
+		}
+		if (!searchStack.length) {
+			return {};
+		}
+		return {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")};
 	}
 }

@@ -80,6 +80,7 @@
 		"figures": "^6.1.0",
 		"he": "^1.2.0",
 		"json-source-map": "^0.6.1",
+		"magic-string": "^0.30.17",
 		"minimatch": "^10.0.1",
 		"sax-wasm": "^3.0.5",
 		"typescript": "^5.7.3",
