@@ -67,9 +67,9 @@ async function transpileXmlToJs(
 	saxParser.eventHandler = (event, tag) => {
 		if (tag instanceof SaxTag) {
 			if (event === SaxEventType.OpenTag) {
-				parser.pushTag(tag.toJSON());
+				parser.pushTag(tag.toJSON() as SaxTag);
 			} else if (event === SaxEventType.CloseTag) {
-				parser.popTag(tag.toJSON());
+				parser.popTag(tag.toJSON() as SaxTag);
 			}
 		}
 	};
