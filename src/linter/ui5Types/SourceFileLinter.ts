@@ -22,6 +22,8 @@ import {findDirectives} from "./directives.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
+const QUNIT_FILE_EXTENSION = /\.qunit\.(js|ts)$/;
+
 // This is the same check as in the framework and prevents false-positives
 // https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
 const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
@@ -658,7 +660,7 @@ export default class SourceFileLinter {
 	}
 
 	analyzeNewExpression(node: ts.NewExpression) {
-		if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
+		if (this.hasQUnitFileExtension() &&
 			((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "jsUnitTestSuite") ||
 				(ts.isIdentifier(node.expression) && node.expression.text === "jsUnitTestSuite")
 			)) {
@@ -824,7 +826,8 @@ export default class SourceFileLinter {
 				(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
 			) {
 				this.#analyzeFragmentLoad(node, symbolName);
-			} else if (/\.qunit\.(js|ts)$/.test(this.sourceFile.fileName) &&
+			} else if (this.hasQUnitFileExtension() &&
+				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
 			}
@@ -877,7 +880,10 @@ export default class SourceFileLinter {
 			details: deprecationInfo.messageDetails,
 		}, reportNode);
 
-		if (propName === "attachInit" && /\.qunit\.(js|ts)$/.test(this.sourceFile.fileName)) {
+		if (
+			propName === "attachInit" && this.hasQUnitFileExtension() &&
+			!VALID_TESTSUITE.test(this.sourceFile.fileName)
+		) {
 			this.#reportTestStarter(reportNode);
 		}
 	}
@@ -1463,5 +1469,9 @@ export default class SourceFileLinter {
 				themeName,
 			}, node);
 		}
+	}
+
+	hasQUnitFileExtension() {
+		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
 	}
 }
