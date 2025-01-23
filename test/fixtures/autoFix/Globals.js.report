@@ -1,0 +1,140 @@
+[
+    {
+        "id": 29,
+        "args": {
+            "variableName": "jQuery",
+            "namespace": "jQuery",
+            "moduleName": "sap/ui/thirdparty/jquery"
+        },
+        "position": {
+            "line": 2,
+            "column": 20
+        }
+    },
+    {
+        "id": 12,
+        "args": {
+            "functionName": "byId",
+            "additionalMessage": "of class 'Core'",
+            "details": ""
+        },
+        "position": {
+            "line": 3,
+            "column": 32
+        }
+    },
+    {
+        "id": 12,
+        "args": {
+            "functionName": "getCore",
+            "additionalMessage": "(sap.ui.getCore)",
+            "details": ""
+        },
+        "position": {
+            "line": 3,
+            "column": 22
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.ui.getCore",
+            "moduleName": "sap/ui/core/Core"
+        },
+        "position": {
+            "line": 3,
+            "column": 15
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.m.Button",
+            "moduleName": "sap/m/Button",
+            "propertyAccess": "sap.m.Button"
+        },
+        "position": {
+            "line": 4,
+            "column": 21
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "window.sap.m.Button",
+            "moduleName": "sap/m/Button",
+            "propertyAccess": "sap.m.Button"
+        },
+        "position": {
+            "line": 7,
+            "column": 22
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.ui.core.ValueState.Success",
+            "moduleName": "sap/ui/core/library",
+            "exportName": "ValueState",
+            "propertyAccess": "sap.ui.core"
+        },
+        "position": {
+            "line": 10,
+            "column": 2
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.ui.core",
+            "moduleName": "sap/ui/core/library",
+            "propertyAccess": "sap.ui.core"
+        },
+        "position": {
+            "line": 11,
+            "column": 15
+        }
+    },
+    {
+        "id": 12,
+        "args": {
+            "functionName": "view",
+            "additionalMessage": "(sap.ui.view)",
+            "details": ""
+        },
+        "position": {
+            "line": 13,
+            "column": 9
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.ui.view"
+        },
+        "position": {
+            "line": 13,
+            "column": 2
+        }
+    },
+    {
+        "id": 29,
+        "args": {
+            "variableName": "sap",
+            "namespace": "sap.m.URLHelper.triggerSms",
+            "moduleName": "sap/m/library",
+            "exportName": "URLHelper",
+            "propertyAccess": "sap.m"
+        },
+        "position": {
+            "line": 14,
+            "column": 2
+        }
+    }
+]
