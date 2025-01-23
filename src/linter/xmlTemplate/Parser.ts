@@ -11,7 +11,7 @@ import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
-import {SaxParserToJSON} from "../../utils/xmlParser.js";
+import {Tag as SaxTag} from "sax-wasm";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -161,11 +161,11 @@ export default class Parser {
 		this.#bindingLinter = new BindingLinter(resourcePath, context);
 	}
 
-	pushTag(tag: SaxParserToJSON) {
+	pushTag(tag: SaxTag) {
 		this.#nodeStack.push(this._createNode(tag));
 	}
 
-	popTag(_tag: SaxParserToJSON) { // No need to use the parsed tag, we rely on our nodeStack
+	popTag(_tag: SaxTag) { // No need to use the parsed tag, we rely on our nodeStack
 		const level = this.#nodeStack.length;
 		const closingNode = this.#nodeStack.pop();
 
@@ -272,7 +272,7 @@ export default class Parser {
 		}
 	}
 
-	_createNode(tag: SaxParserToJSON): NodeDeclaration {
+	_createNode(tag: SaxTag): NodeDeclaration {
 		let tagName = tag.name;
 		let tagNamespace = null; // default namespace
 
@@ -393,7 +393,7 @@ export default class Parser {
 
 	_handleUi5LibraryNamespace(
 		moduleName: string, namespace: Namespace, attributes: Set<AttributeDeclaration>,
-		tag: SaxParserToJSON
+		tag: SaxTag
 	): ControlDeclaration | AggregationDeclaration | FragmentDefinitionDeclaration {
 		const controlProperties = new Set<PropertyDeclaration>();
 		const customDataElements: ControlDeclaration[] = [];

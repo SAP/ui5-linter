@@ -1,5 +1,5 @@
 import test from "ava";
-import {parseXML, SaxParserToJSON} from "../../../src/utils/xmlParser.js";
+import {parseXML} from "../../../src/utils/xmlParser.js";
 import {ReadStream} from "node:fs";
 import {Readable} from "node:stream";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
@@ -35,12 +35,12 @@ test("Test xmlParser with .library", async (t) => {
 	contentStream.push(null);
 
 	// Call SAXParser with the contentStream
-	const libs: SaxParserToJSON[] = [];
+	const libs: SaxTag[] = [];
 	await parseXML(contentStream, (event, tag) => {
 		if (tag instanceof SaxTag &&
 			event === SaxEventType.CloseTag &&
 			tag.value === "libraryName") {
-			libs.push(tag.toJSON());
+			libs.push(tag.toJSON() as SaxTag);
 		}
 	});
 

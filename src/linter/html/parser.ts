@@ -1,10 +1,10 @@
 import type {ReadStream} from "node:fs";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
-import {parseXML, SaxParserToJSON} from "../../utils/xmlParser.js";
+import {parseXML} from "../../utils/xmlParser.js";
 
 interface ExtractedTags {
-	scriptTags: SaxParserToJSON[];
-	stylesheetLinkTags: SaxParserToJSON[];
+	scriptTags: SaxTag[];
+	stylesheetLinkTags: SaxTag[];
 }
 
 export async function extractHTMLTags(contentStream: ReadStream) {
@@ -16,7 +16,7 @@ export async function extractHTMLTags(contentStream: ReadStream) {
 		if (!(tag instanceof SaxTag)) {
 			return;
 		}
-		const serializedTag = tag.toJSON() as SaxParserToJSON;
+		const serializedTag = tag.toJSON() as SaxTag;
 		if (event === SaxEventType.OpenTag &&
 			serializedTag.name === "link") {
 			if (serializedTag.attributes.some((attr) => {

@@ -1,7 +1,7 @@
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
-import {parseXML, SaxParserToJSON} from "../../utils/xmlParser.js";
+import {parseXML} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
 import {MESSAGE} from "../messages.js";
 
@@ -26,7 +26,7 @@ export default class DotLibraryLinter {
 		}
 	}
 
-	async #parseDotLibrary(contentStream: ReadStream): Promise<SaxParserToJSON[]> {
+	async #parseDotLibrary(contentStream: ReadStream): Promise<SaxTag[]> {
 		const libs = new Set();
 		const tagsStack: string[] = [];
 		const libNamePath = ["library", "dependencies", "dependency"];
@@ -35,7 +35,7 @@ export default class DotLibraryLinter {
 				return;
 			}
 
-			const serializedTag = tag.toJSON();
+			const serializedTag = tag.toJSON() as SaxTag;
 			if (event === SaxEventType.OpenTag && !serializedTag.selfClosing) {
 				tagsStack.push(serializedTag.name);
 			} else if (event === SaxEventType.CloseTag && !serializedTag.selfClosing) {
@@ -53,10 +53,10 @@ export default class DotLibraryLinter {
 			}
 		});
 
-		return Array.from(libs) as SaxParserToJSON[];
+		return Array.from(libs) as SaxTag[];
 	}
 
-	#analyzeDeprecatedLibs(libs: SaxParserToJSON[]) {
+	#analyzeDeprecatedLibs(libs: SaxTag[]) {
 		// Check for deprecated libraries
 		libs.forEach((lib) => {
 			// textNodes is always an array, but it might be empty
