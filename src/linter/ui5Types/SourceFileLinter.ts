@@ -687,18 +687,7 @@ export default class SourceFileLinter {
 			// Do not process xml-s. This case would be handled separately withing the BindingParser
 			if (!originalFilename ||
 				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
-				node?.arguments?.filter((arg) => ts.isObjectLiteralExpression(arg))
-					.flatMap((arg) => arg.properties)
-					.forEach((prop) => {
-						if (ts.isPropertyAssignment(prop) &&
-							this.#isPropertyBindingType(node, prop.name.getText())) {
-							if (ts.isObjectLiteralExpression(prop.initializer)) {
-								this.#analyzeModelDataTypes(prop.initializer);
-							} else {
-								this.#analyzeModelDataTypesBinding(prop);
-							}
-						}
-					});
+				this.#analyzeNewAndApplySettings(node);
 			}
 		}
 
@@ -853,6 +842,10 @@ export default class SourceFileLinter {
 				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
+			} else if (symbolName === "applySettings" &&
+				nodeType.symbol.declarations?.some((declaration) =>
+					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+				this.#analyzeNewAndApplySettings(node);
 			} else if (symbolName.startsWith("bindProperty") && moduleName === "sap/ui/base/ManagedObject") {
 				this.#analyzeModelDataTypes(node.arguments[1] as ts.ObjectLiteralExpression);
 			} else if (symbolName.startsWith("bind") &&
@@ -1173,6 +1166,23 @@ export default class SourceFileLinter {
 		}
 	}
 
+	#analyzeNewAndApplySettings(node: ts.NewExpression | ts.CallExpression) {
+		node?.arguments?.filter((arg) => ts.isObjectLiteralExpression(arg))
+			.flatMap((arg) => arg.properties)
+			.forEach((prop) => {
+				if (ts.isPropertyAssignment(prop) &&
+					(ts.isCallExpression(node) ||
+						this.#isPropertyBindingType(node, prop.name.getText()))
+				) {
+					if (ts.isObjectLiteralExpression(prop.initializer)) {
+						this.#analyzeModelDataTypes(prop.initializer);
+					} else {
+						this.#analyzeModelDataTypesBinding(prop);
+					}
+				}
+			});
+	}
+
 	#analyzeModelDataTypes(node: ts.ObjectLiteralExpression) {
 		node?.properties.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop)) {
@@ -1204,8 +1214,6 @@ export default class SourceFileLinter {
 	#analyzeModelDataTypesBinding(node: ts.PropertyAssignment) {
 		if (ts.isStringLiteral(node.initializer) &&
 			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
-			// ts.isNewExpression(node) &&
-			// this.#isPropertyBindingType(node, prop.name.getText())) {
 			const imports = this.sourceFile.statements
 				.filter((stmnt): stmnt is ts.ImportDeclaration =>
 					stmnt.kind === ts.SyntaxKind.ImportDeclaration)
