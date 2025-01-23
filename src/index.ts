@@ -21,6 +21,10 @@ export interface UI5LinterOptions {
 	 */
 	details?: boolean;
 	/**
+	 * TODO
+	 */
+	fix?: boolean;
+	/**
 	 * Path to a ui5lint.config.(cjs|mjs|js) file
 	 */
 	config?: string;

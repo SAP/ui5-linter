@@ -13,7 +13,7 @@ import {Minimatch} from "minimatch";
 import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
+	rootDir, filePatterns, ignorePatterns, coverage, details, fix, configPath, ui5Config, noConfig,
 }: LinterOptions, sharedLanguageService: SharedLanguageService): Promise<LintResult[]> {
 	if (!path.isAbsolute(rootDir)) {
 		throw new Error(`rootDir must be an absolute path. Received: ${rootDir}`);
@@ -71,6 +71,7 @@ export async function lintProject({
 		ignorePatterns,
 		coverage,
 		details,
+		fix,
 		configPath,
 		noConfig,
 		ui5Config,
