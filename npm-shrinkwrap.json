@@ -21,6 +21,7 @@
 				"globals": "^16.0.0",
 				"he": "^1.2.0",
 				"json-source-map": "^0.6.1",
+				"magic-string": "^0.30.17",
 				"minimatch": "^10.0.1",
 				"sax-wasm": "^3.0.5",
 				"typescript": "^5.8.2",
@@ -8359,7 +8360,6 @@
 			"version": "0.30.17",
 			"resolved": "https://registry.npmjs.org/magic-string/-/magic-string-0.30.17.tgz",
 			"integrity": "sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==",
-			"dev": true,
 			"dependencies": {
 				"@jridgewell/sourcemap-codec": "^1.5.0"
 			}

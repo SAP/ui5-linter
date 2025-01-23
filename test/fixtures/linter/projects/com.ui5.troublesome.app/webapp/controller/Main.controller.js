@@ -6,6 +6,22 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 			MessageBox.show("Hello World!");
 		},
 
+		globalVarsForAutofix() {
+			// This is a scenario to test the autofix
+			const list = sap.ui.getCore().byId("container-todo---app--todoList");
+			const button = new sap.m.Button({
+				text: "Hello"
+			});
+			const button3 = new window.sap.m.Button({
+				text: "Hello"
+			});
+			sap.ui.core.ValueState.Success;
+			const core = sap.ui.core;
+			core.ValueState.Success;
+			sap.ui.view("myView");
+			sap.m.URLHelper.triggerSms();
+		},
+
 		registerButtonEventHandlers() {
 			// this.byId and this.getView().byId should report the same issues
 			this.byId("helloButton").attachTap(function() {
