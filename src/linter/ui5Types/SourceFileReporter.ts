@@ -7,6 +7,7 @@ import LinterContext, {
 	CoverageInfo,
 	PositionInfo, PositionRange, ResourcePath,
 	RawLintMessage,
+	FixHints,
 } from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
@@ -16,7 +17,7 @@ interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
 
-function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | undefined): node is ts.Node {
+function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | FixHints | undefined): node is ts.Node {
 	return !!node && "getSourceFile" in node && typeof node.getSourceFile === "function";
 }
 
@@ -53,22 +54,29 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node): void;
-	addMessage<M extends MESSAGE>(id: M, node: ts.Node): void;
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node, fixHints?: FixHints): void;
+	addMessage<M extends MESSAGE>(id: M, node: ts.Node, fixHints?: FixHints): void;
 	addMessage<M extends MESSAGE>(
-		id: M, argsOrNode?: MessageArgs[M] | ts.Node, node?: ts.Node
+		id: M, argsOrNode: MessageArgs[M] | ts.Node, nodeOrFixHints?: ts.Node | FixHints, fixHints?: FixHints
 	) {
 		if (!argsOrNode) {
 			throw new Error("Invalid arguments: Missing second argument");
 		}
 		let args: MessageArgs[M];
+		let node: ts.Node;
 		if (isTsNode(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
-		} else if (!node) {
-			throw new Error("Invalid arguments: Missing 'node'");
+			if (!isTsNode(nodeOrFixHints)) {
+				fixHints = nodeOrFixHints;
+			}
 		} else {
 			args = argsOrNode;
+			if (isTsNode(nodeOrFixHints)) {
+				node = nodeOrFixHints;
+			} else {
+				throw new Error("Invalid arguments: Expected third argument to be a ts.Node");
+			}
 		}
 
 		const position: PositionInfo = {
@@ -84,7 +92,7 @@ export default class SourceFileReporter {
 			// endColumn = end.column + 1;
 		}
 
-		this.#rawMessages.push({id, args, position});
+		this.#rawMessages.push({id, args, position, fixHints});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {

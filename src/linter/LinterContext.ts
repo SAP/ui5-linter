@@ -10,6 +10,13 @@ export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
 
+export interface FixHints {
+	moduleName?: string;
+	exportName?: string;
+	propertyAccess?: string;
+	conditional?: boolean;
+}
+
 // Data types are structured very similar to the ESLint types for better compatibility into existing integrations:
 // https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type
 export interface LintResult {
@@ -21,10 +28,16 @@ export interface LintResult {
 	warningCount: number;
 }
 
+export interface RawLintResult {
+	filePath: FilePath;
+	rawMessages: RawLintMessage[];
+}
+
 export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	id: M;
 	args: MessageArgs[M];
 	position?: PositionInfo;
+	fixHints?: FixHints;
 }
 
 export interface LintMessage {
@@ -64,18 +77,12 @@ export interface LinterOptions {
 	ignorePatterns?: FilePattern[];
 	coverage?: boolean;
 	details?: boolean;
+	fix?: boolean;
 	configPath?: string;
 	noConfig?: boolean;
 	ui5Config?: string | object;
 	namespace?: string;
 }
-
-export interface FSToVirtualPathOptions {
-	relFsBasePath: string;
-	virBasePath: string;
-	relFsBasePathTest?: string;
-	virBasePathTest?: string;
-};
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
@@ -111,12 +118,14 @@ export default class LinterContext {
 
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
+	#applyAutofix: boolean;
 
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
 		this.#reportCoverage = !!options.coverage;
 		this.#includeMessageDetails = !!options.details;
+		this.#applyAutofix = !!options.fix;
 	}
 
 	getRootDir(): string {
@@ -152,6 +161,10 @@ export default class LinterContext {
 
 	getIncludeMessageDetails(): boolean {
 		return this.#includeMessageDetails;
+	}
+
+	getApplyAutofix(): boolean {
+		return this.#applyAutofix;
 	}
 
 	getMetadata(resourcePath: ResourcePath): LintMetadata {
@@ -370,5 +383,24 @@ export default class LinterContext {
 		}
 
 		return lintResults;
+	}
+
+	generateRawLintResults(): RawLintResult[] {
+		const rawLintResults: RawLintResult[] = [];
+		let resourcePaths;
+		if (this.#reportCoverage) {
+			resourcePaths = new Set([...this.#rawMessages.keys(), ...this.#coverageInfo.keys()]).values();
+		} else {
+			resourcePaths = this.#rawMessages.keys();
+		}
+
+		for (const resourcePath of resourcePaths) {
+			rawLintResults.push({
+				filePath: resourcePath,
+				rawMessages: this.#getFilteredMessages(resourcePath),
+			});
+		}
+
+		return rawLintResults;
 	}
 }

@@ -90,7 +90,7 @@ declare module "@ui5/fs" {
 
 	export interface AbstractReader {
 		byGlob: (virPattern: string | string[], options?: GlobOptions) => Promise<Resource[]>;
-		byPath: (path: string) => Promise<Resource>;
+		byPath: (path: string) => Promise<Resource | null>;
 	}
 	export interface AbstractAdapter extends AbstractReader {
 		write: (resource: Resource) => Promise<void>;
