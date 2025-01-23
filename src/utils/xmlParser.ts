@@ -1,5 +1,5 @@
 import type {ReadStream} from "node:fs";
-import {AttributeType, Detail, PositionDetail, Reader, SaxEventType, SAXParser} from "sax-wasm";
+import {AttributeType, Detail, PositionDetail, Reader, SaxEventType, SAXParser, Text} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
@@ -12,16 +12,8 @@ export interface SaxParserToJSON {
 	closeEnd: PositionDetail;
 	name: string;
 	attributes: {
-		name: {
-			start: PositionDetail;
-			end: PositionDetail;
-			value: string;
-		};
-		value: {
-			start: PositionDetail;
-			end: PositionDetail;
-			value: string;
-		};
+		name: Text;
+		value: Text;
 		type: AttributeType;
 	}[];
 	textNodes: {
@@ -41,6 +33,13 @@ export function isSaxParserToJSON(tag: unknown): tag is SaxParserToJSON {
 		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "closeEnd") &&
 		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "attributes") &&
 		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "textNodes");
+}
+
+export function isSaxText(tag: unknown): tag is Text {
+	return !!tag &&
+		Object.prototype.hasOwnProperty.call(tag, "start") &&
+		Object.prototype.hasOwnProperty.call(tag, "end") &&
+		Object.prototype.hasOwnProperty.call(tag, "value");
 }
 
 let saxWasmBuffer: Buffer;

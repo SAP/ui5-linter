@@ -2,7 +2,7 @@ import {Tag as SaxTag, Text as SaxText, Position as SaxPosition} from "sax-wasm"
 import LinterContext, {CoverageInfo, ResourcePath} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
-import {isSaxParserToJSON} from "../../utils/xmlParser.js";
+import {isSaxParserToJSON, SaxParserToJSON, isSaxText} from "../../utils/xmlParser.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: SaxTag;
@@ -17,10 +17,10 @@ export default class HtmlReporter {
 		this.#context = context;
 	}
 
-	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: SaxTag | SaxText): void;
-	addMessage<M extends MESSAGE>(id: M, node: SaxTag | SaxText): void;
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: SaxParserToJSON | SaxText): void;
+	addMessage<M extends MESSAGE>(id: M, node: SaxParserToJSON | SaxText): void;
 	addMessage<M extends MESSAGE>(
-		id: M, argsOrNode?: MessageArgs[M] | SaxTag | SaxText, node?: SaxTag | SaxText
+		id: M, argsOrNode?: MessageArgs[M] | SaxParserToJSON | SaxText, node?: SaxParserToJSON | SaxText
 	) {
 		if (!argsOrNode) {
 			throw new Error("Invalid arguments: Missing second argument");
@@ -29,7 +29,7 @@ export default class HtmlReporter {
 		if (isSaxParserToJSON(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
-		} else if (argsOrNode instanceof SaxText) {
+		} else if (isSaxText(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
 		} else if (!node) {

@@ -4,8 +4,9 @@ import HtmlReporter from "./HtmlReporter.js";
 import LinterContext, {ResourcePath, TranspileResult} from "../LinterContext.js";
 import {taskStart} from "../../utils/perf.js";
 import {MESSAGE} from "../messages.js";
-import {Tag, Attribute} from "sax-wasm";
+import {Attribute} from "sax-wasm";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
+import type {SaxParserToJSON} from "../../utils/xmlParser.js";
 
 export default async function transpileHtml(
 	resourcePath: ResourcePath, contentStream: ReadStream, context: LinterContext
@@ -54,7 +55,7 @@ export default async function transpileHtml(
 	}
 }
 
-function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], context: LinterContext) {
+function detectTestStarter(resourcePath: ResourcePath, scriptTags: SaxParserToJSON[], context: LinterContext) {
 	const shouldBeMigrated = scriptTags.some((tag) => {
 		const isTestsuiteQunitFile = /testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.html$/.test(resourcePath);
 		return (isTestsuiteQunitFile && !tag.attributes.some((attr) => {
@@ -74,7 +75,7 @@ function detectTestStarter(resourcePath: ResourcePath, scriptTags: Tag[], contex
 	}
 }
 
-function findBootstrapTag(tags: Tag[]): Tag | undefined {
+function findBootstrapTag(tags: SaxParserToJSON[]): SaxParserToJSON | undefined {
 	// First search for script tag with id "sap-ui-bootstrap"
 	for (const tag of tags) {
 		for (const attr of tag.attributes) {
@@ -119,7 +120,7 @@ const aliasToAttr = new Map([
 	["data-sap-ui-xx-noless", "data-sap-ui-xx-no-less"],
 ]);
 
-function lintBootstrapAttributes(tag: Tag, report: HtmlReporter) {
+function lintBootstrapAttributes(tag: SaxParserToJSON, report: HtmlReporter) {
 	const attributes = new Set();
 	for (const attr of tag.attributes) {
 		let attributeName = attr.name.value.toLowerCase();
