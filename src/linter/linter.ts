@@ -12,7 +12,7 @@ import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 
 export async function lintProject({
-	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
+	rootDir, filePatterns, ignorePatterns, coverage, details, fix, configPath, ui5Config, noConfig,
 }: LinterOptions): Promise<LintResult[]> {
 	if (!path.isAbsolute(rootDir)) {
 		throw new Error(`rootDir must be an absolute path. Received: ${rootDir}`);
@@ -70,6 +70,7 @@ export async function lintProject({
 		ignorePatterns,
 		coverage,
 		details,
+		fix,
 		configPath,
 		noConfig,
 		ui5Config,

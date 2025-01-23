@@ -14,7 +14,7 @@ export interface AutofixResource {
 
 export interface AutofixOptions {
 	rootDir: string;
-	namespace: string;
+	namespace?: string;
 	resources: Map<ResourcePath, AutofixResource>;
 }
 
@@ -113,7 +113,9 @@ export default async function ({
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!);
-		res.set(resourcePath, newContent);
+		if (newContent) {
+			res.set(resourcePath, newContent);
+		}
 	}
 
 	return res;
@@ -121,8 +123,8 @@ export default async function ({
 
 function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath, resource: AutofixResource
-): string {
-	let {content} = resource;
+): string | undefined {
+	const {content} = resource;
 
 	// Group messages by id
 	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
@@ -155,9 +157,12 @@ function applyFixes(
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet);
 	}
-	content = applyChanges(content, changeSet);
 
-	return content;
+	if (changeSet.length === 0) {
+		// No modifications needed
+		return undefined;
+	}
+	return applyChanges(content, changeSet);
 }
 interface Position {
 	line: number;
@@ -575,16 +580,21 @@ function addModuleDeclaration(
 		return identifier;
 	});
 
-	const namespace = getFirstArgument(declareCall);
-	let moduleName = "";
-	if (namespace) {
-		moduleName = `"${namespace}", `;
-	}
-
 	// Create module declaration
 	const dependencyDecl = `[${dependencies.join(", ")}], `;
 
-	const moduleOpen = `sap.ui.define(${moduleName}${dependencyDecl}function(${identifiers.join(", ")}) {`;
+	let moduleOpen = `sap.ui.define(`;
+
+	// TODO: Decide whether or in which case we want to add the module name to the define call.
+	// Usually it's omitted in our code and not mentioned in our best practices.
+	// const namespace = getFirstArgument(declareCall).replace(/\./g, "/");
+	// let moduleName = "";
+	// if (namespace) {
+	// moduleName = `"${namespace}", `;
+	// }
+	// moduleOpen += moduleName;
+
+	moduleOpen += `${dependencyDecl}function(${identifiers.join(", ")}) {`;
 	const moduleClose = "});\n";
 	changeSet.push({
 		action: ChangeAction.INSERT,
@@ -607,7 +617,16 @@ function addModuleDeclaration(
 			}
 			const nodeStart = node.getStart();
 			const nodeEnd = node.getEnd();
-			const nodeReplacement = `${identifier}`;
+			let nodeReplacement = `${identifier}`;
+
+			// FIXME: Add proper handling of adding return statements for the declared class.
+			// This could be solved by looking for a matching extend call with the same class name as the
+			// jQuery.sap.declare call. Note that a local variable might need to be introduced as some code
+			// might e.g. add methods on the class prototype before returning the class.
+			if (nodeReplacement === "UIComponent") {
+				nodeReplacement = "return " + nodeReplacement;
+			}
+
 			changeSet.push({
 				action: ChangeAction.REPLACE,
 				start: nodeStart,

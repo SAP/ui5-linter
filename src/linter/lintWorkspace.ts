@@ -11,11 +11,52 @@ import LinterContext, {LintResult, LinterParameters, LinterOptions, FSToVirtualP
 import {createReader} from "@ui5/fs/resourceFactory";
 import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
+import autofix, {AutofixResource} from "../autofix/autofix.js";
+import {readFileSync, writeFileSync} from "fs";
+import path from "path";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>
 ): Promise<LintResult[]> {
+	let context = await runLintWorkspace(workspace, filePathsWorkspace, options, config, patternsMatch);
+
+	if (options.fix) {
+		const rawLintResults = context.generateRawLintResults();
+
+		const autofixResources = new Map<string, AutofixResource>();
+		for (const {filePath, rawMessages} of rawLintResults) {
+			// FIXME: handle this the same way as we already do for the general results
+			const realFilePath = filePath.replace(options.virBasePath, options.relFsBasePath + path.sep);
+			autofixResources.set(realFilePath, {
+				content: readFileSync(realFilePath, "utf-8"),
+				messages: rawMessages,
+			});
+		}
+
+		const autofixResult = await autofix({
+			rootDir: options.rootDir,
+			namespace: options.namespace,
+			resources: autofixResources,
+		});
+
+		if (autofixResult.size > 0) {
+			for (const [filePath, content] of autofixResult.entries()) {
+				writeFileSync(filePath, content);
+			}
+
+			// Run lint again after fixes are applied
+			context = await runLintWorkspace(workspace, filePathsWorkspace, options, config, patternsMatch);
+		}
+	}
+
+	return context.generateLintResults();
+}
+
+async function runLintWorkspace(
+	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
+	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>
+): Promise<LinterContext> {
 	const done = taskStart("Linting Workspace");
 	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
@@ -58,5 +99,5 @@ export default async function lintWorkspace(
 	const typeLinter = new TypeLinter(params);
 	await typeLinter.lint();
 	done();
-	return context.generateLintResults();
+	return context;
 }
