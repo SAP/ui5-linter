@@ -21,6 +21,11 @@ export interface LintResult {
 	warningCount: number;
 }
 
+export interface RawLintResult {
+	filePath: FilePath;
+	rawMessages: RawLintMessage[];
+}
+
 export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	id: M;
 	args: MessageArgs[M];
@@ -64,18 +69,12 @@ export interface LinterOptions {
 	ignorePatterns?: FilePattern[];
 	coverage?: boolean;
 	details?: boolean;
+	fix?: boolean;
 	configPath?: string;
 	noConfig?: boolean;
 	ui5Config?: string | object;
 	namespace?: string;
 }
-
-export interface FSToVirtualPathOptions {
-	relFsBasePath: string;
-	virBasePath: string;
-	relFsBasePathTest?: string;
-	virBasePathTest?: string;
-};
 
 export interface LinterParameters {
 	workspace: AbstractAdapter;
@@ -370,5 +369,24 @@ export default class LinterContext {
 		}
 
 		return lintResults;
+	}
+
+	generateRawLintResults(): RawLintResult[] {
+		const rawLintResults: RawLintResult[] = [];
+		let resourcePaths;
+		if (this.#reportCoverage) {
+			resourcePaths = new Set([...this.#rawMessages.keys(), ...this.#coverageInfo.keys()]).values();
+		} else {
+			resourcePaths = this.#rawMessages.keys();
+		}
+
+		for (const resourcePath of resourcePaths) {
+			rawLintResults.push({
+				filePath: resourcePath,
+				rawMessages: this.#getFilteredMessages(resourcePath),
+			});
+		}
+
+		return rawLintResults;
 	}
 }

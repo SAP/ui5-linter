@@ -21,6 +21,11 @@ export interface UI5LinterOptions {
 	 */
 	details?: boolean;
 	/**
+	 * Automatically fix linter findings
+	 * @default false
+	 */
+	fix?: boolean;
+	/**
 	 * Path to a ui5lint.config.(cjs|mjs|js) file
 	 */
 	config?: string;
@@ -64,6 +69,7 @@ export class UI5LinterEngine {
 			filePatterns,
 			ignorePatterns = [],
 			details = false,
+			fix = false,
 			config,
 			noConfig,
 			coverage = false,
@@ -78,6 +84,7 @@ export class UI5LinterEngine {
 				ignorePatterns,
 				coverage,
 				details,
+				fix,
 				configPath: config,
 				noConfig,
 				ui5Config,
