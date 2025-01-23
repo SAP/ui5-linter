@@ -14,6 +14,24 @@ test("JSTokenizer: Basic values", (t) => {
 	});
 });
 
+test("JSTokenizer: Tab after unquoted key", (t) => {
+	const res = JSTokenizer.parseJS(
+		`{path\t: 'invoice>Status', formatter: 'ui5.walkthrough.model.formatter.statusText'}`);
+	t.deepEqual(res, {
+		path: "invoice>Status",
+		formatter: "ui5.walkthrough.model.formatter.statusText",
+	});
+});
+
+test("JSTokenizer: Tab after quoted key", (t) => {
+	const res = JSTokenizer.parseJS(
+		`{"path"\t: 'invoice>Status', formatter: 'ui5.walkthrough.model.formatter.statusText'}`);
+	t.deepEqual(res, {
+		path: "invoice>Status",
+		formatter: "ui5.walkthrough.model.formatter.statusText",
+	});
+});
+
 test("JSTokenizer: Not allowed", (t) => {
 	t.throws(() => {
 		JSTokenizer.parseJS(`{

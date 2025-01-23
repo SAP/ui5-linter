@@ -337,6 +337,16 @@ test("XML Expression Binding", (t) => {
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
 
+test("XML Expression Binding with encoded ampersand", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= ${PrdcssrSuccssrSemanticObjTxt} !== '' && ${PrdcssrSuccssrSemanticActnTxt} !== '' }",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
 test("Error Testing: XML Property Binding missing closing bracket", (t) => {
 	const {bindingLinter, linterContext} = t.context;
 
