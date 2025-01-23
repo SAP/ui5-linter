@@ -566,24 +566,7 @@ function addDependencies(
 	});
 
 	// Patch identifiers
-	for (const {nodeInfos, identifier} of importRequests.values()) {
-		for (const nodeInfo of nodeInfos) {
-			let node: ts.Node = nodeInfo.node!;
-
-			if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.getCore") {
-				node = node.parent;
-			}
-			const nodeStart = node.getStart();
-			const nodeEnd = node.getEnd();
-			const nodeReplacement = `${identifier}`;
-			changeSet.push({
-				action: ChangeAction.REPLACE,
-				start: nodeStart,
-				end: nodeEnd,
-				value: nodeReplacement,
-			});
-		}
-	}
+	patchIdentifiers(importRequests, changeSet);
 }
 
 function addModuleDeclaration(
@@ -630,6 +613,10 @@ function addModuleDeclaration(
 	});
 
 	// Patch identifiers
+	patchIdentifiers(importRequests, changeSet);
+}
+
+function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
 	for (const {nodeInfos, identifier} of importRequests.values()) {
 		for (const nodeInfo of nodeInfos) {
 			let node: ts.Node = nodeInfo.node!;
@@ -647,6 +634,8 @@ function addModuleDeclaration(
 			// might e.g. add methods on the class prototype before returning the class.
 			if (nodeReplacement === "UIComponent") {
 				nodeReplacement = "return " + nodeReplacement;
+			} else if (nodeReplacement === "Controller") {
+				nodeReplacement = `return ${nodeReplacement}.extend`;
 			}
 
 			changeSet.push({

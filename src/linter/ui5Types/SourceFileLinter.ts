@@ -1500,6 +1500,8 @@ export default class SourceFileLinter {
 			return {moduleName: "sap/ui/thirdparty/jquery"};
 		} else if (namespace === "sap.ui.getCore") {
 			return {moduleName: "sap/ui/core/Core"};
+		} else if (namespace === "sap.ui.controller") {
+			return {moduleName: "sap/ui/core/mvc/Controller"};
 		}
 		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
 		let moduleSymbol;
