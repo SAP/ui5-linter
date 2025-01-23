@@ -634,8 +634,15 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			// might e.g. add methods on the class prototype before returning the class.
 			if (nodeReplacement === "UIComponent") {
 				nodeReplacement = "return " + nodeReplacement;
-			} else if (nodeReplacement === "Controller") {
-				nodeReplacement = `return ${nodeReplacement}.extend`;
+			} else if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.controller") {
+				// Check whether sap.ui.controller was used to define or create a controller
+				if (ts.isCallExpression(node.parent) && node.parent.arguments.length === 1) {
+					// Creating a controller instance can't be easily replaced as the new API is async
+					continue;
+				} else {
+					// Controller definition
+					nodeReplacement = `return ${nodeReplacement}.extend`;
+				}
 			}
 
 			changeSet.push({
