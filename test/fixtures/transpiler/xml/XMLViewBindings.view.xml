@@ -46,6 +46,10 @@
 		}"
 	/>
 
+	<ObjectStatus
+		visible="{= ${PrdcssrSuccssrSemanticObjTxt} !== '' &amp;&amp; ${PrdcssrSuccssrSemanticActnTxt} !== '' }"
+	/>
+
 	<!-- Correct import and use of required modules -->
 	<ObjectStatus
 		core:require="{

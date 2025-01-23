@@ -177,7 +177,7 @@
 		}
 
 		while (this.next()) {
-			if (this.ch === ' ') {
+			if (this.ch <= ' ') {
 				this.next();
 				return name;
 			}
