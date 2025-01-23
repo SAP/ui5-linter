@@ -186,7 +186,7 @@ interface DeprecatedApiAccessNode {
 }
 
 type ImportRequests = Map<string, {
-	nodeInfos: GlobalPropertyAccessNodeInfo[];
+	nodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
 	identifier?: string;
 }>;
 
@@ -279,6 +279,26 @@ function generateSolutionDeprecatedApiAccess(
 								start: deletableNode.getStart(),
 								end: deletableNode.getEnd(),
 							});
+							continue;
+						} else if (matchPropertyAccessExpression(callExp.expression, "jQuery.sap.formatMessage")) {
+							const moduleDeclaration = newModuleDeclarations[newModuleDeclarations.length - 1];
+
+							// Add Import
+							const importName = "sap/base/strings/formatMessage";
+							if (!moduleDeclaration.requireCalls.has(importName)) {
+								moduleDeclaration.requireCalls.set(importName, []);
+							}
+							moduleDeclaration.requireCalls.get(importName)!.push(callExp);
+
+							// Ensure update of usage
+							if (!moduleDeclaration.importRequests.has(importName)) {
+								moduleDeclaration.importRequests.set(importName, {
+									nodeInfos: [],
+								});
+							}
+							moduleDeclaration.importRequests.get(importName)!.nodeInfos.push(nodeInfo);
+							nodeInfo.node = accessExp;
+
 							continue;
 						}
 					}
@@ -549,7 +569,8 @@ function addDependencies(
 	for (const {nodeInfos, identifier} of importRequests.values()) {
 		for (const nodeInfo of nodeInfos) {
 			let node: ts.Node = nodeInfo.node!;
-			if (nodeInfo.namespace === "sap.ui.getCore") {
+
+			if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.getCore") {
 				node = node.parent;
 			}
 			const nodeStart = node.getStart();
@@ -612,7 +633,8 @@ function addModuleDeclaration(
 	for (const {nodeInfos, identifier} of importRequests.values()) {
 		for (const nodeInfo of nodeInfos) {
 			let node: ts.Node = nodeInfo.node!;
-			if (nodeInfo.namespace === "sap.ui.getCore") {
+
+			if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.getCore") {
 				node = node.parent;
 			}
 			const nodeStart = node.getStart();
@@ -666,7 +688,7 @@ function getIdentifierForImport(importName: string): string {
 	if (identifier === "library") {
 		return parts[parts.length - 2] + "Library";
 	}
-	return identifier[0].toUpperCase() + identifier.slice(1);
+	return identifier;
 }
 
 function getFirstArgument(callExp: ts.CallExpression): string {
