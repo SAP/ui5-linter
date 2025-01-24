@@ -1190,9 +1190,9 @@ export default class SourceFileLinter {
 			}
 
 			// Get the type property
-			let typeField;
+			let propertyField;
 			if (ts.isObjectLiteralExpression(prop.initializer)) {
-				typeField = propNames
+				propertyField = propNames
 					.map((name) => getPropertyAssignmentInObjectLiteralExpression(
 						name, prop.initializer as ts.ObjectLiteralExpression))
 					.find((typeProp) => !!typeProp);
@@ -1201,11 +1201,11 @@ export default class SourceFileLinter {
 				// Whether it's a direct property of the Control
 				// or name collision in property binding
 				!ts.isNewExpression(prop.parent.parent)) {
-				typeField = prop;
+				propertyField = prop;
 			}
 
-			if (typeField) {
-				this.#analyzeModelTypeField(typeField.initializer);
+			if (propertyField) {
+				this.#analyzeBindingPropertyField(propertyField.initializer);
 			}
 		});
 	}
@@ -1264,7 +1264,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	#analyzeModelTypeField(node: ts.Expression) {
+	#analyzeBindingPropertyField(node: ts.Expression) {
 		if (!ts.isStringLiteralLike(node)) {
 			return;
 		}
