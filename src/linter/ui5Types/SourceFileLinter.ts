@@ -1172,7 +1172,7 @@ export default class SourceFileLinter {
 			.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isCallExpression(node) ||
-						(ts.isIdentifier(prop.name) && this.#isPropertyBindingType(node, prop.name.text)))
+						this.#isPropertyBindingType(node, getPropertyNameText(prop.name)))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
 						this.#analyzeModelDataTypes(prop.initializer);
@@ -1241,7 +1241,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBindingType(node: ts.NewExpression, propName: string) {
+	#isPropertyBindingType(node: ts.NewExpression, propName: string | undefined) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 		const classArg = (controlAmbientModule?.body as ts.ModuleBlock)?.statements
