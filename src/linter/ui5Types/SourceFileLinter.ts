@@ -1192,10 +1192,8 @@ export default class SourceFileLinter {
 			// Get the type property
 			let propertyField;
 			if (ts.isObjectLiteralExpression(prop.initializer)) {
-				propertyField = propNames
-					.map((name) => getPropertyAssignmentInObjectLiteralExpression(
-						name, prop.initializer as ts.ObjectLiteralExpression))
-					.find((typeProp) => !!typeProp);
+				propertyField = getPropertyAssignmentsInObjectLiteralExpression(
+					propNames, prop.initializer)[0];
 			} else if (ts.isStringLiteralLike(prop.initializer) &&
 				ts.isIdentifier(prop.name) && propNames.includes(prop.name.text) &&
 				// Whether it's a direct property of the Control
