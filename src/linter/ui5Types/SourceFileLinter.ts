@@ -846,12 +846,12 @@ export default class SourceFileLinter {
 			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
 				moduleName === "sap/ui/base/ManagedObject" &&
 				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
-				this.#analyzeControlBindings(node.arguments[1], ["type"]);
+				this.#analyzePropertyBindings(node.arguments[1], ["type"]);
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
 					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
-				this.#analyzeControlBindings(node.arguments[0], ["type"]);
+				this.#analyzePropertyBindings(node.arguments[0], ["type"]);
 			}
 		}
 
@@ -1175,15 +1175,15 @@ export default class SourceFileLinter {
 						this.#isPropertyBinding(node, getPropertyNameText(prop.name)))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
-						this.#analyzeControlBindings(prop.initializer, ["type"]);
+						this.#analyzePropertyBindings(prop.initializer, ["type"]);
 					} else {
-						this.#analyzeControlStringBindings(prop);
+						this.#analyzePropertyStringBindings(prop);
 					}
 				}
 			});
 	}
 
-	#analyzeControlBindings(node: ts.ObjectLiteralExpression, propNames: string[]) {
+	#analyzePropertyBindings(node: ts.ObjectLiteralExpression, propNames: string[]) {
 		node?.properties.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop)) {
 				return;
@@ -1205,12 +1205,12 @@ export default class SourceFileLinter {
 			}
 
 			if (propertyField) {
-				this.#analyzeBindingPropertyField(propertyField.initializer);
+				this.#analyzeBindingPropertyNode(propertyField.initializer);
 			}
 		});
 	}
 
-	#analyzeControlStringBindings(node: ts.PropertyAssignment) {
+	#analyzePropertyStringBindings(node: ts.PropertyAssignment) {
 		if (ts.isStringLiteralLike(node.initializer) &&
 			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
 			const imports = this.sourceFile.statements
@@ -1264,7 +1264,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	#analyzeBindingPropertyField(node: ts.Expression) {
+	#analyzeBindingPropertyNode(node: ts.Expression) {
 		if (!ts.isStringLiteralLike(node)) {
 			return;
 		}
