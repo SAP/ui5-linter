@@ -274,7 +274,7 @@ export default class SourceFileLinter {
 			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
 				let rendererName;
 				if (
-					ts.isStringLiteral(rendererMember.initializer) ||
+					ts.isStringLiteralLike(rendererMember.initializer) ||
 					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
 				) {
 					rendererName = rendererMember.initializer.text;
@@ -482,7 +482,7 @@ export default class SourceFileLinter {
 		const rendererSource = renderMethodNode.getSourceFile();
 		const hasIconPoolImport = rendererSource.statements.some((importNode: ts.Statement) => {
 			return ts.isImportDeclaration(importNode) &&
-				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				ts.isStringLiteralLike(importNode.moduleSpecifier) &&
 				importNode.moduleSpecifier.text === "sap/ui/core/IconPool";
 		});
 
@@ -1081,7 +1081,7 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeThemingSetTheme(node: ts.CallExpression) {
-		if (!node.arguments.length || !ts.isStringLiteral(node.arguments[0])) {
+		if (!node.arguments.length || !ts.isStringLiteralLike(node.arguments[0])) {
 			return;
 		}
 		const themeName = node.arguments[0].text;
@@ -1197,7 +1197,7 @@ export default class SourceFileLinter {
 						ts.isIdentifier(prop.name) &&
 						prop.name.text === "type";
 				});
-			} else if (ts.isStringLiteral(prop.initializer) &&
+			} else if (ts.isStringLiteralLike(prop.initializer) &&
 				ts.isIdentifier(prop.name) && prop.name.text === "type" &&
 				// Whether it's a direct property, named "type" of the Control
 				// or type in property binding
@@ -1212,7 +1212,7 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeModelDataTypesBinding(node: ts.PropertyAssignment) {
-		if (ts.isStringLiteral(node.initializer) &&
+		if (ts.isStringLiteralLike(node.initializer) &&
 			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
 			const imports = this.sourceFile.statements
 				.filter((stmnt): stmnt is ts.ImportDeclaration =>
@@ -1262,14 +1262,14 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeModelTypeField(node: ts.Expression) {
-		if (!ts.isStringLiteral(node)) {
+		if (!ts.isStringLiteralLike(node)) {
 			return;
 		}
 
 		const typeModule = node.text.replaceAll(".", "/");
 		const hasModuleImported = this.sourceFile.statements.filter(ts.isImportDeclaration)
 			.some((importNode) =>
-				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				ts.isStringLiteralLike(importNode.moduleSpecifier) &&
 				importNode.moduleSpecifier.text === typeModule);
 
 		if (!hasModuleImported) {
@@ -1480,7 +1480,7 @@ export default class SourceFileLinter {
 
 	analyzeImportDeclaration(importDeclarationNode: ts.ImportDeclaration) {
 		const moduleSpecifierNode = importDeclarationNode.moduleSpecifier;
-		if (!ts.isStringLiteral(moduleSpecifierNode)) {
+		if (!ts.isStringLiteralLike(moduleSpecifierNode)) {
 			// An ImportDeclaration moduleSpecifier is of type Expression, but the docs says:
 			// "If this is not a StringLiteral it will be a grammar error."
 			// So we ignore such cases here.
