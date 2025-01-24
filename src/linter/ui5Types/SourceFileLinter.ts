@@ -1193,7 +1193,8 @@ export default class SourceFileLinter {
 			let typeField;
 			if (ts.isObjectLiteralExpression(prop.initializer)) {
 				typeField = propNames
-					.map((name) => getPropertyAssignmentInObjectLiteralExpression(name, prop.initializer))
+					.map((name) => getPropertyAssignmentInObjectLiteralExpression(
+						name, prop.initializer as ts.ObjectLiteralExpression))
 					.find((typeProp) => !!typeProp);
 			} else if (ts.isStringLiteralLike(prop.initializer) &&
 				ts.isIdentifier(prop.name) && propNames.includes(prop.name.text) &&
@@ -1203,7 +1204,7 @@ export default class SourceFileLinter {
 				typeField = prop;
 			}
 
-			if (typeField && ts.isPropertyAssignment(typeField)) {
+			if (typeField) {
 				this.#analyzeModelTypeField(typeField.initializer);
 			}
 		});
