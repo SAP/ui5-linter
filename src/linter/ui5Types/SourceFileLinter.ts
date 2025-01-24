@@ -1269,16 +1269,16 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const typeModule = node.text.replaceAll(".", "/");
+		const moduleName = node.text.replaceAll(".", "/");
 		const hasModuleImported = this.sourceFile.statements.filter(ts.isImportDeclaration)
 			.some((importNode) =>
 				ts.isStringLiteralLike(importNode.moduleSpecifier) &&
-				importNode.moduleSpecifier.text === typeModule);
+				importNode.moduleSpecifier.text === moduleName);
 
 		if (!hasModuleImported) {
 			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 				variableName: node.text,
-				namespace: typeModule,
+				namespace: moduleName,
 			}, node);
 		}
 	}
