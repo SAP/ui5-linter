@@ -1172,7 +1172,7 @@ export default class SourceFileLinter {
 			.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isCallExpression(node) ||
-						this.#isPropertyBindingType(node, prop.name.getText()))
+						(ts.isIdentifier(prop.name) && this.#isPropertyBindingType(node, prop.name.text)))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
 						this.#analyzeModelDataTypes(prop.initializer);
