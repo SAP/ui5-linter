@@ -846,12 +846,12 @@ export default class SourceFileLinter {
 			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
 				moduleName === "sap/ui/base/ManagedObject" &&
 				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
-				this.#analyzeModelDataTypes(node.arguments[1], ["type"]);
+				this.#analyzeControlBindings(node.arguments[1], ["type"]);
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
 					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
-				this.#analyzeModelDataTypes(node.arguments[0], ["type"]);
+				this.#analyzeControlBindings(node.arguments[0], ["type"]);
 			}
 		}
 
@@ -1172,18 +1172,18 @@ export default class SourceFileLinter {
 			.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isCallExpression(node) ||
-						this.#isPropertyBindingType(node, getPropertyNameText(prop.name)))
+						this.#isPropertyBinding(node, getPropertyNameText(prop.name)))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
-						this.#analyzeModelDataTypes(prop.initializer, ["type"]);
+						this.#analyzeControlBindings(prop.initializer, ["type"]);
 					} else {
-						this.#analyzeModelDataTypesBinding(prop);
+						this.#analyzeControlStringBindings(prop);
 					}
 				}
 			});
 	}
 
-	#analyzeModelDataTypes(node: ts.ObjectLiteralExpression, propNames: string[]) {
+	#analyzeControlBindings(node: ts.ObjectLiteralExpression, propNames: string[]) {
 		node?.properties.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop)) {
 				return;
@@ -1209,7 +1209,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	#analyzeModelDataTypesBinding(node: ts.PropertyAssignment) {
+	#analyzeControlStringBindings(node: ts.PropertyAssignment) {
 		if (ts.isStringLiteralLike(node.initializer) &&
 			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
 			const imports = this.sourceFile.statements
@@ -1239,7 +1239,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBindingType(node: ts.NewExpression, propName: string | undefined) {
+	#isPropertyBinding(node: ts.NewExpression, propName: string | undefined) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
