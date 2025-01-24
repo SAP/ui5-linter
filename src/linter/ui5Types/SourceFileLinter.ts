@@ -1198,8 +1198,8 @@ export default class SourceFileLinter {
 					.find((typeProp) => !!typeProp);
 			} else if (ts.isStringLiteralLike(prop.initializer) &&
 				ts.isIdentifier(prop.name) && propNames.includes(prop.name.text) &&
-				// Whether it's a direct property, named "type" of the Control
-				// or type in property binding
+				// Whether it's a direct property of the Control
+				// or name collision in property binding
 				!ts.isNewExpression(prop.parent.parent)) {
 				typeField = prop;
 			}
