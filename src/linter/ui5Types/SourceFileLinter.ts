@@ -684,7 +684,7 @@ export default class SourceFileLinter {
 		} else if (nodeType.symbol.declarations?.some(
 			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
 			const originalFilename = this.#metadata?.xmlCompiledResource;
-			// Do not process xml-s. This case would be handled separately withing the BindingParser
+			// Do not process xml-s. This case would be handled separately within the BindingParser
 			if (!originalFilename ||
 				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
 				this.#analyzeNewAndApplySettings(node);
