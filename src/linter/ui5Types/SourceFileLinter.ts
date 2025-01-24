@@ -1221,10 +1221,12 @@ export default class SourceFileLinter {
 					} as RequireDeclaration;
 				});
 
+			const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
 			const {start: nodePos} = getPositionsForNode({
 				node: node,
 				sourceFile: this.sourceFile,
 				resourcePath: this.resourcePath,
+				traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
 			});
 			const bindingLinter = new BindingLinter(this.resourcePath, this.context);
 			bindingLinter.lintPropertyBinding(node.initializer.text, imports, nodePos);
