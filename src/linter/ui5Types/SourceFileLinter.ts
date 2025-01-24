@@ -273,10 +273,7 @@ export default class SourceFileLinter {
 
 			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
 				let rendererName;
-				if (
-					ts.isStringLiteralLike(rendererMember.initializer) ||
-					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
-				) {
+				if (ts.isStringLiteralLike(rendererMember.initializer)) {
 					rendererName = rendererMember.initializer.text;
 				}
 				// Declaration as string requires sync loading of renderer module
@@ -846,12 +843,15 @@ export default class SourceFileLinter {
 				nodeType.symbol.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
 				this.#analyzeNewAndApplySettings(node);
-			} else if (symbolName.startsWith("bindProperty") && moduleName === "sap/ui/base/ManagedObject") {
-				this.#analyzeModelDataTypes(node.arguments[1] as ts.ObjectLiteralExpression);
+			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
+				moduleName === "sap/ui/base/ManagedObject" &&
+				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
+				this.#analyzeModelDataTypes(node.arguments[1], ["type"]);
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol.declarations?.some((declaration) =>
-					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
-				this.#analyzeModelDataTypes(node.arguments[0] as ts.ObjectLiteralExpression);
+					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
+					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+				this.#analyzeModelDataTypes(node.arguments[0], ["type"]);
 			}
 		}
 
@@ -1175,7 +1175,7 @@ export default class SourceFileLinter {
 						this.#isPropertyBindingType(node, getPropertyNameText(prop.name)))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
-						this.#analyzeModelDataTypes(prop.initializer);
+						this.#analyzeModelDataTypes(prop.initializer, ["type"]);
 					} else {
 						this.#analyzeModelDataTypesBinding(prop);
 					}
@@ -1183,7 +1183,7 @@ export default class SourceFileLinter {
 			});
 	}
 
-	#analyzeModelDataTypes(node: ts.ObjectLiteralExpression) {
+	#analyzeModelDataTypes(node: ts.ObjectLiteralExpression, propNames: string[]) {
 		node?.properties.forEach((prop) => {
 			if (!ts.isPropertyAssignment(prop)) {
 				return;
@@ -1192,13 +1192,11 @@ export default class SourceFileLinter {
 			// Get the type property
 			let typeField;
 			if (ts.isObjectLiteralExpression(prop.initializer)) {
-				typeField = prop.initializer.properties.find((prop: ts.ObjectLiteralElementLike) => {
-					return ts.isPropertyAssignment(prop) &&
-						ts.isIdentifier(prop.name) &&
-						prop.name.text === "type";
-				});
+				typeField = propNames
+					.map((name) => getPropertyAssignmentInObjectLiteralExpression(name, prop.initializer))
+					.find((typeProp) => !!typeProp);
 			} else if (ts.isStringLiteralLike(prop.initializer) &&
-				ts.isIdentifier(prop.name) && prop.name.text === "type" &&
+				ts.isIdentifier(prop.name) && propNames.includes(prop.name.text) &&
 				// Whether it's a direct property, named "type" of the Control
 				// or type in property binding
 				!ts.isNewExpression(prop.parent.parent)) {
@@ -1244,16 +1242,20 @@ export default class SourceFileLinter {
 	#isPropertyBindingType(node: ts.NewExpression, propName: string | undefined) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
-		const classArg = (controlAmbientModule?.body as ts.ModuleBlock)?.statements
-			?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
-			?.members.find((m): m is ts.ConstructorDeclaration => ts.isConstructorDeclaration(m));
+
+		let classArg;
+		if (controlAmbientModule?.body && ts.isModuleBlock(controlAmbientModule.body)) {
+			classArg = controlAmbientModule.body.statements
+				?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
+				?.members.find((m): m is ts.ConstructorDeclaration => ts.isConstructorDeclaration(m));
+		}
 
 		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
 		const argProperty = constructorArgType?.getProperties()
 			.find((p: ts.Symbol) => p.name === propName);
 
-		const argPropType = argProperty?.declarations?.[0] &&
-			this.checker.getTypeAtLocation(argProperty.declarations[0]);
+		const argPropType = argProperty?.valueDeclaration &&
+			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
 
 		return argPropType?.isUnion() && argPropType.types.some((t) => {
 			return t?.getSymbol()?.getName() === "PropertyBindingInfo" ||
