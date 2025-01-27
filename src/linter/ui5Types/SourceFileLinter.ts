@@ -850,7 +850,8 @@ export default class SourceFileLinter {
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol?.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
-					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0]) &&
+					this.#isPropertyBinding(node, symbolName.replace("bind", "").toLocaleLowerCase())) {
 				this.#analyzePropertyBindings(node.arguments[0], ["type"]);
 			}
 		}
@@ -1172,7 +1173,7 @@ export default class SourceFileLinter {
 			.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isCallExpression(node) ||
-						this.#isPropertyBinding(node, getPropertyNameText(prop.name)))
+						this.#isPropertyBinding(node, getPropertyNameText(prop.name)?.toLocaleLowerCase()))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
 						this.#analyzePropertyBindings(prop.initializer, ["type"]);
@@ -1240,7 +1241,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBinding(node: ts.NewExpression, propName: string | undefined) {
+	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string | undefined) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
@@ -1248,13 +1249,12 @@ export default class SourceFileLinter {
 		if (controlAmbientModule?.body && ts.isModuleBlock(controlAmbientModule.body)) {
 			classArg = controlAmbientModule.body.statements
 				?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
-				?.members.find((m): m is ts.ConstructorDeclaration => ts.isConstructorDeclaration(m));
+				?.members.find((m): m is ts.ConstructorDeclaration => m.kind === ts.SyntaxKind.Constructor);
 		}
 
 		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
 		const argProperty = constructorArgType?.getProperties()
-			.find((p: ts.Symbol) => p.name === propName);
-		// this.checker.getTypeAtLocation(node.parent).members.get(propName).valueDeclaration.locals.get("oBindingInfo")
+			.find((p: ts.Symbol) => p.name.toLocaleLowerCase() === propName);
 		const argPropType = argProperty?.valueDeclaration &&
 			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
 
