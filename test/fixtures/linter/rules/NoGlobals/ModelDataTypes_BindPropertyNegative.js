@@ -1,6 +1,6 @@
 sap.ui.define(
-	["sap/m/Input", "sap/ui/model/type/Integer"],
-	(Input, Integer) => {
+	["sap/m/Input", "sap/ui/model/type/Integer", "sap/ui/events/ControlEvents"],
+	(Input, Integer, ControlEvents) => {
 		"use strict";
 
 		const input = new Input();
@@ -17,5 +17,9 @@ sap.ui.define(
 			formatOptions: { minIntegerDigits: 2 },
 			constraints: { maximum: 1000 },
 		});
+		
+		input._bindAnyEvent = ControlEvents.bindAnyEvent.bind(this);
+
+		ControlEvents.bindAnyEvent({}); // Should be skipped. Not a control bind* method
 	}
 );

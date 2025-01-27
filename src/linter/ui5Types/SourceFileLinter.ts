@@ -840,7 +840,7 @@ export default class SourceFileLinter {
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
 			} else if (symbolName === "applySettings" &&
-				nodeType.symbol.declarations?.some((declaration) =>
+				nodeType.symbol?.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
 				this.#analyzeNewAndApplySettings(node);
 			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
@@ -848,7 +848,7 @@ export default class SourceFileLinter {
 				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
 				this.#analyzePropertyBindings(node.arguments[1], ["type"]);
 			} else if (symbolName.startsWith("bind") &&
-				nodeType.symbol.declarations?.some((declaration) =>
+				nodeType.symbol?.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
 					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
 				this.#analyzePropertyBindings(node.arguments[0], ["type"]);
@@ -1254,7 +1254,7 @@ export default class SourceFileLinter {
 		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
 		const argProperty = constructorArgType?.getProperties()
 			.find((p: ts.Symbol) => p.name === propName);
-
+		// this.checker.getTypeAtLocation(node.parent).members.get(propName).valueDeclaration.locals.get("oBindingInfo")
 		const argPropType = argProperty?.valueDeclaration &&
 			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
 
