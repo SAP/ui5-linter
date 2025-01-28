@@ -232,6 +232,17 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
 
+test.serial("lint: All files of library with sap.ui.unified namespace", async (t) => {
+	const projectPath = path.join(fixturesProjectsPath, "sap.ui.unified");
+	const {lintProject} = t.context;
+
+	const res = await lintProject({
+		rootDir: projectPath,
+	}, t.context.sharedLanguageService);
+
+	t.snapshot(preprocessLintResultsForSnapshot(res));
+});
+
 test.serial("lint: All files of com.ui5.troublesome.app with custom config", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
 	const {lintProject} = t.context;
