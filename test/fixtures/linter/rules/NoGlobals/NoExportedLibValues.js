@@ -5,10 +5,11 @@ sap.ui.define(
 
 		var CalendarDayType = unifiedLibrary.CalendarDayType,
 			DateRange = unifiedLibrary["DateRange"],
+			DateRange2 = unifiedLibrary['DateRange'],
 			DateTypeRange = unifiedLibrary.DateTypeRange,
 			DOMAttribute = coreLibrary.tmpl.DOMAttribute,
 			DOMAttribute2 = coreLibrary["tmpl"].DOMAttribute,
-			DOMAttribute3 = coreLibrary["tmpl"]["DOMAttribute"],
-			DOMAttribute4 = coreLibrary.tmpl["DOMAttribute"];
+			DOMAttribute3 = coreLibrary['tmpl']["DOMAttribute"],
+			DOMAttribute4 = coreLibrary.tmpl['DOMAttribute'];
 	}
 );

@@ -13,6 +13,7 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
+	findAmbientModuleByDeclarationName,
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -1439,11 +1440,13 @@ export default class SourceFileLinter {
 		}
 
 		const extractVarName = (node: ts.PropertyAccessExpression | ts.ElementAccessExpression) => {
-			const nodeName = ts.isPropertyAccessExpression(node) ?
-				node.name.text :
-					node.argumentExpression.getText();
-
-			return nodeName.replaceAll("\"", "");
+			if (ts.isPropertyAccessExpression(node)) {
+				return node.name.text;
+			} else if (ts.isStringLiteralLike(node.argumentExpression)) {
+				return node.argumentExpression.text;
+			} else {
+				return node.argumentExpression.getText();
+			}
 		};
 
 		let exprNode = node.expression;
@@ -1453,13 +1456,35 @@ export default class SourceFileLinter {
 			namespace.unshift(extractVarName(exprNode));
 			exprNode = exprNode.expression;
 		}
-		const exprType = this.checker.getTypeAtLocation(exprNode);
-		const potentialLibImport = exprType.symbol?.getName().replaceAll("\"", "") ?? "";
+		const exprTypeSymbol = this.checker.getTypeAtLocation(exprNode)?.symbol;
+		let potentialLibImport = "";
+		if (exprTypeSymbol?.valueDeclaration && ts.isModuleDeclaration(exprTypeSymbol.valueDeclaration)) {
+			potentialLibImport = exprTypeSymbol.valueDeclaration.name.text;
+		}
 
 		// Checks if the left hand side is a library import.
 		// It's sufficient just to check for "/library" at the end of the string by convention
 		if (!potentialLibImport.endsWith("/library")) {
-			return;
+			// Fallback in case of relative imports within framework libraries, where the type does not have a symbol
+			const exprSymbol = this.checker.getSymbolAtLocation(exprNode);
+			const exprDeclaration = exprSymbol?.declarations?.[0];
+			if (!exprDeclaration) {
+				return;
+			}
+			if (!ts.isImportDeclaration(exprDeclaration.parent)) {
+				return;
+			}
+			const moduleSpecifier = exprDeclaration.parent.moduleSpecifier;
+			const moduleSpecifierSymbol = this.checker.getSymbolAtLocation(moduleSpecifier);
+			const moduleName = moduleSpecifierSymbol?.valueDeclaration?.getSourceFile().fileName;
+			if (
+				!moduleName?.startsWith("/resources/") ||
+				!(moduleName?.endsWith("/library.js") || moduleName?.endsWith("/library.ts"))
+			) {
+				return;
+			}
+			// Cut off "/resources/" (11 chars) and the ".(js|ts)" extension (3 chars)
+			potentialLibImport = moduleName.slice(11, -3);
 		}
 
 		const varName = extractVarName(node);
@@ -1471,10 +1496,8 @@ export default class SourceFileLinter {
 
 		// Check if the module is registered within ambient modules
 		const ambientModules = this.checker.getAmbientModules();
-		const libAmbientModule = ambientModules.find((module) =>
-			module.name === `"${potentialLibImport}"`);
-		const isRegisteredAsUi5Module = ambientModules.some((module) =>
-			module.name === `"${moduleName}"`);
+		const libAmbientModule = findAmbientModuleByDeclarationName(ambientModules, potentialLibImport);
+		const isRegisteredAsUi5Module = !!findAmbientModuleByDeclarationName(ambientModules, moduleName);
 
 		let isModuleExported = true;
 		let libExports = libAmbientModule?.exports ?? new Map();
