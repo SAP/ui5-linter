@@ -1247,7 +1247,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string[] | undefined) {
+	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string[]) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
