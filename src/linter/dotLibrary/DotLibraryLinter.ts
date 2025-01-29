@@ -35,19 +35,20 @@ export default class DotLibraryLinter {
 				return;
 			}
 
-			if (event === SaxEventType.OpenTag && !tag.selfClosing) {
-				tagsStack.push(tag.value);
-			} else if (event === SaxEventType.CloseTag && !tag.selfClosing) {
+			const serializedTag = tag.toJSON() as SaxTag;
+			if (event === SaxEventType.OpenTag && !serializedTag.selfClosing) {
+				tagsStack.push(serializedTag.name);
+			} else if (event === SaxEventType.CloseTag && !serializedTag.selfClosing) {
 				tagsStack.pop();
 			}
 
 			if (event === SaxEventType.CloseTag &&
-				tag.value === "libraryName") {
+				serializedTag.name === "libraryName") {
 				const isMatchingPath = libNamePath.length === tagsStack.length &&
 					libNamePath.every((lib, index) => lib === tagsStack[index]);
 
 				if (isMatchingPath) {
-					libs.add(tag);
+					libs.add(serializedTag);
 				}
 			}
 		});

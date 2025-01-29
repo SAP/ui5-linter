@@ -16,17 +16,18 @@ export async function extractHTMLTags(contentStream: ReadStream) {
 		if (!(tag instanceof SaxTag)) {
 			return;
 		}
+		const serializedTag = tag.toJSON() as SaxTag;
 		if (event === SaxEventType.OpenTag &&
-			tag.value === "link") {
-			if (tag.attributes.some((attr) => {
+			serializedTag.name === "link") {
+			if (serializedTag.attributes.some((attr) => {
 				return (attr.name.value === "rel" &&
 					attr.value.value === "stylesheet");
 			})) {
-				extractedTags.stylesheetLinkTags.push(tag);
+				extractedTags.stylesheetLinkTags.push(serializedTag);
 			};
 		} else if (event === SaxEventType.CloseTag &&
-			tag.value === "script") {
-			const isJSScriptTag = tag.attributes.every((attr) => {
+			serializedTag.name === "script") {
+			const isJSScriptTag = serializedTag.attributes.every((attr) => {
 				// The "type" attribute of the script tag should be
 				// 1. not set (default),
 				// 2. an empty string,
@@ -41,7 +42,7 @@ export async function extractHTMLTags(contentStream: ReadStream) {
 						].includes(attr.value.value.toLowerCase()));
 			});
 			if (isJSScriptTag) {
-				extractedTags.scriptTags.push(tag);
+				extractedTags.scriptTags.push(serializedTag);
 			}
 		}
 	});

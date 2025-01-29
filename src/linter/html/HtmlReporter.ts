@@ -1,7 +1,8 @@
-import {Tag as SaxTag, Text as SaxText, Position as SaxPosition} from "sax-wasm";
+import {Position as SaxPosition, Tag as SaxTag, Text as SaxText} from "sax-wasm";
 import LinterContext, {CoverageInfo, ResourcePath} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
+import {isSaxParserToJSON, isSaxText} from "../../utils/xmlParser.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: SaxTag;
@@ -25,10 +26,10 @@ export default class HtmlReporter {
 			throw new Error("Invalid arguments: Missing second argument");
 		}
 		let args: MessageArgs[M];
-		if (argsOrNode instanceof SaxTag) {
+		if (isSaxParserToJSON(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
-		} else if (argsOrNode instanceof SaxText) {
+		} else if (isSaxText(argsOrNode)) {
 			node = argsOrNode;
 			args = null as unknown as MessageArgs[M];
 		} else if (!node) {
@@ -38,7 +39,7 @@ export default class HtmlReporter {
 		}
 
 		let startPos: SaxPosition;
-		if (node instanceof SaxTag) {
+		if (isSaxParserToJSON(node)) {
 			startPos = node.openStart;
 		} else {
 			startPos = node.start;
@@ -51,7 +52,7 @@ export default class HtmlReporter {
 
 	addCoverageInfo({node, message, category}: ReporterCoverageInfo) {
 		let line = 0, column = 0, endLine = 0, endColumn = 0;
-		if (node instanceof SaxTag) {
+		if (isSaxParserToJSON(node)) {
 			({line, character: column} = node.openStart);
 			({line: endLine, character: endColumn} = node.closeEnd);
 		}

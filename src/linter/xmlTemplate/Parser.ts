@@ -1,4 +1,4 @@
-import {Attribute as SaxAttribute, Tag as SaxTag, Position as SaxPosition} from "sax-wasm";
+import {PositionDetail as SaxPosition} from "sax-wasm";
 import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
@@ -11,6 +11,7 @@ import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
+import {Tag as SaxTag} from "sax-wasm";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -285,7 +286,7 @@ export default class Parser {
 		}
 
 		const attributes = new Set<AttributeDeclaration>();
-		tag.attributes.forEach((attr: SaxAttribute) => {
+		tag.attributes.forEach((attr) => {
 			const attrName = attr.name.value;
 			const attrValue = he.decode(attr.value.value);
 			// Extract namespaces immediately so we can resolve namespaced attributes in the next go

@@ -1,9 +1,27 @@
 import type {ReadStream} from "node:fs";
-import {Detail, SaxEventType, SAXParser} from "sax-wasm";
+import {Detail, Reader, SaxEventType, SAXParser, Tag, Text} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
+
+export function isSaxParserToJSON(tag: unknown): tag is Tag {
+	const tagAsSaxParserToJSON = tag as Tag;
+	return !!tag &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "openStart") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "openEnd") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "closeStart") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "closeEnd") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "attributes") &&
+		Object.prototype.hasOwnProperty.call(tagAsSaxParserToJSON, "textNodes");
+}
+
+export function isSaxText(tag: unknown): tag is Text {
+	return !!tag &&
+		Object.prototype.hasOwnProperty.call(tag, "start") &&
+		Object.prototype.hasOwnProperty.call(tag, "end") &&
+		Object.prototype.hasOwnProperty.call(tag, "value");
+}
 
 let saxWasmBuffer: Buffer;
 async function initSaxWasm() {
@@ -15,10 +33,10 @@ async function initSaxWasm() {
 	return saxWasmBuffer;
 }
 
-export async function parseXML(contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Detail) => void) {
-	const options = {highWaterMark: 32 * 1024}; // 32k chunks
+export async function parseXML(
+	contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Reader<Detail>) => void) {
 	const saxWasmBuffer = await initSaxWasm();
-	const saxParser = new SAXParser(SaxEventType.CloseTag + SaxEventType.OpenTag, options);
+	const saxParser = new SAXParser(SaxEventType.CloseTag + SaxEventType.OpenTag);
 
 	saxParser.eventHandler = parseHandler;
 

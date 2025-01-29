@@ -62,17 +62,14 @@ async function transpileXmlToJs(
 	const parser = new Parser(resourcePath, apiExtract, context, controllerByIdInfo);
 
 	// Initialize parser
-	const options = {highWaterMark: 32 * 1024}; // 32k chunks
-	const saxParser = new SAXParser(
-		SaxEventType.OpenTag | SaxEventType.CloseTag,
-		options);
+	const saxParser = new SAXParser(SaxEventType.OpenTag | SaxEventType.CloseTag);
 
 	saxParser.eventHandler = (event, tag) => {
 		if (tag instanceof SaxTag) {
 			if (event === SaxEventType.OpenTag) {
-				parser.pushTag(tag);
+				parser.pushTag(tag.toJSON() as SaxTag);
 			} else if (event === SaxEventType.CloseTag) {
-				parser.popTag(tag);
+				parser.popTag(tag.toJSON() as SaxTag);
 			}
 		}
 	};

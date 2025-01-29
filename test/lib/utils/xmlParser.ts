@@ -40,7 +40,7 @@ test("Test xmlParser with .library", async (t) => {
 		if (tag instanceof SaxTag &&
 			event === SaxEventType.CloseTag &&
 			tag.value === "libraryName") {
-			libs.push(tag);
+			libs.push(tag.toJSON() as SaxTag);
 		}
 	});
 
