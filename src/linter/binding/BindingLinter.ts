@@ -114,7 +114,9 @@ export default class BindingLinter {
 		} else {
 			variableName = ref;
 		}
-		const requireDeclaration = requireDeclarations.find((decl) => decl.variableName === variableName);
+		const requireDeclaration = requireDeclarations.find((decl) =>
+			decl.variableName === variableName ||
+			decl.moduleName === parts.join("/"));
 		if (requireDeclaration) {
 			return false;
 		}

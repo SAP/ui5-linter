@@ -96,6 +96,7 @@ export interface LintMetadata {
 	// The metadata holds information to be shared across linters
 	directives: Set<Directive>;
 	transformedImports: Map<string, Set<string>>;
+	xmlCompiledResource: string;
 }
 
 export default class LinterContext {

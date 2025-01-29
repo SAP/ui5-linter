@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {ResourcePath, CoverageCategory} from "../LinterContext.js";
+import LinterContext, {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -19,6 +19,8 @@ import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {TraceMap} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
+import BindingLinter from "../binding/BindingLinter.js";
+import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -63,6 +65,7 @@ export default class SourceFileLinter {
 	#fileName: string;
 	#isComponent: boolean;
 	#hasTestStarterFindings: boolean;
+	#metadata: LintMetadata;
 
 	constructor(
 		private context: LinterContext,
@@ -81,21 +84,21 @@ export default class SourceFileLinter {
 		this.#fileName = path.basename(resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#hasTestStarterFindings = false;
+		this.#metadata = this.context.getMetadata(this.resourcePath);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
-			const metadata = this.context.getMetadata(this.resourcePath);
-			if (!metadata.directives) {
+			if (!this.#metadata.directives) {
 				// Directives might have already been extracted by the amd transpiler
 				// This is done since the transpile process might loose comments
-				findDirectives(this.sourceFile, metadata);
+				findDirectives(this.sourceFile, this.#metadata);
 			}
 			this.visitNode(this.sourceFile);
 
 			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
-				!metadata?.transformedImports?.get("sap.ui.define")) {
+				!this.#metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reportTestStarter(this.sourceFile);
 			}
 
@@ -270,10 +273,7 @@ export default class SourceFileLinter {
 
 			if (initializerType.flags & ts.TypeFlags.StringLiteral) {
 				let rendererName;
-				if (
-					ts.isStringLiteral(rendererMember.initializer) ||
-					ts.isNoSubstitutionTemplateLiteral(rendererMember.initializer)
-				) {
+				if (ts.isStringLiteralLike(rendererMember.initializer)) {
 					rendererName = rendererMember.initializer.text;
 				}
 				// Declaration as string requires sync loading of renderer module
@@ -479,7 +479,7 @@ export default class SourceFileLinter {
 		const rendererSource = renderMethodNode.getSourceFile();
 		const hasIconPoolImport = rendererSource.statements.some((importNode: ts.Statement) => {
 			return ts.isImportDeclaration(importNode) &&
-				ts.isStringLiteral(importNode.moduleSpecifier) &&
+				ts.isStringLiteralLike(importNode.moduleSpecifier) &&
 				importNode.moduleSpecifier.text === "sap/ui/core/IconPool";
 		});
 
@@ -678,6 +678,14 @@ export default class SourceFileLinter {
 			this.#analyzeNewCoreRouter(node);
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
+		} else if (nodeType.symbol.declarations?.some(
+			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+			const originalFilename = this.#metadata?.xmlCompiledResource;
+			// Do not process xml-s. This case would be handled separately within the BindingParser
+			if (!originalFilename ||
+				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
+				this.#analyzeNewAndApplySettings(node);
+			}
 		}
 
 		if (!node.arguments?.length) {
@@ -802,6 +810,7 @@ export default class SourceFileLinter {
 		if (exprType.symbol && moduleDeclaration) {
 			const symbolName = exprType.symbol.getName();
 			const moduleName = moduleDeclaration.name.text;
+			const nodeType = this.checker.getTypeAtLocation(node);
 
 			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 				// Check for sap/ui/core/Lib.init usages
@@ -830,6 +839,20 @@ export default class SourceFileLinter {
 				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
 				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 				this.#reportTestStarter(node);
+			} else if (symbolName === "applySettings" &&
+				nodeType.symbol?.declarations?.some((declaration) =>
+					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+				this.#analyzeNewAndApplySettings(node);
+			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
+				moduleName === "sap/ui/base/ManagedObject" &&
+				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
+				this.#analyzePropertyBindings(node.arguments[1], ["type"]);
+			} else if (symbolName.startsWith("bind") &&
+				nodeType.symbol?.declarations?.some((declaration) =>
+					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
+					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0]) &&
+					this.#isPropertyBinding(node, symbolName.replace("bind", "").toLocaleLowerCase())) {
+				this.#analyzePropertyBindings(node.arguments[0], ["type"]);
 			}
 		}
 
@@ -1059,7 +1082,7 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeThemingSetTheme(node: ts.CallExpression) {
-		if (!node.arguments.length || !ts.isStringLiteral(node.arguments[0])) {
+		if (!node.arguments.length || !ts.isStringLiteralLike(node.arguments[0])) {
 			return;
 		}
 		const themeName = node.arguments[0].text;
@@ -1141,6 +1164,122 @@ export default class SourceFileLinter {
 					}, node);
 				}
 			}
+		}
+	}
+
+	#analyzeNewAndApplySettings(node: ts.NewExpression | ts.CallExpression) {
+		node?.arguments?.filter((arg) => ts.isObjectLiteralExpression(arg))
+			.flatMap((arg) => arg.properties)
+			.forEach((prop) => {
+				if (ts.isPropertyAssignment(prop) &&
+					(ts.isCallExpression(node) ||
+						this.#isPropertyBinding(node, getPropertyNameText(prop.name)?.toLocaleLowerCase()))
+				) {
+					if (ts.isObjectLiteralExpression(prop.initializer)) {
+						this.#analyzePropertyBindings(prop.initializer, ["type"]);
+					} else {
+						this.#analyzePropertyStringBindings(prop);
+					}
+				}
+			});
+	}
+
+	#analyzePropertyBindings(node: ts.ObjectLiteralExpression, propNames: string[]) {
+		node?.properties.forEach((prop) => {
+			if (!ts.isPropertyAssignment(prop)) {
+				return;
+			}
+
+			// Get the type property
+			let propertyField;
+			if (ts.isObjectLiteralExpression(prop.initializer)) {
+				propertyField = getPropertyAssignmentsInObjectLiteralExpression(
+					propNames, prop.initializer)[0];
+			} else if (ts.isStringLiteralLike(prop.initializer) &&
+				ts.isIdentifier(prop.name) && propNames.includes(prop.name.text) &&
+				// Whether it's a direct property of the Control
+				// or name collision in property binding
+				!ts.isNewExpression(prop.parent.parent)) {
+				propertyField = prop;
+			}
+
+			if (propertyField) {
+				this.#analyzeBindingPropertyNode(propertyField.initializer);
+			}
+		});
+	}
+
+	#analyzePropertyStringBindings(node: ts.PropertyAssignment) {
+		if (ts.isStringLiteralLike(node.initializer) &&
+			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
+			const imports = this.sourceFile.statements
+				.filter((stmnt): stmnt is ts.ImportDeclaration =>
+					stmnt.kind === ts.SyntaxKind.ImportDeclaration)
+				.map((importNode) => {
+					return {
+						moduleName: (importNode.moduleSpecifier as ts.StringLiteral).text,
+						variableName: importNode.importClause?.name?.text,
+					} as RequireDeclaration;
+				});
+
+			const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+			const {start: nodePos} = getPositionsForNode({
+				node: node,
+				sourceFile: this.sourceFile,
+				resourcePath: this.resourcePath,
+				traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
+			});
+			const bindingLinter = new BindingLinter(this.resourcePath, this.context);
+			bindingLinter.lintPropertyBinding(node.initializer.text, imports, nodePos);
+		}
+	}
+
+	/**
+	 * Identify if a constructor argument property is bindable
+	 *
+	 * Get the class declaration by going up the chain and then find the argument property
+	 * from there. Directly finding the type of the property is not possible from here as it's
+	 * missing some context.
+	*/
+	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string | undefined) {
+		const controlAmbientModule =
+			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
+
+		let classArg;
+		if (controlAmbientModule?.body && ts.isModuleBlock(controlAmbientModule.body)) {
+			classArg = controlAmbientModule.body.statements
+				?.find((stmnt): stmnt is ts.ClassDeclaration => stmnt.kind === ts.SyntaxKind.ClassDeclaration)
+				?.members.find((m): m is ts.ConstructorDeclaration => m.kind === ts.SyntaxKind.Constructor);
+		}
+
+		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
+		const argProperty = constructorArgType?.getProperties()
+			.find((p: ts.Symbol) => p.name.toLocaleLowerCase() === propName);
+		const argPropType = argProperty?.valueDeclaration &&
+			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
+
+		return argPropType?.isUnion() && argPropType.types.some((t) => {
+			return t?.getSymbol()?.getName() === "PropertyBindingInfo" ||
+				t.aliasSymbol?.getName() === "PropertyBindingInfo";
+		});
+	}
+
+	#analyzeBindingPropertyNode(node: ts.Expression) {
+		if (!ts.isStringLiteralLike(node)) {
+			return;
+		}
+
+		const moduleName = node.text.replaceAll(".", "/");
+		const hasModuleImported = this.sourceFile.statements.filter(ts.isImportDeclaration)
+			.some((importNode) =>
+				ts.isStringLiteralLike(importNode.moduleSpecifier) &&
+				importNode.moduleSpecifier.text === moduleName);
+
+		if (!hasModuleImported) {
+			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
+				variableName: node.text,
+				namespace: moduleName,
+			}, node);
 		}
 	}
 
@@ -1344,7 +1483,7 @@ export default class SourceFileLinter {
 
 	analyzeImportDeclaration(importDeclarationNode: ts.ImportDeclaration) {
 		const moduleSpecifierNode = importDeclarationNode.moduleSpecifier;
-		if (!ts.isStringLiteral(moduleSpecifierNode)) {
+		if (!ts.isStringLiteralLike(moduleSpecifierNode)) {
 			// An ImportDeclaration moduleSpecifier is of type Expression, but the docs says:
 			// "If this is not a StringLiteral it will be a grammar error."
 			// So we ignore such cases here.
