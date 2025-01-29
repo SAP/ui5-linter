@@ -852,7 +852,7 @@ export default class SourceFileLinter {
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
 					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
 				// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
-				// Check lowercase version of the property name as well.
+				// Check decapitalized version of the property name as well.
 				const propName = symbolName.replace("bind", "");
 				const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
 
