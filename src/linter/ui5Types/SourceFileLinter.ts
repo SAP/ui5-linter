@@ -850,9 +850,15 @@ export default class SourceFileLinter {
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol?.declarations?.some((declaration) =>
 					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
-					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0]) &&
-					this.#isPropertyBinding(node, symbolName.replace("bind", "").toLocaleLowerCase())) {
-				this.#analyzePropertyBindings(node.arguments[0], ["type"]);
+					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+				// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
+				// Check lowercase version of the property name as well.
+				const propName = symbolName.replace("bind", "");
+				const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
+
+				if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
+					this.#analyzePropertyBindings(node.arguments[0], ["type"]);
+				}
 			}
 		}
 
@@ -1173,7 +1179,7 @@ export default class SourceFileLinter {
 			.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isCallExpression(node) ||
-						this.#isPropertyBinding(node, getPropertyNameText(prop.name)?.toLocaleLowerCase()))
+						this.#isPropertyBinding(node, [getPropertyNameText(prop.name) ?? ""]))
 				) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
 						this.#analyzePropertyBindings(prop.initializer, ["type"]);
@@ -1241,7 +1247,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string | undefined) {
+	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string[] | undefined) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
@@ -1254,7 +1260,7 @@ export default class SourceFileLinter {
 
 		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
 		const argProperty = constructorArgType?.getProperties()
-			.find((p: ts.Symbol) => p.name.toLocaleLowerCase() === propName);
+			.find((p: ts.Symbol) => propName?.includes(p.name));
 		const argPropType = argProperty?.valueDeclaration &&
 			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
 
