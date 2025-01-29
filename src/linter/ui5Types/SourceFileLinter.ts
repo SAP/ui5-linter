@@ -1247,7 +1247,7 @@ export default class SourceFileLinter {
 	 * from there. Directly finding the type of the property is not possible from here as it's
 	 * missing some context.
 	*/
-	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propName: string[]) {
+	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propNames: string[]) {
 		const controlAmbientModule =
 			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
@@ -1260,7 +1260,7 @@ export default class SourceFileLinter {
 
 		const constructorArgType = classArg && this.checker.getTypeAtLocation(classArg.parameters[0]);
 		const argProperty = constructorArgType?.getProperties()
-			.find((p: ts.Symbol) => propName?.includes(p.name));
+			.find((p: ts.Symbol) => propNames.includes(p.name));
 		const argPropType = argProperty?.valueDeclaration &&
 			this.checker.getTypeAtLocation(argProperty.valueDeclaration);
 
