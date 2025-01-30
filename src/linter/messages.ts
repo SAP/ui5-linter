@@ -57,6 +57,7 @@ export enum MESSAGE {
 	NO_EXPORTED_VALUES_BY_LIB,
 	NO_GLOBALS,
 	NO_ICON_POOL_RENDERER,
+	NO_ODATA_GLOBALS,
 	NOT_STATIC_CONTROL_RENDERER,
 	PARSING_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
@@ -612,6 +613,16 @@ export const MESSAGE_INFO = {
 			`Access of module '${module}' (${namespace}) not exported by library '${libraryName}'`,
 		details: () =>
 			`Please import the module itself directly instead of accessing it via the library module.`,
+	},
+
+	[MESSAGE.NO_ODATA_GLOBALS]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-implicit-globals"],
+
+		message: () => "OData built-in global symbols must not be used implicitly",
+		details: ({module}: {module: string}) =>
+			`Import the '${module}' module instead. ` +
+			"See {@link topic:28fcd55b04654977b63dacbee0552712 Best Practices for Developers}",
 	},
 
 } as const;
