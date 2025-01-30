@@ -152,4 +152,22 @@ export default class BindingLinter {
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
 		}
 	}
+
+	lintPropertyExpression(
+		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		const varModuleMap = {
+			"odata.compare": "sap/ui/model/odata/v4/ODataUtils",
+			"odata.fillUriTemplate": "sap/ui/thirdparty/URITemplate",
+			"odata.uriEncode": "sap/ui/model/odata/ODataUtils",
+		};
+
+		for (const [key, value] of Object.entries(varModuleMap)) {
+			if (bindingDefinition.includes(`${key}(`) &&
+				!requireDeclarations.some((decl) => decl.moduleName === value)) {
+				this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {
+					module: value,
+				}, position);
+			}
+		}
+	}
 }

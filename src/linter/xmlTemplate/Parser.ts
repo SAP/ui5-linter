@@ -561,6 +561,10 @@ export default class Parser {
 						line: prop.start.line + 1, // Add one to align with IDEs
 						column: prop.start.column + 1,
 					});
+					this.#bindingLinter.lintPropertyExpression(prop.value, this.#requireDeclarations, {
+						line: prop.start.line + 1, // Add one to align with IDEs
+						column: prop.start.column + 1,
+					});
 				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, {
 						line: prop.start.line + 1, // Add one to align with IDEs
