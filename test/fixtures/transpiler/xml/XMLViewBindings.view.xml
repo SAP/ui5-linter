@@ -3,6 +3,9 @@
 	xmlns:core="sap.ui.core"
 	controllerName="com.myapp.controller.Main"
 >
+
+	<Text text="{= odata.compare(%{myvalue1},%{myvalue2})}" />
+
 	<!-- text: Deprecated reference of global formatter and binding event handler function -->
 	<!-- tooltip: Aggregation with a 0..1 aggregation and "string" alt type can be used like a property -->
 	<!-- customData: Aggregation with factory and nested filter -->
