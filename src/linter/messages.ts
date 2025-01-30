@@ -411,7 +411,7 @@ export const MESSAGE_INFO = {
 		fatal: true,
 
 		message: ({message}: {message: string}) => message,
-		details: () => `Check the source file for syntax errors`,
+		details: ({details}: {details?: string}) => details ?? `Check the source file for syntax errors`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {
