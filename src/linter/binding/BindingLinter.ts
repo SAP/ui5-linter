@@ -153,8 +153,15 @@ export default class BindingLinter {
 		}
 	}
 
+	#isExpressionBinding(bindingDefinition: string): boolean {
+		return /^\{:?=/.test(bindingDefinition) && bindingDefinition.endsWith("}");
+	}
+
 	lintPropertyExpression(
 		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		if (!this.#isExpressionBinding(bindingDefinition)) {
+			return;
+		}
 		const varModuleMap = {
 			"odata.compare": "sap/ui/model/odata/v4/ODataUtils",
 			"odata.fillUriTemplate": "sap/ui/thirdparty/URITemplate",
