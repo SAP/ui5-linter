@@ -1,4 +1,7 @@
-<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core">
+<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" core:require="{
+    bar: 'sap/ui/model/odata/ODataUtils'
+  }">
+
   <Input
       value="{
       path: 'amount',
@@ -12,4 +15,19 @@
     core:require="{
       Integer: 'sap/ui/model/type/Integer'
   }"/>
+
+  <Text text="{= odata.compare(%{myvalue1},%{myvalue2})}" core:require="{
+    foo: 'sap/ui/model/odata/v4/ODataUtils'
+  }" />
+
+  <!-- "sap/ui/model/odata/ODataExpressionAddons" contains all of the odata globals -->
+  <Text text="{= odata.compare(${myvalue1},${path: 'myvalue1', model: 'myModel'})}" core:require="{
+    foo: 'sap/ui/model/odata/ODataExpressionAddons'
+  }" />
+
+  <!-- Should not be reported. Module already required with the previous binding -->
+  <Text text="{= odata.compare(%{myvalue1},%{myvalue2})}" />
+
+  <!-- Should not be reported. Module already required in the root -->
+  <Text text="{= odata.uriEncode(%{myvalue1})}" />
 </mvc:View>

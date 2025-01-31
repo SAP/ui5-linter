@@ -152,4 +152,28 @@ export default class BindingLinter {
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
 		}
 	}
+
+	#isExpressionBinding(bindingDefinition: string): boolean {
+		return /^\{:?=/.test(bindingDefinition) && bindingDefinition.endsWith("}");
+	}
+
+	lintPropertyExpression(
+		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		if (!this.#isExpressionBinding(bindingDefinition)) {
+			return;
+		}
+		const allFunctionsModule = "sap/ui/model/odata/ODataExpressionAddons";
+		const varModuleMap = {
+			"odata.compare": "sap/ui/model/odata/v4/ODataUtils",
+			"odata.fillUriTemplate": "sap/ui/thirdparty/URITemplate",
+			"odata.uriEncode": "sap/ui/model/odata/ODataUtils",
+		};
+
+		for (const [key, value] of Object.entries(varModuleMap)) {
+			if (bindingDefinition.includes(`${key}(`) &&
+				!requireDeclarations.some((decl) => decl.moduleName === value || value === allFunctionsModule)) {
+				this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {} as never, position);
+			}
+		}
+	}
 }
