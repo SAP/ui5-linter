@@ -13,6 +13,7 @@ const RULES = {
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
 	"ui5-class-declaration": "ui5-class-declaration",
+	"unsupported-api-usage": "unsupported-api-usage",
 	"prefer-test-starter": "prefer-test-starter",
 } as const;
 
@@ -76,6 +77,7 @@ export enum MESSAGE {
 	REDUNDANT_VIEW_CONFIG_PROPERTY,
 	REPLACED_BOOTSTRAP_PARAM,
 	SPELLING_BOOTSTRAP_PARAM,
+	STRING_FOR_FORMATTER_VALUE_IN_JS,
 	SVG_IN_XML,
 	MISSING_CONTROL_RENDERER_DECLARATION,
 	CONTROL_RENDERER_DECLARATION_STRING,
@@ -551,6 +553,14 @@ export const MESSAGE_INFO = {
 		message: ({oldName, newName}: {oldName: string; newName: string}) =>
 			`Outdated spelling of bootstrap parameter: '${oldName}'; should be written as '${newName}'`,
 		details: () => undefined,
+	},
+
+	[MESSAGE.STRING_FOR_FORMATTER_VALUE_IN_JS]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["unsupported-api-usage"],
+
+		message: () => `Do not use strings for 'formatter' values in JavaScript and TypeScript.`,
+		details: () => `{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},
 
 	[MESSAGE.SVG_IN_XML]: {
