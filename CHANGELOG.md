@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.8.0](https://github.com/SAP/ui5-linter/compare/v1.7.0...v1.8.0) (2025-01-31)
+
+
+### Features
+
+* **binding:** Detect global formatter notation in bindings ([0845caf](https://github.com/SAP/ui5-linter/commit/0845cafbbfc2daebfdf6d821cb0703c34e9c01c3))
+* **binding:** Detect more globals in property- and aggregation bindings ([406f6f5](https://github.com/SAP/ui5-linter/commit/406f6f5872c279257a4584d04e68d22385f052fb))
+* Detection for UI5 Model Data Types ([#480](https://github.com/SAP/ui5-linter/issues/480)) ([572db29](https://github.com/SAP/ui5-linter/commit/572db294f149c304d2cf2df7c09501f491709c58))
+* **Formatter:** Detect globals and strings of formatters in bindings (JS/TS) ([#499](https://github.com/SAP/ui5-linter/issues/499)) ([291ffed](https://github.com/SAP/ui5-linter/commit/291ffed5f1e3a0d26ae808aea883eaa1f44d8f16))
+* OData implicit globals detection ([#510](https://github.com/SAP/ui5-linter/issues/510)) ([daff87b](https://github.com/SAP/ui5-linter/commit/daff87bc7074d242b3c4c7cdf13720a533fc93cc))
+
+
+### Bug Fixes
+
+* **binding:** Resolve 'Bad name' error on tab ([1466abb](https://github.com/SAP/ui5-linter/commit/1466abbbf36b555f75cea3ef77ee38207a72fee0))
+* CodeQL scan ([#509](https://github.com/SAP/ui5-linter/issues/509)) ([67e86d8](https://github.com/SAP/ui5-linter/commit/67e86d8166fa9801086f5dbeb16dbf1edc8edff5))
+* Improve overall code detection ([#489](https://github.com/SAP/ui5-linter/issues/489)) ([af6dbd4](https://github.com/SAP/ui5-linter/commit/af6dbd4b4ce519725caef703c4c79a85f072b0d1))
+* Prevent false-positive "prefer-test-starter" in testsuite ([2e733d2](https://github.com/SAP/ui5-linter/commit/2e733d225d7ddb39ac562069bf08f57cb3c3c835))
+* Provide check for alternative names of the properties ([#506](https://github.com/SAP/ui5-linter/issues/506)) ([8d2ad2f](https://github.com/SAP/ui5-linter/commit/8d2ad2fc9e10dc081d01e13ffaa3b58e12943b6d))
+* **XML:** Do not fail on empty core:require attribute ([4efb2d7](https://github.com/SAP/ui5-linter/commit/4efb2d77cbe72ece78093d766f9bf83791828779))
+* **xmlTemplate:** Fix column position off-by-one ([07169f6](https://github.com/SAP/ui5-linter/commit/07169f62ac6953957dd7a07ce4e57f4f6c348c7f))
+
+
+### Dependencies
+
+* Bump sax-wasm from 2.2.4 to 3.0.3 ([#485](https://github.com/SAP/ui5-linter/issues/485)) ([237ff94](https://github.com/SAP/ui5-linter/commit/237ff94e36afc741e0bcd778296e675c4a3490ab))
+
 ## [1.7.0](https://github.com/SAP/ui5-linter/compare/v1.6.1...v1.7.0) (2025-01-15)
 
 
