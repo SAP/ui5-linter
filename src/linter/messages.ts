@@ -620,8 +620,8 @@ export const MESSAGE_INFO = {
 		ruleId: RULES["no-implicit-globals"],
 
 		message: () => "OData built-in global symbols must not be used implicitly",
-		details: ({module}: {module: string}) =>
-			`Import the '${module}' module instead. ` +
+		details: () =>
+			"Import the 'sap/ui/model/odata/ODataExpressionAddons' module instead. " +
 			"See {@link topic:28fcd55b04654977b63dacbee0552712 Best Practices for Developers}",
 	},
 

@@ -162,6 +162,7 @@ export default class BindingLinter {
 		if (!this.#isExpressionBinding(bindingDefinition)) {
 			return;
 		}
+		const allFunctionsModule = "sap/ui/model/odata/ODataExpressionAddons";
 		const varModuleMap = {
 			"odata.compare": "sap/ui/model/odata/v4/ODataUtils",
 			"odata.fillUriTemplate": "sap/ui/thirdparty/URITemplate",
@@ -170,10 +171,8 @@ export default class BindingLinter {
 
 		for (const [key, value] of Object.entries(varModuleMap)) {
 			if (bindingDefinition.includes(`${key}(`) &&
-				!requireDeclarations.some((decl) => decl.moduleName === value)) {
-				this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {
-					module: value,
-				}, position);
+				!requireDeclarations.some((decl) => decl.moduleName === value || value === allFunctionsModule)) {
+				this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {} as never, position);
 			}
 		}
 	}

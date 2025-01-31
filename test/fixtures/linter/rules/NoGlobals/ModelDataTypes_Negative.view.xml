@@ -20,6 +20,11 @@
     foo: 'sap/ui/model/odata/v4/ODataUtils'
   }" />
 
+  <!-- "sap/ui/model/odata/ODataExpressionAddons" contains all of the odata globals -->
+  <Text text="{= odata.compare(${myvalue1},${path: 'myvalue1', model: 'myModel'})}" core:require="{
+    foo: 'sap/ui/model/odata/ODataExpressionAddons'
+  }" />
+
   <!-- Should not be reported. Module already required with the previous binding -->
   <Text text="{= odata.compare(%{myvalue1},%{myvalue2})}" />
 
