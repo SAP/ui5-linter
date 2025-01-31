@@ -1211,12 +1211,7 @@ export default class SourceFileLinter {
 				it should be detected since the runtime cannot resolve it
 				even if a 'formatter' variable is imported: */
 				if (prop.name.getText() === "formatter") {
-					this.#reporter.addMessage(MESSAGE.PARSING_ERROR, {
-						message: `Value of property 'formatter' is of type 'string'.`,
-						details:
-							`Do not use strings for 'formatter' values in JavaScript and TypeScript. ` +
-							`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
-					}, prop.initializer);
+					this.#reporter.addMessage(MESSAGE.STRING_FOR_FORMATTER_VALUE_IN_JS, prop.initializer);
 				} else {
 					propertyField = prop;
 				}
@@ -1239,11 +1234,9 @@ export default class SourceFileLinter {
 				const {formatter} = bindingInfo as PropertyBindingInfo;
 				// Check if formatter is of type string and report a message if so:
 				if (formatter && typeof formatter === "string") {
-					this.#reporter.addMessage(MESSAGE.PARSING_ERROR, {
-						message: `Value of property 'formatter' is of type 'string'.`,
-						details:
-							`Do not use strings for 'formatter' values in JavaScript and TypeScript. ` +
-							`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
+					this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
+						variableName: formatter.split(".")[0],
+						namespace: formatter,
 					}, node.initializer);
 				}
 			} catch {
