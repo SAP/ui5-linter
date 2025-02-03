@@ -15,10 +15,12 @@ const ODATA_FUNCTION_MODULE_MAP: Record<string, string> = {
 export default class BindingLinter {
 	#resourcePath: string;
 	#context: LinterContext;
+	#isJsBindingString: boolean;
 
-	constructor(resourcePath: ResourcePath, context: LinterContext) {
+	constructor(resourcePath: ResourcePath, context: LinterContext, isJsBindingString = false) {
 		this.#resourcePath = resourcePath;
 		this.#context = context;
+		this.#isJsBindingString = isJsBindingString;
 	}
 
 	#parseBinding(binding: string): BindingInfo | string | undefined {
@@ -53,6 +55,11 @@ export default class BindingLinter {
 		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
 		const {formatter, type} = bindingInfo;
 		if (formatter) {
+			// If the binding is defined as a string and inside a JS/TS sourcefile,
+			// the imports cannot be used for resolving formatter references:
+			if (this.#isJsBindingString) {
+				requireDeclarations = [];
+			}
 			if (Array.isArray(formatter)) {
 				formatter.forEach((formatterItem) => {
 					this.checkForGlobalReference(formatterItem, requireDeclarations, position);
