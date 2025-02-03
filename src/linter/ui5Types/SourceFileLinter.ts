@@ -21,7 +21,6 @@ import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
-import BindingParser, {PropertyBindingInfo} from "../binding/lib/BindingParser.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 
@@ -94,7 +93,6 @@ export default class SourceFileLinter {
 		this.#xmlContents = [];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
 	async lint() {
 		try {
 			if (!this.#metadata.directives) {
@@ -1298,23 +1296,6 @@ export default class SourceFileLinter {
 	#analyzePropertyStringBindings(node: ts.PropertyAssignment) {
 		if (ts.isStringLiteralLike(node.initializer) &&
 			node.initializer.text.startsWith("{") && node.initializer.text.endsWith("}")) {
-			/* Special Case (JS/TS): If the value of the property 'formatter' is a string,
-			it should be detected since the runtime cannot resolve it
-			even if a 'formatter' variable is imported: */
-			try {
-				const bindingInfo = BindingParser.complexParser(node.initializer.text, null, true, true, true, true);
-				const {formatter} = bindingInfo as PropertyBindingInfo;
-				// Check if formatter is of type string and report a message if so:
-				if (formatter && typeof formatter === "string") {
-					this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
-						variableName: formatter.split(".")[0],
-						namespace: formatter,
-					}, node.initializer);
-				}
-			} catch {
-				// Ignore errors since they are already reported by the BindingParser
-			}
-
 			const imports = this.sourceFile.statements
 				.filter((stmnt): stmnt is ts.ImportDeclaration =>
 					stmnt.kind === ts.SyntaxKind.ImportDeclaration)
@@ -1327,12 +1308,12 @@ export default class SourceFileLinter {
 
 			const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
 			const {start: nodePos} = getPositionsForNode({
-				node: node,
+				node: node.initializer,
 				sourceFile: this.sourceFile,
 				resourcePath: this.resourcePath,
 				traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
 			});
-			const bindingLinter = new BindingLinter(this.resourcePath, this.context);
+			const bindingLinter = new BindingLinter(this.resourcePath, this.context, true);
 			bindingLinter.lintPropertyBinding(node.initializer.text, imports, nodePos);
 		}
 	}
