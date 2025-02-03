@@ -1,0 +1,29 @@
+sap.ui.define(
+	["sap/ui/core/mvc/View", "sap/ui/core/mvc/XMLView"],
+	async (View, XMLView) => {
+		const oView = await View.create({
+			type: "XML",
+			definition: `<mvc:View 
+		controllerName="ui5app.controller.Home" 
+		displayBlock="true"
+		xmlns="sap.m"
+		xmlns:mvc="sap.ui.core.mvc"
+		xmlns:core="sap.ui.core"> 
+		  <Button tap=".sayHello">
+		</mvc:View>`,
+		});
+		oView.placeAt("content");
+
+		const oView2 = XMLView.create({
+			definition: `<mvc:View 
+		controllerName="ui5app.controller.Home" 
+		displayBlock="true"
+		xmlns="sap.m"
+		xmlns:mvc="sap.ui.core.mvc"
+		xmlns:core="sap.ui.core"> 
+		  <Button tap=".sayHello">
+		</mvc:View>`,
+		});
+		oView2.placeAt("content");
+	}
+);
