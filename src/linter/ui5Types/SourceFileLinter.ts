@@ -842,7 +842,7 @@ export default class SourceFileLinter {
 				this.#reportTestStarter(node);
 			} else if (symbolName === "applySettings" &&
 				nodeType.symbol?.declarations?.some((declaration) =>
-					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+					this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
 				this.#analyzeNewAndApplySettings(node);
 			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
 				moduleName === "sap/ui/base/ManagedObject" &&
