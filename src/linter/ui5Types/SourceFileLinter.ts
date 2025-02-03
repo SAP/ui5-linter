@@ -850,7 +850,7 @@ export default class SourceFileLinter {
 				this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
 			} else if (symbolName.startsWith("bind") &&
 				nodeType.symbol?.declarations?.some((declaration) =>
-					this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control")) &&
+					this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
 					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
 				// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
 				// Check decapitalized version of the property name as well.
