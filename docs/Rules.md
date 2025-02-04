@@ -12,6 +12,7 @@
 	- [no-pseudo-modules](#no-pseudo-modules)
 	- [parsing-error](#parsing-error)
 	- [ui5-class-declaration](#ui5-class-declaration)
+	- [unsupported-api-usage](#unsupported-api-usage)
 
 ## async-component-flags
 
@@ -82,3 +83,7 @@ Syntax/parsing errors that appear during the linting process are reported with t
 ## ui5-class-declaration
 
 Checks whether the declaration of UI5 classes is correct. This rule only applies to TypeScript code where built-in ECMAScript classes are used instead of an `.extend()` call.
+
+## unsupported-api-usage
+
+Checks whether the UI5 API is used correctly, for example, whether a formatter in a JavaScript/TypeScript binding declaration is of type `function`.
