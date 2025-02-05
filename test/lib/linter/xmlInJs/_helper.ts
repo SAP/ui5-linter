@@ -4,8 +4,8 @@ import path from "node:path";
 import util from "util";
 import {readdirSync} from "node:fs";
 import fs from "node:fs/promises";
-import transpileAmdToEsm from "../../../../src/linter/ui5Types/amdTranspiler/transpiler.js";
-import LinterContext from "../../../../src/linter/LinterContext.js";
+import {lintFile} from "../../../../src/linter/linter.js";
+import {extractXMLFromJs} from "../../../../src/linter/xmlInJs/transpile.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -42,13 +42,20 @@ export function createTestsForFixtures(fixturesPath: string) {
 			defineTest(`Transpile ${testName}`, async (t) => {
 				const filePath = path.join(fixturesPath, fileName);
 				const fileContent = await fs.readFile(filePath);
-				const context = new LinterContext({
-					rootDir: "/",
+				const extractedResource = extractXMLFromJs(testName, fileContent.toString());
+
+				const resources = await lintFile({
+					rootDir: fixturesPath,
 					namespace: "namespace",
+					filePatterns: [fileName],
+					coverage: true,
+					details: true,
 				});
-				const {source, map} = transpileAmdToEsm(testName, fileContent.toString(), context);
-				t.snapshot(source);
-				t.snapshot(map && JSON.parse(map));
+				extractedResource?.forEach((resource) => {
+					t.snapshot(resource.string);
+					t.snapshot(resource.map);
+				});
+				resources.forEach((res) => t.snapshot(res));
 			});
 		}
 	} catch (err) {
