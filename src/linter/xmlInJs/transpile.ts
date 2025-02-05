@@ -13,7 +13,7 @@ export function extractXMLFromJs(filePath: string, fileContent: string) {
 	if (viewProps.some((prop) => fileContent.includes(`${prop}:`))) {
 		const output = ts.transpileModule(fileContent, {compilerOptions});
 
-		const inlineSourceMapMatch = output.outputText.match(/\/\/# sourceMappingURL=data:application\/json;base64,([\w+/=]+)/);
+		const inlineSourceMapMatch = /\/\/# sourceMappingURL=data:application\/json;base64,([\w+/=]+)/.exec(output.outputText);
 		if (!inlineSourceMapMatch) {
 			return;
 		}

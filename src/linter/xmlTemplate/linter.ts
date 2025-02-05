@@ -18,7 +18,16 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 
 	await Promise.all(xmlFromJsResources.map((resource, idx) => {
 		resource!.path = resource!.path.replace("<n>", (idx + 1).toString());
-		return filePathsWorkspace.write(createResource(resource!));
+
+		const resolvedResources = [filePathsWorkspace.write(createResource(resource!))];
+		if (resource?.map) {
+			resolvedResources.push(filePathsWorkspace.write(createResource({
+				path: resource.path + ".map",
+				string: resource?.map,
+			})));
+		}
+
+		return Promise.all(resolvedResources);
 	}));
 
 	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
