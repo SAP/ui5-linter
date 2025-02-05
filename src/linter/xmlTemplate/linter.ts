@@ -4,11 +4,23 @@ import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import {ControllerByIdDtsGenerator} from "./generator/ControllerByIdDtsGenerator.js";
+import {extractXMLFromJs} from "../xmlInJs/transpile.js";
 
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
 export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
+	const jsTsResources = (await filePathsWorkspace.byGlob("**/*.{js,ts}"))
+		.map(async (resource) => extractXMLFromJs(resource.getPath(), await resource.getString()));
+
+	const xmlFromJsResources = (await Promise.all(jsTsResources))
+		.flatMap((res) => res).filter((resource) => !!resource?.string);
+
+	await Promise.all(xmlFromJsResources.map((resource, idx) => {
+		resource!.path = resource!.path.replace("<n>", (idx + 1).toString());
+		return filePathsWorkspace.write(createResource(resource!));
+	}));
+
 	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	const controllerByIdInfo = new ControllerByIdInfo();
