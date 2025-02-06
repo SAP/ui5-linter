@@ -1,5 +1,5 @@
 import ts from "typescript";
-import {FileContents, createVirtualCompilerHost} from "./host.js";
+import {FileContents} from "./host.js";
 import SourceFileLinter from "./SourceFileLinter.js";
 import {taskStart} from "../../utils/perf.js";
 import {getLogger} from "@ui5/logger";
@@ -9,6 +9,7 @@ import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
 import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
+import SharedCompiler from "../../typescript/SharedCompiler.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -43,8 +44,11 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	allowSyntheticDefaultImports: true,
 };
 
+// FIXME: This is a PoC implementation to verify the re-use of a ts.program across multiple linting runs
+const sharedCompiler = new SharedCompiler(DEFAULT_OPTIONS);
+
 export default class TypeChecker {
-	#compilerOptions: ts.CompilerOptions;
+	#projectSpecificCompilerOptions: ts.CompilerOptions;
 	#context: LinterContext;
 	#workspace: AbstractAdapter;
 	#filePathsWorkspace: AbstractAdapter;
@@ -53,12 +57,12 @@ export default class TypeChecker {
 		this.#context = context;
 		this.#workspace = workspace;
 		this.#filePathsWorkspace = filePathsWorkspace;
-		this.#compilerOptions = {...DEFAULT_OPTIONS};
+		this.#projectSpecificCompilerOptions = {};
 
 		const namespace = context.getNamespace();
 		if (namespace) {
 			// Map namespace used in imports (without /resources) to /resources paths
-			this.#compilerOptions.paths = {
+			this.#projectSpecificCompilerOptions.paths = {
 				[`${namespace}/*`]: [
 					// Enforce that the compiler also tries to resolve imports with a .js extension.
 					// With this mapping, the compiler still first tries to resolve the .ts, .tsx and .d.ts extensions
@@ -98,11 +102,13 @@ export default class TypeChecker {
 			}
 		}
 
-		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
-
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
-		const program = ts.createProgram(
-			allResources.map((resource) => resource.getPath()), this.#compilerOptions, host);
+
+		const program = sharedCompiler.acquire({
+			compilerOptionsOverride: this.#projectSpecificCompilerOptions,
+			files, sourceMaps, context: this.#context,
+		});
+
 		createProgramDone();
 
 		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
@@ -142,6 +148,8 @@ export default class TypeChecker {
 			}
 		}
 		typeCheckDone();
+
+		sharedCompiler.release();
 
 		if (process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES) {
 			// If requested, write out every resource that has a source map (which indicates it has been transformed)
