@@ -1,5 +1,5 @@
 import ts from "typescript";
-import {DecodedSourceMap, SourceMapInput, TraceMap, decodedMap} from "@jridgewell/trace-mapping";
+import {DecodedSourceMap, SourceMapInput, TraceMap, decodedMap, SourceMapSegment} from "@jridgewell/trace-mapping";
 
 export function extractXMLFromJs(filePath: string, fileContent: string) {
 	const viewProps = ["definition", "fragmentContent", "viewContent"];
@@ -38,13 +38,16 @@ export function extractXMLFromJs(filePath: string, fileContent: string) {
 }
 
 export function fixSourceMapIndices(map: SourceMapInput, lineShift = 0, columnShift = 0): DecodedSourceMap {
-	const newMappings = decodedMap(new TraceMap(map)).mappings.map((segment) =>
+	const decodedTraceMap = decodedMap(new TraceMap(map));
+	const {mappings} = decodedTraceMap;
+
+	const newMappings = mappings.map((segment) =>
 		segment.map(([genCol, srcIndex, origLine, origCol, nameIndex]) => {
-			return srcIndex !== undefined ?
+			return (srcIndex !== undefined ?
 					[genCol + columnShift, srcIndex, origLine! + lineShift, origCol! + columnShift, nameIndex] :
-					[genCol + columnShift]; // Only adjust generated column if no source mapping
+					[genCol + columnShift]) as SourceMapSegment;
 		})
 	);
 
-	return {...map as object, mappings: newMappings};
+	return {...decodedTraceMap, mappings: newMappings};
 }
