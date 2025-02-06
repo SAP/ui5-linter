@@ -46,7 +46,6 @@ export function createTestsForFixtures(fixturesPath: string) {
 
 				const resources = await lintFile({
 					rootDir: fixturesPath,
-					namespace: "namespace",
 					filePatterns: [fileName],
 					coverage: true,
 					details: true,
