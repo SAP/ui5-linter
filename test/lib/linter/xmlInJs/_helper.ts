@@ -51,8 +51,13 @@ export function createTestsForFixtures(fixturesPath: string) {
 					coverage: true,
 					details: true,
 				});
+
 				extractedResource?.forEach((resource) => t.snapshot(resource.xmlSnippet));
-				resources.forEach((res) => t.snapshot(res));
+				resources.forEach((res) => {
+					res.messages.sort(
+						(a, b) => (a.line! - b.line!) + (a.column! - b.column!));
+					t.snapshot(res);
+				});
 			});
 		}
 	} catch (err) {
