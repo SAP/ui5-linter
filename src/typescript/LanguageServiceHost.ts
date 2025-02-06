@@ -1,39 +1,17 @@
 import ts from "typescript";
-import {FileContents} from "../linter/ui5Types/host.js";
-import LinterContext from "../linter/LinterContext.js";
-
-interface Script {
-	snapshot: ts.IScriptSnapshot;
-	version: number;
-	isProjectScript: boolean;
-}
+import ScriptCollection from "./ScriptCollection.js";
 
 export default class LanguageServiceHost implements ts.LanguageServiceHost {
-	private scripts: ts.MapLike<Script> = {};
-
-	constructor(private readonly compilerOptions: ts.CompilerOptions) {
+	constructor(
+		private readonly compilerOptions: ts.CompilerOptions,
+		private readonly scriptCollection: ScriptCollection
+	) {
 	}
 
 	// Custom methods:
 
-	setProjectInfo(files: FileContents, _sourceMaps: Map<string, string>, _context: LinterContext) {
-		for (const [fileName, content] of files) {
-			this.scripts[fileName] = {
-				snapshot: ts.ScriptSnapshot.fromString(
-					typeof content === "function" ? content() : content
-				),
-				version: 0,
-				isProjectScript: true,
-			};
-		}
-	}
-
-	removeProjectInfo() {
-		for (const fileName in this.scripts) {
-			if (this.scripts[fileName].isProjectScript) {
-				delete this.scripts[fileName];
-			}
-		}
+	setCompilerOptions(options: ts.CompilerOptions) {
+		Object.assign(this.compilerOptions, options);
 	}
 
 	// ts.LanguageServiceHost implementation:
@@ -43,33 +21,45 @@ export default class LanguageServiceHost implements ts.LanguageServiceHost {
 	}
 
 	getScriptFileNames() {
-		return Object.keys(this.scripts);
+		return this.scriptCollection.getScriptFileNames();
 	}
 
 	getScriptVersion(fileName: string) {
-		return this.scripts[fileName]?.version.toString() ?? "-1";
+		const version = this.scriptCollection.getScriptVersion(fileName);
+		if (version) {
+			return version;
+		}
+		return "0";
 	}
 
 	getScriptSnapshot(fileName: string) {
-		return this.scripts[fileName]?.snapshot;
+		const snapshot = this.scriptCollection.getScriptSnapshot(fileName);
+		if (snapshot) {
+			return snapshot;
+		}
+		return ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName) ?? "");
+	}
+
+	fileExists(filePath: string) {
+		const exists = this.scriptCollection.fileExists(filePath);
+		if (exists) {
+			return true;
+		}
+		if (filePath.startsWith("/types/")) {
+			return ts.sys.fileExists(filePath);
+		}
+		return false;
+	}
+
+	readFile(filePath: string) {
+		return this.scriptCollection.readFile(filePath);
 	}
 
 	getDefaultLibFileName(_options: ts.CompilerOptions) {
-		return "FIXME";
+		return "";
 	}
 
 	getCurrentDirectory() {
 		return "";
-	}
-
-	fileExists(filePath: string) {
-		return !!this.scripts[filePath];
-	}
-
-	readFile(filePath: string) {
-		const script = this.scripts[filePath];
-		if (script) {
-			return script.snapshot.getText(0, script.snapshot.getLength());
-		}
 	}
 }

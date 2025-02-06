@@ -75,7 +75,7 @@ export default class TypeChecker {
 
 	async lint() {
 		const silly = log.isLevelEnabled("silly");
-		const files: FileContents = new Map();
+		const files = new Map<string, string>();
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 
 		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
@@ -102,12 +102,19 @@ export default class TypeChecker {
 			}
 		}
 
+		sharedCompiler.acquire(this.#context.getNamespace());
+
+		allResources.forEach((resource) => {
+			const filePath = resource.getPath();
+			const content = files.get(filePath);
+			if (content) {
+				sharedCompiler.addFile(filePath, content);
+			}
+		});
+
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
 
-		const program = sharedCompiler.acquire({
-			compilerOptionsOverride: this.#projectSpecificCompilerOptions,
-			files, sourceMaps, context: this.#context,
-		});
+		const program = sharedCompiler.getProgram();
 
 		createProgramDone();
 
@@ -155,22 +162,15 @@ export default class TypeChecker {
 			// If requested, write out every resource that has a source map (which indicates it has been transformed)
 			// Loop over sourceMaps set
 			for (const [resourcePath, sourceMap] of sourceMaps) {
-				let fileContent = files.get(resourcePath);
-
-				if (typeof fileContent === "function") {
-					fileContent = fileContent();
-				}
+				const fileContent = files.get(resourcePath);
 				if (fileContent) {
 					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 						resourcePath, fileContent, sourceMap);
 				}
 			}
 			// Although not being a typical transformed source, write out the byId dts file for debugging purposes
-			let byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
+			const byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
 			if (byIdDts) {
-				if (typeof byIdDts === "function") {
-					byIdDts = byIdDts();
-				}
 				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
 			}

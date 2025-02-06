@@ -2,6 +2,8 @@ import ts from "typescript";
 import LanguageServiceHost from "./LanguageServiceHost.js";
 import LinterContext from "../linter/LinterContext.js";
 import {FileContents} from "../linter/ui5Types/host.js";
+import ScriptCollection from "./ScriptCollection.js";
+import Sapui5Types from "./Sapui5Types.js";
 
 /*
 function create() {
@@ -88,32 +90,35 @@ function create() {
 create();
 */
 
-interface AcquireOptions {
-	compilerOptionsOverride: ts.CompilerOptions;
-	files: FileContents;
-	sourceMaps: Map<string, string>;
-	context: LinterContext;
-}
-
 export default class SharedCompiler {
+	private readonly scriptCollection: ScriptCollection;
+	private readonly sapui5Types: Sapui5Types;
 	private readonly languageServiceHost: LanguageServiceHost;
 	private readonly languageService: ts.LanguageService;
 	private acquired = false;
 
 	constructor(compilerOptions: ts.CompilerOptions) {
-		this.languageServiceHost = new LanguageServiceHost(compilerOptions);
+		this.scriptCollection = new ScriptCollection();
+		this.sapui5Types = new Sapui5Types();
+		this.languageServiceHost = new LanguageServiceHost(compilerOptions, this.scriptCollection);
 		this.languageService = ts.createLanguageService(this.languageServiceHost, ts.createDocumentRegistry());
 	}
 
-	acquire(acquireOptions: AcquireOptions) {
+	acquire(projectNamespace?: string) {
 		if (this.acquired) {
 			throw new Error("SharedCompiler is already acquired");
 		}
 		this.acquired = true;
 
-		this.languageServiceHost.setProjectInfo(
-			acquireOptions.files, acquireOptions.sourceMaps, acquireOptions.context
-		);
+		// Set project-specific compiler options
+		const compilerOptions = this.sapui5Types.getCompilerOptions(projectNamespace);
+		this.languageServiceHost.setCompilerOptions(compilerOptions);
+	}
+
+	getProgram() {
+		if (!this.acquired) {
+			throw new Error("SharedCompiler is not acquired");
+		}
 
 		const program = this.languageService.getProgram();
 		if (!program) {
@@ -122,10 +127,30 @@ export default class SharedCompiler {
 		return program;
 	}
 
+	addFile(fileName: string, content: string) {
+		if (!this.acquired) {
+			throw new Error("SharedCompiler is not acquired");
+		}
+
+		this.scriptCollection.addScript(fileName, content);
+	}
+
 	release() {
 		if (!this.acquired) {
 			throw new Error("SharedCompiler is not acquired");
 		}
+
+		this.scriptCollection.removeProjectScripts();
+
 		this.acquired = false;
 	}
 }
+
+/*
+
+There should be two different types of files that can be added to the language service host:
+- Project files: These are the files that are part of the project that is being linted.
+                 They need to be removed again after the compiler is released.
+- Common files: These are files that are shared between different projects and should not be
+                removed between linting runs.
+*/
