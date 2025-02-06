@@ -1,6 +1,10 @@
 import ts from "typescript";
 import {DecodedSourceMap, SourceMapInput, TraceMap, decodedMap, SourceMapSegment} from "@jridgewell/trace-mapping";
 
+/**
+ * Gets the original JS file and looks for specific properties that might eventually
+ * contain XML content. Then search for the XML content and return it.
+ */
 export function extractXMLFromJs(filePath: string, fileContent: string) {
 	const viewProps = ["definition", "fragmentContent", "viewContent"];
 	if (viewProps.some((prop) => fileContent.includes(`${prop}:`))) {
@@ -37,6 +41,9 @@ export function extractXMLFromJs(filePath: string, fileContent: string) {
 	}
 }
 
+/**
+ * Shifts the line and column indices of a source map.
+ */
 export function fixSourceMapIndices(map: SourceMapInput, lineShift = 0, columnShift = 0): DecodedSourceMap {
 	const decodedTraceMap = decodedMap(new TraceMap(map));
 	const {mappings} = decodedTraceMap;

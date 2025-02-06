@@ -11,12 +11,15 @@ import {type SourceMapInput} from "@jridgewell/trace-mapping";
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
 export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
+	// Get all JS/TS resources and extract eventual XML snippets from them
 	const jsTsResources = await Promise.all((await filePathsWorkspace.byGlob("**/*.{js,ts}"))
 		.map(async (resource) => extractXMLFromJs(resource.getPath(), await resource.getString())));
 
 	const xmlFromJsResources = jsTsResources
 		.flatMap((res) => res).filter((resource) => !!resource?.xmlSnippet.xml);
 
+	// Record those snippets as "virtual" resources in the workspace,
+	// so that they can be transpiled & linted by the XML linter
 	await Promise.all(xmlFromJsResources.map((resource) =>
 		filePathsWorkspace.write(createResource({
 			path: resource!.path,
@@ -40,7 +43,12 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		if (xmlFromJsResource?.originalPath) {
 			xmlFromJsResourceMap = JSON.parse(map) as SourceMapInput;
 			const {pos} = xmlFromJsResource.xmlSnippet;
+			// If it's an XML snippet extracted from a JS file, adjust the source map positions
+			// as they positions are relative to the extracted string, not to the real position in the JS file.
+			// Add that missing line shift from the original JS file to the source map.
 			xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
+			// Replace the name of the source file in the source map with the original JS file name,
+			// so that reporter will lead to the correct file.
 			xmlFromJsResourceMap.sources.splice(0, 1, xmlFromJsResource.originalPath.split("/").pop() ?? null);
 		}
 
