@@ -1,30 +1,12 @@
 import ts from "typescript";
+import {DecodedSourceMap, SourceMapInput, TraceMap, decodedMap} from "@jridgewell/trace-mapping";
 
 export function extractXMLFromJs(filePath: string, fileContent: string) {
-	// TODO: Get the TS config from the main project
-	const compilerOptions: ts.CompilerOptions = {
-		module: ts.ModuleKind.CommonJS,
-		target: ts.ScriptTarget.ESNext,
-		inlineSourceMap: true,
-		inlineSources: true,
-	};
-
 	const viewProps = ["definition", "fragmentContent", "viewContent"];
 	if (viewProps.some((prop) => fileContent.includes(`${prop}:`))) {
-		const output = ts.transpileModule(fileContent, {compilerOptions});
+		const sourceFile = ts.createSourceFile(filePath, fileContent, ts.ScriptTarget.Latest, true);
 
-		const inlineSourceMapMatch = /\/\/# sourceMappingURL=data:application\/json;base64,([\w+/=]+)/.exec(output.outputText);
-		if (!inlineSourceMapMatch) {
-			return;
-		}
-
-		const base64Map = inlineSourceMapMatch[1];
-		const decodedMap = JSON.parse(Buffer.from(base64Map, "base64").toString("utf8")) as string;
-
-		// TODO: Get the TS config from the main project
-		const sourceFile = ts.createSourceFile(filePath, output.outputText, ts.ScriptTarget.Latest, true);
-
-		const xmlContents: string[] = [];
+		const xmlContents: {xml: string; pos: ts.LineAndCharacter}[] = [];
 		function findProperty(node: ts.Node) {
 			if (ts.isObjectLiteralExpression(node)) {
 				node.properties.forEach((prop) => {
@@ -36,7 +18,10 @@ export function extractXMLFromJs(filePath: string, fileContent: string) {
 						// "definition": ["create", "load", "sap.ui.view"],
 						// "viewContent": ["sap.ui.xmlview", "sap.ui.view"],
 						// "fragmentContent": ["sap.ui.fragment", "sap.ui.xmlfragment"],
-						xmlContents.push(prop.initializer.text);
+						xmlContents.push({
+							xml: prop.initializer.text,
+							pos: sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos),
+						});
 					}
 				});
 			}
@@ -44,10 +29,22 @@ export function extractXMLFromJs(filePath: string, fileContent: string) {
 		}
 
 		findProperty(sourceFile);
-		return xmlContents.map((xmlContent) => ({
-			path: `${sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-<n>.view.xml`,
-			string: xmlContent ?? "",
-			map: decodedMap,
+		return xmlContents.map((xmlContent, idx) => ({
+			originalPath: filePath,
+			path: `${sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${idx + 1}.view.xml`,
+			xmlSnippet: xmlContent ?? "",
 		}));
 	}
+}
+
+export function fixSourceMapIndices(map: SourceMapInput, lineShift = 0, columnShift = 0): DecodedSourceMap {
+	const newMappings = decodedMap(new TraceMap(map)).mappings.map((segment) =>
+		segment.map(([genCol, srcIndex, origLine, origCol, nameIndex]) => {
+			return srcIndex !== undefined ?
+					[genCol + columnShift, srcIndex, origLine! + lineShift, origCol! + columnShift, nameIndex] :
+					[genCol + columnShift]; // Only adjust generated column if no source mapping
+		})
+	);
+
+	return {...map as object, mappings: newMappings};
 }

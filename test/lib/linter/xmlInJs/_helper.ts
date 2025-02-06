@@ -51,10 +51,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					coverage: true,
 					details: true,
 				});
-				extractedResource?.forEach((resource) => {
-					t.snapshot(resource.string);
-					t.snapshot(resource.map);
-				});
+				extractedResource?.forEach((resource) => t.snapshot(resource.xmlSnippet));
 				resources.forEach((res) => t.snapshot(res));
 			});
 		}
