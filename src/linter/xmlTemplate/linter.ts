@@ -4,31 +4,24 @@ import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import {ControllerByIdDtsGenerator} from "./generator/ControllerByIdDtsGenerator.js";
-import {extractXMLFromJs} from "../xmlInJs/transpile.js";
+import {extractXMLFromJs, fixSourceMapIndices} from "../xmlInJs/transpile.js";
+import {type SourceMapInput} from "@jridgewell/trace-mapping";
 
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
 export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
-	const jsTsResources = (await filePathsWorkspace.byGlob("**/*.{js,ts}"))
-		.map(async (resource) => extractXMLFromJs(resource.getPath(), await resource.getString()));
+	const jsTsResources = await Promise.all((await filePathsWorkspace.byGlob("**/*.{js,ts}"))
+		.map(async (resource) => extractXMLFromJs(resource.getPath(), await resource.getString())));
 
-	const xmlFromJsResources = (await Promise.all(jsTsResources))
-		.flatMap((res) => res).filter((resource) => !!resource?.string);
+	const xmlFromJsResources = jsTsResources
+		.flatMap((res) => res).filter((resource) => !!resource?.xmlSnippet.xml);
 
-	await Promise.all(xmlFromJsResources.map((resource, idx) => {
-		resource!.path = resource!.path.replace("<n>", (idx + 1).toString());
-
-		const resolvedResources = [filePathsWorkspace.write(createResource(resource!))];
-		if (resource?.map) {
-			resolvedResources.push(filePathsWorkspace.write(createResource({
-				path: resource.path + ".map",
-				string: resource?.map,
-			})));
-		}
-
-		return Promise.all(resolvedResources);
-	}));
+	await Promise.all(xmlFromJsResources.map((resource) =>
+		filePathsWorkspace.write(createResource({
+			path: resource!.path,
+			string: resource!.xmlSnippet.xml,
+		}))));
 
 	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
@@ -42,6 +35,15 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		const {source, map} = res;
 		const resourcePath = resource.getPath();
 
+		const xmlFromJsResource = xmlFromJsResources.find((res) => res!.path === resourcePath);
+		let xmlFromJsResourceMap;
+		if (xmlFromJsResource?.originalPath) {
+			xmlFromJsResourceMap = JSON.parse(map) as SourceMapInput;
+			const {pos} = xmlFromJsResource.xmlSnippet;
+			xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
+			xmlFromJsResourceMap.sources.splice(0, 1, xmlFromJsResource.originalPath.split("/").pop() ?? null);
+		}
+
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
 		const jsPath = resourcePath.replace(/\.xml$/, ".js");
@@ -51,7 +53,7 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		});
 		const transpiledResourceSourceMap = createResource({
 			path: jsPath + ".map",
-			string: map,
+			string: xmlFromJsResourceMap ? JSON.stringify(xmlFromJsResourceMap) : map,
 		});
 
 		await filePathsWorkspace.write(transpiledResource);
