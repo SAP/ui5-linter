@@ -4,7 +4,7 @@ import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import {ControllerByIdDtsGenerator} from "./generator/ControllerByIdDtsGenerator.js";
-import { decodedMap, DecodedSourceMap, SourceMapInput, TraceMap } from "@jridgewell/trace-mapping";
+import {decodedMap, DecodedSourceMap, SourceMapInput, TraceMap} from "@jridgewell/trace-mapping";
 
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
@@ -24,17 +24,17 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 
 		const metadata = context.getMetadata(resourcePath);
 		let xmlFromJsResourceMap;
-		// if (metadata.jsToXmlPosMapping) {
-		// 	xmlFromJsResourceMap = JSON.parse(map) as DecodedSourceMap;
-		// 	const {pos} = metadata.jsToXmlPosMapping;
-		// 	// If it's an XML snippet extracted from a JS file, adjust the source map positions
-		// 	// as they positions are relative to the extracted string, not to the real position in the JS file.
-		// 	// Add that missing line shift from the original JS file to the source map.
-		// 	xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
-		// 	// Replace the name of the source file in the source map with the original JS file name,
-		// 	// so that reporter will lead to the correct file.
-		// 	xmlFromJsResourceMap.sources.splice(0, 1, metadata.jsToXmlPosMapping.originalPath.split("/").pop() ?? null);
-		// }
+		if (metadata.jsToXmlPosMapping) {
+			xmlFromJsResourceMap = JSON.parse(map) as DecodedSourceMap;
+			const {pos} = metadata.jsToXmlPosMapping;
+			// If it's an XML snippet extracted from a JS file, adjust the source map positions
+			// as they positions are relative to the extracted string, not to the real position in the JS file.
+			// Add that missing line shift from the original JS file to the source map.
+			xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
+			// Replace the name of the source file in the source map with the original JS file name,
+			// so that reporter will lead to the correct file.
+			xmlFromJsResourceMap.sources.splice(0, 1, metadata.jsToXmlPosMapping.originalPath.split("/").pop() ?? null);
+		}
 
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
@@ -77,10 +77,10 @@ function fixSourceMapIndices(map: SourceMapInput, lineShift = 0, columnShift = 0
 	const newMappings = mappings.map((segment) =>
 		segment.map(([genCol, srcIndex, origLine, origCol, nameIndex]) => {
 			return (srcIndex !== undefined ?
-					[genCol + columnShift, srcIndex, origLine! + lineShift, origCol! + columnShift, nameIndex] :
+					[genCol + columnShift, srcIndex, origLine! + lineShift, origCol! + columnShift, nameIndex ?? 0] :
 					[genCol + columnShift]);
 		})
 	);
 
-	return {...decodedTraceMap, mappings: newMappings};
+	return {...decodedTraceMap, mappings: newMappings as DecodedSourceMap["mappings"]};
 }

@@ -126,7 +126,9 @@ export default class TypeChecker {
 		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 		const apiExtract = await loadApiExtract();
 		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
-		let {program, checker, pathsToLint} = await this.getProgram(host, files, sourceMaps);
+		const programInfo = await this.getProgram(host, files, sourceMaps);
+		let {program, checker} = programInfo;
+		const {pathsToLint} = programInfo;
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();

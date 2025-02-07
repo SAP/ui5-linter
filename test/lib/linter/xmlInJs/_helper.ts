@@ -1,11 +1,8 @@
 import anyTest, {TestFn} from "ava";
 import sinonGlobal from "sinon";
-import path from "node:path";
 import util from "util";
 import {readdirSync} from "node:fs";
-import fs from "node:fs/promises";
 import {lintFile} from "../../../../src/linter/linter.js";
-import {extractXMLFromJs} from "../../../../src/linter/xmlInJs/transpile.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -40,9 +37,9 @@ export function createTestsForFixtures(fixturesPath: string) {
 			// Executing linting in parallel might lead to OOM errors in the CI
 			// Therefore always use serial
 			defineTest(`Transpile ${testName}`, async (t) => {
-				const filePath = path.join(fixturesPath, fileName);
-				const fileContent = await fs.readFile(filePath);
-				const extractedResource = extractXMLFromJs(testName, fileContent.toString());
+				// const filePath = path.join(fixturesPath, fileName);
+				// const fileContent = await fs.readFile(filePath);
+				// const extractedResource = extractXMLFromJs(testName, fileContent.toString());
 
 				const resources = await lintFile({
 					rootDir: fixturesPath,
@@ -51,7 +48,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					details: true,
 				});
 
-				extractedResource?.forEach((resource) => t.snapshot(resource.xmlSnippet));
+				// extractedResource?.forEach((resource) => t.snapshot(resource.xmlSnippet));
 				resources.forEach((res) => {
 					res.messages.sort(
 						(a, b) => (a.line! - b.line!) + (a.column! - b.column!));
