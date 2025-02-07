@@ -75,8 +75,11 @@ export default class TypeChecker {
 		}
 	}
 
-	async getProgram(host: ts.CompilerHost, files: FileContents, sourceMaps: FileContents) {
+	async lint() {
 		const silly = log.isLevelEnabled("silly");
+		const files: FileContents = new Map();
+		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
+
 		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const filteredResources = await this.#filePathsWorkspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const pathsToLint = filteredResources.map((resource) => resource.getPath());
@@ -110,25 +113,14 @@ export default class TypeChecker {
 		this.#sharedLanguageService.acquire(host);
 
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
-		const program = this.#sharedLanguageService.getProgram();
+		let program = this.#sharedLanguageService.getProgram();
 		createProgramDone();
 
 		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
-		const checker = program.getTypeChecker();
+		let checker = program.getTypeChecker();
 		getTypeCheckerDone();
 
-		return {program, checker, pathsToLint};
-	}
-
-	async lint() {
-		const silly = log.isLevelEnabled("silly");
-		const files: FileContents = new Map();
-		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 		const apiExtract = await loadApiExtract();
-		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
-		const programInfo = await this.getProgram(host, files, sourceMaps);
-		let {program, checker} = programInfo;
-		const {pathsToLint} = programInfo;
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
@@ -167,7 +159,13 @@ export default class TypeChecker {
 			workspace: this.#workspace,
 			context: this.#context,
 		});
-		({program, checker} = await this.getProgram(host, files, sourceMaps));
+		const virtualXMLResources =
+			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.view.{js,ts}");
+		for (const resource of virtualXMLResources) {
+			files.set(resource.getPath(), await resource.getString());
+		}
+		program = this.#sharedLanguageService.getProgram();
+		checker = program.getTypeChecker();
 		for (const sourceFile of program.getSourceFiles()) {
 			if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.view\.js/.exec(sourceFile.fileName)) {
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
