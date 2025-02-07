@@ -9,7 +9,7 @@ import type {LintResult} from "../../../src/linter/LinterContext.js";
 import type Base from "../../../src/cli/base.js";
 
 const test = anyTest as TestFn<{
-	lintProject: SinonStub;
+	ui5lint: SinonStub;
 	writeFile: SinonStub;
 	consoleLogStub: SinonStub;
 	processStdErrWriteStub: SinonStub;
@@ -42,7 +42,7 @@ test.beforeEach(async (t) => {
 	t.context.isLogLevelEnabledStub.withArgs("verbose").returns(false);
 	t.context.consoleWriterStopStub = sinon.stub();
 
-	t.context.lintProject = sinon.stub().resolves([lintResult]);
+	t.context.ui5lint = sinon.stub().resolves([lintResult]);
 	t.context.writeFile = sinon.stub().resolves();
 	t.context.cli = yargs();
 
@@ -51,8 +51,8 @@ test.beforeEach(async (t) => {
 	t.context.formatMarkdown = sinon.stub().returns("");
 
 	t.context.base = await esmock.p("../../../src/cli/base.js", {
-		"../../../src/linter/linter.js": {
-			lintProject: t.context.lintProject,
+		"../../../src/index.js": {
+			ui5lint: t.context.ui5lint,
 		},
 		"../../../src/formatter/coverage.js": {
 			Coverage: sinon.stub().callsFake(() => {
@@ -98,106 +98,106 @@ test.afterEach.always((t) => {
 });
 
 test.serial("ui5lint (default) ", async (t) => {
-	const {cli, lintProject, writeFile} = t.context;
+	const {cli, ui5lint, writeFile} = t.context;
 
 	await cli.parseAsync([]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(ui5lint.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 0, "Coverage was not called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
+	t.deepEqual(ui5lint.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, config: undefined,
 		details: false, coverage: false, ui5Config: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --coverage ", async (t) => {
-	const {cli, lintProject, writeFile} = t.context;
+	const {cli, ui5lint, writeFile} = t.context;
 
 	await cli.parseAsync(["--coverage"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(ui5lint.calledOnce, "Linter is called");
 	t.is(writeFile.callCount, 1, "Coverage was called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
+	t.deepEqual(ui5lint.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, config: undefined,
 		details: false, coverage: true, ui5Config: undefined,
 	});
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --details ", async (t) => {
-	const {cli, lintProject, formatText} = t.context;
+	const {cli, ui5lint, formatText} = t.context;
 
 	await cli.parseAsync(["--details"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(ui5lint.calledOnce, "Linter is called");
 	t.true(formatText.getCall(0).args[1], "linter is called with 'details=true' flag");
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
 
 test.serial("ui5lint --format json ", async (t) => {
-	const {cli, lintProject, formatJson} = t.context;
+	const {cli, ui5lint, formatJson} = t.context;
 
 	await cli.parseAsync(["--format", "json"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(ui5lint.calledOnce, "Linter is called");
 	t.true(formatJson.calledOnce, "JSON formatter has been called");
 });
 
 test.serial("ui5lint --ignore-pattern ", async (t) => {
-	const {cli, lintProject} = t.context;
+	const {cli, ui5lint} = t.context;
 
 	await cli.parseAsync(["--ignore-pattern", "test/**/*"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
+	t.true(ui5lint.calledOnce, "Linter is called");
+	t.deepEqual(ui5lint.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: ["test/**/*"],
-		configPath: undefined, details: false, coverage: false, ui5Config: undefined,
+		config: undefined, details: false, coverage: false, ui5Config: undefined,
 	});
 });
 
 test.serial("ui5lint --format markdown", async (t) => {
-	const {cli, lintProject, formatMarkdown} = t.context;
+	const {cli, ui5lint, formatMarkdown} = t.context;
 
 	await cli.parseAsync(["--format", "markdown"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
+	t.true(ui5lint.calledOnce, "Linter is called");
 	t.true(formatMarkdown.calledOnce, "Markdown formatter has been called");
 });
 
 test.serial("ui5lint --config", async (t) => {
-	const {cli, lintProject} = t.context;
+	const {cli, ui5lint} = t.context;
 
 	await cli.parseAsync(["--config", "config.js"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: "config.js",
+	t.true(ui5lint.calledOnce, "Linter is called");
+	t.deepEqual(ui5lint.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, config: "config.js",
 		details: false, coverage: false, ui5Config: undefined,
 	});
 });
 
 test.serial("ui5lint --ui5-config", async (t) => {
-	const {cli, lintProject} = t.context;
+	const {cli, ui5lint} = t.context;
 
 	await cli.parseAsync(["--ui5-config", "ui5.yaml"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
-		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, configPath: undefined,
+	t.true(ui5lint.calledOnce, "Linter is called");
+	t.deepEqual(ui5lint.getCall(0).args[0], {
+		rootDir: path.join(process.cwd()), filePatterns: undefined, ignorePatterns: undefined, config: undefined,
 		details: false, coverage: false, ui5Config: "ui5.yaml",
 	});
 });
 
 test.serial("ui5lint path/to/file.js glob/**/*", async (t) => {
-	const {cli, lintProject} = t.context;
+	const {cli, ui5lint} = t.context;
 
 	await cli.parseAsync(["path/to/file.js", "glob/**/*"]);
 
-	t.true(lintProject.calledOnce, "Linter is called");
-	t.deepEqual(lintProject.getCall(0).args[0], {
+	t.true(ui5lint.calledOnce, "Linter is called");
+	t.deepEqual(ui5lint.getCall(0).args[0], {
 		rootDir: path.join(process.cwd()), filePatterns: ["path/to/file.js", "glob/**/*"],
-		ignorePatterns: undefined, configPath: undefined,
+		ignorePatterns: undefined, config: undefined,
 		details: false, coverage: false, ui5Config: undefined,
 	});
 });

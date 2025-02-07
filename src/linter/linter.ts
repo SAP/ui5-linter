@@ -10,10 +10,11 @@ import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
+import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,
-}: LinterOptions): Promise<LintResult[]> {
+}: LinterOptions, sharedLanguageService: SharedLanguageService): Promise<LintResult[]> {
 	if (!path.isAbsolute(rootDir)) {
 		throw new Error(`rootDir must be an absolute path. Received: ${rootDir}`);
 	}
@@ -74,7 +75,7 @@ export async function lintProject({
 		noConfig,
 		ui5Config,
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
-	}, config);
+	}, config, sharedLanguageService);
 
 	res.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath,
@@ -89,7 +90,8 @@ export async function lintProject({
 
 export async function lintFile({
 	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, configPath, noConfig,
-}: LinterOptions): Promise<LintResult[]> {
+}: LinterOptions, sharedLanguageService: SharedLanguageService
+): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
 		const configMngr = new ConfigManager(rootDir, configPath);
@@ -112,7 +114,7 @@ export async function lintFile({
 		configPath,
 		relFsBasePath: "",
 		virBasePath,
-	}, config);
+	}, config, sharedLanguageService);
 
 	res.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath, "", "/");
@@ -125,7 +127,8 @@ export async function lintFile({
 
 async function lint(
 	resourceReader: AbstractReader, options: LinterOptions & FSToVirtualPathOptions,
-	config: UI5LintConfigType
+	config: UI5LintConfigType,
+	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
 	let {ignorePatterns, filePatterns} = options;
@@ -171,7 +174,9 @@ async function lint(
 		reader,
 	});
 
-	const res = await lintWorkspace(workspace, filePathsWorkspace, options, config, matchedPatterns);
+	const res = await lintWorkspace(
+		workspace, filePathsWorkspace, options, config, matchedPatterns, sharedLanguageService
+	);
 	checkUnmatchedPatterns(filePatterns, matchedPatterns);
 
 	lintEnd();

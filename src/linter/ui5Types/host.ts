@@ -6,15 +6,12 @@ import {createRequire} from "node:module";
 import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
 import LinterContext, {ResourcePath} from "../LinterContext.js";
 import {getLogger} from "@ui5/logger";
+import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 const log = getLogger("linter:ui5Types:host");
 const require = createRequire(import.meta.url);
 
 interface PackageJson {
 	dependencies: Record<string, string>;
-}
-
-function notImplemented(methodName: string) {
-	throw new Error(`Not implemented: ${methodName}`);
 }
 
 function addPathMappingForPackage(pkgName: string, pathMapping: Map<string, string>) {
@@ -70,13 +67,14 @@ function addSapui5TypesMappingToCompilerOptions(
 	});
 }
 
-export type FileContents = Map<ResourcePath, string | (() => string)>;
+export type FileContents = Map<ResourcePath, string>;
 
-export async function createVirtualCompilerHost(
+export async function createVirtualLanguageServiceHost(
 	options: ts.CompilerOptions,
 	files: FileContents, sourceMaps: FileContents,
-	context: LinterContext
-): Promise<ts.CompilerHost> {
+	context: LinterContext,
+	projectScriptVersion: string
+): Promise<ts.LanguageServiceHost> {
 	const silly = log.isLevelEnabled("silly");
 
 	options.typeRoots = ["/types"];
@@ -126,9 +124,6 @@ export async function createVirtualCompilerHost(
 
 		if (files.has(resourcePath)) {
 			let fileContent = files.get(resourcePath);
-			if (typeof fileContent === "function") {
-				fileContent = fileContent();
-			}
 			if (fileContent && resourcePath.endsWith(".js") && !sourceMaps.get(resourcePath)) {
 				// No source map indicates no transpilation was done yet
 				const res = transpileAmdToEsm(resourcePath, fileContent, context);
@@ -147,56 +142,51 @@ export async function createVirtualCompilerHost(
 		// console.log("Not found " + fileName);
 	}
 
-	// Pre-compile list of all directories
-	const directories = new Set();
-	for (const filePath of files.keys()) {
-		// Add every directory of the file path to the set of directories
-		let directory = posixPath.dirname(filePath);
-		while (directory !== "/" && directory !== ".") {
-			directories.add(directory);
-			directory = posixPath.dirname(directory);
-		}
-	}
-
-	for (const typePackageDir of typePackageDirs) {
-		// Add every directory of the type package path to the set of directories
-		let directory = typePackageDir;
-		while (directory !== "/" && directory !== ".") {
-			directories.add(directory);
-			directory = posixPath.dirname(directory);
-		}
-	}
-
 	if (silly) {
 		log.silly(`compilerOptions: ${JSON.stringify(options, null, 2)}`);
 	}
 
-	const sourceFileCache = new Map<string, ts.SourceFile>();
 	return {
-		directoryExists: (directory) => {
-			if (silly) {
-				log.silly(`directoryExists: ${directory}`);
-			}
 
-			if (directories.has(directory)) {
-				return true;
-			}
-			if (directory.startsWith("/types")) {
-				// Check whether any mapped directory path begins with the requested directory
-				// Check within mapped paths by rewriting the requested path
-				if (!directory.endsWith("/")) {
-					// Ensure trailing slash to make sure we only match directories,
-					// because compiler sometimes asks for paths like "[...]/controller/Main.controller".
-					// Which could match the beginning of a file's path too
-					directory += "/";
-				}
-				const fsPath = mapToTypePath(directory);
-				if (fsPath) {
-					return ts.sys.directoryExists(fsPath);
-				}
-			}
-			return false;
+		getCompilationSettings: () => {
+			return options;
 		},
+
+		getScriptFileNames: () => {
+			if (silly) {
+				log.silly(`getScriptFileNames`);
+			}
+			return Array.from(files.keys());
+		},
+
+		getScriptVersion: (fileName) => {
+			if (silly) {
+				log.silly(`getScriptVersion: ${fileName}`);
+			}
+			if (fileName.startsWith("/types/") && fileName !== CONTROLLER_BY_ID_DTS_PATH) {
+				// All types should be cached forever as they can be shared across projects
+				// except for the ControllerById.d.ts file which is generated per project
+				return "0";
+			}
+			// Currently we don't use incremental compilation within a project, so
+			// updating the script version is not necessary.
+			// However, as the language service is shared across multiple projects, we need
+			// to provide a version that is unique for each project to avoid impacting other
+			// projects that might use the same file path.
+			return projectScriptVersion;
+		},
+
+		getScriptSnapshot: (fileName) => {
+			if (silly) {
+				log.silly(`getScriptSnapshot: ${fileName}`);
+			}
+			const fileContent = getFile(fileName);
+			if (typeof fileContent === "string") {
+				return ts.ScriptSnapshot.fromString(fileContent);
+			}
+			return undefined;
+		},
+
 		fileExists: (fileName) => {
 			// NOTE: This function should be kept in sync with "getFile"
 			if (silly) {
@@ -221,66 +211,15 @@ export async function createVirtualCompilerHost(
 			return options.rootDir ?? "/";
 		},
 
-		getDirectories: (directory: string) => {
-			// This function seems to be called only if the "types" option is not set
-			if (silly) {
-				log.silly(`getDirectories: ${directory}`);
-			}
-			return [];
-		},
-		readDirectory: (
-			dirPath: string, extensions?: readonly string[],
-			exclude?: readonly string[], include?: readonly string[],
-			depth?: number
-		): string[] => {
-			if (silly) {
-				log.silly(`readDirectory: ${dirPath}`);
-			}
-
-			// This function doesn't seem to be called during normal operations
-			return Array.from(files.keys()).filter((filePath) => {
-				if (include ?? exclude ?? depth ?? extensions) {
-					notImplemented("readDirectory: Optional parameters");
-				}
-				return posixPath.dirname(filePath) === dirPath;
-			});
-		},
-		getSourceFile: (
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) => {
-			if (silly) {
-				log.silly(`getSourceFile: ${fileName}`);
-			}
-			if (sourceFileCache.has(fileName)) {
-				return sourceFileCache.get(fileName);
-			}
-			const sourceText = getFile(fileName);
-			if (sourceText === undefined) {
-				throw new Error(`File not found: ${fileName}`);
-			}
-
-			const sourceFile = ts.createSourceFile(fileName, sourceText, languageVersion);
-			sourceFileCache.set(fileName, sourceFile);
-			return sourceFile;
-		},
 		readFile: (fileName) => {
 			if (silly) {
 				log.silly(`readFile: ${fileName}`);
 			}
 			return getFile(fileName);
 		},
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		writeFile: (fileName, contents) => {
-			// We don't expect this function to be called for our use case so far
-			notImplemented("write");
-			// files.set(fileName, contents);
-		},
-		getCanonicalFileName: (fileName) => fileName,
 		getDefaultLibFileName: (defaultLibOptions: ts.CompilerOptions) => {
-			return ts.getDefaultLibFileName(defaultLibOptions);
+			const defaultLibFileName = ts.getDefaultLibFileName(defaultLibOptions);
+			return "/types/typescript/lib/" + defaultLibFileName;
 		},
-		getDefaultLibLocation: () => "/types/typescript/lib",
-		getNewLine: () => "\n",
-		useCaseSensitiveFileNames: () => true,
 	};
 }

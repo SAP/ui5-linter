@@ -1,5 +1,5 @@
 import ts from "typescript";
-import {FileContents, createVirtualCompilerHost} from "./host.js";
+import {FileContents, createVirtualLanguageServiceHost} from "./host.js";
 import SourceFileLinter from "./SourceFileLinter.js";
 import {taskStart} from "../../utils/perf.js";
 import {getLogger} from "@ui5/logger";
@@ -9,6 +9,7 @@ import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
 import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
+import type SharedLanguageService from "./SharedLanguageService.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -44,12 +45,17 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 };
 
 export default class TypeChecker {
+	#sharedLanguageService: SharedLanguageService;
 	#compilerOptions: ts.CompilerOptions;
 	#context: LinterContext;
 	#workspace: AbstractAdapter;
 	#filePathsWorkspace: AbstractAdapter;
 
-	constructor({workspace, filePathsWorkspace, context}: LinterParameters) {
+	constructor(
+		{workspace, filePathsWorkspace, context}: LinterParameters,
+		sharedLanguageService: SharedLanguageService
+	) {
+		this.#sharedLanguageService = sharedLanguageService;
 		this.#context = context;
 		this.#workspace = workspace;
 		this.#filePathsWorkspace = filePathsWorkspace;
@@ -98,11 +104,16 @@ export default class TypeChecker {
 			}
 		}
 
-		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
+		const projectScriptVersion = this.#sharedLanguageService.getNextProjectScriptVersion();
+
+		const host = await createVirtualLanguageServiceHost(
+			this.#compilerOptions, files, sourceMaps, this.#context, projectScriptVersion
+		);
+
+		this.#sharedLanguageService.acquire(host);
 
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
-		const program = ts.createProgram(
-			allResources.map((resource) => resource.getPath()), this.#compilerOptions, host);
+		const program = this.#sharedLanguageService.getProgram();
 		createProgramDone();
 
 		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
@@ -143,26 +154,21 @@ export default class TypeChecker {
 		}
 		typeCheckDone();
 
+		this.#sharedLanguageService.release();
+
 		if (process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES) {
 			// If requested, write out every resource that has a source map (which indicates it has been transformed)
 			// Loop over sourceMaps set
 			for (const [resourcePath, sourceMap] of sourceMaps) {
-				let fileContent = files.get(resourcePath);
-
-				if (typeof fileContent === "function") {
-					fileContent = fileContent();
-				}
+				const fileContent = files.get(resourcePath);
 				if (fileContent) {
 					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 						resourcePath, fileContent, sourceMap);
 				}
 			}
 			// Although not being a typical transformed source, write out the byId dts file for debugging purposes
-			let byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
+			const byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
 			if (byIdDts) {
-				if (typeof byIdDts === "function") {
-					byIdDts = byIdDts();
-				}
 				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
 			}
