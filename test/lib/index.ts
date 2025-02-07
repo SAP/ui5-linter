@@ -1,149 +1,257 @@
 import anyTest, {TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import esmock from "esmock";
-import path from "node:path";
-import {fileURLToPath} from "node:url";
-import {
-	esmockDeprecationText, preprocessLintResultsForSnapshot,
-} from "./linter/_linterHelper.js";
-import {LintResult} from "../../src/linter/LinterContext.js";
-import {UI5LinterOptions} from "../../src/index.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fixturesBasePath = path.join(__dirname, "..", "fixtures", "linter");
-const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
+import {ui5lint, Ui5LinterEngine} from "../../src/index.js";
+import {lintProject} from "../../src/linter/linter.js";
+import SharedLanguageService from "../../src/linter/ui5Types/SharedLanguageService.js";
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	ui5lint: SinonStub<[UI5LinterOptions?], Promise<LintResult[]>>;
+	lintProjectStub: SinonStub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>;
+	ui5lint: typeof ui5lint;
+	Ui5LinterEngine: typeof Ui5LinterEngine;
 }>;
 
-test.before(async (t) => {
+test.beforeEach(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
-	const {ui5lint} = await esmock("../../src/index.js", {
-		"../../src/linter/linter.js": await esmockDeprecationText(),
-	});
+	t.context.lintProjectStub =
+		t.context.sinon.stub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>().resolves([]);
 
-	t.context.ui5lint = ui5lint;
-});
-test.after.always((t) => {
-	t.context.sinon.restore();
-});
-
-// Test project fixtures individually
-test.serial("ui5lint API: Provide config as an object for com.ui5.troublesome.app", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const {ui5lint} = t.context;
-
-	const res = await ui5lint({
-		rootDir: projectPath,
-		ui5Config: {
-			specVersion: "3.0",
-			metadata: {
-				name: "com.ui5.troublesome.app",
-			},
-			type: "application",
-			framework: {
-				name: "OpenUI5",
-				version: "1.121.0",
-				libraries: [
-					{name: "sap.m"},
-					{name: "sap.ui.core"},
-					{name: "sap.landvisz"},
-				],
-			},
+	const {ui5lint, Ui5LinterEngine} = await esmock("../../src/index.js", {
+		"../../src/linter/linter.js": {
+			lintProject: t.context.lintProjectStub,
 		},
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.context.ui5lint = ui5lint;
+	t.context.Ui5LinterEngine = Ui5LinterEngine;
+});
+test.afterEach.always((t) => {
+	t.context.sinon.restore();
 });
 
-test.serial("ui5lint API: Only /webapp folder from com.ui5.troublesome.app", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const filePaths = [
-		// Minimatch requires POSIX
-		"webapp/",
-	];
+test("ui5lint API: No arguments", async (t) => {
 	const {ui5lint} = t.context;
-
-	const res = await ui5lint({
-		rootDir: projectPath,
-		filePatterns: filePaths,
-	});
-
-	t.snapshot(preprocessLintResultsForSnapshot(res));
-});
-
-test.serial("ui5lint API: com.ui5.troublesome.app with unmatched patterns", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-
-	const {ui5lint} = t.context;
-
-	await t.throwsAsync(ui5lint({
-		rootDir: projectPath,
-		config: "ui5lint.config.unmatched-patterns.mjs",
-	}), {
-		message: `Specified file patterns 'unmatched-pattern1', ` +
-			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
-	});
-});
-
-test.serial("ui5lint API: Ignore webapp/controller folder from com.ui5.troublesome.app (with details & coverage)",
-	async (t) => {
-		const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-		const ignorePatterns = [
-			// Minimatch requires POSIX
-			"webapp/controller/",
-		];
-		const {ui5lint} = t.context;
-
-		const res = await ui5lint({
-			rootDir: projectPath,
-			ignorePatterns,
-			coverage: true,
-			details: true,
-		});
-
-		t.snapshot(preprocessLintResultsForSnapshot(res));
-	});
-
-test.serial("ui5lint API: Ignore config file for com.ui5.troublesome.app", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const {ui5lint} = t.context;
-
-	const res = await ui5lint({
-		rootDir: projectPath,
-		noConfig: true,
-		config: "ui5lint.config.unmatched-patterns.mjs",
-	});
-
-	t.snapshot(preprocessLintResultsForSnapshot(res));
-});
-
-test.serial("ui5lint API: Use defaults", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const {ui5lint, sinon} = t.context;
-	// Stub process.cwd(), so we have some app to test
-	sinon.stub(process, "cwd").returns(projectPath);
 
 	const res = await ui5lint();
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
-	sinon.restore();
+	t.deepEqual(res, []);
+
+	t.is(t.context.lintProjectStub.callCount, 1);
+	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(0).args[0], {
+		configPath: undefined,
+		coverage: false,
+		details: false,
+		filePatterns: undefined,
+		ignorePatterns: [],
+		noConfig: undefined,
+		rootDir: process.cwd(),
+		ui5Config: undefined,
+	});
+	t.true(t.context.lintProjectStub.getCall(0).args[1] instanceof SharedLanguageService);
 });
 
-test.serial("ui5lint API: Simultaneously test different projects", async (t) => {
-	const appPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const libPath = path.join(fixturesProjectsPath, "library.with.custom.paths");
+test("ui5lint API: Empty options", async (t) => {
 	const {ui5lint} = t.context;
 
-	const results = await Promise.all([
-		ui5lint({rootDir: appPath}),
-		ui5lint({rootDir: libPath}),
-	]);
+	const res = await ui5lint({});
 
-	results.forEach((res) => {
-		t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.deepEqual(res, []);
+
+	t.is(t.context.lintProjectStub.callCount, 1);
+	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(0).args[0], {
+		configPath: undefined,
+		coverage: false,
+		details: false,
+		filePatterns: undefined,
+		ignorePatterns: [],
+		noConfig: undefined,
+		rootDir: process.cwd(),
+		ui5Config: undefined,
 	});
+	t.true(t.context.lintProjectStub.getCall(0).args[1] instanceof SharedLanguageService);
+});
+
+test("ui5lint API: All options", async (t) => {
+	const {ui5lint} = t.context;
+
+	const res = await ui5lint({
+		filePatterns: ["webapp/**/*.xml"],
+		ignorePatterns: ["webapp/thirdparty/"],
+		details: true,
+		config: "ui5lint-foo.config.mjs",
+		noConfig: true,
+		coverage: true,
+		ui5Config: "ui5-lint.yaml",
+		rootDir: "/path/to/project",
+	});
+
+	t.deepEqual(res, []);
+
+	t.is(t.context.lintProjectStub.callCount, 1);
+	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(0).args[0], {
+		configPath: "ui5lint-foo.config.mjs",
+		coverage: true,
+		details: true,
+		filePatterns: ["webapp/**/*.xml"],
+		ignorePatterns: ["webapp/thirdparty/"],
+		noConfig: true,
+		rootDir: "/path/to/project",
+		ui5Config: "ui5-lint.yaml",
+	});
+	t.true(t.context.lintProjectStub.getCall(0).args[1] instanceof SharedLanguageService);
+});
+
+test("Ui5LinterEngine: Creating an instance", (t) => {
+	const engine = new Ui5LinterEngine();
+	t.true(engine instanceof Ui5LinterEngine);
+});
+
+test("Ui5LinterEngine: Calling 'lint'", async (t) => {
+	const {Ui5LinterEngine} = t.context;
+
+	const engine = new Ui5LinterEngine();
+
+	const results = await engine.lint({});
+
+	t.deepEqual(results, []);
+
+	t.is(t.context.lintProjectStub.callCount, 1);
+	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(0).args[0], {
+		configPath: undefined,
+		coverage: false,
+		details: false,
+		filePatterns: undefined,
+		ignorePatterns: [],
+		noConfig: undefined,
+		rootDir: process.cwd(),
+		ui5Config: undefined,
+	});
+	const sharedLanguageService = t.context.lintProjectStub.getCall(0).args[1];
+	t.true(sharedLanguageService instanceof SharedLanguageService);
+
+	// @ts-expect-error access of private property for testing purposes
+	t.is(sharedLanguageService, engine.sharedLanguageService);
+});
+
+test("Ui5LinterEngine: Calling 'lint' twice before first run is finished", async (t) => {
+	const {Ui5LinterEngine} = t.context;
+
+	const engine = new Ui5LinterEngine();
+
+	const firstLintRun = engine.lint({});
+	const secondLintRun = engine.lint({});
+
+	await t.throwsAsync(secondLintRun, {
+		message: "Linting is already in progress",
+	});
+
+	const results = await firstLintRun;
+	t.deepEqual(results, []);
+});
+
+test("Ui5LinterEngine: Calling 'lint' multiple times", async (t) => {
+	const {Ui5LinterEngine} = t.context;
+
+	const engine = new Ui5LinterEngine();
+
+	const firstLintResults = await engine.lint({
+		filePatterns: ["webapp/**/*.xml"],
+		ignorePatterns: ["webapp/thirdparty/"],
+		details: true,
+		config: "ui5lint-foo.config.mjs",
+		noConfig: true,
+		coverage: true,
+		ui5Config: "ui5-lint.yaml",
+		rootDir: "/path/to/project",
+	});
+
+	t.deepEqual(firstLintResults, []);
+
+	t.is(t.context.lintProjectStub.callCount, 1);
+	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(0).args[0], {
+		configPath: "ui5lint-foo.config.mjs",
+		coverage: true,
+		details: true,
+		filePatterns: ["webapp/**/*.xml"],
+		ignorePatterns: ["webapp/thirdparty/"],
+		noConfig: true,
+		rootDir: "/path/to/project",
+		ui5Config: "ui5-lint.yaml",
+	});
+	const firstLintSharedLanguageService = t.context.lintProjectStub.getCall(0).args[1];
+	t.true(firstLintSharedLanguageService instanceof SharedLanguageService);
+	// @ts-expect-error access of private property for testing purposes
+	t.is(firstLintSharedLanguageService, engine.sharedLanguageService);
+
+	const secondLintResults = await engine.lint();
+
+	t.deepEqual(secondLintResults, []);
+
+	t.is(t.context.lintProjectStub.callCount, 2);
+	t.is(t.context.lintProjectStub.getCall(1).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(1).args[0], {
+		configPath: undefined,
+		coverage: false,
+		details: false,
+		filePatterns: undefined,
+		ignorePatterns: [],
+		noConfig: undefined,
+		rootDir: process.cwd(),
+		ui5Config: undefined,
+	});
+	const secondLintSharedLanguageService = t.context.lintProjectStub.getCall(0).args[1];
+	t.true(secondLintSharedLanguageService instanceof SharedLanguageService);
+	// @ts-expect-error access of private property for testing purposes
+	t.is(secondLintSharedLanguageService, engine.sharedLanguageService);
+
+	// The shared language service should be the same for both runs
+	t.is(firstLintSharedLanguageService, secondLintSharedLanguageService);
+});
+
+test("Ui5LinterEngine: Calling 'lint' again after it failed", async (t) => {
+	const {Ui5LinterEngine} = t.context;
+
+	const engine = new Ui5LinterEngine();
+
+	t.context.lintProjectStub.onFirstCall().rejects(new Error("Something went wrong"));
+
+	await t.throwsAsync(engine.lint(), {
+		message: "Something went wrong",
+	});
+
+	const firstLintSharedLanguageService = t.context.lintProjectStub.getCall(0).args[1];
+	t.true(firstLintSharedLanguageService instanceof SharedLanguageService);
+	// @ts-expect-error access of private property for testing purposes
+	t.is(firstLintSharedLanguageService, engine.sharedLanguageService);
+
+	const secondLintResults = await engine.lint();
+
+	t.deepEqual(secondLintResults, []);
+
+	t.is(t.context.lintProjectStub.callCount, 2);
+	t.is(t.context.lintProjectStub.getCall(1).args.length, 2);
+	t.deepEqual(t.context.lintProjectStub.getCall(1).args[0], {
+		configPath: undefined,
+		coverage: false,
+		details: false,
+		filePatterns: undefined,
+		ignorePatterns: [],
+		noConfig: undefined,
+		rootDir: process.cwd(),
+		ui5Config: undefined,
+	});
+	const secondLintSharedLanguageService = t.context.lintProjectStub.getCall(0).args[1];
+	t.true(secondLintSharedLanguageService instanceof SharedLanguageService);
+	// @ts-expect-error access of private property for testing purposes
+	t.is(secondLintSharedLanguageService, engine.sharedLanguageService);
+
+	// The shared language service should be the same for both runs
+	t.is(firstLintSharedLanguageService, secondLintSharedLanguageService);
 });
