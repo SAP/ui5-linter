@@ -57,7 +57,7 @@ class EmptyLanguageServiceHost implements ts.LanguageServiceHost {
 	}
 
 	getScriptVersion() {
-		return "";
+		return "0";
 	}
 
 	getScriptSnapshot() {
@@ -69,7 +69,7 @@ class EmptyLanguageServiceHost implements ts.LanguageServiceHost {
 	}
 
 	readFile() {
-		return "";
+		return undefined;
 	}
 
 	getCurrentDirectory() {
