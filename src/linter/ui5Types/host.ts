@@ -6,6 +6,7 @@ import {createRequire} from "node:module";
 import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
 import LinterContext, {ResourcePath} from "../LinterContext.js";
 import {getLogger} from "@ui5/logger";
+import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 const log = getLogger("linter:ui5Types:host");
 const require = createRequire(import.meta.url);
 
@@ -189,8 +190,9 @@ export async function createVirtualLanguageServiceHost(
 			if (silly) {
 				log.silly(`getScriptVersion: ${fileName}`);
 			}
-			if (fileName.startsWith("/types/")) {
+			if (fileName.startsWith("/types/") && fileName !== CONTROLLER_BY_ID_DTS_PATH) {
 				// All types should be cached forever as they can be shared across projects
+				// except for the ControllerById.d.ts file which is generated per project
 				return "0";
 			}
 			// Currently we don't use incremental compilation within a project, so
