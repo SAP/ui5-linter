@@ -47,25 +47,33 @@ export interface UI5LinterOptions {
 }
 
 export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]> {
-	const {
-		filePatterns,
-		ignorePatterns = [],
-		details = false,
-		config,
-		noConfig,
-		coverage = false,
-		ui5Config,
-		rootDir = process.cwd(),
-	} = options ?? {};
+	return new Ui5LinterEngine().lint(options);
+}
 
-	return lintProject({
-		rootDir,
-		filePatterns,
-		ignorePatterns,
-		coverage,
-		details,
-		configPath: config,
-		noConfig,
-		ui5Config,
-	}, new SharedLanguageService());
+export class Ui5LinterEngine {
+	private sharedLanguageService = new SharedLanguageService();
+
+	async lint(options?: UI5LinterOptions): Promise<LintResult[]> {
+		const {
+			filePatterns,
+			ignorePatterns = [],
+			details = false,
+			config,
+			noConfig,
+			coverage = false,
+			ui5Config,
+			rootDir = process.cwd(),
+		} = options ?? {};
+
+		return lintProject({
+			rootDir,
+			filePatterns,
+			ignorePatterns,
+			coverage,
+			details,
+			configPath: config,
+			noConfig,
+			ui5Config,
+		}, this.sharedLanguageService);
+	}
 }
