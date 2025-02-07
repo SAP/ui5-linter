@@ -75,7 +75,8 @@ export type FileContents = Map<ResourcePath, string | (() => string)>;
 export async function createVirtualLanguageServiceHost(
 	options: ts.CompilerOptions,
 	files: FileContents, sourceMaps: FileContents,
-	context: LinterContext
+	context: LinterContext,
+	projectScriptVersion: string
 ): Promise<ts.LanguageServiceHost> {
 	const silly = log.isLevelEnabled("silly");
 
@@ -171,9 +172,6 @@ export async function createVirtualLanguageServiceHost(
 		log.silly(`compilerOptions: ${JSON.stringify(options, null, 2)}`);
 	}
 
-	// TODO: Check if this is necessary and/or needed at all for invalidation
-	const scriptVersionPrefix = Math.random().toString() + "-";
-
 	return {
 
 		getCompilationSettings: () => {
@@ -191,12 +189,16 @@ export async function createVirtualLanguageServiceHost(
 			if (silly) {
 				log.silly(`getScriptVersion: ${fileName}`);
 			}
+			if (fileName.startsWith("/types/")) {
+				// All types should be cached forever as they can be shared across projects
+				return "0";
+			}
 			// Currently we don't use incremental compilation within a project, so
 			// updating the script version is not necessary.
 			// However, as the language service is shared across multiple projects, we need
 			// to provide a version that is unique for each project to avoid impacting other
 			// projects that might use the same file path.
-			return scriptVersionPrefix + (options.rootDir ?? "0");
+			return projectScriptVersion;
 		},
 
 		getScriptSnapshot: (fileName) => {

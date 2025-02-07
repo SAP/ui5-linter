@@ -5,6 +5,7 @@ export default class SharedLanguageService {
 	private readonly languageServiceHostProxy: LanguageServiceHostProxy;
 	private readonly languageService: ts.LanguageService;
 	private acquired = false;
+	private projectScriptVersion = 0;
 
 	constructor() {
 		this.languageServiceHostProxy = new LanguageServiceHostProxy();
@@ -42,5 +43,10 @@ export default class SharedLanguageService {
 		this.languageServiceHostProxy.setHost(null);
 
 		this.acquired = false;
+	}
+
+	getNextProjectScriptVersion() {
+		this.projectScriptVersion++;
+		return this.projectScriptVersion.toString();
 	}
 }

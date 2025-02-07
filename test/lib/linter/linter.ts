@@ -18,7 +18,7 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
 	lintProject: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
-	sharedLanguageService: SharedLanguageService;
+	sharedLanguageService: SharedLanguageService; // Will be provided by _linterHelper
 }>;
 
 test.before(async (t) => {
@@ -26,8 +26,6 @@ test.before(async (t) => {
 
 	const {lintModule: {lintProject}} = await esmockDeprecationText();
 	t.context.lintProject = lintProject;
-
-	t.context.sharedLanguageService = new SharedLanguageService();
 });
 test.after.always((t) => {
 	t.context.sinon.restore();

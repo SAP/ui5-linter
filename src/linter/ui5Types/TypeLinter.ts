@@ -104,7 +104,9 @@ export default class TypeChecker {
 			}
 		}
 
-		const host = await createVirtualLanguageServiceHost(this.#compilerOptions, files, sourceMaps, this.#context);
+		const projectScriptVersion = this.#sharedLanguageService.getNextProjectScriptVersion();
+
+		const host = await createVirtualLanguageServiceHost(this.#compilerOptions, files, sourceMaps, this.#context, projectScriptVersion);
 
 		this.#sharedLanguageService.acquire(host);
 

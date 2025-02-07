@@ -8,17 +8,20 @@ import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
 import {SourceFile, TypeChecker} from "typescript";
 import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
+import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	lintFile: SinonStub<[LinterOptions], Promise<LintResult[]>>;
+	lintFile: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
+	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
 
 test.before(async (t) => {
 	const {lintModule: {lintFile}} = await esmockDeprecationText();
 	t.context.lintFile = lintFile;
+	t.context.sharedLanguageService = new SharedLanguageService();
 });
 
 // Mock getDeprecationText as we do not have control over the deprecated texts and they could
@@ -146,7 +149,7 @@ function testDefinition(
 			filePatterns: filePaths,
 			coverage: true,
 			details: true,
-		});
+		}, t.context.sharedLanguageService);
 		assertExpectedLintResults(t, res, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
 

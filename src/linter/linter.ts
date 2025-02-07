@@ -90,7 +90,8 @@ export async function lintProject({
 
 export async function lintFile({
 	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, configPath, noConfig,
-}: LinterOptions): Promise<LintResult[]> {
+}: LinterOptions, sharedLanguageService: SharedLanguageService
+): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
 		const configMngr = new ConfigManager(rootDir, configPath);
@@ -102,9 +103,6 @@ export async function lintFile({
 		fsBasePath: rootDir,
 		virBasePath,
 	});
-
-	// TODO: Refactor lintFile
-	const sharedLanguageService = new SharedLanguageService();
 
 	const res = await lint(reader, {
 		rootDir,
