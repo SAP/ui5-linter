@@ -10,10 +10,10 @@
 		"**/*.d.ts"
 	],
 	"check-coverage": true,
-	"statements": 87,
-	"branches": 79,
-	"functions": 94,
-	"lines": 87,
+	"statements": 89,
+	"branches": 82,
+	"functions": 95,
+	"lines": 89,
 	"watermarks": {
 		"statements": [70, 90],
 		"branches": [70, 90],
