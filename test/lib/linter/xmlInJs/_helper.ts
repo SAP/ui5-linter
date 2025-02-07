@@ -2,7 +2,7 @@ import anyTest, {TestFn} from "ava";
 import sinonGlobal from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
-import {lintFile} from "../../../../src/linter/linter.js";
+import {ui5lint} from "../../../../src/index.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -41,7 +41,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				// const fileContent = await fs.readFile(filePath);
 				// const extractedResource = extractXMLFromJs(testName, fileContent.toString());
 
-				const resources = await lintFile({
+				const resources = await ui5lint({
 					rootDir: fixturesPath,
 					filePatterns: [fileName],
 					coverage: true,
