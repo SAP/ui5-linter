@@ -1,5 +1,6 @@
 import {lintProject} from "./linter/linter.js";
 import type {LintResult} from "./linter/LinterContext.js";
+import SharedLanguageService from "./linter/ui5Types/SharedLanguageService.js";
 
 export type {LintResult} from "./linter/LinterContext.js";
 
@@ -66,5 +67,5 @@ export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]>
 		configPath: config,
 		noConfig,
 		ui5Config,
-	});
+	}, new SharedLanguageService());
 }

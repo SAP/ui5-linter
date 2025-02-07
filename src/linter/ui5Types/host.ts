@@ -72,11 +72,11 @@ function addSapui5TypesMappingToCompilerOptions(
 
 export type FileContents = Map<ResourcePath, string | (() => string)>;
 
-export async function createVirtualCompilerHost(
+export async function createVirtualLanguageServiceHost(
 	options: ts.CompilerOptions,
 	files: FileContents, sourceMaps: FileContents,
 	context: LinterContext
-): Promise<ts.CompilerHost> {
+): Promise<ts.LanguageServiceHost> {
 	const silly = log.isLevelEnabled("silly");
 
 	options.typeRoots = ["/types"];
@@ -171,8 +171,45 @@ export async function createVirtualCompilerHost(
 		log.silly(`compilerOptions: ${JSON.stringify(options, null, 2)}`);
 	}
 
-	const sourceFileCache = new Map<string, ts.SourceFile>();
+	// TODO: Check if this is necessary and/or needed at all for invalidation
+	const scriptVersionPrefix = Math.random().toString() + "-";
+
 	return {
+
+		getCompilationSettings: () => {
+			return options;
+		},
+
+		getScriptFileNames: () => {
+			if (silly) {
+				log.silly(`getScriptFileNames`);
+			}
+			return Array.from(files.keys());
+		},
+
+		getScriptVersion: (fileName) => {
+			if (silly) {
+				log.silly(`getScriptVersion: ${fileName}`);
+			}
+			// Currently we don't use incremental compilation within a project, so
+			// updating the script version is not necessary.
+			// However, as the language service is shared across multiple projects, we need
+			// to provide a version that is unique for each project to avoid impacting other
+			// projects that might use the same file path.
+			return scriptVersionPrefix + (options.rootDir ?? "0");
+		},
+
+		getScriptSnapshot: (fileName) => {
+			if (silly) {
+				log.silly(`getScriptSnapshot: ${fileName}`);
+			}
+			const fileContent = getFile(fileName);
+			if (typeof fileContent === "string") {
+				return ts.ScriptSnapshot.fromString(fileContent);
+			}
+			return undefined;
+		},
+
 		directoryExists: (directory) => {
 			if (silly) {
 				log.silly(`directoryExists: ${directory}`);
@@ -245,24 +282,6 @@ export async function createVirtualCompilerHost(
 				return posixPath.dirname(filePath) === dirPath;
 			});
 		},
-		getSourceFile: (
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) => {
-			if (silly) {
-				log.silly(`getSourceFile: ${fileName}`);
-			}
-			if (sourceFileCache.has(fileName)) {
-				return sourceFileCache.get(fileName);
-			}
-			const sourceText = getFile(fileName);
-			if (sourceText === undefined) {
-				throw new Error(`File not found: ${fileName}`);
-			}
-
-			const sourceFile = ts.createSourceFile(fileName, sourceText, languageVersion);
-			sourceFileCache.set(fileName, sourceFile);
-			return sourceFile;
-		},
 		readFile: (fileName) => {
 			if (silly) {
 				log.silly(`readFile: ${fileName}`);
@@ -275,11 +294,10 @@ export async function createVirtualCompilerHost(
 			notImplemented("write");
 			// files.set(fileName, contents);
 		},
-		getCanonicalFileName: (fileName) => fileName,
 		getDefaultLibFileName: (defaultLibOptions: ts.CompilerOptions) => {
-			return ts.getDefaultLibFileName(defaultLibOptions);
+			const defaultLibFileName = ts.getDefaultLibFileName(defaultLibOptions);
+			return "/types/typescript/lib/" + defaultLibFileName;
 		},
-		getDefaultLibLocation: () => "/types/typescript/lib",
 		getNewLine: () => "\n",
 		useCaseSensitiveFileNames: () => true,
 	};

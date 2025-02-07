@@ -1,5 +1,4 @@
 import {Argv, ArgumentsCamelCase, CommandModule, MiddlewareFunction} from "yargs";
-import {lintProject} from "../linter/linter.js";
 import {Text} from "../formatter/text.js";
 import {Json} from "../formatter/json.js";
 import {Markdown} from "../formatter/markdown.js";
@@ -10,6 +9,7 @@ import chalk from "chalk";
 import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 import {getVersion} from "./version.js";
+import {ui5lint} from "../index.js";
 
 export interface LinterArg {
 	coverage: boolean;
@@ -152,13 +152,13 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	const reportCoverage = !!(process.env.UI5LINT_COVERAGE_REPORT ?? coverage);
 
-	const res = await lintProject({
+	const res = await ui5lint({
 		rootDir,
 		ignorePatterns,
 		filePatterns,
 		coverage: reportCoverage,
 		details,
-		configPath: config,
+		config,
 		ui5Config,
 	});
 

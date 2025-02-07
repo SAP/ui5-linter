@@ -7,7 +7,8 @@ import {
 	createTestsForFixtures, assertExpectedLintResults,
 	esmockDeprecationText, preprocessLintResultsForSnapshot,
 } from "./_linterHelper.js";
-import {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
+import type {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
+import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "..", "fixtures", "linter");
@@ -16,7 +17,8 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	lintProject: SinonStub<[LinterOptions], Promise<LintResult[]>>;
+	lintProject: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
+	sharedLanguageService: SharedLanguageService;
 }>;
 
 test.before(async (t) => {
@@ -24,6 +26,8 @@ test.before(async (t) => {
 
 	const {lintModule: {lintProject}} = await esmockDeprecationText();
 	t.context.lintProject = lintProject;
+
+	t.context.sharedLanguageService = new SharedLanguageService();
 });
 test.after.always((t) => {
 	t.context.sinon.restore();
@@ -42,7 +46,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 		filePatterns: [],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -60,7 +64,7 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: filePaths,
-	});
+	}, t.context.sharedLanguageService);
 
 	assertExpectedLintResults(t, res, projectPath, [
 		path.join("webapp", "model", "models.js"),
@@ -83,7 +87,7 @@ test.serial("lint: Only /webapp folder from com.ui5.troublesome.app (without det
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: filePaths,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -99,7 +103,7 @@ test.serial("lint: One file of com.ui5.troublesome.app (without details / covera
 	const res = await lintProject({
 		rootDir: projectPath,
 		filePatterns: filePaths,
-	});
+	}, t.context.sharedLanguageService);
 
 	assertExpectedLintResults(t, res, projectPath, [
 		// Comparing files requires platform specific separators,
@@ -118,7 +122,7 @@ test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) =
 	await t.throwsAsync(lintProject({
 		rootDir: projectPath,
 		configPath: "ui5lint.config.unmatched-patterns.mjs",
-	}), {
+	}, t.context.sharedLanguageService), {
 		message: `Specified file patterns 'unmatched-pattern1', ` +
 			`'unmatched-pattern2', 'unmatched-pattern3' did not match any resource`,
 	});
@@ -132,7 +136,7 @@ test.serial("lint: com.ui5.troublesome.app with files property in ui5lint.config
 	const res = await lintProject({
 		rootDir: projectPath,
 		configPath: "ui5lint.config.matched-patterns.mjs",
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -146,7 +150,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 		filePatterns: [],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -165,7 +169,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 			"!src/main/",
 			"./ui5.yaml", // Relative paths starting with "./" should match the same as without it
 		],
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -179,7 +183,7 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 		filePatterns: [],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -197,7 +201,7 @@ test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) =
 		filePatterns: [],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -211,7 +215,7 @@ test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
 		filePatterns: ["src/ui5loader.js"],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -225,7 +229,7 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 		filePatterns: [],
 		coverage: true,
 		details: true,
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -240,7 +244,7 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 		coverage: true,
 		details: true,
 		configPath: "./ui5lint-custom.config.cjs",
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -255,7 +259,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 		coverage: true,
 		details: true,
 		ui5Config: "./configs/ui5-custom.yaml",
-	});
+	}, t.context.sharedLanguageService);
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 });
@@ -271,7 +275,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT
 		coverage: true,
 		details: true,
 		ui5Config,
-	}), {message: `Unable to find UI5 config file '${ui5Config}'`});
+	}, t.context.sharedLanguageService), {message: `Unable to find UI5 config file '${ui5Config}'`});
 });
 
 test.serial("lint: getProjectGraph with different directory structures", async (t) => {
@@ -436,6 +440,6 @@ test.serial("lint: Relative rootDir path throws an exception", async (t) => {
 			filePatterns: [],
 			coverage: true,
 			details: true,
-		});
+		}, t.context.sharedLanguageService);
 	});
 });
