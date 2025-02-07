@@ -4,28 +4,12 @@ import transpileXml from "./transpiler.js";
 import {LinterParameters} from "../LinterContext.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import {ControllerByIdDtsGenerator} from "./generator/ControllerByIdDtsGenerator.js";
-import {extractXMLFromJs, fixSourceMapIndices} from "../xmlInJs/transpile.js";
-import {type SourceMapInput} from "@jridgewell/trace-mapping";
+import { decodedMap, DecodedSourceMap, SourceMapInput, TraceMap } from "@jridgewell/trace-mapping";
 
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
 export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
-	// Get all JS/TS resources and extract eventual XML snippets from them
-	const jsTsResources = await Promise.all((await filePathsWorkspace.byGlob("**/*.{js,ts}"))
-		.map(async (resource) => extractXMLFromJs(resource.getPath(), await resource.getString())));
-
-	const xmlFromJsResources = jsTsResources
-		.flatMap((res) => res).filter((resource) => !!resource?.xmlSnippet.xml);
-
-	// Record those snippets as "virtual" resources in the workspace,
-	// so that they can be transpiled & linted by the XML linter
-	await Promise.all(xmlFromJsResources.map((resource) =>
-		filePathsWorkspace.write(createResource({
-			path: resource!.path,
-			string: resource!.xmlSnippet.xml,
-		}))));
-
 	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
 
 	const controllerByIdInfo = new ControllerByIdInfo();
@@ -38,19 +22,19 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		const {source, map} = res;
 		const resourcePath = resource.getPath();
 
-		const xmlFromJsResource = xmlFromJsResources.find((res) => res!.path === resourcePath);
+		const metadata = context.getMetadata(resourcePath);
 		let xmlFromJsResourceMap;
-		if (xmlFromJsResource?.originalPath) {
-			xmlFromJsResourceMap = JSON.parse(map) as SourceMapInput;
-			const {pos} = xmlFromJsResource.xmlSnippet;
-			// If it's an XML snippet extracted from a JS file, adjust the source map positions
-			// as they positions are relative to the extracted string, not to the real position in the JS file.
-			// Add that missing line shift from the original JS file to the source map.
-			xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
-			// Replace the name of the source file in the source map with the original JS file name,
-			// so that reporter will lead to the correct file.
-			xmlFromJsResourceMap.sources.splice(0, 1, xmlFromJsResource.originalPath.split("/").pop() ?? null);
-		}
+		// if (metadata.jsToXmlPosMapping) {
+		// 	xmlFromJsResourceMap = JSON.parse(map) as DecodedSourceMap;
+		// 	const {pos} = metadata.jsToXmlPosMapping;
+		// 	// If it's an XML snippet extracted from a JS file, adjust the source map positions
+		// 	// as they positions are relative to the extracted string, not to the real position in the JS file.
+		// 	// Add that missing line shift from the original JS file to the source map.
+		// 	xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
+		// 	// Replace the name of the source file in the source map with the original JS file name,
+		// 	// so that reporter will lead to the correct file.
+		// 	xmlFromJsResourceMap.sources.splice(0, 1, metadata.jsToXmlPosMapping.originalPath.split("/").pop() ?? null);
+		// }
 
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
@@ -84,4 +68,19 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		});
 		await workspace.write(dtsResource);
 	}
+}
+
+function fixSourceMapIndices(map: SourceMapInput, lineShift = 0, columnShift = 0): DecodedSourceMap {
+	const decodedTraceMap = decodedMap(new TraceMap(map));
+	const {mappings} = decodedTraceMap;
+
+	const newMappings = mappings.map((segment) =>
+		segment.map(([genCol, srcIndex, origLine, origCol, nameIndex]) => {
+			return (srcIndex !== undefined ?
+					[genCol + columnShift, srcIndex, origLine! + lineShift, origCol! + columnShift, nameIndex] :
+					[genCol + columnShift]);
+		})
+	);
+
+	return {...decodedTraceMap, mappings: newMappings};
 }

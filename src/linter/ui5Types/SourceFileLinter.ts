@@ -22,6 +22,8 @@ import {findDirectives} from "./directives.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import BindingParser, {PropertyBindingInfo} from "../binding/lib/BindingParser.js";
+import {createResource} from "@ui5/fs/resourceFactory";
+import {AbstractAdapter} from "@ui5/fs";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -67,6 +69,7 @@ export default class SourceFileLinter {
 	#isComponent: boolean;
 	#hasTestStarterFindings: boolean;
 	#metadata: LintMetadata;
+	#xmlContents: {xml: string; pos: ts.LineAndCharacter}[];
 
 	constructor(
 		private context: LinterContext,
@@ -77,6 +80,8 @@ export default class SourceFileLinter {
 		private reportCoverage = false,
 		private messageDetails = false,
 		private apiExtract: ApiExtract,
+		// private workspace: AbstractAdapter,
+		private filePathsWorkspace: AbstractAdapter,
 		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -86,6 +91,7 @@ export default class SourceFileLinter {
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.context.getMetadata(this.resourcePath);
+		this.#xmlContents = [];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -101,6 +107,21 @@ export default class SourceFileLinter {
 			if (this.sourceFile.fileName.endsWith(".qunit.js") && // TS files do not have sap.ui.define
 				!this.#metadata?.transformedImports?.get("sap.ui.define")) {
 				this.#reportTestStarter(this.sourceFile);
+			}
+
+			let i = 0;
+			for (const xmlContent of this.#xmlContents) {
+				const fileName = `${this.sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${++i}.view.xml`;
+				const metadata = this.context.getMetadata(fileName);
+				metadata.jsToXmlPosMapping = {
+					pos: xmlContent.pos,
+					originalPath: this.sourceFile.fileName,
+				};
+
+				await this.filePathsWorkspace.write(createResource({
+					path: fileName,
+					string: xmlContent.xml,
+				}));
 			}
 
 			this.#reporter.deduplicateMessages();
@@ -178,6 +199,19 @@ export default class SourceFileLinter {
 			this.analyzeControlRerenderMethod(node);
 		} else if (ts.isPropertyAssignment(node) && getPropertyNameText(node.name) === "theme") {
 			this.analyzeTestsuiteThemeProperty(node);
+		} else if (ts.isObjectLiteralExpression(node)) {
+			node.properties.forEach((prop) => {
+				if (ts.isPropertyAssignment(prop) &&
+					ts.isIdentifier(prop.name) &&
+					ts.isStringLiteralLike(prop.initializer) &&
+					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
+					// TODO: Identify the type of the object
+					this.#xmlContents.push({
+						xml: prop.initializer.text,
+						pos: this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos),
+					});
+				}
+			});
 		}
 
 		// Traverse the whole AST from top to bottom

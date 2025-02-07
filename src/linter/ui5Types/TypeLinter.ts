@@ -8,7 +8,7 @@ import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
-import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
+import lintXml, {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 import type SharedLanguageService from "./SharedLanguageService.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
@@ -75,11 +75,8 @@ export default class TypeChecker {
 		}
 	}
 
-	async lint() {
+	async getProgram(host: ts.CompilerHost, files: FileContents, sourceMaps: FileContents) {
 		const silly = log.isLevelEnabled("silly");
-		const files: FileContents = new Map();
-		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
-
 		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const filteredResources = await this.#filePathsWorkspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const pathsToLint = filteredResources.map((resource) => resource.getPath());
@@ -120,7 +117,16 @@ export default class TypeChecker {
 		const checker = program.getTypeChecker();
 		getTypeCheckerDone();
 
+		return {program, checker, pathsToLint};
+	}
+
+	async lint() {
+		const silly = log.isLevelEnabled("silly");
+		const files: FileContents = new Map();
+		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 		const apiExtract = await loadApiExtract();
+		const host = await createVirtualCompilerHost(this.#compilerOptions, files, sourceMaps, this.#context);
+		let {program, checker, pathsToLint} = await this.getProgram(host, files, sourceMaps);
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
@@ -146,7 +152,28 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails,
-					apiExtract, manifestContent
+					apiExtract, this.#filePathsWorkspace, manifestContent
+				);
+				await linter.lint();
+				linterDone();
+			}
+		}
+
+		// Will eventually produce new JS files for XML views and fragments
+		await lintXml({
+			filePathsWorkspace: this.#filePathsWorkspace,
+			workspace: this.#workspace,
+			context: this.#context,
+		});
+		({program, checker} = await this.getProgram(host, files, sourceMaps));
+		for (const sourceFile of program.getSourceFiles()) {
+			if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.view\.js/.exec(sourceFile.fileName)) {
+				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
+				const linter = new SourceFileLinter(
+					this.#context, sourceFile.fileName,
+					sourceFile, sourceMaps,
+					checker, reportCoverage, messageDetails,
+					apiExtract, this.#filePathsWorkspace
 				);
 				await linter.lint();
 				linterDone();
