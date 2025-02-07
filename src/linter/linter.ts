@@ -10,7 +10,7 @@ import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
-import SharedLanguageService from "./ui5Types/SharedLanguageService.js";
+import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePatterns, coverage, details, configPath, ui5Config, noConfig,

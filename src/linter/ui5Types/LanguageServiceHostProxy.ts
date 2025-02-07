@@ -1,7 +1,7 @@
 import ts from "typescript";
 
 export default class LanguageServiceHostProxy implements ts.LanguageServiceHost {
-	private emptyLanguageServiceHost: ts.LanguageServiceHost;
+	private readonly emptyLanguageServiceHost: ts.LanguageServiceHost;
 	private languageServiceHost: ts.LanguageServiceHost;
 
 	constructor() {
@@ -47,7 +47,7 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 	}
 }
 
-class EmptyLanguageServiceHost implements ts.LanguageServiceHost {
+export class EmptyLanguageServiceHost implements ts.LanguageServiceHost {
 	getCompilationSettings() {
 		return {};
 	}

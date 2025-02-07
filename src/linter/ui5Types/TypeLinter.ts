@@ -160,22 +160,15 @@ export default class TypeChecker {
 			// If requested, write out every resource that has a source map (which indicates it has been transformed)
 			// Loop over sourceMaps set
 			for (const [resourcePath, sourceMap] of sourceMaps) {
-				let fileContent = files.get(resourcePath);
-
-				if (typeof fileContent === "function") {
-					fileContent = fileContent();
-				}
+				const fileContent = files.get(resourcePath);
 				if (fileContent) {
 					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 						resourcePath, fileContent, sourceMap);
 				}
 			}
 			// Although not being a typical transformed source, write out the byId dts file for debugging purposes
-			let byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
+			const byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
 			if (byIdDts) {
-				if (typeof byIdDts === "function") {
-					byIdDts = byIdDts();
-				}
 				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
 			}
