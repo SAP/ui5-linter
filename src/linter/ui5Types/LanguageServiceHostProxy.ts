@@ -1,8 +1,10 @@
 import ts from "typescript";
+import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 
 export default class LanguageServiceHostProxy implements ts.LanguageServiceHost {
 	private readonly emptyLanguageServiceHost: ts.LanguageServiceHost;
 	private languageServiceHost: ts.LanguageServiceHost;
+	private scriptSnapshots: ts.MapLike<ts.IScriptSnapshot | undefined> = {};
 
 	constructor() {
 		this.emptyLanguageServiceHost = this.languageServiceHost = new EmptyLanguageServiceHost();
@@ -10,6 +12,11 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 
 	setHost(languageServiceHostImpl: ts.LanguageServiceHost | null) {
 		this.languageServiceHost = languageServiceHostImpl ?? this.emptyLanguageServiceHost;
+	}
+
+	private isSharedTypesFile(filePath: string) {
+		// ControllerById.d.ts file is generated per project and should not be treated as a shared file
+		return filePath.startsWith("/types/") && filePath !== CONTROLLER_BY_ID_DTS_PATH;
 	}
 
 	// ts.LanguageServiceHost implementation:
@@ -23,11 +30,22 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 	}
 
 	getScriptVersion(fileName: string) {
+		if (this.isSharedTypesFile(fileName)) {
+			// All types should be cached forever as they can be shared across projects
+			return "1";
+		}
 		return this.languageServiceHost.getScriptVersion(fileName);
 	}
 
 	getScriptSnapshot(fileName: string) {
-		return this.languageServiceHost.getScriptSnapshot(fileName);
+		if (this.scriptSnapshots[fileName]) {
+			return this.scriptSnapshots[fileName];
+		}
+		const scriptSnapshot = this.languageServiceHost.getScriptSnapshot(fileName);
+		if (this.isSharedTypesFile(fileName)) {
+			this.scriptSnapshots[fileName] = scriptSnapshot;
+		}
+		return scriptSnapshot;
 	}
 
 	fileExists(filePath: string) {
