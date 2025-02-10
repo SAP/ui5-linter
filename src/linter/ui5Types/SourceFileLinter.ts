@@ -267,6 +267,7 @@ export default class SourceFileLinter {
 			return [
 				"sap/ui/core/mvc/View",
 				"sap/ui/core/mvc/XMLView",
+				"sap/ui/core/Fragment",
 			].includes((potentialImport?.moduleSpecifier as ts.StringLiteral)?.text);
 		}
 
