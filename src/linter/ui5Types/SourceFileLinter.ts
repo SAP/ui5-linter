@@ -204,7 +204,8 @@ export default class SourceFileLinter {
 				if (ts.isPropertyAssignment(prop) &&
 					ts.isIdentifier(prop.name) &&
 					ts.isStringLiteralLike(prop.initializer) &&
-					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
+					["definition", "fragmentContent", "viewContent"].includes(prop.name.text) &&
+					this.isXMLInJsCreationCall(prop, prop.name.text)) {
 					const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
 					const traceMap = sourceMapJson ?
 						new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
@@ -216,7 +217,6 @@ export default class SourceFileLinter {
 					const originalPos = posInSource ?
 							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
 						pos;
-					// TODO: Identify the type of the object
 					this.#xmlContents.push({
 						xml: prop.initializer.text,
 						pos: originalPos,
@@ -227,6 +227,50 @@ export default class SourceFileLinter {
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
+	}
+
+	isXMLInJsCreationCall(node: ts.Node, methodName: string) {
+		const mainNode = node.parent.parent;
+
+		if (!ts.isCallExpression(mainNode)) {
+			return false;
+		}
+
+		const nameChunks = [];
+		let nameTraversalNode = mainNode.expression;
+		while (ts.isPropertyAccessExpression(nameTraversalNode)) {
+			nameChunks.unshift(nameTraversalNode.name.text);
+			nameTraversalNode = nameTraversalNode.expression;
+		}
+
+		let potentialGlobalName;
+		if (ts.isIdentifier(nameTraversalNode)) {
+			potentialGlobalName = nameTraversalNode.text;
+			nameChunks.unshift(potentialGlobalName);
+		}
+
+		if (!potentialGlobalName) {
+			return false;
+		}
+
+		const name = nameChunks.join(".");
+		if ((methodName === "definition" && ["sap.ui.view"].includes(name)) ||
+			(methodName === "viewContent" && ["sap.ui.xmlview", "sap.ui.view"].includes(name)) ||
+			(methodName === "fragmentContent" && ["sap.ui.fragment", "sap.ui.xmlfragment"].includes(name))) {
+			return true;
+		} else if (methodName === "definition" && ["create", "load"].includes(nameChunks[nameChunks.length - 1])) {
+			const potentialImport = this.sourceFile.statements.find((statement) => {
+				return ts.isImportDeclaration(statement) &&
+					statement.importClause?.name?.text === potentialGlobalName;
+			}) as ts.ImportDeclaration | undefined;
+
+			return [
+				"sap/ui/core/mvc/View",
+				"sap/ui/core/mvc/XMLView",
+			].includes((potentialImport?.moduleSpecifier as ts.StringLiteral)?.text);
+		}
+
+		return false;
 	}
 
 	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
