@@ -16,7 +16,7 @@ import {
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
-import {TraceMap} from "@jridgewell/trace-mapping";
+import {TraceMap, originalPositionFor} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
 import BindingLinter from "../binding/BindingLinter.js";
@@ -205,10 +205,19 @@ export default class SourceFileLinter {
 					ts.isIdentifier(prop.name) &&
 					ts.isStringLiteralLike(prop.initializer) &&
 					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
+					const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
+					const traceMap = sourceMapJson ? new TraceMap(JSON.parse(sourceMapJson)) : undefined;
+					const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
+					const posInSource = traceMap ?
+							originalPositionFor(traceMap, {line: pos.line + 1, column: pos.character + 1}) :
+						null;
+					const originalPos = posInSource ?
+							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
+						pos;
 					// TODO: Identify the type of the object
 					this.#xmlContents.push({
 						xml: prop.initializer.text,
-						pos: this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos),
+						pos: originalPos,
 					});
 				}
 			});
