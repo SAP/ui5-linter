@@ -16,7 +16,7 @@ import {
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
-import {TraceMap, originalPositionFor} from "@jridgewell/trace-mapping";
+import {SourceMapInput, TraceMap, originalPositionFor} from "@jridgewell/trace-mapping";
 import type {ApiExtract} from "../../utils/ApiExtract.js";
 import {findDirectives} from "./directives.js";
 import BindingLinter from "../binding/BindingLinter.js";
@@ -80,8 +80,8 @@ export default class SourceFileLinter {
 		private reportCoverage = false,
 		private messageDetails = false,
 		private apiExtract: ApiExtract,
-		// private workspace: AbstractAdapter,
 		private filePathsWorkspace: AbstractAdapter,
+		private workspace: AbstractAdapter,
 		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -113,15 +113,15 @@ export default class SourceFileLinter {
 			for (const xmlContent of this.#xmlContents) {
 				const fileName = `${this.sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${++i}.view.xml`;
 				const metadata = this.context.getMetadata(fileName);
+				const newResource = createResource({path: fileName, string: xmlContent.xml});
 				metadata.jsToXmlPosMapping = {
 					pos: xmlContent.pos,
 					originalPath: this.sourceFile.fileName,
 				};
-
-				await this.filePathsWorkspace.write(createResource({
-					path: fileName,
-					string: xmlContent.xml,
-				}));
+				await Promise.all([
+					await this.filePathsWorkspace.write(newResource),
+					await this.workspace.write(newResource),
+				]);
 			}
 
 			this.#reporter.deduplicateMessages();
@@ -206,7 +206,9 @@ export default class SourceFileLinter {
 					ts.isStringLiteralLike(prop.initializer) &&
 					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
 					const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
-					const traceMap = sourceMapJson ? new TraceMap(JSON.parse(sourceMapJson)) : undefined;
+					const traceMap = sourceMapJson ?
+						new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
+						undefined;
 					const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
 					const posInSource = traceMap ?
 							originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :

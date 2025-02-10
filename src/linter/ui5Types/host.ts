@@ -214,6 +214,7 @@ export async function createVirtualLanguageServiceHost(
 			}
 			return options.rootDir ?? "/";
 		},
+
 		readFile: (fileName) => {
 			if (silly) {
 				log.silly(`readFile: ${fileName}`);

@@ -146,7 +146,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails,
-					apiExtract, this.#filePathsWorkspace, manifestContent
+					apiExtract, this.#filePathsWorkspace, this.#workspace, manifestContent
 				);
 				await linter.lint();
 				linterDone();
@@ -182,7 +182,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails,
-					apiExtract, this.#filePathsWorkspace
+					apiExtract, this.#filePathsWorkspace, this.#workspace
 				);
 				await linter.lint();
 				linterDone();

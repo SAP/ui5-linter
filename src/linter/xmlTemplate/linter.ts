@@ -15,30 +15,36 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 	const controllerByIdInfo = new ControllerByIdInfo();
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
+		const resourcePath = resource.getPath();
+		const jsPath = resourcePath.replace(/\.xml$/, ".js");
+		const contextMeta = context.getMetadata(jsPath);
+		// This resource has already been transpiled & linted, so no need for duplicate linting
+		if (contextMeta.xmlCompiledResource) {
+			return;
+		}
+
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context, controllerByIdInfo);
 		if (!res) {
 			return;
 		}
 		const {source, map} = res;
-		const resourcePath = resource.getPath();
 
-		const metadata = context.getMetadata(resourcePath);
 		let xmlFromJsResourceMap;
+		const metadata = context.getMetadata(resourcePath);
 		if (metadata.jsToXmlPosMapping) {
 			xmlFromJsResourceMap = JSON.parse(map) as DecodedSourceMap;
 			const {pos} = metadata.jsToXmlPosMapping;
 			// If it's an XML snippet extracted from a JS file, adjust the source map positions
-			// as they positions are relative to the extracted string, not to the real position in the JS file.
+			// as these positions are relative to the extracted string, not to the real position in the JS file.
 			// Add that missing line shift from the original JS file to the source map.
 			xmlFromJsResourceMap = fixSourceMapIndices(xmlFromJsResourceMap, pos.line);
 			// Replace the name of the source file in the source map with the original JS file name,
-			// so that reporter will lead to the correct file.
+			// so that reporter will lead to the original source file.
 			xmlFromJsResourceMap.sources.splice(0, 1, metadata.jsToXmlPosMapping.originalPath.split("/").pop() ?? null);
 		}
 
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
-		const jsPath = resourcePath.replace(/\.xml$/, ".js");
 		const transpiledResource = createResource({
 			path: jsPath,
 			string: source,
@@ -54,7 +60,6 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		await workspace.write(transpiledResourceSourceMap);
 
 		// Stash information that this .js file is actually a transpiled XML.
-		const contextMeta = context.getMetadata(jsPath);
 		contextMeta.xmlCompiledResource = resourcePath;
 	}));
 
