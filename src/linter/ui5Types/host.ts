@@ -57,12 +57,12 @@ function addSapui5TypesMappingToCompilerOptions(
 			// - When linting a framework library, the corresponding types should be loaded by default as they
 			//   might not get loaded by the compiler otherwise, as the actual sources are available in the project.
 			options.types?.push(dtsPath);
-		} else {
-			// For other framework libraries we can add a paths mapping to load them on demand
-			const mappingNamespace = libraryNamespace + "/*";
-			const pathsEntry = paths[mappingNamespace] ?? (paths[mappingNamespace] = []);
-			pathsEntry.push(dtsPath);
 		}
+		// In every case, add a paths mapping to load them on demand and ensure loading them
+		// when the framework library itself is linted
+		const mappingNamespace = libraryNamespace + "/*";
+		const pathsEntry = paths[mappingNamespace] ?? (paths[mappingNamespace] = []);
+		pathsEntry.push(dtsPath);
 	});
 }
 
@@ -84,6 +84,11 @@ export async function createVirtualLanguageServiceHost(
 
 	const typePackages = new Set(["@sapui5/types"]);
 	await collectTransitiveDependencies("@sapui5/types", typePackages);
+
+	// Remove dependencies that are not needed for UI5 linter type checking:
+	typePackages.delete("@types/three"); // Used in sap.ui.vk, but is not needed for linter checks.
+	typePackages.delete("@types/offscreencanvas"); // Used by @types/three
+
 	typePackages.forEach((pkgName) => {
 		addPathMappingForPackage(pkgName, typePathMappings);
 	});
