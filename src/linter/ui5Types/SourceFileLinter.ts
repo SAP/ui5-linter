@@ -209,7 +209,7 @@ export default class SourceFileLinter {
 					const traceMap = sourceMapJson ? new TraceMap(JSON.parse(sourceMapJson)) : undefined;
 					const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
 					const posInSource = traceMap ?
-							originalPositionFor(traceMap, {line: pos.line + 1, column: pos.character + 1}) :
+							originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :
 						null;
 					const originalPos = posInSource ?
 							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :

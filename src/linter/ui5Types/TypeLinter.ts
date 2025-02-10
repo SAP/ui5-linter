@@ -160,9 +160,18 @@ export default class TypeChecker {
 			context: this.#context,
 		});
 		const virtualXMLResources =
-			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.view.{js,ts}");
+			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.view{.js,.ts,.js.map}");
 		for (const resource of virtualXMLResources) {
-			files.set(resource.getPath(), await resource.getString());
+			const resourcePath = resource.getPath();
+			if (resourcePath.endsWith(".js.map")) {
+				sourceMaps.set(
+					// Remove ".map" from path to have it reflect the associated source path
+					resourcePath.slice(0, -4),
+					await resource.getString()
+				);
+			} else {
+				files.set(resourcePath, await resource.getString());
+			}
 		}
 		program = this.#sharedLanguageService.getProgram();
 		checker = program.getTypeChecker();
