@@ -7,9 +7,9 @@ sap.ui.require([], () => {
 			<Button tap=".sayHello">
 		</core:FragmentDefinition>`,
 	});
-	
+
 	const fragment2 = sap.ui.xmlfragment({
-		fragmentContent: `<core:FragmentDefinition
+		"fragmentContent": `<core:FragmentDefinition
 		xmlns="sap.m"
 		xmlns:core="sap.ui.core">
 			<Button tap=".sayHello">

@@ -202,7 +202,7 @@ export default class SourceFileLinter {
 		} else if (ts.isObjectLiteralExpression(node)) {
 			node.properties.forEach((prop) => {
 				if (ts.isPropertyAssignment(prop) &&
-					ts.isIdentifier(prop.name) &&
+					(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
 					ts.isStringLiteralLike(prop.initializer) &&
 					["definition", "fragmentContent", "viewContent"].includes(prop.name.text) &&
 					this.isXMLInJsCreationCall(prop, prop.name.text)) {

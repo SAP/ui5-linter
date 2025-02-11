@@ -14,8 +14,8 @@ sap.ui.define(
 		});
 		oView.placeAt("content");
 
-		const oView2 = XMLView.create({
-			definition: `<mvc:View 
+		const oView2 = await XMLView.create({
+			"definition": `<mvc:View 
 		controllerName="ui5app.controller.Home" 
 		displayBlock="true"
 		xmlns="sap.m"

@@ -14,7 +14,7 @@ sap.ui.define([], () => {
 	
 	const oView2 = sap.ui.view({
 		type: "XML",
-		viewContent: `<mvc:View 
+		"viewContent": `<mvc:View 
 			controllerName="ui5app.controller.Home" 
 			displayBlock="true"
 			xmlns="sap.m"
@@ -34,5 +34,9 @@ sap.ui.define([], () => {
 			xmlns:core="sap.ui.core"> 
 				<Button tap=".sayHello">
 			</mvc:View>`,
+	});
+
+	sap.ui.xmlview({
+		viewContent: `<mvc:View controllerName="ui5app.controller.Home" displayBlock="true" xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core"><Button tap=".sayHello"></mvc:View>`,
 	});
 });
