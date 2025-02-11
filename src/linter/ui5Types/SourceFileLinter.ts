@@ -204,7 +204,8 @@ export default class SourceFileLinter {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
 					ts.isStringLiteralLike(prop.initializer) &&
-					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
+					["definition", "fragmentContent", "viewContent"].includes(prop.name.text) &&
+					this.isXmlInJsCreationCall(prop)) {
 					const viewType = this.getViewTypeFromXMLInJsCreationCall(prop, prop.name.text);
 					if (!viewType) {
 						return;
@@ -234,11 +235,47 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	getViewTypeFromXMLInJsCreationCall(node: ts.Node, methodName: string) {
-		const mainNode = node.parent.parent;
+	isXmlInJsCreationCall(node: ts.PropertyAssignment) {
+		if ((!ts.isIdentifier(node.name) && !ts.isStringLiteralLike(node.name)) ||
+			!["definition", "fragmentContent", "viewContent"].includes(node.name.text)) {
+			return false;
+		}
 
+		const callNode = node.parent.parent;
+		if (!ts.isCallExpression(callNode)) {
+			return false;
+		}
+
+		const globalName = this.getGlobalName(callNode);
+		if (!["sap.ui.view", "sap.ui.fragment"].includes(globalName)) {
+			const importedModuleVar = globalName.split(".")[0];
+			const potentialImport = this.sourceFile.statements.find((statement) => {
+				return ts.isImportDeclaration(statement) &&
+					statement.importClause?.name?.text === importedModuleVar;
+			}) as ts.ImportDeclaration | undefined;
+			const moduleImport = (potentialImport?.moduleSpecifier as ts.StringLiteral)?.text;
+
+			if (!["sap/ui/core/mvc/View", "sap/ui/core/Fragment"].includes(moduleImport)) {
+				return true;
+			}
+		}
+
+		if (ts.isObjectLiteralExpression(callNode.arguments[0])) {
+			const typeNode = callNode.arguments[0].properties.find((prop) =>
+				prop.name && ts.isIdentifier(prop.name) && prop.name.text === "type");
+
+			return typeNode &&
+				ts.isPropertyAssignment(typeNode) &&
+				ts.isStringLiteralLike(typeNode.initializer) &&
+				typeNode.initializer.text === "XML";
+		}
+
+		return false;
+	}
+
+	getGlobalName(mainNode: ts.Node) {
 		if (!ts.isCallExpression(mainNode)) {
-			return null;
+			return "";
 		}
 
 		const nameChunks = [];
@@ -253,23 +290,25 @@ export default class SourceFileLinter {
 			nameTraversalNode = nameTraversalNode.expression;
 		}
 
-		let potentialGlobalName;
 		if (ts.isIdentifier(nameTraversalNode)) {
-			potentialGlobalName = nameTraversalNode.text;
-			nameChunks.unshift(potentialGlobalName);
+			nameChunks.unshift(nameTraversalNode.text);
 		}
 
-		if (!potentialGlobalName) {
-			return null;
-		}
+		return nameChunks.join(".");
+	}
 
-		const name = nameChunks.join(".");
+	getViewTypeFromXMLInJsCreationCall(node: ts.Node, methodName: string) {
+		const name = this.getGlobalName(node.parent.parent);
+		const nameChunks = name.split(".");
+		const potentialGlobalName = nameChunks[0];
+		const callName = nameChunks[nameChunks.length - 1];
+
 		if ((methodName === "definition" && ["sap.ui.view"].includes(name)) ||
 			(methodName === "viewContent" && ["sap.ui.xmlview", "sap.ui.view"].includes(name))) {
 			return "view";
 		} else if ((methodName === "fragmentContent" && ["sap.ui.fragment", "sap.ui.xmlfragment"].includes(name))) {
 			return "fragment";
-		} else if (methodName === "definition" && ["create", "load"].includes(nameChunks[nameChunks.length - 1])) {
+		} else if (methodName === "definition" && ["create", "load"].includes(callName)) {
 			const potentialImport = this.sourceFile.statements.find((statement) => {
 				return ts.isImportDeclaration(statement) &&
 					statement.importClause?.name?.text === potentialGlobalName;
