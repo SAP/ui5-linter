@@ -169,6 +169,11 @@ export default class BindingLinter {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
 			if (typeof bindingInfo === "object") {
 				this.#analyzePropertyBinding(bindingInfo as PropertyBindingInfo, requireDeclarations, position);
+				if (bindingInfo.parts) {
+					for (const part of bindingInfo.parts) {
+						this.#analyzePropertyBinding(part, requireDeclarations, position);
+					}
+				}
 				if ("tokens" in bindingInfo) {
 					this.#lintExpressionBindingTokens(bindingInfo, requireDeclarations, position);
 				}
@@ -185,6 +190,11 @@ export default class BindingLinter {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
 			if (typeof bindingInfo === "object") {
 				this.#analyzeAggregationBinding(bindingInfo as AggregationBindingInfo, requireDeclarations, position);
+				if (bindingInfo.parts) {
+					for (const part of bindingInfo.parts) {
+						this.#analyzeAggregationBinding(part, requireDeclarations, position);
+					}
+				}
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);

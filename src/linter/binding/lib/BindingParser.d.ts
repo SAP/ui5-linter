@@ -19,11 +19,13 @@ export interface BindingInfoBase {
 	path?: string;
 	model?: string;
 	events?: Record<string, FunctionReference>;
+	parts?: BindingInfoBase[];
 }
 
 export interface PropertyBindingInfo extends BindingInfoBase {
 	formatter?: FunctionReference | FunctionReference[];
 	type?: FunctionReference;
+	parts?: PropertyBindingInfo[];
 }
 
 export interface AggregationBindingInfo extends BindingInfoBase {
@@ -31,6 +33,7 @@ export interface AggregationBindingInfo extends BindingInfoBase {
 	sorter?: SorterInfo | SorterInfo[];
 	factory?: FunctionReference;
 	groupHeaderFactory?: FunctionReference;
+	parts?: AggregationBindingInfo[];
 }
 
 interface ExpressionBindingToken {
