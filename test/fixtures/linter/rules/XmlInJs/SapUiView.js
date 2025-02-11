@@ -1,7 +1,7 @@
 sap.ui.define([], () => {
 	const oView = sap.ui.view({
 		type: "XML",
-		definition: `<mvc:View 
+		viewContent: `<mvc:View 
 			controllerName="ui5app.controller.Home" 
 			displayBlock="true"
 			xmlns="sap.m"
@@ -12,8 +12,7 @@ sap.ui.define([], () => {
 	});
 	oView.placeAt("content");
 	
-	const oView2 = sap.ui.view({
-		type: "XML",
+	const oView2 = sap.ui.xmlview({
 		"viewContent": `<mvc:View 
 			controllerName="ui5app.controller.Home" 
 			displayBlock="true"
@@ -24,19 +23,9 @@ sap.ui.define([], () => {
 			</mvc:View>`,
 	});
 	oView2.placeAt("content");
-	
-	sap.ui.xmlview({
-		viewContent: `<mvc:View 
-			controllerName="ui5app.controller.Home" 
-			displayBlock="true"
-			xmlns="sap.m"
-			xmlns:mvc="sap.ui.core.mvc"
-			xmlns:core="sap.ui.core"> 
-				<Button tap=".sayHello">
-			</mvc:View>`,
-	});
 
-	sap.ui.xmlview({
+	const oView3 = sap.ui.xmlview({
 		viewContent: `<mvc:View controllerName="ui5app.controller.Home" displayBlock="true" xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core"><Button tap=".sayHello"></mvc:View>`,
 	});
+	oView3.placeAt("content");
 });

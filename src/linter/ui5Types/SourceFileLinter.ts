@@ -220,15 +220,6 @@ export default class SourceFileLinter {
 					const originalPos = posInSource ?
 							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
 						pos;
-					// const viewType = prop.name.text === "fragmentContent" ||
-					// 	(prop.name.text === "definition" &&
-					// 		ts.isCallExpression(prop.parent.parent) &&
-					// 		((ts.isPropertyAccessExpression(prop.parent.parent.expression) &&
-					// 			prop.parent.parent.expression.name.text === "load") ||
-					// 			(ts.isElementAccessExpression(prop.parent.parent.expression) &&
-					// 				prop.parent.parent.expression.argumentExpression.text === "load"))) ?
-					// 	"fragment" :
-					// 	"view";
 
 					this.#xmlContents.push({
 						xml: prop.initializer.text,
