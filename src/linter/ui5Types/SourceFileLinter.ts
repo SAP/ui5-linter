@@ -69,7 +69,7 @@ export default class SourceFileLinter {
 	#isComponent: boolean;
 	#hasTestStarterFindings: boolean;
 	#metadata: LintMetadata;
-	#xmlContents: {xml: string; pos: ts.LineAndCharacter}[];
+	#xmlContents: {xml: string; pos: ts.LineAndCharacter; viewType: "fragment" | "view"}[];
 
 	constructor(
 		private context: LinterContext,
@@ -111,7 +111,7 @@ export default class SourceFileLinter {
 
 			let i = 0;
 			for (const xmlContent of this.#xmlContents) {
-				const fileName = `${this.sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${++i}.view.xml`;
+				const fileName = `${this.sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${++i}.${xmlContent.viewType}.xml`;
 				const metadata = this.context.getMetadata(fileName);
 				const newResource = createResource({path: fileName, string: xmlContent.xml});
 				metadata.jsToXmlPosMapping = {
@@ -204,8 +204,11 @@ export default class SourceFileLinter {
 				if (ts.isPropertyAssignment(prop) &&
 					(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
 					ts.isStringLiteralLike(prop.initializer) &&
-					["definition", "fragmentContent", "viewContent"].includes(prop.name.text) &&
-					this.isXMLInJsCreationCall(prop, prop.name.text)) {
+					["definition", "fragmentContent", "viewContent"].includes(prop.name.text)) {
+					const viewType = this.getViewTypeFromXMLInJsCreationCall(prop, prop.name.text);
+					if (!viewType) {
+						return;
+					}
 					const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
 					const traceMap = sourceMapJson ?
 						new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
@@ -217,9 +220,20 @@ export default class SourceFileLinter {
 					const originalPos = posInSource ?
 							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
 						pos;
+					// const viewType = prop.name.text === "fragmentContent" ||
+					// 	(prop.name.text === "definition" &&
+					// 		ts.isCallExpression(prop.parent.parent) &&
+					// 		((ts.isPropertyAccessExpression(prop.parent.parent.expression) &&
+					// 			prop.parent.parent.expression.name.text === "load") ||
+					// 			(ts.isElementAccessExpression(prop.parent.parent.expression) &&
+					// 				prop.parent.parent.expression.argumentExpression.text === "load"))) ?
+					// 	"fragment" :
+					// 	"view";
+
 					this.#xmlContents.push({
 						xml: prop.initializer.text,
 						pos: originalPos,
+						viewType,
 					});
 				}
 			});
@@ -229,17 +243,22 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isXMLInJsCreationCall(node: ts.Node, methodName: string) {
+	getViewTypeFromXMLInJsCreationCall(node: ts.Node, methodName: string) {
 		const mainNode = node.parent.parent;
 
 		if (!ts.isCallExpression(mainNode)) {
-			return false;
+			return null;
 		}
 
 		const nameChunks = [];
 		let nameTraversalNode = mainNode.expression;
-		while (ts.isPropertyAccessExpression(nameTraversalNode)) {
-			nameChunks.unshift(nameTraversalNode.name.text);
+		while (ts.isPropertyAccessExpression(nameTraversalNode) ||
+			ts.isElementAccessExpression(nameTraversalNode)) {
+			if (ts.isPropertyAccessExpression(nameTraversalNode)) {
+				nameChunks.unshift(nameTraversalNode.name.text);
+			} else if (ts.isStringLiteral(nameTraversalNode.argumentExpression)) {
+				nameChunks.unshift(nameTraversalNode.argumentExpression.text);
+			}
 			nameTraversalNode = nameTraversalNode.expression;
 		}
 
@@ -250,28 +269,31 @@ export default class SourceFileLinter {
 		}
 
 		if (!potentialGlobalName) {
-			return false;
+			return null;
 		}
 
 		const name = nameChunks.join(".");
 		if ((methodName === "definition" && ["sap.ui.view"].includes(name)) ||
-			(methodName === "viewContent" && ["sap.ui.xmlview", "sap.ui.view"].includes(name)) ||
-			(methodName === "fragmentContent" && ["sap.ui.fragment", "sap.ui.xmlfragment"].includes(name))) {
-			return true;
+			(methodName === "viewContent" && ["sap.ui.xmlview", "sap.ui.view"].includes(name))) {
+			return "view";
+		} else if ((methodName === "fragmentContent" && ["sap.ui.fragment", "sap.ui.xmlfragment"].includes(name))) {
+			return "fragment";
 		} else if (methodName === "definition" && ["create", "load"].includes(nameChunks[nameChunks.length - 1])) {
 			const potentialImport = this.sourceFile.statements.find((statement) => {
 				return ts.isImportDeclaration(statement) &&
 					statement.importClause?.name?.text === potentialGlobalName;
 			}) as ts.ImportDeclaration | undefined;
 
-			return [
-				"sap/ui/core/mvc/View",
-				"sap/ui/core/mvc/XMLView",
-				"sap/ui/core/Fragment",
-			].includes((potentialImport?.moduleSpecifier as ts.StringLiteral)?.text);
+			const moduleImport = (potentialImport?.moduleSpecifier as ts.StringLiteral)?.text;
+
+			if (["sap/ui/core/mvc/View", "sap/ui/core/mvc/XMLView"].includes(moduleImport)) {
+				return "view";
+			} else if (moduleImport === "sap/ui/core/Fragment") {
+				return "fragment";
+			}
 		}
 
-		return false;
+		return null;
 	}
 
 	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {

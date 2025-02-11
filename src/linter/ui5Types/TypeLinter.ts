@@ -160,7 +160,7 @@ export default class TypeChecker {
 			context: this.#context,
 		});
 		const virtualXMLResources =
-			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.view{.js,.ts,.js.map}");
+			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.{view,fragment}{.js,.ts,.js.map}");
 		if (virtualXMLResources.length > 0) {
 			for (const resource of virtualXMLResources) {
 				const resourcePath = resource.getPath();
@@ -177,7 +177,7 @@ export default class TypeChecker {
 			program = this.#sharedLanguageService.getProgram();
 			checker = program.getTypeChecker();
 			for (const sourceFile of program.getSourceFiles()) {
-				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.view\.js/.exec(sourceFile.fileName)) {
+				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
 					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 					const linter = new SourceFileLinter(
 						this.#context, sourceFile.fileName,
