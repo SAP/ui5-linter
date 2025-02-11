@@ -161,31 +161,33 @@ export default class TypeChecker {
 		});
 		const virtualXMLResources =
 			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.view{.js,.ts,.js.map}");
-		for (const resource of virtualXMLResources) {
-			const resourcePath = resource.getPath();
-			if (resourcePath.endsWith(".js.map")) {
-				sourceMaps.set(
-					// Remove ".map" from path to have it reflect the associated source path
-					resourcePath.slice(0, -4),
-					await resource.getString()
-				);
-			} else {
-				files.set(resourcePath, await resource.getString());
+		if (virtualXMLResources.length > 0) {
+			for (const resource of virtualXMLResources) {
+				const resourcePath = resource.getPath();
+				if (resourcePath.endsWith(".js.map")) {
+					sourceMaps.set(
+						// Remove ".map" from path to have it reflect the associated source path
+						resourcePath.slice(0, -4),
+						await resource.getString()
+					);
+				} else {
+					files.set(resourcePath, await resource.getString());
+				}
 			}
-		}
-		program = this.#sharedLanguageService.getProgram();
-		checker = program.getTypeChecker();
-		for (const sourceFile of program.getSourceFiles()) {
-			if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.view\.js/.exec(sourceFile.fileName)) {
-				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
-				const linter = new SourceFileLinter(
-					this.#context, sourceFile.fileName,
-					sourceFile, sourceMaps,
-					checker, reportCoverage, messageDetails,
-					apiExtract, this.#filePathsWorkspace, this.#workspace
-				);
-				await linter.lint();
-				linterDone();
+			program = this.#sharedLanguageService.getProgram();
+			checker = program.getTypeChecker();
+			for (const sourceFile of program.getSourceFiles()) {
+				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.view\.js/.exec(sourceFile.fileName)) {
+					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
+					const linter = new SourceFileLinter(
+						this.#context, sourceFile.fileName,
+						sourceFile, sourceMaps,
+						checker, reportCoverage, messageDetails,
+						apiExtract, this.#filePathsWorkspace, this.#workspace
+					);
+					await linter.lint();
+					linterDone();
+				}
 			}
 		}
 		typeCheckDone();
