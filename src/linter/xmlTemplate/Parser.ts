@@ -426,6 +426,13 @@ export default class Parser {
 								variableName,
 							});
 						});
+						if (requireDeclarations.length) {
+							// Usage of space separated list is not recommended, as it only allows for global access
+							this.#context.addLintingMessage(this.#resourcePath,
+								MESSAGE.NO_LEGACY_TEMPLATE_REQUIRE_SYNTAX,
+								{moduleNames: attr.value}, attr.start
+							);
+						}
 					} else {
 						// Most common case: JSON-like representation
 						// e.g. core:require="{Helper: 'sap/ui/demo/todo/util/Helper'}"
