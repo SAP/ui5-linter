@@ -2,8 +2,15 @@ import LinterContext, {PositionInfo, ResourcePath} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import BindingParser, {
-	AggregationBindingInfo, BindingInfo, FilterInfo, PropertyBindingInfo, SorterInfo,
+	AggregationBindingInfo, BindingInfo, ExpressionBinding, FilterInfo, PropertyBindingInfo, SorterInfo,
 } from "./lib/BindingParser.js";
+
+const ODATA_EXPRESSION_ADDONS_MODULE = "sap/ui/model/odata/ODataExpressionAddons";
+const ODATA_FUNCTION_MODULE_MAP: Record<string, string> = {
+	compare: "sap/ui/model/odata/v4/ODataUtils",
+	fillUriTemplate: "sap/ui/thirdparty/URITemplate",
+	uriEncode: "sap/ui/model/odata/ODataUtils",
+} as const;
 
 export default class BindingLinter {
 	#resourcePath: string;
@@ -133,6 +140,9 @@ export default class BindingLinter {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
 			if (bindingInfo) {
 				this.#analyzePropertyBinding(bindingInfo as PropertyBindingInfo, requireDeclarations, position);
+				if ("tokens" in bindingInfo) {
+					this.#lintExpressionBindingTokens(bindingInfo, requireDeclarations, position);
+				}
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
@@ -153,27 +163,35 @@ export default class BindingLinter {
 		}
 	}
 
-	#isExpressionBinding(bindingDefinition: string): boolean {
-		return /^\{:?=/.test(bindingDefinition) && bindingDefinition.endsWith("}");
-	}
-
-	lintPropertyExpression(
-		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		if (!this.#isExpressionBinding(bindingDefinition)) {
-			return;
-		}
-		const allFunctionsModule = "sap/ui/model/odata/ODataExpressionAddons";
-		const varModuleMap = {
-			"odata.compare": "sap/ui/model/odata/v4/ODataUtils",
-			"odata.fillUriTemplate": "sap/ui/thirdparty/URITemplate",
-			"odata.uriEncode": "sap/ui/model/odata/ODataUtils",
-		};
-
-		for (const [key, value] of Object.entries(varModuleMap)) {
-			if (bindingDefinition.includes(`${key}(`) &&
-				!requireDeclarations.some((decl) => decl.moduleName === value || value === allFunctionsModule)) {
-				this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {} as never, position);
+	#lintExpressionBindingTokens(
+		expressionBinding: ExpressionBinding, requireDeclarations: RequireDeclaration[], position: PositionInfo
+	) {
+		const {tokens} = expressionBinding;
+		for (let i = 0; i < tokens.length; i++) {
+			const token = tokens[i];
+			if (token.id !== "IDENTIFIER" || token.value !== "odata" || tokens[i + 1]?.id !== ".") {
+				continue;
 			}
+			const functionToken = tokens[i + 2];
+			if (functionToken?.id !== "IDENTIFIER") {
+				// Can't happen. A "." must be followed by an IDENTIFIER
+				continue;
+			}
+			const functionName = functionToken.value;
+			if (functionName in ODATA_FUNCTION_MODULE_MAP) {
+				const expectedModuleName = ODATA_FUNCTION_MODULE_MAP[functionName];
+				if (
+					// There must be either an import for the corresponding module
+					// or for the ODataExpressionAddons module
+					!requireDeclarations.some((decl) =>
+						decl.moduleName === expectedModuleName || decl.moduleName === ODATA_EXPRESSION_ADDONS_MODULE)
+				) {
+					this.#context.addLintingMessage(
+						this.#resourcePath, MESSAGE.NO_ODATA_GLOBALS, {} as never, position
+					);
+				}
+			}
+			i += 2; // Skip the next two tokens as we already checked them
 		}
 	}
 }

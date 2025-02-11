@@ -347,6 +347,36 @@ test("XML Expression Binding with encoded ampersand", (t) => {
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
 
+test("XML Expression Binding with odata function calls", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= odata.uriEncode(%{myvalue1},'Edm.String') + ' - ' + odata.uriEncode(%{myvalue2},'Edm.String') }",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Expression Binding with unknown odata function call", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= odata.foo(%{myvalue1},'Edm.String') }",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Expression Binding with nested unknown odata function call", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		"{= odata.foo.bar(%{myvalue1},'Edm.String') }",
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
 test("Error Testing: XML Property Binding missing closing bracket", (t) => {
 	const {bindingLinter, linterContext} = t.context;
 

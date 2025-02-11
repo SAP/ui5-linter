@@ -929,7 +929,9 @@ export default {
 
 		/* UI5 LINTER MODIFICATION:
 			Disabled the next few formatter-related lines.
-			The ExpressionParser formatter function is not required for linting purposes
+			The ExpressionParser formatter function is not required for linting purposes.
+
+			Instead, the tokens are returned to allow linting the individual parts of the expression.
 		*/
 		// function formatter() {
 		// 	//turn separate parameters for parts into one (array like) parameter
@@ -939,7 +941,8 @@ export default {
 		return {
 			result: {
 				// formatter: formatter,
-				parts: oTokens.parts
+				parts: oTokens.parts,
+				tokens: oTokens.tokens
 			},
 			at: oResult.at || oTokens.at
 		};

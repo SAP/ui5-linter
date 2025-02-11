@@ -33,7 +33,16 @@ export interface AggregationBindingInfo extends BindingInfoBase {
 	groupHeaderFactory?: FunctionReference;
 }
 
-export type BindingInfo = PropertyBindingInfo | AggregationBindingInfo;
+interface ExpressionBindingToken {
+	id: "IDENTIFIER" | "."; // Only the ones required for UI5 linter
+	value: string;
+}
+
+export interface ExpressionBinding extends BindingInfoBase {
+	tokens: ExpressionBindingToken[];
+}
+
+export type BindingInfo = PropertyBindingInfo | AggregationBindingInfo | ExpressionBinding;
 
 interface BindingParser {
 	complexParser: (
