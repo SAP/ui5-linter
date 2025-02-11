@@ -58,6 +58,7 @@ export enum MESSAGE {
 	NO_EXPORTED_VALUES_BY_LIB,
 	NO_GLOBALS,
 	NO_ICON_POOL_RENDERER,
+	NO_LEGACY_TEMPLATE_REQUIRE_SYNTAX,
 	NO_ODATA_GLOBALS,
 	NOT_STATIC_CONTROL_RENDERER,
 	PARSING_ERROR,
@@ -366,6 +367,16 @@ export const MESSAGE_INFO = {
 		message: () =>
 			`"sap/ui/core/IconPool" module must be imported when using RenderManager's icon() method`,
 		details: () => `{@link sap.ui.core.RenderManager#methods/icon RenderManager}`,
+	},
+
+	[MESSAGE.NO_LEGACY_TEMPLATE_REQUIRE_SYNTAX]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({moduleNames}: {moduleNames: string}) =>
+			`Usage of space-separated list '${moduleNames}' in template:require`,
+		details: () => `Use the object notation of template:require instead ` +
+			`{@link topic:263f6e5a915f430894ee290040e7e220}`,
 	},
 
 	[MESSAGE.NOT_STATIC_CONTROL_RENDERER]: {
