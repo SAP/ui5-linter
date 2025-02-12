@@ -199,131 +199,10 @@ export default class SourceFileLinter {
 			this.analyzeControlRerenderMethod(node);
 		} else if (ts.isPropertyAssignment(node) && getPropertyNameText(node.name) === "theme") {
 			this.analyzeTestsuiteThemeProperty(node);
-		} else if (ts.isObjectLiteralExpression(node)) {
-			node.properties.forEach((prop) => {
-				if (ts.isPropertyAssignment(prop) &&
-					(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
-					ts.isStringLiteralLike(prop.initializer) &&
-					["definition", "fragmentContent", "viewContent"].includes(prop.name.text) &&
-					this.isXmlInJsCreationCall(prop)) {
-					const viewType = this.getViewTypeFromXMLInJsCreationCall(prop, prop.name.text);
-					if (!viewType) {
-						return;
-					}
-					const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
-					const traceMap = sourceMapJson ?
-						new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
-						undefined;
-					const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
-					const posInSource = traceMap ?
-							originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :
-						null;
-					const originalPos = posInSource ?
-							{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
-						pos;
-
-					this.#xmlContents.push({
-						xml: prop.initializer.text,
-						pos: originalPos,
-						viewType,
-					});
-				}
-			});
 		}
 
 		// Traverse the whole AST from top to bottom
 		ts.forEachChild(node, this.#boundVisitNode);
-	}
-
-	isXmlInJsCreationCall(node: ts.PropertyAssignment) {
-		if ((!ts.isIdentifier(node.name) && !ts.isStringLiteralLike(node.name)) ||
-			!["definition", "fragmentContent", "viewContent"].includes(node.name.text)) {
-			return false;
-		}
-
-		const callNode = node.parent.parent;
-		if (!ts.isCallExpression(callNode)) {
-			return false;
-		}
-
-		const globalName = this.getGlobalName(callNode);
-		if (!["sap.ui.view", "sap.ui.fragment"].includes(globalName)) {
-			const importedModuleVar = globalName.split(".")[0];
-			const potentialImport = this.sourceFile.statements.find((statement) => {
-				return ts.isImportDeclaration(statement) &&
-					statement.importClause?.name?.text === importedModuleVar;
-			}) as ts.ImportDeclaration | undefined;
-			const moduleImport = (potentialImport?.moduleSpecifier as ts.StringLiteral)?.text;
-
-			if (!["sap/ui/core/mvc/View", "sap/ui/core/Fragment"].includes(moduleImport)) {
-				return true;
-			}
-		}
-
-		if (ts.isObjectLiteralExpression(callNode.arguments[0])) {
-			const typeNode = callNode.arguments[0].properties.find((prop) =>
-				prop.name && ts.isIdentifier(prop.name) && prop.name.text === "type");
-
-			return typeNode &&
-				ts.isPropertyAssignment(typeNode) &&
-				ts.isStringLiteralLike(typeNode.initializer) &&
-				typeNode.initializer.text === "XML";
-		}
-
-		return false;
-	}
-
-	getGlobalName(mainNode: ts.Node) {
-		if (!ts.isCallExpression(mainNode)) {
-			return "";
-		}
-
-		const nameChunks = [];
-		let nameTraversalNode = mainNode.expression;
-		while (ts.isPropertyAccessExpression(nameTraversalNode) ||
-			ts.isElementAccessExpression(nameTraversalNode)) {
-			if (ts.isPropertyAccessExpression(nameTraversalNode)) {
-				nameChunks.unshift(nameTraversalNode.name.text);
-			} else if (ts.isStringLiteral(nameTraversalNode.argumentExpression)) {
-				nameChunks.unshift(nameTraversalNode.argumentExpression.text);
-			}
-			nameTraversalNode = nameTraversalNode.expression;
-		}
-
-		if (ts.isIdentifier(nameTraversalNode)) {
-			nameChunks.unshift(nameTraversalNode.text);
-		}
-
-		return nameChunks.join(".");
-	}
-
-	getViewTypeFromXMLInJsCreationCall(node: ts.Node, methodName: string) {
-		const name = this.getGlobalName(node.parent.parent);
-		const nameChunks = name.split(".");
-		const potentialGlobalName = nameChunks[0];
-		const callName = nameChunks[nameChunks.length - 1];
-
-		if ((methodName === "definition" && ["sap.ui.view"].includes(name)) ||
-			(methodName === "viewContent" && ["sap.ui.xmlview", "sap.ui.view"].includes(name))) {
-			return "view";
-		} else if ((methodName === "fragmentContent" && ["sap.ui.fragment", "sap.ui.xmlfragment"].includes(name))) {
-			return "fragment";
-		} else if (methodName === "definition" && ["create", "load"].includes(callName)) {
-			const potentialImport = this.sourceFile.statements.find((statement) => {
-				return ts.isImportDeclaration(statement) &&
-					statement.importClause?.name?.text === potentialGlobalName;
-			}) as ts.ImportDeclaration | undefined;
-
-			const moduleImport = (potentialImport?.moduleSpecifier as ts.StringLiteral)?.text;
-
-			if (["sap/ui/core/mvc/View", "sap/ui/core/mvc/XMLView"].includes(moduleImport)) {
-				return "view";
-			} else if (moduleImport === "sap/ui/core/Fragment") {
-				return "fragment";
-			}
-		}
-
-		return null;
 	}
 
 	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
@@ -878,7 +757,7 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression): string {
+	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
 		const propAccessChain: string[] = [];
 		propAccessChain.push(node.expression.getText());
 
@@ -1002,6 +881,19 @@ export default class SourceFileLinter {
 				if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
 					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
 				}
+			} else if (["view", "xmlview", "fragment", "xmlfragment"].includes(symbolName)) {
+				const namespace = this.extractNamespace(node);
+				const typeProperty = ts.isObjectLiteralExpression(node.arguments[0]) &&
+					getPropertyAssignmentInObjectLiteralExpression("type", node.arguments[0]);
+				if (namespace === `sap.ui.${symbolName}` &&
+					(!typeProperty ||
+						(ts.isStringLiteralLike(typeProperty.initializer) && typeProperty.initializer.text === "XML"))
+				) {
+					const viewType = ["fragment", "xmlfragment"].includes(symbolName) ? "fragment" : "view";
+					this.#extractXmlFromJs(node, viewType);
+				}
+			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
+				this.#extractXmlFromJs(node, "view");
 			}
 		}
 
@@ -1145,6 +1037,36 @@ export default class SourceFileLinter {
 		}
 	}
 
+	#extractXmlFromJs(node: ts.CallExpression, viewType: "view" | "fragment" = "view") {
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+			return;
+		}
+
+		node.arguments[0].properties.forEach((prop) => {
+			if (ts.isPropertyAssignment(prop) &&
+				(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
+				ts.isStringLiteralLike(prop.initializer)) {
+				const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
+				const traceMap = sourceMapJson ?
+					new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
+					undefined;
+				const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
+				const posInSource = traceMap ?
+						originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :
+					null;
+				const originalPos = posInSource ?
+						{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
+					pos;
+
+				this.#xmlContents.push({
+					xml: prop.initializer.text,
+					pos: originalPos,
+					viewType,
+				});
+			}
+		});
+	}
+
 	#analyzeParametersGetCall(node: ts.CallExpression) {
 		if (node.arguments.length && ts.isObjectLiteralExpression(node.arguments[0])) {
 			// Non-deprecated usage
@@ -1285,6 +1207,9 @@ export default class SourceFileLinter {
 					typeValue,
 				}, node);
 			}
+			if (typeValue === "XML") {
+				this.#extractXmlFromJs(node, "view");
+			}
 		}
 	}
 
@@ -1312,6 +1237,8 @@ export default class SourceFileLinter {
 						typeValue,
 					}, node);
 				}
+			} else if (typeValue === "XML" && symbolName === "load") {
+				this.#extractXmlFromJs(node, "fragment");
 			}
 		}
 	}
