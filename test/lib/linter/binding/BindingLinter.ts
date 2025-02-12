@@ -386,3 +386,23 @@ test("Error Testing: XML Property Binding missing closing bracket", (t) => {
 
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
+
+test("Error Testing: Escaped JSON (escaped opening bracket)", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`\\{"foo": "bar"}`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("Error Testing: Escaped JSON (escaped opening/closing brackets)", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`\\{"foo": "bar"\\}`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});

@@ -21,8 +21,9 @@ export default class BindingLinter {
 		this.#context = context;
 	}
 
-	#parseBinding(binding: string): BindingInfo {
-		const bindingInfo = BindingParser.complexParser(binding, null, true, true, true, true);
+	#parseBinding(binding: string): BindingInfo | string | undefined {
+		// Do not unescape (3rd argument), as we're only interested in the binding
+		const bindingInfo = BindingParser.complexParser(binding, null, false, true, true, true);
 		return bindingInfo;
 	}
 
@@ -138,7 +139,7 @@ export default class BindingLinter {
 	lintPropertyBinding(bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
 		try {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
-			if (bindingInfo) {
+			if (typeof bindingInfo === "object") {
 				this.#analyzePropertyBinding(bindingInfo as PropertyBindingInfo, requireDeclarations, position);
 				if ("tokens" in bindingInfo) {
 					this.#lintExpressionBindingTokens(bindingInfo, requireDeclarations, position);
@@ -154,7 +155,7 @@ export default class BindingLinter {
 		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
 		try {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
-			if (bindingInfo) {
+			if (typeof bindingInfo === "object") {
 				this.#analyzeAggregationBinding(bindingInfo as AggregationBindingInfo, requireDeclarations, position);
 			}
 		} catch (err) {

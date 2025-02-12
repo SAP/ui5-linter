@@ -54,7 +54,7 @@ interface BindingParser {
 		bPreferContext?: boolean,
 		mLocals?: Record<string, string>,
 		bResolveTypesAsync?: boolean
-	) => BindingInfo;
+	) => BindingInfo | string | undefined; // Might return a string when bUnescape is true
 }
 
 declare const BindingParser: BindingParser;

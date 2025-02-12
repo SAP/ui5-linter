@@ -2,12 +2,12 @@ import anyTest, {TestFn} from "ava";
 import BindingParser, {BindingInfo} from "../../../../../src/linter/binding/lib/BindingParser.js";
 
 const test = anyTest as TestFn<{
-	parse: (string: string) => BindingInfo;
+	parse: (string: string) => BindingInfo | string | undefined;
 }>;
 
 test.before((t) => {
 	t.context.parse = function (string: string) {
-		return BindingParser.complexParser(string, null, true, true, true, true);
+		return BindingParser.complexParser(string, null, false, true, true, true);
 	};
 });
 
@@ -108,11 +108,37 @@ test("XML Binding: Expression Binding with an embedded composite binding", (t) =
 	const {parse} = t.context;
 
 	const res = parse(`{= %{/data/message}.length < 20
-      ? %{i18n>errorMsg} 
+      ? %{i18n>errorMsg}
       : %{parts: [
          {path: 'i18n>successMsg'},
          {path: '/data/today', type:'sap.ui.model.type.Date', constraints:{displayFormat:'Date'}},
          {path: '/data/tomorrow', type:'sap.ui.model.type.Date', constraints:{displayFormat:'Date'}}
       ], formatter: 'my.globalFormatter'}}`);
+	t.snapshot(res);
+});
+
+test("No binding: Just text", (t) => {
+	const {parse} = t.context;
+
+	const res = parse(`foo bar`);
+	t.snapshot(res);
+});
+
+test("No binding: Escaped JSON (escaped opening bracket)", (t) => {
+	const {parse} = t.context;
+
+	const res = parse(`\\{"foo": "bar"}`);
+	t.snapshot(res);
+});
+
+test("No binding: Escaped JSON (escaped opening/closing brackets)", (t) => {
+	const {parse} = t.context;
+
+	const res = parse(`\\{"foo": "bar"\\}`);
+	t.snapshot(res);
+});
+
+test("No binding: Escaped JSON (escaped opening/closing brackets), bUnescape=true", (t) => {
+	const res = BindingParser.complexParser(`\\{"foo": "bar"\\}`, null, /* bUnescape */ true, true, true, true);
 	t.snapshot(res);
 });
