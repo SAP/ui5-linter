@@ -368,6 +368,15 @@ export default class LinterContext {
 			lintResults.push(this.generateLintResult(resourcePath));
 		}
 
+		// Provide deterministic order of results & messages.
+		// Some of the (virtual) files might be generated during linting
+		// (XML transpilation & extraction) and their order might be non-deterministic.
+		lintResults.sort((a, b) => a.filePath.localeCompare(b.filePath));
+		lintResults.forEach((result) => {
+			result.messages.sort(
+				(a, b) => (a.line! - b.line!) || (a.column! - b.column!));
+		});
+
 		return lintResults;
 	}
 }

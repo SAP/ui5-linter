@@ -165,9 +165,6 @@ function testDefinition(
 				// Use only the file name without the directory (which might contain modifiers)
 				result.filePath = resultFileName;
 			}
-
-			result.messages.sort(
-				(a, b) => (a.line! - b.line!) + (a.column! - b.column!));
 		});
 		t.snapshot(res);
 	});
