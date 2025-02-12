@@ -158,6 +158,7 @@ export default class TypeChecker {
 			filePathsWorkspace: this.#filePathsWorkspace,
 			workspace: this.#workspace,
 			context: this.#context,
+			altGlob: "**/*.inline-*.{view,fragment}.xml",
 		});
 		const virtualXMLResources =
 			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.{view,fragment}{.js,.ts,.js.map}");

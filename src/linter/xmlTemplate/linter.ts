@@ -9,8 +9,9 @@ import {decodedMap, DecodedSourceMap, SourceMapInput, TraceMap} from "@jridgewel
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
-export default async function lintXml({filePathsWorkspace, workspace, context}: LinterParameters) {
-	const xmlResources = await filePathsWorkspace.byGlob("**/{*.view.xml,*.fragment.xml}");
+export default async function lintXml({filePathsWorkspace, workspace, context, altGlob}: LinterParameters) {
+	altGlob = altGlob ?? "**/{*.view.xml,*.fragment.xml}";
+	const xmlResources = await filePathsWorkspace.byGlob(altGlob);
 
 	const controllerByIdInfo = new ControllerByIdInfo();
 
@@ -18,10 +19,6 @@ export default async function lintXml({filePathsWorkspace, workspace, context}: 
 		const resourcePath = resource.getPath();
 		const jsPath = resourcePath.replace(/\.xml$/, ".js");
 		const contextMeta = context.getMetadata(jsPath);
-		// This resource has already been transpiled & linted, so no need for duplicate linting
-		if (contextMeta.xmlCompiledResource) {
-			return;
-		}
 
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context, controllerByIdInfo);
 		if (!res) {
