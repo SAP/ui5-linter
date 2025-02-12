@@ -122,9 +122,21 @@ export default class BindingLinter {
 	}
 
 	checkForGlobalReference(ref: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		// Global reference detected
+		const variableName = this.getGlobalReference(ref, requireDeclarations);
+		if (!variableName) {
+			return;
+		}
+		this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_GLOBALS, {
+			variableName,
+			namespace: ref,
+		}, position);
+	}
+
+	getGlobalReference(ref: string, requireDeclarations: RequireDeclaration[]): string | null {
 		if (ref.startsWith(".")) {
 			// Ignore empty reference or reference to the controller (as indicated by the leading dot)
-			return false;
+			return null;
 		}
 		const parts = ref.split(".");
 		let variableName;
@@ -137,14 +149,12 @@ export default class BindingLinter {
 			decl.variableName === variableName ||
 			decl.moduleName === parts.join("/"));
 		if (requireDeclaration) {
-			return false;
+			// Local reference detected
+			return null;
 		}
 
 		// Global reference detected
-		this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_GLOBALS, {
-			variableName,
-			namespace: ref,
-		}, position);
+		return variableName;
 	}
 
 	lintPropertyBinding(bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {

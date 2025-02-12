@@ -3,6 +3,7 @@
 const RULES = {
 	"async-component-flags": "async-component-flags",
 	"csp-unsafe-inline-script": "csp-unsafe-inline-script",
+	"no-ambiguous-event-handler": "no-ambiguous-event-handler",
 	"no-deprecated-api": "no-deprecated-api",
 	"no-deprecated-component": "no-deprecated-component",
 	"no-deprecated-control-renderer-declaration": "no-deprecated-control-renderer-declaration",
@@ -51,6 +52,7 @@ export enum MESSAGE {
 	HTML_IN_XML,
 	LIB_INIT_API_VERSION,
 	MISSING_BOOTSTRAP_PARAM,
+	NO_AMBIGUOUS_EVENT_HANDLER,
 	NO_CONTROL_RERENDER_OVERRIDE,
 	NO_DEPRECATED_RENDERER,
 	NO_DIRECT_DATATYPE_ACCESS,
@@ -338,6 +340,17 @@ export const MESSAGE_INFO = {
 		message: ({libInitFunction}: {libInitFunction: string}) =>
 			`Deprecated call to ${libInitFunction}(). Use the {apiVersion: 2} parameter instead`,
 		details: () => `{@link sap.ui.core.Lib.init Lib.init}`,
+	},
+
+	[MESSAGE.NO_AMBIGUOUS_EVENT_HANDLER]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["no-ambiguous-event-handler"],
+
+		message: ({eventHandler}: {eventHandler: string}) =>
+			`Event handler '${eventHandler}' must be prefixed by a dot '.' or refer to a local name`,
+		details: () => `If the handler is defined on the controller, use the leading dot notation. ` +
+			`Otherwise import the module via core:require and use the handler via the local name. ` +
+			`See {@link topic:b0fb4de7364f4bcbb053a99aa645affe Handling Events in XML Views}`,
 	},
 
 	[MESSAGE.NO_CONTROL_RERENDER_OVERRIDE]: {

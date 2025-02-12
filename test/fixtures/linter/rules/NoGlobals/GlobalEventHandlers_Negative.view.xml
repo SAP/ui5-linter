@@ -1,0 +1,24 @@
+<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core">
+
+	<!-- Local event handler -->
+	<Button press=".onPressFancyButton" />
+
+	<!-- Local event handler (nested) -->
+	<Button press=".eventHandlers.onPressFancyButton" />
+
+	<!-- Local event handler (with arguments) -->
+	<Button press=".onPressFancyButton(0, ${i18n>LABEL_ALL}, $controller.foo.bar, $event)" />
+
+	<!-- Command Execution -->
+	<Button press="cmd:Save" />
+
+	<!-- Empty event handler -->
+	<Button press="" />
+
+	<!-- Usage of event handler imported via core:require helper -->
+	<Button core:require='{ "MyHelper": "ui5/walkthrougth/utils/MyHelper" }' press="MyHelper.onPressFancyButton" />
+
+	<!-- Usage of event handler function imported via core:require -->
+	<Button core:require='{ "doSomething": "ui5/walkthrougth/utils/doSomething" }' press="doSomething" />
+
+</mvc:View>

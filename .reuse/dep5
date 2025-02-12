@@ -28,7 +28,12 @@ Files: *
 Copyright: 2024 SAP SE or an SAP affiliate company and UI5 linter contributors
 License: Apache-2.0
 
-Files: src/detectors/transpilers/xml/lib/JSTokenizer.js
+Files: src/linter/xmlTemplate/lib/EventHandlerResolver.js
+Copyright: 2009-2025 SAP SE or an SAP affiliate company
+License: Apache-2.0
+Comment: This file is a copy of sap/ui/core/mvc/EventHandlerResolver.js from the OpenUI5 project.
+
+Files: src/linter/xmlTemplate/lib/JSTokenizer.js
 Copyright: 2009-2024 SAP SE or an SAP affiliate company
 License: Apache-2.0
 Comment: This file is a copy of sap/base/util/JSTokenizer.js from the OpenUI5 project.
