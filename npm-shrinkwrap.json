@@ -46,7 +46,7 @@
 				"@ui5-language-assistant/semantic-model-types": "^3.3.1",
 				"ava": "^6.2.0",
 				"depcheck": "^1.4.7",
-				"eslint": "^9.20.0",
+				"eslint": "^9.20.1",
 				"eslint-plugin-ava": "^15.0.1",
 				"esmock": "^2.7.0",
 				"husky": "^9.1.7",
@@ -6162,10 +6162,11 @@
 			}
 		},
 		"node_modules/eslint": {
-			"version": "9.20.0",
-			"resolved": "https://registry.npmjs.org/eslint/-/eslint-9.20.0.tgz",
-			"integrity": "sha512-aL4F8167Hg4IvsW89ejnpTwx+B/UQRzJPGgbIOl+4XqffWsahVVsLEWoZvnrVuwpWmnRd7XeXmQI1zlKcFDteA==",
+			"version": "9.20.1",
+			"resolved": "https://registry.npmjs.org/eslint/-/eslint-9.20.1.tgz",
+			"integrity": "sha512-m1mM33o6dBUjxl2qb6wv6nGNwCAsns1eKtaQ4l/NPHeTvhiUPbtdfMyktxN4B3fgHIgsYh1VT3V9txblpQHq+g==",
 			"dev": true,
+			"license": "MIT",
 			"dependencies": {
 				"@eslint-community/eslint-utils": "^4.2.0",
 				"@eslint-community/regexpp": "^4.12.1",
