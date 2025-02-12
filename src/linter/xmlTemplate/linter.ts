@@ -16,15 +16,12 @@ export default async function lintXml({filePathsWorkspace, workspace, context, a
 	const controllerByIdInfo = new ControllerByIdInfo();
 
 	await Promise.all(xmlResources.map(async (resource: Resource) => {
-		const resourcePath = resource.getPath();
-		const jsPath = resourcePath.replace(/\.xml$/, ".js");
-		const contextMeta = context.getMetadata(jsPath);
-
 		const res = await transpileXml(resource.getPath(), resource.getStream(), context, controllerByIdInfo);
 		if (!res) {
 			return;
 		}
 		const {source, map} = res;
+		const resourcePath = resource.getPath();
 
 		let xmlFromJsResourceMap;
 		const metadata = context.getMetadata(resourcePath);
@@ -42,6 +39,7 @@ export default async function lintXml({filePathsWorkspace, workspace, context, a
 
 		// Write transpiled resource to workspace
 		// TODO: suffix name to prevent clashes with existing files?
+		const jsPath = resourcePath.replace(/\.xml$/, ".js");
 		const transpiledResource = createResource({
 			path: jsPath,
 			string: source,
@@ -57,6 +55,7 @@ export default async function lintXml({filePathsWorkspace, workspace, context, a
 		await workspace.write(transpiledResourceSourceMap);
 
 		// Stash information that this .js file is actually a transpiled XML.
+		const contextMeta = context.getMetadata(jsPath);
 		contextMeta.xmlCompiledResource = resourcePath;
 	}));
 
