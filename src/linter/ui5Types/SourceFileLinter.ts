@@ -1039,7 +1039,9 @@ export default class SourceFileLinter {
 	}
 
 	#extractXmlFromJs(node: ts.CallExpression, viewType: "view" | "fragment" = "view") {
-		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0]) ||
+			// xmlCompiledResource is an XML file, so we don't need to do extraction here
+			this.#metadata?.xmlCompiledResource) {
 			return;
 		}
 
