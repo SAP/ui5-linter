@@ -4,7 +4,7 @@
 
 	<!-- text: Deprecated reference of global formatter and binding event handler function -->
 	<!-- tooltip: Aggregation with a 0..1 aggregation and "string" alt type can be used like a property -->
-	<!-- formatError: Control event handlers should be ignored for now -->
+	<!-- formatError: Deprecated reference of global event handler -->
 	<ObjectStatus
 		text="{
 			path: 'invoice>Status',
@@ -35,6 +35,8 @@
 				dataRequested: 'EventHandler.onMyDataRequested'
 			}
 		}"
+
+		formatError=".handleEvent"
 	/>
 
 </VBox>

@@ -12,6 +12,7 @@ import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag} from "sax-wasm";
+import EventHandlerResolver from "./lib/EventHandlerResolver.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -557,15 +558,51 @@ export default class Parser {
 				// Check whether prop is of type "property" (indicating that it can have a binding)
 				// Note that some aggregations are handled like properties (0..n + alt type). Therefore check
 				// whether this is a property first. Additional aggregation-specific checks are not needed in that case
-				if (this.#apiExtract.isProperty(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, {
-						line: prop.start.line + 1, // Add one to align with IDEs
-						column: prop.start.column + 1,
-					});
-				} else if (this.#apiExtract.isAggregation(`${namespace}.${moduleName}`, prop.name)) {
-					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, {
-						line: prop.start.line + 1, // Add one to align with IDEs
-						column: prop.start.column + 1,
+				const symbolName = `${namespace}.${moduleName}`;
+				const position = {
+					line: prop.start.line + 1, // Add one to align with IDEs
+					column: prop.start.column + 1,
+				};
+				if (this.#apiExtract.isProperty(symbolName, prop.name)) {
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
+				} else if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
+					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
+				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
+					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
+						if (eventHandler.startsWith("cmd:")) {
+							// No global usage possible via command execution
+							return;
+						}
+						let functionName;
+						const openBracketIndex = eventHandler.indexOf("(");
+						if (openBracketIndex !== -1) {
+							functionName = eventHandler.slice(0, openBracketIndex);
+						} else {
+							functionName = eventHandler;
+						}
+						const variableName = this.#bindingLinter.getGlobalReference(
+							functionName, this.#requireDeclarations
+						);
+						if (!variableName) {
+							return;
+						}
+						if (!functionName.includes(".")) {
+							// If the event handler does not include a dot, it is most likely a reference to the
+							// controller which should be prefixed with a leading dot, but works in UI5 1.x runtime
+							// without also it.
+							// Note that this could also be a global function reference, but we can't distinguish
+							// that here.
+							this.#context.addLintingMessage(
+								this.#resourcePath, MESSAGE.NO_AMBIGUOUS_EVENT_HANDLER, {
+									eventHandler: functionName,
+								}, position
+							);
+						} else {
+							this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_GLOBALS, {
+								variableName,
+								namespace: functionName,
+							}, position);
+						}
 					});
 				}
 			}

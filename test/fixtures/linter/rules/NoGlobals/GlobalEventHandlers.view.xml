@@ -1,0 +1,21 @@
+<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc">
+
+	<!-- Global event handler -->
+	<Button press="ui5.walkthrougth.utils.MyHelper.onPressFancyButton" />
+
+	<!-- Global event handler (with arguments) -->
+	<Button press="ui5.walkthrougth.utils.MyHelper.onPressFancyButton(0, ${i18n>TEXT}, $controller.foo.bar, $event)" />
+
+	<!-- Multiple global event handler -->
+	<Button press="global.doSomething; ui5.walkthrougth.utils.MyHelper.onPressFancyButton(0, ${i18n>TEXT}, $controller.foo.bar, $event); global.doSomethingElse" />
+
+	<!-- Local event handler without leading dot, which could also be a global reference -->
+	<Button press="onPressFancyButton" />
+
+	<!-- Local event handler without leading dot, which could also be a global reference (with arguments) -->
+	<Button press="onPressFancyButton(0, ${i18n>TEXT}, $controller.foo.bar, $event)" />
+
+	<!-- Mixed: local, local without leading dot, command execution and global handler -->
+	<Button press="onPressFancyButton(0, ${i18n>TEXT}, $controller.foo.bar, $event); .onPressFancyButton; cmd:Save; global.doSomething($event, $controller)" />
+
+</mvc:View>
