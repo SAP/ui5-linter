@@ -882,7 +882,8 @@ export default class SourceFileLinter {
 					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
 				}
 			} else if (["view", "xmlview", "fragment", "xmlfragment"].includes(symbolName)) {
-				const namespace = this.extractNamespace(node);
+				const namespace = this.extractNamespace(node)
+					.replace(/\[("|'|`)*/g, ".").replace(/("|'|`)*\]/g, "");
 				const typeProperty = ts.isObjectLiteralExpression(node.arguments[0]) &&
 					getPropertyAssignmentInObjectLiteralExpression("type", node.arguments[0]);
 				if (namespace === `sap.ui.${symbolName}` &&
