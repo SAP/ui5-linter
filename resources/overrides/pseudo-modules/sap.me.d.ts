@@ -3,6 +3,8 @@ declare module "sap/me/CalendarDesign" {
 
 	/**
 	 * Type of Design for the Calendar
+	 * 
+	 * This enum is part of the 'sap/me/library' module export and must be accessed by the property 'CalendarDesign'.
 	 *
 	 * @experimental (since 1.12) - API is not yet finished and might change completely
 	 * @deprecated (since 1.34)
@@ -16,6 +18,8 @@ declare module "sap/me/CalendarEventType" {
 
 	/**
 	 * Type code for a calendar event
+	 * 
+	 * This enum is part of the 'sap/me/library' module export and must be accessed by the property 'CalendarEventType'.
 	 *
 	 * @experimental (since 1.12) - API is not yet finished and might change completely
 	 * @deprecated (since 1.34)
@@ -29,6 +33,8 @@ declare module "sap/me/CalendarSelectionMode" {
 
 	/**
 	 * Selection Mode for the Calendar
+	 * 
+	 * This enum is part of the 'sap/me/library' module export and must be accessed by the property 'CalendarSelectionMode'.
 	 *
 	 * @experimental (since 1.12) - API is not yet finished and might change completely
 	 * @deprecated (since 1.34)

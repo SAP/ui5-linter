@@ -3,6 +3,8 @@ declare module "sap/ui/suite/TaskCircleColor" {
 
 	/**
 	 * Defined color values for the Task Circle Control
+	 * 
+	 * This enum is part of the 'sap/ui/suite/library' module export and must be accessed by the property 'TaskCircleColor'.
 	 *
 	 * @public
 	*/

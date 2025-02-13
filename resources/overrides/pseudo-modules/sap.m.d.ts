@@ -3,6 +3,8 @@ declare module "sap/m/BackgroundDesign" {
 
 	/**
 	 * Available Background Design.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BackgroundDesign'.
 	 *
 	 * @public
 	*/
@@ -14,6 +16,8 @@ declare module "sap/m/BadgeAnimationType" {
 
 	/**
 	 * Types of animation performed by {@link sap.m.BadgeEnabler}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BadgeAnimationType'.
 	 *
 	 * @public
 	 * @since 1.87
@@ -26,6 +30,8 @@ declare module "sap/m/BadgeState" {
 
 	/**
 	 * Types of state of {@link sap.m.BadgeEnabler} to expose its current state.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BadgeState'.
 	 *
 	 * @public
 	 * @since 1.81
@@ -33,11 +39,26 @@ declare module "sap/m/BadgeState" {
 	export default BadgeState;
 }
 
+declare module "sap/m/BadgeStyle" {
+	import {BadgeStyle} from "sap/m/library";
+
+	/**
+	 * Types of badge rendering style.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BadgeStyle'.
+	 *
+	 * @public
+	*/
+	export default BadgeStyle;
+}
+
 declare module "sap/m/BarDesign" {
 	import {BarDesign} from "sap/m/library";
 
 	/**
 	 * Types of the Bar design.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BarDesign'.
 	 *
 	 * @public
 	 * @since 1.20
@@ -50,6 +71,8 @@ declare module "sap/m/BorderDesign" {
 
 	/**
 	 * Available Border Design.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BorderDesign'.
 	 *
 	 * @public
 	*/
@@ -61,6 +84,8 @@ declare module "sap/m/BreadcrumbsSeparatorStyle" {
 
 	/**
 	 * Variations of the {@link sap.m.Breadcrumbs} separators.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'BreadcrumbsSeparatorStyle'.
 	 *
 	 * @public
 	 * @since 1.69
@@ -73,6 +98,8 @@ declare module "sap/m/ButtonAccessibleRole" {
 
 	/**
 	 * Enumeration for possible Button accessibility roles.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ButtonAccessibleRole'.
 	 *
 	 * @public
 	 * @since 1.114.0
@@ -85,6 +112,8 @@ declare module "sap/m/ButtonType" {
 
 	/**
 	 * Different predefined button types for the {@link sap.m.Button sap.m.Button}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ButtonType'.
 	 *
 	 * @public
 	*/
@@ -96,10 +125,53 @@ declare module "sap/m/CarouselArrowsPlacement" {
 
 	/**
 	 * Carousel arrows align.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'CarouselArrowsPlacement'.
 	 *
 	 * @public
 	*/
 	export default CarouselArrowsPlacement;
+}
+
+declare module "sap/m/CarouselPageIndicatorPlacementType" {
+	import {CarouselPageIndicatorPlacementType} from "sap/m/library";
+
+	/**
+	 * Types for the placement of the page indicator of the Carousel control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'CarouselPageIndicatorPlacementType'.
+	 *
+	 * @public
+	*/
+	export default CarouselPageIndicatorPlacementType;
+}
+
+declare module "sap/m/CarouselScrollMode" {
+	import {CarouselScrollMode} from "sap/m/library";
+
+	/**
+	 * Defines how pages will be scrolled, when clicking the arrow.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'CarouselScrollMode'.
+	 *
+	 * @public
+	*/
+	export default CarouselScrollMode;
+}
+
+declare module "sap/m/ContentConfigType" {
+	import {ContentConfigType} from "sap/m/library";
+
+	/**
+	 * Defines the rendering type of the TileAttribute
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ContentConfigType'.
+	 *
+	 * @experimental (since 1.122)
+	 * @public
+	 * @since 1.122
+	*/
+	export default ContentConfigType;
 }
 
 declare module "sap/m/DateTimeInputType" {
@@ -107,6 +179,8 @@ declare module "sap/m/DateTimeInputType" {
 
 	/**
 	 * A subset of DateTimeInput types that fit to a simple API returning one string.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DateTimeInputType'.
 	 *
 	 * @deprecated (since 1.32.8) - Instead, use dedicated <code>sap.m.DatePicker</code> and/or <code>sap.m.TimePicker</code> controls.
 	 * @public
@@ -119,6 +193,8 @@ declare module "sap/m/DeviationIndicator" {
 
 	/**
 	 * Enum of the available deviation markers for the NumericContent control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DeviationIndicator'.
 	 *
 	 * @public
 	 * @since 1.34
@@ -131,6 +207,8 @@ declare module "sap/m/DialogRoleType" {
 
 	/**
 	 * Enum for the ARIA role of {@link sap.m.Dialog} control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DialogRoleType'.
 	 *
 	 * @public
 	 * @since 1.65
@@ -143,6 +221,8 @@ declare module "sap/m/DialogType" {
 
 	/**
 	 * Enum for the type of {@link sap.m.Dialog} control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DialogType'.
 	 *
 	 * @public
 	*/
@@ -154,6 +234,8 @@ declare module "sap/m/DraftIndicatorState" {
 
 	/**
 	 * Enum for the state of {@link sap.m.DraftIndicator} control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DraftIndicatorState'.
 	 *
 	 * @public
 	*/
@@ -165,6 +247,8 @@ declare module "sap/m/DynamicDateRangeGroups" {
 
 	/**
 	 * Defines the groups in {@link sap.m.DynamicDateRange}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'DynamicDateRangeGroups'.
 	 *
 	 * @public
 	 * @since 1.118
@@ -177,6 +261,8 @@ declare module "sap/m/EmptyIndicatorMode" {
 
 	/**
 	 * Modes in which a control will render empty indicator if its content is empty.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'EmptyIndicatorMode'.
 	 *
 	 * @public
 	 * @since 1.87
@@ -189,6 +275,8 @@ declare module "sap/m/ExpandableTextOverflowMode" {
 
 	/**
 	 * Expandable text overflow mode
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ExpandableTextOverflowMode'.
 	 *
 	 * @public
 	*/
@@ -200,6 +288,8 @@ declare module "sap/m/FacetFilterListDataType" {
 
 	/**
 	 * FacetFilterList data types.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FacetFilterListDataType'.
 	 *
 	 * @public
 	*/
@@ -211,6 +301,8 @@ declare module "sap/m/FacetFilterType" {
 
 	/**
 	 * Used by the FacetFilter control to adapt its design according to type.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FacetFilterType'.
 	 *
 	 * @public
 	*/
@@ -222,6 +314,8 @@ declare module "sap/m/FlexAlignContent" {
 
 	/**
 	 * Available options for the layout of container lines along the cross axis of the flexbox layout.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexAlignContent'.
 	 *
 	 * @public
 	*/
@@ -233,6 +327,8 @@ declare module "sap/m/FlexAlignItems" {
 
 	/**
 	 * Available options for the layout of all elements along the cross axis of the flexbox layout.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexAlignItems'.
 	 *
 	 * @public
 	*/
@@ -244,6 +340,8 @@ declare module "sap/m/FlexAlignSelf" {
 
 	/**
 	 * Available options for the layout of individual elements along the cross axis of the flexbox layout overriding the default alignment.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexAlignSelf'.
 	 *
 	 * @public
 	*/
@@ -255,6 +353,8 @@ declare module "sap/m/FlexDirection" {
 
 	/**
 	 * Available directions for flex layouts.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexDirection'.
 	 *
 	 * @public
 	*/
@@ -266,6 +366,8 @@ declare module "sap/m/FlexJustifyContent" {
 
 	/**
 	 * Available options for the layout of elements along the main axis of the flexbox layout.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexJustifyContent'.
 	 *
 	 * @public
 	*/
@@ -277,6 +379,8 @@ declare module "sap/m/FlexRendertype" {
 
 	/**
 	 * Determines the type of HTML elements used for rendering controls.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexRendertype'.
 	 *
 	 * @public
 	*/
@@ -288,6 +392,8 @@ declare module "sap/m/FlexWrap" {
 
 	/**
 	 * Available options for the wrapping behavior of a flex container.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FlexWrap'.
 	 *
 	 * @public
 	*/
@@ -299,6 +405,8 @@ declare module "sap/m/FrameType" {
 
 	/**
 	 * Enum for possible frame size types for sap.m.TileContent and sap.m.GenericTile control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'FrameType'.
 	 *
 	 * @public
 	 * @since 1.34.0
@@ -311,6 +419,8 @@ declare module "sap/m/GenericTagDesign" {
 
 	/**
 	 * Design modes for the <code>GenericTag</code> control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'GenericTagDesign'.
 	 *
 	 * @public
 	 * @since 1.62.0
@@ -323,6 +433,8 @@ declare module "sap/m/GenericTagValueState" {
 
 	/**
 	 * Value states for the <code>GenericTag</code> control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'GenericTagValueState'.
 	 *
 	 * @public
 	 * @since 1.62.0
@@ -335,6 +447,8 @@ declare module "sap/m/GenericTileMode" {
 
 	/**
 	 * Defines the mode of GenericTile.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'GenericTileMode'.
 	 *
 	 * @public
 	 * @since 1.38.0
@@ -347,6 +461,8 @@ declare module "sap/m/GenericTileScope" {
 
 	/**
 	 * Defines the scopes of GenericTile enabling the developer to implement different "flavors" of tiles.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'GenericTileScope'.
 	 *
 	 * @public
 	 * @since 1.46.0
@@ -359,6 +475,8 @@ declare module "sap/m/HeaderLevel" {
 
 	/**
 	 * Different levels for headers.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'HeaderLevel'.
 	 *
 	 * @public
 	*/
@@ -370,6 +488,8 @@ declare module "sap/m/IBarHTMLTag" {
 
 	/**
 	 * Allowed tags for the implementation of the IBar interface.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IBarHTMLTag'.
 	 *
 	 * @public
 	 * @since 1.22
@@ -382,6 +502,8 @@ declare module "sap/m/IconTabDensityMode" {
 
 	/**
 	 * Specifies <code>IconTabBar</code> tab density mode.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IconTabDensityMode'.
 	 *
 	 * @public
 	*/
@@ -393,10 +515,26 @@ declare module "sap/m/IconTabFilterDesign" {
 
 	/**
 	 * Available Filter Item Design.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IconTabFilterDesign'.
 	 *
 	 * @public
 	*/
 	export default IconTabFilterDesign;
+}
+
+declare module "sap/m/IconTabFilterInteractionMode" {
+	import {IconTabFilterInteractionMode} from "sap/m/library";
+
+	/**
+	 * Available Interaction Modes.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IconTabFilterInteractionMode'.
+	 *
+	 * @experimental (since 1.121) - Behavior might change.
+	 * @public
+	*/
+	export default IconTabFilterInteractionMode;
 }
 
 declare module "sap/m/IconTabHeaderMode" {
@@ -404,6 +542,8 @@ declare module "sap/m/IconTabHeaderMode" {
 
 	/**
 	 * Specifies <code>IconTabBar</code> header mode.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'IconTabHeaderMode'.
 	 *
 	 * @public
 	*/
@@ -415,6 +555,8 @@ declare module "sap/m/ImageMode" {
 
 	/**
 	 * Determines how the source image is used on the output DOM element.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ImageMode'.
 	 *
 	 * @public
 	 * @since 1.30.0
@@ -422,11 +564,26 @@ declare module "sap/m/ImageMode" {
 	export default ImageMode;
 }
 
+declare module "sap/m/InputListItemContentSize" {
+	import {InputListItemContentSize} from "sap/m/library";
+
+	/**
+	 * Defines the available content sizes for the <code>InputListItem</code> control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'InputListItemContentSize'.
+	 *
+	 * @public
+	*/
+	export default InputListItemContentSize;
+}
+
 declare module "sap/m/InputTextFormatMode" {
 	import {InputTextFormatMode} from "sap/m/library";
 
 	/**
 	 * Defines how the input display text should be formatted.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'InputTextFormatMode'.
 	 *
 	 * @public
 	 * @since 1.44.0
@@ -441,6 +598,8 @@ declare module "sap/m/InputType" {
 	 * A subset of input types that fits to a simple API returning one string.
 	 * 
 	 * Not available on purpose: button, checkbox, hidden, image, password, radio, range, reset, search, submit.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'InputType'.
 	 *
 	 * @public
 	*/
@@ -452,6 +611,8 @@ declare module "sap/m/LabelDesign" {
 
 	/**
 	 * Available label display modes.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LabelDesign'.
 	 *
 	 * @public
 	*/
@@ -463,6 +624,8 @@ declare module "sap/m/LightBoxLoadingStates" {
 
 	/**
 	 * Types of LightBox loading stages.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LightBoxLoadingStates'.
 	 *
 	 * @public
 	 * @since 1.40
@@ -475,6 +638,8 @@ declare module "sap/m/LinkAccessibleRole" {
 
 	/**
 	 * Enumeration for possible Link accessibility roles.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LinkAccessibleRole'.
 	 *
 	 * @public
 	 * @since 1.104.0
@@ -487,6 +652,8 @@ declare module "sap/m/LinkConversion" {
 
 	/**
 	 * Enumeration for possible link-to-anchor conversion strategy.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LinkConversion'.
 	 *
 	 * @public
 	 * @since 1.45.5
@@ -499,6 +666,8 @@ declare module "sap/m/ListGrowingDirection" {
 
 	/**
 	 * Defines the growing direction of the <code>sap.m.List</code> or <code>sap.m.Table</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListGrowingDirection'.
 	 *
 	 * @public
 	 * @since 1.40.0
@@ -511,6 +680,8 @@ declare module "sap/m/ListHeaderDesign" {
 
 	/**
 	 * Defines the different header styles.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListHeaderDesign'.
 	 *
 	 * @deprecated (since 1.16) - Has no functionality since 1.16.
 	 * @public
@@ -523,6 +694,8 @@ declare module "sap/m/ListKeyboardMode" {
 
 	/**
 	 * Defines the keyboard handling behavior of the <code>sap.m.List</code> or <code>sap.m.Table</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListKeyboardMode'.
 	 *
 	 * @public
 	 * @since 1.38.0
@@ -535,6 +708,8 @@ declare module "sap/m/ListMode" {
 
 	/**
 	 * Defines the mode of the list.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListMode'.
 	 *
 	 * @public
 	*/
@@ -546,6 +721,8 @@ declare module "sap/m/ListSeparators" {
 
 	/**
 	 * Defines which separator style will be applied for the items.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListSeparators'.
 	 *
 	 * @public
 	*/
@@ -557,6 +734,8 @@ declare module "sap/m/ListType" {
 
 	/**
 	 * Defines the visual indication and behaviour of the list items.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ListType'.
 	 *
 	 * @public
 	*/
@@ -568,6 +747,8 @@ declare module "sap/m/LoadState" {
 
 	/**
 	 * Enumeration of possible load statuses.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'LoadState'.
 	 *
 	 * @public
 	 * @since 1.34.0
@@ -580,6 +761,8 @@ declare module "sap/m/MenuButtonMode" {
 
 	/**
 	 * Different modes for a MenuButton (predefined types).
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'MenuButtonMode'.
 	 *
 	 * @public
 	 * @since 1.38.0
@@ -592,6 +775,8 @@ declare module "sap/m/MultiSelectMode" {
 
 	/**
 	 * Enumeration of the <code>multiSelectMode>/code> in <code>ListBase</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'MultiSelectMode'.
 	 *
 	 * @public
 	 * @since 1.93
@@ -604,6 +789,8 @@ declare module "sap/m/ObjectHeaderPictureShape" {
 
 	/**
 	 * Used by the <code>ObjectHeader</code> control to define which shape to use for the image.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ObjectHeaderPictureShape'.
 	 *
 	 * @public
 	 * @since 1.61
@@ -616,6 +803,8 @@ declare module "sap/m/ObjectMarkerType" {
 
 	/**
 	 * Predefined types for ObjectMarker.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ObjectMarkerType'.
 	 *
 	 * @public
 	*/
@@ -627,6 +816,8 @@ declare module "sap/m/ObjectMarkerVisibility" {
 
 	/**
 	 * Predefined visibility for ObjectMarker.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ObjectMarkerVisibility'.
 	 *
 	 * @public
 	*/
@@ -638,6 +829,8 @@ declare module "sap/m/OverflowToolbarPriority" {
 
 	/**
 	 * Defines the priorities of the controls within {@link sap.m.OverflowToolbar}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'OverflowToolbarPriority'.
 	 *
 	 * @public
 	 * @since 1.32
@@ -649,7 +842,10 @@ declare module "sap/m/P13nConditionOperation" {
 	import {P13nConditionOperation} from "sap/m/library";
 
 	/**
-	 * @experimental (since 1.26) - !!! THIS TYPE IS ONLY FOR INTERNAL USE !!!
+	 * undefined
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'P13nConditionOperation'.
+	 *
 	 * @public
 	*/
 	export default P13nConditionOperation;
@@ -660,6 +856,8 @@ declare module "sap/m/P13nPanelType" {
 
 	/**
 	 * Type of panels used in the personalization dialog.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'P13nPanelType'.
 	 *
 	 * @public
 	*/
@@ -671,6 +869,8 @@ declare module "sap/m/P13nPopupMode" {
 
 	/**
 	 * Type of popup used in the <code>sap.m.p13n.Popup</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'P13nPopupMode'.
 	 *
 	 * @public
 	*/
@@ -682,6 +882,8 @@ declare module "sap/m/PageBackgroundDesign" {
 
 	/**
 	 * Available Page Background Design.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PageBackgroundDesign'.
 	 *
 	 * @public
 	*/
@@ -693,6 +895,8 @@ declare module "sap/m/PanelAccessibleRole" {
 
 	/**
 	 * Available Panel Accessible Landmark Roles.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PanelAccessibleRole'.
 	 *
 	 * @public
 	*/
@@ -704,6 +908,8 @@ declare module "sap/m/PDFViewerDisplayType" {
 
 	/**
 	 * PDF viewer display types.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PDFViewerDisplayType'.
 	 *
 	 * @public
 	*/
@@ -715,6 +921,8 @@ declare module "sap/m/PlacementType" {
 
 	/**
 	 * Types for the placement of Popover control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PlacementType'.
 	 *
 	 * @public
 	*/
@@ -726,6 +934,8 @@ declare module "sap/m/PlanningCalendarBuiltInView" {
 
 	/**
 	 * A list of the default built-in views in a {@link sap.m.PlanningCalendar}, described by their keys.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PlanningCalendarBuiltInView'.
 	 *
 	 * @public
 	 * @since 1.50
@@ -738,6 +948,8 @@ declare module "sap/m/PlanningCalendarStickyMode" {
 
 	/**
 	 * Available sticky modes for the {@link sap.m.SinglePlanningCalendar}
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PlanningCalendarStickyMode'.
 	 *
 	 * @public
 	 * @since 1.62
@@ -745,11 +957,27 @@ declare module "sap/m/PlanningCalendarStickyMode" {
 	export default PlanningCalendarStickyMode;
 }
 
+declare module "sap/m/plugins/ContextMenuScope" {
+	import {plugins} from "sap/m/library";
+
+	/**
+	 * Defines the states of list items when the context menu is opened.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'plugins.ContextMenuScope'.
+	 *
+	 * @public
+	 * @since 1.121
+	*/
+	export default plugins.ContextMenuScope;
+}
+
 declare module "sap/m/plugins/CopyPreference" {
 	import {plugins} from "sap/m/library";
 
 	/**
 	 * Enumeration of the <code>copyPreference</code> in <code>CopyProvider</code>. Determines what is copied during a copy operation.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'plugins.CopyPreference'.
 	 *
 	 * @public
 	 * @since 1.119
@@ -762,6 +990,8 @@ declare module "sap/m/PopinDisplay" {
 
 	/**
 	 * Defines the display of table pop-ins.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PopinDisplay'.
 	 *
 	 * @public
 	 * @since 1.13.2
@@ -774,6 +1004,8 @@ declare module "sap/m/PopinLayout" {
 
 	/**
 	 * Defines the layout options of the table popins.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'PopinLayout'.
 	 *
 	 * @public
 	 * @since 1.52
@@ -786,6 +1018,8 @@ declare module "sap/m/Priority" {
 
 	/**
 	 * Defines the priority for the TileContent in ActionMode
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'Priority'.
 	 *
 	 * @public
 	*/
@@ -797,6 +1031,8 @@ declare module "sap/m/QuickViewGroupElementType" {
 
 	/**
 	 * QuickViewGroupElement is a combination of one label and another control (Link or Text) associated to this label.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'QuickViewGroupElementType'.
 	 *
 	 * @public
 	*/
@@ -808,6 +1044,8 @@ declare module "sap/m/RatingIndicatorVisualMode" {
 
 	/**
 	 * Possible values for the visualization of float values in the RatingIndicator control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'RatingIndicatorVisualMode'.
 	 *
 	 * @public
 	*/
@@ -818,7 +1056,9 @@ declare module "sap/m/ResetAllMode" {
 	import {ResetAllMode} from "sap/m/library";
 
 	/**
-	 * Enumeration of the <code>ResetAllMode>/code> that can be used in a <code>TablePersoController</code>.
+	 * Enumeration of the <code>ResetAllMode</code> that can be used in a <code>TablePersoController</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ResetAllMode'.
 	 *
 	 * @public
 	*/
@@ -830,6 +1070,8 @@ declare module "sap/m/ScreenSize" {
 
 	/**
 	 * Breakpoint names for different screen sizes.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ScreenSize'.
 	 *
 	 * @public
 	*/
@@ -855,6 +1097,8 @@ declare module "sap/m/SelectDialogInitialFocus" {
 
 	/**
 	 * Defines the control that will receive the initial focus in the <code>sap.m.SelectDialog</code> or <code>sap.m.TableSelectDialog</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectDialogInitialFocus'.
 	 *
 	 * @public
 	 * @since 1.117.0
@@ -867,6 +1111,8 @@ declare module "sap/m/SelectionDetailsActionLevel" {
 
 	/**
 	 * Enumeration for different action levels in sap.m.SelectionDetails control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectionDetailsActionLevel'.
 	 *
 	 * @protected
 	 * @since 1.48
@@ -879,6 +1125,8 @@ declare module "sap/m/SelectListKeyboardNavigationMode" {
 
 	/**
 	 * Defines the keyboard navigation mode.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectListKeyboardNavigationMode'.
 	 *
 	 * @public
 	 * @since 1.38
@@ -891,6 +1139,8 @@ declare module "sap/m/SelectType" {
 
 	/**
 	 * Enumeration for different Select types.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SelectType'.
 	 *
 	 * @public
 	 * @since 1.16
@@ -903,6 +1153,8 @@ declare module "sap/m/semantic/SemanticRuleSetType" {
 
 	/**
 	 * Declares the type of semantic ruleset that will govern the styling and positioning of semantic content.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'semantic.SemanticRuleSetType'.
 	 *
 	 * @public
 	 * @since 1.44
@@ -910,11 +1162,26 @@ declare module "sap/m/semantic/SemanticRuleSetType" {
 	export default semantic.SemanticRuleSetType;
 }
 
+declare module "sap/m/SharingMode" {
+	import {SharingMode} from "sap/m/library";
+
+	/**
+	 * Enumeration of the <code>SharingMode</code> that can be used in a <code>VariantItem</code>.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SharingMode'.
+	 *
+	 * @public
+	*/
+	export default SharingMode;
+}
+
 declare module "sap/m/SinglePlanningCalendarSelectionMode" {
 	import {SinglePlanningCalendarSelectionMode} from "sap/m/library";
 
 	/**
 	 * Available selection modes for the {@link sap.m.SinglePlanningCalendar}
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SinglePlanningCalendarSelectionMode'.
 	 *
 	 * @public
 	 * @since 1.113
@@ -927,6 +1194,8 @@ declare module "sap/m/Size" {
 
 	/**
 	 * Enumeration of possible size settings.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'Size'.
 	 *
 	 * @public
 	 * @since 1.34.0
@@ -939,6 +1208,8 @@ declare module "sap/m/SplitAppMode" {
 
 	/**
 	 * The mode of SplitContainer or SplitApp control to show/hide the master area.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SplitAppMode'.
 	 *
 	 * @public
 	*/
@@ -950,6 +1221,8 @@ declare module "sap/m/StandardDynamicDateRangeKeys" {
 
 	/**
 	 * The option keys of all the standard options of a DynamicDateRange control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'StandardDynamicDateRangeKeys'.
 	 *
 	 * @public
 	*/
@@ -961,6 +1234,8 @@ declare module "sap/m/StandardTileType" {
 
 	/**
 	 * Types for StandardTile.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'StandardTileType'.
 	 *
 	 * @public
 	*/
@@ -972,6 +1247,8 @@ declare module "sap/m/StepInputStepModeType" {
 
 	/**
 	 * Available step modes for {@link sap.m.StepInput}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'StepInputStepModeType'.
 	 *
 	 * @public
 	 * @since 1.54
@@ -984,6 +1261,8 @@ declare module "sap/m/StepInputValidationMode" {
 
 	/**
 	 * Available validation modes for {@link sap.m.StepInput}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'StepInputValidationMode'.
 	 *
 	 * @public
 	*/
@@ -995,6 +1274,8 @@ declare module "sap/m/Sticky" {
 
 	/**
 	 * Defines which area of the control remains fixed at the top of the page during vertical scrolling as long as the control is in the viewport.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'Sticky'.
 	 *
 	 * @public
 	 * @since 1.54
@@ -1007,6 +1288,8 @@ declare module "sap/m/StringFilterOperator" {
 
 	/**
 	 * Types of string filter operators.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'StringFilterOperator'.
 	 *
 	 * @public
 	 * @since 1.42
@@ -1019,6 +1302,8 @@ declare module "sap/m/SwipeDirection" {
 
 	/**
 	 * Directions for swipe event.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SwipeDirection'.
 	 *
 	 * @public
 	*/
@@ -1030,6 +1315,8 @@ declare module "sap/m/SwitchType" {
 
 	/**
 	 * Enumeration for different switch types.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'SwitchType'.
 	 *
 	 * @public
 	*/
@@ -1041,6 +1328,8 @@ declare module "sap/m/table/columnmenu/Category" {
 
 	/**
 	 * Categories of column menu entries.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'table.columnmenu.Category'.
 	 *
 	 * @public
 	 * @since 1.110
@@ -1053,6 +1342,8 @@ declare module "sap/m/TabsOverflowMode" {
 
 	/**
 	 * Specifies <code>IconTabBar</code> tab overflow mode.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TabsOverflowMode'.
 	 *
 	 * @public
 	 * @since 1.90.0
@@ -1060,11 +1351,29 @@ declare module "sap/m/TabsOverflowMode" {
 	export default TabsOverflowMode;
 }
 
+declare module "sap/m/TileInfoColor" {
+	import {TileInfoColor} from "sap/m/library";
+
+	/**
+	 * Colors to highlight certain UI elements.
+	 * 
+	 * In contrast to the <code>ValueState</code>, the semantic meaning must be defined by the application.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TileInfoColor'.
+	 *
+	 * @public
+	 * @since 1.124
+	*/
+	export default TileInfoColor;
+}
+
 declare module "sap/m/TileSizeBehavior" {
 	import {TileSizeBehavior} from "sap/m/library";
 
 	/**
 	 * Describes the behavior of tiles when displayed on a small-screened phone (374px wide and lower).
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TileSizeBehavior'.
 	 *
 	 * @public
 	 * @since 1.56.0
@@ -1077,6 +1386,8 @@ declare module "sap/m/TimePickerMaskMode" {
 
 	/**
 	 * Different modes for the <code>sap.m.TimePicker</code> mask.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TimePickerMaskMode'.
 	 *
 	 * @public
 	 * @since 1.54
@@ -1089,6 +1400,8 @@ declare module "sap/m/TitleAlignment" {
 
 	/**
 	 * Declares the type of title alignment for some controls
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TitleAlignment'.
 	 *
 	 * @public
 	*/
@@ -1100,6 +1413,8 @@ declare module "sap/m/TokenizerRenderMode" {
 
 	/**
 	 * Types of the <code>sap.m.Tokenizer</code> responsive modes.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'TokenizerRenderMode'.
 	 *
 	 * @public
 	 * @since 1.80
@@ -1114,6 +1429,8 @@ declare module "sap/m/ToolbarDesign" {
 	 * Types of the Toolbar Design.
 	 * 
 	 * To preview the different combinations of <code>sap.m.ToolbarDesign</code> and <code>sap.m.ToolbarStyle</code>, see the <b>OverflowToolbar - Design and styling</b> sample of the {@link sap.m.OverflowToolbar} control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ToolbarDesign'.
 	 *
 	 * @public
 	 * @since 1.16.8
@@ -1130,6 +1447,8 @@ declare module "sap/m/ToolbarStyle" {
 	 * <b>Note:</b> Keep in mind that the styles are theme-dependent and can differ based on the currently used theme.
 	 * 
 	 * To preview the different combinations of <code>sap.m.ToolbarDesign</code> and <code>sap.m.ToolbarStyle</code>, see the <b>OverflowToolbar - Design and styling</b> sample of the {@link sap.m.OverflowToolbar} control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ToolbarStyle'.
 	 *
 	 * @public
 	 * @since 1.54
@@ -1142,6 +1461,8 @@ declare module "sap/m/UploadSetwithTableActionPlaceHolder" {
 
 	/**
 	 * Defines the placeholder type for the control to be replaced.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'UploadSetwithTableActionPlaceHolder'.
 	 *
 	 * @public
 	 * @since 1.120
@@ -1154,6 +1475,8 @@ declare module "sap/m/UploadState" {
 
 	/**
 	 * States of the upload process of {@link sap.m.UploadCollectionItem}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'UploadState'.
 	 *
 	 * @public
 	*/
@@ -1165,6 +1488,8 @@ declare module "sap/m/UploadType" {
 
 	/**
 	 * Type of the upload {@link sap.m.UploadSetItem}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'UploadType'.
 	 *
 	 * @public
 	*/
@@ -1176,6 +1501,8 @@ declare module "sap/m/ValueColor" {
 
 	/**
 	 * Enumeration of possible value color settings.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ValueColor'.
 	 *
 	 * @public
 	*/
@@ -1200,6 +1527,8 @@ declare module "sap/m/VerticalPlacementType" {
 
 	/**
 	 * Types for the placement of message Popover control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'VerticalPlacementType'.
 	 *
 	 * @public
 	*/
@@ -1211,9 +1540,11 @@ declare module "sap/m/WizardRenderMode" {
 
 	/**
 	 * Wizard rendering mode.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'WizardRenderMode'.
 	 *
-	 * @experimental (since 1.83)
 	 * @public
+	 * @since 1.83
 	*/
 	export default WizardRenderMode;
 }
@@ -1225,6 +1556,8 @@ declare module "sap/m/WrappingType" {
 	 * Available wrapping types for text controls that can be wrapped that enable you to display the text as hyphenated.
 	 * 
 	 * For more information about text hyphenation, see {@link sap.ui.core.hyphenation.Hyphenation} and {@link topic:6322164936f047de941ec522b95d7b70 Text Controls Hyphenation}.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'WrappingType'.
 	 *
 	 * @public
 	 * @since 1.60

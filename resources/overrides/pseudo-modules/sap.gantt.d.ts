@@ -3,6 +3,8 @@ declare module "sap/gantt/AdhocLineLayer" {
 
 	/**
 	 * The layer of adhoc line in chart area
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'AdhocLineLayer'.
 	 *
 	 * @public
 	*/
@@ -14,6 +16,8 @@ declare module "sap/gantt/config/BirdEyeRange" {
 
 	/**
 	 * Define the range of data that bird eye would use to calculate visibleHorizon
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'config.BirdEyeRange'.
 	 *
 	 * @public
 	*/
@@ -25,6 +29,8 @@ declare module "sap/gantt/config/FindMode" {
 
 	/**
 	 * Defines the control where find and select search box will appear
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'config.FindMode'.
 	 *
 	 * @public
 	*/
@@ -36,6 +42,8 @@ declare module "sap/gantt/config/TimeUnit" {
 
 	/**
 	 * Different time units used as part of the zoom level. They are names of d3 time unit classes.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'config.TimeUnit'.
 	 *
 	 * @public
 	*/
@@ -47,6 +55,8 @@ declare module "sap/gantt/config/ZoomControlType" {
 
 	/**
 	 * Define the type of zoom control in global tool bar
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'config.ZoomControlType'.
 	 *
 	 * @public
 	*/
@@ -60,6 +70,8 @@ declare module "sap/gantt/def/filter/ColorMatrixValue" {
 	 * Color Matrix Values.
 	 * 
 	 * The matrix decides what target color from source color.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'def.filter.ColorMatrixValue'.
 	 *
 	 * @public
 	*/
@@ -73,6 +85,8 @@ declare module "sap/gantt/def/filter/MorphologyOperator" {
 	 * Morphology Operators.
 	 * 
 	 * The operator decides the morphology to make the shape fatter or slimmer.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'def.filter.MorphologyOperator'.
 	 *
 	 * @public
 	*/
@@ -84,6 +98,8 @@ declare module "sap/gantt/DeltaLineLayer" {
 
 	/**
 	 * The layer of delta line in chart area
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'DeltaLineLayer'.
 	 *
 	 * @public
 	 * @since 1.84
@@ -96,6 +112,8 @@ declare module "sap/gantt/dragdrop/GhostAlignment" {
 
 	/**
 	 * Defines how Gantt Chart aligns a draggable shape to the mouse pointer before dragging.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'dragdrop.GhostAlignment'.
 	 *
 	 * @public
 	*/
@@ -107,6 +125,8 @@ declare module "sap/gantt/dragdrop/SnapMode" {
 
 	/**
 	 * Defines the side of the shape that gets attached to the nearest visual element.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'dragdrop.SnapMode'.
 	 *
 	 * @public
 	 * @since 1.91
@@ -119,6 +139,8 @@ declare module "sap/gantt/DragOrientation" {
 
 	/**
 	 * Defines how dragged ghost moves when dragging.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'DragOrientation'.
 	 *
 	 * @public
 	*/
@@ -145,6 +167,8 @@ declare module "sap/gantt/MouseWheelZoomType" {
 
 	/**
 	 * Different zoom type for mouse wheel zooming
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'MouseWheelZoomType'.
 	 *
 	 * @public
 	*/
@@ -168,6 +192,8 @@ declare module "sap/gantt/SelectionMode" {
 
 	/**
 	 * Different selection mode for GanttChart
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'SelectionMode'.
 	 *
 	 * @public
 	*/
@@ -179,6 +205,8 @@ declare module "sap/gantt/shape/ext/rls/RelationshipType" {
 
 	/**
 	 * Type of relationships
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'shape.ext.rls.RelationshipType'.
 	 *
 	 * @public
 	*/
@@ -192,6 +220,8 @@ declare module "sap/gantt/shape/ShapeCategory" {
 	 * Shape Categories.
 	 * 
 	 * Different categories use different Drawers. Therefore, different categories may have different designs of parameters in their getter methods.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'shape.ShapeCategory'.
 	 *
 	 * @public
 	*/
@@ -203,6 +233,8 @@ declare module "sap/gantt/simple/connectorType" {
 
 	/**
 	 * Type connector shapes for relationship
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.connectorType'.
 	 *
 	 * @public
 	 * @since 1.86
@@ -215,6 +247,8 @@ declare module "sap/gantt/simple/ContainerToolbarPlaceholderType" {
 
 	/**
 	 * Toolbar placeholders for a Gantt chart container.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.ContainerToolbarPlaceholderType'.
 	 *
 	 * @public
 	*/
@@ -226,6 +260,8 @@ declare module "sap/gantt/simple/findByOperator" {
 
 	/**
 	 * Defines the relationship between the operator and the property names using the findAll method
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.findByOperator'.
 	 *
 	 * @public
 	 * @since 1.100
@@ -238,6 +274,8 @@ declare module "sap/gantt/simple/GanttChartWithTableDisplayType" {
 
 	/**
 	 * Gantt chart display types.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.GanttChartWithTableDisplayType'.
 	 *
 	 * @public
 	*/
@@ -249,6 +287,8 @@ declare module "sap/gantt/simple/horizontalTextAlignment" {
 
 	/**
 	 * Configuration options for horizontal alignment of title of the shape representing a Task.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.horizontalTextAlignment'.
 	 *
 	 * @public
 	 * @since 1.81
@@ -261,6 +301,8 @@ declare module "sap/gantt/simple/relationshipShapeSize" {
 
 	/**
 	 * Size of shapes in the relationship
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.relationshipShapeSize'.
 	 *
 	 * @public
 	 * @since 1.96
@@ -273,6 +315,8 @@ declare module "sap/gantt/simple/RelationshipType" {
 
 	/**
 	 * Type of relationship shape. <code>sap.gantt.simple.RelationshipType</code> shall be used to define property type on class <code>sap.gantt.simple.Relationship</code>
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.RelationshipType'.
 	 *
 	 * @public
 	 * @since 1.60.0
@@ -280,11 +324,27 @@ declare module "sap/gantt/simple/RelationshipType" {
 	export default simple.RelationshipType;
 }
 
+declare module "sap/gantt/simple/shapeEventType" {
+	import {simple} from "sap/gantt/library";
+
+	/**
+	 * Defines eventType for Shape style configuration.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.shapeEventType'.
+	 *
+	 * @public
+	 * @since 1.130
+	*/
+	export default simple.shapeEventType;
+}
+
 declare module "sap/gantt/simple/shapes/ShapeAlignment" {
 	import {simple} from "sap/gantt/library";
 
 	/**
 	 * Configuration options for vertical alignment of shape representing a Task. This is only applicable for Tasks.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.shapes.ShapeAlignment'.
 	 *
 	 * @public
 	 * @since 1.81
@@ -297,6 +357,8 @@ declare module "sap/gantt/simple/shapes/TaskType" {
 
 	/**
 	 * Type of task shape.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.shapes.TaskType'.
 	 *
 	 * @public
 	 * @since 1.69
@@ -309,6 +371,8 @@ declare module "sap/gantt/simple/verticalTextAlignment" {
 
 	/**
 	 * Configuration options for vertical alignment of title of the shape representing a Task.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.verticalTextAlignment'.
 	 *
 	 * @public
 	 * @since 1.81
@@ -321,6 +385,8 @@ declare module "sap/gantt/simple/VisibleHorizonUpdateSubType" {
 
 	/**
 	 * This specifies the sub reason detailing why the visible horizon is changing
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.VisibleHorizonUpdateSubType'.
 	 *
 	 * @public
 	 * @since 1.100
@@ -333,6 +399,8 @@ declare module "sap/gantt/simple/VisibleHorizonUpdateType" {
 
 	/**
 	 * This type specifies the reason why visible horizon is changing.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.VisibleHorizonUpdateType'.
 	 *
 	 * @public
 	 * @since 1.68
@@ -345,6 +413,8 @@ declare module "sap/gantt/simple/yAxisColumnContent" {
 
 	/**
 	 * Configaration option for yAxis Column.
+	 * 
+	 * This enum is part of the 'sap/gantt/library' module export and must be accessed by the property 'simple.yAxisColumnContent'.
 	 *
 	 * @public
 	 * @since 1.102
