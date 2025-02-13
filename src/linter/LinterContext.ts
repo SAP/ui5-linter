@@ -81,7 +81,6 @@ export interface LinterParameters {
 	workspace: AbstractAdapter;
 	filePathsWorkspace: AbstractAdapter;
 	context: LinterContext;
-	altGlob?: string;
 }
 
 export interface PositionInfo {

@@ -9,7 +9,8 @@ import {decodedMap, DecodedSourceMap, SourceMapInput, TraceMap} from "@jridgewel
 // For usage in TypeLinter to write the file as part of the internal WRITE_TRANSFORMED_SOURCES debug mode
 export const CONTROLLER_BY_ID_DTS_PATH = "/types/@ui5/linter/virtual/ControllerById.d.ts";
 
-export default async function lintXml({filePathsWorkspace, workspace, context, altGlob}: LinterParameters) {
+export default async function lintXml({filePathsWorkspace, workspace, context, altGlob}:
+	LinterParameters & {altGlob?: string}) {
 	altGlob = altGlob ?? "**/{*.view.xml,*.fragment.xml}";
 	const xmlResources = await filePathsWorkspace.byGlob(altGlob);
 
