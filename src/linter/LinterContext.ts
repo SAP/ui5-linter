@@ -237,13 +237,18 @@ export default class LinterContext {
 	}
 
 	#getFilteredMessages(resourcePath: ResourcePath): RawLintMessage[] {
+		const sortFn = (a: RawLintMessage, b: RawLintMessage) => {
+			const aPos = a.position ?? {line: 0, column: 0};
+			const bPos = b.position ?? {line: 0, column: 0};
+			return aPos.line === bPos.line ? aPos.column - bPos.column : aPos.line - bPos.line;
+		};
 		const rawMessages = this.#rawMessages.get(resourcePath);
 		if (!rawMessages) {
 			return [];
 		}
 		const metadata = this.#metadata.get(resourcePath);
 		if (!metadata?.directives?.size) {
-			return rawMessages;
+			return rawMessages.sort(sortFn);
 		}
 
 		const filteredMessages: RawLintMessage[] = [];
@@ -255,11 +260,7 @@ export default class LinterContext {
 				return false;
 			}
 			return true;
-		}).sort((a, b) => {
-			const aPos = a.position!;
-			const bPos = b.position!;
-			return aPos.line === bPos.line ? aPos.column - bPos.column : aPos.line - bPos.line;
-		});
+		}).sort(sortFn);
 
 		// Filter messages based on directives
 		let directiveStack: Directive[] = [];
