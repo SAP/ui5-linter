@@ -1,7 +1,7 @@
 sap.ui.define(["sap/ui/core/Core"], function(Core) {
 	"use strict";
 
-	async function waitForCore(callback) {
+	function waitForCore(callback) {
 		// Usage of Core.ready / Core.attachInit in a test starter testsuite
 		// should not cause a false-positive for "prefer-test-starter"
 		if (Core.ready) {
