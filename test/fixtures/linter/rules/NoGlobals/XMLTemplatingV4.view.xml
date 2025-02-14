@@ -36,6 +36,12 @@
 					<!-- Global access via computed annotation - no arguments, composite binding -->
 					<Text text="ValueListType: {field>@@sap.ui.model.odata.v4.AnnotationHelper.getValueListType}" />
 
+					<!-- Global access via expression binding for aggregation -->
+					<Text dragDropConfig="{:= ${property>@@getValueListType} === 'None' ? '/config' : '/otherConfig' }" />
+
+					<!-- Global access via computed annotation - composite binding with explicit parts and simple path -->
+					<Text text="ValueListType: { parts: [ 'property>@@getValueListType' ] }" />
+
 				</template:else>
 
 			</template:if>

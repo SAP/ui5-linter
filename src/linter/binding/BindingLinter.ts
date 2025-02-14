@@ -30,8 +30,14 @@ export default class BindingLinter {
 	}
 
 	#analyzeCommonBindingParts(
-		bindingInfo: BindingInfo, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		const {events, path} = bindingInfo;
+		bindingInfo: BindingInfo | string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		let path, events;
+		if (typeof bindingInfo === "string") {
+			path = bindingInfo;
+		} else {
+			path = bindingInfo.path;
+			events = bindingInfo.events;
+		}
 		if (events && typeof events === "object") {
 			for (const eventHandler of Object.values(events)) {
 				this.checkForGlobalReference(eventHandler, requireDeclarations, position);
@@ -48,11 +54,17 @@ export default class BindingLinter {
 				this.checkForGlobalReference(computationFunction, requireDeclarations, position);
 			}
 		}
+
+		if (typeof bindingInfo === "object" && "tokens" in bindingInfo) {
+			this.#lintExpressionBindingTokens(bindingInfo, requireDeclarations, position);
+		}
 	}
 
 	#analyzePropertyBinding(
-		bindingInfo: PropertyBindingInfo, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
+		bindingInfo: PropertyBindingInfo | string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		if (typeof bindingInfo === "string") {
+			return;
+		}
 		const {formatter, type} = bindingInfo;
 		if (formatter) {
 			// If the binding is defined as a string and inside a JS/TS sourcefile,
@@ -74,8 +86,11 @@ export default class BindingLinter {
 	}
 
 	#analyzeAggregationBinding(
-		bindingInfo: AggregationBindingInfo, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
-		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
+		bindingInfo: AggregationBindingInfo | string, requireDeclarations: RequireDeclaration[], position: PositionInfo
+	) {
+		if (typeof bindingInfo === "string") {
+			return;
+		}
 		const {factory, groupHeaderFactory, filters, sorter} = bindingInfo;
 		if (factory) {
 			this.checkForGlobalReference(factory, requireDeclarations, position);
@@ -167,20 +182,26 @@ export default class BindingLinter {
 	lintPropertyBinding(bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
 		try {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
-			if (typeof bindingInfo === "object") {
-				this.#analyzePropertyBinding(bindingInfo as PropertyBindingInfo, requireDeclarations, position);
-				if (bindingInfo.parts) {
-					for (const part of bindingInfo.parts) {
-						this.#analyzePropertyBinding(part, requireDeclarations, position);
-					}
-				}
-				if ("tokens" in bindingInfo) {
-					this.#lintExpressionBindingTokens(bindingInfo, requireDeclarations, position);
-				}
+			if (bindingInfo) {
+				this.#lintPropertyBindingInfo(bindingInfo, requireDeclarations, position);
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+		}
+	}
+
+	#lintPropertyBindingInfo(
+		bindingInfo: BindingInfo | string, requireDeclarations: RequireDeclaration[], position: PositionInfo
+	) {
+		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
+		this.#analyzePropertyBinding(bindingInfo, requireDeclarations, position);
+
+		// Recursively check all parts of the property binding
+		if (typeof bindingInfo === "object" && bindingInfo.parts) {
+			for (const part of bindingInfo.parts) {
+				this.#lintPropertyBindingInfo(part, requireDeclarations, position);
+			}
 		}
 	}
 
@@ -189,16 +210,29 @@ export default class BindingLinter {
 		try {
 			const bindingInfo = this.#parseBinding(bindingDefinition);
 			if (typeof bindingInfo === "object") {
-				this.#analyzeAggregationBinding(bindingInfo as AggregationBindingInfo, requireDeclarations, position);
-				if (bindingInfo.parts) {
-					for (const part of bindingInfo.parts) {
-						this.#analyzeAggregationBinding(part, requireDeclarations, position);
-					}
-				}
+				this.#lintAggregationBindingInfo(bindingInfo, requireDeclarations, position);
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+		}
+	}
+
+	#lintAggregationBindingInfo(
+		bindingInfo: BindingInfo | string, requireDeclarations: RequireDeclaration[], position: PositionInfo
+	) {
+		this.#analyzeCommonBindingParts(bindingInfo, requireDeclarations, position);
+		this.#analyzeAggregationBinding(bindingInfo, requireDeclarations, position);
+		// As XML templating interprets all bindings as property bindings we also have to run the
+		// property binding analysis here.
+		// Note: This also covers the analysis of commons binding parts such as events and path
+		this.#analyzePropertyBinding(bindingInfo, requireDeclarations, position);
+
+		// Recursively check all parts of the aggregation binding
+		if (typeof bindingInfo === "object" && bindingInfo.parts) {
+			for (const part of bindingInfo.parts) {
+				this.#lintAggregationBindingInfo(part, requireDeclarations, position);
+			}
 		}
 	}
 
