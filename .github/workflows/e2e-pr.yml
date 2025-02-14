@@ -30,4 +30,4 @@ jobs:
       run: cd test/fixtures/linter/projects/com.ui5.troublesome.app && ../../../../../bin/ui5lint.js --format=json > ../../../../../ui5lint-e2e-results.json 2>&1 || true
       
     - name: Compare results
-      run: npm run compare-results
+      run: npm run compare-e2e-results

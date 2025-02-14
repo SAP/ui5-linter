@@ -43,6 +43,7 @@
 		"test": "npm run lint && npm run build-test && npm run coverage && npm run e2e && npm run depcheck && npm run check-licenses",
 		"unit": "ava",
 		"e2e": "npm run build && ava --config ava-e2e.config.js",
+		"compare-e2e-results": "ava --config ava-e2e-ci.config.js",
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
