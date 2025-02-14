@@ -1,4 +1,3 @@
-/* eslint ava/no-ignored-test-files: "error" */
 import test from "ava";
 import {createRequire} from "node:module";
 

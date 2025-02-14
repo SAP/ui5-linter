@@ -23,6 +23,7 @@ export default tseslint.config(
 			// requiring the package itself, which causes a circular dependency
 			// and TypeScript/ESlint gets confused during compilation.
 			"test/e2e/package-exports.ts",
+			"test/e2e/ci-compare.ts",
 
 			// Exclude generated code
 			"lib/*",
