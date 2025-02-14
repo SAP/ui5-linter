@@ -27,4 +27,7 @@ jobs:
       run: npm run build
 
     - name: Run tests against sample project
-      run: cd test/fixtures/linter/projects/com.ui5.troublesome.app && ../../../../../bin/ui5lint.js --format=json
+      run: cd test/fixtures/linter/projects/com.ui5.troublesome.app && ../../../../../bin/ui5lint.js --format=json 2> ../../../../../ui5lint-e2e-results.json
+      
+    - name: Compare results
+      run: npm run compare-results
