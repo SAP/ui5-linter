@@ -8,7 +8,7 @@ import path from "node:path/posix";
 import {AbstractAdapter} from "@ui5/fs";
 import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
-import {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
+import lintXml, {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 import type SharedLanguageService from "./SharedLanguageService.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
@@ -113,11 +113,11 @@ export default class TypeChecker {
 		this.#sharedLanguageService.acquire(host);
 
 		const createProgramDone = taskStart("ts.createProgram", undefined, true);
-		const program = this.#sharedLanguageService.getProgram();
+		let program = this.#sharedLanguageService.getProgram();
 		createProgramDone();
 
 		const getTypeCheckerDone = taskStart("program.getTypeChecker", undefined, true);
-		const checker = program.getTypeChecker();
+		let checker = program.getTypeChecker();
 		getTypeCheckerDone();
 
 		const apiExtract = await loadApiExtract();
@@ -146,10 +146,49 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails,
-					apiExtract, manifestContent
+					apiExtract, this.#filePathsWorkspace, this.#workspace, manifestContent
 				);
 				await linter.lint();
 				linterDone();
+			}
+		}
+
+		// Will eventually produce new JS files for XML views and fragments
+		await lintXml({
+			filePathsWorkspace: this.#filePathsWorkspace,
+			workspace: this.#workspace,
+			context: this.#context,
+			altGlob: "**/*.inline-*.{view,fragment}.xml",
+		});
+		const virtualXMLResources =
+			await this.#filePathsWorkspace.byGlob("/**/*.inline-*.{view,fragment}{.js,.ts,.js.map}");
+		if (virtualXMLResources.length > 0) {
+			for (const resource of virtualXMLResources) {
+				const resourcePath = resource.getPath();
+				if (resourcePath.endsWith(".js.map")) {
+					sourceMaps.set(
+						// Remove ".map" from path to have it reflect the associated source path
+						resourcePath.slice(0, -4),
+						await resource.getString()
+					);
+				} else {
+					files.set(resourcePath, await resource.getString());
+				}
+			}
+			program = this.#sharedLanguageService.getProgram();
+			checker = program.getTypeChecker();
+			for (const sourceFile of program.getSourceFiles()) {
+				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
+					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
+					const linter = new SourceFileLinter(
+						this.#context, sourceFile.fileName,
+						sourceFile, sourceMaps,
+						checker, reportCoverage, messageDetails,
+						apiExtract, this.#filePathsWorkspace, this.#workspace
+					);
+					await linter.lint();
+					linterDone();
+				}
 			}
 		}
 		typeCheckDone();

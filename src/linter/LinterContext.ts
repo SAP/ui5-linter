@@ -4,6 +4,7 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import {Directive} from "./ui5Types/directives.js";
+import ts from "typescript";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
@@ -97,6 +98,7 @@ export interface LintMetadata {
 	directives: Set<Directive>;
 	transformedImports: Map<string, Set<string>>;
 	xmlCompiledResource: string;
+	jsToXmlPosMapping: {pos: ts.LineAndCharacter; originalPath: string};
 }
 
 export default class LinterContext {
