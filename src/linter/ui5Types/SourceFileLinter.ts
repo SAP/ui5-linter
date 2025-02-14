@@ -29,7 +29,7 @@ const QUNIT_FILE_EXTENSION = /\.qunit\.(js|ts)$/;
 
 // This is the same check as in the framework and prevents false-positives
 // https://github.com/SAP/openui5/blob/32c21c33d9dc29a32bf7ee7f41d7bae23dcf086b/src/sap.ui.core/src/sap/ui/test/starter/_utils.js#L287
-const VALID_TESTSUITE = /^\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
+const VALID_TESTSUITE = /\/testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.(?:js|ts)$/;
 
 const DEPRECATED_VIEW_TYPES = ["JS", "JSON", "HTML", "Template"];
 
