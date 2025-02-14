@@ -1,0 +1,35 @@
+name: E2E Manual Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to checkout'
+        required: true
+        default: 'main'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Use Node.js 20.11.0
+      uses: actions/setup-node@v4.0.2
+      with:
+        node-version: 20.11.0
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build UI5 Linter
+      run: npm run build
+
+    - name: Run tests against sample project
+      run: cd test/fixtures/linter/projects/com.ui5.troublesome.app && ../../../../../bin/ui5lint.js --format=json > ../../../../../ui5lint-e2e-results.json 2>&1 || true
+      
+    - name: Compare results
+      run: npm run ci:e2e

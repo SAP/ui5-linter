@@ -1,4 +1,4 @@
-name: E2E Test
+name: E2E Automatic Test
 
 on:
   push:
@@ -7,12 +7,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to checkout'
-        required: true
-        default: 'main'
 
 jobs:
   build-and-test:
