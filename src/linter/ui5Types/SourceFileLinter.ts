@@ -1468,7 +1468,7 @@ export default class SourceFileLinter {
 			// Fallback in case of relative imports within framework libraries, where the type does not have a symbol
 			const exprSymbol = this.checker.getSymbolAtLocation(exprNode);
 			const exprDeclaration = exprSymbol?.declarations?.[0];
-			if (!exprDeclaration) {
+			if (!exprDeclaration?.parent) {
 				return;
 			}
 			if (!ts.isImportDeclaration(exprDeclaration.parent)) {
