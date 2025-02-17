@@ -19,10 +19,6 @@ export default tseslint.config(
 			"test/tmp/*",
 			"test/projects/*",
 			"test/fixtures/*",
-			// This file must be excluded as it tests the package exports by
-			// requiring the package itself, which causes a circular dependency
-			// and TypeScript/ESlint gets confused during compilation.
-			"test/e2e/package-exports.ts",
 
 			// Exclude generated code
 			"lib/*",
@@ -58,6 +54,12 @@ export default tseslint.config(
 			// This file is a copy of an openui5 resource which is located at
 			// https://github.com/SAP/openui5/blob/master/lib/jsdoc/transformApiJson.js
 			"src/formatter/lib/resolveLinks.ts",
+
+			// This file must be excluded as it tests the package exports by
+			// requiring the package itself, which causes a circular dependency
+			// and TypeScript/ESlint gets confused during compilation.
+			"test/e2e/package-exports.ts",
+
 		],
 		languageOptions: {
 			ecmaVersion: 2022,
@@ -128,6 +130,14 @@ export default tseslint.config(
 			],
 			"no-console": "error",
 			"no-eval": "error",
+			"ava/no-ignored-test-files": ["error", {
+				files: [
+					"test/lib/**/*.ts",
+					// This additional entry is needed as the rule otherwise complains about
+					// ignored test files. The files are configured in a separate ava config.
+					"test/e2e/**/*.ts",
+				],
+			}],
 		},
 	}
 );
