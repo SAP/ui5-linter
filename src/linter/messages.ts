@@ -1,6 +1,6 @@
 // TODO: Migrate to enum instead of Object/Map
 // Currently, it's done this way to avoid pollution of the test snapshots
-const RULES = {
+export const RULES = {
 	"async-component-flags": "async-component-flags",
 	"csp-unsafe-inline-script": "csp-unsafe-inline-script",
 	"no-ambiguous-event-handler": "no-ambiguous-event-handler",
