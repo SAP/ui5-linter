@@ -1,8 +1,5 @@
 import defaultAvaConfig from "./ava.config.js";
 
-defaultAvaConfig.files = [
-	"test/e2e/**/*.ts",
-	"!test/e2e/ci-compare.ts",
-];
+defaultAvaConfig.files = ["test/e2e/**/*.ts"];
 
 export default defaultAvaConfig;
