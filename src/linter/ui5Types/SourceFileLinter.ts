@@ -874,19 +874,29 @@ export default class SourceFileLinter {
 					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
 				}
 			} else if (["view", "xmlview", "fragment", "xmlfragment"].includes(symbolName)) {
+				const options = node?.arguments?.[0];
+				if (!options || !ts.isObjectLiteralExpression(options)) {
+					return;
+				}
 				const namespace = this.extractNamespace(node)
 					.replace(/\[("|'|`)*/g, ".").replace(/("|'|`)*\]/g, "");
-				const typeProperty = node?.arguments?.[0] && ts.isObjectLiteralExpression(node.arguments[0]) &&
-					getPropertyAssignmentInObjectLiteralExpression("type", node.arguments[0]);
-				if (namespace === `sap.ui.${symbolName}` &&
-					(!typeProperty ||
-						(ts.isStringLiteralLike(typeProperty.initializer) && typeProperty.initializer.text === "XML"))
+				if (namespace !== `sap.ui.${symbolName}`) {
+					return;
+				}
+				const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", options);
+				if (
+					!typeProperty ||
+					(ts.isStringLiteralLike(typeProperty.initializer) && typeProperty.initializer.text === "XML")
 				) {
 					const viewType = ["fragment", "xmlfragment"].includes(symbolName) ? "fragment" : "view";
-					this.#extractXmlFromJs(node, viewType);
+					this.#extractXmlFromJs(options, viewType, true);
 				}
 			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
-				this.#extractXmlFromJs(node, "view");
+				const options = node?.arguments?.[0];
+				if (!options || !ts.isObjectLiteralExpression(options)) {
+					return;
+				}
+				this.#extractXmlFromJs(options, "view");
 			}
 		}
 
@@ -1030,35 +1040,40 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#extractXmlFromJs(node: ts.CallExpression, viewType: "view" | "fragment" = "view") {
-		if (!node.arguments.length || !ts.isObjectLiteralExpression(node.arguments[0]) ||
-			// xmlCompiledResource is an XML file, so we don't need to do extraction here
-			this.#metadata?.xmlCompiledResource) {
+	#extractXmlFromJs(
+		options: ts.ObjectLiteralExpression,
+		viewType: "view" | "fragment" = "view",
+		isLegacyApi = false
+	) {
+		// xmlCompiledResource is an XML file, so we don't need to do extraction here
+		if (this.#metadata?.xmlCompiledResource) {
 			return;
 		}
 
-		node.arguments[0].properties.forEach((prop) => {
-			if (ts.isPropertyAssignment(prop) &&
-				(ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name)) &&
-				ts.isStringLiteralLike(prop.initializer)) {
-				const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
-				const traceMap = sourceMapJson ?
-					new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
-					undefined;
-				const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
-				const posInSource = traceMap ?
-						originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :
-					null;
-				const originalPos = posInSource ?
-						{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
-					pos;
+		const propertyName = isLegacyApi ? (viewType === "view" ? "viewContent" : "fragmentContent") : "definition";
 
-				this.#xmlContents.push({
-					xml: prop.initializer.text,
-					pos: originalPos,
-					viewType,
-				});
-			}
+		const prop = getPropertyAssignmentInObjectLiteralExpression(propertyName, options);
+
+		if (!prop || !ts.isStringLiteralLike(prop.initializer)) {
+			return;
+		}
+
+		const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
+		const traceMap = sourceMapJson ?
+			new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
+			undefined;
+		const pos = this.sourceFile.getLineAndCharacterOfPosition(prop.initializer.pos);
+		const posInSource = traceMap ?
+				originalPositionFor(traceMap, {line: pos.line, column: pos.character}) :
+			null;
+		const originalPos = posInSource ?
+				{line: posInSource.line ?? 0, character: posInSource.column ?? 0} :
+			pos;
+
+		this.#xmlContents.push({
+			xml: prop.initializer.text,
+			pos: originalPos,
+			viewType,
 		});
 	}
 
@@ -1188,12 +1203,13 @@ export default class SourceFileLinter {
 	}
 
 	#analyzeViewCreate(node: ts.CallExpression) {
-		if (!node.arguments?.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+		const options = node.arguments[0];
+		if (!options || !ts.isObjectLiteralExpression(options)) {
 			return;
 		}
 
 		// Find "type" property
-		const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", node.arguments[0]);
+		const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", options);
 
 		if (typeProperty && ts.isStringLiteralLike(typeProperty.initializer)) {
 			const typeValue = typeProperty.initializer.text;
@@ -1203,7 +1219,7 @@ export default class SourceFileLinter {
 				}, node);
 			}
 			if (typeValue === "XML") {
-				this.#extractXmlFromJs(node, "view");
+				this.#extractXmlFromJs(options, "view");
 			}
 		}
 	}
@@ -1213,12 +1229,13 @@ export default class SourceFileLinter {
 		// - sap/ui/core/Fragment.load
 		// - sap/ui/core/mvc/Controller#loadFragment
 
-		if (!node.arguments?.length || !ts.isObjectLiteralExpression(node.arguments[0])) {
+		const options = node.arguments[0];
+		if (!options || !ts.isObjectLiteralExpression(options)) {
 			return;
 		}
 
 		// Find "type" property
-		const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", node.arguments[0]);
+		const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", options);
 
 		if (typeProperty && ts.isStringLiteralLike(typeProperty.initializer)) {
 			const typeValue = typeProperty.initializer.text;
@@ -1233,7 +1250,7 @@ export default class SourceFileLinter {
 					}, node);
 				}
 			} else if (typeValue === "XML" && symbolName === "load") {
-				this.#extractXmlFromJs(node, "fragment");
+				this.#extractXmlFromJs(options, "fragment");
 			}
 		}
 	}
