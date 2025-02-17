@@ -35,7 +35,7 @@ Checks whether inline scripts are used in HTML files in accordance with Content 
 
 ## no-ambiguous-event-handler
 
-Checks whether event handlers in XML views/fragments are prefixed by a dot '.' (i.e. controller method) or refer to a local name (via `core:require` import).
+Checks whether event handlers in XML views/fragments are prefixed by a dot '.' (i.e. represent a controller method) or refer to a local name (via `core:require` import).
 
 **Related information**
 - [Handling Events in XML Views](https://ui5.sap.com/#/topic/b0fb4de7364f4bcbb053a99aa645affe)
@@ -83,7 +83,7 @@ Checks for the usage of global variables in the code.
 
 Checks whether:
 - modules are accessed via the global library namespace that is exposed by the `library` module of a UI5 library
-- `odata` globals are used implicitly in bindings without an explicit import to the corresponding modules
+- `odata` globals are used implicitly in bindings without an explicit import of the corresponding modules
 
 **Related information**
 - [Best Practices for Developers](https://ui5.sap.com/#/topic/28fcd55b04654977b63dacbee0552712)
@@ -101,7 +101,7 @@ Syntax/parsing errors that appear during the linting process are reported with t
 
 ## prefer-test-starter
 
-Checks whether test related files are using the Test Starter concept.
+Checks whether test-related files are using the Test Starter concept.
 
 **Related information**
 - [Test Starter](https://ui5.sap.com/#/topic/032be2cb2e1d4115af20862673bedcdb)
