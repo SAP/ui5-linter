@@ -3,14 +3,17 @@
 - [Rules Reference](#rules-reference)
 	- [async-component-flags](#async-component-flags)
 	- [csp-unsafe-inline-script](#csp-unsafe-inline-script)
+	- [no-ambiguous-event-handler](#no-ambiguous-event-handler)
 	- [no-deprecated-api](#no-deprecated-api)
 	- [no-deprecated-component](#no-deprecated-component)
 	- [no-deprecated-control-renderer-declaration](#no-deprecated-control-renderer-declaration)
 	- [no-deprecated-library](#no-deprecated-library)
 	- [no-deprecated-theme](#no-deprecated-theme)
 	- [no-globals](#no-globals)
+	- [no-implicit-globals](#no-implicit-globals)
 	- [no-pseudo-modules](#no-pseudo-modules)
 	- [parsing-error](#parsing-error)
+	- [prefer-test-starter](#prefer-test-starter)
 	- [ui5-class-declaration](#ui5-class-declaration)
 	- [unsupported-api-usage](#unsupported-api-usage)
 
@@ -29,6 +32,13 @@ Checks whether inline scripts are used in HTML files in accordance with Content 
 
 **Related information**
 - [Content Security Policy](https://ui5.sap.com/#/topic/fe1a6dba940e479fb7c3bc753f92b28c)
+
+## no-ambiguous-event-handler
+
+Checks whether event handlers in XML views/fragments are prefixed by a dot '.' (i.e. controller method) or refer to a local name (via `core:require` import).
+
+**Related information**
+- [Handling Events in XML Views](https://ui5.sap.com/#/topic/b0fb4de7364f4bcbb053a99aa645affe)
 
 ## no-deprecated-api
 
@@ -69,6 +79,15 @@ Checks for the usage of global variables in the code.
 **Related information**
 - [Best Practices for Developers](https://ui5.sap.com/#/topic/28fcd55b04654977b63dacbee0552712)
 
+## no-implicit-globals
+
+Checks whether:
+- modules are accessed via the global library namespace that is exposed by the `library` module of a UI5 library
+- `odata` globals are used implicitly in bindings without an explicit import to the corresponding modules
+
+**Related information**
+- [Best Practices for Developers](https://ui5.sap.com/#/topic/28fcd55b04654977b63dacbee0552712)
+
 ## no-pseudo-modules
 
 Checks for dependencies to pseudo modules in the code.
@@ -79,6 +98,13 @@ Checks for dependencies to pseudo modules in the code.
 ## parsing-error
 
 Syntax/parsing errors that appear during the linting process are reported with this rule.
+
+## prefer-test-starter
+
+Checks whether test related files are using the Test Starter concept.
+
+**Related information**
+- [Test Starter](https://ui5.sap.com/#/topic/032be2cb2e1d4115af20862673bedcdb)
 
 ## ui5-class-declaration
 
