@@ -43,6 +43,7 @@ export default class BindingLinter {
 				this.checkForGlobalReference(eventHandler, requireDeclarations, position);
 			}
 		}
+
 		if (path) {
 			// Check for computed annotations (@@ syntax)
 			const atAtIndex = path.indexOf("@@");
@@ -51,7 +52,11 @@ export default class BindingLinter {
 				const computationFunction = path.slice(
 					atAtIndex + 2, openingBracketIndex !== -1 ? openingBracketIndex : undefined
 				);
-				this.checkForGlobalReference(computationFunction, requireDeclarations, position);
+				// Exclude built-in functions for currency and units of measure from global check.
+				// See: https://github.com/SAP/openui5/blob/e1de19f9a09a0e7a112d63a8f8d4b04afa96620c/src/sap.ui.core/src/sap/ui/model/odata/v4/ODataMetaModel.js#L1268-L1274
+				if (computationFunction !== "requestCurrencyCodes" && computationFunction !== "requestUnitsOfMeasure") {
+					this.checkForGlobalReference(computationFunction, requireDeclarations, position);
+				}
 			}
 		}
 
