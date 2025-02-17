@@ -51,6 +51,22 @@
 			<Input id="Identification::{field>Value/$Path}"
 				value="{field>Value@@AH.format(null,$(style:'short'$))}" />
 
+			<!--Negative test: Built-in paths /##@@requestCurrencyCodes and /##@@requestUnitsOfMeasure -->
+			<Input id="Identification::{field>Value/$Path}"
+				value="{
+				parts:[
+					{path: 'TotalTargetAmount'},
+					{path: 'DocumentCurrency'},
+					{
+						mode: 'OneTime',
+						path: '/##@@requestCurrencyCodes',
+						targetType: 'any'
+					}
+				],
+				formatter:'.formatter.totalTargetAmountFormatter'
+			}" />
+			<Text text="{parts:[ {path: 'QuantityInBaseUnit'}, {path: 'BaseUnit'}, {path: '/##@@requestUnitsOfMeasure'} ]}" />
+
 		</template:repeat>
 	</form:SimpleForm>
 </mvc:View>
