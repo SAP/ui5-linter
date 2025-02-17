@@ -176,14 +176,3 @@ export function getPropertyAssignmentsInObjectLiteralExpression(
 	}
 	return properties;
 }
-
-export function findAmbientModuleByDeclarationName(
-	ambientModules: ts.Symbol[], moduleName: string
-): ts.Symbol | undefined {
-	return ambientModules.find((symbol) => {
-		if (!symbol.valueDeclaration || !ts.isModuleDeclaration(symbol.valueDeclaration)) {
-			return false;
-		}
-		return symbol.valueDeclaration.name.text === moduleName;
-	});
-}
