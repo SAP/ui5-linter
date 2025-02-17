@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.9.0](https://github.com/SAP/ui5-linter/compare/v1.8.0...v1.9.0) (2025-02-17)
+
+
+### Features
+
+* Add global detection for XML Templating ([45729a0](https://github.com/SAP/ui5-linter/commit/45729a06675a7b0800ee70decefe115d440288d4))
+* **binding:** Add detection for composite bindings (parts) ([#541](https://github.com/SAP/ui5-linter/issues/541)) ([561d482](https://github.com/SAP/ui5-linter/commit/561d482dbbdaef849a53ed33df9af2ab9c353d03))
+* Check event handlers in XML views/fragments ([57d8251](https://github.com/SAP/ui5-linter/commit/57d825155ab1473cd38c85b7e3f7cf531de673cb))
+* Detect inline XML fragments & views ([#519](https://github.com/SAP/ui5-linter/issues/519)) ([e85ad26](https://github.com/SAP/ui5-linter/commit/e85ad26ce96c8e4dc9ae124de01a3a20624ce41c))
+* Detect legacy template:require (space-separated list) ([76394f8](https://github.com/SAP/ui5-linter/commit/76394f8523e575b5a93333762f39a1da30403eba))
+* OData implicit globals detection (JS/TS) ([#533](https://github.com/SAP/ui5-linter/issues/533)) ([257d005](https://github.com/SAP/ui5-linter/commit/257d0055ecefc46949713586ced54f437618fdc8))
+
+
+### Bug Fixes
+
+* **formatter:** Remove duplicate findings ([d240b4a](https://github.com/SAP/ui5-linter/commit/d240b4a31e3ac337fb93cc8280b61fc57e647f54))
+* Handle relative imports within framework libs ([b063e4d](https://github.com/SAP/ui5-linter/commit/b063e4d645c7e3196a2e2bf6bbbe39fde3e5785f))
+* Prevent false-positive "prefer-test-starter" in testsuite (follow-up) ([45edfe0](https://github.com/SAP/ui5-linter/commit/45edfe0d02314f315c5c85ed32061f02a4e14886))
+
+
+### Dependencies
+
+* Bump @sapui5/types to 1.120.26 ([fbb5016](https://github.com/SAP/ui5-linter/commit/fbb5016fd92c3d96dd46f24ff4733614d2c329bf))
+
 ## [1.8.0](https://github.com/SAP/ui5-linter/compare/v1.7.0...v1.8.0) (2025-01-31)
 
 
