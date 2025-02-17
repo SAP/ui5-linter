@@ -31,6 +31,27 @@
 					</template:with>
 				</Table>
 			</template:if>
+			<template:else>
+				<!--
+					In XML templating the bindings are interpreted as property bindings and therefore can
+					have multiple parts with formatters that provide the actual binding path for the aggregation binding.
+					But as we cannot know whether it will be processed during templating or via normal XML view processing,
+					we need to treat aggregation binding also as potential property bindings and run those checks as well.
+				-->
+				<Table items="{
+					parts: [
+						{
+							path: 'facet>Target',
+							formatter: 'sap.ui.model.odata.AnnotationHelper.getNavigationPath'
+						},
+						{
+							path: 'facet>Label',
+							formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.doSomething'
+						}
+					],
+					formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.combineParts'
+				}" />
+			</template:else>
 
 		</template:with>
 		</template:with>

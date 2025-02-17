@@ -310,7 +310,7 @@ test("XML Aggregation Binding: Imported Group Header Factory", (t) => {
 	t.snapshot(linterContext.generateLintResult("/test.js"));
 });
 
-test("XML Property Binding: Composite Binding with single Formatter and trailing space", (t) => {
+test("XML Property Binding: Composite Binding with single formatter / type and trailing space", (t) => {
 	const {bindingLinter, linterContext} = t.context;
 
 	bindingLinter.lintPropertyBinding(
@@ -320,8 +320,64 @@ test("XML Property Binding: Composite Binding with single Formatter and trailing
 			}, {
 				path: 'entityDetailsModel>/DataSource/AllProperties'
 			}],
-			formatter: 'global.formatter'
+			formatter: 'global.formatter',
+			type: 'sap.ui.model.type.String'
 		} `,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Property Binding: Composite Binding with multiple formatters / types", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{
+			parts:[{
+				path: 'entityDetailsModel>/AdditionalMeasures',
+				type: 'sap.ui.model.type.Currency',
+				formatter: 'global.formatter1'
+			}, {
+				path: 'entityDetailsModel>/DataSource/AllProperties',
+				type: 'sap.ui.model.type.String',
+				formatter: 'global.formatter2'
+			}]
+		}`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Property Binding: Composite Binding with mixed parts", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`{
+			parts:[
+				{
+					path: 'entityDetailsModel>/AdditionalMeasures',
+					type: 'sap.ui.model.type.Currency',
+					formatter: 'global.formatter1'
+				},
+				'just/a/binding/path'
+			]
+		}`,
+		[], {line: 1, column: 1});
+
+	t.snapshot(linterContext.generateLintResult("/test.js"));
+});
+
+test("XML Property Binding: Composite Binding in between text", (t) => {
+	const {bindingLinter, linterContext} = t.context;
+
+	bindingLinter.lintPropertyBinding(
+		`Hello Mr. {
+			path:'/singleEntry/firstName',
+			formatter: 'global.myFormatter'
+		},
+		{
+			/singleEntry/lastName
+		}"`,
 		[], {line: 1, column: 1});
 
 	t.snapshot(linterContext.generateLintResult("/test.js"));
