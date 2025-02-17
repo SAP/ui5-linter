@@ -10,6 +10,7 @@ import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
 import lintXml, {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 import type SharedLanguageService from "./SharedLanguageService.js";
+import {AmbientModuleCache} from "./AmbientModuleCache.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -120,6 +121,8 @@ export default class TypeChecker {
 		let checker = program.getTypeChecker();
 		getTypeCheckerDone();
 
+		let ambientModuleCache = new AmbientModuleCache(checker.getAmbientModules());
+
 		const apiExtract = await loadApiExtract();
 
 		const reportCoverage = this.#context.getReportCoverage();
@@ -146,7 +149,7 @@ export default class TypeChecker {
 					this.#context, sourceFile.fileName,
 					sourceFile, sourceMaps,
 					checker, reportCoverage, messageDetails,
-					apiExtract, this.#filePathsWorkspace, this.#workspace, manifestContent
+					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
 				);
 				await linter.lint();
 				linterDone();
@@ -177,6 +180,8 @@ export default class TypeChecker {
 			}
 			program = this.#sharedLanguageService.getProgram();
 			checker = program.getTypeChecker();
+			ambientModuleCache = new AmbientModuleCache(checker.getAmbientModules());
+
 			for (const sourceFile of program.getSourceFiles()) {
 				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
 					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
@@ -184,7 +189,7 @@ export default class TypeChecker {
 						this.#context, sourceFile.fileName,
 						sourceFile, sourceMaps,
 						checker, reportCoverage, messageDetails,
-						apiExtract, this.#filePathsWorkspace, this.#workspace
+						apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
 					);
 					await linter.lint();
 					linterDone();

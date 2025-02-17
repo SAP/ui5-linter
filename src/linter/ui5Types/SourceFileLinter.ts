@@ -13,7 +13,6 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
-	findAmbientModuleByDeclarationName,
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -24,8 +23,18 @@ import BindingLinter from "../binding/BindingLinter.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
+import {AmbientModuleCache} from "./AmbientModuleCache.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
+
+const ALLOWED_GLOBALS = ["require", "define", "QUnit", "sinon"];
+
+const ALLOWED_GLOBAL_SAP_APIS = [
+	"sap.ui.define",
+	"sap.ui.require",
+	"sap.ui.require.toUrl",
+	"sap.ui.loader.config",
+];
 
 const QUNIT_FILE_EXTENSION = /\.qunit\.(js|ts)$/;
 
@@ -82,6 +91,7 @@ export default class SourceFileLinter {
 		private apiExtract: ApiExtract,
 		private filePathsWorkspace: AbstractAdapter,
 		private workspace: AbstractAdapter,
+		private ambientModuleCache: AmbientModuleCache,
 		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -155,6 +165,8 @@ export default class SourceFileLinter {
 			}
 
 			this.analyzeExportedValuesByLib(node as (ts.PropertyAccessExpression | ts.ElementAccessExpression));
+		} else if (ts.isPropertyAssignment(node) && getPropertyNameText(node.name) === "theme") {
+			this.analyzeTestsuiteThemeProperty(node);
 		} else if (node.kind === ts.SyntaxKind.ObjectBindingPattern &&
 			node.parent?.kind === ts.SyntaxKind.VariableDeclaration) {
 			// e.g. `const { Button } = sap.m;`
@@ -169,35 +181,76 @@ export default class SourceFileLinter {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
 		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
 			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
-		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
-			analyzeComponentJson({
-				classDeclaration: node,
-				manifestContent: this.manifestContent,
-				resourcePath: this.resourcePath,
-				reporter: this.#reporter,
-				context: this.context,
-				checker: this.checker,
-				isUiComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
-			});
-		} else if (
-			ts.isPropertyDeclaration(node) &&
-			getPropertyNameText(node.name) === "metadata" &&
-			node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
-			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
-		) {
-			const visitMetadataNodes = (childNode: ts.Node) => {
-				if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
-					this.analyzeMetadataProperty(childNode);
+		} else {
+			let nodeIsManagedObject = false;
+			const nodeIsControl = this.isUi5ClassDeclaration(node, "sap/ui/core/Control");
+			let nodeIsComponent = false;
+			const nodeIsUiComponent = this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent");
+			if (nodeIsUiComponent) {
+				nodeIsManagedObject = true;
+				nodeIsComponent = true;
+			} else {
+				nodeIsComponent = this.isUi5ClassDeclaration(node, "sap/ui/core/Component");
+				if (nodeIsComponent) {
+					nodeIsManagedObject = true;
 				}
+			}
+			if (nodeIsControl) {
+				nodeIsManagedObject = true;
+			}
+			if (!nodeIsManagedObject) {
+				nodeIsManagedObject = this.isUi5ClassDeclaration(node, "sap/ui/base/ManagedObject");
+			}
 
-				ts.forEachChild(childNode, visitMetadataNodes);
-			};
-			ts.forEachChild(node, visitMetadataNodes);
-		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
-			this.analyzeControlRendererDeclaration(node);
-			this.analyzeControlRerenderMethod(node);
-		} else if (ts.isPropertyAssignment(node) && getPropertyNameText(node.name) === "theme") {
-			this.analyzeTestsuiteThemeProperty(node);
+			if (this.#isComponent && nodeIsComponent) {
+				analyzeComponentJson({
+					classDeclaration: node as ts.ClassDeclaration,
+					manifestContent: this.manifestContent,
+					resourcePath: this.resourcePath,
+					reporter: this.#reporter,
+					context: this.context,
+					checker: this.checker,
+					isUiComponent: nodeIsUiComponent,
+				});
+			}
+
+			if (nodeIsManagedObject) {
+				const metadataProperty = findClassMember(
+					node as ts.ClassDeclaration, "metadata", [{modifier: ts.SyntaxKind.StaticKeyword}]
+				);
+
+				const visitMetadataNodesInner = (childNode: ts.Node) => {
+					if (ts.isPropertyAssignment(childNode)) { // Skip nodes out of interest
+						this.analyzeMetadataProperty(childNode);
+					}
+
+					ts.forEachChild(childNode, visitMetadataNodes);
+				};
+
+				const visitMetadataNodes = (childNode: ts.Node) => {
+					if (
+						ts.isPropertyAssignment(childNode) && (
+							getPropertyNameText(childNode.name) === "properties" ||
+							getPropertyNameText(childNode.name) === "aggregations" ||
+							getPropertyNameText(childNode.name) === "associations" ||
+							getPropertyNameText(childNode.name) === "events"
+						)
+					) {
+						this.analyzeMetadataProperty(childNode);
+					}
+
+					ts.forEachChild(childNode, visitMetadataNodesInner);
+				};
+
+				if (metadataProperty && ts.isPropertyDeclaration(metadataProperty)) {
+					ts.forEachChild(metadataProperty, visitMetadataNodes);
+				}
+			}
+
+			if (nodeIsControl) {
+				this.analyzeControlRendererDeclaration(node);
+				this.analyzeControlRerenderMethod(node);
+			}
 		}
 
 		// Traverse the whole AST from top to bottom
@@ -215,11 +268,14 @@ export default class SourceFileLinter {
 
 		// Go up the hierarchy chain to find whether the class extends from the provided base class
 		const isClassUi5Subclass = (node: ts.ClassDeclaration): boolean => {
-			return node?.heritageClauses?.flatMap((parentClasses: ts.HeritageClause) => {
-				return parentClasses.types.map((parentClass) => {
+			const heritageClauses = node?.heritageClauses;
+			if (!heritageClauses) {
+				return false;
+			}
+			for (const parentClasses of heritageClauses) {
+				for (const parentClass of parentClasses.types) {
 					const parentClassType = this.checker.getTypeAtLocation(parentClass);
-
-					return parentClassType.symbol?.declarations?.some((declaration) => {
+					const found = parentClassType.symbol?.declarations?.some((declaration) => {
 						if (!ts.isClassDeclaration(declaration)) {
 							return false;
 						}
@@ -247,9 +303,12 @@ export default class SourceFileLinter {
 						}
 						return isClassUi5Subclass(declaration);
 					});
-				});
-			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-			}).reduce((acc, cur) => cur || acc, false) ?? false;
+					if (found) {
+						return true;
+					}
+				}
+			}
+			return false;
 		};
 
 		return isClassUi5Subclass(node);
@@ -686,9 +745,10 @@ export default class SourceFileLinter {
 				(ts.isIdentifier(node.expression) && node.expression.text === "jsUnitTestSuite")
 			)) {
 			this.#reportTestStarter(node);
+			return;
 		}
 
-		const nodeType = this.checker.getTypeAtLocation(node); // checker.getContextualType(node);
+		const nodeType = this.checker.getTypeAtLocation(node);
 		if (!nodeType.symbol || !this.isSymbolOfUi5OrThirdPartyType(nodeType.symbol)) {
 			return;
 		}
@@ -699,15 +759,14 @@ export default class SourceFileLinter {
 			this.#analyzeNewCoreRouter(node);
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
-		} else if (nodeType.symbol.declarations?.some(
-			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
-			const originalFilename = this.#metadata?.xmlCompiledResource;
-			// Do not process xml-s. This case would be handled separately within the BindingParser
-			if (!originalFilename ||
-				![".view.xml", ".fragment.xml"].some((ending) => originalFilename.endsWith(ending))) {
-				this.#analyzeNewAndApplySettings(node);
-			}
 		}
+
+		const isManagedObject = nodeType.symbol.declarations?.some(
+			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"));
+
+		// Only check bindings when class is ManagedObject and the source file is not transpiled/compiled from XML,
+		// as bindings are already checked during transpilation
+		const checkBindings = isManagedObject && !this.#metadata.xmlCompiledResource;
 
 		if (!node.arguments?.length) {
 			// Nothing to check
@@ -721,12 +780,17 @@ export default class SourceFileLinter {
 			return constructSignature.getParameters().length === node.arguments?.length;
 		});
 
-		node.arguments.forEach((arg, argIdx) => {
+		if (!possibleConstructSignatures.length) {
+			return;
+		}
+
+		for (let argIdx = 0; argIdx < node.arguments.length; argIdx++) {
+			const arg = node.arguments[argIdx];
 			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
 			if (!ts.isObjectLiteralExpression(arg)) {
-				return;
+				continue;
 			}
-			arg.properties.forEach((prop) => {
+			for (const prop of arg.properties) {
 				if (!ts.isPropertyAssignment(prop)) {
 					return;
 				}
@@ -737,23 +801,31 @@ export default class SourceFileLinter {
 				const propertySymbol = getSymbolForPropertyInConstructSignatures(
 					possibleConstructSignatures, argIdx, propertyName
 				);
-				if (!propertySymbol) {
-					return;
+				// Check for deprecations
+				if (propertySymbol) {
+					const deprecationInfo = this.getDeprecationInfo(propertySymbol);
+					if (deprecationInfo) {
+						this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
+							{
+								propertyName: propertySymbol.escapedName as string,
+								className: this.checker.typeToString(nodeType),
+								details: deprecationInfo.messageDetails,
+							},
+							prop
+						);
+					}
 				}
-				const deprecationInfo = this.getDeprecationInfo(propertySymbol);
-				if (!deprecationInfo) {
-					return;
+
+				// Check ManagedObject bindings
+				if (checkBindings && this.#isPropertyBinding(node, [propertyName])) {
+					if (ts.isObjectLiteralExpression(prop.initializer)) {
+						this.#analyzePropertyBindings(prop.initializer, ["type", "formatter"]);
+					} else {
+						this.#analyzePropertyStringBindings(prop);
+					}
 				}
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
-					{
-						propertyName: propertySymbol.escapedName as string,
-						className: this.checker.typeToString(nodeType),
-						details: deprecationInfo.messageDetails,
-					},
-					prop
-				);
-			});
-		});
+			}
+		}
 	}
 
 	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
@@ -1245,21 +1317,32 @@ export default class SourceFileLinter {
 		}
 	}
 
-	#analyzeNewAndApplySettings(node: ts.NewExpression | ts.CallExpression) {
-		node?.arguments?.filter((arg) => ts.isObjectLiteralExpression(arg))
-			.flatMap((arg) => arg.properties)
-			.forEach((prop) => {
-				if (ts.isPropertyAssignment(prop) &&
-					(ts.isCallExpression(node) ||
-						this.#isPropertyBinding(node, [getPropertyNameText(prop.name) ?? ""]))
-				) {
+	#analyzeNewAndApplySettings(node: ts.CallExpression) {
+		if (!node.arguments?.length) {
+			return;
+		}
+		for (const arg of node.arguments) {
+			// Only handle object literals, ignoring the optional first id argument or other unrelated arguments
+			if (!ts.isObjectLiteralExpression(arg)) {
+				continue;
+			}
+			for (const prop of arg.properties) {
+				if (!ts.isPropertyAssignment(prop)) {
+					return;
+				}
+				const propertyName = getPropertyNameText(prop.name);
+				if (!propertyName) {
+					return;
+				}
+				if (this.#isPropertyBinding(node, [propertyName])) {
 					if (ts.isObjectLiteralExpression(prop.initializer)) {
 						this.#analyzePropertyBindings(prop.initializer, ["type", "formatter"]);
 					} else {
 						this.#analyzePropertyStringBindings(prop);
 					}
 				}
-			});
+			}
+		}
 	}
 
 	#analyzePropertyBindings(node: ts.ObjectLiteralExpression, propNames: string[]) {
@@ -1458,13 +1541,17 @@ export default class SourceFileLinter {
 		}
 		const exprTypeSymbol = this.checker.getTypeAtLocation(exprNode)?.symbol;
 		let potentialLibImport = "";
-		if (exprTypeSymbol?.valueDeclaration && ts.isModuleDeclaration(exprTypeSymbol.valueDeclaration)) {
+		if (exprTypeSymbol?.valueDeclaration) {
+			if (!ts.isModuleDeclaration(exprTypeSymbol.valueDeclaration)) {
+				return;
+			}
 			potentialLibImport = exprTypeSymbol.valueDeclaration.name.text;
-		}
-
-		// Checks if the left hand side is a library import.
-		// It's sufficient just to check for "/library" at the end of the string by convention
-		if (!potentialLibImport.endsWith("/library")) {
+			// Checks if the left hand side is a library import.
+			// It's sufficient just to check for "/library" at the end of the string by convention
+			if (!potentialLibImport.endsWith("/library")) {
+				return;
+			}
+		} else {
 			// Fallback in case of relative imports within framework libraries, where the type does not have a symbol
 			const exprSymbol = this.checker.getSymbolAtLocation(exprNode);
 			const exprDeclaration = exprSymbol?.declarations?.[0];
@@ -1495,9 +1582,8 @@ export default class SourceFileLinter {
 		].join("/");
 
 		// Check if the module is registered within ambient modules
-		const ambientModules = this.checker.getAmbientModules();
-		const libAmbientModule = findAmbientModuleByDeclarationName(ambientModules, potentialLibImport);
-		const isRegisteredAsUi5Module = !!findAmbientModuleByDeclarationName(ambientModules, moduleName);
+		const libAmbientModule = this.ambientModuleCache.getModule(potentialLibImport);
+		const isRegisteredAsUi5Module = !!this.ambientModuleCache.getModule(moduleName);
 
 		let isModuleExported = true;
 		let libExports = libAmbientModule?.exports ?? new Map();
@@ -1571,17 +1657,12 @@ export default class SourceFileLinter {
 			throw new Error(
 				`Unhandled PropertyAccessExpression expression syntax: ${ts.SyntaxKind[node.expression.kind]}`);
 		}
-		if (["require", "define", "QUnit", "sinon"].includes(node.expression.text)) {
+		if (ALLOWED_GLOBALS.includes(node.expression.text)) {
 			return true;
 		}
 
 		const propAccess = this.extractNamespace(node);
-		return [
-			"sap.ui.define",
-			"sap.ui.require",
-			"sap.ui.require.toUrl",
-			"sap.ui.loader.config",
-		].some((allowedAccessString) => {
+		return ALLOWED_GLOBAL_SAP_APIS.some((allowedAccessString) => {
 			return propAccess == allowedAccessString ||
 				propAccess.startsWith(allowedAccessString + ".") ||
 				propAccess.endsWith("." + allowedAccessString);
@@ -1664,13 +1745,20 @@ export default class SourceFileLinter {
 		symbol: ts.Symbol, checkFunction: (sourceFile: ts.SourceFile) => boolean
 	) {
 		const declarations = symbol.getDeclarations();
-		if (!declarations) {
+		if (!declarations?.length) {
 			return false;
 		}
 		// First check if any declaration is from the TypeScript lib and if so, return false in order to never process
 		// such symbols (e.g. globals like 'Symbol', which might have dedicated types in UI5 thirdparty like JQuery)
-		return !declarations.some((declaration) => isSourceFileOfTypeScriptLib(declaration.getSourceFile())) &&
-			declarations.some((declaration) => checkFunction(declaration.getSourceFile()));
+		for (const declaration of declarations) {
+			const sourceFile = declaration.getSourceFile();
+			if (isSourceFileOfTypeScriptLib(sourceFile)) {
+				return false;
+			}
+			if (checkFunction(sourceFile)) {
+				return true;
+			}
+		}
 	}
 
 	analyzeTestsuiteThemeProperty(node: ts.PropertyAssignment) {
