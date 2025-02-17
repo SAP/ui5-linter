@@ -200,14 +200,14 @@ export default class TypeChecker {
 			// Loop over sourceMaps set
 			for (const [resourcePath, sourceMap] of sourceMaps) {
 				const fileContent = files.get(resourcePath);
-				if (fileContent) {
+				if (typeof fileContent !== "undefined") {
 					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 						resourcePath, fileContent, sourceMap);
 				}
 			}
 			// Although not being a typical transformed source, write out the byId dts file for debugging purposes
 			const byIdDts = files.get(CONTROLLER_BY_ID_DTS_PATH);
-			if (byIdDts) {
+			if (typeof byIdDts !== "undefined") {
 				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
 			}
