@@ -700,7 +700,7 @@ export default class SourceFileLinter {
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
-			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/core/Control"))) {
+			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
 			const originalFilename = this.#metadata?.xmlCompiledResource;
 			// Do not process xml-s. This case would be handled separately within the BindingParser
 			if (!originalFilename ||
