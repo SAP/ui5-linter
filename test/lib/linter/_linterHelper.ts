@@ -1,5 +1,5 @@
 import anyTest, {ExecutionContext, TestFn} from "ava";
-import sinonGlobal, {SinonStub} from "sinon";
+import sinonGlobal, {SinonSpy, SinonStub} from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
 import path from "node:path";
@@ -10,19 +10,25 @@ import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/Lint
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
 import {AbstractAdapter} from "@ui5/fs";
 import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
+import {AutofixOptions, AutofixResult} from "../../../src/autofix/autofix.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
 	lintFile: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
+	autofixSpy: SinonSpy<[AutofixOptions], Promise<AutofixResult>>;
 	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
 
-test.before(async (t) => {
-	const {lintModule: {lintFile}} = await esmockDeprecationText();
-	t.context.lintFile = lintFile;
+test.before((t) => {
 	t.context.sharedLanguageService = new SharedLanguageService();
+});
+
+test.beforeEach(async (t) => {
+	const {lintModule: {lintFile}, autofixModule} = await esmockDeprecationText();
+	t.context.lintFile = lintFile;
+	t.context.autofixSpy = autofixModule.default;
 });
 
 // Mock getDeprecationText as we do not have control over the deprecated texts and they could
@@ -50,8 +56,14 @@ export async function esmockDeprecationText() {
 				return linter;
 			},
 	});
+	const autofixModule = await esmock("../../../src/autofix/autofix.js");
+
+	const originalAutofix = autofixModule.default;
+	autofixModule.default = sinonGlobal.stub().callsFake((options: AutofixOptions) => originalAutofix(options));
+
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
+		"../../../src/autofix/autofix.js": autofixModule,
 	});
 
 	const lintModule = await esmock("../../../src/linter/linter.js", {
@@ -62,7 +74,7 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/linter.js": lintModule,
 	});
 
-	return {lintModule, indexModule};
+	return {lintModule, indexModule, autofixModule};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots
@@ -79,7 +91,7 @@ export function assertExpectedLintResults(
 }
 
 // Helper function to create linting tests for all files in a directory
-export function createTestsForFixtures(fixturesPath: string) {
+export function createTestsForFixtures(fixturesPath: string, fix = false) {
 	try {
 		const testFiles = readdirSync(fixturesPath, {withFileTypes: true, recursive: true}).filter((dirEntries) => {
 			return dirEntries.isFile() && dirEntries.name !== ".DS_Store";
@@ -101,6 +113,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				fileName: dirName,
 				fixturesPath,
 				filePaths: testFiles,
+				fix,
 			});
 		} else {
 			for (const fileName of testFiles) {
@@ -119,6 +132,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					fileName,
 					fixturesPath,
 					filePaths: [fileName],
+					fix,
 				});
 			}
 		}
@@ -132,8 +146,9 @@ export function createTestsForFixtures(fixturesPath: string) {
 }
 
 function testDefinition(
-	{testName, fileName, fixturesPath, filePaths, namespace}:
-	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]; namespace?: string}) {
+	{testName, fileName, fixturesPath, filePaths, namespace, fix}:
+	{testName: string; fileName: string; fixturesPath: string;
+		filePaths: string[]; namespace?: string; fix?: boolean;}) {
 	let defineTest = test.serial;
 
 	if (fileName.startsWith("_")) {
@@ -156,6 +171,7 @@ function testDefinition(
 			filePatterns: filePaths,
 			coverage: true,
 			details: true,
+			fix,
 		}, t.context.sharedLanguageService);
 		assertExpectedLintResults(t, res, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
@@ -171,6 +187,14 @@ function testDefinition(
 			}
 		});
 		t.snapshot(res);
+
+		if (fix) {
+			t.is(t.context.autofixSpy.callCount, 1);
+			const autofixResult = await t.context.autofixSpy.getCall(0).returnValue;
+			for (const [filePath, content] of autofixResult.entries()) {
+				t.snapshot(content, `AutofixResult: ${filePath}`);
+			}
+		}
 	});
 }
 
@@ -182,12 +206,12 @@ export function preprocessLintResultsForSnapshot(res: LintResult[]) {
 	return res;
 }
 
-export function runLintRulesTests(filePath: string, fixturesPath?: string) {
+export function runLintRulesTests(filePath: string, fixturesPath?: string, fix = false) {
 	if (!fixturesPath) {
 		const __dirname = path.dirname(filePath);
 		const fileName = path.basename(filePath, ".ts");
 		fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
 	}
 
-	createTestsForFixtures(fixturesPath);
+	createTestsForFixtures(fixturesPath, fix);
 }

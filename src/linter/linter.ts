@@ -90,7 +90,7 @@ export async function lintProject({
 }
 
 export async function lintFile({
-	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, configPath, noConfig,
+	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, fix, configPath, noConfig,
 }: LinterOptions, sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
 	let config: UI5LintConfigType = {};
@@ -112,6 +112,7 @@ export async function lintFile({
 		ignorePatterns,
 		coverage,
 		details,
+		fix,
 		configPath,
 		relFsBasePath: "",
 		virBasePath,
