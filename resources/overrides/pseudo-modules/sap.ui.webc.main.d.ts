@@ -3,6 +3,8 @@ declare module "sap/ui/webc/main/AvatarColorScheme" {
 
 	/**
 	 * Different types of AvatarColorScheme.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'AvatarColorScheme'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -16,6 +18,8 @@ declare module "sap/ui/webc/main/AvatarGroupType" {
 
 	/**
 	 * Different types of AvatarGroupType.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'AvatarGroupType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -29,6 +33,8 @@ declare module "sap/ui/webc/main/AvatarShape" {
 
 	/**
 	 * Different types of AvatarShape.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'AvatarShape'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -42,6 +48,8 @@ declare module "sap/ui/webc/main/AvatarSize" {
 
 	/**
 	 * Different types of AvatarSize.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'AvatarSize'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -55,6 +63,8 @@ declare module "sap/ui/webc/main/BackgroundDesign" {
 
 	/**
 	 * Defines background designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'BackgroundDesign'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -68,6 +78,8 @@ declare module "sap/ui/webc/main/BorderDesign" {
 
 	/**
 	 * Defines border designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'BorderDesign'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -81,6 +93,8 @@ declare module "sap/ui/webc/main/BreadcrumbsDesign" {
 
 	/**
 	 * Different Breadcrumbs designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'BreadcrumbsDesign'.
 	 *
 	 * @experimental (since 1.95.0) - This API is experimental and might change significantly.
 	 * @public
@@ -94,6 +108,8 @@ declare module "sap/ui/webc/main/BreadcrumbsSeparatorStyle" {
 
 	/**
 	 * Different Breadcrumbs separator styles.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'BreadcrumbsSeparatorStyle'.
 	 *
 	 * @experimental (since 1.95.0) - This API is experimental and might change significantly.
 	 * @public
@@ -107,6 +123,8 @@ declare module "sap/ui/webc/main/BusyIndicatorSize" {
 
 	/**
 	 * Different BusyIndicator sizes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'BusyIndicatorSize'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -120,6 +138,8 @@ declare module "sap/ui/webc/main/ButtonDesign" {
 
 	/**
 	 * Different Button designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ButtonDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -133,6 +153,8 @@ declare module "sap/ui/webc/main/ButtonType" {
 
 	/**
 	 * Determines if the button has special form-related functionality.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ButtonType'.
 	 *
 	 * @experimental (since 1.120.0) - This API is experimental and might change significantly.
 	 * @public
@@ -146,6 +168,8 @@ declare module "sap/ui/webc/main/CalendarSelectionMode" {
 
 	/**
 	 * Different Calendar selection mode.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'CalendarSelectionMode'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -159,6 +183,8 @@ declare module "sap/ui/webc/main/CarouselArrowsPlacement" {
 
 	/**
 	 * Different Carousel arrows placement.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'CarouselArrowsPlacement'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -172,6 +198,8 @@ declare module "sap/ui/webc/main/CarouselPageIndicatorStyle" {
 
 	/**
 	 * Different Carousel page indicator styles.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'CarouselPageIndicatorStyle'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -185,6 +213,8 @@ declare module "sap/ui/webc/main/ComboBoxFilter" {
 
 	/**
 	 * Different filtering types of the ComboBox.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ComboBoxFilter'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -198,6 +228,8 @@ declare module "sap/ui/webc/main/HasPopup" {
 
 	/**
 	 * Different types of HasPopup.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'HasPopup'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -211,6 +243,8 @@ declare module "sap/ui/webc/main/IconDesign" {
 
 	/**
 	 * Different Icon semantic designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'IconDesign'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -224,6 +258,8 @@ declare module "sap/ui/webc/main/InputType" {
 
 	/**
 	 * Different input types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'InputType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -237,6 +273,8 @@ declare module "sap/ui/webc/main/LinkDesign" {
 
 	/**
 	 * Different link designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'LinkDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -250,6 +288,8 @@ declare module "sap/ui/webc/main/ListGrowingMode" {
 
 	/**
 	 * Different list growing modes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ListGrowingMode'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -263,6 +303,8 @@ declare module "sap/ui/webc/main/ListItemType" {
 
 	/**
 	 * Different list item types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ListItemType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -276,6 +318,8 @@ declare module "sap/ui/webc/main/ListMode" {
 
 	/**
 	 * Different list modes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ListMode'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -289,6 +333,8 @@ declare module "sap/ui/webc/main/ListSeparators" {
 
 	/**
 	 * Different types of list items separators.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ListSeparators'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -302,6 +348,8 @@ declare module "sap/ui/webc/main/MessageStripDesign" {
 
 	/**
 	 * MessageStrip designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'MessageStripDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -315,6 +363,8 @@ declare module "sap/ui/webc/main/PanelAccessibleRole" {
 
 	/**
 	 * Panel accessible roles.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'PanelAccessibleRole'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -328,6 +378,8 @@ declare module "sap/ui/webc/main/PopoverHorizontalAlign" {
 
 	/**
 	 * Popover horizontal align types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'PopoverHorizontalAlign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -341,6 +393,8 @@ declare module "sap/ui/webc/main/PopoverPlacementType" {
 
 	/**
 	 * Popover placement types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'PopoverPlacementType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -354,6 +408,8 @@ declare module "sap/ui/webc/main/PopoverVerticalAlign" {
 
 	/**
 	 * Popover vertical align types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'PopoverVerticalAlign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -367,6 +423,8 @@ declare module "sap/ui/webc/main/PopupAccessibleRole" {
 
 	/**
 	 * Popup accessible roles.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'PopupAccessibleRole'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -380,6 +438,8 @@ declare module "sap/ui/webc/main/Priority" {
 
 	/**
 	 * Different types of Priority.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'Priority'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -393,6 +453,8 @@ declare module "sap/ui/webc/main/SegmentedButtonMode" {
 
 	/**
 	 * Different SegmentedButton modes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'SegmentedButtonMode'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -406,6 +468,8 @@ declare module "sap/ui/webc/main/SemanticColor" {
 
 	/**
 	 * Different types of SemanticColor.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'SemanticColor'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -419,6 +483,8 @@ declare module "sap/ui/webc/main/SwitchDesign" {
 
 	/**
 	 * Different types of Switch designs.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'SwitchDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -432,6 +498,8 @@ declare module "sap/ui/webc/main/TabContainerBackgroundDesign" {
 
 	/**
 	 * Background design for the header and content of TabContainer.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TabContainerBackgroundDesign'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -445,6 +513,8 @@ declare module "sap/ui/webc/main/TabLayout" {
 
 	/**
 	 * Tab layout of TabContainer.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TabLayout'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -458,6 +528,8 @@ declare module "sap/ui/webc/main/TableColumnPopinDisplay" {
 
 	/**
 	 * Table cell popin display.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TableColumnPopinDisplay'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -471,6 +543,8 @@ declare module "sap/ui/webc/main/TableGrowingMode" {
 
 	/**
 	 * Different table growing modes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TableGrowingMode'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -484,6 +558,8 @@ declare module "sap/ui/webc/main/TableMode" {
 
 	/**
 	 * Different table modes.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TableMode'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -497,6 +573,8 @@ declare module "sap/ui/webc/main/TableRowType" {
 
 	/**
 	 * Different table row types.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TableRowType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -510,6 +588,8 @@ declare module "sap/ui/webc/main/TabsOverflowMode" {
 
 	/**
 	 * Tabs overflow mode in TabContainer.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TabsOverflowMode'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -523,6 +603,8 @@ declare module "sap/ui/webc/main/TitleLevel" {
 
 	/**
 	 * Different types of Title level.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'TitleLevel'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -536,6 +618,8 @@ declare module "sap/ui/webc/main/ToastPlacement" {
 
 	/**
 	 * Toast placement.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ToastPlacement'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -549,6 +633,8 @@ declare module "sap/ui/webc/main/ToolbarAlign" {
 
 	/**
 	 * Defines which direction the items of ui5-toolbar will be aligned.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ToolbarAlign'.
 	 *
 	 * @experimental (since 1.120.0) - This API is experimental and might change significantly.
 	 * @public
@@ -562,6 +648,8 @@ declare module "sap/ui/webc/main/ToolbarItemOverflowBehavior" {
 
 	/**
 	 * Defines the priority of the toolbar item to go inside overflow popover.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'ToolbarItemOverflowBehavior'.
 	 *
 	 * @experimental (since 1.120.0) - This API is experimental and might change significantly.
 	 * @public
@@ -575,6 +663,8 @@ declare module "sap/ui/webc/main/WrappingType" {
 
 	/**
 	 * Different types of wrapping.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/main/library' module export and must be accessed by the property 'WrappingType'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public

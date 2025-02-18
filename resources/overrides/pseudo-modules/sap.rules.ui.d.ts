@@ -3,6 +3,8 @@ declare module "sap/rules/ui/DecisionTableCellFormat" {
 
 	/**
 	 * An enumeration that defines how a cell in a decision table is formulated by the rule creator.
+	 * 
+	 * This enum is part of the 'sap/rules/ui/library' module export and must be accessed by the property 'DecisionTableCellFormat'.
 	 *
 	 * @deprecated (since 1.52.8) - use the property decisionTableFormat.
 	 * @public
@@ -15,6 +17,8 @@ declare module "sap/rules/ui/DecisionTableFormat" {
 
 	/**
 	 * An enumeration that decides the rendering format for decisionTable.
+	 * 
+	 * This enum is part of the 'sap/rules/ui/library' module export and must be accessed by the property 'DecisionTableFormat'.
 	 *
 	 * @public
 	*/
@@ -26,6 +30,8 @@ declare module "sap/rules/ui/ExpressionType" {
 
 	/**
 	 * An enumeration that defines the different business data types for an expression
+	 * 
+	 * This enum is part of the 'sap/rules/ui/library' module export and must be accessed by the property 'ExpressionType'.
 	 *
 	 * @public
 	*/
@@ -37,8 +43,9 @@ declare module "sap/rules/ui/RuleHitPolicy" {
 
 	/**
 	 * An enumeration that defines the output when more than one rule in the decision table is matched for a given set of inputs.
+	 * 
+	 * This enum is part of the 'sap/rules/ui/library' module export and must be accessed by the property 'RuleHitPolicy'.
 	 *
-	 * @deprecated (since 1.120.2) - to configure the settings, use the Manage Rules Project app or the Rule Authoring APIs.
 	 * @public
 	*/
 	export default RuleHitPolicy;
@@ -49,6 +56,8 @@ declare module "sap/rules/ui/RuleType" {
 
 	/**
 	 * An enumeration that defines whether the rule is formulated as a table with multiple rules instead of a rule with a single associated condition.
+	 * 
+	 * This enum is part of the 'sap/rules/ui/library' module export and must be accessed by the property 'RuleType'.
 	 *
 	 * @public
 	*/
