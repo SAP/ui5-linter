@@ -873,30 +873,31 @@ export default class SourceFileLinter {
 				if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
 					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
 				}
-			} else if (["view", "xmlview", "fragment", "xmlfragment"].includes(symbolName)) {
+			} else if (
+				["view", "xmlview", "fragment", "xmlfragment"].includes(symbolName) &&
+				moduleName == "ui" &&
+				moduleDeclaration.parent?.parent &&
+				ts.isModuleDeclaration(moduleDeclaration.parent.parent) &&
+				moduleDeclaration.parent.parent.name.text === "sap" &&
+				moduleDeclaration.parent.parent.parent &&
+				ts.isSourceFile(moduleDeclaration.parent.parent.parent)
+			) {
 				const options = node?.arguments?.[0];
-				if (!options || !ts.isObjectLiteralExpression(options)) {
-					return;
-				}
-				const namespace = this.extractNamespace(node)
-					.replace(/\[("|'|`)*/g, ".").replace(/("|'|`)*\]/g, "");
-				if (namespace !== `sap.ui.${symbolName}`) {
-					return;
-				}
-				const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", options);
-				if (
-					!typeProperty ||
-					(ts.isStringLiteralLike(typeProperty.initializer) && typeProperty.initializer.text === "XML")
-				) {
-					const viewType = ["fragment", "xmlfragment"].includes(symbolName) ? "fragment" : "view";
-					this.#extractXmlFromJs(options, viewType, true);
+				if (options && ts.isObjectLiteralExpression(options)) {
+					const typeProperty = getPropertyAssignmentInObjectLiteralExpression("type", options);
+					if (
+						!typeProperty ||
+						(ts.isStringLiteralLike(typeProperty.initializer) && typeProperty.initializer.text === "XML")
+					) {
+						const viewType = ["fragment", "xmlfragment"].includes(symbolName) ? "fragment" : "view";
+						this.#extractXmlFromJs(options, viewType, true);
+					}
 				}
 			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
 				const options = node?.arguments?.[0];
-				if (!options || !ts.isObjectLiteralExpression(options)) {
-					return;
+				if (options && ts.isObjectLiteralExpression(options)) {
+					this.#extractXmlFromJs(options, "view");
 				}
-				this.#extractXmlFromJs(options, "view");
 			}
 		}
 
