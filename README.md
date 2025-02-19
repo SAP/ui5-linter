@@ -35,7 +35,7 @@
 		- [Scope](#scope)
 	- [Node.js API](#nodejs-api)
 		- [`ui5lint`](#ui5lint)
-		- [`Ui5LinterEngine`](#ui5linterengine)
+		- [`UI5LinterEngine`](#ui5linterengine)
 	- [Internals](#internals)
 	- [Support, Feedback, Contributing](#support-feedback-contributing)
 	- [Security / Disclosure](#security--disclosure)
@@ -295,16 +295,16 @@ await ui5lint({
 });
 ```
 
-### `Ui5LinterEngine`
+### `UI5LinterEngine`
 
-The `Ui5LinterEngine` class can be used to run `ui5lint` multiple times with different options while reusing and caching common parts to improve performance.
+The `UI5LinterEngine` class can be used to run `ui5lint` multiple times with different options while reusing and caching common parts to improve performance.
 
 **Note:** The `lint` method can only be called once at a time. If you want to lint multiple projects in parallel, use worker threads or separate processes. The linting process is CPU-heavy and there is no benefit in parallelizing within the same Node.js process (single-threaded).
 
 ```js
-import {Ui5LinterEngine} from "@ui5/linter";
+import {UI5LinterEngine} from "@ui5/linter";
 
-const linterEngine = new Ui5LinterEngine();
+const linterEngine = new UI5LinterEngine();
 
 // Run the linter with default options
 await linterEngine.lint();

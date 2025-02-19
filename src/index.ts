@@ -47,10 +47,10 @@ export interface UI5LinterOptions {
 }
 
 export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]> {
-	return new Ui5LinterEngine().lint(options);
+	return new UI5LinterEngine().lint(options);
 }
 
-export class Ui5LinterEngine {
+export class UI5LinterEngine {
 	private sharedLanguageService = new SharedLanguageService();
 	private lintingInProgress = false;
 

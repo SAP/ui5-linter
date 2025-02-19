@@ -1,7 +1,7 @@
 import anyTest, {TestFn} from "ava";
 import sinonGlobal, {SinonStub} from "sinon";
 import esmock from "esmock";
-import {ui5lint, Ui5LinterEngine} from "../../src/index.js";
+import {ui5lint, UI5LinterEngine} from "../../src/index.js";
 import {lintProject} from "../../src/linter/linter.js";
 import SharedLanguageService from "../../src/linter/ui5Types/SharedLanguageService.js";
 
@@ -9,7 +9,7 @@ const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
 	lintProjectStub: SinonStub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>;
 	ui5lint: typeof ui5lint;
-	Ui5LinterEngine: typeof Ui5LinterEngine;
+	UI5LinterEngine: typeof UI5LinterEngine;
 }>;
 
 test.beforeEach(async (t) => {
@@ -18,14 +18,14 @@ test.beforeEach(async (t) => {
 	t.context.lintProjectStub =
 		t.context.sinon.stub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>().resolves([]);
 
-	const {ui5lint, Ui5LinterEngine} = await esmock("../../src/index.js", {
+	const {ui5lint, UI5LinterEngine} = await esmock("../../src/index.js", {
 		"../../src/linter/linter.js": {
 			lintProject: t.context.lintProjectStub,
 		},
 	});
 
 	t.context.ui5lint = ui5lint;
-	t.context.Ui5LinterEngine = Ui5LinterEngine;
+	t.context.UI5LinterEngine = UI5LinterEngine;
 });
 test.afterEach.always((t) => {
 	t.context.sinon.restore();
@@ -106,15 +106,15 @@ test("ui5lint API: All options", async (t) => {
 	t.true(t.context.lintProjectStub.getCall(0).args[1] instanceof SharedLanguageService);
 });
 
-test("Ui5LinterEngine: Creating an instance", (t) => {
-	const engine = new Ui5LinterEngine();
-	t.true(engine instanceof Ui5LinterEngine);
+test("UI5LinterEngine: Creating an instance", (t) => {
+	const engine = new UI5LinterEngine();
+	t.true(engine instanceof UI5LinterEngine);
 });
 
-test("Ui5LinterEngine: Calling 'lint'", async (t) => {
-	const {Ui5LinterEngine} = t.context;
+test("UI5LinterEngine: Calling 'lint'", async (t) => {
+	const {UI5LinterEngine} = t.context;
 
-	const engine = new Ui5LinterEngine();
+	const engine = new UI5LinterEngine();
 
 	const results = await engine.lint({});
 
@@ -139,10 +139,10 @@ test("Ui5LinterEngine: Calling 'lint'", async (t) => {
 	t.is(sharedLanguageService, engine.sharedLanguageService);
 });
 
-test("Ui5LinterEngine: Calling 'lint' twice before first run is finished", async (t) => {
-	const {Ui5LinterEngine} = t.context;
+test("UI5LinterEngine: Calling 'lint' twice before first run is finished", async (t) => {
+	const {UI5LinterEngine} = t.context;
 
-	const engine = new Ui5LinterEngine();
+	const engine = new UI5LinterEngine();
 
 	const firstLintRun = engine.lint({});
 	const secondLintRun = engine.lint({});
@@ -155,10 +155,10 @@ test("Ui5LinterEngine: Calling 'lint' twice before first run is finished", async
 	t.deepEqual(results, []);
 });
 
-test("Ui5LinterEngine: Calling 'lint' multiple times", async (t) => {
-	const {Ui5LinterEngine} = t.context;
+test("UI5LinterEngine: Calling 'lint' multiple times", async (t) => {
+	const {UI5LinterEngine} = t.context;
 
-	const engine = new Ui5LinterEngine();
+	const engine = new UI5LinterEngine();
 
 	const firstLintResults = await engine.lint({
 		filePatterns: ["webapp/**/*.xml"],
@@ -215,10 +215,10 @@ test("Ui5LinterEngine: Calling 'lint' multiple times", async (t) => {
 	t.is(firstLintSharedLanguageService, secondLintSharedLanguageService);
 });
 
-test("Ui5LinterEngine: Calling 'lint' again after it failed", async (t) => {
-	const {Ui5LinterEngine} = t.context;
+test("UI5LinterEngine: Calling 'lint' again after it failed", async (t) => {
+	const {UI5LinterEngine} = t.context;
 
-	const engine = new Ui5LinterEngine();
+	const engine = new UI5LinterEngine();
 
 	t.context.lintProjectStub.onFirstCall().rejects(new Error("Something went wrong"));
 

@@ -7,7 +7,7 @@ import {
 	createTestsForFixtures, assertExpectedLintResults,
 	esmockDeprecationText, preprocessLintResultsForSnapshot,
 } from "./_linterHelper.js";
-import {Ui5LinterEngine} from "../../../src/index.js";
+import {UI5LinterEngine} from "../../../src/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "..", "fixtures", "linter");
@@ -16,14 +16,14 @@ const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	linterEngine: Ui5LinterEngine;
+	linterEngine: UI5LinterEngine;
 }>;
 
 test.before(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
-	const {indexModule: {Ui5LinterEngine}} = await esmockDeprecationText();
-	t.context.linterEngine = new Ui5LinterEngine();
+	const {indexModule: {UI5LinterEngine}} = await esmockDeprecationText();
+	t.context.linterEngine = new UI5LinterEngine();
 });
 test.afterEach.always((t) => {
 	t.context.sinon.restore();
