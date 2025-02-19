@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://github.com/SAP/ui5-linter/compare/v1.9.0...v1.10.0) (2025-02-19)
+
+
+### Features
+
+* Add UI5LinterEngine ([#551](https://github.com/SAP/ui5-linter/issues/551)) ([1a44868](https://github.com/SAP/ui5-linter/commit/1a44868d30343603e03d93f02a78597ca7758ab9))
+
+
+### Bug Fixes
+
+* Check bindings of all ManagedObject subclasses ([5435623](https://github.com/SAP/ui5-linter/commit/543562396267dcdb22b42cf6919f1eabba3a5e18))
+* False-positives for requestCurrencyCodes/requestUnitsOfMeasure ([24f6ea7](https://github.com/SAP/ui5-linter/commit/24f6ea70d1c78d2a75eedfc537f521bc3b7e3ccd))
+
 ## [1.9.0](https://github.com/SAP/ui5-linter/compare/v1.8.0...v1.9.0) (2025-02-17)
 
 
