@@ -58,7 +58,11 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/lintWorkspace.js": lintWorkspaceModule,
 	});
 
-	return {lintModule};
+	const indexModule = await esmock("../../../src/index.js", {
+		"../../../src/linter/linter.js": lintModule,
+	});
+
+	return {lintModule, indexModule};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots

@@ -33,6 +33,9 @@
 	- [Directives](#directives)
 		- [Specifying Rules](#specifying-rules)
 		- [Scope](#scope)
+	- [Node.js API](#nodejs-api)
+		- [`ui5lint`](#ui5lint)
+		- [`UI5LinterEngine`](#ui5linterengine)
 	- [Internals](#internals)
 	- [Support, Feedback, Contributing](#support-feedback-contributing)
 	- [Security / Disclosure](#security--disclosure)
@@ -264,7 +267,61 @@ An explanation why a rule is disabled can be added after the rule name; it must 
 
 ### Scope
 
-Directives are currently supported  in JavaScript and TypeScript files only; they are **not** supported in XML, YAML, HTML, or any other type of file.
+Directives are currently supported in JavaScript and TypeScript files only; they are **not** supported in XML, YAML, HTML, or any other type of file.
+
+## Node.js API
+
+### `ui5lint`
+
+The `ui5lint` function is the main entry point for the UI5 linter. It resolves with an array of `LinterResult` objects, identical to the CLI output with the `--format json` option.
+See the [src/index.ts](./src/index.ts) file for the available options.
+
+```js
+import {ui5lint} from "@ui5/linter";
+
+// Run the linter with default options
+await ui5lint();
+
+// Run the linter with custom options
+await ui5lint({
+	filePatterns: ["webapp/**/*.xml"],
+	ignorePatterns: ["webapp/thirdparty/"],
+	details: true,
+	config: "ui5lint-foo.config.mjs",
+	noConfig: true,
+	coverage: true,
+	ui5Config: "ui5-lint.yaml",
+	rootDir: "/path/to/project",
+});
+```
+
+### `UI5LinterEngine`
+
+The `UI5LinterEngine` class can be used to run `ui5lint` multiple times with different options while reusing and caching common parts to improve performance.
+
+**Note:** The `lint` method can only be called once at a time. If you want to lint multiple projects in parallel, use worker threads or separate processes. The linting process is CPU-heavy and there is no benefit in parallelizing within the same Node.js process (single-threaded).
+
+```js
+import {UI5LinterEngine} from "@ui5/linter";
+
+const linterEngine = new UI5LinterEngine();
+
+// Run the linter with default options
+await linterEngine.lint();
+
+// Run the linter with custom options
+await linterEngine.lint({
+	filePatterns: ["webapp/**/*.xml"],
+	ignorePatterns: ["webapp/thirdparty/"],
+	details: true,
+	config: "ui5lint-foo.config.mjs",
+	noConfig: true,
+	coverage: true,
+	ui5Config: "ui5-lint.yaml",
+	rootDir: "/path/to/project",
+});
+
+```
 
 ## Internals
 
