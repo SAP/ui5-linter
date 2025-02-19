@@ -10,7 +10,8 @@ export default class ViewGenerator extends AbstractGenerator {
 				this._controllerByIdInfo.addMappings(attribute.value, this._idToModule);
 			}
 		});
-		this._body.write(`export default `);
+
 		this.writeControl(controlInfo, true);
+		this._body.write(`export default ${controlInfo.variableName};`);
 	}
 }
