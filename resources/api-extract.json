@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.132.1"
+    "version": "1.133.0"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -707,6 +707,7 @@
         "defaultDataSource",
         "optimizeForValueHelp",
         "filterDataSources",
+        "facets",
         "facetVisibility",
         "boSuggestions",
         "displayFacetPanelInCaseOfNoResults",
@@ -1699,6 +1700,9 @@
     "sap.fe.macros.FormElement": {
       "aggregation": [
         "fields"
+      ],
+      "event": [
+        "change"
       ],
       "property": [
         "contextPath",
@@ -3400,7 +3404,8 @@
         "shapeMouseEnterDelay",
         "shapeMouseLeaveDelay",
         "shapeRenderOrder",
-        "enableMultipleGhosts"
+        "enableMultipleGhosts",
+        "optimiseRelationships"
       ],
       "extends": "sap.ui.core.Control"
     },
@@ -4804,7 +4809,8 @@
         "_title"
       ],
       "association": [
-        "illustrationAriaLabelledBy"
+        "illustrationAriaLabelledBy",
+        "illustrationAriaDescribedBy"
       ],
       "property": [
         "description",
@@ -4821,7 +4827,8 @@
     },
     "sap.m.Illustration": {
       "association": [
-        "ariaLabelledBy"
+        "ariaLabelledBy",
+        "ariaDescribedBy"
       ],
       "property": [
         "set",
@@ -5043,6 +5050,7 @@
         "emphasized",
         "ariaHasPopup",
         "accessibleRole",
+        "reactiveAreaMode",
         "emptyIndicatorMode",
         "highlightAccKeysRef",
         "accesskey"
@@ -5559,6 +5567,7 @@
         "title",
         "text",
         "active",
+        "reactiveAreaMode",
         "textDirection",
         "ariaHasPopup"
       ],
@@ -5639,6 +5648,7 @@
         "badgeAttachments",
         "visible",
         "titleActive",
+        "reactiveAreaMode",
         "textDirection",
         "emptyIndicatorMode"
       ],
@@ -5685,6 +5695,7 @@
       ],
       "property": [
         "type",
+        "reactiveAreaMode",
         "visibility",
         "additionalInfo"
       ],
@@ -5707,6 +5718,7 @@
         "textDirection",
         "textAlign",
         "active",
+        "reactiveAreaMode",
         "inverted",
         "emptyIndicatorMode"
       ],
@@ -5724,6 +5736,7 @@
         "title",
         "text",
         "active",
+        "reactiveAreaMode",
         "state",
         "inverted",
         "icon",
@@ -5789,7 +5802,8 @@
       "property": [
         "key",
         "text",
-        "icon"
+        "icon",
+        "type"
       ],
       "extends": "sap.ui.core.Element"
     },
@@ -7607,6 +7621,12 @@
         "_items"
       ],
       "defaultAggregation": "quickActions",
+      "event": [
+        "tableSettingsPressed"
+      ],
+      "property": [
+        "showTableSettingsButton"
+      ],
       "extends": "sap.m.table.columnmenu.MenuBase"
     },
     "sap.m.table.columnmenu.MenuBase": {
@@ -7623,7 +7643,8 @@
       "defaultAggregation": "content",
       "property": [
         "label",
-        "category"
+        "category",
+        "contentSize"
       ],
       "extends": "sap.m.table.columnmenu.QuickActionBase"
     },
@@ -7996,12 +8017,14 @@
       ],
       "defaultAggregation": "tokens",
       "event": [
+        "renderModeChange",
         "tokenChange",
         "tokenDelete",
         "tokenUpdate"
       ],
       "property": [
         "editable",
+        "enabled",
         "width",
         "maxWidth",
         "renderMode",
@@ -11153,7 +11176,9 @@
         "visible",
         "selectable",
         "href",
-        "target"
+        "target",
+        "design",
+        "ariaHasPopup"
       ],
       "extends": "sap.tnt.NavigationListItemBase"
     },
@@ -11161,6 +11186,9 @@
       "aggregation": [
         "_expandIconControl",
         "_externalLinkIconControl"
+      ],
+      "event": [
+        "press"
       ],
       "property": [
         "expanded",
@@ -15183,6 +15211,7 @@
         "displayVariant",
         "previewMode",
         "useProgressiveDisclosure",
+        "overflow",
         "showCloseButton",
         "interactive"
       ],
@@ -16459,6 +16488,7 @@
         "showGroupUndo",
         "wrapping",
         "required",
+        "prefixHttps",
         "sanitizeValue",
         "plugins",
         "useLegacyTheme",
@@ -24580,6 +24610,7 @@
       "sap.m.P13nSortPanel": "(since 1.98) Use the {@link sap.m.p13n.SortPanel} instead.",
       "sap.m.routing.RouteMatchedHandler": "(since 1.28) use {@link sap.m.routing.Router} or {@link sap.m.routing.Targets} instead. The functionality of the routematched handler is built in into these two classes, there is no need to create this anymore.",
       "sap.m.StandardTile": "(since 1.50) replaced by {@link sap.m.GenericTile}",
+      "sap.m.table.columnmenu.Item": "(since 1.132) the concept has been discarded.",
       "sap.m.TablePersoController": "(since 1.115) Please use the {@link sap.m.p13n.Engine Engine} for personalization instead.",
       "sap.m.TablePersoDialog": "(since 1.115) Please use the {@link sap.m.p13n.Popup Popup} for personalization instead.",
       "sap.m.TablePersoProvider": "(since 1.115) replaced by {@link sap.m.p13n.Engine}",
@@ -25279,6 +25310,8 @@
       "sap.ui.core.mvc.ViewType.Template": "(since 1.56) ",
       "sap.ui.model.odata.CountMode.Both": "(since 1.43) this shouldn't be used any longer, decide for one of the other modes.",
       "sap.ui.model.odata.OperationMode.Auto": "(since 1.102.0) because filtering and sorting may lead to different results when executed on the client and on the server, and thus to inconsistent behavior. If it is certain that the collection is completely loaded on the client, use {@link sap.ui.model.odata.OperationMode.Client}; otherwise, use {@link sap.ui.model.odata.OperationMode.Default} or {@link sap.ui.model.odata.OperationMode.Server}.",
+      "sap.ui.model.odata.UpdateMethod.Merge": "(since 1.133.0) use {@link sap.ui.model.odata.UpdateMethod.MERGE} instead",
+      "sap.ui.model.odata.UpdateMethod.Put": "(since 1.133.0) use {@link sap.ui.model.odata.UpdateMethod.PUT} instead",
       "sap.ui.model.odata.v2.BatchMode": "(since 1.74.0) Use {@link sap.ui.model.odata.CountMode} to specify how the count of collections is retrieved. Use the <code>useBatch</code> parameter of the {@link sap.ui.model.odata.v2.ODataModel} constructor to specify whether requests are sent in $batch.",
       "sap.ui.test.generic.GenericTestCollection.Test.ControlRenderer": "(since 1.120) ",
       "sap.ui.generic.app.navigation.service.NavType": "(since 1.83.0) Please use {@link sap.fe.navigation.NavType} instead.",

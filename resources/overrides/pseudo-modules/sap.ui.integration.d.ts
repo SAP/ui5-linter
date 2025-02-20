@@ -113,6 +113,21 @@ declare module "sap/ui/integration/CardMessageType" {
 	export default CardMessageType;
 }
 
+declare module "sap/ui/integration/CardOverflow" {
+	import {CardOverflow} from "sap/ui/integration/library";
+
+	/**
+	 * Determines the overflow behaviour of the card.
+	 * 
+	 * This enum is part of the 'sap/ui/integration/library' module export and must be accessed by the property 'CardOverflow'.
+	 *
+	 * @experimental (since 1.133)
+	 * @public
+	 * @since 1.133
+	*/
+	export default CardOverflow;
+}
+
 declare module "sap/ui/integration/CardPreviewMode" {
 	import {CardPreviewMode} from "sap/ui/integration/library";
 

@@ -1052,6 +1052,19 @@ declare module "sap/m/RatingIndicatorVisualMode" {
 	export default RatingIndicatorVisualMode;
 }
 
+declare module "sap/m/ReactiveAreaMode" {
+	import {ReactiveAreaMode} from "sap/m/library";
+
+	/**
+	 * Reactive area modes of interactable elements.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'ReactiveAreaMode'.
+	 *
+	 * @public
+	*/
+	export default ReactiveAreaMode;
+}
+
 declare module "sap/m/ResetAllMode" {
 	import {ResetAllMode} from "sap/m/library";
 
@@ -1335,6 +1348,19 @@ declare module "sap/m/table/columnmenu/Category" {
 	 * @since 1.110
 	*/
 	export default table.columnmenu.Category;
+}
+
+declare module "sap/m/table/columnmenu/QuickActionContentSize" {
+	import {table} from "sap/m/library";
+
+	/**
+	 * Defines the available content sizes for the <code>sap.m.table.columnmenu.QuickAction</code> control.
+	 * 
+	 * This enum is part of the 'sap/m/library' module export and must be accessed by the property 'table.columnmenu.QuickActionContentSize'.
+	 *
+	 * @public
+	*/
+	export default table.columnmenu.QuickActionContentSize;
 }
 
 declare module "sap/m/TabsOverflowMode" {
