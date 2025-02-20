@@ -8,6 +8,10 @@ import Table from "sap/ui/table/Table";
 import MultiSelectionPlugin from "sap/ui/table/plugins/MultiSelectionPlugin";
 import Configuration from "sap/ui/core/Configuration";
 import {InputType} from "sap/m/library";
+import MultiInput, { MultiInput$TokenChangeEvent } from "sap/m/MultiInput";
+import IllustratedMessage, { $IllustratedMessageSettings as MessageSettings } from "sap/f/IllustratedMessage";
+import { $AvatarSettings } from "sap/f/Avatar";
+import "sap/m/ActionSelect";
 
 var dateTimeInput = new DateTimeInput(); // Control is deprecated. A finding only appears for the module dependency, not for the usage.
 
@@ -51,3 +55,4 @@ var btn2 = new Button("btn2", {
 
 	...moreArgs // Should be ignored
 });
+

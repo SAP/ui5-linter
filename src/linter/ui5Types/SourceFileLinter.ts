@@ -160,15 +160,8 @@ export default class SourceFileLinter {
 			// e.g. `const { Button } = sap.m;`
 			// This is a destructuring assignment and we need to check each property for deprecation
 			this.analyzeObjectBindingPattern(node as ts.ObjectBindingPattern);
-		} else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression &&
-			node.parent?.kind === ts.SyntaxKind.BinaryExpression &&
-			node.parent?.parent?.kind === ts.SyntaxKind.ParenthesizedExpression) {
-			// e.g. `({ Button }) = sap.m;`
-			this.analyzeObjectLiteralExpression(node as ts.ObjectLiteralExpression);
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
-		} else if (node.kind === ts.SyntaxKind.ImportSpecifier) {
-			this.analyzeImportSpecifier(node as ts.ImportSpecifier);
 		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
 			analyzeComponentJson({
 				classDeclaration: node,
@@ -630,7 +623,7 @@ export default class SourceFileLinter {
 	analyzeIdentifier(node: ts.Identifier) {
 		const type = this.checker.getTypeAtLocation(node);
 		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
-			return;
+			return false;
 		}
 		const deprecationInfo = this.getDeprecationInfo(type.symbol);
 		if (deprecationInfo) {
@@ -638,28 +631,38 @@ export default class SourceFileLinter {
 				apiName: node.text,
 				details: deprecationInfo.messageDetails,
 			}, node);
+			return true;
 		}
-	}
-
-	analyzeImportSpecifier(node: ts.ImportSpecifier) {
-		const type = this.checker.getTypeAtLocation(node);
-		if (!type?.symbol || !this.isSymbolOfUi5OrThirdPartyType(type.symbol)) {
-			return;
-		}
-		const deprecationInfo = this.getDeprecationInfo(type.symbol);
-		if (deprecationInfo) {
-			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
-				apiName: node.getText(),
-				details: deprecationInfo.messageDetails,
-			}, node);
-		}
+		return false;
 	}
 
 	analyzeObjectBindingPattern(node: ts.ObjectBindingPattern) {
+		const objectBindingPatternType = this.checker.getTypeAtLocation(node);
 		node.elements.forEach((element) => {
 			if (element.kind === ts.SyntaxKind.BindingElement &&
 				element.name.kind === ts.SyntaxKind.Identifier) {
-				this.analyzeIdentifier(element.name);
+				let identifier;
+				if (element.propertyName) {
+					if (!ts.isIdentifier(element.propertyName)) {
+						return;
+					}
+					identifier = element.propertyName;
+				} else {
+					identifier = element.name;
+				}
+
+				if (this.analyzeIdentifier(identifier)) {
+					return;
+				}
+				const property = objectBindingPatternType.getProperty(identifier.text);
+				const deprecationInfo = this.getDeprecationInfo(property);
+				if (deprecationInfo) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
+						apiName: identifier.text,
+						details: deprecationInfo.messageDetails,
+					}, element.name);
+					return;
+				}
 			}
 			// Currently this lacks support for handling nested destructuring, e.g.
 			//   `const { SomeObject: { SomeOtherObject } } = coreLib;`
@@ -667,16 +670,6 @@ export default class SourceFileLinter {
 			//   const propName = "SomeObject"
 			//   const {[propName]: SomeVar} = coreLib;
 			// Neither is expected to be relevant in the context of UI5 API usage.
-		});
-	}
-
-	analyzeObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-		node.properties.forEach((prop) => {
-			if (prop.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
-				this.analyzeIdentifier(prop.name);
-			} else if (prop.kind === ts.SyntaxKind.PropertyAssignment) {
-				this.analyzeIdentifier(prop.name as ts.Identifier);
-			}
 		});
 	}
 
@@ -1600,16 +1593,43 @@ export default class SourceFileLinter {
 		if (!symbol) {
 			return;
 		}
-		// Only check for the "default" export regardless of what's declared
-		// as UI5 / AMD only supports importing the default anyways.
-		// TODO: This needs to be enhanced in future
+
+		const moduleName = moduleSpecifierNode.text;
+		const importClause = importDeclarationNode.importClause;
 		const defaultExportSymbol = symbol.exports?.get("default" as ts.__String);
-		const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
-		if (deprecationInfo) {
-			this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT, {
-				moduleName: moduleSpecifierNode.text,
-				details: deprecationInfo.messageDetails,
-			}, moduleSpecifierNode);
+
+		if (!importClause || importClause.name) {
+			// Import without import clause (e.g. import "module-name") or default import:
+			// Check whether the default export is deprecated
+			const deprecationInfo = this.getDeprecationInfo(defaultExportSymbol);
+			if (deprecationInfo) {
+				this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT, {
+					moduleName,
+					details: deprecationInfo.messageDetails,
+				}, moduleSpecifierNode);
+			}
+		}
+
+		if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+			// Named imports: Check whether each export is deprecated
+			for (const namedImportElement of importClause.namedBindings.elements) {
+				let identifier;
+				if (namedImportElement.propertyName) {
+					identifier = namedImportElement.propertyName;
+				} else {
+					identifier = namedImportElement.name;
+				}
+				const importName = identifier.text;
+				const namedImportSymbol = symbol.exports?.get(importName as ts.__String);
+				const deprecationInfo = this.getDeprecationInfo(namedImportSymbol);
+				if (deprecationInfo) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT_NAMED, {
+						importName,
+						moduleName,
+						details: deprecationInfo.messageDetails,
+					}, namedImportElement);
+				}
+			}
 		}
 
 		if (this.isSymbolOfPseudoModuleType(symbol)) {
@@ -1631,13 +1651,13 @@ export default class SourceFileLinter {
 			if (isEnum) {
 				this.#reporter.addMessage(
 					MESSAGE.NO_DIRECT_ENUM_ACCESS,
-					{moduleName: moduleSpecifierNode.text},
+					{moduleName},
 					moduleSpecifierNode
 				);
 			} else { // Data Type
 				this.#reporter.addMessage(
 					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
-					{moduleName: moduleSpecifierNode.text},
+					{moduleName},
 					moduleSpecifierNode
 				);
 			}

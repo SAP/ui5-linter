@@ -42,6 +42,7 @@ export enum MESSAGE {
 	DEPRECATED_LESS_SUPPORT,
 	DEPRECATED_LIBRARY,
 	DEPRECATED_MANIFEST_JS_RESOURCES,
+	DEPRECATED_MODULE_IMPORT_NAMED,
 	DEPRECATED_MODULE_IMPORT,
 	DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE,
 	DEPRECATED_PROPERTY,
@@ -248,6 +249,15 @@ export const MESSAGE_INFO = {
 			`Use of deprecated property 'sap.ui5/resources/js'`,
 		details: () => "As of version 1.94, the usage of js resources is deprecated. " +
 			"Please use regular dependencies instead.",
+	},
+
+	[MESSAGE.DEPRECATED_MODULE_IMPORT_NAMED]: {
+		severity: LintMessageSeverity.Error,
+		ruleId: RULES["no-deprecated-api"],
+
+		message: ({importName, moduleName}: {importName: string; moduleName: string}) =>
+			`Import of deprecated '${importName}' from module '${moduleName}'`,
+		details: ({details}: {details: string}) => details,
 	},
 
 	[MESSAGE.DEPRECATED_MODULE_IMPORT]: {

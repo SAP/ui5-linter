@@ -81,14 +81,14 @@ coreLib.MessageType; // REPORT: Enum "MessageType" is deprecated
 
 // ui5lint-disable-next-line no-deprecated-api
 let {BarColor, MessageType} = coreLib; // IGNORE: Enum "MessageType" is deprecated
-// ui5lint-disable-next-line no-deprecated-api
-({MessageType} = coreLib); // IGNORE: Enum "MessageType" is deprecated
+
+
 MessageType.Error;
 
 // ui5lint-disable-next-line no-deprecated-api
 let {BarColor: bt, MessageType: mt} = coreLib; // IGNORE: Enum "MessageType" is deprecated
-// ui5lint-disable-next-line no-deprecated-api
-({BarColor, MessageType: mt} = coreLib); // IGNORE: Enum "MessageType" is deprecated
+
+
 mt.Error;
 
 /*
