@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   pull-request:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       releases_created: ${{steps.release.outputs.releases_created}}
       paths_released: ${{steps.release.outputs.paths_released}}
@@ -23,7 +23,7 @@ jobs:
   publish-package:
     needs: pull-request
     if: ${{needs.pull-request.outputs.releases_created && toJson(fromJson(needs.pull-request.outputs.paths_released)) != '[]'}}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write
     steps:
