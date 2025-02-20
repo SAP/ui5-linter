@@ -23,7 +23,7 @@ export default class FragmentGenerator extends AbstractGenerator {
 		this._body.writeln(`export default {
     createContent: function () {
         return ${returnVal};
-    };
+    }
 }`);
 	}
 }
