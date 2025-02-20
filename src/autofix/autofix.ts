@@ -312,13 +312,14 @@ function generateSolutionDeprecatedApiAccess(
 	ts.forEachChild(sourceFile, visitNode);
 	for (const nodeInfo of affectedNodesInfo) {
 		if (!nodeInfo.node) {
-			throw new Error(`Unable to find node for ${nodeInfo.apiName}`);
+			// throw new Error(`Unable to find node for ${nodeInfo.apiName}`);
+			console.error(`Unable to find node for ${nodeInfo.apiName}`);
 		}
 	}
 
 	if (newModuleDeclarations.length === 1) {
 		newModuleDeclarations[0].endPos = sourceFile.getEnd();
-	} else {
+	} else if (newModuleDeclarations.length > 1) {
 		throw new Error(`TODO: Implement handling for multiple module declarations`);
 	}
 

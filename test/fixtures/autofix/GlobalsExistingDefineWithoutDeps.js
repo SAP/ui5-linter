@@ -1,4 +1,4 @@
-sap.ui.define(function () {
+sap.ui.define(function() {
 	const avatarDOM = jQuery("#container-todo---app--avatar-profile");
 	const list = sap.ui.getCore().byId("container-todo---app--todoList");
 	const button = new sap.m.Button({
