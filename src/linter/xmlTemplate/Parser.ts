@@ -13,6 +13,7 @@ import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
+import BindingParser from "../binding/lib/BindingParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -568,8 +569,22 @@ export default class Parser {
 				} else if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
+					// In XML templates, it's possible to have bindings in event handlers
+					// We need to parse and lint these as well
+					let bindingInfo = null;
+					try {
+						bindingInfo = BindingParser.complexParser(prop.value, null, false, true, true, true);
+						if (typeof bindingInfo === "object") {
+							this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
+						}
+					} catch (err) {
+						const message = err instanceof Error ? err.message : String(err);
+						this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+					}
+
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
-						if (eventHandler.startsWith("cmd:")) {
+						if (eventHandler.startsWith("cmd:") ||
+							(bindingInfo && eventHandler.startsWith("{") && eventHandler.endsWith("}"))) {
 							// No global usage possible via command execution
 							return;
 						}
