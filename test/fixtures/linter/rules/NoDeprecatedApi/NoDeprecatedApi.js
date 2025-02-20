@@ -2,7 +2,7 @@ sap.ui.define([
 	"sap/m/Button", "sap/m/DateTimeInput", "sap/base/util/includes", "sap/ui/Device", "sap/ui/core/library", "sap/ui/generic/app/navigation/service/NavigationHandler",
 	"sap/ui/table/Table", "sap/ui/table/plugins/MultiSelectionPlugin", "sap/ui/core/Configuration", "sap/m/library"
 ], function(Button, DateTimeInput, includes, Device, coreLib, NavigationHandler, Table, MultiSelectionPlugin, Configuration, mobileLib) {
-
+	"use strict";
 	var dateTimeInput = new DateTimeInput(); // Control is deprecated. A finding only appears for the module dependency, not for the usage.
 
 	var btn = new Button({
@@ -37,11 +37,11 @@ sap.ui.define([
 	coreLib.MessageType; // Enum "MessageType" is deprecated
 
 	let {BarColor, MessageType} = coreLib; // Enum "MessageType" is deprecated
-	({MessageType} = coreLib); // Enum "MessageType" is deprecated
+
 	MessageType.Error;
 
-	let {BarColor, MessageType: mt} = coreLib; // Enum "MessageType" is deprecated
-	({BarColor, MessageType: mt} = coreLib); // Enum "MessageType" is deprecated
+	let {MessageType: mt} = coreLib; // Enum "MessageType" is deprecated
+
 	mt.Error;
 
 	mobileLib.InputType.Date; // Enum value "InputType.Date" is deprecated
