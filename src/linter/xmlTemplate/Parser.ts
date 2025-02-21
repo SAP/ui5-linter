@@ -564,27 +564,18 @@ export default class Parser {
 					line: prop.start.line + 1, // Add one to align with IDEs
 					column: prop.start.column + 1,
 				};
-				if (this.#apiExtract.isProperty(symbolName, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
-				} else if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
+				if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
 					// In XML templates, it's possible to have bindings in event handlers
 					// We need to parse and lint these as well
-					let bindingInfo = null;
-					try {
-						bindingInfo = BindingParser.complexParser(prop.value, null, false, true, true, true);
-						if (typeof bindingInfo === "object") {
-							this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
-						}
-					} catch (err) {
-						const message = err instanceof Error ? err.message : String(err);
-						this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+					const bindingInfo =
+						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
+					if (bindingInfo && prop.value.startsWith("{") && prop.value.endsWith("}")) {
+						continue;
 					}
-
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
-						if (eventHandler.startsWith("cmd:") ||
-							(bindingInfo && eventHandler.startsWith("{") && eventHandler.endsWith("}"))) {
+						if (eventHandler.startsWith("cmd:")) {
 							// No global usage possible via command execution
 							return;
 						}
@@ -619,6 +610,9 @@ export default class Parser {
 							}, position);
 						}
 					});
+				// Treat every other xml attribute as property and check for bindings. XML templates can have such cases
+				} else { // if (this.#apiExtract.isProperty(symbolName, prop.name))
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
 				}
 			}
 			// This node declares a control

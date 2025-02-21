@@ -9,6 +9,7 @@
                     text="{path: 'dataField>Label', formatter: 'AHModel.format'}"
                     press="{parts: [{path: 'parameter>/settings'}, {path: 'dataField>'}], formatter: 'AH.getAnnotatedActionPress'}"
                     enabled="{parts: [{path: 'dataField>'}, {path: 'facet>'}, {path: 'entityType>'}, {path: 'device>/system/phone'}, {path: 'tabItem>'},{path: 'chartItem>'}], formatter: 'AH.buildAnnotatedActionButtonEnablementExpression'}"
+                    class="{parts: [{path: 'dataField>'}, {path: 'facet>'}, {path: 'entityType>'}, {path: 'device>/system/phone'}, {path: 'tabItem>'},{path: 'chartItem>'}], formatter: 'AH.buildAnnotatedActionButtonEnablementExpression'}"
                     type="Transparent"
                     visible="{path: 'dataField>', formatter: 'AH.getBindingForHiddenPath'}">
                     <layoutData>
