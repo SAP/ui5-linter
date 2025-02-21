@@ -185,8 +185,9 @@ export default class BindingLinter {
 	}
 
 	lintPropertyBinding(bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		let bindingInfo = null;
 		try {
-			const bindingInfo = this.#parseBinding(bindingDefinition);
+			bindingInfo = this.#parseBinding(bindingDefinition);
 			if (bindingInfo) {
 				this.#lintPropertyBindingInfo(bindingInfo, requireDeclarations, position);
 			}
@@ -194,6 +195,8 @@ export default class BindingLinter {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
 		}
+
+		return bindingInfo;
 	}
 
 	#lintPropertyBindingInfo(
@@ -212,8 +215,9 @@ export default class BindingLinter {
 
 	lintAggregationBinding(
 		bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+		let bindingInfo = null;
 		try {
-			const bindingInfo = this.#parseBinding(bindingDefinition);
+			bindingInfo = this.#parseBinding(bindingDefinition);
 			if (typeof bindingInfo === "object") {
 				this.#lintAggregationBindingInfo(bindingInfo, requireDeclarations, position);
 			}
@@ -221,6 +225,8 @@ export default class BindingLinter {
 			const message = err instanceof Error ? err.message : String(err);
 			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
 		}
+
+		return bindingInfo;
 	}
 
 	#lintAggregationBindingInfo(
