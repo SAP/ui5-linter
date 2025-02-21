@@ -13,7 +13,6 @@ import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
-import BindingParser from "../binding/lib/BindingParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
