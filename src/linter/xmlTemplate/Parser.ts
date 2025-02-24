@@ -571,15 +571,18 @@ export default class Parser {
 					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
 
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
+						if (eventHandler.startsWith("cmd:")) {
+							// No global usage possible via command execution
+							return;
+						}
 						// Check for a valid function/identifier name
 						// Currently XML views support the following syntaxes that are covered with this pattern:
 						// - myFunction
 						// - .myFunction
 						// - my.namespace.myFunction
 						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
-						const validFunctionName = /^(?:\.?[$_\p{ID_Start}][$_\p{ID_Continue}]{0,})+(\(.*\))?$/u;
-						if (eventHandler.startsWith("cmd:") || !validFunctionName.test(eventHandler)) {
-							// No global usage possible via command execution
+						const validFunctionName = /^\.?[$_\p{ID_Start}][$\p{ID_Continue}]*(?:\.[$_\p{ID_Start}][$\p{ID_Continue}]*)*(\(.*\))?$/u;
+						if (!validFunctionName.test(eventHandler)) {
 							return;
 						}
 						let functionName;
