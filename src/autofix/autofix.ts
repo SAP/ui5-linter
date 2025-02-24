@@ -313,6 +313,7 @@ function generateSolutionDeprecatedApiAccess(
 	for (const nodeInfo of affectedNodesInfo) {
 		if (!nodeInfo.node) {
 			// throw new Error(`Unable to find node for ${nodeInfo.apiName}`);
+			// eslint-disable-next-line no-console
 			console.error(`Unable to find node for ${nodeInfo.apiName}`);
 		}
 	}
