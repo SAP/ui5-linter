@@ -577,7 +577,7 @@ export default class Parser {
 						// - .myFunction
 						// - my.namespace.myFunction
 						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
-						const validFunctionName = /^(?:\.?[$_\p{ID_Start}][$_\p{ID_Continue}]*)+(\(.*\))?$/u;
+						const validFunctionName = /^(?:\.?[$_\p{ID_Start}][$_\p{ID_Continue}]{0,})+(\(.*\))?$/u;
 						if (eventHandler.startsWith("cmd:") || !validFunctionName.test(eventHandler)) {
 							// No global usage possible via command execution
 							return;
