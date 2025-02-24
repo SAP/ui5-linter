@@ -581,17 +581,12 @@ export default class Parser {
 						// - .myFunction
 						// - my.namespace.myFunction
 						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
-						const validFunctionName = /^\.?[$_\p{ID_Start}][$\p{ID_Continue}]*(?:\.[$_\p{ID_Start}][$\p{ID_Continue}]*)*(\(.*\))?$/u;
-						if (!validFunctionName.test(eventHandler)) {
+						const validFunctionName = /^(\.?[$_\p{ID_Start}][$\p{ID_Continue}]*(?:\.[$_\p{ID_Start}][$\p{ID_Continue}]*)*)\s*(?:\(|$)/u;
+						const match = validFunctionName.exec(eventHandler);
+						if (!match) {
 							return;
 						}
-						let functionName;
-						const openBracketIndex = eventHandler.indexOf("(");
-						if (openBracketIndex !== -1) {
-							functionName = eventHandler.slice(0, openBracketIndex);
-						} else {
-							functionName = eventHandler;
-						}
+						const functionName = match[1];
 						const variableName = this.#bindingLinter.getGlobalReference(
 							functionName, this.#requireDeclarations
 						);
