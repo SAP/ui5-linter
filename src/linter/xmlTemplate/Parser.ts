@@ -568,13 +568,17 @@ export default class Parser {
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
 					// In XML templates, it's possible to have bindings in event handlers
 					// We need to parse and lint these as well
-					const bindingInfo =
-						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
-					if (bindingInfo && prop.value.startsWith("{") && prop.value.endsWith("}")) {
-						continue;
-					}
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
+
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
-						if (eventHandler.startsWith("cmd:")) {
+						// Check for a valid function/identifier name
+						// Currently XML views support the following syntaxes that are covered with this pattern:
+						// - myFunction
+						// - .myFunction
+						// - my.namespace.myFunction
+						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
+						const validFunctionName = /^(\.?[$_\p{ID_Start}][$_\p{ID_Continue}]*)+(\(.*\))?$/u;
+						if (eventHandler.startsWith("cmd:") || !validFunctionName.test(eventHandler)) {
 							// No global usage possible via command execution
 							return;
 						}
