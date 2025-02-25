@@ -13,6 +13,7 @@ import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
+import BindingParser from "../binding/lib/BindingParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -566,15 +567,38 @@ export default class Parser {
 				if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
-					// In XML templates, it's possible to have bindings in event handlers
-					// We need to parse and lint these as well
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
+					// In XML templating, it's possible to have bindings in event handlers
+					// We need to parse and lint these as well, but the error should only be reported in case the event
+					// handler is not parsable. This prevents duplicate error messages for the same event handler.
+					const propertyBindingParsingErrorMessage =
+						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position, true);
+
+					let isValidEventHandler = true;
 
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
 						if (eventHandler.startsWith("cmd:")) {
 							// No global usage possible via command execution
 							return;
 						}
+
+						// Try parsing the event handler expression to check whether a property binding parsing error
+						// should be reported or not.
+						// This prevents false-positive errors in case a valid event handler declaration is not parsable
+						// as a binding.
+						// TODO: The parsed expression could also be used to check for global references in the future
+						if (propertyBindingParsingErrorMessage && isValidEventHandler) {
+							try {
+								BindingParser.parseExpression(eventHandler.replace(/^\./, "$controller."), 0, {
+									bTolerateFunctionsNotFound: true,
+								}, {});
+							} catch (_err) {
+								isValidEventHandler = false;
+								// For now we don't report errors here, as it's likely that the input is a valid
+								// binding expression that is processed during XML templating which at runtime
+								// then results into a valid event handler.
+							}
+						}
+
 						// Check for a valid function/identifier name
 						// Currently XML views support the following syntaxes that are covered with this pattern:
 						// - myFunction
@@ -611,6 +635,11 @@ export default class Parser {
 							}, position);
 						}
 					});
+
+					if (!isValidEventHandler && propertyBindingParsingErrorMessage) {
+						this.#bindingLinter.reportParsingError(propertyBindingParsingErrorMessage, position);
+					}
+
 				// Treat every other xml attribute as property and check for bindings. XML templates can have such cases
 				} else { // if (this.#apiExtract.isProperty(symbolName, prop.name))
 					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);

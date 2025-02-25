@@ -21,4 +21,7 @@
 	<!-- Usage of event handler function imported via core:require -->
 	<Button core:require='{ "doSomething": "ui5/walkthrougth/utils/doSomething" }' press="doSomething" />
 
+	<!-- Event handler with object argument (not parsable as a PropertyBinding) -->
+	<Button press=".onPressFancyButton($event, { text: ${i18n>TEXT} })" />
+
 </mvc:View>

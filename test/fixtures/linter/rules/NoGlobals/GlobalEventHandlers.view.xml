@@ -18,4 +18,7 @@
 	<!-- Mixed: local, local without leading dot, command execution and global handler -->
 	<Button press="onPressFancyButton(0, ${i18n>TEXT}, $controller.foo.bar, $event); .onPressFancyButton; cmd:Save; global.doSomething($event, $controller)" />
 
+	<!-- Global handler with object argument (not parsable as a PropertyBinding) -->
+	<Button press="global.doSomething($event, { text: ${i18n>TEXT} })" />
+
 </mvc:View>
