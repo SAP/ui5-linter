@@ -56,4 +56,20 @@ sap.ui.define([
 
 		...moreArgs // Should be ignored
 	});
+
+	// Detection of deprecated sap.ui.xmlfragment when instantiating a fragment via simple parameters
+	const fragment1 = sap.ui.xmlfragment("com.ui5.troublesome.app.view.MyFragment");
+
+	// Detection of deprecated sap.ui.xmlfragment when instantiating a fragment via object parameter
+	const fragment2 = sap.ui.xmlfragment({
+		fragmentName: "com.ui5.troublesome.app.view.MyFragment"
+	});
+
+	// Detection of deprecated sap.ui.xmlview when instantiating a view via simple parameters
+	const view1 = sap.ui.xmlview("com.ui5.troublesome.app.view.MyView");
+
+	// Detection of deprecated sap.ui.xmlview when instantiating a view via object parameter
+	const view2 = sap.ui.xmlview({
+		viewName: "com.ui5.troublesome.app.view.MyView"
+	});
 });
