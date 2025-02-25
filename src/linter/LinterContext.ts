@@ -76,13 +76,6 @@ export interface LinterOptions {
 	namespace?: string;
 }
 
-export interface FSToVirtualPathOptions {
-	relFsBasePath: string;
-	virBasePath: string;
-	relFsBasePathTest?: string;
-	virBasePathTest?: string;
-};
-
 export interface LinterParameters {
 	workspace: AbstractAdapter;
 	filePathsWorkspace: AbstractAdapter;

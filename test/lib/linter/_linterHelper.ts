@@ -64,6 +64,10 @@ export async function esmockDeprecationText() {
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
 		"../../../src/autofix/autofix.js": autofixModule,
+		"node:fs/promises": {
+			// Prevent tests from update fixtures on the filesystem (autofix)
+			writeFile: sinonGlobal.stub().resolves(),
+		},
 	});
 
 	const lintModule = await esmock("../../../src/linter/linter.js", {
