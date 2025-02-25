@@ -1,16 +1,16 @@
 import {graphFromObject} from "@ui5/project/graph";
 import {createReader, createWorkspace, createReaderCollection, createFilterReader} from "@ui5/fs/resourceFactory";
-import {FilePath, FilePattern, LinterOptions, FSToVirtualPathOptions, LintResult} from "./LinterContext.js";
+import {FilePattern, LinterOptions, LintResult} from "./LinterContext.js";
 import lintWorkspace from "./lintWorkspace.js";
 import {taskStart} from "../utils/perf.js";
 import path from "node:path";
-import posixPath from "node:path/posix";
 import {stat} from "node:fs/promises";
 import {ProjectGraph} from "@ui5/project";
 import type {AbstractReader, Resource} from "@ui5/fs";
 import ConfigManager, {UI5LintConfigType} from "../utils/ConfigManager.js";
 import {Minimatch} from "minimatch";
 import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
+import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePatterns, coverage, details, fix, configPath, ui5Config, noConfig,
@@ -79,9 +79,9 @@ export async function lintProject({
 	}, config, sharedLanguageService);
 
 	res.forEach((result) => {
-		result.filePath = transformVirtualPathToFilePath(result.filePath,
-			relFsBasePath, virBasePath,
-			relFsBasePathTest, virBasePathTest);
+		result.filePath = transformVirtualPathToFilePath(result.filePath, {
+			relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
+		});
 	});
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
@@ -119,7 +119,10 @@ export async function lintFile({
 	}, config, sharedLanguageService);
 
 	res.forEach((result) => {
-		result.filePath = transformVirtualPathToFilePath(result.filePath, "", "/");
+		result.filePath = transformVirtualPathToFilePath(result.filePath, {
+			relFsBasePath: "",
+			virBasePath: "/",
+		});
 	});
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
@@ -153,7 +156,7 @@ async function lint(
 		patterns: ignorePatterns,
 		resourceReader,
 		patternsMatch: matchedPatterns,
-		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
+		fsToVirtualPathOptions: options,
 	});
 
 	// Apply files + ignores over the filePaths reader
@@ -162,13 +165,13 @@ async function lint(
 		resourceReader,
 		inverseResult: true,
 		patternsMatch: matchedPatterns,
-		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
+		fsToVirtualPathOptions: options,
 	});
 	filePathsReader = resolveReader({
 		patterns: ignorePatterns,
 		resourceReader: filePathsReader,
 		patternsMatch: matchedPatterns,
-		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
+		fsToVirtualPathOptions: options,
 	});
 	const filePathsWorkspace = createWorkspace({reader: filePathsReader});
 
@@ -294,25 +297,6 @@ function createProjectConfig(projectType: string, projectSrcPath?: string, proje
 		resources: resourcesConfig,
 	};
 }
-/**
- * Normalize provided virtual paths to the original file paths
- */
-function transformVirtualPathToFilePath(
-	virtualPath: string,
-	srcFsBasePath: string, srcVirBasePath: string,
-	testFsBasePath?: string, testVirBasePath?: string
-): FilePath {
-	if (virtualPath.startsWith(srcVirBasePath)) {
-		return path.join(srcFsBasePath, posixPath.relative(srcVirBasePath, virtualPath));
-	} else if (testFsBasePath && testVirBasePath && virtualPath.startsWith(testVirBasePath)) {
-		return path.join(testFsBasePath, posixPath.relative(testVirBasePath, virtualPath));
-	} else if (virtualPath.startsWith("/")) {
-		return posixPath.relative("/", virtualPath);
-	} else {
-		throw new Error(
-			`Resource path ${virtualPath} is not located within the virtual source or test directories of the project`);
-	}
-}
 
 async function fsStat(fsPath: string) {
 	try {
@@ -391,13 +375,13 @@ export function resolveReader({
 	resourceReader,
 	inverseResult = false,
 	patternsMatch,
-	relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
+	fsToVirtualPathOptions,
 }: {
 	patterns: string[];
 	resourceReader: AbstractReader;
 	inverseResult?: boolean;
 	patternsMatch: Set<string>;
-	relFsBasePath: string; virBasePath: string; relFsBasePathTest?: string; virBasePathTest?: string;
+	fsToVirtualPathOptions: FSToVirtualPathOptions;
 }) {
 	if (!patterns.length) {
 		return resourceReader;
@@ -411,7 +395,7 @@ export function resolveReader({
 			// Minimatch works with FS and relative paths.
 			// So, we need to convert virtual paths to fs
 			const resPath = transformVirtualPathToFilePath(
-				resource.getPath(), relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest);
+				resource.getPath(), fsToVirtualPathOptions);
 
 			return inverseResult ?
 					// When we work with files paths we actually need to limit the result to those
