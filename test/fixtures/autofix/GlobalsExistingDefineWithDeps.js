@@ -1,10 +1,10 @@
-sap.ui.define(["sap/m/Button"], function(Button) {
+sap.ui.define(["sap/m/Button", "sap/m/Avatar", "sap/m/ComboBox"], function(ButtonRenamed) {
 	const avatarDOM = jQuery("#container-todo---app--avatar-profile");
 	const list = sap.ui.getCore().byId("container-todo---app--todoList");
 	const button = new sap.m.Button({
 		text: "Hello"
 	});
-	const button2 = new Button({
+	const button2 = new ButtonRenamed({
 		text: "Hello"
 	});
 	const button3 = new window.sap.m.Button({

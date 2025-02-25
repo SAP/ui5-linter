@@ -209,29 +209,64 @@ function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo, changeSet: ChangeSet[]
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
-	if (moduleDeclaration.dependencies) {
-		throw new Error("TODO: Implement sap.ui.define extending existing dependencies");
-	}
 
 	if (!ts.isFunctionExpression(moduleDeclaration.factory)) {
 		throw new Error("TODO: Unsupported factory declaration");
 	}
 
+	let existingImportModules: {moduleName: string; identifier: string}[] = [];
+	if (ts.isArrayLiteralExpression(defineCall.arguments[0]) && ts.isFunctionExpression(defineCall.arguments[1])) {
+		existingImportModules = defineCall.arguments[0].elements.map((e) => {
+			if (ts.isStringLiteral(e)) {
+				return {
+					moduleName: e.text,
+					identifier: getIdentifierForImport(e.text),
+				};
+			}
+		}).filter(($) => $);
+		defineCall.arguments[1].parameters.forEach((param, index) => {
+			if (ts.isParameter(param) && ts.isIdentifier(param.name) && existingImportModules[index]) {
+				existingImportModules[index].identifier = param.name.text;
+			}
+		});
+	}
+
 	const imports = [...importRequests.keys()];
-	const dependencies = imports.map((i) => `"${i}"`);
-	const identifiers = imports.map((i) => {
-		const identifier = getIdentifierForImport(i);
-		importRequests.get(i)!.identifier = identifier;
-		return identifier;
+	existingImportModules.forEach((existingImportModule) => {
+		const indexOf = imports.indexOf(existingImportModule.moduleName);
+		if (indexOf !== -1) {
+			imports.splice(indexOf, 1);
+			importRequests.get(existingImportModule.moduleName)!.identifier = existingImportModule.identifier;
+		}
 	});
 
-	// Patch dependencies argument
-	const dependencyDecl = `[${dependencies.join(", ")}], `;
-	changeSet.push({
-		action: ChangeAction.INSERT,
-		start: moduleDeclaration.factory.getFullStart(),
-		value: dependencyDecl,
-	});
+	const dependencies = imports.map((i) => `"${i}"`);
+	const identifiers = [
+		...existingImportModules.map((i) => i.identifier).slice(defineCall.arguments[1].parameters.length),
+		...imports.map((i) => {
+			const identifier = getIdentifierForImport(i);
+			importRequests.get(i)!.identifier = identifier;
+			return identifier;
+		})];
+
+	if (moduleDeclaration.dependencies) {
+		const closeBracketToken = moduleDeclaration.dependencies.getChildren()
+			.find((c) => c.kind === ts.SyntaxKind.CloseBracketToken);
+		if (!closeBracketToken) {
+			throw new Error("TODO: Implement missing close paren token");
+		}
+		changeSet.push({
+			action: ChangeAction.INSERT,
+			start: closeBracketToken.getStart(),
+			value: `, ${dependencies.join(", ")}`,
+		});
+	} else {
+		changeSet.push({
+			action: ChangeAction.INSERT,
+			start: moduleDeclaration.factory.getFullStart(),
+			value: `[${dependencies.join(", ")}], `,
+		});
+	}
 
 	// Patch factory arguments
 	const closeParenToken = moduleDeclaration.factory.getChildren()
@@ -242,7 +277,7 @@ function addDependencies(
 	changeSet.push({
 		action: ChangeAction.INSERT,
 		start: closeParenToken.getStart(),
-		value: identifiers.join(", "),
+		value: (moduleDeclaration.dependencies ? ", " : "") + identifiers.join(", "),
 	});
 
 	// Patch identifiers
