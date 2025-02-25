@@ -43,6 +43,7 @@ export default async function lintWorkspace(
 			rootDir: options.rootDir,
 			namespace: options.namespace,
 			resources: autofixResources,
+			context,
 		});
 
 		if (autofixResult.size > 0) {
