@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.10.0](https://github.com/SAP/ui5-linter/compare/v1.9.0...v1.10.0) (2025-02-25)
+
+
+### Features
+
+* Add UI5LinterEngine ([#551](https://github.com/SAP/ui5-linter/issues/551)) ([1a44868](https://github.com/SAP/ui5-linter/commit/1a44868d30343603e03d93f02a78597ca7758ab9))
+
+
+### Bug Fixes
+
+* Check bindings of all ManagedObject subclasses ([5435623](https://github.com/SAP/ui5-linter/commit/543562396267dcdb22b42cf6919f1eabba3a5e18))
+* False-positives for requestCurrencyCodes/requestUnitsOfMeasure ([24f6ea7](https://github.com/SAP/ui5-linter/commit/24f6ea70d1c78d2a75eedfc537f521bc3b7e3ccd))
+* Improve deprecation detection ([f1719f0](https://github.com/SAP/ui5-linter/commit/f1719f01e6253beae914e95fb17f0fcb072078cb))
+* Valid Js syntax after XML transpilation ([#552](https://github.com/SAP/ui5-linter/issues/552)) ([98b89d5](https://github.com/SAP/ui5-linter/commit/98b89d599f4604d2e4a51f02f0f9c2f5effe5910))
+
+
+### Dependencies
+
+* Bump sax-wasm from 3.0.4 to 3.0.5 ([79e0549](https://github.com/SAP/ui5-linter/commit/79e05496e9263e01da02026fd84dea4eb2c7d044))
+
 ## [1.9.0](https://github.com/SAP/ui5-linter/compare/v1.8.0...v1.9.0) (2025-02-17)
 
 
