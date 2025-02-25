@@ -215,6 +215,7 @@ function addDependencies(
 	}
 
 	let existingImportModules: {moduleName: string; identifier: string}[] = [];
+	let existingModulesLength = 0;
 	if (ts.isArrayLiteralExpression(defineCall.arguments[0]) && ts.isFunctionExpression(defineCall.arguments[1])) {
 		existingImportModules = defineCall.arguments[0].elements.map((e) => {
 			if (ts.isStringLiteral(e)) {
@@ -224,6 +225,7 @@ function addDependencies(
 				};
 			}
 		}).filter(($) => $);
+		existingModulesLength = defineCall.arguments[1].parameters.length
 		defineCall.arguments[1].parameters.forEach((param, index) => {
 			if (ts.isParameter(param) && ts.isIdentifier(param.name) && existingImportModules[index]) {
 				existingImportModules[index].identifier = param.name.text;
@@ -242,7 +244,7 @@ function addDependencies(
 
 	const dependencies = imports.map((i) => `"${i}"`);
 	const identifiers = [
-		...existingImportModules.map((i) => i.identifier).slice(defineCall.arguments[1].parameters.length),
+		...existingImportModules.map((i) => i.identifier).slice(existingModulesLength),
 		...imports.map((i) => {
 			const identifier = getIdentifierForImport(i);
 			importRequests.get(i)!.identifier = identifier;
