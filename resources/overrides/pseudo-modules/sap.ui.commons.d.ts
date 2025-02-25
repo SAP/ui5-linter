@@ -3,8 +3,10 @@ declare module "sap/ui/commons/ButtonStyle" {
 
 	/**
 	 * different styles for a button.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'ButtonStyle'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - (altogether with sap.ui.commons.Button). Use sap.m.Button with its sap.m.ButtonType instead.
 	 * @public
 	*/
 	export default ButtonStyle;
@@ -15,6 +17,8 @@ declare module "sap/ui/commons/enums/AreaDesign" {
 
 	/**
 	 * Value set for the background design of areas
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'enums.AreaDesign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -27,6 +31,8 @@ declare module "sap/ui/commons/enums/BorderDesign" {
 
 	/**
 	 * Value set for the border design of areas
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'enums.BorderDesign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -39,6 +45,8 @@ declare module "sap/ui/commons/enums/Orientation" {
 
 	/**
 	 * Orientation of a UI element
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'enums.Orientation'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -51,8 +59,10 @@ declare module "sap/ui/commons/HorizontalDividerHeight" {
 
 	/**
 	 * Enumeration of possible HorizontalDivider height settings.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'HorizontalDividerHeight'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - without replacement.
 	 * @public
 	*/
 	export default HorizontalDividerHeight;
@@ -63,8 +73,10 @@ declare module "sap/ui/commons/HorizontalDividerType" {
 
 	/**
 	 * Enumeration of possible HorizontalDivider types.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'HorizontalDividerType'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - without a replacement.
 	 * @public
 	*/
 	export default HorizontalDividerType;
@@ -75,8 +87,10 @@ declare module "sap/ui/commons/LabelDesign" {
 
 	/**
 	 * Available label display modes.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'LabelDesign'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - the concept has been discarded.
 	 * @public
 	*/
 	export default LabelDesign;
@@ -87,6 +101,8 @@ declare module "sap/ui/commons/layout/BackgroundDesign" {
 
 	/**
 	 * Background design (i.e. color), e.g. of a layout cell.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.BackgroundDesign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -99,8 +115,10 @@ declare module "sap/ui/commons/layout/BorderLayoutAreaTypes" {
 
 	/**
 	 * The type (=position) of a BorderLayoutArea
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.BorderLayoutAreaTypes'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - (altogether with sap.ui.commons.layout.BorderLayout). Use sap.m.Page instead with its aggregations.
 	 * @public
 	*/
 	export default layout.BorderLayoutAreaTypes;
@@ -111,6 +129,8 @@ declare module "sap/ui/commons/layout/HAlign" {
 
 	/**
 	 * Horizontal alignment, e.g. of a layout cell's content within the cell's borders. Note that some values depend on the current locale's writing direction while others do not.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.HAlign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -123,6 +143,8 @@ declare module "sap/ui/commons/layout/Padding" {
 
 	/**
 	 * Padding, e.g. of a layout cell's content within the cell's borders. Note that all options except "None" include a padding of 2px at the top and bottom, and differ only in the presence of a 4px padding towards the beginning or end of a line, in the current locale's writing direction.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.Padding'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -135,6 +157,8 @@ declare module "sap/ui/commons/layout/Separation" {
 
 	/**
 	 * Separation, e.g. of a layout cell from its neighbor, via a vertical gutter of defined width, with or without a vertical line in its middle.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.Separation'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -147,6 +171,8 @@ declare module "sap/ui/commons/layout/VAlign" {
 
 	/**
 	 * Vertical alignment, e.g. of a layout cell's content within the cell's borders.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'layout.VAlign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -159,8 +185,10 @@ declare module "sap/ui/commons/MenuBarDesign" {
 
 	/**
 	 * Determines the visual design of a MenuBar. The feature might be not supported by all themes.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'MenuBarDesign'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - (altogether with sap.ui.commons.Toolbar). Use sap.m.Toolbar and its sap.m.ToolbarDesign instead.
 	 * @public
 	*/
 	export default MenuBarDesign;
@@ -171,8 +199,10 @@ declare module "sap/ui/commons/MessageType" {
 
 	/**
 	 * [Enter description for MessageType]
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'MessageType'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - Instead, use the <code>sap.ui.core.MessageType</code>.
 	 * @public
 	*/
 	export default MessageType;
@@ -183,8 +213,10 @@ declare module "sap/ui/commons/PaginatorEvent" {
 
 	/**
 	 * Distinct paginator event types
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'PaginatorEvent'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - the concept has been discarded.
 	 * @public
 	*/
 	export default PaginatorEvent;
@@ -195,8 +227,10 @@ declare module "sap/ui/commons/RatingIndicatorVisualMode" {
 
 	/**
 	 * Possible values for the visualization of float values in the RatingIndicator Control.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'RatingIndicatorVisualMode'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - Instead, use <code>sap.m.RatingIndicator</code> control.
 	 * @public
 	*/
 	export default RatingIndicatorVisualMode;
@@ -207,6 +241,8 @@ declare module "sap/ui/commons/RowRepeaterDesign" {
 
 	/**
 	 * Determines the visual design of a RowRepeater.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'RowRepeaterDesign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -220,7 +256,7 @@ declare module "sap/ui/commons/SplitterSize" {
 	/**
 	 * A string type that represents subset of CSS size values. For the Splitter only px and % are allowed.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - Instead, use <code>sap.ui.layout.Splitter</code> control.
 	 * @public
 	*/
 	export default SplitterSize;
@@ -231,8 +267,10 @@ declare module "sap/ui/commons/TextViewColor" {
 
 	/**
 	 * Semantic Colors of a text.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'TextViewColor'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - the concept has been discarded.
 	 * @public
 	*/
 	export default TextViewColor;
@@ -243,8 +281,10 @@ declare module "sap/ui/commons/TextViewDesign" {
 
 	/**
 	 * Designs for TextView.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'TextViewDesign'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - the concept has been discarded.
 	 * @public
 	*/
 	export default TextViewDesign;
@@ -255,6 +295,8 @@ declare module "sap/ui/commons/ToolbarDesign" {
 
 	/**
 	 * Determines the visual design of a Toolbar.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'ToolbarDesign'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -267,8 +309,10 @@ declare module "sap/ui/commons/ToolbarSeparatorDesign" {
 
 	/**
 	 * Design of the Toolbar Separator.
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'ToolbarSeparatorDesign'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - (altogether wuith sap.ui.commons.Toolbar). Use sap.m.Toolbar and its sap.m.ToolbarSeparator instead.
 	 * @public
 	*/
 	export default ToolbarSeparatorDesign;
@@ -279,8 +323,10 @@ declare module "sap/ui/commons/TreeSelectionMode" {
 
 	/**
 	 * Selection mode of the tree
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'TreeSelectionMode'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - (altogether with sap.ui.commons.Tree). Use sap.m.Tree with its items instead.
 	 * @public
 	*/
 	export default TreeSelectionMode;
@@ -291,8 +337,10 @@ declare module "sap/ui/commons/TriStateCheckBoxState" {
 
 	/**
 	 * States for TriStateCheckBox
+	 * 
+	 * This enum is part of the 'sap/ui/commons/library' module export and must be accessed by the property 'TriStateCheckBoxState'.
 	 *
-	 * @deprecated (since 1.38)
+	 * @deprecated (since 1.38) - Use {@link sap.m.CheckBox} and its properties instead.
 	 * @public
 	 * @since 1.7.2
 	*/

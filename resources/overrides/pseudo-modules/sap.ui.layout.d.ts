@@ -3,6 +3,8 @@ declare module "sap/ui/layout/BackgroundDesign" {
 
 	/**
 	 * Available Background Design.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'BackgroundDesign'.
 	 *
 	 * @public
 	 * @since 1.36.0
@@ -15,6 +17,8 @@ declare module "sap/ui/layout/BlockBackgroundType" {
 
 	/**
 	 * A string type that is used inside the BlockLayout to set predefined background color to the cells inside the control.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'BlockBackgroundType'.
 	 *
 	 * @public
 	*/
@@ -26,6 +30,8 @@ declare module "sap/ui/layout/BlockLayoutCellColorSet" {
 
 	/**
 	 * A string type that is used inside the BlockLayoutCell to set a predefined set of colors for the cells.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'BlockLayoutCellColorSet'.
 	 *
 	 * @public
 	 * @since 1.48
@@ -38,6 +44,8 @@ declare module "sap/ui/layout/BlockLayoutCellColorShade" {
 
 	/**
 	 * A string type that is used inside the BlockLayoutCell to set a predefined set of color shades for the cells. The colors are defined with sap.ui.layout.BlockLayoutCellColorSet. And this is for the shades only.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'BlockLayoutCellColorShade'.
 	 *
 	 * @public
 	 * @since 1.48
@@ -50,6 +58,8 @@ declare module "sap/ui/layout/BlockRowColorSets" {
 
 	/**
 	 * A string type that is used inside the BlockLayoutRow to set predefined set of colors the cells inside the control. Color sets depend on sap.ui.layout.BlockBackgroundType
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'BlockRowColorSets'.
 	 *
 	 * @public
 	*/
@@ -75,6 +85,8 @@ declare module "sap/ui/layout/cssgrid/CSSGridAutoFlow" {
 
 	/**
 	 * A string type that is used for CSS grid to control how the auto-placement algorithm works, specifying exactly how auto-placed items get flowed into the grid.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'cssgrid.CSSGridAutoFlow'.
 	 *
 	 * @public
 	 * @since 1.60.0
@@ -140,7 +152,7 @@ declare module "sap/ui/layout/form/ColumnsL" {
 	/**
 	 * An <code>int</code> type that defines how many columns a <code>Form</code> control using the <code>ColumnLayout</code> as layout can have if it has large size
 	 * 
-	 * Allowed values are numbers from 1 to 3.
+	 * Allowed values are numbers from 1 to 4. <b>Note:</b> In versions lower than 1.122 only 3 columns are allowed.
 	 *
 	 * @public
 	 * @since 1.56.0
@@ -154,7 +166,7 @@ declare module "sap/ui/layout/form/ColumnsM" {
 	/**
 	 * An <code>int</code> type that defines how many columns a <code>Form</code> control using the <code>ColumnLayout</code> as layout can have if it has medium size
 	 * 
-	 * Allowed values are numbers from 1 to 2.
+	 * Allowed values are numbers from 1 to 3. <b>Note:</b> In versions lower than 1.122 only 2 columns are allowed.
 	 *
 	 * @public
 	 * @since 1.56.0
@@ -207,6 +219,8 @@ declare module "sap/ui/layout/form/SimpleFormLayout" {
 
 	/**
 	 * Available <code>FormLayouts</code> used to render a <code>SimpleForm</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'form.SimpleFormLayout'.
 	 *
 	 * @public
 	 * @since 1.16.0
@@ -220,7 +234,7 @@ declare module "sap/ui/layout/GridIndent" {
 	/**
 	 * A string type that represents the indent values of the <code>Grid</code> for large, medium and small screens.
 	 * 
-	 * Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 11 that the container has to take, for example: <code>L2 M4 S6</code>, <code>M11</code>, <code>s10</code> or <code>l4 m4</code>.
+	 * Allowed values are separated by space with case insensitive Letters XL, L, M or S followed by number of columns from 1 to 11 that the container has to take, for example: <code>L2 M4 S6</code>, <code>M11</code>, <code>s10</code> or <code>l4 m4</code>.
 	 * 
 	 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 	 *
@@ -234,6 +248,8 @@ declare module "sap/ui/layout/GridPosition" {
 
 	/**
 	 * The position of the {@link sap.ui.layout.Grid}. Can be <code>Left</code> (default), <code>Center</code> or <code>Right</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'GridPosition'.
 	 *
 	 * @public
 	*/
@@ -246,7 +262,7 @@ declare module "sap/ui/layout/GridSpan" {
 	/**
 	 * A string type that represents the span values of the <code>Grid</code> for large, medium and small screens.
 	 * 
-	 * Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 12 that the container has to take, for example: <code>L2 M4 S6</code>, <code>M12</code>, <code>s10</code> or <code>l4 m4</code>.
+	 * Allowed values are separated by space with case insensitive Letters XL, L, M or S followed by number of columns from 1 to 12 that the container has to take, for example: <code>L2 M4 S6</code>, <code>M12</code>, <code>s10</code> or <code>l4 m4</code>.
 	 * 
 	 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 	 *
@@ -260,6 +276,8 @@ declare module "sap/ui/layout/SideContentFallDown" {
 
 	/**
 	 * Types of the DynamicSideContent FallDown options
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'SideContentFallDown'.
 	 *
 	 * @public
 	 * @since 1.30
@@ -272,6 +290,8 @@ declare module "sap/ui/layout/SideContentPosition" {
 
 	/**
 	 * The position of the side content - End (default) and Begin.
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'SideContentPosition'.
 	 *
 	 * @public
 	*/
@@ -283,6 +303,8 @@ declare module "sap/ui/layout/SideContentVisibility" {
 
 	/**
 	 * Types of the DynamicSideContent Visibility options
+	 * 
+	 * This enum is part of the 'sap/ui/layout/library' module export and must be accessed by the property 'SideContentVisibility'.
 	 *
 	 * @public
 	 * @since 1.30
