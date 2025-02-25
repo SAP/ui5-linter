@@ -1,6 +1,6 @@
 import ts from "typescript";
 import MagicString from "magic-string";
-import {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
+import LinterContext, {LintMetadata, RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionDeprecatedApiAccess from "./solutions/deprecatedApiAccess.js";
@@ -16,6 +16,7 @@ export interface AutofixOptions {
 	rootDir: string;
 	namespace?: string;
 	resources: Map<ResourcePath, AutofixResource>;
+	context: LinterContext;
 }
 
 export enum ChangeAction {
@@ -130,6 +131,7 @@ export default async function ({
 	rootDir: _unused1,
 	namespace: _unused2,
 	resources,
+	context,
 }: AutofixOptions): Promise<AutofixResult> {
 	const sourceFiles: SourceFiles = new Map();
 	const resourcePaths = [];
@@ -152,7 +154,7 @@ export default async function ({
 	const checker = program.getTypeChecker();
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
-		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!);
+		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!, context);
 		if (newContent) {
 			res.set(resourcePath, newContent);
 		}
@@ -162,7 +164,8 @@ export default async function ({
 }
 
 function applyFixes(
-	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath, resource: AutofixResource
+	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
+	resource: AutofixResource, context: LinterContext
 ): string | undefined {
 	const {content} = resource;
 
@@ -195,7 +198,7 @@ function applyFixes(
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet);
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet, context.getMetadata(resourcePath));
 	}
 
 	if (changeSet.length === 0) {
@@ -206,7 +209,8 @@ function applyFixes(
 }
 
 function addDependencies(
-	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo, changeSet: ChangeSet[]
+	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
+	changeSet: ChangeSet[], resourceMetadata: LintMetadata
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
@@ -214,24 +218,11 @@ function addDependencies(
 		throw new Error("TODO: Unsupported factory declaration");
 	}
 
-	let existingImportModules: {moduleName: string; identifier: string}[] = [];
-	let existingModulesLength = 0;
-	if (ts.isArrayLiteralExpression(defineCall.arguments[0]) && ts.isFunctionExpression(defineCall.arguments[1])) {
-		existingImportModules = defineCall.arguments[0].elements.map((e) => {
-			if (ts.isStringLiteral(e)) {
-				return {
-					moduleName: e.text,
-					identifier: getIdentifierForImport(e.text),
-				};
-			}
-		}).filter(($) => $);
-		existingModulesLength = defineCall.arguments[1].parameters.length
-		defineCall.arguments[1].parameters.forEach((param, index) => {
-			if (ts.isParameter(param) && ts.isIdentifier(param.name) && existingImportModules[index]) {
-				existingImportModules[index].identifier = param.name.text;
-			}
-		});
-	}
+	const existingImportModules = resourceMetadata.transformedImports.get("sap.ui.define") ?? [];
+	const moduleWithoutIdentifier = existingImportModules.find((i) => !i.identifier);
+	const existingIdentifiersLength = moduleWithoutIdentifier ?
+			existingImportModules.indexOf(moduleWithoutIdentifier) :
+		0;
 
 	const imports = [...importRequests.keys()];
 	existingImportModules.forEach((existingImportModule) => {
@@ -244,7 +235,8 @@ function addDependencies(
 
 	const dependencies = imports.map((i) => `"${i}"`);
 	const identifiers = [
-		...existingImportModules.map((i) => i.identifier).slice(existingModulesLength),
+		...existingImportModules.map((i) => i.identifier || getIdentifierForImport(i.moduleName))
+			.slice(existingIdentifiersLength),
 		...imports.map((i) => {
 			const identifier = getIdentifierForImport(i);
 			importRequests.get(i)!.identifier = identifier;
