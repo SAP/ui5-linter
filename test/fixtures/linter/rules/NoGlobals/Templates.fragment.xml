@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core"
     xmlns:template="http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1">
-    
+
     <template:if test="{= ${dataField>RecordType} === 'com.sap.vocabularies.UI.v1.DataFieldForAction'}">
         <template:then>
             <template:if test="{path: 'dataField>', formatter: 'AH.doesActionExist'}">
