@@ -15,4 +15,9 @@ sap.ui.define(["sap/m/Button", "sap/m/Avatar", "sap/m/ComboBox"], function(Butto
 	core.ValueState.Success;
 	sap.ui.view("myView");
 	sap.m.URLHelper.triggerSms();
+	
+	sap.ui.require(["sap/m/Dialog", "sap/m/MessageToast", "sap/f/library"], function(Dialog, MessageToast, fLib) {
+		sap.f.AvatarType.Icon;
+		fLib.AvatarType.Image;
+	});
 });
