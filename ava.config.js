@@ -9,7 +9,6 @@ export default {
 	},
 	files: [
 		"test/lib/**/*.ts",
-		"!test/lib/autofix/autofix-e2e.ts",
 	],
 	watchMode: {
 		ignoreChanges: [
