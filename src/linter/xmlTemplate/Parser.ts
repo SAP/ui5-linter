@@ -593,11 +593,17 @@ export default class Parser {
 								BindingParser.parseExpression(eventHandler.replace(/^\./, "$controller."), 0, {
 									bTolerateFunctionsNotFound: true,
 								}, {});
-							} catch (_err) {
+							} catch (err) {
 								isValidEventHandler = false;
-								// For now we don't report errors here, as it's likely that the input is a valid
-								// binding expression that is processed during XML templating which at runtime
-								// then results into a valid event handler.
+								// Also report the parsing error for the event handler. This creates multiple and
+								// sometimes duplicate messages, but it's better than not reporting the error at all
+								// and there is no easy way to know whether the input is intended to be a binding or
+								// event handler.
+								this.#context.addLintingMessage(
+									this.#resourcePath, MESSAGE.PARSING_ERROR, {
+										message: err instanceof Error ? err.message : String(err),
+									}, position
+								);
 								return;
 							}
 						}
