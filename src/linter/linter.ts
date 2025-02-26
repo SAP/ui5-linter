@@ -137,7 +137,6 @@ async function lint(
 ): Promise<LintResult[]> {
 	const lintEnd = taskStart("Linting");
 	let {ignorePatterns, filePatterns} = options;
-	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
 
 	// Resolve files to include
 	filePatterns = filePatterns ?? config.files ?? [];
