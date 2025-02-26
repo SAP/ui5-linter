@@ -252,7 +252,7 @@ function addDependencies(
 		changeSet.push({
 			action: ChangeAction.INSERT,
 			start: closeBracketToken.getStart(),
-			value: `, ${dependencies.join(", ")}`,
+			value: (existingIdentifiersLength ? ", " : "") + dependencies.join(", "),
 		});
 	} else {
 		changeSet.push({
@@ -271,7 +271,7 @@ function addDependencies(
 	changeSet.push({
 		action: ChangeAction.INSERT,
 		start: closeParenToken.getStart(),
-		value: (moduleDeclaration.dependencies ? ", " : "") + identifiers.join(", "),
+		value: (existingIdentifiersLength ? ", " : "") + identifiers.join(", "),
 	});
 
 	// Patch identifiers
