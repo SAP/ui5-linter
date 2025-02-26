@@ -182,21 +182,25 @@ function getModuleBody(
 				for (const node of factoryBody) {
 					if (ts.isReturnStatement(node) && node.expression) {
 						if (ts.isCallExpression(node.expression)) {
+							let classDeclaration: ts.ClassDeclaration | undefined;
 							try {
-								const classDeclaration = rewriteExtendCall(nodeFactory,
+								classDeclaration = rewriteExtendCall(nodeFactory,
 									node.expression, [
 										nodeFactory.createToken(ts.SyntaxKind.ExportKeyword),
 										nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 									]);
-								body.push(classDeclaration);
-								moveComments.push([node, classDeclaration]);
 							} catch (err) {
 								if (err instanceof UnsupportedExtendCall) {
 									log.verbose(`Failed to transform extend call: ${err.message}`);
-									body.push(createDefaultExport(nodeFactory, node.expression));
 								} else {
 									throw err;
 								}
+							}
+							if (classDeclaration) {
+								body.push(classDeclaration);
+								moveComments.push([node, classDeclaration]);
+							} else {
+								body.push(createDefaultExport(nodeFactory, node.expression));
 							}
 						} else {
 							const defaultExport = createDefaultExport(nodeFactory, node.expression);
@@ -218,20 +222,25 @@ function getModuleBody(
 			}
 		} else if (ts.isCallExpression(moduleDeclaration.factory.body)) {
 			// Arrow function with expression body
+			let classDeclaration: ts.ClassDeclaration | undefined;
 			try {
-				const classDeclaration = rewriteExtendCall(nodeFactory,
+				classDeclaration = rewriteExtendCall(nodeFactory,
 					moduleDeclaration.factory.body, [
 						nodeFactory.createToken(ts.SyntaxKind.ExportKeyword),
 						nodeFactory.createToken(ts.SyntaxKind.DefaultKeyword),
 					]);
-				body = [classDeclaration];
 			} catch (err) {
 				if (err instanceof UnsupportedExtendCall) {
 					log.verbose(`Failed to transform extend call: ${err.message}`);
-					body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
 				} else {
 					throw err;
 				}
+			}
+			if (classDeclaration) {
+				body = [classDeclaration];
+			} else {
+				// Export expression directly
+				body = [createDefaultExport(nodeFactory, moduleDeclaration.factory.body)];
 			}
 		} else {
 			// Export expression directly

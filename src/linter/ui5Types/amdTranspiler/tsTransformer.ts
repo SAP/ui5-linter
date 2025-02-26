@@ -169,51 +169,54 @@ function transform(
 					}
 				}
 			} else {
-				try {
-					let variableStatement: ts.VariableStatement | undefined;
-					let className: string | undefined;
+				let variableStatement: ts.VariableStatement | undefined;
+				let className: string | undefined;
 
-					// Check if class is assigned to a variable.
-					// If so, use the local variable name as class name and remove the variable declaration
-					if (
-						ts.isVariableDeclaration(node.parent) &&
-						ts.isVariableDeclarationList(node.parent.parent) &&
-						ts.isVariableStatement(node.parent.parent.parent)
-					) {
-						variableStatement = node.parent.parent.parent;
-						className = node.parent.name.getText();
-					}
+				// Check if class is assigned to a variable.
+				// If so, use the local variable name as class name and remove the variable declaration
+				if (
+					ts.isVariableDeclaration(node.parent) &&
+					ts.isVariableDeclarationList(node.parent.parent) &&
+					ts.isVariableStatement(node.parent.parent.parent)
+				) {
+					variableStatement = node.parent.parent.parent;
+					className = node.parent.name.getText();
+				}
 
-					// For now, only rewrite extend calls in expressions and variable statements
-					if (variableStatement || ts.isExpressionStatement(node.parent)) {
+				// For now, only rewrite extend calls in expressions and variable statements
+				if (variableStatement || ts.isExpressionStatement(node.parent)) {
+					try {
 						const classDeclaration = rewriteExtendCall(nodeFactory, node, undefined, className);
-						if (variableStatement) {
-							if (variableStatement.declarationList.declarations.length > 1) {
-								// The variable statement contains more than just our class variable
-								// and we can't replace the variable declaration with the class declaration (not valid).
+						if (classDeclaration) {
+							if (variableStatement) {
+								if (variableStatement.declarationList.declarations.length > 1) {
+									// The variable statement contains more than just our class variable
+									// and we can't replace the variable declaration with the class declaration
+									// (not valid).
 
-								// So we remove the single declaration within the variable statement...
-								pruneNode(node.parent);
+									// So we remove the single declaration within the variable statement...
+									pruneNode(node.parent);
 
-								// ... and insert the class declaration after the variable statement
-								insertNodeAfter(variableStatement, classDeclaration);
+									// ... and insert the class declaration after the variable statement
+									insertNodeAfter(variableStatement, classDeclaration);
 
-								// Also: Move comments from the variable declaration to the class declaration
-								moveCommentsToNode(node.parent, classDeclaration, sourceFile);
-							} else {
-								// The variable statement only contains our class variable, so we can replace the whole
-								// statement node with the new class declaration.
-								replaceNode(variableStatement, classDeclaration);
+									// Also: Move comments from the variable declaration to the class declaration
+									moveCommentsToNode(node.parent, classDeclaration, sourceFile);
+								} else {
+									// The variable statement only contains our class variable, so we can replace
+									// the whole statement node with the new class declaration.
+									replaceNode(variableStatement, classDeclaration);
+								}
+							} else if (ts.isExpressionStatement(node.parent)) {
+								replaceNode(node.parent, classDeclaration);
 							}
-						} else if (ts.isExpressionStatement(node.parent)) {
-							replaceNode(node.parent, classDeclaration);
 						}
-					}
-				} catch (err) {
-					if (err instanceof UnsupportedExtendCall) {
-						log.verbose(`Failed to transform extend call: ${err.message}`);
-					} else {
-						throw err;
+					} catch (err) {
+						if (err instanceof UnsupportedExtendCall) {
+							log.verbose(`Failed to transform extend call: ${err.message}`);
+						} else {
+							throw err;
+						}
 					}
 				}
 			}
@@ -236,6 +239,9 @@ function transform(
 
 	// Update the AST with extracted nodes from the module definitions and require expressions
 	processedSourceFile = nodeFactory.updateSourceFile(processedSourceFile, statements);
+
+	// Enforce calculating the line starts so that later modifications and new comments result in a correct source map
+	processedSourceFile.getLineStarts();
 
 	// Get full source text to find comments
 	const fullSourceText = processedSourceFile.getFullText();
