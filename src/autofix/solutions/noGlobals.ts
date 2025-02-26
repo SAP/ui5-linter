@@ -99,7 +99,7 @@ export default function generateSolutionNoGlobals(
 			moduleDeclaration = moduleDeclarations.get(defineCall)!;
 		} else {
 			if (!newModuleDeclarations.length) {
-				throw new Error(`TODO: Implement handling for global access without module declaration`);
+				// throw new Error(`TODO: Implement handling for global access without module declaration`);
 			}
 			for (const decl of newModuleDeclarations) {
 				if (position.pos > decl.declareCall.getStart()) {
@@ -110,14 +110,14 @@ export default function generateSolutionNoGlobals(
 			}
 		}
 		if (!moduleDeclaration) {
-			throw new Error(`TODO: Implement handling for global access without module declaration`);
+			// throw new Error(`TODO: Implement handling for global access without module declaration`);
 		}
-		if (!moduleDeclaration.importRequests.has(moduleName)) {
+		if (moduleDeclaration && !moduleDeclaration.importRequests.has(moduleName)) {
 			moduleDeclaration.importRequests.set(moduleName, {
 				nodeInfos: [],
 			});
 		}
-		moduleDeclaration.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
+		moduleDeclaration?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
 	}
 
 	return moduleDeclarations;
