@@ -222,7 +222,7 @@ function addDependencies(
 	const moduleWithoutIdentifier = existingImportModules.find((i) => !i.identifier);
 	const existingIdentifiersLength = moduleWithoutIdentifier ?
 			existingImportModules.indexOf(moduleWithoutIdentifier) :
-		0;
+		existingImportModules.length ?? 0;
 
 	const imports = [...importRequests.keys()];
 	existingImportModules.forEach((existingImportModule) => {
