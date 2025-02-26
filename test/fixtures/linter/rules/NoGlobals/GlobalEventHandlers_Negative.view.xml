@@ -24,4 +24,14 @@
 	<!-- Event handler with object argument (not parsable as a PropertyBinding) -->
 	<Button press=".onPressFancyButton($event, { text: ${i18n>TEXT} })" />
 
+	<!-- Event handler with non-word character -->
+	<Button press=".handler:onPressFancyButton" />
+
+	<!--
+		Event handler with with spaces.
+		NOTE: This is not recommended, but works at runtime as the value is checked against the controller via
+		"oController['handler onPressFancyButton']"
+	-->
+	<Button press=".handler onPressFancyButton" />
+
 </mvc:View>

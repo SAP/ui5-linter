@@ -571,9 +571,9 @@ export default class Parser {
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
 					// In XML templating, it's possible to have bindings in event handlers
 					// We need to parse and lint these as well, but the error should only be reported in case the event
-					// handler is not parsable. This prevents duplicate error messages for the same event handler.
-					const propertyBindingParsingErrorMessage =
-						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position, true);
+					// handler is not parsable. This prevents false-positive errors.
+					const {bindingInfo, errorMessage} =
+						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position, false);
 
 					let isValidEventHandler = true;
 
@@ -588,7 +588,7 @@ export default class Parser {
 						// This prevents false-positive errors in case a valid event handler declaration is not parsable
 						// as a binding.
 						// TODO: The parsed expression could also be used to check for global references in the future
-						if (propertyBindingParsingErrorMessage && isValidEventHandler) {
+						if (errorMessage && isValidEventHandler) {
 							try {
 								BindingParser.parseExpression(eventHandler.replace(/^\./, "$controller."), 0, {
 									bTolerateFunctionsNotFound: true,
@@ -598,8 +598,11 @@ export default class Parser {
 								// For now we don't report errors here, as it's likely that the input is a valid
 								// binding expression that is processed during XML templating which at runtime
 								// then results into a valid event handler.
+								return;
 							}
 						}
+
+						let functionName;
 
 						// Check for a valid function/identifier name
 						// Currently XML views support the following syntaxes that are covered with this pattern:
@@ -609,10 +612,20 @@ export default class Parser {
 						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
 						const validFunctionName = /^(\.?[$_\p{ID_Start}][$\p{ID_Continue}]*(?:\.[$_\p{ID_Start}][$\p{ID_Continue}]*)*)\s*(?:\(|$)/u;
 						const match = validFunctionName.exec(eventHandler);
-						if (!match) {
+						if (match) {
+							functionName = match[1];
+						} else if (!eventHandler.includes("(") && !bindingInfo) {
+							// Simple case of a function call without arguments which can
+							// use more characters than just the ID_Start and ID_Continue
+							// as it is not parsed as expression
+							// We also get here when the event handler is a binding (resolved during XML templating).
+							// Therefore we can only assume the value is an actual event handler function if there is
+							// no binding info available.
+							functionName = eventHandler;
+						} else {
 							return;
 						}
-						const functionName = match[1];
+
 						const variableName = this.#bindingLinter.getGlobalReference(
 							functionName, this.#requireDeclarations
 						);
@@ -638,8 +651,8 @@ export default class Parser {
 						}
 					});
 
-					if (!isValidEventHandler && propertyBindingParsingErrorMessage) {
-						this.#bindingLinter.reportParsingError(propertyBindingParsingErrorMessage, position);
+					if (!isValidEventHandler && errorMessage) {
+						this.#bindingLinter.reportParsingError(errorMessage, position);
 					}
 				}
 			}

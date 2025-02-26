@@ -21,4 +21,14 @@
 	<!-- Global handler with object argument (not parsable as a PropertyBinding) -->
 	<Button press="global.doSomething($event, { text: ${i18n>TEXT} })" />
 
+	<!-- Local event handler without leading dot with non-word character -->
+	<Button press="handler:onPressFancyButton" />
+
+	<!--
+		Local event handler without leading dot with spaces.
+		NOTE: This is not recommended, but works at runtime as the value is checked against the controller via
+		"oController['handler onPressFancyButton']"
+	-->
+	<Button press="handler onPressFancyButton" />
+
 </mvc:View>
