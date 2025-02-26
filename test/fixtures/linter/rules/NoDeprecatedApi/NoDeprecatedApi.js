@@ -72,4 +72,9 @@ sap.ui.define([
 	const view2 = sap.ui.xmlview({
 		viewName: "com.ui5.troublesome.app.view.MyView"
 	});
+
+	// Detection of deprecated sap.ui.xmlview when instantiating a view via simple parameters
+	// (via local function name)
+	const sapUiXmlView = sap.ui.xmlview;
+	const view3 = sapUiXmlView("com.ui5.troublesome.app.view.MyView");
 });

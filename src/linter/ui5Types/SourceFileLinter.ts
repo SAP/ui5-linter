@@ -766,6 +766,30 @@ export default class SourceFileLinter {
 		return propAccessChain.join(".");
 	}
 
+	/**
+	 * Extracts the sap.ui API namespace from a symbol name and a module declaration
+	 * (from @sapui5/types sap.ui.core.d.ts), e.g. sap.ui.view.
+	 */
+	extractSapUiNamespace(symbolName: string, moduleDeclaration: ts.ModuleDeclaration): string | undefined {
+		const namespace: string[] = [];
+		let currentModuleDeclaration: ts.Node | undefined = moduleDeclaration;
+		while (
+			currentModuleDeclaration &&
+			ts.isModuleDeclaration(currentModuleDeclaration) &&
+			currentModuleDeclaration.flags & ts.NodeFlags.Namespace
+		) {
+			namespace.unshift(currentModuleDeclaration.name.text);
+			currentModuleDeclaration = currentModuleDeclaration.parent?.parent;
+		}
+
+		if (!namespace.length) {
+			return undefined;
+		} else {
+			namespace.push(symbolName);
+			return namespace.join(".");
+		}
+	}
+
 	getDeprecationText(deprecatedTag: ts.JSDocTagInfo): string {
 		// (Workaround) There's an issue in some UI5 TS definition versions and where the
 		// deprecation text gets merged with the description. Splitting on double
@@ -821,10 +845,13 @@ export default class SourceFileLinter {
 		}
 
 		const moduleDeclaration = this.getSymbolModuleDeclaration(exprType.symbol);
+		let globalApiName;
+
 		if (exprType.symbol && moduleDeclaration) {
 			const symbolName = exprType.symbol.getName();
 			const moduleName = moduleDeclaration.name.text;
 			const nodeType = this.checker.getTypeAtLocation(node);
+			globalApiName = this.extractSapUiNamespace(symbolName, moduleDeclaration);
 
 			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 				// Check for sap/ui/core/Lib.init usages
@@ -874,20 +901,12 @@ export default class SourceFileLinter {
 					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
 				}
 			} else if (
-				(
-					symbolName === "view" ||
-					symbolName === "xmlview" ||
-					symbolName === "fragment" ||
-					symbolName === "xmlfragment"
-				) &&
-				moduleName == "ui" &&
-				moduleDeclaration.parent?.parent &&
-				ts.isModuleDeclaration(moduleDeclaration.parent.parent) &&
-				moduleDeclaration.parent.parent.name.text === "sap" &&
-				moduleDeclaration.parent.parent.parent &&
-				ts.isSourceFile(moduleDeclaration.parent.parent.parent)
+				globalApiName === "sap.ui.view" ||
+				globalApiName === "sap.ui.xmlview" ||
+				globalApiName === "sap.ui.fragment" ||
+				globalApiName === "sap.ui.xmlfragment"
 			) {
-				this.#extractXmlFromJs(node, `sap.ui.${symbolName}`);
+				this.#extractXmlFromJs(node, globalApiName);
 			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
 				this.#extractXmlFromJs(node, "XMLView.create");
 			}
@@ -924,6 +943,8 @@ export default class SourceFileLinter {
 				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
 				additionalMessage = `(${this.extractNamespace(exprNode)})`;
 			}
+		} else if (globalApiName) {
+			additionalMessage = `(${globalApiName})`;
 		}
 
 		let propName;
