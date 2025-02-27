@@ -157,6 +157,7 @@ export default class BindingLinter {
 		this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_GLOBALS, {
 			variableName,
 			namespace: ref,
+			fixHints: {},
 		}, position);
 	}
 

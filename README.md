@@ -20,6 +20,7 @@
 		- [Options](#options)
 			- [`--details`](#--details)
 			- [`--format`](#--format)
+			- [`--fix`](#--fix)
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)
 			- [`--ui5-config`](#--ui5-config)
@@ -149,6 +150,15 @@ Choose the output format. Currently, `stylish` (default), `json` and `markdown` 
 **Example:**
 ```sh
 ui5lint --format json
+```
+
+#### `--fix`
+
+Automatically fix linter findings
+
+**Example:**
+```sh
+ui5lint --fix
 ```
 
 #### `--ignore-pattern`
