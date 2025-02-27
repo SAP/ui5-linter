@@ -66,11 +66,13 @@ export default async function lintWorkspace(
 			);
 
 			// Update fixed files on the filesystem
-			const autofixFiles = Array.from(autofixResult.entries());
-			await Promise.all(autofixFiles.map(async ([filePath, content]) => {
-				const realFilePath = transformVirtualPathToFilePath(filePath, options);
-				await writeFile(realFilePath, content);
-			}));
+			if (!process.env.UI5LINT_FIX_DRY_RUN) {
+				const autofixFiles = Array.from(autofixResult.entries());
+				await Promise.all(autofixFiles.map(async ([filePath, content]) => {
+					const realFilePath = transformVirtualPathToFilePath(filePath, options);
+					await writeFile(realFilePath, content);
+				}));
+			}
 		}
 	}
 
