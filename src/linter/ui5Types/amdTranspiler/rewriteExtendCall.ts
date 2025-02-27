@@ -14,10 +14,10 @@ export class UnsupportedExtendCall extends Error {
  */
 export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 	callExp: ts.CallExpression, modifiers?: ts.ModifierLike[],
-	className?: string | ts.Identifier): ts.ClassDeclaration {
+	className?: string | ts.Identifier): ts.ClassDeclaration | undefined {
 	if (!(ts.isPropertyAccessExpression(callExp.expression) && ts.isIdentifier(callExp.expression.name) &&
 		callExp.expression.name.text === "extend")) {
-		throw new UnsupportedExtendCall(`Not a UI5 Class#extends call ${toPosStr(callExp.expression)}`);
+		return undefined;
 	}
 	const [extractedClassName, body] = extractInfoFromArguments(nodeFactory, callExp);
 	if (!className) {
