@@ -4,7 +4,7 @@ import {fileURLToPath} from "node:url";
 import {esmockDeprecationText, preprocessLintResultsForSnapshot} from "../lib/linter/_linterHelper.js";
 import {UI5LinterEngine} from "../../src/index.js";
 import {AutofixOptions, AutofixResult} from "../../src/autofix/autofix.js";
-import {SinonSpy} from "sinon";
+import sinonGlobal, {SinonSpy} from "sinon";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturesBasePath = path.join(__dirname, "..", "fixtures", "linter");
@@ -20,10 +20,13 @@ test.beforeEach(async (t) => {
 	t.context.linterEngine = new UI5LinterEngine();
 	t.context.autofixSpy = autofixModule.default;
 });
+test.afterEach.always(() => {
+	sinonGlobal.restore();
+});
 
 test.serial("autofix: com.ui5.troublesome.app", async (t) => {
 	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const {linterEngine} = t.context;
+	const {linterEngine, autofixSpy} = t.context;
 
 	const res = await linterEngine.lint({
 		rootDir: projectPath,
@@ -35,8 +38,8 @@ test.serial("autofix: com.ui5.troublesome.app", async (t) => {
 
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 
-	t.is(t.context.autofixSpy.callCount, 1);
-	const autofixResult = await t.context.autofixSpy.getCall(0).returnValue;
+	t.is(autofixSpy.callCount, 1);
+	const autofixResult = await autofixSpy.getCall(0).returnValue;
 	for (const [filePath, content] of autofixResult.entries()) {
 		t.snapshot(content, `AutofixResult: ${filePath}`);
 	}
