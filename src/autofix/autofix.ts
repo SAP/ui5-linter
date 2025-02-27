@@ -343,24 +343,7 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			}
 			const nodeStart = node.getStart();
 			const nodeEnd = node.getEnd();
-			let nodeReplacement = `${identifier}`;
-
-			// FIXME: Add proper handling of adding return statements for the declared class.
-			// This could be solved by looking for a matching extend call with the same class name as the
-			// jQuery.sap.declare call. Note that a local variable might need to be introduced as some code
-			// might e.g. add methods on the class prototype before returning the class.
-			if (nodeReplacement === "UIComponent") {
-				nodeReplacement = "return " + nodeReplacement;
-			} else if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.controller") {
-				// Check whether sap.ui.controller was used to define or create a controller
-				if (ts.isCallExpression(node.parent) && node.parent.arguments.length === 1) {
-					// Creating a controller instance can't be easily replaced as the new API is async
-					continue;
-				} else {
-					// Controller definition
-					nodeReplacement = `return ${nodeReplacement}.extend`;
-				}
-			}
+			const nodeReplacement = `${identifier}`;
 
 			changeSet.push({
 				action: ChangeAction.REPLACE,
