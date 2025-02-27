@@ -257,16 +257,29 @@ function addDependencies(
 		});
 	}
 
-	// Patch factory arguments
 	const closeParenToken = moduleDeclaration.factory.getChildren()
 		.find((c) => c.kind === ts.SyntaxKind.CloseParenToken);
+	// Factory arguments
+	const syntaxList = moduleDeclaration.factory.getChildren()
+		.find((c) => c.kind === ts.SyntaxKind.SyntaxList);
+	if (!syntaxList) {
+		throw new Error("Invalid factory syntax");
+	}
+
+	// Patch factory arguments
+	let value = (existingIdentifiersLength && dependencies.length ? ", " : "") + identifiers.join(", ");
 	if (!closeParenToken) {
-		throw new Error("TODO: Implement missing close paren token");
+		changeSet.push({
+			action: ChangeAction.INSERT,
+			start: syntaxList.getStart(),
+			value: "(",
+		});
+		value = `${value})`;
 	}
 	changeSet.push({
 		action: ChangeAction.INSERT,
-		start: closeParenToken.getStart(),
-		value: (existingIdentifiersLength && dependencies.length ? ", " : "") + identifiers.join(", "),
+		start: syntaxList.getEnd(),
+		value,
 	});
 
 	// Patch identifiers
