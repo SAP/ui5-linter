@@ -1437,6 +1437,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 				variableName: node.text,
 				namespace: moduleName,
+				fixHints: {},
 			}, node);
 		}
 	}
@@ -1635,9 +1636,11 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-					moduleName, // TODO: move to separate "Fix hints" parameter
-					exportName,
-					propertyAccess, // TODO: Provide end position instead?
+					fixHints: {
+						moduleName,
+						exportName,
+						propertyAccess, // TODO: Provide end position instead?
+					},
 				}, node);
 			}
 		}
