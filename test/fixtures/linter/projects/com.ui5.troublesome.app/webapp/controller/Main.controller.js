@@ -5,6 +5,22 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 		sayHello: function () {
 			MessageBox.show("Hello World!");
 		},
+		
+		globalVarsForAutofix() {
+			// This is a scenario to test the autofix
+			const list = sap.ui.getCore().byId("container-todo---app--todoList");
+			const button = new sap.m.Button({
+				text: "Hello"
+			});
+			const button3 = new window.sap.m.Button({
+				text: "Hello"
+			});
+			sap.ui.core.ValueState.Success;
+			const core = sap.ui.core;
+			core.ValueState.Success;
+			sap.ui.view("myView");
+			sap.m.URLHelper.triggerSms();
+		}
 
 		registerButtonEventHandlers() {
 			// this.byId and this.getView().byId should report the same issues
@@ -14,7 +30,7 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 			this.getView().byId("helloButton").attachTap(function() {
 				console.log("Tapped");
 			});
-sap.m.Button();
+
 			// testButton exists in two views and could be a sap.m.Button or a sap.ui.commons.Button.
 			// The detection of deprecated button API depends requires TypeScript compliant probing (e.g. using "attachTap" in testButton).
 			// In any case, the detection of UI5 Base Control API should still work as both inherit from it.
