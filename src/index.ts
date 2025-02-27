@@ -21,7 +21,8 @@ export interface UI5LinterOptions {
 	 */
 	details?: boolean;
 	/**
-	 * TODO
+	 * Automatically fix linter findings
+	 * @default false
 	 */
 	fix?: boolean;
 	/**
