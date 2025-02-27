@@ -7,7 +7,8 @@
 		"src/cli/utils/profile.ts",
 		"src/linter/xmlTemplate/lib/JSTokenizer.js",
 		"src/linter/binding/lib/**/*.js",
-		"**/*.d.ts"
+		"**/*.d.ts",
+		"src/autofix/**"
 	],
 	"check-coverage": true,
 	"statements": 89,
