@@ -1,47 +1,17 @@
-import anyTest, {TestFn} from "ava";
+import test from "ava";
+import {readdir, readFile} from "node:fs/promises";
 import path from "node:path";
-import {fileURLToPath} from "node:url";
-import {esmockDeprecationText, preprocessLintResultsForSnapshot} from "../lib/linter/_linterHelper.js";
-import {UI5LinterEngine} from "../../src/index.js";
-import {AutofixOptions, AutofixResult} from "../../src/autofix/autofix.js";
-import sinonGlobal, {SinonSpy} from "sinon";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fixturesBasePath = path.join(__dirname, "..", "fixtures", "linter");
-const fixturesProjectsPath = path.join(fixturesBasePath, "projects");
+const E2E_DIR_URL = new URL("../tmp/e2e/com.ui5.troublesome.app", import.meta.url);
 
-const test = anyTest as TestFn<{
-	linterEngine: UI5LinterEngine;
-	autofixSpy: SinonSpy<[AutofixOptions], Promise<AutofixResult>>;
-}>;
+test.serial("Compare com.ui5.troublesome.app result snapshots", async (t) => {
+	const projectFiles = (await readdir(E2E_DIR_URL, {withFileTypes: true, recursive: true}))
+		.filter((dirEntries) => {
+			return dirEntries.isFile() && dirEntries.name !== ".DS_Store";
+		});
 
-test.beforeEach(async (t) => {
-	sinonGlobal.restore();
-	const {indexModule: {UI5LinterEngine}, autofixModule} = await esmockDeprecationText();
-	t.context.linterEngine = new UI5LinterEngine();
-	t.context.autofixSpy = autofixModule.default;
-});
-test.afterEach.always(() => {
-	sinonGlobal.restore();
-});
-
-test.serial("autofix: com.ui5.troublesome.app", async (t) => {
-	const projectPath = path.join(fixturesProjectsPath, "com.ui5.troublesome.app");
-	const {linterEngine, autofixSpy} = t.context;
-
-	const res = await linterEngine.lint({
-		rootDir: projectPath,
-		filePatterns: [],
-		coverage: true,
-		details: true,
-		fix: true,
-	});
-
-	t.snapshot(preprocessLintResultsForSnapshot(res));
-
-	t.is(autofixSpy.callCount, 1);
-	const autofixResult = await autofixSpy.getCall(0).returnValue;
-	for (const [filePath, content] of autofixResult.entries()) {
-		t.snapshot(content, `AutofixResult: ${filePath}`);
+	for (const file of projectFiles) {
+		const content = await readFile(path.join(file.path, file.name), {encoding: "utf-8"});
+		t.snapshot(`${file.name}:\n${content}`);
 	}
 });
