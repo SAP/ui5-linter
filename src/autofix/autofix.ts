@@ -214,10 +214,6 @@ function addDependencies(
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
-	if (!ts.isFunctionExpression(moduleDeclaration.factory)) {
-		throw new Error("TODO: Unsupported factory declaration");
-	}
-
 	const existingImportModules = resourceMetadata.transformedImports.get("sap.ui.define") ?? [];
 	const moduleWithoutIdentifier = existingImportModules.find((i) => !i.identifier);
 	const existingIdentifiersLength = moduleWithoutIdentifier ?
@@ -244,20 +240,19 @@ function addDependencies(
 		})];
 
 	if (moduleDeclaration.dependencies) {
-		const closeBracketToken = moduleDeclaration.dependencies.getChildren()
-			.find((c) => c.kind === ts.SyntaxKind.CloseBracketToken);
-		if (!closeBracketToken) {
-			throw new Error("TODO: Implement missing close paren token");
-		}
+		const depsNode = defineCall.arguments[0];
+		const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
+		const lastElement = depElementNodes[depElementNodes.length - 1];
+
 		changeSet.push({
 			action: ChangeAction.INSERT,
-			start: closeBracketToken.getStart(),
+			start: lastElement.getEnd(),
 			value: (existingIdentifiersLength && dependencies.length ? ", " : "") + dependencies.join(", "),
 		});
 	} else {
 		changeSet.push({
 			action: ChangeAction.INSERT,
-			start: moduleDeclaration.factory.getFullStart(),
+			start: defineCall.arguments[0].getFullStart(),
 			value: `[${dependencies.join(", ")}], `,
 		});
 	}
