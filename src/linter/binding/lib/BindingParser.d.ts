@@ -58,6 +58,13 @@ interface BindingParser {
 		mLocals?: Record<string, string>,
 		bResolveTypesAsync?: boolean
 	) => BindingInfo | string | undefined; // Might return a string when bUnescape is true
+
+	parseExpression: (
+		sInput: string,
+		iStart: number,
+		oEnv: object,
+		mLocals: object
+	) => void;
 }
 
 declare const BindingParser: BindingParser;

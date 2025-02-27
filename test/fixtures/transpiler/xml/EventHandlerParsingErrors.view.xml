@@ -1,0 +1,22 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:template="http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1"
+	template:require="{ Helper: 'com/myapp/Helper' }"
+>
+
+	<!-- Invalid binding (trailing comma) that is resolved during XML templating at runtime -->
+	<Button press="{ parts: [{path: 'facet>Target'}, {path: 'facet>Label'},],formatter: 'Helper.formatEventHandler'}" />
+
+	<!-- Invalid event handler (trailing comma) -->
+	<Button press=".onPressFancyButton($event, { text: ${i18n>TEXT}, })" />
+
+	<!-- Valid binding that is resolved during XML templating at runtime -->
+	<Button press="{ parts: [{path: 'facet>Target'}, {path: 'facet>Label'}],formatter: 'Helper.formatEventHandler'}" />
+
+	<!-- Valid event handler, but not parsable as property binding. This should not lead to any parsing error -->
+	<Button press=".onPressFancyButton($event, { text: ${i18n>TEXT} })" />
+
+	<!-- Invalid event handler, parsable as property binding. This should not lead to any parsing error -->
+	<Button press="{:= '.onPressFancyButton(\'' + ${meta>/@sapui.name} + '\')' }" />
+
+</mvc:View>

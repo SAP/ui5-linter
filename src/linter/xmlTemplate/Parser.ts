@@ -13,6 +13,7 @@ import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
+import BindingParser from "../binding/lib/BindingParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -568,18 +569,69 @@ export default class Parser {
 				} else if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
+					// In XML templating, it's possible to have bindings in event handlers
+					// We need to parse and lint these as well, but the error should only be reported in case the event
+					// handler is not parsable. This prevents false-positive errors.
+					const {bindingInfo, errorMessage} =
+						this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position, false);
+
+					let isValidEventHandler = true;
+
 					EventHandlerResolver.parse(prop.value).forEach((eventHandler) => {
 						if (eventHandler.startsWith("cmd:")) {
 							// No global usage possible via command execution
 							return;
 						}
-						let functionName;
-						const openBracketIndex = eventHandler.indexOf("(");
-						if (openBracketIndex !== -1) {
-							functionName = eventHandler.slice(0, openBracketIndex);
-						} else {
-							functionName = eventHandler;
+
+						// Try parsing the event handler expression to check whether a property binding parsing error
+						// should be reported or not.
+						// This prevents false-positive errors in case a valid event handler declaration is not parsable
+						// as a binding.
+						// TODO: The parsed expression could also be used to check for global references in the future
+						if (errorMessage && isValidEventHandler) {
+							try {
+								BindingParser.parseExpression(eventHandler.replace(/^\./, "$controller."), 0, {
+									bTolerateFunctionsNotFound: true,
+								}, {});
+							} catch (err) {
+								isValidEventHandler = false;
+								// Also report the parsing error for the event handler. This creates multiple and
+								// sometimes duplicate messages, but it's better than not reporting the error at all
+								// and there is no easy way to know whether the input is intended to be a binding or
+								// event handler.
+								this.#context.addLintingMessage(
+									this.#resourcePath, MESSAGE.PARSING_ERROR, {
+										message: err instanceof Error ? err.message : String(err),
+									}, position
+								);
+								return;
+							}
 						}
+
+						let functionName;
+
+						// Check for a valid function/identifier name
+						// Currently XML views support the following syntaxes that are covered with this pattern:
+						// - myFunction
+						// - .myFunction
+						// - my.namespace.myFunction
+						// - my.namespace.myFunction(arg1, ${i18n>key}, "test")
+						const validFunctionName = /^(\.?[$_\p{ID_Start}][$\p{ID_Continue}]*(?:\.[$_\p{ID_Start}][$\p{ID_Continue}]*)*)\s*(?:\(|$)/u;
+						const match = validFunctionName.exec(eventHandler);
+						if (match) {
+							functionName = match[1];
+						} else if (!eventHandler.includes("(") && !bindingInfo) {
+							// Simple case of a function call without arguments which can
+							// use more characters than just the ID_Start and ID_Continue
+							// as it is not parsed as expression
+							// We also get here when the event handler is a binding (resolved during XML templating).
+							// Therefore we can only assume the value is an actual event handler function if there is
+							// no binding info available.
+							functionName = eventHandler;
+						} else {
+							return;
+						}
+
 						const variableName = this.#bindingLinter.getGlobalReference(
 							functionName, this.#requireDeclarations
 						);
@@ -604,6 +656,10 @@ export default class Parser {
 							}, position);
 						}
 					});
+
+					if (!isValidEventHandler && errorMessage) {
+						this.#bindingLinter.reportParsingError(errorMessage, position);
+					}
 				}
 			}
 			// This node declares a control
