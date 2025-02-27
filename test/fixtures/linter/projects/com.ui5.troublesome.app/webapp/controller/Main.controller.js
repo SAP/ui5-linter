@@ -14,7 +14,7 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 			this.getView().byId("helloButton").attachTap(function() {
 				console.log("Tapped");
 			});
-
+sap.m.Button();
 			// testButton exists in two views and could be a sap.m.Button or a sap.ui.commons.Button.
 			// The detection of deprecated button API depends requires TypeScript compliant probing (e.g. using "attachTap" in testButton).
 			// In any case, the detection of UI5 Base Control API should still work as both inherit from it.
