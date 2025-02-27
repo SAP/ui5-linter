@@ -16,6 +16,7 @@ const test = anyTest as TestFn<{
 }>;
 
 test.beforeEach(async (t) => {
+	sinonGlobal.restore();
 	const {indexModule: {UI5LinterEngine}, autofixModule} = await esmockDeprecationText();
 	t.context.linterEngine = new UI5LinterEngine();
 	t.context.autofixSpy = autofixModule.default;
