@@ -73,7 +73,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				default: false,
 			})
 			.option("fix", {
-				describe: "TODO",
+				describe: "Automatically fix linter findings",
 				type: "boolean",
 				default: false,
 			})
