@@ -27,11 +27,15 @@ export default async function lintWorkspace(
 
 	if (options.fix) {
 		const rawLintResults = context.generateRawLintResults();
+		const rootReader = context.getRootReader();
 
 		const autofixResources = new Map<string, AutofixResource>();
 		for (const {filePath, rawMessages} of rawLintResults) {
 			// FIXME: handle this the same way as we already do for the general results
-			const resource = await workspace.byPath(filePath);
+			let resource = await workspace.byPath(filePath);
+			if (!resource) {
+				resource = await rootReader.byPath(filePath);
+			}
 			const content = await resource.getString();
 			autofixResources.set(filePath, {
 				content,
