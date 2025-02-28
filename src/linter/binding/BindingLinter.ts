@@ -184,16 +184,23 @@ export default class BindingLinter {
 		return variableName;
 	}
 
-	lintPropertyBinding(bindingDefinition: string, requireDeclarations: RequireDeclaration[], position: PositionInfo) {
+	lintPropertyBinding(
+		bindingDefinition: string, requireDeclarations: RequireDeclaration[],
+		position: PositionInfo, reportParsingError = true
+	): {bindingInfo: BindingInfo | string | undefined; errorMessage: string | undefined} {
+		let bindingInfo, errorMessage;
 		try {
-			const bindingInfo = this.#parseBinding(bindingDefinition);
+			bindingInfo = this.#parseBinding(bindingDefinition);
 			if (bindingInfo) {
 				this.#lintPropertyBindingInfo(bindingInfo, requireDeclarations, position);
 			}
 		} catch (err) {
-			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+			errorMessage = err instanceof Error ? err.message : String(err);
+			if (reportParsingError) {
+				this.reportParsingError(errorMessage, position);
+			}
 		}
+		return {bindingInfo, errorMessage};
 	}
 
 	#lintPropertyBindingInfo(
@@ -219,7 +226,7 @@ export default class BindingLinter {
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
+			this.reportParsingError(message, position);
 		}
 	}
 
@@ -271,5 +278,9 @@ export default class BindingLinter {
 			}
 			i += 2; // Skip the next two tokens as we already checked them
 		}
+	}
+
+	reportParsingError(message: string, position: PositionInfo) {
+		this.#context.addLintingMessage(this.#resourcePath, MESSAGE.PARSING_ERROR, {message}, position);
 	}
 }
