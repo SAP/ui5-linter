@@ -168,14 +168,14 @@ export default class Parser {
 	}
 
 	popTag(_tag: SaxTag) { // No need to use the parsed tag, we rely on our nodeStack
-		const level = this.#nodeStack.length;
 		const closingNode = this.#nodeStack.pop();
+		const level = this.#nodeStack.length;
 
 		if (closingNode &&
 			(closingNode.kind & (NodeKind.Control | NodeKind.FragmentDefinition))) {
 			// Generate view code for this control
 			// If this is the root control, export it
-			if (level === 1) {
+			if (level === 0) {
 				// Actually closingNode might be a FragmentDefinitionDeclaration here
 				// But that's tricky with the current generator signatures
 				this.#generator.writeRootControl(closingNode as ControlDeclaration);

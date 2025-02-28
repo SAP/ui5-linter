@@ -1,0 +1,11 @@
+<VBox xmlns="sap.m">
+
+	<Table xmlns="sap.ui.table" group="onGroup">
+		<footer>
+			<Button xmlns="sap.m" tap="onTap" />
+		</footer>
+	</Table>
+
+	<Button tap="onTap" />
+
+</VBox>
