@@ -653,6 +653,7 @@ export default class Parser {
 							this.#context.addLintingMessage(this.#resourcePath, MESSAGE.NO_GLOBALS, {
 								variableName,
 								namespace: functionName,
+								fixHints: {},
 							}, position);
 						}
 					});
