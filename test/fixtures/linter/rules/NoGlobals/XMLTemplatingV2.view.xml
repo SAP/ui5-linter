@@ -33,24 +33,30 @@
 			</template:if>
 			<template:else>
 				<!--
-					In XML templating the bindings are interpreted as property bindings and therefore can
-					have multiple parts with formatters that provide the actual binding path for the aggregation binding.
-					But as we cannot know whether it will be processed during templating or via normal XML view processing,
-					we need to treat aggregation binding also as potential property bindings and run those checks as well.
+					XML templating processes ALL attributes and treats them as property bindings,
+					even for aggregations and events.
 				-->
-				<Table items="{
-					parts: [
-						{
-							path: 'facet>Target',
-							formatter: 'sap.ui.model.odata.AnnotationHelper.getNavigationPath'
-						},
-						{
-							path: 'facet>Label',
-							formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.doSomething'
-						}
-					],
-					formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.combineParts'
-				}" />
+				<Table
+					id="{ path: 'facet>Target', formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.getId' }"
+					items="{
+						parts: [
+							{
+								path: 'facet>Target',
+								formatter: 'sap.ui.model.odata.AnnotationHelper.getNavigationPath'
+							},
+							{
+								path: 'facet>Label',
+								formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.doSomething'
+							}
+						],
+						formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.combineParts'
+					}"
+					selectionChange="{ path: 'facet>Target', formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.getEventHandler' }"
+					ariaLabelledBy="{ path: 'facet>Target', formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.getAriaLabelledBy' }"
+					class="{ path: 'facet>Target', formatter: 'sap.ui.core.sample.ViewTemplate.scenario.Helper.getCssClasses' }"
+					binding="{path: 'facet>Target', formatter: 'sap.ui.model.odata.AnnotationHelper.getNavigationPath'}"
+				/>
+
 			</template:else>
 
 		</template:with>

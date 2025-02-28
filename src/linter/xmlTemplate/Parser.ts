@@ -564,9 +564,7 @@ export default class Parser {
 					line: prop.start.line + 1, // Add one to align with IDEs
 					column: prop.start.column + 1,
 				};
-				if (this.#apiExtract.isProperty(symbolName, prop.name)) {
-					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
-				} else if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
+				if (this.#apiExtract.isAggregation(symbolName, prop.name)) {
 					this.#bindingLinter.lintAggregationBinding(prop.value, this.#requireDeclarations, position);
 				} else if (this.#apiExtract.isEvent(symbolName, prop.name)) {
 					// In XML templating, it's possible to have bindings in event handlers
@@ -660,6 +658,10 @@ export default class Parser {
 					if (!isValidEventHandler && errorMessage) {
 						this.#bindingLinter.reportParsingError(errorMessage, position);
 					}
+				} else {
+					// XML templating processes all attributes as property bindings, so we don't need to check
+					// whether the attribute is a property or not
+					this.#bindingLinter.lintPropertyBinding(prop.value, this.#requireDeclarations, position);
 				}
 			}
 			// This node declares a control
