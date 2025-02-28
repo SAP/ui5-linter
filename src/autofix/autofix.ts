@@ -233,11 +233,20 @@ function addDependencies(
 		const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
 		const lastElement = depElementNodes[depElementNodes.length - 1];
 
-		changeSet.push({
-			action: ChangeAction.INSERT,
-			start: lastElement.getEnd(),
-			value: (existingIdentifiersLength && dependencies.length ? ", " : "") + dependencies.join(", "),
-		});
+		if (lastElement) {
+			changeSet.push({
+				action: ChangeAction.INSERT,
+				start: lastElement.getEnd(),
+				value: (existingIdentifiersLength && dependencies.length ? ", " : "") + dependencies.join(", "),
+			});
+		} else {
+			changeSet.push({
+				action: ChangeAction.REPLACE,
+				start: depsNode.getFullStart(),
+				end: depsNode.getEnd(),
+				value: `[${dependencies.join(", ")}]`,
+			});
+		}
 	} else {
 		changeSet.push({
 			action: ChangeAction.INSERT,
