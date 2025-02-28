@@ -183,7 +183,7 @@ function applyFixes(
 		existingModuleDeclarations = generateSolutionNoGlobals(
 			checker, sourceFile, content,
 			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, []);
+			changeSet, [], context);
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
