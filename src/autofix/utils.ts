@@ -58,38 +58,6 @@ export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression,
 	return propAccessChain.join(".") === match;
 }
 
-export function getImportForNamespace(namespace: string): string {
-	namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
-	if (namespace.startsWith("sap.")) {
-		if (namespace === "sap.ui.getCore") {
-			return "sap/ui/core/Core";
-		}
-		return namespace.replaceAll(".", "/");
-	} else if (namespace === "jQuery") {
-		return "sap/ui/thirdparty/jquery";
-	} else {
-		throw new Error(`Unsupported namespace ${namespace}`);
-	}
-}
-
-// export function getImportForGlobalVariable(globalVariableName: string, namespace: string): string {
-// 	namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
-// 	switch (globalVariableName) {
-// 		case "sap":
-// 			if (!namespace.startsWith("sap.")) {
-// 				throw new Error(`Unsupported namespace ${namespace}`);
-// 			}
-// 			if (namespace === "sap.ui.getCore") {
-// 				return "sap/ui/core/Core";
-// 			}
-// 			return namespace.replaceAll(".", "/");
-// 		case "jQuery":
-// 			return "sap/ui/thirdparty/jquery";
-// 		default:
-// 			throw new Error(`Unsupported global variable ${globalVariableName}`);
-// 	}
-// }
-
 export function getIdentifierForImport(importName: string): string {
 	const parts = importName.split("/");
 	const identifier = parts[parts.length - 1];
@@ -100,27 +68,4 @@ export function getIdentifierForImport(importName: string): string {
 		return parts[parts.length - 2] + "Library";
 	}
 	return identifier;
-}
-
-export function getFirstArgument(callExp: ts.CallExpression): string {
-	const firstArg = callExp.arguments[0];
-	if (!firstArg) {
-		throw new UnsupportedFinding(`Missing extends argument at ${toPosStr(callExp)}`);
-	}
-	if (firstArg && !ts.isStringLiteralLike(firstArg)) {
-		throw new UnsupportedFinding(`Unexpected extends argument of type ${ts.SyntaxKind[firstArg.kind]} at ` +
-			toPosStr(firstArg));
-	}
-	return firstArg.text;
-}
-
-export function getDeletableNode(node: ts.Node): ts.Node | undefined {
-	return pruneNode(node);
-}
-
-export class UnsupportedFinding extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = this.constructor.name;
-	}
 }
