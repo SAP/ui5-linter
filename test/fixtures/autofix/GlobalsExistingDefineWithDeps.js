@@ -1,6 +1,7 @@
-sap.ui.define(["sap/m/Button", "sap/m/Avatar", "sap/m/ComboBox"], function(ButtonRenamed) {
+sap.ui.define(["sap/m/Button", "sap/m/library", "sap/m/Avatar", "sap/m/ComboBox"], function(ButtonRenamed, { BackgroundDesign }) {
 	const avatarDOM = jQuery("#container-todo---app--avatar-profile");
 	const list = sap.ui.getCore().byId("container-todo---app--todoList");
+	const myDesign = BackgroundDesign.Solid;
 	const button = new sap.m.Button({
 		text: "Hello"
 	});
