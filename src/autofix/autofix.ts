@@ -3,7 +3,6 @@ import MagicString from "magic-string";
 import LinterContext, {LintMetadata, RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import generateSolutionDeprecatedApiAccess from "./solutions/deprecatedApiAccess.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getIdentifierForImport} from "./utils.js";
 
@@ -179,22 +178,12 @@ function applyFixes(
 	}
 
 	const changeSet: ChangeSet[] = [];
-	let newModuleDeclarations: NewModuleDeclarationInfo[] = [];
-	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
-		newModuleDeclarations = generateSolutionDeprecatedApiAccess(
-			checker, sourceFile, content,
-			messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
-			changeSet);
-	}
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
 	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
 		existingModuleDeclarations = generateSolutionNoGlobals(
 			checker, sourceFile, content,
 			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, newModuleDeclarations);
-	}
-	for (const moduleDeclaration of newModuleDeclarations) {
-		addModuleDeclaration(moduleDeclaration, changeSet);
+			changeSet, []);
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
@@ -280,53 +269,6 @@ function addDependencies(
 		action: ChangeAction.INSERT,
 		start: syntaxList.getEnd(),
 		value,
-	});
-
-	// Patch identifiers
-	patchIdentifiers(importRequests, changeSet);
-}
-
-function addModuleDeclaration(
-	moduleDeclarationInfo: NewModuleDeclarationInfo, changeSet: ChangeSet[]
-) {
-	const {declareCall, requireCalls, importRequests, endPos} = moduleDeclarationInfo;
-
-	const imports = Array.from(new Set([...requireCalls.keys(), ...importRequests.keys()]));
-	const dependencies = imports.map((i) => `"${i}"`);
-	const identifiers = imports.map((i) => {
-		const identifier = getIdentifierForImport(i);
-		if (importRequests.has(i)) {
-			importRequests.get(i)!.identifier = identifier;
-		}
-		return identifier;
-	});
-
-	// Create module declaration
-	const dependencyDecl = `[${dependencies.join(", ")}], `;
-
-	let moduleOpen = `sap.ui.define(`;
-
-	// TODO: Decide whether or in which case we want to add the module name to the define call.
-	// Usually it's omitted in our code and not mentioned in our best practices.
-	// const namespace = getFirstArgument(declareCall).replace(/\./g, "/");
-	// let moduleName = "";
-	// if (namespace) {
-	// moduleName = `"${namespace}", `;
-	// }
-	// moduleOpen += moduleName;
-
-	moduleOpen += `${dependencyDecl}function(${identifiers.join(", ")}) {`;
-	const moduleClose = "});\n";
-	changeSet.push({
-		action: ChangeAction.INSERT,
-		start: declareCall.getStart(),
-		value: moduleOpen,
-	});
-
-	changeSet.push({
-		action: ChangeAction.INSERT,
-		start: endPos!,
-		value: moduleClose,
 	});
 
 	// Patch identifiers
