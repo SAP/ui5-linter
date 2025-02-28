@@ -1,7 +1,5 @@
 import ts from "typescript";
 import {getPropertyNameText} from "../linter/ui5Types/utils.js";
-import pruneNode from "../linter/ui5Types/amdTranspiler/pruneNode.js";
-import {toPosStr} from "../linter/ui5Types/amdTranspiler/util.js";
 
 export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyAccess?: string):
 	ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression {
