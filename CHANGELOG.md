@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.11.0](https://github.com/SAP/ui5-linter/compare/v1.10.0...v1.11.0) (2025-02-28)
+
+
+### Features
+
+* Check all attributes for bindings in XML ([3c6cfc4](https://github.com/SAP/ui5-linter/commit/3c6cfc4fb57d1e6c8d298dad72fb4e09d41bacdd))
+
+
+### Bug Fixes
+
+* **amdTranspiler:** Ensure correct line information ([dd2d09f](https://github.com/SAP/ui5-linter/commit/dd2d09fc2855a01838912dd904573bcf700375cf))
+* False-positives for event handlers in XML ([#559](https://github.com/SAP/ui5-linter/issues/559)) ([0ed0068](https://github.com/SAP/ui5-linter/commit/0ed0068652dee7765c394528bda46cfcacbad05d))
+* Improve deprecated function message ([ecda17e](https://github.com/SAP/ui5-linter/commit/ecda17e09800123e1d9bdb83bd15cb4a682fcab1))
+* Improve extraction of inline XML ([#547](https://github.com/SAP/ui5-linter/issues/547)) ([c1336a4](https://github.com/SAP/ui5-linter/commit/c1336a456a7af1acb30eb15d3615e1ebba1e69bb))
+* XML namespace handling ([4be9fde](https://github.com/SAP/ui5-linter/commit/4be9fde5b2685c8dad4210aa880195a4bb5b3485))
+
 ## [1.10.0](https://github.com/SAP/ui5-linter/compare/v1.9.0...v1.10.0) (2025-02-25)
 
 
