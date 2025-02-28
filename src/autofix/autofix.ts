@@ -203,7 +203,7 @@ function addDependencies(
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
-	const existingImportModules = resourceMetadata.transformedImports.get("sap.ui.define") ?? [];
+	const existingImportModules = resourceMetadata?.transformedImports?.get("sap.ui.define") ?? [];
 	const moduleWithoutIdentifier = existingImportModules.find((i) => !i.identifier);
 	const existingIdentifiersLength = moduleWithoutIdentifier ?
 			existingImportModules.indexOf(moduleWithoutIdentifier) :
