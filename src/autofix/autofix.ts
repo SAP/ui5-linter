@@ -218,11 +218,12 @@ function addDependencies(
 	const imports = [...importRequests.keys()];
 	existingImportModules.forEach((existingModule, index) => {
 		const indexOf = imports.indexOf(existingModule);
-		existingIdentifiers[index] = existingIdentifiers[index] || getIdentifierForImport(existingModule);
-		if (indexOf !== -1) {
+		if (indexOf !== -1 && !(indexOf === index && !existingIdentifiers[index])) {
 			imports.splice(indexOf, 1);
 			importRequests.get(existingModule)!.identifier = existingIdentifiers[index];
 		}
+
+		existingIdentifiers[index] = existingIdentifiers[index] || getIdentifierForImport(existingModule);
 	});
 
 	const dependencies = imports.map((i) => `"${i}"`);
@@ -330,4 +331,4 @@ function applyChanges(content: string, changeSet: ChangeSet[]): string {
 		}
 	}
 	return s.toString();
-1}
+}
