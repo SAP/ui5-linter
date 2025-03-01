@@ -203,25 +203,31 @@ function addDependencies(
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
-	const existingImportModules = resourceMetadata?.transformedImports?.get("sap.ui.define") ?? [];
-	const moduleWithoutIdentifier = existingImportModules.find((i) => !i.identifier);
-	const existingIdentifiersLength = moduleWithoutIdentifier ?
-			existingImportModules.indexOf(moduleWithoutIdentifier) :
-		moduleDeclaration.dependencies?.elements.length ?? 0;
+	const defineCallArgs = defineCall.arguments;
+	const existingImportModules = defineCall.arguments && ts.isArrayLiteralExpression(defineCallArgs[0]) ?
+			defineCallArgs[0].elements.map((el) => ts.isStringLiteralLike(el) ? el.text : "") :
+			[];
+
+	if (!ts.isFunctionLike(moduleDeclaration.factory)) {
+		throw new Error("Invalid factory function");
+	}
+	const existingIdentifiers = moduleDeclaration.factory
+		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text);
+	const existingIdentifiersLength = existingIdentifiers.length;
 
 	const imports = [...importRequests.keys()];
-	existingImportModules.forEach((existingImportModule) => {
-		const indexOf = imports.indexOf(existingImportModule.moduleName);
+	existingImportModules.forEach((existingModule, index) => {
+		const indexOf = imports.indexOf(existingModule);
+		existingIdentifiers[index] = existingIdentifiers[index] || getIdentifierForImport(existingModule);
 		if (indexOf !== -1) {
 			imports.splice(indexOf, 1);
-			importRequests.get(existingImportModule.moduleName)!.identifier = existingImportModule.identifier;
+			importRequests.get(existingModule)!.identifier = existingIdentifiers[index];
 		}
 	});
 
 	const dependencies = imports.map((i) => `"${i}"`);
 	const identifiers = [
-		...existingImportModules.map((i) => i.identifier || getIdentifierForImport(i.moduleName))
-			.slice(existingIdentifiersLength),
+		...existingIdentifiers.slice(existingIdentifiersLength),
 		...imports.map((i) => {
 			const identifier = getIdentifierForImport(i);
 			importRequests.get(i)!.identifier = identifier;
@@ -237,7 +243,7 @@ function addDependencies(
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start: lastElement.getEnd(),
-				value: (existingIdentifiersLength && dependencies.length ? ", " : "") + dependencies.join(", "),
+				value: (existingImportModules.length ? ", " : "") + dependencies.join(", "),
 			});
 		} else {
 			changeSet.push({
@@ -265,7 +271,7 @@ function addDependencies(
 	}
 
 	// Patch factory arguments
-	let value = (existingIdentifiersLength && dependencies.length ? ", " : "") + identifiers.join(", ");
+	let value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
 	if (!closeParenToken) {
 		changeSet.push({
 			action: ChangeAction.INSERT,
@@ -324,4 +330,4 @@ function applyChanges(content: string, changeSet: ChangeSet[]): string {
 		}
 	}
 	return s.toString();
-}
+1}
