@@ -291,14 +291,11 @@ function transform(
 
 	function addModuleMetadata(metadata: LintMetadata, importType: string, importStatement?: ts.ImportDeclaration) {
 		if (!metadata.transformedImports) {
-			metadata.transformedImports = new Map<string, {moduleName: string; identifier: string}[]>();
+			metadata.transformedImports = new Map<string, Set<string>>();
 		}
-		const curResource = metadata.transformedImports.get(importType) ?? [];
+		const curResource = metadata.transformedImports.get(importType) ?? new Set<string>();
 		if (importStatement && ts.isStringLiteral(importStatement.moduleSpecifier)) {
-			curResource.push({
-				moduleName: importStatement.moduleSpecifier.text,
-				identifier: importStatement.importClause?.name?.text ?? "",
-			});
+			curResource.add(importStatement.moduleSpecifier.text);
 		}
 		metadata.transformedImports.set(importType, curResource);
 	}

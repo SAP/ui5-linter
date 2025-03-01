@@ -95,7 +95,7 @@ export interface PositionRange {
 export interface LintMetadata {
 	// The metadata holds information to be shared across linters
 	directives: Set<Directive>;
-	transformedImports: Map<string, {moduleName: string; identifier: string}[]>;
+	transformedImports: Map<string, Set<string>>;
 	xmlCompiledResource: string;
 	jsToXmlPosMapping: {pos: ts.LineAndCharacter; originalPath: string};
 }
