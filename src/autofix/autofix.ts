@@ -1,6 +1,6 @@
 import ts from "typescript";
 import MagicString from "magic-string";
-import LinterContext, {LintMetadata, RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
+import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
@@ -187,7 +187,7 @@ function applyFixes(
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, context.getMetadata(resourcePath));
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet);
 	}
 
 	if (changeSet.length === 0) {
@@ -199,7 +199,7 @@ function applyFixes(
 
 function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
-	changeSet: ChangeSet[], resourceMetadata: LintMetadata
+	changeSet: ChangeSet[]
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
