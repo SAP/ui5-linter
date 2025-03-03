@@ -65,5 +65,6 @@ export function getIdentifierForImport(importName: string): string {
 	if (identifier === "library") {
 		return parts[parts.length - 2] + "Library";
 	}
-	return identifier;
+	// TODO: Add proper handling of other special cases
+	return identifier.replace(/-/g, "_");
 }

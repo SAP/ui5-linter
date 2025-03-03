@@ -106,11 +106,11 @@ function createCompilerHost(sourceFiles: SourceFiles): ts.CompilerHost {
 	};
 }
 
-const compilerOptions = {
+const compilerOptions: ts.CompilerOptions = {
 	checkJs: false,
 	allowJs: true,
 	skipLibCheck: true,
-
+	noCheck: true,
 	target: ts.ScriptTarget.ES2022,
 	module: ts.ModuleKind.ES2022,
 	isolatedModules: true,
@@ -123,6 +123,32 @@ const compilerOptions = {
 
 function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Program {
 	return ts.createProgram(inputFileNames, compilerOptions, host);
+}
+
+function checkForJsErrors(code: string, resourcePath: string) {
+	const sourceFile = ts.createSourceFile(
+		resourcePath,
+		code,
+		ts.ScriptTarget.ES2022,
+		true,
+		ts.ScriptKind.JS
+	);
+
+	const host = createCompilerHost(new Map([[resourcePath, sourceFile]]));
+	const program = createProgram([resourcePath], host);
+	const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
+
+	const jsErrors = diagnostics.filter(function (d) {
+		return d.file === sourceFile && d.category === ts.DiagnosticCategory.Error;
+	});
+
+	if (jsErrors.length) {
+		throw new Error(
+			`Error parsing file ${resourcePath} after autofix: ${
+				jsErrors.map((d) => d.messageText as string).join(", ")
+			}`
+		);
+	}
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -155,6 +181,7 @@ export default async function ({
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!, context);
 		if (newContent) {
+			checkForJsErrors(newContent, resourcePath);
 			res.set(resourcePath, newContent);
 		}
 	}
@@ -236,6 +263,7 @@ function addDependencies(
 		})];
 
 	if (dependencies.length) {
+		// Add dependencies
 		if (moduleDeclaration.dependencies) {
 			const depsNode = defineCall.arguments[0];
 			const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
@@ -262,33 +290,44 @@ function addDependencies(
 				value: `[${dependencies.join(", ")}], `,
 			});
 		}
-	}
 
-	const closeParenToken = moduleDeclaration.factory.getChildren()
-		.find((c) => c.kind === ts.SyntaxKind.CloseParenToken);
-	// Factory arguments
-	const syntaxList = moduleDeclaration.factory.getChildren()
-		.find((c) => c.kind === ts.SyntaxKind.SyntaxList);
-	if (!syntaxList) {
-		throw new Error("Invalid factory syntax");
-	}
+		const closeParenToken = moduleDeclaration.factory.getChildren()
+			.find((c) => c.kind === ts.SyntaxKind.CloseParenToken);
+		// Factory arguments
+		const syntaxList = moduleDeclaration.factory.getChildren()
+			.find((c) => c.kind === ts.SyntaxKind.SyntaxList);
+		if (!syntaxList) {
+			throw new Error("Invalid factory syntax");
+		}
 
-	// Patch factory arguments
-	if (dependencies.length) {
-		let value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
+		// Patch factory arguments
+		const value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
 		if (!closeParenToken) {
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start: syntaxList.getStart(),
 				value: "(",
 			});
-			value = `${value})`;
+			changeSet.push({
+				action: ChangeAction.INSERT,
+				start: syntaxList.getEnd(),
+				value: `${value})`,
+			});
+		} else {
+			let start = syntaxList.getEnd();
+
+			// Existing trailing comma: Insert new args before it, to keep the trailing comma
+			const lastSyntaxListChild = syntaxList.getChildAt(syntaxList.getChildCount() - 1);
+			if (lastSyntaxListChild?.kind === ts.SyntaxKind.CommaToken) {
+				start = lastSyntaxListChild.getStart();
+			}
+
+			changeSet.push({
+				action: ChangeAction.INSERT,
+				start,
+				value,
+			});
 		}
-		changeSet.push({
-			action: ChangeAction.INSERT,
-			start: syntaxList.getEnd(),
-			value,
-		});
 	}
 
 	// Patch identifiers

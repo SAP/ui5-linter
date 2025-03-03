@@ -1,4 +1,4 @@
-sap.ui.define(["sap/m/Button", "sap/m/library", "sap/m/Avatar", "sap/m/ComboBox"], function(ButtonRenamed, { BackgroundDesign }) {
+sap.ui.define(["sap/m/Button", "sap/m/library", "sap/ui/thirdparty/sinon-qunit"], function(ButtonRenamed, { BackgroundDesign }) {
 	const avatarDOM = jQuery("#container-todo---app--avatar-profile");
 	const list = sap.ui.getCore().byId("container-todo---app--todoList");
 	sap.m.BackgroundDesign.Solid
@@ -17,7 +17,7 @@ sap.ui.define(["sap/m/Button", "sap/m/library", "sap/m/Avatar", "sap/m/ComboBox"
 	core.ValueState.Success;
 	sap.ui.view("myView");
 	sap.m.URLHelper.triggerSms();
-	
+
 	sap.ui.require(["sap/m/Dialog", "sap/m/MessageToast", "sap/f/library"], function(Dialog, MessageToast, fLib) {
 		sap.f.AvatarType.Icon;
 		fLib.AvatarType.Image;
