@@ -63,8 +63,21 @@ export function getIdentifierForImport(importName: string): string {
 		return "jQuery";
 	}
 	if (identifier === "library") {
-		return parts[parts.length - 2] + "Library";
+		const potentialLibraryName = parts[parts.length - 2];
+
+		// Relative imports contain a dot and should not be mistaken for a library name
+		if (!potentialLibraryName.includes(".")) {
+			return potentialLibraryName + "Library";
+		} else {
+			return identifier;
+		}
 	}
-	// TODO: Add proper handling of other special cases
-	return identifier.replace(/[-.]/g, "_");
+	return camelize(identifier);
+}
+
+// Camelize a string by replacing invalid identifier characters
+function camelize(str: string): string {
+	return str.replace(/[^\p{ID_Start}\p{ID_Continue}]([\p{ID_Start}\p{ID_Continue}])/gu, (_match, nextChar) => {
+		return typeof nextChar === "string" ? nextChar.toUpperCase() : "";
+	});
 }
