@@ -5,7 +5,7 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 		sayHello: function () {
 			MessageBox.show("Hello World!");
 		},
-		
+
 		globalVarsForAutofix() {
 			// This is a scenario to test the autofix
 			const list = sap.ui.getCore().byId("container-todo---app--todoList");
@@ -20,7 +20,7 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 			core.ValueState.Success;
 			sap.ui.view("myView");
 			sap.m.URLHelper.triggerSms();
-		}
+		},
 
 		registerButtonEventHandlers() {
 			// this.byId and this.getView().byId should report the same issues
