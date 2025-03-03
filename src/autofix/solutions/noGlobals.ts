@@ -9,13 +9,11 @@ import type {
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import LinterContext from "../../linter/LinterContext.js";
 
 export default function generateSolutionNoGlobals(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
 	messages: RawLintMessage<MESSAGE.NO_GLOBALS>[],
-	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[],
-	context: LinterContext
+	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
 ) {
 	// Collect all global property access nodes
 	const affectedNodesInfo = new Set<GlobalPropertyAccessNodeInfo>();
@@ -98,9 +96,9 @@ export default function generateSolutionNoGlobals(
 						moduleDeclaration: parseModuleDeclaration(defineCall.arguments, checker),
 						importRequests: new Map(),
 					});
-				} catch (err) {
-					const message = err instanceof Error ? err.message : String(err);
-					context.addLintingMessage(sourceFile.fileName, MESSAGE.PARSING_ERROR, {message}, position);
+				} catch (_err) {
+					// const message = err instanceof Error ? err.message : String(err);
+					// context.addLintingMessage(sourceFile.fileName, MESSAGE.PARSING_ERROR, {message}, position);
 				}
 			}
 			moduleDeclaration = moduleDeclarations.get(defineCall)!;

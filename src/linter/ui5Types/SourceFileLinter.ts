@@ -13,7 +13,6 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
-	findAmbientModuleByDeclarationName,
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -24,6 +23,7 @@ import BindingLinter from "../binding/BindingLinter.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
+import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -82,6 +82,7 @@ export default class SourceFileLinter {
 		private apiExtract: ApiExtract,
 		private filePathsWorkspace: AbstractAdapter,
 		private workspace: AbstractAdapter,
+		private ambientModuleCache: AmbientModuleCache,
 		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -1569,9 +1570,8 @@ export default class SourceFileLinter {
 		].join("/");
 
 		// Check if the module is registered within ambient modules
-		const ambientModules = this.checker.getAmbientModules();
-		const libAmbientModule = findAmbientModuleByDeclarationName(ambientModules, potentialLibImport);
-		const isRegisteredAsUi5Module = !!findAmbientModuleByDeclarationName(ambientModules, moduleName);
+		const libAmbientModule = this.ambientModuleCache.getModule(potentialLibImport);
+		const isRegisteredAsUi5Module = !!this.ambientModuleCache.getModule(moduleName);
 
 		let isModuleExported = true;
 		let libExports = libAmbientModule?.exports ?? new Map();
@@ -1830,8 +1830,7 @@ export default class SourceFileLinter {
 	}
 
 	findModuleForName(moduleName: string): ts.Symbol | undefined {
-		const modules = this.checker.getAmbientModules();
-		const moduleSymbol = modules.find((m) => m.getName() === `"${moduleName}"`);
+		const moduleSymbol = this.ambientModuleCache.getModule(moduleName);
 
 		if (!moduleSymbol) {
 			return;
@@ -1872,7 +1871,8 @@ export default class SourceFileLinter {
 				if (moduleSymbol) {
 					exportName = parts[searchStack.length];
 					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
-						throw new Error(`Could not find export ${exportName} in module: ${namespace}`);
+						// throw new Error(`Could not find export ${exportName} in module: ${namespace}`);
+						return {};
 					}
 					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
 				}

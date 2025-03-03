@@ -125,7 +125,7 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 	return ts.createProgram(inputFileNames, compilerOptions, host);
 }
 
-function checkForJsErrors(code: string, resourcePath: string) {
+function getJsErrors(code: string, resourcePath: string) {
 	const sourceFile = ts.createSourceFile(
 		resourcePath,
 		code,
@@ -138,17 +138,9 @@ function checkForJsErrors(code: string, resourcePath: string) {
 	const program = createProgram([resourcePath], host);
 	const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
 
-	const jsErrors = diagnostics.filter(function (d) {
+	return diagnostics.filter(function (d) {
 		return d.file === sourceFile && d.category === ts.DiagnosticCategory.Error;
 	});
-
-	if (jsErrors.length) {
-		throw new Error(
-			`Error parsing file ${resourcePath} after autofix: ${
-				jsErrors.map((d) => d.messageText as string).join(", ")
-			}`
-		);
-	}
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
@@ -179,10 +171,20 @@ export default async function ({
 	const checker = program.getTypeChecker();
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
-		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!, context);
+		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!);
 		if (newContent) {
-			checkForJsErrors(newContent, resourcePath);
-			res.set(resourcePath, newContent);
+			const jsErrors = getJsErrors(newContent, resourcePath);
+			if (jsErrors.length) {
+				context.addLintingMessage(
+					resourcePath,
+					MESSAGE.PARSING_ERROR,
+					{
+						message: "After applying autofix: " + jsErrors.map((d) => d.messageText as string).join(", "),
+					}
+				);
+			} else {
+				res.set(resourcePath, newContent);
+			}
 		}
 	}
 
@@ -191,7 +193,7 @@ export default async function ({
 
 function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
-	resource: AutofixResource, context: LinterContext
+	resource: AutofixResource
 ): string | undefined {
 	const {content} = resource;
 
@@ -210,7 +212,7 @@ function applyFixes(
 		existingModuleDeclarations = generateSolutionNoGlobals(
 			checker, sourceFile, content,
 			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, [], context);
+			changeSet, []);
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
