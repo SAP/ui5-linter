@@ -235,31 +235,33 @@ function addDependencies(
 			return identifier;
 		})];
 
-	if (moduleDeclaration.dependencies) {
-		const depsNode = defineCall.arguments[0];
-		const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
-		const lastElement = depElementNodes[depElementNodes.length - 1];
+	if (dependencies.length) {
+		if (moduleDeclaration.dependencies) {
+			const depsNode = defineCall.arguments[0];
+			const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
+			const lastElement = depElementNodes[depElementNodes.length - 1];
 
-		if (lastElement) {
-			changeSet.push({
-				action: ChangeAction.INSERT,
-				start: lastElement.getEnd(),
-				value: (existingImportModules.length ? ", " : "") + dependencies.join(", "),
-			});
+			if (lastElement) {
+				changeSet.push({
+					action: ChangeAction.INSERT,
+					start: lastElement.getEnd(),
+					value: (existingImportModules.length ? ", " : "") + dependencies.join(", "),
+				});
+			} else {
+				changeSet.push({
+					action: ChangeAction.REPLACE,
+					start: depsNode.getFullStart(),
+					end: depsNode.getEnd(),
+					value: `[${dependencies.join(", ")}]`,
+				});
+			}
 		} else {
 			changeSet.push({
-				action: ChangeAction.REPLACE,
-				start: depsNode.getFullStart(),
-				end: depsNode.getEnd(),
-				value: `[${dependencies.join(", ")}]`,
+				action: ChangeAction.INSERT,
+				start: defineCall.arguments[0].getFullStart(),
+				value: `[${dependencies.join(", ")}], `,
 			});
 		}
-	} else {
-		changeSet.push({
-			action: ChangeAction.INSERT,
-			start: defineCall.arguments[0].getFullStart(),
-			value: `[${dependencies.join(", ")}], `,
-		});
 	}
 
 	const closeParenToken = moduleDeclaration.factory.getChildren()
@@ -272,20 +274,22 @@ function addDependencies(
 	}
 
 	// Patch factory arguments
-	let value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
-	if (!closeParenToken) {
+	if (dependencies.length) {
+		let value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
+		if (!closeParenToken) {
+			changeSet.push({
+				action: ChangeAction.INSERT,
+				start: syntaxList.getStart(),
+				value: "(",
+			});
+			value = `${value})`;
+		}
 		changeSet.push({
 			action: ChangeAction.INSERT,
-			start: syntaxList.getStart(),
-			value: "(",
+			start: syntaxList.getEnd(),
+			value,
 		});
-		value = `${value})`;
 	}
-	changeSet.push({
-		action: ChangeAction.INSERT,
-		start: syntaxList.getEnd(),
-		value,
-	});
 
 	// Patch identifiers
 	patchIdentifiers(importRequests, changeSet);
