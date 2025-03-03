@@ -5,6 +5,7 @@ import {readdirSync} from "node:fs";
 import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
+import autofix from "../../../src/autofix/autofix.js";
 import {SourceFile, TypeChecker} from "typescript";
 import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
@@ -21,14 +22,20 @@ const test = anyTest as TestFn<{
 	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
 
-test.before((t) => {
+test.before(async (t) => {
 	t.context.sharedLanguageService = new SharedLanguageService();
+
+	// Workaround for debugging purposes:
+	// For some files, such as lintWorkspace.ts and autofix.ts the original files are not displayed
+	// when debugging them. Strangely this only happens for the first test run and just mocking the
+	// files initial before the first test run works around the issue.
+	await esmockDeprecationText();
 });
 
 test.beforeEach(async (t) => {
-	const {lintModule: {lintFile}, autofixModule} = await esmockDeprecationText();
+	const {lintModule: {lintFile}, autofixSpy} = await esmockDeprecationText();
 	t.context.lintFile = lintFile;
-	t.context.autofixSpy = autofixModule.default;
+	t.context.autofixSpy = autofixSpy;
 });
 
 // Mock getDeprecationText as we do not have control over the deprecated texts and they could
@@ -56,14 +63,14 @@ export async function esmockDeprecationText() {
 				return linter;
 			},
 	});
-	const autofixModule = await esmock("../../../src/autofix/autofix.js");
 
-	const originalAutofix = autofixModule.default;
-	autofixModule.default = sinonGlobal.stub().callsFake((options: AutofixOptions) => originalAutofix(options));
+	const autofixSpy =
+		sinonGlobal.stub<Parameters<typeof autofix>, ReturnType<typeof autofix>>()
+			.callsFake((options: AutofixOptions) => autofix(options));
 
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
-		"../../../src/autofix/autofix.js": autofixModule,
+		"../../../src/autofix/autofix.js": autofixSpy,
 		"node:fs/promises": {
 			// Prevent tests from update fixtures on the filesystem (autofix)
 			writeFile: sinonGlobal.stub().resolves(),
@@ -78,7 +85,7 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/linter.js": lintModule,
 	});
 
-	return {lintModule, indexModule, autofixModule};
+	return {lintModule, indexModule, autofixSpy};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots
