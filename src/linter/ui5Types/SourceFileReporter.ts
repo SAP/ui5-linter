@@ -38,9 +38,16 @@ export default class SourceFileReporter {
 		this.#sourceFile = sourceFile;
 		if (sourceMap) {
 			const parsedSourceMap = JSON.parse(sourceMap) as EncodedSourceMap;
-			if (parsedSourceMap.mappings !== "") {
+			if (parsedSourceMap.mappings !== "" && !("sections" in parsedSourceMap)) {
 				// Only create a trace map if there are mappings.
 				// Otherwise, it will be useless and causes errors in some cases (Failed to map back to source).
+
+				// Also, only create a trace map if there are no sections.
+				// Sections do not appear within source maps created during AMD/XML transpilation.
+				// This case might appear when bundles such as "Component-preload.js" are linted.
+				// The map points to the original source file, which would not be correct in case code
+				// is rewritten within the bundle such as replacing sap.ui.define with sap.ui.predefine,
+				// which creates a no-globals finding.
 				this.#traceMap = new TraceMap(parsedSourceMap);
 			}
 		}
