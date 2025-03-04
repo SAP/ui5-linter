@@ -77,7 +77,7 @@ export function getIdentifierForImport(importName: string): string {
 
 // Camelize a string by replacing invalid identifier characters
 function camelize(str: string): string {
-	return str.replace(/[^\p{ID_Start}\p{ID_Continue}]([\p{ID_Start}\p{ID_Continue}])/gu, (_match, nextChar) => {
+	return str.replace(/[^\p{ID_Start}\p{ID_Continue}]+([\p{ID_Start}\p{ID_Continue}])/gu, (_match, nextChar) => {
 		return typeof nextChar === "string" ? nextChar.toUpperCase() : "";
 	});
 }

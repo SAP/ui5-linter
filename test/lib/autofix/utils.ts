@@ -32,3 +32,7 @@ test("getIdentifierForImport: Controller module", (t) => {
 test("getIdentifierForImport: sap/ui/thirdparty/sinon-qunit", (t) => {
 	t.is(getIdentifierForImport("sap/ui/thirdparty/sinon-qunit"), "sinonQunit");
 });
+
+test("getIdentifierForImport: Module name with multiple illegal characters", (t) => {
+	t.is(getIdentifierForImport("./my-super--module"), "mySuperModule");
+});
