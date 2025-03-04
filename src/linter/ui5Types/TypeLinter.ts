@@ -21,6 +21,8 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	skipLibCheck: true,
 	// Include standard typescript libraries for ES2022 and DOM support
 	lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
+	// Disable lib replacement lookup as we don't rely on it
+	libReplacement: false,
 	// Allow and check JavaScript files since this is everything we'll do here
 	allowJs: true,
 	checkJs: false,
