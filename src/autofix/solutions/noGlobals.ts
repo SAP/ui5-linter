@@ -9,6 +9,10 @@ import type {
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
+import {UnsupportedModuleError} from "../../linter/ui5Types/amdTranspiler/util.js";
+import {getLogger} from "@ui5/logger";
+
+const log = getLogger("linter:autofix:NoGlobals");
 
 export default function generateSolutionNoGlobals(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
@@ -96,9 +100,10 @@ export default function generateSolutionNoGlobals(
 						moduleDeclaration: parseModuleDeclaration(defineCall.arguments, checker),
 						importRequests: new Map(),
 					});
-				} catch (_err) {
-					// const message = err instanceof Error ? err.message : String(err);
-					// context.addLintingMessage(sourceFile.fileName, MESSAGE.PARSING_ERROR, {message}, position);
+				} catch (err) {
+					const errorMessage = err instanceof Error ? err.message : String(err);
+					log.verbose(`Failed to autofix ${moduleName} in sap.ui.define ` +
+						`call in ${sourceFile.fileName}: ${errorMessage}`);
 				}
 			}
 			moduleDeclaration = moduleDeclarations.get(defineCall)!;
