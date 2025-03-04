@@ -247,17 +247,16 @@ function addDependencies(
 	const imports = [...importRequests.keys()];
 	existingImportModules.forEach((existingModule, index) => {
 		const indexOf = imports.indexOf(existingModule);
+		const identifierName = existingIdentifiers[index] || getIdentifierForImport(existingModule);
 		if (indexOf !== -1 && !(indexOf === index && !existingIdentifiers[index])) {
 			imports.splice(indexOf, 1);
-			importRequests.get(existingModule)!.identifier =
-				existingIdentifiers[index] || getIdentifierForImport(existingModule);
+			importRequests.get(existingModule)!.identifier = identifierName;
 		}
-		existingIdentifiers[index] = existingIdentifiers[index] || getIdentifierForImport(existingModule);
+		existingIdentifiers[index] = identifierName;
 	});
 
 	const dependencies = imports.map((i) => `"${i}"`);
 	const identifiers = [
-		...existingIdentifiers.slice(existingIdentifiersLength),
 		...imports.map((i) => {
 			const identifier = getIdentifierForImport(i);
 			importRequests.get(i)!.identifier = identifier;
@@ -269,12 +268,13 @@ function addDependencies(
 		if (moduleDeclaration.dependencies) {
 			const depsNode = defineCall.arguments[0];
 			const depElementNodes = depsNode && ts.isArrayLiteralExpression(depsNode) ? depsNode.elements : [];
-			const lastElement = depElementNodes[depElementNodes.length - 1];
+			const insertAfterElement = depElementNodes[existingIdentifiersLength - 1] ??
+				depElementNodes[depElementNodes.length - 1];
 
-			if (lastElement) {
+			if (insertAfterElement) {
 				changeSet.push({
 					action: ChangeAction.INSERT,
-					start: lastElement.getEnd(),
+					start: insertAfterElement.getEnd(),
 					value: (existingImportModules.length ? ", " : "") + dependencies.join(", "),
 				});
 			} else {
