@@ -1,28 +1,42 @@
 import anyTest, {ExecutionContext, TestFn} from "ava";
-import sinonGlobal, {SinonStub} from "sinon";
+import sinonGlobal, {SinonSpy, SinonStub} from "sinon";
 import util from "util";
 import {readdirSync} from "node:fs";
 import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
+import autofix from "../../../src/autofix/autofix.js";
 import {SourceFile, TypeChecker} from "typescript";
 import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
 import {AbstractAdapter} from "@ui5/fs";
 import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
+import {AutofixOptions, AutofixResult} from "../../../src/autofix/autofix.js";
+import type {AmbientModuleCache} from "../../../src/linter/ui5Types/AmbientModuleCache.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
 	lintFile: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
+	autofixSpy: SinonSpy<[AutofixOptions], Promise<AutofixResult>>;
 	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
 
 test.before(async (t) => {
-	const {lintModule: {lintFile}} = await esmockDeprecationText();
-	t.context.lintFile = lintFile;
 	t.context.sharedLanguageService = new SharedLanguageService();
+
+	// Workaround for debugging purposes:
+	// For some files, such as lintWorkspace.ts and autofix.ts the original files are not displayed
+	// when debugging them. Strangely this only happens for the first test run and just mocking the
+	// files initial before the first test run works around the issue.
+	await esmockDeprecationText();
+});
+
+test.beforeEach(async (t) => {
+	const {lintModule: {lintFile}, autofixSpy} = await esmockDeprecationText();
+	t.context.lintFile = lintFile;
+	t.context.autofixSpy = autofixSpy;
 });
 
 // Mock getDeprecationText as we do not have control over the deprecated texts and they could
@@ -39,19 +53,30 @@ export async function esmockDeprecationText() {
 				apiExtract: ApiExtract,
 				filePathsWorkspace: AbstractAdapter,
 				workspace: AbstractAdapter,
+				ambientModuleCache: AmbientModuleCache,
 				manifestContent?: string
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(
 					context, filePath, sourceFile, sourceMaps, checker, reportCoverage,
-					messageDetails, apiExtract, filePathsWorkspace, workspace, manifestContent
+					messageDetails, apiExtract, filePathsWorkspace, workspace, ambientModuleCache, manifestContent
 				);
 				linter.getDeprecationText = () => "Deprecated test message";
 				return linter;
 			},
 	});
+
+	const autofixSpy =
+		sinonGlobal.stub<Parameters<typeof autofix>, ReturnType<typeof autofix>>()
+			.callsFake((options: AutofixOptions) => autofix(options));
+
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
+		"../../../src/autofix/autofix.js": autofixSpy,
+		"node:fs/promises": {
+			// Prevent tests from update fixtures on the filesystem (autofix)
+			writeFile: sinonGlobal.stub().resolves(),
+		},
 	});
 
 	const lintModule = await esmock("../../../src/linter/linter.js", {
@@ -62,7 +87,7 @@ export async function esmockDeprecationText() {
 		"../../../src/linter/linter.js": lintModule,
 	});
 
-	return {lintModule, indexModule};
+	return {lintModule, indexModule, autofixSpy};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots
@@ -79,7 +104,7 @@ export function assertExpectedLintResults(
 }
 
 // Helper function to create linting tests for all files in a directory
-export function createTestsForFixtures(fixturesPath: string) {
+export function createTestsForFixtures(fixturesPath: string, fix = false) {
 	try {
 		const testFiles = readdirSync(fixturesPath, {withFileTypes: true, recursive: true}).filter((dirEntries) => {
 			return dirEntries.isFile() && dirEntries.name !== ".DS_Store";
@@ -101,6 +126,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 				fileName: dirName,
 				fixturesPath,
 				filePaths: testFiles,
+				fix,
 			});
 		} else {
 			for (const fileName of testFiles) {
@@ -119,6 +145,7 @@ export function createTestsForFixtures(fixturesPath: string) {
 					fileName,
 					fixturesPath,
 					filePaths: [fileName],
+					fix,
 				});
 			}
 		}
@@ -132,8 +159,9 @@ export function createTestsForFixtures(fixturesPath: string) {
 }
 
 function testDefinition(
-	{testName, fileName, fixturesPath, filePaths, namespace}:
-	{testName: string; fileName: string; fixturesPath: string; filePaths: string[]; namespace?: string}) {
+	{testName, fileName, fixturesPath, filePaths, namespace, fix}:
+	{testName: string; fileName: string; fixturesPath: string;
+		filePaths: string[]; namespace?: string; fix?: boolean;}) {
 	let defineTest = test.serial;
 
 	if (fileName.startsWith("_")) {
@@ -156,6 +184,7 @@ function testDefinition(
 			filePatterns: filePaths,
 			coverage: true,
 			details: true,
+			fix,
 		}, t.context.sharedLanguageService);
 		assertExpectedLintResults(t, res, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
@@ -171,6 +200,14 @@ function testDefinition(
 			}
 		});
 		t.snapshot(res);
+
+		if (fix) {
+			t.is(t.context.autofixSpy.callCount, 1);
+			const autofixResult = await t.context.autofixSpy.getCall(0).returnValue;
+			for (const [filePath, content] of autofixResult.entries()) {
+				t.snapshot(content, `AutofixResult: ${filePath}`);
+			}
+		}
 	});
 }
 
@@ -182,12 +219,12 @@ export function preprocessLintResultsForSnapshot(res: LintResult[]) {
 	return res;
 }
 
-export function runLintRulesTests(filePath: string, fixturesPath?: string) {
+export function runLintRulesTests(filePath: string, fixturesPath?: string, fix = false) {
 	if (!fixturesPath) {
 		const __dirname = path.dirname(filePath);
 		const fileName = path.basename(filePath, ".ts");
 		fixturesPath = path.join(__dirname, "..", "..", "..", "fixtures", "linter", "rules", fileName);
 	}
 
-	createTestsForFixtures(fixturesPath);
+	createTestsForFixtures(fixturesPath, fix);
 }

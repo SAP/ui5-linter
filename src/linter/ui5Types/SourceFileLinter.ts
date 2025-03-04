@@ -13,7 +13,6 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
-	findAmbientModuleByDeclarationName,
 } from "./utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -24,6 +23,7 @@ import BindingLinter from "../binding/BindingLinter.js";
 import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
+import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -82,6 +82,7 @@ export default class SourceFileLinter {
 		private apiExtract: ApiExtract,
 		private filePathsWorkspace: AbstractAdapter,
 		private workspace: AbstractAdapter,
+		private ambientModuleCache: AmbientModuleCache,
 		private manifestContent?: string
 	) {
 		this.#reporter = new SourceFileReporter(context, resourcePath,
@@ -1437,6 +1438,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 				variableName: node.text,
 				namespace: moduleName,
+				fixHints: {},
 			}, node);
 		}
 	}
@@ -1568,9 +1570,8 @@ export default class SourceFileLinter {
 		].join("/");
 
 		// Check if the module is registered within ambient modules
-		const ambientModules = this.checker.getAmbientModules();
-		const libAmbientModule = findAmbientModuleByDeclarationName(ambientModules, potentialLibImport);
-		const isRegisteredAsUi5Module = !!findAmbientModuleByDeclarationName(ambientModules, moduleName);
+		const libAmbientModule = this.ambientModuleCache.getModule(potentialLibImport);
+		const isRegisteredAsUi5Module = !!this.ambientModuleCache.getModule(moduleName);
 
 		let isModuleExported = true;
 		let libExports = libAmbientModule?.exports ?? new Map();
@@ -1630,9 +1631,16 @@ export default class SourceFileLinter {
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
+				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
+				const {moduleName, exportName, propertyAccess} = this.getImportFromGlobal(namespace);
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
-					namespace: this.extractNamespace((node as ts.PropertyAccessExpression)),
+					namespace,
+					fixHints: {
+						moduleName,
+						exportName,
+						propertyAccess, // TODO: Provide end position instead?
+					},
 				}, node);
 			}
 		}
@@ -1819,5 +1827,63 @@ export default class SourceFileLinter {
 
 	hasQUnitFileExtension() {
 		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
+	}
+
+	findModuleForName(moduleName: string): ts.Symbol | undefined {
+		const moduleSymbol = this.ambientModuleCache.getModule(moduleName);
+
+		if (!moduleSymbol) {
+			return;
+		}
+		const declarations = moduleSymbol.getDeclarations();
+		if (!declarations) {
+			throw new Error(`Could not find declarations for module: ${moduleName}`);
+		}
+		for (const decl of declarations) {
+			const sourceFile = decl.getSourceFile();
+			if (isSourceFileOfTypeScriptLib(sourceFile)) {
+				// Ignore any non-UI5 symbols
+				return;
+			}
+			if (isSourceFileOfPseudoModuleType(sourceFile)) {
+				// Ignore pseudo modules, we rather find them via probing for the library module
+				return;
+			}
+		}
+		return moduleSymbol;
+	}
+
+	getImportFromGlobal(namespace: string): {moduleName?: string; exportName?: string; propertyAccess?: string} {
+		if (namespace === "jQuery") {
+			return {moduleName: "sap/ui/thirdparty/jquery"};
+		}
+		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
+		let moduleSymbol;
+		const parts = namespace.split(".");
+		const searchStack = [...parts];
+		let exportName;
+		while (!moduleSymbol && searchStack.length) {
+			const moduleName = searchStack.join("/");
+			moduleSymbol = this.findModuleForName(moduleName);
+			if (!moduleSymbol) {
+				const libraryModuleName = `${moduleName}/library`;
+				moduleSymbol = this.findModuleForName(libraryModuleName);
+				if (moduleSymbol) {
+					exportName = parts[searchStack.length];
+					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
+						// throw new Error(`Could not find export ${exportName} in module: ${namespace}`);
+						return {};
+					}
+					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
+				}
+			}
+			if (!moduleSymbol) {
+				searchStack.pop();
+			}
+		}
+		if (!searchStack.length) {
+			return {};
+		}
+		return {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")};
 	}
 }
