@@ -249,9 +249,9 @@ function addDependencies(
 		const indexOf = imports.indexOf(existingModule);
 		if (indexOf !== -1 && !(indexOf === index && !existingIdentifiers[index])) {
 			imports.splice(indexOf, 1);
-			importRequests.get(existingModule)!.identifier = existingIdentifiers[index];
+			importRequests.get(existingModule)!.identifier =
+				existingIdentifiers[index] || getIdentifierForImport(existingModule);
 		}
-
 		existingIdentifiers[index] = existingIdentifiers[index] || getIdentifierForImport(existingModule);
 	});
 
@@ -292,7 +292,9 @@ function addDependencies(
 				value: `[${dependencies.join(", ")}], `,
 			});
 		}
+	}
 
+	if (identifiers.length) {
 		const closeParenToken = moduleDeclaration.factory.getChildren()
 			.find((c) => c.kind === ts.SyntaxKind.CloseParenToken);
 		// Factory arguments
@@ -338,6 +340,10 @@ function addDependencies(
 
 function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
 	for (const {nodeInfos, identifier} of importRequests.values()) {
+		if (!identifier) {
+			throw new Error("No identifier found for import");
+		}
+
 		for (const nodeInfo of nodeInfos) {
 			let node: ts.Node = nodeInfo.node!;
 
