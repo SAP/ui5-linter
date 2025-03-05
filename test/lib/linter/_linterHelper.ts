@@ -10,6 +10,7 @@ import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/Lint
 import {ApiExtract} from "../../../src/utils/ApiExtract.js";
 import {AbstractAdapter} from "@ui5/fs";
 import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
+import type {AmbientModuleCache} from "../../../src/linter/ui5Types/AmbientModuleCache.js";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -39,12 +40,13 @@ export async function esmockDeprecationText() {
 				apiExtract: ApiExtract,
 				filePathsWorkspace: AbstractAdapter,
 				workspace: AbstractAdapter,
+				ambientModuleCache: AmbientModuleCache,
 				manifestContent?: string
 			) {
 				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
 				const linter = new SourceFileLinter(
 					context, filePath, sourceFile, sourceMaps, checker, reportCoverage,
-					messageDetails, apiExtract, filePathsWorkspace, workspace, manifestContent
+					messageDetails, apiExtract, filePathsWorkspace, workspace, ambientModuleCache, manifestContent
 				);
 				linter.getDeprecationText = () => "Deprecated test message";
 				return linter;
