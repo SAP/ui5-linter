@@ -3,7 +3,8 @@ sap.ui.define([
 	"./controller/App.controller",
 	"./../../library",
 	"../other/library",
-	"./library"
+	"./library",
+	"sap/m/Button",
 ], function() {
 	const button = new sap.m.Button({
 		text: "Hello"
