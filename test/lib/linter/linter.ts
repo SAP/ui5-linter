@@ -5,7 +5,7 @@ import {fileURLToPath} from "node:url";
 import esmock from "esmock";
 import {
 	createTestsForFixtures, assertExpectedLintResults,
-	esmockDeprecationText, preprocessLintResultsForSnapshot,
+	createMockedLinterModules, preprocessLintResultsForSnapshot,
 } from "./_linterHelper.js";
 import {UI5LinterEngine} from "../../../src/index.js";
 
@@ -22,7 +22,7 @@ const test = anyTest as TestFn<{
 test.before(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
-	const {indexModule: {UI5LinterEngine}} = await esmockDeprecationText();
+	const {indexModule: {UI5LinterEngine}} = await createMockedLinterModules();
 	t.context.linterEngine = new UI5LinterEngine();
 });
 test.afterEach.always((t) => {

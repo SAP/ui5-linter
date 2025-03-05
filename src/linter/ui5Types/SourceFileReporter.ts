@@ -30,11 +30,10 @@ export default class SourceFileReporter {
 	#coverageInfo: CoverageInfo[] = [];
 
 	constructor(
-		context: LinterContext, resourcePath: ResourcePath,
-		sourceFile: ts.SourceFile, sourceMap: string | undefined
+		context: LinterContext, sourceFile: ts.SourceFile, sourceMap: string | undefined
 	) {
 		this.#context = context;
-		this.#resourcePath = resourcePath;
+		this.#resourcePath = sourceFile.fileName;
 		this.#sourceFile = sourceFile;
 		if (sourceMap) {
 			const parsedSourceMap = JSON.parse(sourceMap) as EncodedSourceMap;
@@ -45,7 +44,7 @@ export default class SourceFileReporter {
 			}
 		}
 
-		this.#originalResourcePath = this.#getOriginalResourcePath() ?? resourcePath;
+		this.#originalResourcePath = this.#getOriginalResourcePath() ?? this.#resourcePath;
 		// Do not use messages from context yet, to allow local de-duplication
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
@@ -119,7 +118,7 @@ export default class SourceFileReporter {
 		}
 	}
 
-	deduplicateMessages() {
+	addMessagesToContext() {
 		const lineColumnRawMessagesMap = new Map<string, RawLintMessage[]>();
 		const rawMessages: RawLintMessage[] = [];
 		if (this.#rawMessages.length === 0) {
@@ -160,5 +159,6 @@ export default class SourceFileReporter {
 		}
 
 		this.#context.addLintingMessages(this.#originalResourcePath, rawMessages);
+		this.#rawMessages = []; // Prevent messages from being added multiple times
 	}
 }

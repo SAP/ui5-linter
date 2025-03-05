@@ -5,12 +5,12 @@ import {readdirSync} from "node:fs";
 import path from "node:path";
 import esmock from "esmock";
 import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
-import {SourceFile, TypeChecker} from "typescript";
-import LinterContext, {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
-import {ApiExtract} from "../../../src/utils/ApiExtract.js";
-import {AbstractAdapter} from "@ui5/fs";
+import type {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
-import type {AmbientModuleCache} from "../../../src/linter/ui5Types/AmbientModuleCache.js";
+
+// Override getDeprecationText as we do not have control over the deprecated texts and they could
+// change anytime creating false positive failing tests. That way is ensured consistent and testable behavior.
+SourceFileLinter.prototype.getDeprecationText = () => "Deprecated test message";
 
 util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since coverageInfo objects are on level 4
 
@@ -21,36 +21,14 @@ const test = anyTest as TestFn<{
 }>;
 
 test.before(async (t) => {
-	const {lintModule: {lintFile}} = await esmockDeprecationText();
+	const {lintModule: {lintFile}} = await createMockedLinterModules();
 	t.context.lintFile = lintFile;
 	t.context.sharedLanguageService = new SharedLanguageService();
 });
 
-// Mock getDeprecationText as we do not have control over the deprecated texts and they could
-// change anytime creating false positive failing tests. That way is ensured consistent and testable behavior.
-export async function esmockDeprecationText() {
+export async function createMockedLinterModules() {
 	const typeLinterModule = await esmock("../../../src/linter/ui5Types/TypeLinter.js", {
-		"../../../src/linter/ui5Types/SourceFileLinter.js":
-			function (
-				context: LinterContext, filePath: string, sourceFile: SourceFile,
-				sourceMaps: Map<string, string> | undefined,
-				checker: TypeChecker,
-				reportCoverage: boolean | undefined = false,
-				messageDetails: boolean | undefined = false,
-				apiExtract: ApiExtract,
-				filePathsWorkspace: AbstractAdapter,
-				workspace: AbstractAdapter,
-				ambientModuleCache: AmbientModuleCache,
-				manifestContent?: string
-			) {
-				// Don't use sinon's stubs as it's hard to clean after them in this case and it leaks memory.
-				const linter = new SourceFileLinter(
-					context, filePath, sourceFile, sourceMaps, checker, reportCoverage,
-					messageDetails, apiExtract, filePathsWorkspace, workspace, ambientModuleCache, manifestContent
-				);
-				linter.getDeprecationText = () => "Deprecated test message";
-				return linter;
-			},
+		"../../../src/linter/ui5Types/SourceFileLinter.js": SourceFileLinter,
 	});
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,

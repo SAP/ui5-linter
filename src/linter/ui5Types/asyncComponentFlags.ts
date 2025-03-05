@@ -1,6 +1,6 @@
 import ts from "typescript";
 import path from "node:path/posix";
-import SourceFileReporter from "./SourceFileReporter.js";
+import type SourceFileReporter from "./SourceFileReporter.js";
 import type {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../../manifest.js";
 import LinterContext from "../LinterContext.js";
 import jsonMap from "json-source-map";
