@@ -241,22 +241,32 @@ function addDependencies(
 		throw new Error("Invalid factory function");
 	}
 	const existingIdentifiers = moduleDeclaration.factory
-		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text);
+		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text ?? "__undefined__");
 	const existingIdentifiersLength = existingIdentifiers.length;
 
 	const imports = [...importRequests.keys()];
+
+	const identifiersForExistingImports: string[] = [];
+	let existingIdentifiersCut = 0;
 	existingImportModules.forEach((existingModule, index) => {
 		const indexOf = imports.indexOf(existingModule);
 		const identifierName = existingIdentifiers[index] || getIdentifierForImport(existingModule);
-		if (indexOf !== -1 && !(indexOf === index && !existingIdentifiers[index])) {
+		identifiersForExistingImports.push(identifierName);
+		if (indexOf !== -1 &&
+			// Destructuring
+			!(indexOf === index && existingIdentifiers[index] === "__undefined__")) {
+			existingIdentifiersCut = index > existingIdentifiersCut ? (index + 1) : existingIdentifiersCut;
 			imports.splice(indexOf, 1);
 			importRequests.get(existingModule)!.identifier = identifierName;
 		}
-		existingIdentifiers[index] = identifierName;
 	});
+
+	// Cut identifiers that are already there
+	identifiersForExistingImports.splice(existingIdentifiersCut);
 
 	const dependencies = imports.map((i) => `"${i}"`);
 	const identifiers = [
+		...identifiersForExistingImports,
 		...imports.map((i) => {
 			const identifier = getIdentifierForImport(i);
 			importRequests.get(i)!.identifier = identifier;
