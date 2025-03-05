@@ -56,7 +56,7 @@ export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression,
 	return propAccessChain.join(".") === match;
 }
 
-export function getIdentifierForImport(importName: string): string {
+export function getIdentifierForImport(importName: string, existingIdentifiers?: Set<string>): string {
 	const parts = importName.split("/");
 	const identifier = parts[parts.length - 1];
 	if (identifier === "jquery") {
@@ -72,7 +72,51 @@ export function getIdentifierForImport(importName: string): string {
 			return identifier;
 		}
 	}
-	return camelize(identifier);
+
+	let modifiedIdentifier = identifier;
+	let counter = 1;
+	while (existingIdentifiers?.has(modifiedIdentifier)) {
+		modifiedIdentifier = `${identifier}${counter}`;
+		counter++;
+	}
+
+	return camelize(modifiedIdentifier);
+}
+
+export function collectModuleIdentifiers(moduleDeclaration: ts.Node) {
+	const declaredIdentifiers = new Set<string>();
+	const extractDestructIdentifiers = (name: ts.BindingName, identifiers: Set<string>) => {
+		if (ts.isIdentifier(name)) {
+			identifiers.add(name.text);
+		} else if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) {
+			for (const element of name.elements) {
+				if (ts.isBindingElement(element)) {
+					extractDestructIdentifiers(element.name, identifiers);
+				}
+			}
+		}
+	};
+	const collectIdentifiers = (node: ts.Node) => {
+		if (
+			ts.isVariableDeclaration(node) ||
+			ts.isFunctionDeclaration(node) ||
+			ts.isClassDeclaration(node)
+		) {
+			if (node.name && ts.isIdentifier(node.name)) {
+				declaredIdentifiers.add(node.name.text);
+			}
+		}
+
+		if (ts.isParameter(node) || ts.isVariableDeclaration(node)) {
+			extractDestructIdentifiers(node.name, declaredIdentifiers);
+		}
+
+		ts.forEachChild(node, collectIdentifiers);
+	};
+
+	ts.forEachChild(moduleDeclaration, collectIdentifiers);
+
+	return declaredIdentifiers;
 }
 
 // Camelize a string by replacing invalid identifier characters
