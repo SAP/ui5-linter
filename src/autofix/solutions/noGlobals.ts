@@ -9,7 +9,6 @@ import type {
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import {UnsupportedModuleError} from "../../linter/ui5Types/amdTranspiler/util.js";
 import {getLogger} from "@ui5/logger";
 
 const log = getLogger("linter:autofix:NoGlobals");
