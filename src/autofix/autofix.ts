@@ -4,7 +4,7 @@ import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterConte
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
-import {getIdentifierForImport} from "./utils.js";
+import {collectModuleIdentifiers, getIdentifierForImport} from "./utils.js";
 
 export interface AutofixResource {
 	content: string;
@@ -232,6 +232,12 @@ function addDependencies(
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
+	if (importRequests.size === 0) {
+		return;
+	}
+
+	const declaredIdentifiers = collectModuleIdentifiers(moduleDeclaration.factory);
+
 	const defineCallArgs = defineCall.arguments;
 	const existingImportModules = defineCall.arguments && ts.isArrayLiteralExpression(defineCallArgs[0]) ?
 			defineCallArgs[0].elements.map((el) => ts.isStringLiteralLike(el) ? el.text : "") :
@@ -241,7 +247,7 @@ function addDependencies(
 		throw new Error("Invalid factory function");
 	}
 	const existingIdentifiers = moduleDeclaration.factory
-		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text ?? "__undefined__");
+		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text ?? "__destructured__");
 	const existingIdentifiersLength = existingIdentifiers.length;
 
 	const imports = [...importRequests.keys()];
@@ -250,11 +256,15 @@ function addDependencies(
 	let existingIdentifiersCut = 0;
 	existingImportModules.forEach((existingModule, index) => {
 		const indexOf = imports.indexOf(existingModule);
-		const identifierName = existingIdentifiers[index] || getIdentifierForImport(existingModule);
+		const identifierName = existingIdentifiers[index] ||
+			getIdentifierForImport(existingModule, declaredIdentifiers);
 		identifiersForExistingImports.push(identifierName);
 		if (indexOf !== -1 &&
 			// Destructuring
-			!(indexOf === index && existingIdentifiers[index] === "__undefined__")) {
+			!(indexOf === index && existingIdentifiers[index] === "__destructured__")) {
+			// If there are defined dependencies, but identifiers for them are missing,
+			// and those identifiers are needed in the code, then we need to find out
+			// up to which index we need to build identifiers and cut the rest.
 			existingIdentifiersCut = index > existingIdentifiersCut ? (index + 1) : existingIdentifiersCut;
 			imports.splice(indexOf, 1);
 			importRequests.get(existingModule)!.identifier = identifierName;
@@ -268,7 +278,7 @@ function addDependencies(
 	const identifiers = [
 		...identifiersForExistingImports,
 		...imports.map((i) => {
-			const identifier = getIdentifierForImport(i);
+			const identifier = getIdentifierForImport(i, declaredIdentifiers);
 			importRequests.get(i)!.identifier = identifier;
 			return identifier;
 		})];
