@@ -7,11 +7,12 @@ import lintDotLibrary from "./dotLibrary/linter.js";
 import lintFileTypes from "./fileTypes/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
-import LinterContext, {LintResult, LinterParameters, LinterOptions, FSToVirtualPathOptions} from "./LinterContext.js";
+import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
 import {createReader} from "@ui5/fs/resourceFactory";
 import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
+import type {FSToVirtualPathOptions} from "../utils/virtualPathToFilePath.js";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
@@ -19,14 +20,17 @@ export default async function lintWorkspace(
 	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
 	const done = taskStart("Linting Workspace");
-	const {relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest} = options;
+	const fsToVirtualPathOptions = {
+		relFsBasePath: options.relFsBasePath ?? "",
+		virBasePath: options.virBasePath ?? "/",
+		relFsBasePathTest: options.relFsBasePathTest,
+		virBasePathTest: options.virBasePathTest,
+	};
 
 	const context = new LinterContext(options);
 	let reader = resolveReader({
 		patterns: options.filePatterns ?? config.files ?? [],
-		relFsBasePath: relFsBasePath ?? "",
-		virBasePath: virBasePath ?? "/",
-		relFsBasePathTest, virBasePathTest,
+		fsToVirtualPathOptions,
 		resourceReader: createReader({
 			fsBasePath: options.rootDir,
 			virBasePath: "/",
@@ -38,9 +42,7 @@ export default async function lintWorkspace(
 		patterns: mergeIgnorePatterns(options, config),
 		resourceReader: reader,
 		patternsMatch,
-		relFsBasePath: relFsBasePath ?? "",
-		virBasePath: virBasePath ?? "/",
-		relFsBasePathTest, virBasePathTest,
+		fsToVirtualPathOptions,
 	});
 	context.setRootReader(reader);
 
