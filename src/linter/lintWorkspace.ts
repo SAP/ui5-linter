@@ -12,13 +12,25 @@ import {createReader} from "@ui5/fs/resourceFactory";
 import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
-import type {FSToVirtualPathOptions} from "../utils/virtualPathToFilePath.js";
+import {FSToVirtualPathOptions} from "../utils/virtualPathToFilePath.js";
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
 	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
+	const context = await runLintWorkspace(
+		workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
+	);
+
+	return context.generateLintResults();
+}
+
+async function runLintWorkspace(
+	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
+	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
+	sharedLanguageService: SharedLanguageService
+): Promise<LinterContext> {
 	const done = taskStart("Linting Workspace");
 	const fsToVirtualPathOptions = {
 		relFsBasePath: options.relFsBasePath ?? "",
@@ -62,5 +74,5 @@ export default async function lintWorkspace(
 	const typeLinter = new TypeLinter(params, sharedLanguageService);
 	await typeLinter.lint();
 	done();
-	return context.generateLintResults();
+	return context;
 }
