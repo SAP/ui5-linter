@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import LinterContext, {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
+import {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -24,6 +24,7 @@ import {RequireDeclaration} from "../xmlTemplate/Parser.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 import type {AmbientModuleCache} from "./AmbientModuleCache.js";
+import type TypeLinter from "./TypeLinter.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -71,11 +72,11 @@ export default class SourceFileLinter {
 	#metadata: LintMetadata;
 	#xmlContents: {xml: string; pos: ts.LineAndCharacter; documentKind: "fragment" | "view"}[];
 
+	private resourcePath: ResourcePath;
+
 	constructor(
-		private context: LinterContext,
-		private resourcePath: ResourcePath,
+		private typeLinter: TypeLinter,
 		private sourceFile: ts.SourceFile,
-		private sourceMaps: Map<string, string> | undefined,
 		private checker: ts.TypeChecker,
 		private reportCoverage = false,
 		private messageDetails = false,
@@ -85,13 +86,13 @@ export default class SourceFileLinter {
 		private ambientModuleCache: AmbientModuleCache,
 		private manifestContent?: string
 	) {
-		this.#reporter = new SourceFileReporter(context, resourcePath,
-			sourceFile, sourceMaps?.get(sourceFile.fileName));
+		this.#reporter = typeLinter.getSourceFileReporter(sourceFile);
 		this.#boundVisitNode = this.visitNode.bind(this);
-		this.#fileName = path.basename(resourcePath);
+		this.resourcePath = sourceFile.fileName;
+		this.#fileName = path.basename(this.resourcePath);
 		this.#isComponent = this.#fileName === "Component.js" || this.#fileName === "Component.ts";
 		this.#hasTestStarterFindings = false;
-		this.#metadata = this.context.getMetadata(this.resourcePath);
+		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
 	}
 
@@ -112,7 +113,7 @@ export default class SourceFileLinter {
 			let i = 0;
 			for (const xmlContent of this.#xmlContents) {
 				const fileName = `${this.sourceFile.fileName.replace(/(\.js|\.ts)$/, "")}.inline-${++i}.${xmlContent.documentKind}.xml`;
-				const metadata = this.context.getMetadata(fileName);
+				const metadata = this.typeLinter.getContext().getMetadata(fileName);
 				const newResource = createResource({path: fileName, string: xmlContent.xml});
 				metadata.jsToXmlPosMapping = {
 					pos: xmlContent.pos,
@@ -123,15 +124,13 @@ export default class SourceFileLinter {
 					await this.workspace.write(newResource),
 				]);
 			}
-
-			this.#reporter.deduplicateMessages();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			log.verbose(`Error while linting ${this.resourcePath}: ${message}`);
 			if (err instanceof Error) {
 				log.verbose(`Call stack: ${err.stack}`);
 			}
-			this.context.addLintingMessage(this.resourcePath, MESSAGE.PARSING_ERROR, {message});
+			this.typeLinter.getContext().addLintingMessage(this.resourcePath, MESSAGE.PARSING_ERROR, {message});
 		}
 	}
 
@@ -169,7 +168,7 @@ export default class SourceFileLinter {
 				manifestContent: this.manifestContent,
 				resourcePath: this.resourcePath,
 				reporter: this.#reporter,
-				context: this.context,
+				context: this.typeLinter.getContext(),
 				checker: this.checker,
 				isUiComponent: this.isUi5ClassDeclaration(node, "sap/ui/core/UIComponent"),
 			});
@@ -390,19 +389,11 @@ export default class SourceFileLinter {
 			const apiVersionNode = findApiVersionNode(node);
 			const nodeToHighlight = getNodeToHighlight(apiVersionNode);
 			if (nodeToHighlight) {
-				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 				// The findings can be in different file i.e. Control being analyzed,
 				// but reporting might be in ControlRenderer
 				const nodeSourceFile = nodeToHighlight.getSourceFile();
-				const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
-				this.context.addLintingMessage(
-					nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
-					getPositionsForNode({
-						node: nodeToHighlight,
-						sourceFile: nodeSourceFile,
-						resourcePath: nodeSourceFile.fileName,
-						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
-					}).start);
+				this.typeLinter.getSourceFileReporter(nodeSourceFile)
+					.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
 			}
 
 			this.analyzeIconCallInRenderMethod(node);
@@ -415,19 +406,11 @@ export default class SourceFileLinter {
 				ts.isArrowFunction(nodeValueDeclaration)
 			)
 		)) {
-			// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 			// The findings can be in different file i.e. Control being analyzed,
 			// but reporting might be in ControlRenderer
 			const nodeSourceFile = node.getSourceFile();
-			const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
-			this.context.addLintingMessage(
-				nodeSourceFile.fileName, MESSAGE.NO_DEPRECATED_RENDERER, undefined as never,
-				getPositionsForNode({
-					node,
-					sourceFile: nodeSourceFile,
-					resourcePath: nodeSourceFile.fileName,
-					traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
-				}).start);
+			this.typeLinter.getSourceFileReporter(nodeSourceFile)
+				.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
 
 			this.analyzeIconCallInRenderMethod(node);
 		}
@@ -507,19 +490,11 @@ export default class SourceFileLinter {
 				ts.isPropertyAccessExpression(childNode.expression) &&
 				childNode.expression.name.text === "icon"
 			) {
-				// reporter.addMessage() won't work in this case as it's bound to the current analyzed file.
 				// The findings can be in different file i.e. Control being analyzed,
-				// but reporting might be in ControlRenderer
+				// but reporting might be in ControlRenderer, so we have to use the corresponding reporter
 				const nodeSourceFile = childNode.getSourceFile();
-				const nodeSourceMap = this.sourceMaps?.get(nodeSourceFile.fileName);
-				this.context.addLintingMessage(
-					nodeSourceFile.fileName, MESSAGE.NO_ICON_POOL_RENDERER, undefined as never,
-					getPositionsForNode({
-						node: childNode,
-						sourceFile: nodeSourceFile,
-						resourcePath: nodeSourceFile.fileName,
-						traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
-					}).start);
+				this.typeLinter.getSourceFileReporter(nodeSourceFile)
+					.addMessage(MESSAGE.NO_ICON_POOL_RENDERER, childNode);
 			}
 			ts.forEachChild(childNode, findIconCallExpression);
 		};
@@ -1125,7 +1100,7 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		const sourceMapJson = this.sourceMaps?.get(this.sourceFile.fileName);
+		const sourceMapJson = this.typeLinter.getSourceMap(this.sourceFile.fileName);
 		const traceMap = sourceMapJson ?
 			new TraceMap(JSON.parse(sourceMapJson) as SourceMapInput) :
 			undefined;
@@ -1381,14 +1356,14 @@ export default class SourceFileLinter {
 					} as RequireDeclaration;
 				});
 
-			const nodeSourceMap = this.sourceMaps?.get(this.resourcePath);
+			const nodeSourceMap = this.typeLinter.getSourceMap(this.resourcePath);
 			const {start: nodePos} = getPositionsForNode({
 				node: node.initializer,
 				sourceFile: this.sourceFile,
 				resourcePath: this.resourcePath,
 				traceMap: nodeSourceMap ? new TraceMap(nodeSourceMap) : undefined,
 			});
-			const bindingLinter = new BindingLinter(this.resourcePath, this.context, true);
+			const bindingLinter = new BindingLinter(this.resourcePath, this.typeLinter.getContext(), true);
 			bindingLinter.lintPropertyBinding(node.initializer.text, imports, nodePos);
 		}
 	}

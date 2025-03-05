@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, {SourceFile} from "typescript";
 import {FileContents, createVirtualLanguageServiceHost} from "./host.js";
 import SourceFileLinter from "./SourceFileLinter.js";
 import {taskStart} from "../../utils/perf.js";
@@ -10,6 +10,7 @@ import {createAdapter, createResource} from "@ui5/fs/resourceFactory";
 import {loadApiExtract} from "../../utils/ApiExtract.js";
 import lintXml, {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 import type SharedLanguageService from "./SharedLanguageService.js";
+import SourceFileReporter from "./SourceFileReporter.js";
 import {AmbientModuleCache} from "./AmbientModuleCache.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
@@ -47,12 +48,14 @@ const DEFAULT_OPTIONS: ts.CompilerOptions = {
 	allowSyntheticDefaultImports: true,
 };
 
-export default class TypeChecker {
+export default class TypeLinter {
 	#sharedLanguageService: SharedLanguageService;
 	#compilerOptions: ts.CompilerOptions;
 	#context: LinterContext;
 	#workspace: AbstractAdapter;
 	#filePathsWorkspace: AbstractAdapter;
+	#sourceMaps = new Map<string, string>(); // Maps a source path to source map content
+	#sourceFileReporters = new Map<string, SourceFileReporter>();
 
 	constructor(
 		{workspace, filePathsWorkspace, context}: LinterParameters,
@@ -81,7 +84,6 @@ export default class TypeChecker {
 	async lint() {
 		const silly = log.isLevelEnabled("silly");
 		const files: FileContents = new Map();
-		const sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 
 		const allResources = await this.#workspace.byGlob("/**/{*.js,*.js.map,*.ts}");
 		const filteredResources = await this.#filePathsWorkspace.byGlob("/**/{*.js,*.js.map,*.ts}");
@@ -97,7 +99,7 @@ export default class TypeChecker {
 		for (const resource of allResources) {
 			const resourcePath = resource.getPath();
 			if (resourcePath.endsWith(".js.map")) {
-				sourceMaps.set(
+				this.#sourceMaps.set(
 					// Remove ".map" from path to have it reflect the associated source path
 					resource.getPath().slice(0, -4),
 					await resource.getString()
@@ -110,7 +112,7 @@ export default class TypeChecker {
 		const projectScriptVersion = this.#sharedLanguageService.getNextProjectScriptVersion();
 
 		const host = await createVirtualLanguageServiceHost(
-			this.#compilerOptions, files, sourceMaps, this.#context, projectScriptVersion
+			this.#compilerOptions, files, this.#sourceMaps, this.#context, projectScriptVersion
 		);
 
 		this.#sharedLanguageService.acquire(host);
@@ -132,7 +134,7 @@ export default class TypeChecker {
 		const typeCheckDone = taskStart("Linting all transpiled resources");
 		for (const sourceFile of program.getSourceFiles()) {
 			if (!sourceFile.isDeclarationFile && pathsToLint.includes(sourceFile.fileName)) {
-				const sourceMap = sourceMaps.get(sourceFile.fileName);
+				const sourceMap = this.#sourceMaps.get(sourceFile.fileName);
 				if (!sourceMap) {
 					log.verbose(`Failed to get source map for ${sourceFile.fileName}`);
 				}
@@ -148,8 +150,8 @@ export default class TypeChecker {
 				}
 				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 				const linter = new SourceFileLinter(
-					this.#context, sourceFile.fileName,
-					sourceFile, sourceMaps,
+					this,
+					sourceFile,
 					checker, reportCoverage, messageDetails,
 					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
 				);
@@ -171,7 +173,7 @@ export default class TypeChecker {
 			for (const resource of virtualXMLResources) {
 				const resourcePath = resource.getPath();
 				if (resourcePath.endsWith(".js.map")) {
-					sourceMaps.set(
+					this.#sourceMaps.set(
 						// Remove ".map" from path to have it reflect the associated source path
 						resourcePath.slice(0, -4),
 						await resource.getString()
@@ -187,8 +189,8 @@ export default class TypeChecker {
 				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
 					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
 					const linter = new SourceFileLinter(
-						this.#context, sourceFile.fileName,
-						sourceFile, sourceMaps,
+						this,
+						sourceFile,
 						checker, reportCoverage, messageDetails,
 						apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
 					);
@@ -201,10 +203,12 @@ export default class TypeChecker {
 
 		this.#sharedLanguageService.release();
 
+		this.addMessagesToContext();
+
 		if (process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES) {
 			// If requested, write out every resource that has a source map (which indicates it has been transformed)
 			// Loop over sourceMaps set
-			for (const [resourcePath, sourceMap] of sourceMaps) {
+			for (const [resourcePath, sourceMap] of this.#sourceMaps) {
 				const fileContent = files.get(resourcePath);
 				if (typeof fileContent !== "undefined") {
 					await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
@@ -217,6 +221,32 @@ export default class TypeChecker {
 				await writeTransformedSources(process.env.UI5LINT_WRITE_TRANSFORMED_SOURCES,
 					CONTROLLER_BY_ID_DTS_PATH, byIdDts);
 			}
+		}
+	}
+
+	getContext() {
+		return this.#context;
+	}
+
+	getSourceMap(resourcePath: string): string | undefined {
+		return this.#sourceMaps.get(resourcePath);
+	}
+
+	getSourceFileReporter(sourceFile: SourceFile): SourceFileReporter {
+		const resourcePath = sourceFile.fileName;
+		let reporter = this.#sourceFileReporters.get(resourcePath);
+		if (!reporter) {
+			reporter = new SourceFileReporter(
+				this.#context, sourceFile, this.#sourceMaps.get(resourcePath)
+			);
+			this.#sourceFileReporters.set(resourcePath, reporter);
+		}
+		return reporter;
+	}
+
+	addMessagesToContext() {
+		for (const reporter of this.#sourceFileReporters.values()) {
+			reporter.addMessagesToContext();
 		}
 	}
 }
