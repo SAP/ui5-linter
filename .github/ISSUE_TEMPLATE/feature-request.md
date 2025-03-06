@@ -2,7 +2,7 @@
 name: Feature Request
 about: Request a new feature to be added to a package part of UI5 linter
 title: ''
-labels: enhancement
+type: Feature
 assignees: ''
 
 ---
