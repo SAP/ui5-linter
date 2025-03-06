@@ -228,7 +228,7 @@ function applyFixes(
 }
 
 function applyChanges(content: string, changeSet: ChangeSet[]): string {
-	changeSet.sort((a, b) => a.start - b.start);
+	changeSet.sort((a, b) => b.start - a.start);
 	const s = new MagicString(content);
 
 	for (const change of changeSet) {

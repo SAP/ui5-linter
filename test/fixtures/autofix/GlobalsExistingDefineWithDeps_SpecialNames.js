@@ -4,7 +4,7 @@ sap.ui.define([
 	"./../../library",
 	"../other/library",
 	"./library",
-	"sap/m/Button",
+	"sap/m/Button"
 ], function() {
 	const button = new sap.m.Button({
 		text: "Hello"
