@@ -249,7 +249,7 @@ function addDependencies(
 		throw new Error("Invalid factory function");
 	}
 	const existingIdentifiers = moduleDeclaration.factory
-		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text ?? "__destructured__");
+		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text);
 	const existingIdentifiersLength = existingIdentifiers.length;
 
 	const imports = [...importRequests.keys()];
@@ -262,9 +262,7 @@ function addDependencies(
 			resolveUniqueName(existingModule, declaredIdentifiers);
 		declaredIdentifiers.add(identifierName);
 		identifiersForExistingImports.push(identifierName);
-		if (indexOf !== -1 &&
-			// Destructuring
-			!(indexOf === index && existingIdentifiers[index] === "__destructured__")) {
+		if (indexOf !== -1) {
 			// If there are defined dependencies, but identifiers for them are missing,
 			// and those identifiers are needed in the code, then we need to find out
 			// up to which index we need to build identifiers and cut the rest.
