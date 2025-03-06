@@ -1,38 +1,38 @@
 import test from "ava";
-import {getIdentifierForImport} from "../../../src/autofix/utils.js";
+import {resolveUniqueName} from "../../../src/linter/ui5Types/utils/utils.ts";
 
-test("getIdentifierForImport: sap/ui/thirdparty/jquery", (t) => {
-	t.is(getIdentifierForImport("sap/ui/thirdparty/jquery"), "jQuery");
+test("resolveUniqueName: sap/ui/thirdparty/jquery", (t) => {
+	t.is(resolveUniqueName("sap/ui/thirdparty/jquery"), "jQuery");
 });
 
-test("getIdentifierForImport: Absolute framework module name", (t) => {
-	t.is(getIdentifierForImport("sap/ui/core/Control"), "Control");
+test("resolveUniqueName: Absolute framework module name", (t) => {
+	t.is(resolveUniqueName("sap/ui/core/Control"), "Control");
 });
 
-test("getIdentifierForImport: Relative module name", (t) => {
-	t.is(getIdentifierForImport("./Control"), "Control");
+test("resolveUniqueName: Relative module name", (t) => {
+	t.is(resolveUniqueName("./Control"), "Control");
 });
 
-test("getIdentifierForImport: Absolute framework library module", (t) => {
-	t.is(getIdentifierForImport("sap/ui/core/library"), "coreLibrary");
+test("resolveUniqueName: Absolute framework library module", (t) => {
+	t.is(resolveUniqueName("sap/ui/core/library"), "coreLibrary");
 });
 
-test("getIdentifierForImport: Relative library module", (t) => {
-	t.is(getIdentifierForImport("./library"), "library");
+test("resolveUniqueName: Relative library module", (t) => {
+	t.is(resolveUniqueName("./library"), "library");
 });
 
-test("getIdentifierForImport: Relative library module (one folder up)", (t) => {
-	t.is(getIdentifierForImport("../library"), "library");
+test("resolveUniqueName: Relative library module (one folder up)", (t) => {
+	t.is(resolveUniqueName("../library"), "library");
 });
 
-test("getIdentifierForImport: Controller module", (t) => {
-	t.is(getIdentifierForImport("./controller/App.controller"), "AppController");
+test("resolveUniqueName: Controller module", (t) => {
+	t.is(resolveUniqueName("./controller/App.controller"), "App_controller");
 });
 
-test("getIdentifierForImport: sap/ui/thirdparty/sinon-qunit", (t) => {
-	t.is(getIdentifierForImport("sap/ui/thirdparty/sinon-qunit"), "sinonQunit");
+test("resolveUniqueName: sap/ui/thirdparty/sinon-qunit", (t) => {
+	t.is(resolveUniqueName("sap/ui/thirdparty/sinon-qunit"), "sinonQunit");
 });
 
-test("getIdentifierForImport: Module name with multiple illegal characters", (t) => {
-	t.is(getIdentifierForImport("./my-super--module"), "mySuperModule");
+test("resolveUniqueName: Module name with multiple illegal characters", (t) => {
+	t.is(resolveUniqueName("./my-super--module"), "mySuper_module");
 });
