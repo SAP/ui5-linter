@@ -1,5 +1,5 @@
 import ts from "typescript";
-import {getPropertyNameText} from "../linter/ui5Types/utils.js";
+import {getPropertyNameText} from "../linter/ui5Types/utils/utils.js";
 
 export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyAccess?: string):
 	ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression {
