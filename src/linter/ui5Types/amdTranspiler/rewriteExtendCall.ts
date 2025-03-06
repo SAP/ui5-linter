@@ -1,6 +1,6 @@
 import ts from "typescript";
 import {toPosStr} from "./util.js";
-import {getPropertyNameText} from "../utils.js";
+import {getPropertyNameText} from "../utils/utils.js";
 
 export class UnsupportedExtendCall extends Error {
 	constructor(message: string) {

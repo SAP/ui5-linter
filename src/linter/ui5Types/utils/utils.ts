@@ -1,4 +1,5 @@
 import ts from "typescript";
+import {getUniqueName} from "./UniqueNameCreator.js";
 
 /**
  * Returns the text of a PropertyName node.
@@ -175,4 +176,22 @@ export function getPropertyAssignmentsInObjectLiteralExpression(
 		}
 	}
 	return properties;
+}
+
+export function resolveUniqueName(inputName: string, existingIdentifiers?: Set<string>): string {
+	const parts = inputName.split("/");
+	const identifier = parts[parts.length - 1];
+	let name = null;
+	if (identifier === "jquery") {
+		name = "jQuery";
+	} else if (identifier === "library") {
+		const potentialLibraryName = parts[parts.length - 2];
+
+		// Relative imports contain a dot and should not be mistaken for a library name
+		if (!potentialLibraryName.includes(".")) {
+			name = potentialLibraryName + "Library";
+		}
+	}
+
+	return getUniqueName(Array.from(existingIdentifiers ?? []), name ?? inputName, "/");
 }

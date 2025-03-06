@@ -13,7 +13,7 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
-} from "./utils.js";
+} from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {SourceMapInput, TraceMap, originalPositionFor} from "@jridgewell/trace-mapping";

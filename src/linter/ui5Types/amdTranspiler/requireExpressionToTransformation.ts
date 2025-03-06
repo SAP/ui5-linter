@@ -3,6 +3,7 @@ import {getLogger} from "@ui5/logger";
 import {UnsupportedModuleError, toPosStr} from "./util.js";
 import {ProbingRequireExpression, RequireExpression} from "./parseRequire.js";
 const log = getLogger("linter:ui5Types:amdTranspiler:transformRequireCall");
+import {resolveUniqueName} from "../utils/utils.js";
 
 export interface RequireTransformationAsync {
 	imports: ts.ImportDeclaration[];
@@ -63,7 +64,7 @@ export function transformAsyncRequireCall(
 		if (callbackRequiresCallWrapper) {
 			// Generate variable name based on import module
 			// Later this variable will be used to call the factory function
-			identifier = nodeFactory.createUniqueName(dep.text.replace(/[^a-zA-Z0-9]/g, "_"));
+			identifier = nodeFactory.createUniqueName(resolveUniqueName(dep.text));
 		} else if (callbackParams?.[i]) {
 			// Use factory parameter identifier as import identifier
 			identifier = callbackParams[i];
@@ -138,7 +139,7 @@ export function transformSyncRequireCall(
 
 	// Generate variable name based on import module
 	// Later this variable will be used to call the factory function
-	const identifier = nodeFactory.createUniqueName(dependency.text.replace(/[^a-zA-Z0-9]/g, "_"));
+	const identifier = nodeFactory.createUniqueName(resolveUniqueName(dependency.text));
 	const importDeclaration = nodeFactory.createImportDeclaration(
 		undefined,
 		nodeFactory.createImportClause(false, identifier, undefined),

@@ -1,3 +1,4 @@
+import {resolveUniqueName} from "../../ui5Types/utils/utils.js";
 import ControllerByIdInfo from "../ControllerByIdInfo.js";
 import {
 	ControlDeclaration, RequireExpression, Position,
@@ -121,16 +122,12 @@ export default abstract class AbstractGenerator {
 	}
 
 	_getUniqueVariableName(variableName: string): string {
-		let variableNameCandidate = variableName;
-		if (this._variableNames.has(variableNameCandidate)) {
-			let counter = 2;
-			while (this._variableNames.has(variableNameCandidate)) {
-				variableNameCandidate = `${variableName}${counter}`;
-				counter++;
-			}
+		let resolvedName = variableName;
+		if (this._variableNames.has(variableName)) {
+			resolvedName = resolveUniqueName(variableName, this._variableNames);
 		}
-		this._variableNames.add(variableNameCandidate);
-		return variableNameCandidate;
+		this._variableNames.add(resolvedName);
+		return resolvedName;
 	}
 
 	_writeControlFactoryCall(
