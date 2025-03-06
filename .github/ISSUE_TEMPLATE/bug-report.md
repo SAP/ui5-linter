@@ -2,7 +2,8 @@
 name: Bug Report
 about: Report an issue with a package part of UI5 linter
 title: ''
-labels: bug, needs triage
+type: Bug
+labels: needs triage
 assignees: ''
 
 ---
