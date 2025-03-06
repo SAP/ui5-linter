@@ -4,8 +4,9 @@ import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterConte
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
-import {collectModuleIdentifiers, getIdentifierForImport} from "./utils.js";
+import {collectModuleIdentifiers} from "./utils.js";
 import {getLogger} from "@ui5/logger";
+import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
 const log = getLogger("linter:autofix");
 
@@ -258,7 +259,8 @@ function addDependencies(
 	existingImportModules.forEach((existingModule, index) => {
 		const indexOf = imports.indexOf(existingModule);
 		const identifierName = existingIdentifiers[index] ||
-			getIdentifierForImport(existingModule, declaredIdentifiers);
+			resolveUniqueName(existingModule, declaredIdentifiers);
+		declaredIdentifiers.add(identifierName);
 		identifiersForExistingImports.push(identifierName);
 		if (indexOf !== -1 &&
 			// Destructuring
@@ -279,7 +281,8 @@ function addDependencies(
 	const identifiers = [
 		...identifiersForExistingImports,
 		...imports.map((i) => {
-			const identifier = getIdentifierForImport(i, declaredIdentifiers);
+			const identifier = resolveUniqueName(i, declaredIdentifiers);
+			declaredIdentifiers.add(identifier);
 			importRequests.get(i)!.identifier = identifier;
 			return identifier;
 		})];
