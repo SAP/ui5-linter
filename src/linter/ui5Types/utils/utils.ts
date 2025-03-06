@@ -195,3 +195,18 @@ export function resolveUniqueName(inputName: string, existingIdentifiers?: Set<s
 
 	return getUniqueName(Array.from(existingIdentifiers ?? []), name ?? inputName, "/");
 }
+
+export function isGlobalAssignment(node: ts.AccessExpression): boolean {
+	let currentNode: ts.Node | undefined = node;
+	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
+		if (!currentNode.parent) {
+			return false;
+		}
+		if (ts.isBinaryExpression(currentNode.parent)) {
+			return currentNode.parent.left === currentNode &&
+				currentNode.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken;
+		}
+		currentNode = currentNode.parent;
+	}
+	return false;
+}

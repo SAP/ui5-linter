@@ -13,6 +13,7 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
+	isGlobalAssignment,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -1607,15 +1608,17 @@ export default class SourceFileLinter {
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
 				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
-				const {moduleName, exportName, propertyAccess} = this.getImportFromGlobal(namespace);
+
+				const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
+				let fixHints = {};
+				if (fixable) {
+					fixHints = this.getImportFromGlobal(namespace);
+				}
+
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-					fixHints: {
-						moduleName,
-						exportName,
-						propertyAccess, // TODO: Provide end position instead?
-					},
+					fixHints,
 				}, node);
 			}
 		}
