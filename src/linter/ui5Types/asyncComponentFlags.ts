@@ -6,7 +6,7 @@ import LinterContext from "../LinterContext.js";
 import jsonMap from "json-source-map";
 import type {jsonSourceMapType} from "../manifestJson/ManifestLinter.js";
 import {MESSAGE} from "../messages.js";
-import {getPropertyNameText} from "./utils.js";
+import {getPropertyNameText} from "./utils/utils.js";
 
 type propsRecordValueType = string | boolean | undefined | null | number | propsRecord;
 type propsRecord = Record<string, {

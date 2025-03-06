@@ -7,7 +7,7 @@ import {
 	findClassMember,
 	getSymbolForPropertyInConstructSignatures,
 	isClassMethod,
-} from "../../../../src/linter/ui5Types/utils.js";
+} from "../../../../src/linter/ui5Types/utils/utils.js";
 
 function createProgram(code: string) {
 	const compilerOptions: ts.CompilerOptions = {
