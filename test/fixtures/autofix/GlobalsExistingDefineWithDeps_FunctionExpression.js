@@ -10,12 +10,16 @@ const factoryFn = function(ButtonRenamed) {
 	const button3 = new window.sap.m.Button({
 		text: "Hello"
 	});
-	sap.ui.core.ValueState.Success;
+	const fileUploader = new sap.ui.unified.FileUploader({
+		valueState: sap.ui.core.ValueState.Success
+	});
 	const core = sap.ui.core;
-	core.ValueState.Success;
+	const fileUploader2 = new sap.ui.unified.FileUploader({
+		valueState: core.ValueState.Success
+	});
 	sap.ui.view("myView");
 	sap.m.URLHelper.triggerSms();
-	
+
 	sap.ui.require(["sap/m/Dialog", "sap/m/MessageToast", "sap/f/library"], function(Dialog, MessageToast, fLib) {
 		sap.f.AvatarType.Icon;
 		fLib.AvatarType.Image;
