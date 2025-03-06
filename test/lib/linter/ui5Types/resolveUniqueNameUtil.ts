@@ -1,5 +1,5 @@
 import test from "ava";
-import {resolveUniqueName} from "../../../src/linter/ui5Types/utils/utils.ts";
+import {resolveUniqueName} from "../../../../src/linter/ui5Types/utils/utils.js";
 
 test("resolveUniqueName: sap/ui/thirdparty/jquery", (t) => {
 	t.is(resolveUniqueName("sap/ui/thirdparty/jquery"), "jQuery");
