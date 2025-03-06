@@ -4,6 +4,7 @@ import {ModuleDeclaration} from "./parseModuleDeclaration.js";
 import rewriteExtendCall, {UnsupportedExtendCall} from "./rewriteExtendCall.js";
 import {UnsupportedModuleError, toPosStr} from "./util.js";
 import pruneNode from "./pruneNode.js";
+import {resolveUniqueName} from "../utils/utils.js";
 const {SyntaxKind} = ts;
 
 const log = getLogger("linter:ui5Types:amdTranspiler:moduleDeclarationToDefinition");
@@ -95,7 +96,7 @@ function collectImports(
 		if (factoryRequiresCallWrapper) {
 			// Generate variable name based on import module
 			// Later this variable will be used to call the factory function
-			identifier = nodeFactory.createUniqueName(dep.text.replace(/[^a-zA-Z0-9]/g, "_"));
+			identifier = nodeFactory.createUniqueName(resolveUniqueName(dep.text));
 		} else if (factoryParams?.[i]) {
 			// Use factory parameter identifier as import identifier
 			identifier = factoryParams[i];
