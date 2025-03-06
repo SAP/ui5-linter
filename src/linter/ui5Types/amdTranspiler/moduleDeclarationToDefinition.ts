@@ -49,7 +49,7 @@ function collectImports(
 		return {imports, identifiers};
 	}
 
-	let factoryParams: ts.Identifier[] | undefined;
+	let factoryParams: (ts.Identifier | ts.ObjectBindingPattern)[] | undefined;
 	let factoryRequiresCallWrapper = false;
 	if (moduleDeclaration.factory) {
 		if (ts.isFunctionExpression(moduleDeclaration.factory) ||
@@ -57,13 +57,12 @@ function collectImports(
 			ts.isFunctionDeclaration(moduleDeclaration.factory)) {
 			// Extract parameter names
 			factoryParams = moduleDeclaration.factory.parameters.map((param) => {
-				if (!ts.isIdentifier(param.name)) {
-					// Indicates destructuring in factory signature. This is not (yet?) supported
-					throw new UnsupportedModuleError(
-						`Unexpected parameter type ${ts.SyntaxKind[param.kind]} ` +
-						`at ${toPosStr(param)}`);
+				if (ts.isIdentifier(param.name) || ts.isObjectBindingPattern(param.name)) {
+					return param.name;
+				} else {
+					throw new UnsupportedModuleError(`Unable to determine parameter name for factory. Can't parse ` +
+						`parameter at ${toPosStr(param)}`);
 				}
-				return param.name;
 			});
 		} else if (ts.isIdentifier(moduleDeclaration.factory)) {
 			factoryRequiresCallWrapper = true;
@@ -92,20 +91,25 @@ function collectImports(
 			moduleSpecifier = dep;
 		}
 		let identifier: ts.Identifier | undefined;
+		let namedImports: ts.NamedImports | undefined;
 		if (factoryRequiresCallWrapper) {
 			// Generate variable name based on import module
 			// Later this variable will be used to call the factory function
 			identifier = nodeFactory.createUniqueName(dep.text.replace(/[^a-zA-Z0-9]/g, "_"));
 		} else if (factoryParams?.[i]) {
 			// Use factory parameter identifier as import identifier
-			identifier = factoryParams[i];
+			const factoryParam = factoryParams[i];
+			if (ts.isIdentifier(factoryParam)) {
+				identifier = factoryParam;
+			} else if (ts.isObjectBindingPattern(factoryParam)) {
+				namedImports = createNamedImportsFromObjectBindingPattern(factoryParam, nodeFactory);
+			}
 		} // else: Side effect imports. No identifier needed
 
-		let importClause;
 		if (identifier) {
 			identifiers.push(identifier);
-			importClause = nodeFactory.createImportClause(false, identifier, undefined);
 		}
+		const importClause = nodeFactory.createImportClause(false, identifier, namedImports);
 
 		imports.push(nodeFactory.createImportDeclaration(
 			undefined,
@@ -342,4 +346,21 @@ function createDefaultExport(factory: ts.NodeFactory, node: ts.Node): ts.Stateme
 				`Unable to create default export assignment for node of type ${SyntaxKind[node.kind]} at ` +
 				toPosStr(node));
 	}
+}
+
+function createNamedImportsFromObjectBindingPattern(
+	objectBindingPattern: ts.ObjectBindingPattern, nodeFactory: ts.NodeFactory
+): ts.NamedImports {
+	const elements: ts.ImportSpecifier[] = [];
+	for (const element of objectBindingPattern.elements) {
+		if (ts.isBindingElement(element)) {
+			if (ts.isIdentifier(element.name)) {
+				elements.push(nodeFactory.createImportSpecifier(false, undefined, element.name));
+			} else {
+				throw new UnsupportedModuleError(
+					`Unsupported parameter destructuring for factory at ${toPosStr(element.name)}`);
+			}
+		}
+	}
+	return nodeFactory.createNamedImports(elements);
 }
