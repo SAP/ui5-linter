@@ -5,6 +5,9 @@ import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {collectModuleIdentifiers, getIdentifierForImport} from "./utils.js";
+import {getLogger} from "@ui5/logger";
+
+const log = getLogger("linter:autofix");
 
 export interface AutofixResource {
 	content: string;
@@ -171,17 +174,15 @@ export default async function ({
 	const checker = program.getTypeChecker();
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
+		log.verbose(`Applying autofixes to ${resourcePath}`);
 		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!);
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
-				context.addLintingMessage(
-					resourcePath,
-					MESSAGE.PARSING_ERROR,
-					{
-						message: "After applying autofix: " + jsErrors.map((d) => d.messageText as string).join(", "),
-					}
-				);
+				const message = `Syntax error after applying autofix for '${resourcePath}': ` +
+					jsErrors.map((d) => d.messageText as string).join(", ");
+				log.verbose(message);
+				context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 			} else {
 				res.set(resourcePath, newContent);
 			}

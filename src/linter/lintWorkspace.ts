@@ -15,6 +15,9 @@ import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
 import autofix, {AutofixResource} from "../autofix/autofix.js";
 import {writeFile} from "node:fs/promises";
 import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
+import {getLogger} from "@ui5/logger";
+
+const log = getLogger("linter:lintWorkspace");
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
@@ -43,12 +46,19 @@ export default async function lintWorkspace(
 			});
 		}
 
+		log.verbose(`Autofixing ${autofixResources.size} files...`);
+		const doneAutofix = taskStart("Autofix");
+
 		const autofixResult = await autofix({
 			rootDir: options.rootDir,
 			namespace: options.namespace,
 			resources: autofixResources,
 			context,
 		});
+
+		doneAutofix();
+
+		log.verbose(`Autofix provided solutions for ${autofixResult.size} files`);
 
 		if (autofixResult.size > 0) {
 			for (const [filePath, content] of autofixResult.entries()) {
@@ -60,16 +70,21 @@ export default async function lintWorkspace(
 				await filePathsWorkspace.write(newResource);
 			}
 
+			log.verbose("Linting again after applying fixes...");
+
 			// Run lint again after fixes are applied
 			context = await runLintWorkspace(
 				workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
 			);
 
 			// Update fixed files on the filesystem
-			if (!process.env.UI5LINT_FIX_DRY_RUN) {
+			if (process.env.UI5LINT_FIX_DRY_RUN) {
+				log.verbose("UI5LINT_FIX_DRY_RUN: Not updating files on the filesystem");
+			} else {
 				const autofixFiles = Array.from(autofixResult.entries());
 				await Promise.all(autofixFiles.map(async ([filePath, content]) => {
 					const realFilePath = transformVirtualPathToFilePath(filePath, options);
+					log.verbose(`Writing fixed file '${filePath}' to '${realFilePath}'`);
 					await writeFile(realFilePath, content);
 				}));
 			}
