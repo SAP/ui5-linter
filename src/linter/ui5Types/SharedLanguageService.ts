@@ -1,11 +1,15 @@
 import ts from "typescript";
 import LanguageServiceHostProxy from "./LanguageServiceHostProxy.js";
+import {getLogger} from "@ui5/logger";
+
+const log = getLogger("linter:SharedLanguageService");
 
 export default class SharedLanguageService {
 	private readonly languageServiceHostProxy: LanguageServiceHostProxy;
 	private readonly languageService: ts.LanguageService;
 	private acquired = false;
 	private projectScriptVersion = 0;
+	private fileScriptVersions = new Map<string, number>();
 
 	constructor() {
 		this.languageServiceHostProxy = new LanguageServiceHostProxy();
@@ -43,6 +47,14 @@ export default class SharedLanguageService {
 		this.languageServiceHostProxy.setHost(null);
 
 		this.acquired = false;
+	}
+
+	setScriptVersion(fileName: string, version: number) {
+		return this.fileScriptVersions.set(fileName, version);
+	}
+
+	getScriptVersion(fileName: string) {
+		return this.fileScriptVersions.get(fileName) ?? this.projectScriptVersion;
 	}
 
 	getNextProjectScriptVersion() {
