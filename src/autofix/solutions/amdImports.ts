@@ -156,9 +156,15 @@ export function addDependencies(
 			newParametersValue += ")";
 		}
 
-		const insertAfterParameterDeclaration = parameters?.[insertAfterIndex];
+		const insertAfterParameterDeclaration = parameters[insertAfterIndex];
+
+		const existingParameterLeft = insertAfterIndex > -1 && parameters.length > 0;
+		const existingParameterRight = insertAfterIndex === -1 && parameters.length > 0;
+
+		let value = existingParameterLeft ? ", " + newParametersValue : newParametersValue;
+		value += existingParameterRight ? ", " : "";
+
 		const start = insertAfterParameterDeclaration?.getEnd() ?? parameterSyntax.syntaxList.getStart();
-		const value = parameters.length ? ", " + newParametersValue : newParametersValue;
 		changeSet.push({
 			action: ChangeAction.INSERT,
 			start,
