@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
 import {collectModuleIdentifiers} from "../utils.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+const LINE_LENGTH_LIMIT = 200;
 
 function createDependencyMap(dependencies: ts.NodeArray<ts.Expression> | undefined) {
 	const dependencyMap = new Map<string, {node: ts.StringLiteralLike; index: number}>();
@@ -123,7 +124,7 @@ export function addDependencies(
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
-				value,
+				value: formatDependencies(value, identifiersSeparator, {pos: start, node: syntaxList}),
 			});
 		} else if (moduleDeclaration.dependencies) {
 			const start = moduleDeclaration.dependencies.getStart();
@@ -203,4 +204,38 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			});
 		}
 	}
+}
+
+function extractIdentifierSeparator(input: string) {
+	const match = /^(\s)+/.exec(input);
+	return match ? `,${match[0]}` : ", ";
+}
+
+function formatDependencies(input: string, depsSeparator: string, posInfo: {pos: number; node: ts.Node}) {
+	const {node, pos} = posInfo;
+	const {character} = node.getSourceFile().getLineAndCharacterOfPosition(pos);
+
+	let offset = character + 1;
+
+	// If the input is multiline, we don't need to format it
+	if (depsSeparator.includes("\n") || (input.length + offset) <= LINE_LENGTH_LIMIT) {
+		return input;
+	}
+
+	const inputChunks = input.split(",");
+	let finalString = "";
+	let curLineLength = 0;
+	inputChunks.forEach((chunk) => {
+		if ((curLineLength + chunk.length + offset) > LINE_LENGTH_LIMIT) {
+			curLineLength = 0;
+			finalString += `\n`;
+			// The offset is important only for the first line
+			offset = 0;
+		}
+
+		finalString += `${chunk},`;
+		curLineLength += chunk.length;
+	});
+
+	return finalString.substring(0, finalString.length - 1); // Cut the last comma
 }
