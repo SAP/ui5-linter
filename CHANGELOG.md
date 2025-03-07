@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.1](https://github.com/SAP/ui5-linter/compare/v1.11.0...v1.11.1) (2025-03-07)
+
+
+### Performance Improvements
+
+* Prevent unnecessary TypeScript libReplacement lookup ([dac9f88](https://github.com/SAP/ui5-linter/commit/dac9f883acc513415ac24b17d102298e98e9eed0))
+
+
+### Dependencies
+
+* Bump typescript from 5.7.3 to 5.8.2 ([ed84349](https://github.com/SAP/ui5-linter/commit/ed843499b5f9f5f3dc2b9e979f31862a2afc357b))
+
 ## [1.11.0](https://github.com/SAP/ui5-linter/compare/v1.10.0...v1.11.0) (2025-02-28)
 
 
