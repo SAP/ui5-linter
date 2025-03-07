@@ -168,17 +168,11 @@ export async function createVirtualLanguageServiceHost(
 		},
 
 		getScriptVersion: (fileName) => {
+			const scriptVersion = sharedLanguageService.getScriptVersion(fileName);
 			if (silly) {
-				log.silly(`getScriptVersion: ${fileName}`);
+				log.silly(`getScriptVersion: ${fileName} ${scriptVersion}`);
 			}
-			// Note: The script version for the common files at /types/ is handled within the LanguageServiceHostProxy
-
-			// Currently we don't use incremental compilation within a project, so
-			// updating the script version is not necessary.
-			// However, as the language service is shared across multiple projects, we need
-			// to provide a version that is unique for each project to avoid impacting other
-			// projects that might use the same file path.
-			return sharedLanguageService.getScriptVersion(fileName).toString();
+			return scriptVersion.toString();
 		},
 
 		getScriptSnapshot: (fileName) => {

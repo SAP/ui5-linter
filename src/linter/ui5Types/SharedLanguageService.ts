@@ -54,9 +54,7 @@ export default class SharedLanguageService {
 	}
 
 	getScriptVersion(fileName: string) {
-		const scriptVersion = this.fileScriptVersions.get(fileName) ?? this.projectScriptVersion;
-		log.silly(`getScriptVersion ${fileName} ${scriptVersion}`);
-		return scriptVersion;
+		return this.fileScriptVersions.get(fileName) ?? this.projectScriptVersion;
 	}
 
 	getNextProjectScriptVersion() {
