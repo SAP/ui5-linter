@@ -3,6 +3,7 @@ import {Detail, Reader, SaxEventType, SAXParser, Tag, Text} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
+import {Readable} from "node:stream";
 const require = createRequire(import.meta.url);
 
 export function isSaxParserToJSON(tag: unknown): tag is Tag {
@@ -38,27 +39,16 @@ export async function parseXML(
 	const saxWasmBuffer = await initSaxWasm();
 	const saxParser = new SAXParser(SaxEventType.CloseTag + SaxEventType.OpenTag);
 
-	saxParser.eventHandler = parseHandler;
-
 	// Instantiate and prepare the wasm for parsing
 	if (!await saxParser.prepareWasm(saxWasmBuffer)) {
 		throw new Error("Unknown error during WASM Initialization");
 	}
 
-	// stream from a file in the current directory
-	contentStream.on("data", (chunk: Uint8Array) => {
-		try {
-			saxParser.write(chunk);
-		} catch (err) {
-			if (err instanceof Error) {
-				// In case of an error, destroy the content stream to make the
-				// error bubble up to our callers
-				contentStream.destroy(err);
-			} else {
-				throw err;
-			}
-		}
-	});
+	const webContentStream = Readable.toWeb(contentStream);
+
+	for await (const [event, detail] of saxParser.parse(webContentStream.getReader())) {
+		parseHandler(event, detail);
+	}
+
 	await finished(contentStream);
-	saxParser.end();
 }
