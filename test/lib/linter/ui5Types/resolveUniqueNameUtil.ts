@@ -26,7 +26,7 @@ test("resolveUniqueName: Relative library module (one folder up)", (t) => {
 });
 
 test("resolveUniqueName: Controller module", (t) => {
-	t.is(resolveUniqueName("./controller/App.controller"), "App_controller");
+	t.is(resolveUniqueName("./controller/App.controller"), "AppController");
 });
 
 test("resolveUniqueName: sap/ui/thirdparty/sinon-qunit", (t) => {
@@ -34,5 +34,5 @@ test("resolveUniqueName: sap/ui/thirdparty/sinon-qunit", (t) => {
 });
 
 test("resolveUniqueName: Module name with multiple illegal characters", (t) => {
-	t.is(resolveUniqueName("./my-super--module"), "mySuper_module");
+	t.is(resolveUniqueName("./my-super--module"), "mySuperModule");
 });
