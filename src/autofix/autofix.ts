@@ -182,6 +182,7 @@ export default async function ({
 				const message = `Syntax error after applying autofix for '${resourcePath}': ` +
 					jsErrors.map((d) => d.messageText as string).join(", ");
 				log.verbose(message);
+				log.verbose(resourcePath + ":\n" + newContent);
 				context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 			} else {
 				res.set(resourcePath, newContent);
