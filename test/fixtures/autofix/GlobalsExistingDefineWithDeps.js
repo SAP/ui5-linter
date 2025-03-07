@@ -1,4 +1,11 @@
-sap.ui.define(["sap/m/Button", "sap/m/Avatar", "sap/m/ComboBox"], function(ButtonRenamed) {
+sap.ui.define([
+	"sap/m/Button",
+	"sap/m/Avatar",
+	"sap/m/ComboBox"
+], function(
+	ButtonRenamed,
+	Avatar
+) {
 	const avatarDOM = jQuery("#container-todo---app--avatar-profile");
 	const list = sap.ui.getCore().byId("container-todo---app--todoList");
 	sap.m.BackgroundDesign.Solid
@@ -20,6 +27,8 @@ sap.ui.define(["sap/m/Button", "sap/m/Avatar", "sap/m/ComboBox"], function(Butto
 	});
 	sap.ui.view("myView");
 	sap.m.URLHelper.triggerSms();
+
+	const avatar = new Avatar();
 
 	sap.ui.require(["sap/m/Dialog", "sap/m/MessageToast", "sap/f/library"], function(Dialog, MessageToast, fLib) {
 		sap.f.AvatarType.Icon;

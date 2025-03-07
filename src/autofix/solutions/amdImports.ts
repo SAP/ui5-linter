@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
 import {collectModuleIdentifiers} from "../utils.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+const LINE_LENGTH_LIMIT = 200;
 
 export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
@@ -16,16 +17,22 @@ export function addDependencies(
 	const declaredIdentifiers = collectModuleIdentifiers(moduleDeclaration.factory);
 
 	const defineCallArgs = defineCall.arguments;
-	const existingImportModules = defineCall.arguments && ts.isArrayLiteralExpression(defineCallArgs[0]) ?
-			defineCallArgs[0].elements.map((el) => ts.isStringLiteralLike(el) ? el.text : "") :
-			[];
+	let existingImportModules: string[] = [];
+	let depsSeparator = ", ";
+	if (defineCall.arguments && ts.isArrayLiteralExpression(defineCallArgs[0])) {
+		existingImportModules = defineCallArgs[0].elements.map((el) => ts.isStringLiteralLike(el) ? el.text : "");
+		depsSeparator = extractIdentifierSeparator(defineCallArgs[0].elements[0]?.getFullText() ?? "");
+	}
 
 	if (!ts.isFunctionLike(moduleDeclaration.factory)) {
 		throw new Error("Invalid factory function");
 	}
+
 	const existingIdentifiers = moduleDeclaration.factory
 		.parameters.map((param: ts.ParameterDeclaration) => (param.name as ts.Identifier).text);
 	const existingIdentifiersLength = existingIdentifiers.length;
+	const identifiersSeparator = extractIdentifierSeparator(
+		moduleDeclaration.factory.parameters[0]?.getFullText() ?? "");
 
 	const imports = [...importRequests.keys()];
 
@@ -72,21 +79,25 @@ export function addDependencies(
 				changeSet.push({
 					action: ChangeAction.INSERT,
 					start: insertAfterElement.getEnd(),
-					value: (existingImportModules.length ? ", " : "") + dependencies.join(", "),
+					value: formatDependencies((existingImportModules.length ? depsSeparator : "") +
+						dependencies.join(depsSeparator), depsSeparator,
+					{pos: insertAfterElement.getEnd(), node: insertAfterElement}),
 				});
 			} else {
 				changeSet.push({
 					action: ChangeAction.REPLACE,
 					start: depsNode.getFullStart(),
 					end: depsNode.getEnd(),
-					value: `[${dependencies.join(", ")}]`,
+					value: `[${formatDependencies(dependencies.join(depsSeparator),
+						depsSeparator, {pos: defineCall.arguments[0].getFullStart(), node: defineCall.arguments[0]})}]`,
 				});
 			}
 		} else {
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start: defineCall.arguments[0].getFullStart(),
-				value: `[${dependencies.join(", ")}], `,
+				value: `[${formatDependencies(dependencies.join(depsSeparator),
+					depsSeparator, {pos: defineCall.arguments[0].getFullStart(), node: defineCall.arguments[0]})}], `,
 			});
 		}
 	}
@@ -102,7 +113,7 @@ export function addDependencies(
 		}
 
 		// Patch factory arguments
-		const value = (existingIdentifiersLength ? ", " : "") + identifiers.join(", ");
+		const value = (existingIdentifiersLength ? identifiersSeparator : "") + identifiers.join(identifiersSeparator);
 		if (!closeParenToken) {
 			changeSet.push({
 				action: ChangeAction.INSERT,
@@ -112,7 +123,8 @@ export function addDependencies(
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start: syntaxList.getEnd(),
-				value: `${value})`,
+				value: `${formatDependencies(value, identifiersSeparator,
+					{pos: syntaxList.getStart(), node: syntaxList})})`,
 			});
 		} else {
 			let start = syntaxList.getEnd();
@@ -126,7 +138,7 @@ export function addDependencies(
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
-				value,
+				value: formatDependencies(value, identifiersSeparator, {pos: start, node: syntaxList}),
 			});
 		}
 	}
@@ -162,4 +174,38 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			});
 		}
 	}
+}
+
+function extractIdentifierSeparator(input: string) {
+	const match = /^(\s)+/.exec(input);
+	return match ? `,${match[0]}` : ", ";
+}
+
+function formatDependencies(input: string, depsSeparator: string, posInfo: {pos: number; node: ts.Node}) {
+	const {node, pos} = posInfo;
+	const {character} = node.getSourceFile().getLineAndCharacterOfPosition(pos);
+
+	let offset = character + 1;
+
+	// If the input is multiline, we don't need to format it
+	if (depsSeparator.includes("\n") || (input.length + offset) <= LINE_LENGTH_LIMIT) {
+		return input;
+	}
+
+	const inputChunks = input.split(",");
+	let finalString = "";
+	let curLineLength = 0;
+	inputChunks.forEach((chunk) => {
+		if ((curLineLength + chunk.length + offset) > LINE_LENGTH_LIMIT) {
+			curLineLength = 0;
+			finalString += `\n`;
+			// The offset is important only for the first line
+			offset = 0;
+		}
+
+		finalString += `${chunk},`;
+		curLineLength += chunk.length;
+	});
+
+	return finalString.substring(0, finalString.length - 1); // Cut the last comma
 }
