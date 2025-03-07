@@ -143,27 +143,23 @@ export const getUniqueName = function (
 	let candidate = adjustCase(sResultName);
 	if (!isValidIdentifierName(candidate)) {
 		candidate = adjustCase("O") + sResultName;
+		if (!isValidIdentifierName(candidate)) {
+			throw new Error(`Failed to create a valid identifier name for '${sResultName}', tried '${candidate}'`);
+		}
 	}
 	sResultName = candidate;
 
 	// add suffix to make it unique
-	candidate = sResultName;
-	const iMaxIterations = 100;
-	for (let i = 0; i < iMaxIterations; i++) {
-		if (
-			isValidIdentifierName(candidate) &&
-			!alreadyExists(usedNames, candidate, additionalCheck)
-		) {
-			return candidate;
-		}
+	let i = 0;
+	while (alreadyExists(usedNames, candidate, additionalCheck)) {
 		candidate = sResultName + i;
+		if (!isValidIdentifierName(candidate)) {
+			throw new Error(`Invalid unique identifier name '${candidate}' for '${sResultName}'`);
+		}
+		i++;
 	}
 
-	throw new Error(
-		`Did not find a valid unique name for ${sResultName} within ${
-			iMaxIterations - 1
-		} iterations.`
-	);
+	return candidate;
 };
 
 /**
