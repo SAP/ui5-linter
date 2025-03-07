@@ -6,6 +6,7 @@ import {createRequire} from "node:module";
 import transpileAmdToEsm from "./amdTranspiler/transpiler.js";
 import LinterContext, {ResourcePath} from "../LinterContext.js";
 import {getLogger} from "@ui5/logger";
+import type SharedLanguageService from "./SharedLanguageService.js";
 const log = getLogger("linter:ui5Types:host");
 const require = createRequire(import.meta.url);
 
@@ -72,7 +73,7 @@ export async function createVirtualLanguageServiceHost(
 	options: ts.CompilerOptions,
 	files: FileContents, sourceMaps: FileContents,
 	context: LinterContext,
-	projectScriptVersion: string
+	sharedLanguageService: SharedLanguageService
 ): Promise<ts.LanguageServiceHost> {
 	const silly = log.isLevelEnabled("silly");
 
@@ -177,7 +178,7 @@ export async function createVirtualLanguageServiceHost(
 			// However, as the language service is shared across multiple projects, we need
 			// to provide a version that is unique for each project to avoid impacting other
 			// projects that might use the same file path.
-			return projectScriptVersion;
+			return sharedLanguageService.getScriptVersion(fileName).toString();
 		},
 
 		getScriptSnapshot: (fileName) => {

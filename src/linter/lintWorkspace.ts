@@ -44,6 +44,7 @@ export default async function lintWorkspace(
 				content,
 				messages: rawMessages,
 			});
+			// patternsMatch.add(filePath); // Eventually filter files that have been autofixed
 		}
 
 		log.verbose(`Autofixing ${autofixResources.size} files...`);
@@ -68,6 +69,7 @@ export default async function lintWorkspace(
 				});
 				await workspace.write(newResource);
 				await filePathsWorkspace.write(newResource);
+				sharedLanguageService.setScriptVersion(filePath, sharedLanguageService.getScriptVersion(filePath) + 1);
 			}
 
 			log.verbose("Linting again after applying fixes...");

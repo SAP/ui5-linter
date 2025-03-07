@@ -109,10 +109,8 @@ export default class TypeLinter {
 			}
 		}
 
-		const projectScriptVersion = this.#sharedLanguageService.getNextProjectScriptVersion();
-
 		const host = await createVirtualLanguageServiceHost(
-			this.#compilerOptions, files, this.#sourceMaps, this.#context, projectScriptVersion
+			this.#compilerOptions, files, this.#sourceMaps, this.#context, this.#sharedLanguageService
 		);
 
 		this.#sharedLanguageService.acquire(host);
