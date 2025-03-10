@@ -167,6 +167,14 @@ Currently, the linter supports fixing of the following issues:
 
 After applying fixes, the linter runs another pass to detect any remaining issues. Not all findings may be fixable, so those issues may need to be addressed manually.  
 
+##### Dry Run Mode
+To preview the results of `--fix` without modifying any files, set the UI5LINT_FIX_DRY_RUN environment variable:
+
+```sh
+UI5LINT_FIX_DRY_RUN=1 ui5lint --fix
+```
+In this mode, the linter will show the messages after the fixes would have been applied but will not actually change the files.
+
 #### `--ignore-pattern`
 
 Pattern/files that will be ignored during linting. Can also be defined in `ui5lint.config.js`.
