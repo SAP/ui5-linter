@@ -36,7 +36,7 @@ test("ui5lint API: No arguments", async (t) => {
 
 	const res = await ui5lint();
 
-	t.deepEqual(res, []);
+	t.deepEqual(res.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 1);
 	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
@@ -59,7 +59,7 @@ test("ui5lint API: Empty options", async (t) => {
 
 	const res = await ui5lint({});
 
-	t.deepEqual(res, []);
+	t.deepEqual(res.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 1);
 	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
@@ -121,7 +121,7 @@ test("UI5LinterEngine: Calling 'lint'", async (t) => {
 
 	const results = await engine.lint({});
 
-	t.deepEqual(results, []);
+	t.deepEqual(results.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 1);
 	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
