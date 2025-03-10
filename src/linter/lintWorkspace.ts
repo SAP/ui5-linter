@@ -38,6 +38,12 @@ export default async function lintWorkspace(
 			let resource = await workspace.byPath(filePath);
 			if (!resource) {
 				resource = await rootReader.byPath(filePath);
+				if (!resource) {
+					// This might happen in case a file with an existing source map was linted and the referenced
+					// file is not available in the workspace.
+					log.verbose(`Resource '${filePath}' not found. Skipping autofix for this file.`);
+					continue;
+				}
 			}
 			const content = await resource.getString();
 			autofixResources.set(filePath, {
