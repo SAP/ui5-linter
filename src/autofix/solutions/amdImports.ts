@@ -71,6 +71,10 @@ export function addDependencies(
 
 	const newDependencies: {moduleName: string; identifier: string}[] = [];
 
+	const depsSeparator = extractIdentifierSeparator(dependencies?.[0]?.getFullText() ?? "");
+	const identifiersSeparator = extractIdentifierSeparator(
+		moduleDeclaration.factory.parameters[0]?.getFullText() ?? "");
+
 	// Calculate after which index we can add new dependencies
 	const insertAfterIndex = Math.min(parameters.length, dependencies?.length ?? 0) - 1;
 
@@ -112,19 +116,19 @@ export function addDependencies(
 	if (newDependencies.length) {
 		const newDependencyValue = newDependencies.map((newDependency) => {
 			return `"${newDependency.moduleName}"`;
-		}).join(", ");
+		}).join(depsSeparator);
 
 		const insertAfterDependencyElement = dependencies?.[insertAfterIndex];
 		if (insertAfterDependencyElement || (dependencies && insertAfterIndex === -1)) {
 			const existingDependenciesLeft = insertAfterIndex > -1 && dependencyMap.size > 0;
 			const existingDependenciesRight = insertAfterIndex === -1 && dependencyMap.size > 0;
-			let value = existingDependenciesLeft ? ", " + newDependencyValue : newDependencyValue;
+			let value = existingDependenciesLeft ? (depsSeparator + newDependencyValue) : newDependencyValue;
 			value += existingDependenciesRight ? ", " : "";
 			const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
-				value: formatDependencies(value, identifiersSeparator, {pos: start, node: syntaxList}),
+				value: formatDependencies(value, depsSeparator, {pos: start, node: defineCall}),
 			});
 		} else if (moduleDeclaration.dependencies) {
 			const start = moduleDeclaration.dependencies.getStart();
@@ -133,20 +137,21 @@ export function addDependencies(
 				action: ChangeAction.REPLACE,
 				start,
 				end,
-				value: `[${newDependencyValue}]`,
+				value: `[${formatDependencies(newDependencyValue, depsSeparator, {pos: start, node: defineCall})}]`,
 			});
 		} else {
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				// TODO: is this correct if the module name is defined as first argument?
 				start: defineCall.arguments[0].getFullStart(),
-				value: `[${newDependencyValue}], `,
+				value: `[${formatDependencies(newDependencyValue, depsSeparator,
+					{pos: defineCall.arguments[0].getFullStart(), node: defineCall})}], `,
 			});
 		}
 
 		let newParametersValue = newDependencies.map((newDependency) => {
 			return newDependency.identifier;
-		}).join(", ");
+		}).join(identifiersSeparator);
 
 		if (!parameterSyntax.hasParens) {
 			changeSet.push({
@@ -162,14 +167,14 @@ export function addDependencies(
 		const existingParameterLeft = insertAfterIndex > -1 && parameters.length > 0;
 		const existingParameterRight = insertAfterIndex === -1 && parameters.length > 0;
 
-		let value = existingParameterLeft ? ", " + newParametersValue : newParametersValue;
+		let value = existingParameterLeft ? (identifiersSeparator + newParametersValue) : newParametersValue;
 		value += existingParameterRight ? ", " : "";
 
 		const start = insertAfterParameterDeclaration?.getEnd() ?? parameterSyntax.syntaxList.getStart();
 		changeSet.push({
 			action: ChangeAction.INSERT,
 			start,
-			value,
+			value: formatDependencies(value, identifiersSeparator, {pos: start, node: defineCall}),
 		});
 	}
 

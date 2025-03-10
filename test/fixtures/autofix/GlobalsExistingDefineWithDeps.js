@@ -28,7 +28,7 @@ sap.ui.define([
 	sap.ui.view("myView");
 	sap.m.URLHelper.triggerSms();
 
-	const avatar = new Avatar();
+	const avatar = new sap.m.Avatar();
 
 	sap.ui.require(["sap/m/Dialog", "sap/m/MessageToast", "sap/f/library"], function(Dialog, MessageToast, fLib) {
 		sap.f.AvatarType.Icon;
