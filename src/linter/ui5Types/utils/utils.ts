@@ -193,5 +193,31 @@ export function resolveUniqueName(inputName: string, existingIdentifiers?: Set<s
 		}
 	}
 
-	return getUniqueName(Array.from(existingIdentifiers ?? []), name ?? inputName, "/");
+	name = name ?? camelize(identifier);
+	if (existingIdentifiers?.has(name)) {
+		name = getUniqueName(Array.from(existingIdentifiers ?? []), inputName, "/");
+	}
+	return name;
+}
+
+// Camelize a string by replacing invalid identifier characters
+function camelize(str: string): string {
+	return str.replace(/[^\p{ID_Start}\p{ID_Continue}]+([\p{ID_Start}\p{ID_Continue}])/gu, (_match, nextChar) => {
+		return typeof nextChar === "string" ? nextChar.toUpperCase() : "";
+	});
+}
+
+export function isGlobalAssignment(node: ts.AccessExpression): boolean {
+	let currentNode: ts.Node | undefined = node;
+	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
+		if (!currentNode.parent) {
+			return false;
+		}
+		if (ts.isBinaryExpression(currentNode.parent)) {
+			return currentNode.parent.left === currentNode &&
+				currentNode.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken;
+		}
+		currentNode = currentNode.parent;
+	}
+	return false;
 }

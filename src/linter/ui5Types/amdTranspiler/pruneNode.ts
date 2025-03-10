@@ -21,11 +21,13 @@ export class UnsafeNodeRemoval extends Error {
  */
 export default function (node: ts.Node) {
 	let nodeToRemove: ts.Node | undefined = node;
+	let greatestRemovableNode: ts.Node | undefined = undefined;
 	try {
 		while (nodeToRemove) {
 			// Attempt to prune the node, if the parent can exist without it
 			if (pruneNode(nodeToRemove)) {
 				nodeToRemove = nodeToRemove.parent;
+				greatestRemovableNode = nodeToRemove;
 			} else {
 				nodeToRemove = undefined;
 			}
@@ -38,6 +40,7 @@ export default function (node: ts.Node) {
 		}
 		throw err;
 	}
+	return greatestRemovableNode;
 }
 
 /**
