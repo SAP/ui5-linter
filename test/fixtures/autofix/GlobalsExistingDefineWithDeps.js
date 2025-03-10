@@ -1,7 +1,7 @@
 sap.ui.define([
 	"sap/m/Button",
 	"sap/m/Avatar",
-	"sap/m/ComboBox"
+	'sap/m/ComboBox',
 ], function(
 	ButtonRenamed,
 	Avatar

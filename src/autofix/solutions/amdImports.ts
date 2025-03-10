@@ -4,8 +4,13 @@ import {collectModuleIdentifiers} from "../utils.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 const LINE_LENGTH_LIMIT = 200;
 
-function createDependencyMap(dependencies: ts.NodeArray<ts.Expression> | undefined) {
+function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefined) {
 	const dependencyMap = new Map<string, {node: ts.StringLiteralLike; index: number}>();
+	const quoteStyleCount = {
+		"'": 0,
+		"\"": 0,
+		"`": 0,
+	};
 	dependencies?.forEach((dependency, index) => {
 		if (!ts.isStringLiteralLike(dependency)) {
 			return;
@@ -16,8 +21,19 @@ function createDependencyMap(dependencies: ts.NodeArray<ts.Expression> | undefin
 		if (!dependencyMap.has(dependency.text)) {
 			dependencyMap.set(dependency.text, {node: dependency, index});
 		}
+
+		// Check which quote style format is used for existing dependencies
+		// and use the same for the new dependencies (majority wins):
+		if (dependency.getText().startsWith("'")) {
+			quoteStyleCount["'"]++;
+		} else if (dependency.getText().startsWith("\"")) {
+			quoteStyleCount["\""]++;
+		} else if (ts.isNoSubstitutionTemplateLiteral(dependency)) {
+			quoteStyleCount["`"]++;
+		}
 	});
-	return dependencyMap;
+	const mostUsedQuoteStyle = Object.entries(quoteStyleCount).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+	return {dependencyMap, mostUsedQuoteStyle};
 }
 
 function getParameterDeclarationText(param: ts.ParameterDeclaration): string | undefined {
@@ -64,7 +80,7 @@ export function addDependencies(
 	const declaredIdentifiers = collectModuleIdentifiers(moduleDeclaration.factory);
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
-	const dependencyMap = createDependencyMap(dependencies);
+	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies);
 
 	const parameters = moduleDeclaration.factory.parameters;
 	const parameterSyntax = getParameterSyntax(moduleDeclaration.factory);
@@ -115,7 +131,7 @@ export function addDependencies(
 	// Add new dependencies
 	if (newDependencies.length) {
 		const newDependencyValue = newDependencies.map((newDependency) => {
-			return `"${newDependency.moduleName}"`;
+			return `${mostUsedQuoteStyle}${newDependency.moduleName}${mostUsedQuoteStyle}`;
 		}).join(depsSeparator);
 
 		const insertAfterDependencyElement = dependencies?.[insertAfterIndex];
