@@ -23,12 +23,14 @@ export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
 	sharedLanguageService: SharedLanguageService
-): Promise<LintResult[]> {
+): Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
+	let fixableResults;
 	let context = await runLintWorkspace(
 		workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
 	);
 
 	if (options.fix) {
+		const initialLintResults = context.generateLintResults();
 		const rawLintResults = context.generateRawLintResults();
 		const rootReader = context.getRootReader();
 
@@ -95,10 +97,32 @@ export default async function lintWorkspace(
 				}));
 			}
 		}
+
+		fixableResults = calcFixableResults(initialLintResults, context.generateLintResults());
 	}
 
-	return context.generateLintResults();
+	return {results: context.generateLintResults(), fixableResults};
 }
+
+function calcFixableResults(before: LintResult[] | null, after: LintResult[]) {
+	let errCountDiff = 0;
+	let warningCountDiff = 0;
+
+	if (before) {
+		const afterMap = new Map<string, LintResult>();
+		after.forEach((result) => afterMap.set(result.filePath, result));
+
+		before.forEach((beforeResult) => {
+			const afterResult = afterMap.get(beforeResult.filePath);
+			if (afterResult) {
+				errCountDiff += beforeResult.errorCount - afterResult.errorCount;
+				warningCountDiff += beforeResult.warningCount - afterResult.warningCount;
+			}
+		});
+	}
+
+	return {errCountDiff, warningCountDiff};
+};
 
 async function runLintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,

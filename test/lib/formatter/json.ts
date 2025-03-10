@@ -3,25 +3,27 @@ import {Json} from "../../../src/formatter/json.js";
 import {LintResult} from "../../../src/linter/LinterContext.js";
 
 const test = anyTest as TestFn<{
-	lintResults: LintResult[];
+	lintResults: {results: LintResult[]};
 }>;
 
 test.beforeEach((t) => {
-	t.context.lintResults = [{
-		filePath: "",
-		messages: [{
-			ruleId: "no-deprecated-api",
-			severity: 2,
-			line: 5,
-			column: 1,
-			message: "Call to deprecated function 'attachInit' of class 'Core'",
-			messageDetails: "(since 1.118) - Please use {@link sap.ui.core.Core.ready Core.ready} instead.",
+	t.context.lintResults = {
+		results: [{
+			filePath: "",
+			messages: [{
+				ruleId: "no-deprecated-api",
+				severity: 2,
+				line: 5,
+				column: 1,
+				message: "Call to deprecated function 'attachInit' of class 'Core'",
+				messageDetails: "(since 1.118) - Please use {@link sap.ui.core.Core.ready Core.ready} instead.",
+			}],
+			coverageInfo: [],
+			errorCount: 1,
+			fatalErrorCount: 0,
+			warningCount: 0,
 		}],
-		coverageInfo: [],
-		errorCount: 1,
-		fatalErrorCount: 0,
-		warningCount: 0,
-	}];
+	};
 });
 
 test("Test Json Formatter (with '--details true')", (t) => {

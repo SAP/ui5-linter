@@ -51,7 +51,8 @@ export interface UI5LinterOptions {
 	rootDir?: string;
 }
 
-export async function ui5lint(options?: UI5LinterOptions): Promise<LintResult[]> {
+export async function ui5lint(options?: UI5LinterOptions):
+Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
 	return new UI5LinterEngine().lint(options);
 }
 
@@ -59,7 +60,8 @@ export class UI5LinterEngine {
 	private sharedLanguageService = new SharedLanguageService();
 	private lintingInProgress = false;
 
-	async lint(options?: UI5LinterOptions): Promise<LintResult[]> {
+	async lint(options?: UI5LinterOptions):
+	Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
 		if (this.lintingInProgress) {
 			throw new Error("Linting is already in progress");
 		}

@@ -1,7 +1,8 @@
 import {LintMessage, LintResult} from "../linter/LinterContext.js";
 
 export class Json {
-	format(lintResults: LintResult[], showDetails: boolean) {
+	format(lintResults: {results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}},
+		showDetails: boolean) {
 		const jsonFormattedResults: Pick<
 			LintResult,
 			"filePath"
@@ -11,7 +12,7 @@ export class Json {
 			| "fatalErrorCount"
 			// excluded by default: "coverageInfo"
 		>[] = [];
-		lintResults.forEach((oLintedFile) => {
+		lintResults.results.forEach((oLintedFile) => {
 			let aFileMessages: LintMessage[] = oLintedFile.messages;
 
 			// Ignore files without findings (empty messages)

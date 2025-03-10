@@ -172,7 +172,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	if (coverage) {
 		const coverageFormatter = new Coverage();
-		await writeFile("ui5lint-report.html", await coverageFormatter.format(res, new Date()));
+		await writeFile("ui5lint-report.html", await coverageFormatter.format(res.results, new Date()));
 	}
 
 	if (format === "json") {
@@ -192,7 +192,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		await profile.stop();
 	}
 
-	if (res.some((file) => !!file.errorCount)) {
+	if (res.results.some((file) => !!file.errorCount)) {
 		// At least one error is reported. Exit with non-zero exit code.
 		process.exitCode = 1;
 	}

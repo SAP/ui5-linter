@@ -44,7 +44,7 @@ test.serial("lint: All files of com.ui5.troublesome.app", async (t) => {
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: Some files of com.ui5.troublesome.app (without details / coverage)", async (t) => {
@@ -62,14 +62,14 @@ test.serial("lint: Some files of com.ui5.troublesome.app (without details / cove
 		filePatterns: filePaths,
 	});
 
-	assertExpectedLintResults(t, res, projectPath, [
+	assertExpectedLintResults(t, res.results, projectPath, [
 		path.join("webapp", "model", "models.js"),
 		// Comparing files requires platform specific separators,
 		// so, translating POSIX to platform specific.
 		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
 	]);
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: Only /webapp folder from com.ui5.troublesome.app (without details / coverage)", async (t) => {
@@ -85,7 +85,7 @@ test.serial("lint: Only /webapp folder from com.ui5.troublesome.app (without det
 		filePatterns: filePaths,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: One file of com.ui5.troublesome.app (without details / coverage)", async (t) => {
@@ -101,13 +101,13 @@ test.serial("lint: One file of com.ui5.troublesome.app (without details / covera
 		filePatterns: filePaths,
 	});
 
-	assertExpectedLintResults(t, res, projectPath, [
+	assertExpectedLintResults(t, res.results, projectPath, [
 		// Comparing files requires platform specific separators,
 		// so, translating POSIX to platform specific.
 		...filePaths.map((filename) => filename.replaceAll("/", path.sep)),
 	]);
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: com.ui5.troublesome.app with unmatched patterns", async (t) => {
@@ -134,7 +134,7 @@ test.serial("lint: com.ui5.troublesome.app with files property in ui5lint.config
 		config: "ui5lint.config.matched-patterns.mjs",
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of library.with.custom.paths", async (t) => {
@@ -148,7 +148,7 @@ test.serial("lint: All files of library.with.custom.paths", async (t) => {
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
@@ -167,7 +167,7 @@ test.serial("lint: Ignore files from library.with.custom.paths", async (t) => {
 		],
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of library with sap.f namespace", async (t) => {
@@ -181,7 +181,7 @@ test.serial("lint: All files of library with sap.f namespace", async (t) => {
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) => {
@@ -199,7 +199,7 @@ test.serial("lint: All files of mocked minimal sap.ui.core library", async (t) =
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
@@ -213,7 +213,7 @@ test.serial("lint: File out of the namespace of sap.ui.core", async (t) => {
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of library with sap.ui.suite namespace", async (t) => {
@@ -227,7 +227,7 @@ test.serial("lint: All files of library with sap.ui.suite namespace", async (t) 
 		details: true,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of library with sap.ui.unified namespace", async (t) => {
@@ -238,7 +238,7 @@ test.serial("lint: All files of library with sap.ui.unified namespace", async (t
 		rootDir: projectPath,
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: All files of com.ui5.troublesome.app with custom config", async (t) => {
@@ -253,7 +253,7 @@ test.serial("lint: All files of com.ui5.troublesome.app with custom config", asy
 		config: "./ui5lint-custom.config.cjs",
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) => {
@@ -268,7 +268,7 @@ test.serial("lint: com.ui5.troublesome.app with custom UI5 config", async (t) =>
 		ui5Config: "./configs/ui5-custom.yaml",
 	});
 
-	t.snapshot(preprocessLintResultsForSnapshot(res));
+	t.snapshot(preprocessLintResultsForSnapshot(res.results));
 });
 
 test.serial("lint: com.ui5.troublesome.app with custom UI5 config which does NOT exist", async (t) => {
