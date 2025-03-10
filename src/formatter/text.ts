@@ -112,6 +112,13 @@ export class Text {
 			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal errors`));
 		}
 
+		if (lintResults.fixableResults) {
+			this.#writeln(chalk.green(`Autofixed ` +
+				`${lintResults.fixableResults?.errCountDiff + lintResults.fixableResults?.warningCountDiff} problems ` +
+				`(${lintResults.fixableResults?.errCountDiff} errors` +
+				`, ${lintResults.fixableResults?.warningCountDiff} warnings)`));
+		}
+
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {
 			this.#writeln("");
 			this.#writeln(chalk.dim.bold("Note: ") +
