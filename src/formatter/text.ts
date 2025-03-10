@@ -44,13 +44,14 @@ export class Text {
 	constructor(private readonly cwd: string) {
 	}
 
-	format(lintResults: LintResult[], showDetails: boolean) {
+	format(lintResults: {results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}},
+		showDetails: boolean) {
 		this.#writeln(`UI5 linter report:`);
 		this.#writeln("");
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
-		lintResults.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
+		lintResults.results.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
 			if (!errorCount && !warningCount) {
 				return;
 			}

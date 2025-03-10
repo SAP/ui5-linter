@@ -14,7 +14,8 @@ import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/v
 
 export async function lintProject({
 	rootDir, filePatterns, ignorePatterns, coverage, details, fix, configPath, ui5Config, noConfig,
-}: LinterOptions, sharedLanguageService: SharedLanguageService): Promise<LintResult[]> {
+}: LinterOptions, sharedLanguageService: SharedLanguageService):
+	Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
 	if (!path.isAbsolute(rootDir)) {
 		throw new Error(`rootDir must be an absolute path. Received: ${rootDir}`);
 	}
@@ -78,21 +79,21 @@ export async function lintProject({
 		relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 	}, config, sharedLanguageService);
 
-	res.forEach((result) => {
+	res.results.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath, {
 			relFsBasePath, virBasePath, relFsBasePathTest, virBasePathTest,
 		});
 	});
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
-	sortLintResults(res);
+	sortLintResults(res.results);
 	return res;
 }
 
 export async function lintFile({
 	rootDir, filePatterns, ignorePatterns, namespace, coverage, details, fix, configPath, noConfig,
 }: LinterOptions, sharedLanguageService: SharedLanguageService
-): Promise<LintResult[]> {
+): Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
 	let config: UI5LintConfigType = {};
 	if (noConfig !== true) {
 		const configMngr = new ConfigManager(rootDir, configPath);
@@ -118,7 +119,7 @@ export async function lintFile({
 		virBasePath,
 	}, config, sharedLanguageService);
 
-	res.forEach((result) => {
+	res.results.forEach((result) => {
 		result.filePath = transformVirtualPathToFilePath(result.filePath, {
 			relFsBasePath: "",
 			virBasePath: "/",
@@ -126,7 +127,7 @@ export async function lintFile({
 	});
 	// Sort by filePath after the virtual path has been converted back to ensure deterministic and sorted output.
 	// Differences in order can happen as different linters (e.g. xml, json, html, ui5.yaml) are executed in parallel.
-	sortLintResults(res);
+	sortLintResults(res.results);
 	return res;
 }
 
@@ -134,7 +135,7 @@ async function lint(
 	resourceReader: AbstractReader, options: LinterOptions & FSToVirtualPathOptions,
 	config: UI5LintConfigType,
 	sharedLanguageService: SharedLanguageService
-): Promise<LintResult[]> {
+): Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}> {
 	const lintEnd = taskStart("Linting");
 	let {ignorePatterns, filePatterns} = options;
 

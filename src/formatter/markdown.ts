@@ -2,13 +2,14 @@ import {LintResult, LintMessage} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Markdown {
-	format(lintResults: LintResult[], showDetails: boolean, version: string): string {
+	format(lintResults: {results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}},
+		showDetails: boolean, version: string): string {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
 
 		let findings = "";
-		lintResults.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
+		lintResults.results.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
 			if (!errorCount && !warningCount) {
 				// Skip files without errors or warnings
 				return;

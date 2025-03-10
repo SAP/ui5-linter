@@ -16,7 +16,7 @@ test.beforeEach(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
 	t.context.lintProjectStub =
-		t.context.sinon.stub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>().resolves([]);
+		t.context.sinon.stub<Parameters<typeof lintProject>, ReturnType<typeof lintProject>>().resolves({results: []});
 
 	const {ui5lint, UI5LinterEngine} = await esmock("../../src/index.js", {
 		"../../src/linter/linter.js": {
@@ -91,7 +91,7 @@ test("ui5lint API: All options", async (t) => {
 		rootDir: "/path/to/project",
 	});
 
-	t.deepEqual(res, []);
+	t.deepEqual(res.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 1);
 	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
@@ -156,7 +156,7 @@ test("UI5LinterEngine: Calling 'lint' twice before first run is finished", async
 	});
 
 	const results = await firstLintRun;
-	t.deepEqual(results, []);
+	t.deepEqual(results.results, []);
 });
 
 test("UI5LinterEngine: Calling 'lint' multiple times", async (t) => {
@@ -175,7 +175,7 @@ test("UI5LinterEngine: Calling 'lint' multiple times", async (t) => {
 		rootDir: "/path/to/project",
 	});
 
-	t.deepEqual(firstLintResults, []);
+	t.deepEqual(firstLintResults.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 1);
 	t.is(t.context.lintProjectStub.getCall(0).args.length, 2);
@@ -197,7 +197,7 @@ test("UI5LinterEngine: Calling 'lint' multiple times", async (t) => {
 
 	const secondLintResults = await engine.lint();
 
-	t.deepEqual(secondLintResults, []);
+	t.deepEqual(secondLintResults.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 2);
 	t.is(t.context.lintProjectStub.getCall(1).args.length, 2);
@@ -239,7 +239,7 @@ test("UI5LinterEngine: Calling 'lint' again after it failed", async (t) => {
 
 	const secondLintResults = await engine.lint();
 
-	t.deepEqual(secondLintResults, []);
+	t.deepEqual(secondLintResults.results, []);
 
 	t.is(t.context.lintProjectStub.callCount, 2);
 	t.is(t.context.lintProjectStub.getCall(1).args.length, 2);

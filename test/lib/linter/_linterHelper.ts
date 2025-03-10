@@ -17,7 +17,8 @@ util.inspect.defaultOptions.depth = 4; // Increase AVA's printing depth since co
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
-	lintFile: SinonStub<[LinterOptions, SharedLanguageService], Promise<LintResult[]>>;
+	lintFile: SinonStub<[LinterOptions, SharedLanguageService],
+		Promise<{results: LintResult[]; fixableResults?: {errCountDiff: number; warningCountDiff: number}}>>;
 	autofixSpy: SinonSpy<[AutofixOptions], Promise<AutofixResult>>;
 	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
@@ -163,10 +164,10 @@ function testDefinition(
 			details: true,
 			fix,
 		}, t.context.sharedLanguageService);
-		assertExpectedLintResults(t, res, fixturesPath,
+		assertExpectedLintResults(t, res.results, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
 
-		res.forEach((result) => {
+		res.results.forEach((result) => {
 			const resultFileName = path.basename(result.filePath);
 			if (resultFileName === fileName) {
 				// Use "clean" testName instead of the fileName which might contain modifiers like "only_"
@@ -176,7 +177,7 @@ function testDefinition(
 				result.filePath = resultFileName;
 			}
 		});
-		t.snapshot(res);
+		t.snapshot(res.results);
 
 		if (fix) {
 			t.is(t.context.autofixSpy.callCount, 1);
