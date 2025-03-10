@@ -7,9 +7,9 @@ const LINE_LENGTH_LIMIT = 200;
 function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefined) {
 	const dependencyMap = new Map<string, {node: ts.StringLiteralLike; index: number}>();
 	const quoteStyleCount = {
-		"'": 0,
-		"\"": 0,
 		"`": 0,
+		"'": 0,
+		"\"": 0, // Double quotes will be prioritized if tied
 	};
 	dependencies?.forEach((dependency, index) => {
 		if (!ts.isStringLiteralLike(dependency)) {
