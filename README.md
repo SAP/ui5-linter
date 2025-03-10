@@ -154,12 +154,18 @@ ui5lint --format json
 
 #### `--fix`
 
-Automatically fix linter findings
+The UI5 linter supports an automatic fix mode, similar to ESLint. You can enable it by using the `--fix` flag in the CLI.  
 
-**Example:**
+**Usage:**  
 ```sh
 ui5lint --fix
 ```
+
+When `--fix` is enabled, the linter will attempt to automatically correct certain findings.  
+Currently, the linter supports fixing of the following issues:
+- Globals replacement
+
+After applying fixes, the linter runs another pass to detect any remaining issues. Not all findings may be fixable, so those issues may need to be addressed manually.  
 
 #### `--ignore-pattern`
 
