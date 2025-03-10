@@ -79,7 +79,7 @@ export type ImportRequests = Map<string, {
 	identifier?: string;
 }>;
 
-// type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
+export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
 
 export interface ExistingModuleDeclarationInfo {
 	moduleDeclaration: ModuleDeclaration;

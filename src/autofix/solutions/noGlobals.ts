@@ -5,6 +5,7 @@ import type {
 	ChangeSet,
 	ExistingModuleDeclarationInfo,
 	GlobalPropertyAccessNodeInfo,
+	ModuleDeclarationInfo,
 	NewModuleDeclarationInfo,
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
@@ -91,21 +92,22 @@ export default function generateSolutionNoGlobals(
 		if (defineCall === undefined) {
 			defineCall = null;
 		}
-		let moduleDeclaration;
+		let moduleDeclaration: ModuleDeclarationInfo | undefined;
 		if (defineCall) {
-			if (!moduleDeclarations.has(defineCall)) {
+			moduleDeclaration = moduleDeclarations.get(defineCall);
+			if (!moduleDeclaration) {
 				try {
-					moduleDeclarations.set(defineCall, {
+					moduleDeclaration = {
 						moduleDeclaration: parseModuleDeclaration(defineCall.arguments, checker),
 						importRequests: new Map(),
-					});
+					};
+					moduleDeclarations.set(defineCall, moduleDeclaration);
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
 					log.verbose(`Failed to autofix ${moduleName} in sap.ui.define ` +
 						`call in ${sourceFile.fileName}: ${errorMessage}`);
 				}
 			}
-			moduleDeclaration = moduleDeclarations.get(defineCall)!;
 		} else {
 			if (!newModuleDeclarations.length) {
 				// throw new Error(`TODO: Implement handling for global access without module declaration`);
@@ -121,6 +123,17 @@ export default function generateSolutionNoGlobals(
 		if (!moduleDeclaration) {
 			// throw new Error(`TODO: Implement handling for global access without module declaration`);
 		}
+
+		// Skip nodes outside of the module declaration factory
+		if (moduleDeclaration && "moduleDeclaration" in moduleDeclaration) {
+			const factory = moduleDeclaration.moduleDeclaration.factory;
+			if (factory.getStart() > position.pos || factory.getEnd() < position.pos) {
+				log.silly(`Skipping global access ${nodeInfo.globalVariableName} ` +
+					`outside of module declaration factory`);
+				continue;
+			}
+		}
+
 		if (moduleDeclaration && !moduleDeclaration.importRequests.has(moduleName)) {
 			moduleDeclaration.importRequests.set(moduleName, {
 				nodeInfos: [],
