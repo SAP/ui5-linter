@@ -1832,9 +1832,6 @@ export default class SourceFileLinter {
 	}
 
 	getImportFromGlobal(namespace: string): {moduleName?: string; exportName?: string; propertyAccess?: string} {
-		if (namespace === "jQuery") {
-			return {moduleName: "sap/ui/thirdparty/jquery"};
-		}
 		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
 		let moduleSymbol;
 		const parts = namespace.split(".");
