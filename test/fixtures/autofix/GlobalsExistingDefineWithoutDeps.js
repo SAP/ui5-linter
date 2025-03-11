@@ -26,4 +26,7 @@ sap.ui.define(function() {
 		message: "First Error Message",
 		type: sap.ui.core.MessageType.Error
 	});
+
+	// Globals should also be replaced when no import/dependency to the corresponding library exists
+	new sap.esh.search.ui.SearchCompositeControl();
 });

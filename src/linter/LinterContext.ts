@@ -110,12 +110,14 @@ export default class LinterContext {
 
 	#reportCoverage: boolean;
 	#includeMessageDetails: boolean;
+	#applyAutofix: boolean;
 
 	constructor(options: LinterOptions) {
 		this.#rootDir = options.rootDir;
 		this.#namespace = options.namespace;
 		this.#reportCoverage = !!options.coverage;
 		this.#includeMessageDetails = !!options.details;
+		this.#applyAutofix = !!options.fix;
 	}
 
 	getRootDir(): string {
@@ -151,6 +153,10 @@ export default class LinterContext {
 
 	getIncludeMessageDetails(): boolean {
 		return this.#includeMessageDetails;
+	}
+
+	getApplyAutofix(): boolean {
+		return this.#applyAutofix;
 	}
 
 	getMetadata(resourcePath: ResourcePath): LintMetadata {
