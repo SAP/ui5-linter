@@ -219,7 +219,7 @@ function applyFixes(
 	}
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet);
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath);
 	}
 
 	if (changeSet.length === 0) {

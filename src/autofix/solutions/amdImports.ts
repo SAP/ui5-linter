@@ -1,10 +1,17 @@
 import ts from "typescript";
+import path from "node:path/posix";
 import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
 import {collectModuleIdentifiers} from "../utils.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 const LINE_LENGTH_LIMIT = 200;
 
-function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefined) {
+function resolveRelativeDependency(dependency: string, moduleName: string): string {
+	return path.resolve("/" + path.dirname(moduleName), dependency).substring(1);
+}
+
+function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefined, resourcePath: string) {
+	const moduleName =
+		resourcePath.startsWith("/resources/") ? resourcePath.substring("/resources/".length) : undefined;
 	const dependencyMap = new Map<string, {node: ts.StringLiteralLike; index: number}>();
 	const quoteStyleCount = {
 		"`": 0,
@@ -18,8 +25,13 @@ function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefi
 		// In case of duplicate imports, we only use the first one.
 		// As the map is only used for a lookup for reusing existing imports and not
 		// as a exhaustive list of dependencies, this is fine.
-		if (!dependencyMap.has(dependency.text)) {
-			dependencyMap.set(dependency.text, {node: dependency, index});
+		let dependencyText = dependency.text;
+		if (moduleName && dependencyText.startsWith(".")) {
+			dependencyText = resolveRelativeDependency(dependencyText, moduleName);
+		}
+
+		if (!dependencyMap.has(dependencyText)) {
+			dependencyMap.set(dependencyText, {node: dependency, index});
 		}
 
 		// Check which quote style format is used for existing dependencies
@@ -65,7 +77,8 @@ function getParameterSyntax(
 
 export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
-	changeSet: ChangeSet[]
+	changeSet: ChangeSet[],
+	resourcePath: string
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
@@ -80,7 +93,7 @@ export function addDependencies(
 	const declaredIdentifiers = collectModuleIdentifiers(moduleDeclaration.factory);
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
-	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies);
+	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies, resourcePath);
 
 	const parameters = moduleDeclaration.factory.parameters;
 	const parameterSyntax = getParameterSyntax(moduleDeclaration.factory);
@@ -96,6 +109,7 @@ export function addDependencies(
 
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [requestedModuleName, importRequest] of importRequests) {
+		let dependencyModuleName = requestedModuleName;
 		const existingDependency = dependencyMap.get(requestedModuleName);
 		if (existingDependency) {
 			// Reuse the existing dependency
@@ -116,14 +130,17 @@ export function addDependencies(
 					end: existingDependency.node.getEnd(),
 				});
 				dependencyMap.delete(requestedModuleName);
+
+				// Ensure that the new dependency will be the same, e.g. in case it is a relative path
+				dependencyModuleName = existingDependency.node.text;
 			}
 		}
 		// Add a completely new module dependency
-		const identifier = resolveUniqueName(requestedModuleName, declaredIdentifiers);
+		const identifier = resolveUniqueName(dependencyModuleName, declaredIdentifiers);
 		declaredIdentifiers.add(identifier);
 		importRequest.identifier = identifier;
 		newDependencies.push({
-			moduleName: requestedModuleName,
+			moduleName: dependencyModuleName,
 			identifier,
 		});
 	}
