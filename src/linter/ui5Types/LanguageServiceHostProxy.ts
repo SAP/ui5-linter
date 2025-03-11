@@ -5,6 +5,7 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 	private readonly emptyLanguageServiceHost: ts.LanguageServiceHost;
 	private languageServiceHost: ts.LanguageServiceHost;
 	private scriptSnapshots: ts.MapLike<ts.IScriptSnapshot | undefined> = {};
+	private sharedTypesFileExistsCache = new Map<string, boolean>();
 
 	constructor() {
 		this.emptyLanguageServiceHost = this.languageServiceHost = new EmptyLanguageServiceHost();
@@ -49,6 +50,14 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 	}
 
 	fileExists(filePath: string) {
+		if (this.isSharedTypesFile(filePath)) {
+			let fileExists = this.sharedTypesFileExistsCache.get(filePath);
+			if (fileExists === undefined) {
+				fileExists = this.languageServiceHost.fileExists(filePath);
+				this.sharedTypesFileExistsCache.set(filePath, fileExists);
+			}
+			return fileExists;
+		}
 		return this.languageServiceHost.fileExists(filePath);
 	}
 
