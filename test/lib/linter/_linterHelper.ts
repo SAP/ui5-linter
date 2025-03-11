@@ -190,7 +190,9 @@ function testDefinition(
 		if (fix) {
 			t.is(t.context.autofixSpy.callCount, 1);
 			const autofixResult = await t.context.autofixSpy.getCall(0).returnValue;
-			for (const [filePath, content] of autofixResult.entries()) {
+			const autofixResultEntries = Array.from(autofixResult.entries());
+			autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
+			for (const [filePath, content] of autofixResultEntries) {
 				t.snapshot(content, `AutofixResult: ${filePath}`);
 			}
 		}
