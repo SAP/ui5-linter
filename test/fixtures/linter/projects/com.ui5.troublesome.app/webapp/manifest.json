@@ -44,7 +44,8 @@
 			"libs": {
 				"sap.ui.core": {},
 				"sap.m": {},
-				"sap.ui.commons": {}
+				"sap.ui.commons": {},
+				"sap.ushell": {}
 			}
 		},
 
