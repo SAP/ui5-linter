@@ -1846,7 +1846,8 @@ export default class SourceFileLinter {
 				if (moduleSymbol) {
 					exportName = parts[searchStack.length];
 					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
-						// throw new Error(`Could not find export ${exportName} in module: ${namespace}`);
+						// Access of unknown/private export or a global usage without a corresponding module
+						// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
 						return {};
 					}
 					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
