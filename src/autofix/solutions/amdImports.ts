@@ -146,22 +146,14 @@ export function addDependencies(
 				start,
 				value: formatDependencies(value, depsSeparator, {pos: start, node: defineCall}),
 			});
-		} else if (moduleDeclaration.dependencies) {
-			const start = moduleDeclaration.dependencies.getStart();
-			const end = moduleDeclaration.dependencies.getEnd();
-			changeSet.push({
-				action: ChangeAction.REPLACE,
-				start,
-				end,
-				value: `[${formatDependencies(newDependencyValue, depsSeparator, {pos: start, node: defineCall})}]`,
-			});
 		} else {
+			// No dependencies array found, add a new one right before the factory function
+			const start = (moduleDeclaration.moduleName ? defineCall.arguments[1] : defineCall.arguments[0]).getStart();
 			changeSet.push({
 				action: ChangeAction.INSERT,
-				// TODO: is this correct if the module name is defined as first argument?
-				start: defineCall.arguments[0].getFullStart(),
+				start,
 				value: `[${formatDependencies(newDependencyValue, depsSeparator,
-					{pos: defineCall.arguments[0].getFullStart(), node: defineCall})}], `,
+					{pos: start, node: defineCall})}], `,
 			});
 		}
 
@@ -208,11 +200,7 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			if (!nodeInfo.node) {
 				continue;
 			}
-			let node: ts.Node = nodeInfo.node;
-
-			if ("namespace" in nodeInfo && nodeInfo.namespace === "sap.ui.getCore") {
-				node = node.parent;
-			}
+			const node: ts.Node = nodeInfo.node;
 			const nodeStart = node.getStart();
 			const nodeEnd = node.getEnd();
 			const nodeReplacement = `${identifier}`;
