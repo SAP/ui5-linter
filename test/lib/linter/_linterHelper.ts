@@ -22,22 +22,6 @@ const test = anyTest as TestFn<{
 	sharedLanguageService: SharedLanguageService; // Has to be defined by the actual test
 }>;
 
-test.before(async (t) => {
-	t.context.sharedLanguageService = new SharedLanguageService();
-
-	// Workaround for debugging purposes:
-	// For some files, such as lintWorkspace.ts and autofix.ts the original files are not displayed
-	// when debugging them. Strangely this only happens for the first test run and just mocking the
-	// files initial before the first test run works around the issue.
-	await createMockedLinterModules();
-});
-
-test.beforeEach(async (t) => {
-	const {lintModule: {lintFile}, autofixSpy} = await createMockedLinterModules();
-	t.context.lintFile = lintFile;
-	t.context.autofixSpy = autofixSpy;
-});
-
 export async function createMockedLinterModules() {
 	const typeLinterModule = await esmock("../../../src/linter/ui5Types/TypeLinter.js", {
 		"../../../src/linter/ui5Types/SourceFileLinter.js": SourceFileLinter,
@@ -80,8 +64,33 @@ export function assertExpectedLintResults(
 	});
 }
 
+let hooksDefined = false;
+
+function defineHooks() {
+	if (hooksDefined) {
+		return;
+	}
+	test.before(async (t) => {
+		t.context.sharedLanguageService = new SharedLanguageService();
+
+		// Workaround for debugging purposes:
+		// For some files, such as lintWorkspace.ts and autofix.ts the original files are not displayed
+		// when debugging them. Strangely this only happens for the first test run and just mocking the
+		// files initial before the first test run works around the issue.
+		await createMockedLinterModules();
+	});
+
+	test.beforeEach(async (t) => {
+		const {lintModule: {lintFile}, autofixSpy} = await createMockedLinterModules();
+		t.context.lintFile = lintFile;
+		t.context.autofixSpy = autofixSpy;
+	});
+	hooksDefined = true;
+}
+
 // Helper function to create linting tests for all files in a directory
 export function createTestsForFixtures(fixturesPath: string, fix = false) {
+	defineHooks();
 	try {
 		const testFiles = readdirSync(fixturesPath, {withFileTypes: true, recursive: true}).filter((dirEntries) => {
 			return dirEntries.isFile() && dirEntries.name !== ".DS_Store";

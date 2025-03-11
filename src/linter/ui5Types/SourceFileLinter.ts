@@ -44,6 +44,12 @@ interface DeprecationInfo {
 	messageDetails: string;
 }
 
+interface FixHints {
+	moduleName?: string;
+	exportName?: string;
+	propertyAccess?: string;
+}
+
 function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
 	return /\/types\/(@openui5|@sapui5|@ui5\/linter\/overrides)\//.test(sourceFile.fileName);
 }
@@ -1608,17 +1614,10 @@ export default class SourceFileLinter {
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
 				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
-
-				const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
-				let fixHints = {};
-				if (fixable) {
-					fixHints = this.getImportFromGlobal(namespace);
-				}
-
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-					fixHints,
+					fixHints: this.getFixHints(node, namespace),
 				}, node);
 			}
 		}
@@ -1831,7 +1830,26 @@ export default class SourceFileLinter {
 		return moduleSymbol;
 	}
 
-	getImportFromGlobal(namespace: string): {moduleName?: string; exportName?: string; propertyAccess?: string} {
+	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints {
+		const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
+		let fixHints: FixHints = {};
+		if (fixable) {
+			fixHints = this.getImportFromGlobal(namespace);
+			if (
+				fixHints.moduleName &&
+				(
+					this.resourcePath === `/resources/${fixHints.moduleName}.js` ||
+					this.resourcePath === `/resources/${fixHints.moduleName}.ts`
+				)
+			) {
+				// Prevent adding imports to the module itself
+				return {};
+			}
+		}
+		return fixHints;
+	}
+
+	getImportFromGlobal(namespace: string): FixHints {
 		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
 		let moduleSymbol;
 		const parts = namespace.split(".");

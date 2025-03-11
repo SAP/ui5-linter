@@ -5,6 +5,10 @@ sap.ui.define([
 ], function (Library) {
 	"use strict";
 
+	// This global usage should not be replaced with an import of sap/ui/unified/ColorPicker
+	// as it would import the module itself.
+	const ColorPicker = sap.ui.unified.ColorPicker;
+
 	var ColorPickerMode = Library['ColorPickerMode'],
 
 		// This is a special case as ColorPickerDisplayMode is defined in its own module but also exported via the library module.
