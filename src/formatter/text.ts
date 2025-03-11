@@ -50,7 +50,17 @@ export class Text {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
-		lintResults.forEach(({filePath, messages, errorCount, warningCount, fatalErrorCount}) => {
+		let autofixErrorCount = 0;
+		let autofixWarningCount = 0;
+		let autofixRun = false;
+		lintResults.forEach(({filePath, messages, errorCount, warningCount,
+			fatalErrorCount, fixableErrorCount, fixableWarningCount}) => {
+			if (typeof fixableErrorCount !== "undefined" || typeof fixableWarningCount !== "undefined") {
+				autofixRun = true;
+				autofixErrorCount += fixableErrorCount ?? 0;
+				autofixWarningCount += fixableWarningCount ?? 0;
+			}
+
 			if (!errorCount && !warningCount) {
 				return;
 			}
@@ -109,6 +119,13 @@ export class Text {
 		);
 		if (totalFatalErrorCount) {
 			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal errors`));
+		}
+
+		if (autofixRun) {
+			this.#writeln(chalk.green(`Autofixed ` +
+				`${autofixErrorCount + autofixWarningCount} problems ` +
+				`(${autofixErrorCount} errors` +
+				`, ${autofixWarningCount} warnings)`));
 		}
 
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {

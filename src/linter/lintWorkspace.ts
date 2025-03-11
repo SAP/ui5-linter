@@ -24,12 +24,14 @@ export default async function lintWorkspace(
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
 	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
+	let results: LintResult[] | null = null;
 	let context = await runLintWorkspace(
 		workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
 	);
 
 	if (options.fix) {
 		const rawLintResults = context.generateRawLintResults();
+		const initialLintResults = context.generateLintResults();
 		const rootReader = context.getRootReader();
 
 		const autofixResources = new Map<string, AutofixResource>();
@@ -95,9 +97,11 @@ export default async function lintWorkspace(
 				}));
 			}
 		}
+
+		results = calcFixableResults(initialLintResults, context.generateLintResults());
 	}
 
-	return context.generateLintResults();
+	return results ?? context.generateLintResults();
 }
 
 async function runLintWorkspace(
@@ -150,3 +154,32 @@ async function runLintWorkspace(
 	done();
 	return context;
 }
+
+function calcFixableResults(before: LintResult[] | null, after: LintResult[]) {
+	if (before) {
+		const afterMap = new Map<string, LintResult>();
+		after.forEach((result) => afterMap.set(result.filePath, result));
+
+		before.forEach((beforeResult) => {
+			let afterResult = afterMap.get(beforeResult.filePath);
+			if (!afterResult) { // Files might not be present anymore as all of the findings got cleaned up
+				afterResult = {
+					filePath: beforeResult.filePath,
+					messages: [],
+					coverageInfo: [],
+					errorCount: 0,
+					warningCount: 0,
+					fatalErrorCount: 0,
+					fixableErrorCount: 0,
+					fixableWarningCount: 0,
+				};
+				after.push(afterResult);
+			}
+
+			afterResult.fixableErrorCount = beforeResult.errorCount - afterResult.errorCount;
+			afterResult.fixableWarningCount = beforeResult.warningCount - afterResult.warningCount;
+		});
+	}
+
+	return after;
+};

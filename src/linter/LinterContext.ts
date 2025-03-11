@@ -19,6 +19,8 @@ export interface LintResult {
 	errorCount: number; // includes fatal errors
 	fatalErrorCount: number;
 	warningCount: number;
+	fixableErrorCount?: number;
+	fixableWarningCount?: number;
 }
 
 export interface RawLintResult {
