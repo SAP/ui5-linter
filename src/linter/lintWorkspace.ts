@@ -17,6 +17,7 @@ import {writeFile} from "node:fs/promises";
 import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
 import {getLogger} from "@ui5/logger";
 import path from "node:path";
+import {SAPJSONSchemaForWebApplicationManifestFile} from "../manifest.js";
 
 const log = getLogger("linter:lintWorkspace");
 
@@ -147,8 +148,33 @@ async function runLintWorkspace(
 		lintFileTypes(params),
 	]);
 
-	const typeLinter = new TypeLinter(params, sharedLanguageService);
+	const libraryDependencies = await getLibraryDependenciesFromManifest(workspace, options.virBasePath);
+
+	const typeLinter = new TypeLinter(params, libraryDependencies, sharedLanguageService);
 	await typeLinter.lint();
 	done();
 	return context;
+}
+
+async function getLibraryDependenciesFromManifest(workspace: AbstractAdapter, virBasePath: string | undefined) {
+	const resourcePath = (virBasePath ?? "") + "/manifest.json";
+	const manifest = await workspace.byPath(resourcePath);
+	if (!manifest) {
+		return undefined;
+	}
+	const content = await manifest.getString();
+	let json;
+	try {
+		json = JSON.parse(content) as SAPJSONSchemaForWebApplicationManifestFile;
+	} catch (err) {
+		log.verbose(`Failed to parse ${resourcePath} as JSON`);
+		if (err instanceof Error) {
+			log.verbose(err.message);
+			if (err.stack) {
+				log.verbose(err.stack);
+			}
+		}
+		return undefined;
+	}
+	return json["sap.ui5"]?.dependencies?.libs;
 }

@@ -46,7 +46,7 @@ interface DeprecationInfo {
 }
 
 function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
-	return /\/types\/(@openui5|@sapui5|@ui5\/linter\/overrides)\//.test(sourceFile.fileName);
+	return /\/types\/(@openui5|@sapui5|@ui5\/linter\/types)\//.test(sourceFile.fileName);
 }
 
 function isSourceFileOfUi5OrThirdPartyType(sourceFile: ts.SourceFile) {
@@ -54,11 +54,11 @@ function isSourceFileOfUi5OrThirdPartyType(sourceFile: ts.SourceFile) {
 }
 
 function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName === "/types/@ui5/linter/overrides/jquery.sap.d.ts";
+	return sourceFile.fileName === "/types/@ui5/linter/types/jquery.sap.d.ts";
 }
 
 function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName.startsWith("/types/@ui5/linter/overrides/pseudo-modules/");
+	return sourceFile.fileName.startsWith("/types/@ui5/linter/types/pseudo-modules/");
 }
 
 function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
