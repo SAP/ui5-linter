@@ -185,6 +185,7 @@ export default async function ({
 				log.verbose(resourcePath + ":\n" + newContent);
 				context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
 			} else {
+				log.verbose(`Autofix applied to ${resourcePath}`);
 				res.set(resourcePath, newContent);
 			}
 		}
