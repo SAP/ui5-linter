@@ -78,9 +78,13 @@ export default async function lintWorkspace(
 
 			log.verbose("Linting again after applying fixes...");
 
-			// Run lint again after fixes are applied
+			// Run lint again after fixes are applied, but without fixing
+			const optionsAfterFix = {
+				...options,
+				fix: false,
+			};
 			context = await runLintWorkspace(
-				workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
+				workspace, filePathsWorkspace, optionsAfterFix, config, patternsMatch, sharedLanguageService
 			);
 
 			// Update fixed files on the filesystem
@@ -89,7 +93,7 @@ export default async function lintWorkspace(
 			} else {
 				const autofixFiles = Array.from(autofixResult.entries());
 				await Promise.all(autofixFiles.map(async ([filePath, content]) => {
-					const realFilePath = transformVirtualPathToFilePath(filePath, options);
+					const realFilePath = transformVirtualPathToFilePath(filePath, optionsAfterFix);
 					log.verbose(`Writing fixed file '${filePath}' to '${realFilePath}'`);
 					await writeFile(realFilePath, content);
 				}));
