@@ -30,20 +30,15 @@ export default async function lintWorkspace(
 
 	if (options.fix) {
 		const rawLintResults = context.generateRawLintResults();
-		const rootReader = context.getRootReader();
 
 		const autofixResources = new Map<string, AutofixResource>();
 		for (const {filePath, rawMessages} of rawLintResults) {
-			// FIXME: handle this the same way as we already do for the general results
-			let resource = await workspace.byPath(filePath);
+			const resource = await workspace.byPath(filePath);
 			if (!resource) {
-				resource = await rootReader.byPath(filePath);
-				if (!resource) {
-					// This might happen in case a file with an existing source map was linted and the referenced
-					// file is not available in the workspace.
-					log.verbose(`Resource '${filePath}' not found. Skipping autofix for this file.`);
-					continue;
-				}
+				// This might happen in case a file with an existing source map was linted and the referenced
+				// file is not available in the workspace.
+				log.verbose(`Resource '${filePath}' not found. Skipping autofix for this file.`);
+				continue;
 			}
 			const content = await resource.getString();
 			autofixResources.set(filePath, {
