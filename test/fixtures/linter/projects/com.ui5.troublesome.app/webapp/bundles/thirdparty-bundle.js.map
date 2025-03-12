@@ -1,0 +1,38 @@
+{
+	"version": 3,
+	"file": "thirdparty-bundle.js",
+	"sections": [
+		{
+			"offset": {
+				"line": 1,
+				"column": 0
+			},
+			"map": {
+				"version": 3,
+				"names": [],
+				"sources": [
+					"file1.js"
+				],
+				"mappings": "AAAAA",
+				"ignoreList": [],
+				"sourceRoot": ""
+			}
+		},
+		{
+			"offset": {
+				"line": 2,
+				"column": 0
+			},
+			"map": {
+				"version": 3,
+				"names": [],
+				"sources": [
+					"file2.js"
+				],
+				"mappings": "AAAAA",
+				"ignoreList": [],
+				"sourceRoot": ""
+			}
+		}
+	]
+}

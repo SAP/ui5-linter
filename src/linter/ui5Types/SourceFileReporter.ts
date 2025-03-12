@@ -37,9 +37,13 @@ export default class SourceFileReporter {
 		this.#sourceFile = sourceFile;
 		if (sourceMap) {
 			const parsedSourceMap = JSON.parse(sourceMap) as EncodedSourceMap;
-			if (parsedSourceMap.mappings !== "") {
+			if (parsedSourceMap.mappings !== "" && !("sections" in parsedSourceMap)) {
 				// Only create a trace map if there are mappings.
 				// Otherwise, it will be useless and causes errors in some cases (Failed to map back to source).
+
+				// Also, sections are not supported as they only appear in bundles, which in general are not supported
+				// as source files should be linted individually.
+
 				this.#traceMap = new TraceMap(parsedSourceMap);
 			}
 		}
