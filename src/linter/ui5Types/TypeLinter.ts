@@ -133,31 +133,32 @@ export default class TypeLinter {
 		const messageDetails = this.#context.getIncludeMessageDetails();
 		const typeCheckDone = taskStart("Linting all transpiled resources");
 		for (const sourceFile of program.getSourceFiles()) {
-			if (!sourceFile.isDeclarationFile && pathsToLint.includes(sourceFile.fileName)) {
-				const sourceMap = this.#sourceMaps.get(sourceFile.fileName);
-				if (!sourceMap) {
-					log.verbose(`Failed to get source map for ${sourceFile.fileName}`);
-				}
-				let manifestContent;
-				if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
-					const res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
-					if (res) {
-						manifestContent = await res.getString();
-					}
-				}
-				if (silly) {
-					log.silly(`Linting ${sourceFile.fileName}`);
-				}
-				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
-				const linter = new SourceFileLinter(
-					this,
-					sourceFile,
-					checker, reportCoverage, messageDetails,
-					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
-				);
-				await linter.lint();
-				linterDone();
+			if (sourceFile.isDeclarationFile || !pathsToLint.includes(sourceFile.fileName)) {
+				continue;
 			}
+			if (sourceFile.getFullText().startsWith("//@ui5-bundle ")) {
+				log.verbose(`Skipping linting of UI5 bundle '${sourceFile.fileName}'`);
+				continue;
+			}
+			let manifestContent;
+			if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
+				const res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
+				if (res) {
+					manifestContent = await res.getString();
+				}
+			}
+			if (silly) {
+				log.silly(`Linting ${sourceFile.fileName}`);
+			}
+			const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
+			const linter = new SourceFileLinter(
+				this,
+				sourceFile,
+				checker, reportCoverage, messageDetails,
+				apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
+			);
+			await linter.lint();
+			linterDone();
 		}
 
 		// Will eventually produce new JS files for XML views and fragments
@@ -186,17 +187,18 @@ export default class TypeLinter {
 			checker = program.getTypeChecker();
 			ambientModuleCache = new AmbientModuleCache(checker.getAmbientModules());
 			for (const sourceFile of program.getSourceFiles()) {
-				if (!sourceFile.isDeclarationFile && /\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
-					const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
-					const linter = new SourceFileLinter(
-						this,
-						sourceFile,
-						checker, reportCoverage, messageDetails,
-						apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
-					);
-					await linter.lint();
-					linterDone();
+				if (sourceFile.isDeclarationFile || !/\.inline-[0-9]+\.(view|fragment)\.js/.exec(sourceFile.fileName)) {
+					continue;
 				}
+				const linterDone = taskStart("Type-check resource", sourceFile.fileName, true);
+				const linter = new SourceFileLinter(
+					this,
+					sourceFile,
+					checker, reportCoverage, messageDetails,
+					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
+				);
+				await linter.lint();
+				linterDone();
 			}
 		}
 		typeCheckDone();

@@ -53,6 +53,12 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 export default function transpileAmdToEsm(
 	resourcePath: string, content: string, context: LinterContext, strict?: boolean
 ): TranspileResult {
+	// Do not transpile UI5 bundles
+	if (content.startsWith("//@ui5-bundle ")) {
+		log.verbose(`Skipping transformation of UI5 bundle ${resourcePath}.`);
+		return {source: content, map: ""};
+	}
+
 	// This is heavily inspired by the TypesScript "transpileModule" API
 	const fileName = path.basename(resourcePath);
 	const taskDone = taskStart("Transpiling AMD to ESM", fileName, true);
