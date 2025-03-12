@@ -154,25 +154,25 @@ ui5lint --format json
 
 #### `--fix`
 
-The UI5 linter supports an automatic fix mode, similar to ESLint. You can enable it by using the `--fix` flag in the CLI.  
+Attempt to automatically correct certain findings.
 
-**Usage:**  
+**Example::**
 ```sh
 ui5lint --fix
 ```
 
-When `--fix` is enabled, the linter will attempt to automatically correct certain findings.  
-Currently, the linter supports fixing of the following issues:
-- Globals replacement
+Currently, issues of the following rules are fixable:
+- no-globals: Usage of globals that are part of UI5 (e.g. `sap.m.Button`) are replaced with the corresponding module import
 
 After applying fixes, the linter runs another pass to detect any remaining issues. Not all findings may be fixable, so those issues may need to be addressed manually.  
 
 ##### Dry Run Mode
-To preview the results of `--fix` without modifying any files, set the UI5LINT_FIX_DRY_RUN environment variable:
+To preview the results without modifying any files, set the UI5LINT_FIX_DRY_RUN environment variable:
 
 ```sh
-UI5LINT_FIX_DRY_RUN=1 ui5lint --fix
+UI5LINT_FIX_DRY_RUN=true ui5lint --fix
 ```
+
 In this mode, the linter will show the messages after the fixes would have been applied but will not actually change the files.
 
 #### `--ignore-pattern`
