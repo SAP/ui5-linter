@@ -437,8 +437,7 @@ export const MESSAGE_INFO = {
 
 		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
-		details: ({fixHints: {moduleName: _unused1, exportName: _unused2, propertyAccess: _unused3},
-		}: {fixHints: {moduleName?: string; exportName?: string; propertyAccess?: string}}) =>
+		details: () =>
 			`Do not use global variables to access UI5 modules or APIs. ` +
 			`{@link topic:28fcd55b04654977b63dacbee0552712 See Best Practices for Developers}`,
 	},

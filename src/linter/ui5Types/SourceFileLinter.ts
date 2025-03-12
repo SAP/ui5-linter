@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
+import {ResourcePath, CoverageCategory, LintMetadata, FixHints} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -42,12 +42,6 @@ const ALLOWED_RENDERER_API_VERSIONS = ["2", "4"];
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
-}
-
-interface FixHints {
-	moduleName?: string;
-	exportName?: string;
-	propertyAccess?: string;
 }
 
 function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
@@ -1421,7 +1415,6 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 				variableName: node.text,
 				namespace: moduleName,
-				fixHints: {},
 			}, node);
 		}
 	}
@@ -1618,8 +1611,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-					fixHints: this.getFixHints(node, namespace),
-				}, node);
+				}, node, this.getFixHints(node, namespace));
 			}
 		}
 	}
@@ -1831,31 +1823,32 @@ export default class SourceFileLinter {
 		return moduleSymbol;
 	}
 
-	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints {
+	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints | undefined {
 		// Only collect fix hints when running in fix mode
 		if (!this.fix) {
-			return {};
+			return undefined;
 		}
 
 		const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
-		let fixHints: FixHints = {};
-		if (fixable) {
-			fixHints = this.getImportFromGlobal(namespace);
-			if (
-				fixHints.moduleName &&
-				(
-					this.resourcePath === `/resources/${fixHints.moduleName}.js` ||
-					this.resourcePath === `/resources/${fixHints.moduleName}.ts`
-				)
-			) {
-				// Prevent adding imports to the module itself
-				return {};
-			}
+		if (!fixable) {
+			return undefined;
+		}
+
+		const fixHints = this.getImportFromGlobal(namespace);
+		if (
+			fixHints?.moduleName &&
+			(
+				this.resourcePath === `/resources/${fixHints.moduleName}.js` ||
+				this.resourcePath === `/resources/${fixHints.moduleName}.ts`
+			)
+		) {
+			// Prevent adding imports to the module itself
+			return undefined;
 		}
 		return fixHints;
 	}
 
-	getImportFromGlobal(namespace: string): FixHints {
+	getImportFromGlobal(namespace: string): FixHints | undefined {
 		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
 		let moduleSymbol;
 		const parts = namespace.split(".");
@@ -1872,7 +1865,7 @@ export default class SourceFileLinter {
 					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
 						// Access of unknown/private export or a global usage without a corresponding module
 						// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
-						return {};
+						return undefined;
 					}
 					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
 				}
@@ -1882,7 +1875,7 @@ export default class SourceFileLinter {
 			}
 		}
 		if (!searchStack.length) {
-			return {};
+			return undefined;
 		}
 		return {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")};
 	}

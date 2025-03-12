@@ -10,6 +10,12 @@ export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
 
+export interface FixHints {
+	moduleName?: string;
+	exportName?: string;
+	propertyAccess?: string;
+}
+
 // Data types are structured very similar to the ESLint types for better compatibility into existing integrations:
 // https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type
 export interface LintResult {
@@ -30,6 +36,7 @@ export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	id: M;
 	args: MessageArgs[M];
 	position?: PositionInfo;
+	fixHints?: FixHints;
 }
 
 export interface LintMessage {

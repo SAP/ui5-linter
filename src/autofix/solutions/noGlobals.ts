@@ -25,7 +25,7 @@ export default function generateSolutionNoGlobals(
 		if (!msg.position) {
 			throw new Error(`Unable to produce solution for message without position`);
 		}
-		if (!msg.args.fixHints.moduleName) {
+		if (!msg.fixHints?.moduleName) {
 			// Skip global access without module name
 			continue;
 		}
@@ -36,9 +36,9 @@ export default function generateSolutionNoGlobals(
 		affectedNodesInfo.add({
 			globalVariableName: msg.args.variableName,
 			namespace: msg.args.namespace,
-			moduleName: msg.args.fixHints.moduleName,
-			exportName: msg.args.fixHints.exportName,
-			propertyAccess: msg.args.fixHints.propertyAccess,
+			moduleName: msg.fixHints.moduleName,
+			exportName: msg.fixHints.exportName,
+			propertyAccess: msg.fixHints.propertyAccess,
 			position: {
 				line,
 				column,
