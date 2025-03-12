@@ -87,6 +87,7 @@ export default class SourceFileLinter {
 		private checker: ts.TypeChecker,
 		private reportCoverage = false,
 		private messageDetails = false,
+		private fix = false,
 		private apiExtract: ApiExtract,
 		private filePathsWorkspace: AbstractAdapter,
 		private workspace: AbstractAdapter,
@@ -1831,6 +1832,11 @@ export default class SourceFileLinter {
 	}
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints {
+		// Only collect fix hints when running in fix mode
+		if (!this.fix) {
+			return {};
+		}
+
 		const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
 		let fixHints: FixHints = {};
 		if (fixable) {
