@@ -102,6 +102,7 @@ const oldToNewAttr = new Map([
 	["data-sap-ui-compatversion", "data-sap-ui-compat-version"],
 	["data-sap-ui-flexibilityservices", "data-sap-ui-flexibility-services"],
 	["data-sap-ui-frameoptions", "data-sap-ui-frame-options"],
+	["data-sap-ui-loglevel", "data-sap-ui-log-level"],
 	["data-sap-ui-evt-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-oninit", "data-sap-ui-on-init"],
 	["data-sap-ui-resourceroots", "data-sap-ui-resource-roots"],
