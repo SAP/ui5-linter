@@ -8,7 +8,7 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 	let propertyAccessChain: string[] = [];
 	if (matchPropertyAccess) {
 		propertyAccessChain = matchPropertyAccess.split(".");
-		if (node.text !== "window") {
+		if (node.text !== "window" && node.text !== "globalThis" && node.text !== "self") {
 			const firstPropAccess = propertyAccessChain.shift();
 			if (node.text !== firstPropAccess) {
 				throw new Error(`Expected node to be ${firstPropAccess} but got ${node.getText()}`);
