@@ -1,6 +1,6 @@
 import Button from "sap/m/Button";
 
-// NOTE: TypeScript files are currently not processed during autofix, so this won't be fixed
+// NOTE: ES Modules (import/export) are currently not processed during autofix, so this won't be fixed
 const button1 = new sap.m.Button({
 	text: "Hello"
 });
