@@ -227,11 +227,24 @@ export function isConditionalAccess(node: ts.Node): boolean {
 	if (!parent) {
 		return false;
 	}
-	if (ts.isIfStatement(parent)) {
-		return parent.expression === node;
+	switch (parent.kind) {
+		case ts.SyntaxKind.IfStatement:
+			return (parent as ts.IfStatement).expression === node;
+		case ts.SyntaxKind.ConditionalExpression:
+			return (parent as ts.ConditionalExpression).condition === node;
+		case ts.SyntaxKind.BinaryExpression:
+			if ((parent as ts.BinaryExpression).operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
+				return true;
+			}
 	}
-	if (ts.isVariableDeclaration(parent)) {
-		return false;
+
+	let currentNode = node;
+	while (currentNode && (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode))) {
+		if (currentNode.questionDotToken) {
+			return true;
+		}
+		currentNode = currentNode.expression;
 	}
+
 	return false;
 }

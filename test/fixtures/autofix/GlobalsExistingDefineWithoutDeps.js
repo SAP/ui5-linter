@@ -29,4 +29,10 @@ sap.ui.define(function() {
 
 	// Globals should also be replaced when no import/dependency to the corresponding library exists
 	new sap.esh.search.ui.SearchCompositeControl();
+
+	// Enum access via nested library export should be replaced
+	const Category = sap.m.table.columnmenu.Category;
+
+	// Negative test: Access of unknown global via public export of library namespace should not be replaced
+	const PrivateClass = sap.m.table.columnmenu.PrivateClass;
 });

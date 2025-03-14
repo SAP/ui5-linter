@@ -383,18 +383,74 @@ test("isConditionalAccess: AccessExpression in IfStatement", (t) => {
 
 	t.true(isConditionalAccess(sapMButtonPropertyAccessExpression));
 });
+test("isConditionalAccess: AccessExpression in ConditionalExpression condition", (t) => {
+	const program = createProgram(`
+		sap.m.Button ? new sap.m.Button() : undefined;
+	`);
+
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const conditionalExpression = expressionStatement.expression as ts.ConditionalExpression;
+	const sapMButtonPropertyAccessExpression = conditionalExpression.condition as ts.PropertyAccessExpression;
+
+	t.true(isConditionalAccess(sapMButtonPropertyAccessExpression));
+});
+test("isConditionalAccess: AccessExpression in BinaryExpression (left && right)", (t) => {
+	const program = createProgram(`
+		const Container = sap.ushell && sap.ushell.Container;
+	`);
+
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	const binaryExpression = variableDeclaration.initializer as ts.BinaryExpression;
+	const sapUshellPropertyAccessExpression = binaryExpression.left as ts.PropertyAccessExpression;
+	const sapUshellContainerPropertyAccessExpression = binaryExpression.right as ts.PropertyAccessExpression;
+
+	t.true(isConditionalAccess(sapUshellPropertyAccessExpression));
+	t.true(isConditionalAccess(sapUshellContainerPropertyAccessExpression));
+});
+test("isConditionalAccess: AccessExpression with QuestionDotToken (Conditional Chaining) / 1", (t) => {
+	const program = createProgram(`
+		sap.m?.Button;
+	`);
+
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const sapMButtonPropertyAccessExpression = expressionStatement.expression as ts.PropertyAccessExpression;
+
+	t.true(isConditionalAccess(sapMButtonPropertyAccessExpression));
+});
+test("isConditionalAccess: AccessExpression with QuestionDotToken (Conditional Chaining) / 2", (t) => {
+	const program = createProgram(`
+		sap.ui.layout?.form.SimpleForm;
+	`);
+
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const sapUiLayoutFormSimpleFormAccessExpression = expressionStatement.expression as ts.PropertyAccessExpression;
+
+	t.true(isConditionalAccess(sapUiLayoutFormSimpleFormAccessExpression));
+});
 
 // Negative tests for isConditionalAccess
+test("isConditionalAccess: AccessExpression in ExpressionStatement (Negative)", (t) => {
+	const program = createProgram(`
+		sap.m.Button;
+	`);
+
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const sapMButtonPropertyAccessExpression = expressionStatement.expression as ts.PropertyAccessExpression;
+
+	t.false(isConditionalAccess(sapMButtonPropertyAccessExpression));
+});
 test("isConditionalAccess: AccessExpression in IfStatement (Negative)", (t) => {
 	const program = createProgram(`
-		if (sap.m.Button) {}
+		if (sap.m.Button.prototype.onclick) {}
 	`);
 
 	const ifStatement = program.getSourceFile("test.ts")!.statements[0] as ts.IfStatement;
-	const sapMButtonPropertyAccessExpression = ifStatement.expression as ts.PropertyAccessExpression;
-	const sapMPropertyAccessExpression = sapMButtonPropertyAccessExpression.expression;
+	const sapMButtonPropertyAccessExpression =
+		((ifStatement.expression as ts.PropertyAccessExpression).expression as ts.PropertyAccessExpression)
+			.expression as ts.PropertyAccessExpression;
 
-	t.false(isConditionalAccess(sapMPropertyAccessExpression));
+	t.false(isConditionalAccess(sapMButtonPropertyAccessExpression));
 });
 test("isConditionalAccess: AccessExpression in VariableDeclaration (Negative)", (t) => {
 	const program = createProgram(`

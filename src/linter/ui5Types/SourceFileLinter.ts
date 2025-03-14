@@ -1862,6 +1862,25 @@ export default class SourceFileLinter {
 		return fixHints;
 	}
 
+	isLibraryExportAccess(moduleSymbol: ts.Symbol, parts: string[]) {
+		// Check for access of unknown/private export or a global usage without a corresponding module
+		// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
+		let currentSymbol: ts.Symbol | undefined = moduleSymbol;
+		let currentPart;
+		while (parts.length) {
+			currentPart = parts.shift();
+			currentSymbol = currentSymbol.exports?.get(currentPart as ts.__String);
+			if (!currentSymbol) {
+				return false;
+			}
+			// Only continue when symbol is a namespace, as only those have exports we want to check for
+			if (!(currentSymbol.flags & ts.SymbolFlags.Namespace)) {
+				return true;
+			}
+		}
+		return true;
+	}
+
 	getImportFromGlobal(
 		node: ts.CallExpression | ts.AccessExpression
 	): {fixHints: FixHints; propertyAccessNode: ts.Node} | undefined {
@@ -1901,9 +1920,7 @@ export default class SourceFileLinter {
 				moduleSymbol = this.findModuleForName(libraryModuleName);
 				if (moduleSymbol) {
 					exportName = parts[searchStack.length];
-					if (exportName && !moduleSymbol.exports?.has(exportName as ts.__String)) {
-						// Access of unknown/private export or a global usage without a corresponding module
-						// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
+					if (exportName && !this.isLibraryExportAccess(moduleSymbol, parts.slice(searchStack.length))) {
 						return undefined;
 					}
 					return {
