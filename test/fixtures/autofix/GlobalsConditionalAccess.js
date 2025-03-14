@@ -1,7 +1,7 @@
 // Usage of a global variable only after probing for its existence should be replaced with an eager dependency
 sap.ui.define([], function() {
 
-	var fnGetService =  sap.ushell && sap.ushell.Container && sap.ushell.Container.getService;
+	var fnGetService = sap.ushell && sap.ushell.Container && sap.ushell.Container.getService;
 	if (fnGetService) {
 		const oCrossAppNavigator = fnGetService("CrossApplicationNavigation");
 
@@ -27,7 +27,7 @@ sap.ui.define([], function() {
 		console.log("Button prototype has someMethod");
 	}
 
-	// Should be replaced, as there is no lazy dependency to Button in this module
+	// // Should be replaced, as there is no lazy dependency to Button in this module
 	const oButton = new sap.m.Button();
 
 });

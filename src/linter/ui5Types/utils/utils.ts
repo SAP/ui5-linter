@@ -221,3 +221,20 @@ export function isGlobalAssignment(node: ts.AccessExpression): boolean {
 	}
 	return false;
 }
+
+export function isConditionalAccess(node: ts.Node): boolean {
+	let currentNode: ts.Node | undefined = node;
+	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
+		if (!currentNode.parent) {
+			return false;
+		}
+		if (ts.isIfStatement(currentNode.parent)) {
+			return currentNode.parent.expression === currentNode;
+		}
+		if (ts.isVariableDeclaration(currentNode.parent)) {
+			return false;
+		}
+		currentNode = currentNode.parent;
+	}
+	return false;
+}

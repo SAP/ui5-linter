@@ -7,6 +7,7 @@ import {
 	findClassMember,
 	getSymbolForPropertyInConstructSignatures,
 	isClassMethod,
+	isConditionalAccess,
 } from "../../../../src/linter/ui5Types/utils/utils.js";
 
 function createProgram(code: string) {
@@ -369,4 +370,34 @@ test("getPropertyAssignmentsInObjectLiteralExpression - unsupported elements", (
 	t.is(result.length, 2);
 	t.is(result[0], test1);
 	t.is(result[1], test2);
+});
+
+// Positive tests for isConditionalAccess
+test("isConditionalAccess: AccessExpression in IfStatement", (t) => {
+	const program = createProgram(`
+		if (sap.m.Button) {}
+	`);
+
+	const ifStatement = program.getSourceFile("test.ts")!.statements[0] as ts.IfStatement;
+	const sapMButtonPropertyAccessExpression = ifStatement.expression as ts.PropertyAccessExpression;
+	const sapMPropertyAccessExpression = sapMButtonPropertyAccessExpression.expression;
+
+	t.true(isConditionalAccess(sapMButtonPropertyAccessExpression));
+	t.true(isConditionalAccess(sapMPropertyAccessExpression));
+});
+
+// Negative tests for isConditionalAccess
+test("isConditionalAccess: AccessExpression in VariableDeclaration", (t) => {
+	const program = createProgram(`
+		const Button = sap.m.Button;
+	`);
+
+	const variableStatment = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const sapMButtonPropertyAccessExpression =
+		variableStatment.declarationList.declarations[0].initializer as ts.PropertyAccessExpression;
+	const sapMPropertyAccessExpression =
+		sapMButtonPropertyAccessExpression.expression as ts.PropertyAccessExpression;
+
+	t.false(isConditionalAccess(sapMButtonPropertyAccessExpression));
+	t.false(isConditionalAccess(sapMPropertyAccessExpression));
 });

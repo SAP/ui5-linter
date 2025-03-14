@@ -200,9 +200,21 @@ function applyFixes(
 ): string | undefined {
 	const {content} = resource;
 
+	// Collect modules of which at least one message has the conditional fixHint flag set
+	const conditionalModuleAccess = new Set<string>();
+	for (const msg of resource.messages) {
+		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
+			conditionalModuleAccess.add(msg.fixHints.moduleName);
+		}
+	}
+
 	// Group messages by id
 	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
 	for (const msg of resource.messages) {
+		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
+			// Skip messages with conditional fixHints
+			continue;
+		}
 		if (!messagesById.has(msg.id)) {
 			messagesById.set(msg.id, []);
 		}

@@ -14,6 +14,7 @@ import {
 	findClassMember,
 	isClassMethod,
 	isGlobalAssignment,
+	isConditionalAccess,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -1840,8 +1841,11 @@ export default class SourceFileLinter {
 		}
 
 		const fixHints = this.getImportFromGlobal(namespace);
+		if (!fixHints) {
+			return undefined;
+		}
 		if (
-			fixHints?.moduleName &&
+			fixHints.moduleName &&
 			(
 				this.resourcePath === `/resources/${fixHints.moduleName}.js` ||
 				this.resourcePath === `/resources/${fixHints.moduleName}.ts`
@@ -1850,6 +1854,10 @@ export default class SourceFileLinter {
 			// Prevent adding imports to the module itself
 			return undefined;
 		}
+
+		// Check whether the access is conditional / probing / lazy
+		fixHints.conditional = isConditionalAccess(node);
+
 		return fixHints;
 	}
 

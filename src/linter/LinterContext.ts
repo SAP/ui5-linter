@@ -14,6 +14,7 @@ export interface FixHints {
 	moduleName?: string;
 	exportName?: string;
 	propertyAccess?: string;
+	conditional?: boolean;
 }
 
 // Data types are structured very similar to the ESLint types for better compatibility into existing integrations:
