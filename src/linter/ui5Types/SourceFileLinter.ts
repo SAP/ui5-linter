@@ -1823,14 +1823,19 @@ export default class SourceFileLinter {
 		return moduleSymbol;
 	}
 
+	isFixable(node: ts.CallExpression | ts.AccessExpression): boolean {
+		if (ts.isCallExpression(node)) {
+			return true;
+		}
+		if (isGlobalAssignment(node)) {
+			return false;
+		}
+		return true;
+	}
+
 	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints | undefined {
 		// Only collect fix hints when running in fix mode
-		if (!this.fix) {
-			return undefined;
-		}
-
-		const fixable = ts.isCallExpression(node) || !isGlobalAssignment(node);
-		if (!fixable) {
+		if (!this.fix || !this.isFixable(node)) {
 			return undefined;
 		}
 
