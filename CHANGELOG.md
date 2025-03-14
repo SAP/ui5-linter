@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.11.1](https://github.com/SAP/ui5-linter/compare/v1.11.0...v1.11.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* Cannot read properties of undefined (reading 'map') ([28ab574](https://github.com/SAP/ui5-linter/commit/28ab574098c4c7f203f3233ee7ff43ac19edd239))
+* Suppress eslint finding ([93acfff](https://github.com/SAP/ui5-linter/commit/93acfff839e2ed7a70f81eb39fe13168eaef364c))
+
+
+### Performance Improvements
+
+* Prevent unnecessary TypeScript libReplacement lookup ([dac9f88](https://github.com/SAP/ui5-linter/commit/dac9f883acc513415ac24b17d102298e98e9eed0))
+
+
+### Dependencies
+
+* Bump typescript from 5.7.3 to 5.8.2 ([ed84349](https://github.com/SAP/ui5-linter/commit/ed843499b5f9f5f3dc2b9e979f31862a2afc357b))
+
 ## [1.11.0](https://github.com/SAP/ui5-linter/compare/v1.10.0...v1.11.0) (2025-02-28)
 
 
