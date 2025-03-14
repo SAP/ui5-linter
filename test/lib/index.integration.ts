@@ -20,6 +20,6 @@ test.serial("ui5lint API: Simultaneously test different projects", async (t) => 
 	]);
 
 	results.forEach((res) => {
-		t.snapshot(preprocessLintResultsForSnapshot(res));
+		t.snapshot(preprocessLintResultsForSnapshot(res.results));
 	});
 });

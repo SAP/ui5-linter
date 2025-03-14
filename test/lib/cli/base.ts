@@ -42,7 +42,7 @@ test.beforeEach(async (t) => {
 	t.context.isLogLevelEnabledStub.withArgs("verbose").returns(false);
 	t.context.consoleWriterStopStub = sinon.stub();
 
-	t.context.ui5lint = sinon.stub().resolves([lintResult]);
+	t.context.ui5lint = sinon.stub().resolves({results: [lintResult]});
 	t.context.writeFile = sinon.stub().resolves();
 	t.context.cli = yargs();
 
