@@ -380,14 +380,23 @@ test("isConditionalAccess: AccessExpression in IfStatement", (t) => {
 
 	const ifStatement = program.getSourceFile("test.ts")!.statements[0] as ts.IfStatement;
 	const sapMButtonPropertyAccessExpression = ifStatement.expression as ts.PropertyAccessExpression;
-	const sapMPropertyAccessExpression = sapMButtonPropertyAccessExpression.expression;
 
 	t.true(isConditionalAccess(sapMButtonPropertyAccessExpression));
-	t.true(isConditionalAccess(sapMPropertyAccessExpression));
 });
 
 // Negative tests for isConditionalAccess
-test("isConditionalAccess: AccessExpression in VariableDeclaration", (t) => {
+test("isConditionalAccess: AccessExpression in IfStatement (Negative)", (t) => {
+	const program = createProgram(`
+		if (sap.m.Button) {}
+	`);
+
+	const ifStatement = program.getSourceFile("test.ts")!.statements[0] as ts.IfStatement;
+	const sapMButtonPropertyAccessExpression = ifStatement.expression as ts.PropertyAccessExpression;
+	const sapMPropertyAccessExpression = sapMButtonPropertyAccessExpression.expression;
+
+	t.false(isConditionalAccess(sapMPropertyAccessExpression));
+});
+test("isConditionalAccess: AccessExpression in VariableDeclaration (Negative)", (t) => {
 	const program = createProgram(`
 		const Button = sap.m.Button;
 	`);

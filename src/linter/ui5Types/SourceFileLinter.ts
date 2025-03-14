@@ -1612,7 +1612,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-				}, node, this.getFixHints(node, namespace));
+				}, node, this.getFixHints(node));
 			}
 		}
 	}
@@ -1834,16 +1834,17 @@ export default class SourceFileLinter {
 		return true;
 	}
 
-	getFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string): FixHints | undefined {
+	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
 		// Only collect fix hints when running in fix mode
 		if (!this.fix || !this.isFixable(node)) {
 			return undefined;
 		}
 
-		const fixHints = this.getImportFromGlobal(namespace);
-		if (!fixHints) {
+		const result = this.getImportFromGlobal(node);
+		if (!result) {
 			return undefined;
 		}
+		const {fixHints, propertyAccessNode} = result;
 		if (
 			fixHints.moduleName &&
 			(
@@ -1856,15 +1857,40 @@ export default class SourceFileLinter {
 		}
 
 		// Check whether the access is conditional / probing / lazy
-		fixHints.conditional = isConditionalAccess(node);
+		fixHints.conditional = isConditionalAccess(propertyAccessNode);
 
 		return fixHints;
 	}
 
-	getImportFromGlobal(namespace: string): FixHints | undefined {
-		namespace = namespace.replace(/^(?:window|globalThis|self)./, "");
+	getImportFromGlobal(
+		node: ts.CallExpression | ts.AccessExpression
+	): {fixHints: FixHints; propertyAccessNode: ts.Node} | undefined {
+		const parts: string[] = [];
+		const partNodes: ts.Node[] = [];
+
+		const firstPart = node.expression;
+		if (!ts.isIdentifier(firstPart)) {
+			return undefined;
+		}
+
+		if (firstPart.text !== "window" && firstPart.text !== "globalThis" && firstPart.text !== "self") {
+			parts.push(firstPart.text);
+			partNodes.push(firstPart);
+		}
+
+		let scanNode: ts.Node = node;
+		while (ts.isPropertyAccessExpression(scanNode)) {
+			if (!ts.isIdentifier(scanNode.name)) {
+				throw new Error(
+					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
+					ts.SyntaxKind[scanNode.name.kind]);
+			}
+			parts.push(scanNode.name.text);
+			partNodes.push(scanNode);
+			scanNode = scanNode.parent;
+		}
+
 		let moduleSymbol;
-		const parts = namespace.split(".");
 		const searchStack = [...parts];
 		let exportName;
 		while (!moduleSymbol && searchStack.length) {
@@ -1880,7 +1906,10 @@ export default class SourceFileLinter {
 						// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
 						return undefined;
 					}
-					return {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")};
+					return {
+						fixHints: {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")},
+						propertyAccessNode: partNodes[searchStack.length - 1],
+					};
 				}
 			}
 			if (!moduleSymbol) {
@@ -1890,6 +1919,9 @@ export default class SourceFileLinter {
 		if (!searchStack.length) {
 			return undefined;
 		}
-		return {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")};
+		return {
+			fixHints: {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")},
+			propertyAccessNode: partNodes[searchStack.length - 1],
+		};
 	}
 }
