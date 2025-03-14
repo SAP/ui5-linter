@@ -12,14 +12,16 @@ const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
 	linterEngine: UI5LinterEngine;
 	autofixSpy: SinonSpy<[AutofixOptions], Promise<AutofixResult>>;
+	writeFileStub: sinonGlobal.SinonStub;
 }>;
 
 test.before(async (t) => {
 	t.context.sinon = sinonGlobal.createSandbox();
 
-	const {indexModule: {UI5LinterEngine}, autofixSpy} = await createMockedLinterModules();
+	const {indexModule: {UI5LinterEngine}, autofixSpy, writeFileStub} = await createMockedLinterModules();
 	t.context.linterEngine = new UI5LinterEngine();
 	t.context.autofixSpy = autofixSpy;
+	t.context.writeFileStub = writeFileStub;
 });
 test.afterEach.always((t) => {
 	t.context.sinon.restore();
@@ -42,5 +44,12 @@ test.serial("lint: All files of library with sap.ui.unified namespace", async (t
 	autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
 	for (const [filePath, content] of autofixResultEntries) {
 		t.snapshot(content, `AutofixResult: ${filePath}`);
+	}
+
+	// Ensure that all files are written using an absolute path within the project
+	t.is(t.context.writeFileStub.callCount, autofixResult.size);
+	const writeFilePaths = t.context.writeFileStub.args.map((args) => args[0]);
+	for (const writeFilePath of writeFilePaths) {
+		t.true(writeFilePath.startsWith(projectPath), `${writeFilePath} should start with ${projectPath}`);
 	}
 });

@@ -31,12 +31,14 @@ export async function createMockedLinterModules() {
 		sinonGlobal.stub<Parameters<typeof autofix>, ReturnType<typeof autofix>>()
 			.callsFake((options: AutofixOptions) => autofix(options));
 
+	const writeFileStub = sinonGlobal.stub().resolves();
+
 	const lintWorkspaceModule = await esmock("../../../src/linter/lintWorkspace.js", {
 		"../../../src/linter/ui5Types/TypeLinter.js": typeLinterModule,
 		"../../../src/autofix/autofix.js": autofixSpy,
 		"node:fs/promises": {
 			// Prevent tests from update fixtures on the filesystem (autofix)
-			writeFile: sinonGlobal.stub().resolves(),
+			writeFile: writeFileStub,
 		},
 	});
 
@@ -48,7 +50,7 @@ export async function createMockedLinterModules() {
 		"../../../src/linter/linter.js": lintModule,
 	});
 
-	return {lintModule, indexModule, autofixSpy};
+	return {lintModule, indexModule, autofixSpy, writeFileStub};
 }
 
 // Helper function to compare file paths since we don't want to store those in the snapshots

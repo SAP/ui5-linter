@@ -16,6 +16,7 @@ import autofix, {AutofixResource} from "../autofix/autofix.js";
 import {writeFile} from "node:fs/promises";
 import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
 import {getLogger} from "@ui5/logger";
+import path from "node:path";
 
 const log = getLogger("linter:lintWorkspace");
 
@@ -88,7 +89,10 @@ export default async function lintWorkspace(
 			} else {
 				const autofixFiles = Array.from(autofixResult.entries());
 				await Promise.all(autofixFiles.map(async ([filePath, content]) => {
-					const realFilePath = transformVirtualPathToFilePath(filePath, optionsAfterFix);
+					const realFilePath = path.join(
+						optionsAfterFix.rootDir,
+						transformVirtualPathToFilePath(filePath, optionsAfterFix)
+					);
 					log.verbose(`Writing fixed file '${filePath}' to '${realFilePath}'`);
 					await writeFile(realFilePath, content);
 				}));
