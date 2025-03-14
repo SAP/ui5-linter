@@ -204,6 +204,8 @@ function applyFixes(
 	const conditionalModuleAccess = new Set<string>();
 	for (const msg of resource.messages) {
 		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
+			log.verbose(`Skipping fixes that would import module '${msg.fixHints.moduleName}' ` +
+				`because of conditional global access within the current file.`);
 			conditionalModuleAccess.add(msg.fixHints.moduleName);
 		}
 	}

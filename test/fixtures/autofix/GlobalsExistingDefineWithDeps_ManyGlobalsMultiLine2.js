@@ -1,7 +1,8 @@
 sap.ui.define([
-	"sap/m/Dialog"
-], function(
-	Dialog
+	"sap/m/Dialog",
+	"sap/m/ComboBox",
+], function(Dialog,
+	ComboBox
 ) {
 	const dialog = new Dialog();
 	const combobox = new sap.m.ComboBox();

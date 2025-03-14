@@ -100,8 +100,11 @@ export function addDependencies(
 
 	const newDependencies: {moduleName: string; identifier: string}[] = [];
 
-	const depsSeparator = extractIdentifierSeparator(dependencies?.[0]?.getFullText() ?? "");
+	// Prefer using the second element for separator detection as the first one might not have a line-break before it
+	const depsSeparator = extractIdentifierSeparator(
+		dependencies?.[1]?.getFullText() ?? dependencies?.[0]?.getFullText() ?? "");
 	const identifiersSeparator = extractIdentifierSeparator(
+		moduleDeclaration.factory.parameters[1]?.getFullText() ??
 		moduleDeclaration.factory.parameters[0]?.getFullText() ?? "");
 
 	// Calculate after which index we can add new dependencies

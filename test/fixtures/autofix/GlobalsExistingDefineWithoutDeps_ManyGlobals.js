@@ -1,6 +1,6 @@
 sap.ui.define([], function() {
 	const dialog = new sap.m.Dialog();
-	const combbox = new sap.m.ComboBox();
+	const combobox = new sap.m.ComboBox();
 	const input = new sap.m.Input();
 	const label = new sap.m.Label();
 	const list = new sap.m.List();
