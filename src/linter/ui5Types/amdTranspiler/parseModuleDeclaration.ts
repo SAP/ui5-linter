@@ -7,7 +7,7 @@ const log = getLogger("linter:ui5Types:amdTranspiler:parseModuleDeclaration");
 const {SyntaxKind} = ts;
 
 export interface ModuleDeclaration {
-	moduleName?: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral;
+	moduleName?: ts.StringLiteralLike;
 	dependencies?: ts.ArrayLiteralExpression;
 	factory: DefineCallArgument;
 	export?: ts.BooleanLiteral;

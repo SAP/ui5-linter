@@ -40,6 +40,10 @@ sap.ui.define(
 		// expose imported enum as property of library namespace, for documentation see ColorPickerDisplayMode.js
 		thisLib.ColorPickerDisplayMode = ColorPickerDisplayMode;
 
+		// This global usage should not be replaced with an import of sap/ui/unified/library
+		// as it would import the library.js file itself.
+		const unifiedLib = sap.ui.unified;
+
 		return thisLib;
 	}
 );

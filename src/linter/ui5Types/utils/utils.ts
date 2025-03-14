@@ -193,5 +193,58 @@ export function resolveUniqueName(inputName: string, existingIdentifiers?: Set<s
 		}
 	}
 
-	return getUniqueName(Array.from(existingIdentifiers ?? []), name ?? inputName, "/");
+	name = name ?? camelize(identifier);
+	if (existingIdentifiers?.has(name)) {
+		name = getUniqueName(Array.from(existingIdentifiers ?? []), inputName, "/");
+	}
+	return name;
+}
+
+// Camelize a string by replacing invalid identifier characters
+function camelize(str: string): string {
+	return str.replace(/[^\p{ID_Start}\p{ID_Continue}]+([\p{ID_Start}\p{ID_Continue}])/gu, (_match, nextChar) => {
+		return typeof nextChar === "string" ? nextChar.toUpperCase() : "";
+	});
+}
+
+export function isGlobalAssignment(node: ts.AccessExpression): boolean {
+	let currentNode: ts.Node | undefined = node;
+	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
+		if (!currentNode.parent) {
+			return false;
+		}
+		if (ts.isBinaryExpression(currentNode.parent)) {
+			return currentNode.parent.left === currentNode &&
+				currentNode.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken;
+		}
+		currentNode = currentNode.parent;
+	}
+	return false;
+}
+
+export function isConditionalAccess(node: ts.Node): boolean {
+	const parent = node.parent;
+	if (!parent) {
+		return false;
+	}
+	switch (parent.kind) {
+		case ts.SyntaxKind.IfStatement:
+			return (parent as ts.IfStatement).expression === node;
+		case ts.SyntaxKind.ConditionalExpression:
+			return (parent as ts.ConditionalExpression).condition === node;
+		case ts.SyntaxKind.BinaryExpression:
+			if ((parent as ts.BinaryExpression).operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
+				return true;
+			}
+	}
+
+	let currentNode = node;
+	while (currentNode && (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode))) {
+		if (currentNode.questionDotToken) {
+			return true;
+		}
+		currentNode = currentNode.expression;
+	}
+
+	return false;
 }

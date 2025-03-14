@@ -131,6 +131,7 @@ export default class TypeLinter {
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
+		const applyAutofix = this.#context.getApplyAutofix();
 		const typeCheckDone = taskStart("Linting all transpiled resources");
 		for (const sourceFile of program.getSourceFiles()) {
 			if (!sourceFile.isDeclarationFile && pathsToLint.includes(sourceFile.fileName)) {
@@ -152,7 +153,7 @@ export default class TypeLinter {
 				const linter = new SourceFileLinter(
 					this,
 					sourceFile,
-					checker, reportCoverage, messageDetails,
+					checker, reportCoverage, messageDetails, applyAutofix,
 					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
 				);
 				await linter.lint();
@@ -191,7 +192,7 @@ export default class TypeLinter {
 					const linter = new SourceFileLinter(
 						this,
 						sourceFile,
-						checker, reportCoverage, messageDetails,
+						checker, reportCoverage, messageDetails, applyAutofix,
 						apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
 					);
 					await linter.lint();

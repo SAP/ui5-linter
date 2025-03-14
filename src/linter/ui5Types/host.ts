@@ -44,15 +44,18 @@ async function collectSapui5TypesFiles() {
 }
 
 function addSapui5TypesMappingToCompilerOptions(
-	sapui5TypesFiles: string[], options: ts.CompilerOptions, projectNamespace?: string
+	sapui5TypesFiles: string[], options: ts.CompilerOptions, context: LinterContext
 ) {
+	const projectNamespace = context.getNamespace();
+	const applyAutofix = context.getApplyAutofix();
 	const paths = options.paths ?? (options.paths = {});
 	sapui5TypesFiles.forEach((fileName) => {
 		const dtsPath = `/types/@sapui5/types/types/${fileName}`;
 		const libraryName = posixPath.basename(fileName, ".d.ts");
 		const libraryNamespace = libraryName.replace(/\./g, "/");
-		if (libraryNamespace === "sap/ui/core" || libraryNamespace === projectNamespace) {
+		if (applyAutofix || libraryNamespace === "sap/ui/core" || libraryNamespace === projectNamespace) {
 			// Special cases:
+			// - Autofix needs all types to be able to lookup the modules that can be imported when replacing globals
 			// - sap.ui.core needs to be loaded by default as it provides general API that must always be available
 			// - When linting a framework library, the corresponding types should be loaded by default as they
 			//   might not get loaded by the compiler otherwise, as the actual sources are available in the project.
@@ -103,7 +106,7 @@ export async function createVirtualLanguageServiceHost(
 	options.types.push(...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"));
 
 	// Adds types / mappings for all @sapui5/types
-	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options, context.getNamespace());
+	addSapui5TypesMappingToCompilerOptions(await collectSapui5TypesFiles(), options, context);
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(

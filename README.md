@@ -20,6 +20,7 @@
 		- [Options](#options)
 			- [`--details`](#--details)
 			- [`--format`](#--format)
+			- [`--fix`](#--fix)
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)
 			- [`--ui5-config`](#--ui5-config)
@@ -150,6 +151,29 @@ Choose the output format. Currently, `stylish` (default), `json` and `markdown` 
 ```sh
 ui5lint --format json
 ```
+
+#### `--fix`
+
+Attempt to automatically correct certain findings.
+
+**Example::**
+```sh
+ui5lint --fix
+```
+
+Currently, issues of the following rules are fixable:
+- no-globals: Usage of globals that are part of UI5 (e.g. `sap.m.Button`) are replaced with the corresponding module import
+
+After applying fixes, the linter runs another pass to detect any remaining issues. Not all findings may be fixable, so those issues may need to be addressed manually.  
+
+##### Dry Run Mode
+To preview the results without modifying any files, set the UI5LINT_FIX_DRY_RUN environment variable:
+
+```sh
+UI5LINT_FIX_DRY_RUN=true ui5lint --fix
+```
+
+In this mode, the linter will show the messages after the fixes would have been applied but will not actually change the files.
 
 #### `--ignore-pattern`
 
