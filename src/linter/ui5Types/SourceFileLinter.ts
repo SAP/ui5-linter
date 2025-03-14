@@ -728,18 +728,30 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
+	extractNamespace(node: ts.AccessExpression | ts.CallExpression): string {
 		const propAccessChain: string[] = [];
 		propAccessChain.push(node.expression.getText());
 
 		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
+		while (ts.isPropertyAccessExpression(scanNode) || ts.isElementAccessExpression(scanNode)) {
+			if (ts.isPropertyAccessExpression(scanNode)) {
+				if (!ts.isIdentifier(scanNode.name)) {
+					throw new Error(
+						`Unexpected PropertyAccessExpression node: ` +
+						`Expected name to be identifier but got ` +
+						ts.SyntaxKind[scanNode.name.kind]);
+				}
+				propAccessChain.push(scanNode.name.text);
+			} else {
+				if (!ts.isStringLiteralLike(scanNode.argumentExpression)) {
+					throw new Error(
+						`Unexpected ElementAccessExpression node: ` +
+						`Expected argumentExpression to be string literal like but got ` +
+						ts.SyntaxKind[scanNode.argumentExpression.kind]);
+				}
+				propAccessChain.push(scanNode.argumentExpression.text);
 			}
-			propAccessChain.push(scanNode.name.text);
+
 			scanNode = scanNode.parent;
 		}
 		return propAccessChain.join(".");

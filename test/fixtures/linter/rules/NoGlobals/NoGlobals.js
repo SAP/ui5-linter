@@ -41,6 +41,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller"],
 			top.sap?.ui?.define() // OK: Special case sap.ui.define
 			parent.sap?.ui?.define() // OK: Special case sap.ui.define
 			Symbol("isProxy"); // OK: Global variable "Symbol"
+
+			const currentOS = "IOS";
+			sap.ui.Device.os.OS[currentOS]; // ERROR: Global variable "sap"
 		}
 	});
 });
