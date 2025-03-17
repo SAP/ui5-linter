@@ -7,11 +7,12 @@ import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getLogger} from "@ui5/logger";
 import {addDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
+import {Resource} from "@ui5/fs";
 
 const log = getLogger("linter:autofix");
 
 export interface AutofixResource {
-	content: string;
+	resource: Resource;
 	messages: RawLintMessage[];
 }
 
@@ -147,19 +148,57 @@ function getJsErrors(code: string, resourcePath: string) {
 	});
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
+function getAutofixMessages(resource: AutofixResource) {
+	// Collect modules of which at least one message has the conditional fixHint flag set
+	const conditionalModuleAccess = new Set<string>();
+	for (const msg of resource.messages) {
+		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
+			log.verbose(`Skipping fixes that would import module '${msg.fixHints.moduleName}' ` +
+				`because of conditional global access within the current file.`);
+			conditionalModuleAccess.add(msg.fixHints.moduleName);
+		}
+	}
+
+	// Group messages by id
+	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
+	for (const msg of resource.messages) {
+		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
+			// Skip messages with conditional fixHints
+			continue;
+		}
+		if (!messagesById.has(msg.id)) {
+			messagesById.set(msg.id, []);
+		}
+		messagesById.get(msg.id)!.push(msg);
+	}
+
+	return messagesById;
+}
+
 export default async function ({
 	rootDir: _unused1,
 	namespace: _unused2,
-	resources,
+	resources: autofixResources,
 	context,
 }: AutofixOptions): Promise<AutofixResult> {
+	// Only collect and parse files for which fixes are available
+	const resources: Resource[] = [];
+	for (const [_, autofixResource] of autofixResources) {
+		const messagesById = getAutofixMessages(autofixResource);
+		// Currently only global access autofixes are supported
+		// This needs to stay aligned with the applyFixes function
+		if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+			resources.push(autofixResource.resource);
+		}
+	}
+
 	const sourceFiles: SourceFiles = new Map();
 	const resourcePaths = [];
-	for (const [resourcePath, resource] of resources) {
+	for (const resource of resources) {
+		const resourcePath = resource.getPath();
 		const sourceFile = ts.createSourceFile(
-			resourcePath,
-			resource.content,
+			resource.getPath(),
+			await resource.getString(),
 			{
 				languageVersion: ts.ScriptTarget.ES2022,
 				jsDocParsingMode: ts.JSDocParsingMode.ParseNone,
@@ -176,7 +215,7 @@ export default async function ({
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		log.verbose(`Applying autofixes to ${resourcePath}`);
-		const newContent = applyFixes(checker, sourceFile, resourcePath, resources.get(resourcePath)!);
+		const newContent = applyFixes(checker, sourceFile, resourcePath, autofixResources.get(resourcePath)!);
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
@@ -199,7 +238,7 @@ function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
 	resource: AutofixResource
 ): string | undefined {
-	const {content} = resource;
+	const content = sourceFile.getFullText();
 
 	// Collect modules of which at least one message has the conditional fixHint flag set
 	const conditionalModuleAccess = new Set<string>();

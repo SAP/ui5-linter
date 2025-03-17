@@ -5,6 +5,7 @@ import autofix, {AutofixResource, ChangeAction} from "../../../src/autofix/autof
 import LinterContext from "../../../src/linter/LinterContext.js";
 import {MESSAGE} from "../../../src/linter/messages.js";
 import type {addDependencies} from "../../../src/autofix/solutions/amdImports.js";
+import {createResource} from "@ui5/fs/resourceFactory";
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
@@ -48,7 +49,10 @@ test("autofix: Parsing error after applying fixes", async (t) => {
 
 	const resources = new Map<string, AutofixResource>();
 	resources.set("/resources/file.js", {
-		content: "sap.ui.define(() => new sap.m.Button())",
+		resource: createResource({
+			path: "/resources/file.js",
+			string: "sap.ui.define(() => new sap.m.Button())",
+		}),
 		messages: [
 			// Noter: Message details don't need to be correct in this test case
 			// as we stub the addDependencies function

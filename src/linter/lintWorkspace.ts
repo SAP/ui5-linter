@@ -41,9 +41,8 @@ export default async function lintWorkspace(
 				log.verbose(`Resource '${filePath}' not found. Skipping autofix for this file.`);
 				continue;
 			}
-			const content = await resource.getString();
 			autofixResources.set(filePath, {
-				content,
+				resource,
 				messages: rawMessages,
 			});
 		}
