@@ -98,6 +98,7 @@ export function addDependencies(
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
 	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies, resourcePath);
+	let numberOfDependencies = dependencies?.length ?? 0;
 
 	const parameters = factory.parameters;
 	const parameterSyntax = getParameterSyntax(factory);
@@ -138,6 +139,9 @@ export function addDependencies(
 				});
 				dependencyMap.delete(requestedModuleName);
 
+				// Update number of dependencies
+				numberOfDependencies--;
+
 				// Ensure that the new dependency will be the same, e.g. in case it is a relative path
 				dependencyModuleName = existingDependency.node.text;
 			}
@@ -160,8 +164,8 @@ export function addDependencies(
 
 		const insertAfterDependencyElement = dependencies?.[insertAfterIndex];
 		if (insertAfterDependencyElement || (dependencies && insertAfterIndex === -1)) {
-			const existingDependenciesLeft = insertAfterIndex > -1 && dependencyMap.size > 0;
-			const existingDependenciesRight = insertAfterIndex === -1 && dependencyMap.size > 0;
+			const existingDependenciesLeft = insertAfterIndex > -1 && numberOfDependencies > 0;
+			const existingDependenciesRight = insertAfterIndex === -1 && numberOfDependencies > 0;
 			let value = existingDependenciesLeft ? (depsSeparator + newDependencyValue) : newDependencyValue;
 			value += existingDependenciesRight ? ", " : "";
 			const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
