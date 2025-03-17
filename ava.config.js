@@ -18,4 +18,5 @@ export default {
 	},
 	nodeArguments,
 	workerThreads: false,
+	timeout: "20s", // Increased timeout for slower CI environments
 };
