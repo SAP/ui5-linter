@@ -6,6 +6,7 @@ import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDec
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getLogger} from "@ui5/logger";
 import {addDependencies} from "./solutions/amdImports.js";
+import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 
 const log = getLogger("linter:autofix");
 
@@ -53,7 +54,7 @@ interface DeleteChange extends AbstractChangeSet {
 export type AutofixResult = Map<ResourcePath, string>;
 type SourceFiles = Map<ResourcePath, ts.SourceFile>;
 
-interface Position {
+export interface Position {
 	line: number;
 	column: number;
 	pos: number;
@@ -82,7 +83,7 @@ export type ImportRequests = Map<string, {
 export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
 
 export interface ExistingModuleDeclarationInfo {
-	moduleDeclaration: ModuleDeclaration;
+	moduleDeclaration: ModuleDeclaration | RequireExpression;
 	importRequests: ImportRequests;
 }
 

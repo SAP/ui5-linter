@@ -86,17 +86,21 @@ export function addDependencies(
 		return;
 	}
 
-	if (!ts.isFunctionLike(moduleDeclaration.factory)) {
+	const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
+
+	if (!factory || !ts.isFunctionLike(factory)) {
 		throw new Error("Invalid factory function");
 	}
 
-	const declaredIdentifiers = collectModuleIdentifiers(moduleDeclaration.factory);
+	const moduleName = "moduleName" in moduleDeclaration ? moduleDeclaration.moduleName : undefined;
+
+	const declaredIdentifiers = collectModuleIdentifiers(factory);
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
 	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies, resourcePath);
 
-	const parameters = moduleDeclaration.factory.parameters;
-	const parameterSyntax = getParameterSyntax(moduleDeclaration.factory);
+	const parameters = factory.parameters;
+	const parameterSyntax = getParameterSyntax(factory);
 
 	const newDependencies: {moduleName: string; identifier: string}[] = [];
 
@@ -104,8 +108,8 @@ export function addDependencies(
 	const depsSeparator = extractIdentifierSeparator(
 		dependencies?.[1]?.getFullText() ?? dependencies?.[0]?.getFullText() ?? "");
 	const identifiersSeparator = extractIdentifierSeparator(
-		moduleDeclaration.factory.parameters[1]?.getFullText() ??
-		moduleDeclaration.factory.parameters[0]?.getFullText() ?? "");
+		factory.parameters[1]?.getFullText() ??
+		factory.parameters[0]?.getFullText() ?? "");
 
 	// Calculate after which index we can add new dependencies
 	const insertAfterIndex = Math.min(parameters.length, dependencies?.length ?? 0) - 1;
@@ -168,7 +172,7 @@ export function addDependencies(
 			});
 		} else {
 			// No dependencies array found, add a new one right before the factory function
-			const start = (moduleDeclaration.moduleName ? defineCall.arguments[1] : defineCall.arguments[0]).getStart();
+			const start = (moduleName ? defineCall.arguments[1] : defineCall.arguments[0]).getStart();
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
