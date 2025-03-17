@@ -12,6 +12,7 @@ jobs:
   test:
     name: Unit and Integration
     strategy:
+      fail-fast: false # Do not stop other jobs if one fails
       matrix:
         version: [20, 22, 23]
         os: [ubuntu-24.04, windows-2025, macos-15]
