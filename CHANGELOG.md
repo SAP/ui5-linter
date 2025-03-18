@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.12.0](https://github.com/SAP/ui5-linter/compare/v1.11.0...v1.12.0) (2025-03-18)
+
+
+### Features
+
+* **Autofix:** UI5 globals ([#572](https://github.com/SAP/ui5-linter/issues/572)) ([2a9daac](https://github.com/SAP/ui5-linter/commit/2a9daac768d966f2329aa9b73feb78a9bbcb4903))
+
+
+### Bug Fixes
+
+* Cannot read properties of undefined (reading 'map') ([28ab574](https://github.com/SAP/ui5-linter/commit/28ab574098c4c7f203f3233ee7ff43ac19edd239))
+* Detect outdated notation for bootstrap attribute log-level ([#603](https://github.com/SAP/ui5-linter/issues/603)) ([4fb76f8](https://github.com/SAP/ui5-linter/commit/4fb76f80d6bfce2f99cdb3789aa7aacb63d516e2))
+* Suppress eslint finding ([93acfff](https://github.com/SAP/ui5-linter/commit/93acfff839e2ed7a70f81eb39fe13168eaef364c))
+
+
+### Performance Improvements
+
+* Prevent unnecessary TypeScript libReplacement lookup ([dac9f88](https://github.com/SAP/ui5-linter/commit/dac9f883acc513415ac24b17d102298e98e9eed0))
+
+
+### Dependencies
+
+* Bump typescript from 5.7.3 to 5.8.2 ([ed84349](https://github.com/SAP/ui5-linter/commit/ed843499b5f9f5f3dc2b9e979f31862a2afc357b))
+
 ## [1.11.0](https://github.com/SAP/ui5-linter/compare/v1.10.0...v1.11.0) (2025-02-28)
 
 
