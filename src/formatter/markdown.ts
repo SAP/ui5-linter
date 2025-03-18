@@ -72,7 +72,7 @@ export class Markdown {
 			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
 		}
 		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
-			summary += "> Run `ui5lint --fix` to resolve all auto-fixable errors\n\n";
+			summary += "> Run `ui5lint --fix` to resolve all auto-fixable problems\n\n";
 		}
 
 		if (findings) {

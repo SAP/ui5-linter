@@ -108,7 +108,7 @@ export class Text {
 			)
 		);
 		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
-			this.#writeln("   Run \"ui5lint --fix\" to resolve all auto-fixable errors\n");
+			this.#writeln("   Run \"ui5lint --fix\" to resolve all auto-fixable problems\n");
 		}
 
 		if (totalFatalErrorCount) {
