@@ -2,7 +2,7 @@ import {LintResult, LintMessage} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Markdown {
-	format(lintResults: LintResult[], showDetails: boolean, version: string): string {
+	format(lintResults: LintResult[], showDetails: boolean, version: string, autofix: boolean): string {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
@@ -70,6 +70,9 @@ export class Markdown {
 			`(${totalErrorCount} errors, ${totalWarningCount} warnings)  \n`;
 		if (totalFatalErrorCount) {
 			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
+		}
+		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
+			summary += "> Run `ui5lint --fix` to resolve all auto-fixable errors\n\n";
 		}
 
 		if (findings) {

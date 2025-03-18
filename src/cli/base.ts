@@ -181,11 +181,11 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
-		process.stdout.write(markdownFormatter.format(res, details, getVersion()));
+		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
-		process.stderr.write(textFormatter.format(res, details));
+		process.stderr.write(textFormatter.format(res, details, fix));
 	}
 	// Stop profiling after CLI finished execution
 	if (profile) {
