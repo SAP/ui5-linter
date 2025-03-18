@@ -44,7 +44,7 @@ export class Text {
 	constructor(private readonly cwd: string) {
 	}
 
-	format(lintResults: LintResult[], showDetails: boolean) {
+	format(lintResults: LintResult[], showDetails: boolean, autofix: boolean) {
 		this.#writeln(`UI5 linter report:`);
 		this.#writeln("");
 		let totalErrorCount = 0;
@@ -107,6 +107,10 @@ export class Text {
 				`(${totalErrorCount} errors, ${totalWarningCount} warnings)`
 			)
 		);
+		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
+			this.#writeln("   Run \"ui5lint --fix\" to resolve all auto-fixable problems\n");
+		}
+
 		if (totalFatalErrorCount) {
 			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal errors`));
 		}

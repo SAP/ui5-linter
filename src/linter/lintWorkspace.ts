@@ -8,20 +8,96 @@ import lintFileTypes from "./fileTypes/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
 import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
-import {createReader} from "@ui5/fs/resourceFactory";
+import {createReader, createResource} from "@ui5/fs/resourceFactory";
 import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
 import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
-import {FSToVirtualPathOptions} from "../utils/virtualPathToFilePath.js";
+import autofix, {AutofixResource} from "../autofix/autofix.js";
+import {writeFile} from "node:fs/promises";
+import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
+import {getLogger} from "@ui5/logger";
+import path from "node:path";
+
+const log = getLogger("linter:lintWorkspace");
 
 export default async function lintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
 	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
-	const context = await runLintWorkspace(
+	let context = await runLintWorkspace(
 		workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
 	);
+
+	if (options.fix) {
+		const rawLintResults = context.generateRawLintResults();
+
+		const autofixResources = new Map<string, AutofixResource>();
+		for (const {filePath, rawMessages} of rawLintResults) {
+			const resource = await workspace.byPath(filePath);
+			if (!resource) {
+				// This might happen in case a file with an existing source map was linted and the referenced
+				// file is not available in the workspace.
+				log.verbose(`Resource '${filePath}' not found. Skipping autofix for this file.`);
+				continue;
+			}
+			autofixResources.set(filePath, {
+				resource,
+				messages: rawMessages,
+			});
+		}
+
+		log.verbose(`Autofixing ${autofixResources.size} files...`);
+		const doneAutofix = taskStart("Autofix");
+
+		const autofixResult = await autofix({
+			rootDir: options.rootDir,
+			namespace: options.namespace,
+			resources: autofixResources,
+			context,
+		});
+
+		doneAutofix();
+
+		log.verbose(`Autofix provided solutions for ${autofixResult.size} files`);
+
+		if (autofixResult.size > 0) {
+			for (const [filePath, content] of autofixResult.entries()) {
+				const newResource = createResource({
+					path: filePath,
+					string: content,
+				});
+				await workspace.write(newResource);
+				await filePathsWorkspace.write(newResource);
+			}
+
+			log.verbose("Linting again after applying fixes...");
+
+			// Run lint again after fixes are applied, but without fixing
+			const optionsAfterFix = {
+				...options,
+				fix: false,
+			};
+			context = await runLintWorkspace(
+				workspace, filePathsWorkspace, optionsAfterFix, config, patternsMatch, sharedLanguageService
+			);
+
+			// Update fixed files on the filesystem
+			if (process.env.UI5LINT_FIX_DRY_RUN) {
+				log.verbose("UI5LINT_FIX_DRY_RUN: Not updating files on the filesystem");
+			} else {
+				const autofixFiles = Array.from(autofixResult.entries());
+				await Promise.all(autofixFiles.map(async ([filePath, content]) => {
+					const realFilePath = path.join(
+						optionsAfterFix.rootDir,
+						transformVirtualPathToFilePath(filePath, optionsAfterFix)
+					);
+					log.verbose(`Writing fixed file '${filePath}' to '${realFilePath}'`);
+					await writeFile(realFilePath, content);
+				}));
+			}
+		}
+	}
 
 	return context.generateLintResults();
 }

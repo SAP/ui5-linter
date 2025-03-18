@@ -17,6 +17,7 @@ export interface LinterArg {
 	filePaths?: string[];
 	ignorePattern?: string[];
 	details: boolean;
+	fix: boolean;
 	format: string;
 	config?: string;
 	ui5Config?: string;
@@ -68,6 +69,11 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 			})
 			.option("details", {
 				describe: "Print complementary information for each finding, if available",
+				type: "boolean",
+				default: false,
+			})
+			.option("fix", {
+				describe: "Automatically fix linter findings",
 				type: "boolean",
 				default: false,
 			})
@@ -137,6 +143,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		coverage,
 		ignorePattern: ignorePatterns,
 		details,
+		fix,
 		format,
 		config,
 		ui5Config,
@@ -158,6 +165,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		filePatterns,
 		coverage: reportCoverage,
 		details,
+		fix,
 		config,
 		ui5Config,
 	});
@@ -173,11 +181,11 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
-		process.stdout.write(markdownFormatter.format(res, details, getVersion()));
+		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
-		process.stderr.write(textFormatter.format(res, details));
+		process.stderr.write(textFormatter.format(res, details, fix));
 	}
 	// Stop profiling after CLI finished execution
 	if (profile) {
