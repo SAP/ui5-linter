@@ -30,7 +30,7 @@ test.beforeEach((t) => {
 test("Test Text Formatter (with '--details true')", (t) => {
 	const {lintResults, fakePath} = t.context;
 	const textFormatter = new Text(fakePath);
-	let res = textFormatter.format(lintResults, true);
+	let res = textFormatter.format(lintResults, true, false);
 	res = res.replaceAll(path.resolve(fakePath) + path.sep, "<base path>/");
 	t.snapshot(res);
 });
@@ -38,7 +38,7 @@ test("Test Text Formatter (with '--details true')", (t) => {
 test("Test Text Formatter (with '--details false')", (t) => {
 	const {lintResults, fakePath} = t.context;
 	const textFormatter = new Text(fakePath);
-	let res = textFormatter.format(lintResults, false);
+	let res = textFormatter.format(lintResults, false, false);
 	res = res.replaceAll(path.resolve(fakePath) + path.sep, "<base path>/");
 	t.snapshot(res);
 });
