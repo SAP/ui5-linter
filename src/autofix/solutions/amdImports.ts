@@ -136,7 +136,12 @@ export function addDependencies(
 	const parameters = factory.parameters;
 	const parameterSyntax = getParameterSyntax(factory);
 
-	const newDependencies: {moduleName: string; identifier: string; dependencyExists: boolean}[] = [];
+	const newDependencies: {
+		moduleName: string;
+		identifier: string;
+		existingDependency?: DependencyMapValue;
+		dependencyExists?: boolean;
+	}[] = [];
 
 	// Prefer using the second element for separator detection as the first one might not have a line-break before it
 	const depsSeparator = extractIdentifierSeparator(
@@ -151,9 +156,8 @@ export function addDependencies(
 
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [requestedModuleName, importRequest] of importRequests) {
-		let dependencyModuleName = requestedModuleName;
+		const dependencyModuleName = requestedModuleName;
 		const existingDependency = dependencyMap.get(requestedModuleName);
-		let dependencyExists = false;
 		if (existingDependency) {
 			// Reuse the existing dependency
 			// Check whether a parameter name already exists for this dependency
@@ -163,47 +167,67 @@ export function addDependencies(
 				// Existing parameter can be reused
 				importRequest.identifier = getParameterDeclarationText(existingParameter);
 				continue;
-			} else {
-				// Dependency exist, but without a function parameter.
-				// If it is not already at the first place where we insert new deps,
-				// remove the dependency so that it will be handled together with the new dependencies
-				// This prevents the need to introduce new parameters for unrelated dependencies
-				if (existingDependency.index === insertDependenciesAfterIndex + 1) {
-					dependencyExists = true;
-					insertDependenciesAfterIndex++;
-				} else {
-					let start = existingDependency.node.getFullStart();
-					let end = existingDependency.node.getEnd();
-
-					// Leading comma means, it's not the first dependency, so we also remove the comma before
-					// the dependency
-					if (existingDependency.leadingComma) {
-						start = existingDependency.leadingComma.getFullStart();
-					} else if (existingDependency.trailingComma) {
-						// First dependency, but there might be more, so we also remove the comma after the dependency
-						end = existingDependency.trailingComma.getEnd();
-					}
-					changeSet.push({action: ChangeAction.DELETE, start, end});
-					dependencyMap.delete(requestedModuleName);
-
-					// Update number of dependencies
-					numberOfDependencies--;
-
-					// Ensure that the new dependency will be the same, e.g. in case it is a relative path
-					dependencyModuleName = existingDependency.node.text;
-				}
 			}
 		}
-		// Add a completely new module dependency
+		// Add a new module dependency. Handing of missing parameters is done later
 		const identifier = resolveUniqueName(dependencyModuleName, declaredIdentifiers);
 		declaredIdentifiers.add(identifier);
 		importRequest.identifier = identifier;
 		newDependencies.push({
 			moduleName: dependencyModuleName,
 			identifier,
-			dependencyExists,
+			existingDependency,
 		});
 	}
+
+	// Sort by existing dependency index, then by module name
+	// Sorting by index is needed to properly check for re-using existing dependencies
+	newDependencies.sort((a, b) => {
+		if (a.existingDependency && b.existingDependency) {
+			return a.existingDependency.index - b.existingDependency.index;
+		} else if (a.existingDependency) {
+			return -1;
+		} else if (b.existingDependency) {
+			return 1;
+		} else {
+			return a.moduleName.localeCompare(b.moduleName);
+		}
+	});
+
+	// Check whether existing dependencies without factory parameters can be reused or need to be re-added
+	newDependencies.forEach((newDependency) => {
+		const existingDependency = newDependency.existingDependency;
+		if (!existingDependency) {
+			return;
+		}
+		if (existingDependency.index === insertDependenciesAfterIndex + 1) {
+			// The dependency is already in the correct position, so we can skip adding it again
+			insertDependenciesAfterIndex++;
+			newDependency.dependencyExists = true;
+		} else {
+			// We need to remove the existing dependency and re-add it at the correct position
+
+			let start = existingDependency.node.getFullStart();
+			let end = existingDependency.node.getEnd();
+
+			// Leading comma means, it's not the first dependency, so we also remove the comma before
+			// the dependency
+			if (existingDependency.leadingComma) {
+				start = existingDependency.leadingComma.getFullStart();
+			} else if (existingDependency.trailingComma) {
+				// First dependency, but there might be more, so we also remove the comma after the dependency
+				end = existingDependency.trailingComma.getEnd();
+			}
+			changeSet.push({action: ChangeAction.DELETE, start, end});
+			dependencyMap.delete(newDependency.moduleName);
+
+			// Update number of dependencies
+			numberOfDependencies--;
+
+			// Ensure that the new dependency will be the same, e.g. in case it is a relative path
+			newDependency.moduleName = existingDependency.node.text;
+		}
+	});
 
 	// Add new dependencies
 	if (newDependencies.length) {
