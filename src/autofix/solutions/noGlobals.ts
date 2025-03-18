@@ -81,7 +81,7 @@ export default function generateSolutionNoGlobals(
 					// Only handle async require calls, not sap.ui.require probing
 					if (requireExpression.async) {
 						moduleDeclarations.set(node, {
-							moduleDeclaration: parseModuleDeclaration(node.arguments, checker),
+							moduleDeclaration: requireExpression,
 							importRequests: new Map(),
 						});
 					}

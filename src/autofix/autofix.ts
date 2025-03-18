@@ -181,13 +181,15 @@ export default async function ({
 	resources: autofixResources,
 	context,
 }: AutofixOptions): Promise<AutofixResult> {
-	// Only collect and parse files for which fixes are available
+	// Group messages by ID and only process files for which fixes are available
+	const messages = new Map<string, Map<MESSAGE, RawLintMessage[]>>();
 	const resources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
 		const messagesById = getAutofixMessages(autofixResource);
 		// Currently only global access autofixes are supported
 		// This needs to stay aligned with the applyFixes function
 		if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+			messages.set(autofixResource.resource.getPath(), messagesById);
 			resources.push(autofixResource.resource);
 		}
 	}
@@ -215,7 +217,7 @@ export default async function ({
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		log.verbose(`Applying autofixes to ${resourcePath}`);
-		const newContent = applyFixes(checker, sourceFile, resourcePath, autofixResources.get(resourcePath)!);
+		const newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
@@ -236,32 +238,9 @@ export default async function ({
 
 function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
-	resource: AutofixResource
+	messagesById: Map<MESSAGE, RawLintMessage[]>
 ): string | undefined {
 	const content = sourceFile.getFullText();
-
-	// Collect modules of which at least one message has the conditional fixHint flag set
-	const conditionalModuleAccess = new Set<string>();
-	for (const msg of resource.messages) {
-		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
-			log.verbose(`Skipping fixes that would import module '${msg.fixHints.moduleName}' ` +
-				`because of conditional global access within the current file.`);
-			conditionalModuleAccess.add(msg.fixHints.moduleName);
-		}
-	}
-
-	// Group messages by id
-	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
-	for (const msg of resource.messages) {
-		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
-			// Skip messages with conditional fixHints
-			continue;
-		}
-		if (!messagesById.has(msg.id)) {
-			messagesById.set(msg.id, []);
-		}
-		messagesById.get(msg.id)!.push(msg);
-	}
 
 	const changeSet: ChangeSet[] = [];
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
