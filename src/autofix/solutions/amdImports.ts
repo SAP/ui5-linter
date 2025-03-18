@@ -136,7 +136,7 @@ export function addDependencies(
 	const parameters = factory.parameters;
 	const parameterSyntax = getParameterSyntax(factory);
 
-	const newDependencies: {moduleName: string; identifier: string}[] = [];
+	const newDependencies: {moduleName: string; identifier: string; dependencyExists: boolean}[] = [];
 
 	// Prefer using the second element for separator detection as the first one might not have a line-break before it
 	const depsSeparator = extractIdentifierSeparator(
@@ -145,13 +145,15 @@ export function addDependencies(
 		factory.parameters[1]?.getFullText() ??
 		factory.parameters[0]?.getFullText() ?? "");
 
-	// Calculate after which index we can add new dependencies
-	const insertAfterIndex = Math.min(parameters.length, dependencies?.length ?? 0) - 1;
+	// Calculate after which index we can add new dependencies / parameters
+	let insertDependenciesAfterIndex = Math.min(parameters.length, dependencies?.length ?? 0) - 1;
+	const insertParametersAfterIndex = insertDependenciesAfterIndex;
 
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [requestedModuleName, importRequest] of importRequests) {
 		let dependencyModuleName = requestedModuleName;
 		const existingDependency = dependencyMap.get(requestedModuleName);
+		let dependencyExists = false;
 		if (existingDependency) {
 			// Reuse the existing dependency
 			// Check whether a parameter name already exists for this dependency
@@ -163,25 +165,33 @@ export function addDependencies(
 				continue;
 			} else {
 				// Dependency exist, but without a function parameter.
-				// Remove the dependency so that it will be handled together with the new dependencies
-				let start = existingDependency.node.getFullStart();
-				let end = existingDependency.node.getEnd();
+				// If it is not already at the first place where we insert new deps,
+				// remove the dependency so that it will be handled together with the new dependencies
+				// This prevents the need to introduce new parameters for unrelated dependencies
+				if (existingDependency.index === insertDependenciesAfterIndex + 1) {
+					dependencyExists = true;
+					insertDependenciesAfterIndex++;
+				} else {
+					let start = existingDependency.node.getFullStart();
+					let end = existingDependency.node.getEnd();
 
-				// Leading comma means, it's not the first dependency, so we also remove the comma before the dependency
-				if (existingDependency.leadingComma) {
-					start = existingDependency.leadingComma.getFullStart();
-				} else if (existingDependency.trailingComma) {
-					// First dependency, but there might be more, so we also remove the comma after the dependency
-					end = existingDependency.trailingComma.getEnd();
+					// Leading comma means, it's not the first dependency, so we also remove the comma before
+					// the dependency
+					if (existingDependency.leadingComma) {
+						start = existingDependency.leadingComma.getFullStart();
+					} else if (existingDependency.trailingComma) {
+						// First dependency, but there might be more, so we also remove the comma after the dependency
+						end = existingDependency.trailingComma.getEnd();
+					}
+					changeSet.push({action: ChangeAction.DELETE, start, end});
+					dependencyMap.delete(requestedModuleName);
+
+					// Update number of dependencies
+					numberOfDependencies--;
+
+					// Ensure that the new dependency will be the same, e.g. in case it is a relative path
+					dependencyModuleName = existingDependency.node.text;
 				}
-				changeSet.push({action: ChangeAction.DELETE, start, end});
-				dependencyMap.delete(requestedModuleName);
-
-				// Update number of dependencies
-				numberOfDependencies--;
-
-				// Ensure that the new dependency will be the same, e.g. in case it is a relative path
-				dependencyModuleName = existingDependency.node.text;
 			}
 		}
 		// Add a completely new module dependency
@@ -191,44 +201,47 @@ export function addDependencies(
 		newDependencies.push({
 			moduleName: dependencyModuleName,
 			identifier,
+			dependencyExists,
 		});
 	}
 
 	// Add new dependencies
 	if (newDependencies.length) {
-		const newDependencyValue = newDependencies.map((newDependency) => {
+		const newDependencyValue = newDependencies.filter(($) => !$.dependencyExists).map((newDependency) => {
 			return `${mostUsedQuoteStyle}${newDependency.moduleName}${mostUsedQuoteStyle}`;
 		}).join(depsSeparator.trailing);
 
-		const insertAfterDependencyElement = dependencies?.[insertAfterIndex];
-		if (insertAfterDependencyElement || (dependencies && insertAfterIndex === -1)) {
-			const existingDependenciesLeft = insertAfterIndex > -1 && numberOfDependencies > 0;
-			const existingDependenciesRight = insertAfterIndex === -1 && numberOfDependencies > 0;
-			let value = existingDependenciesLeft ? depsSeparator.trailing : depsSeparator.leading;
-			value += newDependencyValue;
-			if (existingDependenciesRight) {
-				if (depsSeparator.trailing.includes("\n")) {
-					value += ",";
-				} else {
-					// Ensure to add a new space in case there are no line-breaks for separation
-					value += ", ";
+		if (newDependencyValue) {
+			const insertAfterDependencyElement = dependencies?.[insertDependenciesAfterIndex];
+			if (insertAfterDependencyElement || (dependencies && insertDependenciesAfterIndex === -1)) {
+				const existingDependenciesLeft = insertDependenciesAfterIndex > -1 && numberOfDependencies > 0;
+				const existingDependenciesRight = insertDependenciesAfterIndex === -1 && numberOfDependencies > 0;
+				let value = existingDependenciesLeft ? depsSeparator.trailing : depsSeparator.leading;
+				value += newDependencyValue;
+				if (existingDependenciesRight) {
+					if (depsSeparator.trailing.includes("\n")) {
+						value += ",";
+					} else {
+						// Ensure to add a new space in case there are no line-breaks for separation
+						value += ", ";
+					}
 				}
+				const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
+				changeSet.push({
+					action: ChangeAction.INSERT,
+					start,
+					value: formatDependencies(value, depsSeparator.trailing, {pos: start, node: defineCall}),
+				});
+			} else {
+				// No dependencies array found, add a new one right before the factory function
+				const start = (moduleName ? defineCall.arguments[1] : defineCall.arguments[0]).getStart();
+				changeSet.push({
+					action: ChangeAction.INSERT,
+					start,
+					value: `[${formatDependencies(newDependencyValue, depsSeparator.trailing,
+						{pos: start, node: defineCall})}], `,
+				});
 			}
-			const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
-			changeSet.push({
-				action: ChangeAction.INSERT,
-				start,
-				value: formatDependencies(value, depsSeparator.trailing, {pos: start, node: defineCall}),
-			});
-		} else {
-			// No dependencies array found, add a new one right before the factory function
-			const start = (moduleName ? defineCall.arguments[1] : defineCall.arguments[0]).getStart();
-			changeSet.push({
-				action: ChangeAction.INSERT,
-				start,
-				value: `[${formatDependencies(newDependencyValue, depsSeparator.trailing,
-					{pos: start, node: defineCall})}], `,
-			});
 		}
 
 		let newParametersValue = newDependencies.map((newDependency) => {
@@ -244,10 +257,10 @@ export function addDependencies(
 			newParametersValue += ")";
 		}
 
-		const insertAfterParameterDeclaration = parameters[insertAfterIndex];
+		const insertAfterParameterDeclaration = parameters[insertParametersAfterIndex];
 
-		const existingParameterLeft = insertAfterIndex > -1 && parameters.length > 0;
-		const existingParameterRight = insertAfterIndex === -1 && parameters.length > 0;
+		const existingParameterLeft = insertParametersAfterIndex > -1 && parameters.length > 0;
+		const existingParameterRight = insertParametersAfterIndex === -1 && parameters.length > 0;
 
 		let value = existingParameterLeft ? (identifiersSeparator.trailing + newParametersValue) : newParametersValue;
 		value += existingParameterRight ? ", " : "";
