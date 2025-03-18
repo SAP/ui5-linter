@@ -9,41 +9,75 @@ function resolveRelativeDependency(dependency: string, moduleName: string): stri
 	return path.resolve("/" + path.dirname(moduleName), dependency).substring(1);
 }
 
-function createDependencyInfo(dependencies: ts.NodeArray<ts.Expression> | undefined, resourcePath: string) {
+interface DependencyMapValue {
+	node: ts.StringLiteralLike;
+	index: number;
+	leadingComma?: ts.Token<ts.SyntaxKind.CommaToken>;
+	trailingComma?: ts.Token<ts.SyntaxKind.CommaToken>;
+}
+
+function createDependencyInfo(dependencyArray: ts.ArrayLiteralExpression | undefined, resourcePath: string) {
 	const moduleName =
 		resourcePath.startsWith("/resources/") ? resourcePath.substring("/resources/".length) : undefined;
-	const dependencyMap = new Map<string, {node: ts.StringLiteralLike; index: number}>();
+	const dependencyMap = new Map<string, DependencyMapValue>();
 	const quoteStyleCount = {
 		"`": 0,
 		"'": 0,
 		"\"": 0, // Double quotes will be prioritized if tied
 	};
-	dependencies?.forEach((dependency, index) => {
-		if (!ts.isStringLiteralLike(dependency)) {
-			return;
+	if (dependencyArray) {
+		let syntaxList: ts.SyntaxList | undefined;
+		for (const child of dependencyArray.getChildren()) {
+			if (child.kind === ts.SyntaxKind.SyntaxList) {
+				syntaxList = child as ts.SyntaxList;
+			}
 		}
-		// In case of duplicate imports, we only use the first one.
-		// As the map is only used for a lookup for reusing existing imports and not
-		// as a exhaustive list of dependencies, this is fine.
-		let dependencyText = dependency.text;
-		if (moduleName && dependencyText.startsWith(".")) {
-			dependencyText = resolveRelativeDependency(dependencyText, moduleName);
-		}
-
-		if (!dependencyMap.has(dependencyText)) {
-			dependencyMap.set(dependencyText, {node: dependency, index});
+		if (!syntaxList) {
+			throw new Error("SyntaxList not found in dependencies array");
 		}
 
-		// Check which quote style format is used for existing dependencies
-		// and use the same for the new dependencies (majority wins):
-		if (dependency.getText().startsWith("'")) {
-			quoteStyleCount["'"]++;
-		} else if (dependency.getText().startsWith("\"")) {
-			quoteStyleCount["\""]++;
-		} else if (ts.isNoSubstitutionTemplateLiteral(dependency)) {
-			quoteStyleCount["`"]++;
+		let previousComma: ts.Token<ts.SyntaxKind.CommaToken> | undefined;
+		let previousDependency: DependencyMapValue | undefined;
+		for (const child of syntaxList.getChildren()) {
+			if (child.kind === ts.SyntaxKind.CommaToken) {
+				if (previousDependency) {
+					previousDependency.trailingComma = child as ts.Token<ts.SyntaxKind.CommaToken>;
+					previousDependency = undefined;
+				}
+				previousComma = child as ts.Token<ts.SyntaxKind.CommaToken>;
+			}
+
+			if (!ts.isStringLiteralLike(child)) {
+				continue;
+			}
+			// In case of duplicate imports, we only use the first one.
+			// As the map is only used for a lookup for reusing existing imports and not
+			// as a exhaustive list of dependencies, this is fine.
+			let dependencyText = child.text;
+			if (moduleName && dependencyText.startsWith(".")) {
+				dependencyText = resolveRelativeDependency(dependencyText, moduleName);
+			}
+
+			if (!dependencyMap.has(dependencyText)) {
+				previousDependency = {node: child, index: dependencyArray.elements.indexOf(child)};
+				if (previousComma) {
+					previousDependency.leadingComma = previousComma;
+					previousComma = undefined;
+				}
+				dependencyMap.set(dependencyText, previousDependency);
+			}
+
+			// Check which quote style format is used for existing dependencies
+			// and use the same for the new dependencies (majority wins):
+			if (child.getText().startsWith("'")) {
+				quoteStyleCount["'"]++;
+			} else if (child.getText().startsWith("\"")) {
+				quoteStyleCount["\""]++;
+			} else if (ts.isNoSubstitutionTemplateLiteral(child)) {
+				quoteStyleCount["`"]++;
+			}
 		}
-	});
+	}
 	const mostUsedQuoteStyle = Object.entries(quoteStyleCount).reduce((a, b) => a[1] > b[1] ? a : b)[0];
 	return {dependencyMap, mostUsedQuoteStyle};
 }
@@ -97,7 +131,7 @@ export function addDependencies(
 	const declaredIdentifiers = collectModuleIdentifiers(factory);
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
-	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(dependencies, resourcePath);
+	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(moduleDeclaration.dependencies, resourcePath);
 	let numberOfDependencies = dependencies?.length ?? 0;
 
 	const parameters = factory.parameters;
@@ -131,12 +165,17 @@ export function addDependencies(
 			} else {
 				// Dependency exist, but without a function parameter.
 				// Remove the dependency so that it will be handled together with the new dependencies
-				changeSet.push({
-					action: ChangeAction.DELETE,
-					// Also remove the comma before the dependency
-					start: existingDependency.node.getFullStart() - (existingDependency.index > 0 ? 1 : 0),
-					end: existingDependency.node.getEnd(),
-				});
+				let start = existingDependency.node.getFullStart();
+				let end = existingDependency.node.getEnd();
+
+				// Leading comma means, it's not the first dependency, so we also remove the comma before the dependency
+				if (existingDependency.leadingComma) {
+					start = existingDependency.leadingComma.getFullStart();
+				} else if (existingDependency.trailingComma) {
+					// First dependency, but there might be more, so we also remove the comma after the dependency
+					end = existingDependency.trailingComma.getEnd();
+				}
+				changeSet.push({action: ChangeAction.DELETE, start, end});
 				dependencyMap.delete(requestedModuleName);
 
 				// Update number of dependencies
@@ -160,19 +199,27 @@ export function addDependencies(
 	if (newDependencies.length) {
 		const newDependencyValue = newDependencies.map((newDependency) => {
 			return `${mostUsedQuoteStyle}${newDependency.moduleName}${mostUsedQuoteStyle}`;
-		}).join(depsSeparator);
+		}).join(depsSeparator.trailing);
 
 		const insertAfterDependencyElement = dependencies?.[insertAfterIndex];
 		if (insertAfterDependencyElement || (dependencies && insertAfterIndex === -1)) {
 			const existingDependenciesLeft = insertAfterIndex > -1 && numberOfDependencies > 0;
 			const existingDependenciesRight = insertAfterIndex === -1 && numberOfDependencies > 0;
-			let value = existingDependenciesLeft ? (depsSeparator + newDependencyValue) : newDependencyValue;
-			value += existingDependenciesRight ? ", " : "";
+			let value = existingDependenciesLeft ? depsSeparator.trailing : depsSeparator.leading;
+			value += newDependencyValue;
+			if (existingDependenciesRight) {
+				if (depsSeparator.trailing.includes("\n")) {
+					value += ",";
+				} else {
+					// Ensure to add a new space in case there are no line-breaks for separation
+					value += ", ";
+				}
+			}
 			const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
-				value: formatDependencies(value, depsSeparator, {pos: start, node: defineCall}),
+				value: formatDependencies(value, depsSeparator.trailing, {pos: start, node: defineCall}),
 			});
 		} else {
 			// No dependencies array found, add a new one right before the factory function
@@ -180,14 +227,14 @@ export function addDependencies(
 			changeSet.push({
 				action: ChangeAction.INSERT,
 				start,
-				value: `[${formatDependencies(newDependencyValue, depsSeparator,
+				value: `[${formatDependencies(newDependencyValue, depsSeparator.trailing,
 					{pos: start, node: defineCall})}], `,
 			});
 		}
 
 		let newParametersValue = newDependencies.map((newDependency) => {
 			return newDependency.identifier;
-		}).join(identifiersSeparator);
+		}).join(identifiersSeparator.trailing);
 
 		if (!parameterSyntax.hasParens) {
 			changeSet.push({
@@ -203,14 +250,14 @@ export function addDependencies(
 		const existingParameterLeft = insertAfterIndex > -1 && parameters.length > 0;
 		const existingParameterRight = insertAfterIndex === -1 && parameters.length > 0;
 
-		let value = existingParameterLeft ? (identifiersSeparator + newParametersValue) : newParametersValue;
+		let value = existingParameterLeft ? (identifiersSeparator.trailing + newParametersValue) : newParametersValue;
 		value += existingParameterRight ? ", " : "";
 
 		const start = insertAfterParameterDeclaration?.getEnd() ?? parameterSyntax.syntaxList.getStart();
 		changeSet.push({
 			action: ChangeAction.INSERT,
 			start,
-			value: formatDependencies(value, identifiersSeparator, {pos: start, node: defineCall}),
+			value: formatDependencies(value, identifiersSeparator.trailing, {pos: start, node: defineCall}),
 		});
 	}
 
@@ -245,7 +292,17 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 
 function extractIdentifierSeparator(input: string) {
 	const match = /^(\s)+/.exec(input);
-	return match ? `,${match[0]}` : ", ";
+	let leading = "";
+	if (match?.[0].includes("\n")) {
+		// Only use the leading whitespace if it contains a line-break
+		// Otherwise a single space might be used because the extraction is
+		// done on the 2nd element in the array, if it exists
+		leading = match[0];
+	}
+	return {
+		leading,
+		trailing: match ? `,${match[0]}` : ", ",
+	};
 }
 
 function formatDependencies(input: string, depsSeparator: string, posInfo: {pos: number; node: ts.Node}) {
