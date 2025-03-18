@@ -1,7 +1,6 @@
 import ts from "typescript";
 import path from "node:path/posix";
 import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
-import {collectModuleIdentifiers} from "../utils.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 const LINE_LENGTH_LIMIT = 200;
 
@@ -30,6 +29,7 @@ function createDependencyInfo(dependencyArray: ts.ArrayLiteralExpression | undef
 		for (const child of dependencyArray.getChildren()) {
 			if (child.kind === ts.SyntaxKind.SyntaxList) {
 				syntaxList = child as ts.SyntaxList;
+				break;
 			}
 		}
 		if (!syntaxList) {
@@ -112,7 +112,8 @@ function getParameterSyntax(
 export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
 	changeSet: ChangeSet[],
-	resourcePath: string
+	resourcePath: string,
+	declaredIdentifiers: Set<string>
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
@@ -127,8 +128,6 @@ export function addDependencies(
 	}
 
 	const moduleName = "moduleName" in moduleDeclaration ? moduleDeclaration.moduleName : undefined;
-
-	const declaredIdentifiers = collectModuleIdentifiers(factory);
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
 	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(moduleDeclaration.dependencies, resourcePath);

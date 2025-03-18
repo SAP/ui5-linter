@@ -8,6 +8,7 @@ import {getLogger} from "@ui5/logger";
 import {addDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
+import {collectIdentifiers} from "./utils.js";
 
 const log = getLogger("linter:autofix");
 
@@ -251,8 +252,11 @@ function applyFixes(
 			changeSet, []);
 	}
 
+	// Collect all identifiers in the source file to ensure unique names when adding imports
+	const identifiers = collectIdentifiers(sourceFile);
+
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath);
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
 	}
 
 	if (changeSet.length === 0) {

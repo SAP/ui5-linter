@@ -56,7 +56,7 @@ export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression,
 	return propAccessChain.join(".") === match;
 }
 
-export function collectModuleIdentifiers(moduleDeclaration: ts.Node) {
+export function collectIdentifiers(node: ts.SourceFile) {
 	const declaredIdentifiers = new Set<string>();
 	const extractDestructIdentifiers = (name: ts.BindingName, identifiers: Set<string>) => {
 		if (ts.isIdentifier(name)) {
@@ -87,7 +87,7 @@ export function collectModuleIdentifiers(moduleDeclaration: ts.Node) {
 		ts.forEachChild(node, collectIdentifiers);
 	};
 
-	ts.forEachChild(moduleDeclaration, collectIdentifiers);
+	ts.forEachChild(node, collectIdentifiers);
 
 	return declaredIdentifiers;
 }
