@@ -3,6 +3,8 @@ declare module "sap/ui/webc/fiori/BarDesign" {
 
 	/**
 	 * Different types of Bar design
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'BarDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -16,6 +18,8 @@ declare module "sap/ui/webc/fiori/FCLLayout" {
 
 	/**
 	 * Different types of FCLLayout.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'FCLLayout'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -29,6 +33,8 @@ declare module "sap/ui/webc/fiori/IllustrationMessageSize" {
 
 	/**
 	 * Different types of IllustrationMessageSize.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'IllustrationMessageSize'.
 	 *
 	 * @experimental (since 1.106.0) - This API is experimental and might change significantly.
 	 * @public
@@ -42,6 +48,8 @@ declare module "sap/ui/webc/fiori/IllustrationMessageType" {
 
 	/**
 	 * Different illustration types of Illustrated Message.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'IllustrationMessageType'.
 	 *
 	 * @experimental (since 1.95.0) - This API is experimental and might change significantly.
 	 * @public
@@ -55,6 +63,8 @@ declare module "sap/ui/webc/fiori/MediaGalleryItemLayout" {
 
 	/**
 	 * Defines the layout of the content displayed in the <code>ui5-media-gallery-item</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'MediaGalleryItemLayout'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -68,6 +78,8 @@ declare module "sap/ui/webc/fiori/MediaGalleryLayout" {
 
 	/**
 	 * Defines the layout type of the thumbnails list of the <code>ui5-media-gallery</code> component.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'MediaGalleryLayout'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -81,6 +93,8 @@ declare module "sap/ui/webc/fiori/MediaGalleryMenuHorizontalAlign" {
 
 	/**
 	 * Defines the horizontal alignment of the thumbnails menu of the <code>ui5-media-gallery</code> component.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'MediaGalleryMenuHorizontalAlign'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -94,6 +108,8 @@ declare module "sap/ui/webc/fiori/MediaGalleryMenuVerticalAlign" {
 
 	/**
 	 * Types for the vertical alignment of the thumbnails menu of the <code>ui5-media-gallery</code> component.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'MediaGalleryMenuVerticalAlign'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -107,6 +123,8 @@ declare module "sap/ui/webc/fiori/PageBackgroundDesign" {
 
 	/**
 	 * Available Page Background Design.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'PageBackgroundDesign'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -120,6 +138,8 @@ declare module "sap/ui/webc/fiori/SideContentFallDown" {
 
 	/**
 	 * SideContent FallDown options.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'SideContentFallDown'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -133,6 +153,8 @@ declare module "sap/ui/webc/fiori/SideContentPosition" {
 
 	/**
 	 * Side Content position options.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'SideContentPosition'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -146,6 +168,8 @@ declare module "sap/ui/webc/fiori/SideContentVisibility" {
 
 	/**
 	 * Side Content visibility options.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'SideContentVisibility'.
 	 *
 	 * @experimental (since 1.99.0) - This API is experimental and might change significantly.
 	 * @public
@@ -159,6 +183,8 @@ declare module "sap/ui/webc/fiori/TimelineLayout" {
 
 	/**
 	 * Available Timeline layout orientation
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'TimelineLayout'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -172,6 +198,8 @@ declare module "sap/ui/webc/fiori/UploadState" {
 
 	/**
 	 * Different types of UploadState.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'UploadState'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public
@@ -185,6 +213,8 @@ declare module "sap/ui/webc/fiori/ViewSettingsDialogMode" {
 
 	/**
 	 * Different types of Bar.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'ViewSettingsDialogMode'.
 	 *
 	 * @experimental (since 1.115.0) - This API is experimental and might change significantly.
 	 * @public
@@ -198,6 +228,8 @@ declare module "sap/ui/webc/fiori/WizardContentLayout" {
 
 	/**
 	 * Enumeration for different content layouts of the <code>ui5-wizard</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/webc/fiori/library' module export and must be accessed by the property 'WizardContentLayout'.
 	 *
 	 * @experimental (since 1.92.0) - This API is experimental and might change significantly.
 	 * @public

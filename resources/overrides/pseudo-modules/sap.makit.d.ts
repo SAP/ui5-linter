@@ -3,6 +3,8 @@ declare module "sap/makit/ChartType" {
 
 	/**
 	 * Enumeration for chart type
+	 * 
+	 * This enum is part of the 'sap/makit/library' module export and must be accessed by the property 'ChartType'.
 	 *
 	 * @deprecated (since 1.38) - MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This control will not be supported anymore from 1.38.
 	 * @public
@@ -16,6 +18,8 @@ declare module "sap/makit/LegendPosition" {
 
 	/**
 	 * Enumeration for legend position.
+	 * 
+	 * This enum is part of the 'sap/makit/library' module export and must be accessed by the property 'LegendPosition'.
 	 *
 	 * @deprecated (since 1.38) - MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This control will not be supported anymore from 1.38.
 	 * @public
@@ -28,6 +32,8 @@ declare module "sap/makit/SortOrder" {
 
 	/**
 	 * Enumeration for sort order
+	 * 
+	 * This enum is part of the 'sap/makit/library' module export and must be accessed by the property 'SortOrder'.
 	 *
 	 * @deprecated (since 1.38) - MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This control will not be supported anymore from 1.38.
 	 * @public
@@ -41,6 +47,8 @@ declare module "sap/makit/ValueBubblePosition" {
 
 	/**
 	 * Position for Value Bubble only applies to Pie/Donut Chart.
+	 * 
+	 * This enum is part of the 'sap/makit/library' module export and must be accessed by the property 'ValueBubblePosition'.
 	 *
 	 * @deprecated (since 1.38) - MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This control will not be supported anymore from 1.38.
 	 * @public
@@ -54,6 +62,8 @@ declare module "sap/makit/ValueBubbleStyle" {
 
 	/**
 	 * Enumeration for Value Bubble's positioning style. This applies all chart types except Pie/Donut/HBar chart.
+	 * 
+	 * This enum is part of the 'sap/makit/library' module export and must be accessed by the property 'ValueBubbleStyle'.
 	 *
 	 * @deprecated (since 1.38) - MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This control will not be supported anymore from 1.38.
 	 * @public

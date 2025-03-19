@@ -3,6 +3,8 @@ declare module "sap/ui/export/EdmType" {
 
 	/**
 	 * EDM data types for document export.
+	 * 
+	 * This enum is part of the 'sap/ui/export/library' module export and must be accessed by the property 'EdmType'.
 	 *
 	 * @public
 	 * @since 1.50.0
@@ -15,6 +17,8 @@ declare module "sap/ui/export/FileType" {
 
 	/**
 	 * File types for document export.
+	 * 
+	 * This enum is part of the 'sap/ui/export/library' module export and must be accessed by the property 'FileType'.
 	 *
 	 * @public
 	 * @since 1.78

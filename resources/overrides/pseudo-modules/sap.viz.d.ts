@@ -3,6 +3,8 @@ declare module "sap/viz/ui5/types/Area_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Area_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -21,6 +23,8 @@ declare module "sap/viz/ui5/types/Area_marker_shape" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_marker_shape
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Area_marker_shape'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -39,6 +43,8 @@ declare module "sap/viz/ui5/types/Area_mode" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_mode
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Area_mode'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -57,6 +63,8 @@ declare module "sap/viz/ui5/types/Area_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Area_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Area_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -75,6 +83,8 @@ declare module "sap/viz/ui5/types/Axis_gridline_type" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_gridline_type
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Axis_gridline_type'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -93,6 +103,8 @@ declare module "sap/viz/ui5/types/Axis_label_unitFormatType" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_label_unitFormatType
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Axis_label_unitFormatType'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -111,6 +123,8 @@ declare module "sap/viz/ui5/types/Axis_position" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_position
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Axis_position'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -129,6 +143,8 @@ declare module "sap/viz/ui5/types/Axis_type" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Axis_type
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Axis_type'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -147,6 +163,8 @@ declare module "sap/viz/ui5/types/Background_direction" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Background_direction
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Background_direction'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -165,6 +183,8 @@ declare module "sap/viz/ui5/types/Background_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Background_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Background_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -183,6 +203,8 @@ declare module "sap/viz/ui5/types/Bar_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bar_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Bar_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -201,6 +223,8 @@ declare module "sap/viz/ui5/types/Bar_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bar_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Bar_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -219,6 +243,8 @@ declare module "sap/viz/ui5/types/Bubble_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bubble_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Bubble_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -237,6 +263,8 @@ declare module "sap/viz/ui5/types/Bullet_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bullet_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Bullet_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -255,6 +283,8 @@ declare module "sap/viz/ui5/types/Bullet_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Bullet_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Bullet_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -273,6 +303,8 @@ declare module "sap/viz/ui5/types/Combination_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Combination_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Combination_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -291,6 +323,8 @@ declare module "sap/viz/ui5/types/Combination_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Combination_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Combination_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -309,6 +343,8 @@ declare module "sap/viz/ui5/types/controller/Interaction_pan_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.controller.Interaction_pan_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.controller.Interaction_pan_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -327,6 +363,8 @@ declare module "sap/viz/ui5/types/controller/Interaction_selectability_mode" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.controller.Interaction_selectability_mode
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.controller.Interaction_selectability_mode'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -345,6 +383,8 @@ declare module "sap/viz/ui5/types/Datalabel_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Datalabel_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -363,6 +403,8 @@ declare module "sap/viz/ui5/types/Datalabel_outsidePosition" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_outsidePosition
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Datalabel_outsidePosition'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -381,6 +423,8 @@ declare module "sap/viz/ui5/types/Datalabel_paintingMode" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_paintingMode
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Datalabel_paintingMode'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -399,6 +443,8 @@ declare module "sap/viz/ui5/types/Datalabel_position" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Datalabel_position
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Datalabel_position'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -417,6 +463,8 @@ declare module "sap/viz/ui5/types/legend/Common_alignment" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_alignment
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.legend.Common_alignment'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -435,6 +483,8 @@ declare module "sap/viz/ui5/types/legend/Common_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.legend.Common_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -453,6 +503,8 @@ declare module "sap/viz/ui5/types/legend/Common_position" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_position
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.legend.Common_position'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -471,6 +523,8 @@ declare module "sap/viz/ui5/types/legend/Common_type" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.legend.Common_type
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.legend.Common_type'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -489,6 +543,8 @@ declare module "sap/viz/ui5/types/Legend_layout_position" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Legend_layout_position
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Legend_layout_position'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -507,6 +563,8 @@ declare module "sap/viz/ui5/types/Line_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Line_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -525,6 +583,8 @@ declare module "sap/viz/ui5/types/Line_marker_shape" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_marker_shape
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Line_marker_shape'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -543,6 +603,8 @@ declare module "sap/viz/ui5/types/Line_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Line_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Line_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -561,6 +623,8 @@ declare module "sap/viz/ui5/types/Pie_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Pie_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Pie_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -579,6 +643,8 @@ declare module "sap/viz/ui5/types/Pie_valign" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Pie_valign
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Pie_valign'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -597,6 +663,8 @@ declare module "sap/viz/ui5/types/Scatter_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Scatter_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Scatter_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -615,6 +683,8 @@ declare module "sap/viz/ui5/types/StackedVerticalBar_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.StackedVerticalBar_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -633,6 +703,8 @@ declare module "sap/viz/ui5/types/StackedVerticalBar_mode" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_mode
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.StackedVerticalBar_mode'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -651,6 +723,8 @@ declare module "sap/viz/ui5/types/StackedVerticalBar_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.StackedVerticalBar_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.StackedVerticalBar_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -669,6 +743,8 @@ declare module "sap/viz/ui5/types/Title_alignment" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Title_alignment
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Title_alignment'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -687,6 +763,8 @@ declare module "sap/viz/ui5/types/Tooltip_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.Tooltip_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.Tooltip_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -705,6 +783,8 @@ declare module "sap/viz/ui5/types/VerticalBar_drawingEffect" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.VerticalBar_drawingEffect
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.VerticalBar_drawingEffect'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.
@@ -723,6 +803,8 @@ declare module "sap/viz/ui5/types/VerticalBar_orientation" {
 
 	/**
 	 * List (Enum) type sap.viz.ui5.types.VerticalBar_orientation
+	 * 
+	 * This enum is part of the 'sap/viz/library' module export and must be accessed by the property 'ui5.types.VerticalBar_orientation'.
 	 *
 	 * @experimental (since 1.7.2) - Charting API is not finished yet and might change completely.
 	 * @deprecated (since 1.32.0) - The chart controls in the <code>sap.viz.ui5</code> package (which were always marked as <i>experimental</i>) have been deprecated since 1.32.0. They are no longer actively developed and won't receive new features or improvements, only important bug fixes. They will only remain in the SAPUI5 distribution for backward compatibility.

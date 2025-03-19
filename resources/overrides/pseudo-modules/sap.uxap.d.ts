@@ -14,6 +14,8 @@ declare module "sap/uxap/BlockBaseFormAdjustment" {
 
 	/**
 	 * Used by the <code>BlockBase</code> control to define if it should do automatic adjustment of its nested forms.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'BlockBaseFormAdjustment'.
 	 *
 	 * @public
 	*/
@@ -25,6 +27,8 @@ declare module "sap/uxap/Importance" {
 
 	/**
 	 * Used by the <code>ObjectSectionBase</code> control to define the importance of the content contained in it.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'Importance'.
 	 *
 	 * @public
 	 * @since 1.32.0
@@ -37,6 +41,8 @@ declare module "sap/uxap/ObjectPageConfigurationMode" {
 
 	/**
 	 * Used by the <code>sap.uxap.component.Component</code> how to initialize the <code>ObjectPageLayout</code> sections and subsections.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'ObjectPageConfigurationMode'.
 	 *
 	 * @public
 	*/
@@ -48,6 +54,8 @@ declare module "sap/uxap/ObjectPageHeaderDesign" {
 
 	/**
 	 * Used by the <code>ObjectPageHeader</code> control to define which design to use.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'ObjectPageHeaderDesign'.
 	 *
 	 * @public
 	*/
@@ -59,6 +67,8 @@ declare module "sap/uxap/ObjectPageHeaderPictureShape" {
 
 	/**
 	 * Used by the <code>ObjectPageHeader</code> control to define which shape to use for the image.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'ObjectPageHeaderPictureShape'.
 	 *
 	 * @public
 	*/
@@ -70,6 +80,8 @@ declare module "sap/uxap/ObjectPageSubSectionLayout" {
 
 	/**
 	 * Used by the <code>ObjectPagSubSection</code> control to define which layout to apply.
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'ObjectPageSubSectionLayout'.
 	 *
 	 * @public
 	*/
@@ -81,6 +93,8 @@ declare module "sap/uxap/ObjectPageSubSectionMode" {
 
 	/**
 	 * Used by the <code>ObjectPageLayout</code> control to define which layout to use (either Collapsed or Expanded).
+	 * 
+	 * This enum is part of the 'sap/uxap/library' module export and must be accessed by the property 'ObjectPageSubSectionMode'.
 	 *
 	 * @public
 	*/
