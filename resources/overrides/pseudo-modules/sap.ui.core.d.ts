@@ -132,6 +132,18 @@ declare module "sap/ui/core/CSSColor" {
 	export default CSSColor;
 }
 
+declare module "sap/ui/core/CSSGapShortHand" {
+	import {CSSGapShortHand} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents a short hand CSS gap.
+	 *
+	 * @public
+	 * @since 1.134
+	*/
+	export default CSSGapShortHand;
+}
+
 declare module "sap/ui/core/CSSSize" {
 	import {CSSSize} from "sap/ui/core/library";
 

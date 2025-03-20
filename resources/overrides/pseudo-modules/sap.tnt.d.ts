@@ -25,3 +25,18 @@ declare module "sap/tnt/RenderMode" {
 	*/
 	export default RenderMode;
 }
+
+declare module "sap/tnt/SideNavigationDesign" {
+	import {SideNavigationDesign} from "sap/tnt/library";
+
+	/**
+	 * Available options for the Side Navigation design.
+	 * 
+	 * This enum is part of the 'sap/tnt/library' module export and must be accessed by the property 'SideNavigationDesign'.
+	 *
+	 * @experimental - Behavior might change.
+	 * @public
+	 * @since 1.134.0
+	*/
+	export default SideNavigationDesign;
+}

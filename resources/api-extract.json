@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.133.0"
+    "version": "1.134.0"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -1523,6 +1523,12 @@
       ],
       "extends": "sap.fe.macros.RichTextEditor"
     },
+    "sap.fe.macros.Share": {
+      "aggregation": [
+        "shareOptions"
+      ],
+      "extends": "sap.fe.core.buildingBlocks.BuildingBlock"
+    },
     "sap.fe.macros.VariantManagement": {
       "property": [
         "for",
@@ -1745,12 +1751,8 @@
       ],
       "extends": "sap.ui.core.Element"
     },
-    "sap.fe.macros.Share": {
-      "property": [
-        "shareOptions",
-        "visible"
-      ],
-      "extends": "sap.ui.core.Control"
+    "sap.fe.macros.share.ShareOptions": {
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
     },
     "sap.fe.macros.table.Action": {
       "property": [
@@ -2990,7 +2992,9 @@
     },
     "sap.gantt.simple.BaseCalendar": {
       "property": [
-        "calendarName"
+        "calendarName",
+        "fill",
+        "stroke"
       ],
       "extends": "sap.gantt.simple.BaseRectangle"
     },
@@ -3152,7 +3156,8 @@
         "showEllipsis",
         "isLabel",
         "_shapeCropped",
-        "_xBiassed"
+        "_xBiassed",
+        "fill"
       ],
       "extends": "sap.gantt.simple.BaseShape"
     },
@@ -4558,7 +4563,10 @@
         "alignItems",
         "wrap",
         "alignContent",
-        "backgroundDesign"
+        "backgroundDesign",
+        "gap",
+        "rowGap",
+        "columnGap"
       ],
       "extends": "sap.ui.core.Control"
     },
@@ -4589,7 +4597,8 @@
         "convertedLinksDefaultTarget",
         "height",
         "textDirection",
-        "textAlign"
+        "textAlign",
+        "disableStyleAttribute"
       ],
       "extends": "sap.ui.core.Control"
     },
@@ -7920,6 +7929,9 @@
         "_buttons",
         "_clocks"
       ],
+      "property": [
+        "skipAnimation"
+      ],
       "extends": "sap.ui.core.Control"
     },
     "sap.m.TimePickerInputs": {
@@ -8130,7 +8142,8 @@
       "event": [
         "uploadCompleted",
         "uploadProgressed",
-        "uploadStarted"
+        "uploadStarted",
+        "uploadTerminated"
       ],
       "property": [
         "uploadUrl",
@@ -8143,6 +8156,10 @@
     "sap.m.upload.UploadItem": {
       "aggregation": [
         "headerFields"
+      ],
+      "event": [
+        "uploadProgress",
+        "uploadTerminated"
       ],
       "property": [
         "fileName",
@@ -9015,9 +9032,6 @@
         "title"
       ],
       "extends": "sap.ui.core.Control"
-    },
-    "sap.sac.df.model.AxesLayout": {
-      "extends": "sap.ui.base.Object"
     },
     "sap.sac.df.model.Configuration": {
       "property": [
@@ -11214,7 +11228,8 @@
         "width",
         "expanded",
         "selectedKey",
-        "ariaLabel"
+        "ariaLabel",
+        "design"
       ],
       "extends": "sap.ui.core.Control"
     },
@@ -15740,6 +15755,17 @@
       ],
       "extends": "sap.ui.core.Control"
     },
+    "sap.ui.mdc.actiontoolbar.ActionToolbarAction": {
+      "aggregation": [
+        "action"
+      ],
+      "defaultAggregation": "action",
+      "property": [
+        "layoutInformation",
+        "label"
+      ],
+      "extends": "sap.ui.core.Control"
+    },
     "sap.ui.mdc.Chart": {
       "aggregation": [
         "items",
@@ -15998,6 +16024,9 @@
         "_filterCount"
       ],
       "extends": "sap.ui.mdc.Control"
+    },
+    "sap.ui.mdc.filterbar.IFilterContainer": {
+      "extends": "sap.ui.core.Element"
     },
     "sap.ui.mdc.filterbar.p13n.AdaptationFilterBar": {
       "association": [
@@ -16955,6 +16984,7 @@
         "month",
         "months",
         "intervalSelection",
+        "_singleSelection",
         "columns",
         "primaryCalendarType",
         "secondaryCalendarType",
@@ -17026,6 +17056,7 @@
         "year",
         "years",
         "intervalSelection",
+        "_singleSelection",
         "columns",
         "date",
         "primaryCalendarType",
@@ -18454,6 +18485,19 @@
         "radius"
       ],
       "extends": "sap.ui.vbm.VoBase"
+    },
+    "sap.ui.vbm.Legend": {
+      "aggregation": [
+        "items"
+      ],
+      "defaultAggregation": "items",
+      "event": [
+        "click"
+      ],
+      "property": [
+        "caption"
+      ],
+      "extends": "sap.ui.core.Element"
     },
     "sap.ui.vbm.LegendItem": {
       "event": [
@@ -24513,7 +24557,7 @@
       "sap.f.Avatar": "(since 1.73) Use the {@link sap.m.Avatar} instead.",
       "sap.f.IllustratedMessage": "(since 1.98) Use the {@link sap.m.IllustratedMessage} instead.",
       "sap.f.Illustration": "(since 1.98) Use the {@link sap.m.Illustration} instead.",
-      "sap.fe.macros.chart.Chart": "(since now) As of version 1.130, use {@link sap.fe.macros.Chart } instead",
+      "sap.fe.macros.chart.Chart": "(since 1.130) Use {@link sap.fe.macros.Chart } instead",
       "sap.gantt.AdhocLine": "(since 1.84) {@link sap.gantt.simple.AdhocLine} should be used instead.",
       "sap.gantt.config.BirdEyeGroup": "(since 1.64) the concept has been discarded.",
       "sap.gantt.config.ChartScheme": "(since 1.64) the concept has been discarded.",
@@ -24649,7 +24693,6 @@
       "sap.me.TabContainer": "(since 1.15.0) The functionality of this control is merged with the sap.m.IconTabBar. Please use the sap.m.IconTabBar instead! This control will not be supported anymore.",
       "sap.rules.ui.services.ExpressionLanguage": "(since 1.120.2) use the attribute astExpressionLanguage instead.",
       "sap.sac.df.FlexAnalysis": "(since 1.132) Replaced by {@link sap.sac.df.DataAnalyzer DataAnalyzer} or {@link sap.sac.df.Grid Grid}.",
-      "sap.sac.df.model.AxesLayout": "(since 1.132) Replaced by {@link sap.sac.df.model.visualization.Grid Grid}.",
       "sap.suite.ui.commons.BulletChart": "(since 1.34) this control is a mere wrapper for sap.suite.ui.microchart.BulletMicroChart.",
       "sap.suite.ui.commons.BulletChartData": "(since 1.34) this control is a mere wrapper for sap.suite.ui.microchart.BulletMicroChartData.",
       "sap.suite.ui.commons.BusinessCard": "(since 1.32) Deprecated. Standard Fiori technology should be used.",
@@ -25418,8 +25461,6 @@
     },
     "UI5Function": {
       "module:sap/base/util/includes": "(since 1.90) Use the <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> instead, but note that <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> fail when called on null values.",
-      "module:sap/base/util/mixedFetch": "(since 1.120) ",
-      "module:sap/base/util/syncFetch": "(since 1.120) ",
       "module:sap/ui/core/getCompatibilityVersion": "(since 1.119) without a replacement. All features that have been controlled by a compatibility version in UI5 1.x will abandon their legacy behavior, starting with the next major version. In other words, they will behave as if compatibility version \"edge\" was configured. Due to this, no more access to the compatibility version will be required starting with the next major version.",
       "module:sap/ui/events/isMouseEventDelayed": "deprecated"
     },
