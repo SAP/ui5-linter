@@ -14,7 +14,7 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 		this.languageServiceHost = languageServiceHostImpl ?? this.emptyLanguageServiceHost;
 	}
 
-	private isSharedTypesFile(filePath: string) {
+	public static isSharedTypesFile(filePath: string) {
 		// ControllerById.d.ts file is generated per project and should not be treated as a shared file
 		return filePath.startsWith("/types/") && filePath !== CONTROLLER_BY_ID_DTS_PATH;
 	}
@@ -30,7 +30,7 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 	}
 
 	getScriptVersion(fileName: string) {
-		if (this.isSharedTypesFile(fileName)) {
+		if (LanguageServiceHostProxy.isSharedTypesFile(fileName)) {
 			// All types should be cached forever as they can be shared across projects
 			return "1";
 		}
@@ -42,7 +42,7 @@ export default class LanguageServiceHostProxy implements ts.LanguageServiceHost 
 			return this.scriptSnapshots[fileName];
 		}
 		const scriptSnapshot = this.languageServiceHost.getScriptSnapshot(fileName);
-		if (this.isSharedTypesFile(fileName)) {
+		if (LanguageServiceHostProxy.isSharedTypesFile(fileName)) {
 			this.scriptSnapshots[fileName] = scriptSnapshot;
 		}
 		return scriptSnapshot;

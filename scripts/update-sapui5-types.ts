@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import createMetadataInfo from "./metadataProvider/createMetadataInfo.js";
-import createPseudoModulesInfo from "./metadataProvider/createPseudoModulesInfo.js";
+import createTypes from "./metadataProvider/createTypes.js";
 import {cleanup, fetchAndExtractApiJsons} from "./metadataProvider/helpers.js";
 import {promisify} from "node:util";
 import {execFile as execFileCb} from "node:child_process";
@@ -22,7 +22,7 @@ try {
 	const apiJsonsRoot = await fetchAndExtractApiJsons(url);
 
 	await createMetadataInfo(apiJsonsRoot, version);
-	await createPseudoModulesInfo(apiJsonsRoot);
+	await createTypes(apiJsonsRoot);
 
 	await cleanup();
 

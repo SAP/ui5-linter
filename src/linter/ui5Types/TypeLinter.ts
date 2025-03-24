@@ -12,6 +12,7 @@ import lintXml, {CONTROLLER_BY_ID_DTS_PATH} from "../xmlTemplate/linter.js";
 import type SharedLanguageService from "./SharedLanguageService.js";
 import SourceFileReporter from "./SourceFileReporter.js";
 import {AmbientModuleCache} from "./AmbientModuleCache.js";
+import {JSONSchemaForSAPUI5Namespace} from "../../manifest.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -56,15 +57,18 @@ export default class TypeLinter {
 	#filePathsWorkspace: AbstractAdapter;
 	#sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 	#sourceFileReporters = new Map<string, SourceFileReporter>();
+	#libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"];
 
 	constructor(
 		{workspace, filePathsWorkspace, context}: LinterParameters,
+		libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"],
 		sharedLanguageService: SharedLanguageService
 	) {
 		this.#sharedLanguageService = sharedLanguageService;
 		this.#context = context;
 		this.#workspace = workspace;
 		this.#filePathsWorkspace = filePathsWorkspace;
+		this.#libraryDependencies = libraryDependencies;
 		this.#compilerOptions = {...DEFAULT_OPTIONS};
 
 		const namespace = context.getNamespace();
@@ -112,7 +116,8 @@ export default class TypeLinter {
 		const projectScriptVersion = this.#sharedLanguageService.getNextProjectScriptVersion();
 
 		const host = await createVirtualLanguageServiceHost(
-			this.#compilerOptions, files, this.#sourceMaps, this.#context, projectScriptVersion
+			this.#compilerOptions, files, this.#sourceMaps, this.#context,
+			projectScriptVersion, this.#libraryDependencies
 		);
 
 		this.#sharedLanguageService.acquire(host);

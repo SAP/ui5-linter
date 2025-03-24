@@ -17,6 +17,7 @@ import {writeFile} from "node:fs/promises";
 import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
 import {getLogger} from "@ui5/logger";
 import path from "node:path";
+import {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../manifest.js";
 
 const log = getLogger("linter:lintWorkspace");
 
@@ -25,8 +26,10 @@ export default async function lintWorkspace(
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
 	sharedLanguageService: SharedLanguageService
 ): Promise<LintResult[]> {
+	const libraryDependencies = await getLibraryDependenciesFromManifest(workspace, options.virBasePath);
+
 	let context = await runLintWorkspace(
-		workspace, filePathsWorkspace, options, config, patternsMatch, sharedLanguageService
+		workspace, filePathsWorkspace, options, config, patternsMatch, libraryDependencies, sharedLanguageService
 	);
 
 	if (options.fix) {
@@ -79,7 +82,8 @@ export default async function lintWorkspace(
 				fix: false,
 			};
 			context = await runLintWorkspace(
-				workspace, filePathsWorkspace, optionsAfterFix, config, patternsMatch, sharedLanguageService
+				workspace, filePathsWorkspace, optionsAfterFix, config, patternsMatch,
+				libraryDependencies, sharedLanguageService
 			);
 
 			// Update fixed files on the filesystem
@@ -105,6 +109,7 @@ export default async function lintWorkspace(
 async function runLintWorkspace(
 	workspace: AbstractAdapter, filePathsWorkspace: AbstractAdapter,
 	options: LinterOptions & FSToVirtualPathOptions, config: UI5LintConfigType, patternsMatch: Set<string>,
+	libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"],
 	sharedLanguageService: SharedLanguageService
 ): Promise<LinterContext> {
 	const done = taskStart("Linting Workspace");
@@ -147,8 +152,31 @@ async function runLintWorkspace(
 		lintFileTypes(params),
 	]);
 
-	const typeLinter = new TypeLinter(params, sharedLanguageService);
+	const typeLinter = new TypeLinter(params, libraryDependencies, sharedLanguageService);
 	await typeLinter.lint();
 	done();
 	return context;
+}
+
+async function getLibraryDependenciesFromManifest(workspace: AbstractAdapter, virBasePath: string | undefined) {
+	const resourcePath = (virBasePath ?? "") + "/manifest.json";
+	const manifest = await workspace.byPath(resourcePath);
+	if (!manifest) {
+		return undefined;
+	}
+	const content = await manifest.getString();
+	let json;
+	try {
+		json = JSON.parse(content) as SAPJSONSchemaForWebApplicationManifestFile;
+	} catch (err) {
+		log.verbose(`Failed to parse ${resourcePath} as JSON`);
+		if (err instanceof Error) {
+			log.verbose(err.message);
+			if (err.stack) {
+				log.verbose(err.stack);
+			}
+		}
+		return undefined;
+	}
+	return json["sap.ui5"]?.dependencies?.libs;
 }
