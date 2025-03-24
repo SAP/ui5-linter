@@ -1,15 +1,18 @@
 import ts from "typescript";
 import LanguageServiceHostProxy from "./LanguageServiceHostProxy.js";
+import DocumentRegistryProxy from "./DocumentRegistryProxy.js";
 
 export default class SharedLanguageService {
 	private readonly languageServiceHostProxy: LanguageServiceHostProxy;
+	private readonly documentRegistryProxy: DocumentRegistryProxy;
 	private readonly languageService: ts.LanguageService;
 	private acquired = false;
 	private projectScriptVersion = 0;
 
 	constructor() {
 		this.languageServiceHostProxy = new LanguageServiceHostProxy();
-		this.languageService = ts.createLanguageService(this.languageServiceHostProxy, ts.createDocumentRegistry());
+		this.documentRegistryProxy = new DocumentRegistryProxy();
+		this.languageService = ts.createLanguageService(this.languageServiceHostProxy, this.documentRegistryProxy);
 	}
 
 	acquire(languageServiceHost: ts.LanguageServiceHost) {
