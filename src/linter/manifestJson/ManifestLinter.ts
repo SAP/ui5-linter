@@ -100,8 +100,7 @@ export default class ManifestLinter {
 		if (targets) {
 			for (const [key, target] of Object.entries(targets)) {
 				// Check if name starts with module and viewType is defined:
-				// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-				const name = target.name || target.viewName;
+				const name = target.name ?? target.viewName;
 				if (name && (name as string).startsWith("module:")) {
 					if (target.viewType) {
 						this.#reporter?.addMessage(MESSAGE.REDUNDANT_VIEW_CONFIG_PROPERTY, {
