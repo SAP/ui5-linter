@@ -232,13 +232,12 @@ export class ApiExtractImpl implements ApiExtract {
 let resolveWithSingleton: Promise<ApiExtract>;
 
 export async function loadApiExtract(): Promise<ApiExtract> {
-	if (resolveWithSingleton == null) {
-		resolveWithSingleton = (async () => {
-			const data = await readFile(
-				new URL("../../resources/api-extract.json", import.meta.url),
-				{encoding: "utf-8"});
-			return new ApiExtractImpl(JSON.parse(data) as ApiExtractJson);
-		})();
-	}
+	resolveWithSingleton ??= (async () => {
+		const data = await readFile(
+			new URL("../../resources/api-extract.json", import.meta.url),
+			{encoding: "utf-8"});
+		return new ApiExtractImpl(JSON.parse(data) as ApiExtractJson);
+	})();
+
 	return resolveWithSingleton;
 }
