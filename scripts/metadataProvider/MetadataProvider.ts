@@ -78,29 +78,29 @@ export default class MetadataProvider {
 				symbolMetadata = symbol as UI5Class;
 				while (symbolMetadata) {
 					symbolMetadata.aggregations.forEach((aggregation) => {
-						if (!outputSymbolRecord.aggregation) outputSymbolRecord.aggregation = [];
+						outputSymbolRecord.aggregation ??= [];
 						outputSymbolRecord.aggregation.push(aggregation.name);
 						/* The following is necessary because some aggregations in UI5 can be defined as properties too,
 						if they have a cardinality of "0..1" and define alternative types.
 						E.g. "tooltip" of "sap.ui.core.Element" meets this criteria. */
 						if (aggregation.cardinality === "0..1" && aggregation.altTypes.length) {
-							if (!outputSymbolRecord.property) outputSymbolRecord.property = [];
+							outputSymbolRecord.property ??= [];
 							outputSymbolRecord.property.push(aggregation.name);
 						}
 					});
 					symbolMetadata.associations.forEach((association) => {
-						if (!outputSymbolRecord.association) outputSymbolRecord.association = [];
+						outputSymbolRecord.association ??= [];
 						outputSymbolRecord.association.push(association.name);
 					});
 					if (symbolMetadata.defaultAggregation) {
 						outputSymbolRecord.defaultAggregation = symbolMetadata.defaultAggregation.name;
 					}
 					symbolMetadata.events.forEach((event) => {
-						if (!outputSymbolRecord.event) outputSymbolRecord.event = [];
+						outputSymbolRecord.event ??= [];
 						outputSymbolRecord.event.push(event.name);
 					});
 					symbolMetadata.properties.forEach((property) => {
-						if (!outputSymbolRecord.property) outputSymbolRecord.property = [];
+						outputSymbolRecord.property ??= [];
 						outputSymbolRecord.property.push(property.name);
 					});
 					/* Disabled, as "methods" not being required:

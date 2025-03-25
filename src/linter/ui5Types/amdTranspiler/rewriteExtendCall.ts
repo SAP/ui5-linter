@@ -20,9 +20,8 @@ export default function rewriteExtendCall(nodeFactory: ts.NodeFactory,
 		return undefined;
 	}
 	const [extractedClassName, body] = extractInfoFromArguments(nodeFactory, callExp);
-	if (!className) {
-		className = nodeFactory.createUniqueName(extractedClassName);
-	}
+	className ??= nodeFactory.createUniqueName(extractedClassName);
+
 	return nodeFactory.createClassDeclaration(modifiers,
 		className,
 		undefined,

@@ -171,9 +171,7 @@ export function getPropertyAssignmentsInObjectLiteralExpression(
 	}
 	// Fill array with undefined for missing properties
 	for (let i = 0; i < propertyNames.length; i++) {
-		if (!properties[i]) {
-			properties[i] = undefined;
-		}
+		properties[i] ??= undefined;
 	}
 	return properties;
 }

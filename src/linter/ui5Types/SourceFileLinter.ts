@@ -930,9 +930,8 @@ export default class SourceFileLinter {
 		if (ts.isPropertyName(reportNode)) {
 			propName = getPropertyNameText(reportNode);
 		}
-		if (!propName) {
-			propName = reportNode.getText();
-		}
+
+		propName ??= reportNode.getText();
 
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
