@@ -189,7 +189,7 @@ export default async function ({
 		const messagesById = getAutofixMessages(autofixResource);
 		// Currently only global access autofixes are supported
 		// This needs to stay aligned with the applyFixes function
-		if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+		if (messagesById.has(MESSAGE.NO_GLOBALS) || messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
 			messages.set(autofixResource.resource.getPath(), messagesById);
 			resources.push(autofixResource.resource);
 		}
