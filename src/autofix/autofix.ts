@@ -246,15 +246,15 @@ function applyFixes(
 
 	const changeSet: ChangeSet[] = [];
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
-	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-		existingModuleDeclarations = generateSolutionNoGlobals(
-			checker, sourceFile, content,
-			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, []);
-	} else if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
+	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
 		existingModuleDeclarations = generateSolutionJQueryDeprecations(
 			checker, sourceFile, content,
 			messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
+			changeSet, []);
+	} else if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+		existingModuleDeclarations = generateSolutionNoGlobals(
+			checker, sourceFile, content,
+			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
 			changeSet, []);
 	}
 
