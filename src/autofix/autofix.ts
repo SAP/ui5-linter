@@ -4,6 +4,7 @@ import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterConte
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
+import generateSolutionJQueryDeprecations from "./solutions/jqueryDeprecations.js";
 import {getLogger} from "@ui5/logger";
 import {addDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
@@ -249,6 +250,11 @@ function applyFixes(
 		existingModuleDeclarations = generateSolutionNoGlobals(
 			checker, sourceFile, content,
 			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
+			changeSet, []);
+	} else if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
+		existingModuleDeclarations = generateSolutionJQueryDeprecations(
+			checker, sourceFile, content,
+			messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
 			changeSet, []);
 	}
 
