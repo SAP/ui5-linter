@@ -27,6 +27,7 @@ const jQueryModulesReplacements = new Map<string, string>([
 	["jQuery/sap/each", "sap/base/util/each"],
 	["jQuery/sap/forIn", "sap/base/util/each"],
 	["jQuery/isPlainObject", "sap/base/util/isPlainObject"],
+	["jQuery/sap/FrameOptions", "sap/ui/security/FrameOptions"],
 	// TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/529
 	["jQuery/sap/parseJS", "sap/base/util/JSTokenizer"],
 	["jQuery/sap/extend", "sap/base/util/merge"],
@@ -145,7 +146,6 @@ const jQueryModulesReplacements = new Map<string, string>([
 	["jQuery/sap/passport/setActive", "sap/ui/performance/trace/Passport"],
 	// TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
 	["jQuery/sap/passport/traceFlags", "sap/ui/performance/trace/Passport"],
-	["jQuery/sap/FrameOptions", "sap/ui/security/FrameOptions"],
 	// TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
 	["jQuery/sap/act", "sap/ui/util/ActivityDetection"],
 	// TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
@@ -189,7 +189,9 @@ export default function generateSolutionJQueryDeprecations(
 					// TODO: FIX Type information
 					nodeInfo.moduleName = jQueryModulesReplacements.get(nodeInfo.moduleName);
 				});
-				importRequests.set(newKey, moduleContent);
+				const existingNodeInfos = importRequests.get(newKey) ?? {nodeInfos: []};
+				existingNodeInfos.nodeInfos.push(...moduleContent.nodeInfos);
+				importRequests.set(newKey, existingNodeInfos);
 				importRequests.delete(moduleToReplace);
 			}
 		});
