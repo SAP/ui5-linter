@@ -1444,10 +1444,11 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
+			const fixHints = this.getFixHints(node);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, node);
+			}, node, fixHints);
 		} else {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
@@ -1800,7 +1801,7 @@ export default class SourceFileLinter {
 	}
 
 	findModuleForName(moduleName: string): ts.Symbol | undefined {
-		const moduleSymbol = this.ambientModuleCache.getModule(moduleName);
+		const moduleSymbol = this.ambientModuleCache.getModule("sap/base/assert"); //this.ambientModuleCache.getModule(moduleName);
 
 		if (!moduleSymbol) {
 			return;
