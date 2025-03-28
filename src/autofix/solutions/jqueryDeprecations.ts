@@ -164,6 +164,19 @@ const jQueryModulesReplacements = new Map<string, string>([
 	["jQuery/sap/serializeXML", "sap/ui/util/XMLHelper"],
 ]);
 
+function getOriginalKey(key: string) {
+	const originalKeys = Array.from(jQueryModulesReplacements.keys());
+	return originalKeys.find((originalKey) => {
+		const keyChunks = key.split("/");
+		while (keyChunks.length > 0) {
+			if (originalKey === keyChunks.join("/")) {
+				return originalKey;
+			}
+			keyChunks.pop();
+		}
+	});
+}
+
 export default function generateSolutionJQueryDeprecations(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
 	messages: RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
@@ -171,30 +184,36 @@ export default function generateSolutionJQueryDeprecations(
 ) {
 	// TODO: Fix type info
 	// TODO: Validate if jQuery is included as dependency
+	// TODO: Remove unmatched imports
 	const moduleImports = generateSolutionNoGlobals(
 		checker, sourceFile, content, messages, changeSet, newModuleDeclarations);
 
-	const replacementsKeys = Array.from(jQueryModulesReplacements.keys());
-	for (const [, {importRequests}] of moduleImports) {
-		const modulesToReplace = replacementsKeys.filter((key) => importRequests.has(key));
-		if (modulesToReplace.length === 0) {
-			continue;
+	for (const [moduleImportsKey, {importRequests}] of moduleImports) {
+		for (const [key, {nodeInfos}] of importRequests) {
+			const baseKey = getOriginalKey(key);
+			if (baseKey) {
+				const newKey = jQueryModulesReplacements.get(baseKey);
+				if (newKey) {
+					nodeInfos.forEach((nodeInfo) => {
+						const lastNodeText = baseKey.split("/").pop();
+						let node = nodeInfo.node;
+						while (node && node.name.getText() !== lastNodeText) {
+							node = node.expression;
+						}
+						nodeInfo.node = node;
+					});
+					const existingNodeInfos = importRequests.get(newKey) ?? {nodeInfos: []};
+					existingNodeInfos.nodeInfos.push(...nodeInfos);
+					importRequests.set(newKey, existingNodeInfos);
+					importRequests.delete(key);
+				}
+			}
 		}
 
-		modulesToReplace.forEach((moduleToReplace) => {
-			const newKey = jQueryModulesReplacements.get(moduleToReplace);
-			const moduleContent = importRequests.get(moduleToReplace);
-			if (newKey && moduleContent) {
-				moduleContent.nodeInfos.forEach((nodeInfo) => {
-					// TODO: FIX Type information
-					nodeInfo.moduleName = jQueryModulesReplacements.get(nodeInfo.moduleName);
-				});
-				const existingNodeInfos = importRequests.get(newKey) ?? {nodeInfos: []};
-				existingNodeInfos.nodeInfos.push(...moduleContent.nodeInfos);
-				importRequests.set(newKey, existingNodeInfos);
-				importRequests.delete(moduleToReplace);
-			}
-		});
+		if (importRequests.size === 0) {
+			moduleImports.delete(moduleImportsKey);
+			continue;
+		}
 	}
 
 	return moduleImports;
