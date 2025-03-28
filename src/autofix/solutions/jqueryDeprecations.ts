@@ -8,12 +8,11 @@ import {ChangeSet, NewModuleDeclarationInfo} from "../autofix.js";
 const jQueryModulesReplacements = new Map<string, string>([
 	["jQuery/sap/assert", "sap/base/assert"],
 	["jQuery/sap/resources", "sap/base/i18n/ResourceBundle"],
-	["jQuery/sap/log", "sap/base/Log"], // TODO: Partial module
+	["jQuery/sap/log", "sap/base/Log"],
 	["jQuery/sap/encodeCSS", "sap/base/security/encodeCSS"],
 	["jQuery/sap/encodeJS", "sap/base/security/encodeJS"],
 	["jQuery/sap/encodeURL", "sap/base/security/encodeURL"],
 	["jQuery/sap/encodeURLParameters", "sap/base/security/encodeURLParameters"],
-	// TODO: Check it. Currently does not work. Check nodeInfos
 	["jQuery/sap/encodeHTML", "sap/base/security/encodeXML"],
 	["jQuery/sap/encodeXML", "sap/base/security/encodeXML"],
 	["jQuery/sap/camelCase", "sap/base/strings/camelize"],
@@ -183,9 +182,7 @@ export default function generateSolutionJQueryDeprecations(
 	messages: RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
 	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
 ) {
-	// TODO: Fix type info
-	// TODO: Validate if jQuery is included as dependency
-	// TODO: Remove unmatched imports
+	// TODO: Fix type information
 	const moduleImports = generateSolutionNoGlobals(
 		checker, sourceFile, content, messages, changeSet, newModuleDeclarations);
 
