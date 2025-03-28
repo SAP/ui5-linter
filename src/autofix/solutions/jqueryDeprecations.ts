@@ -4,10 +4,11 @@ import {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
 import {ChangeSet, NewModuleDeclarationInfo} from "../autofix.js";
 
+// TODO: Replace with resources/jquery-replacers.json
 const jQueryModulesReplacements = new Map<string, string>([
 	["jQuery/sap/assert", "sap/base/assert"],
 	["jQuery/sap/resources", "sap/base/i18n/ResourceBundle"],
-	// ["jQuery/sap/log", "sap/base/Log"], // TODO: Partial module
+	["jQuery/sap/log", "sap/base/Log"], // TODO: Partial module
 	["jQuery/sap/encodeCSS", "sap/base/security/encodeCSS"],
 	["jQuery/sap/encodeJS", "sap/base/security/encodeJS"],
 	["jQuery/sap/encodeURL", "sap/base/security/encodeURL"],
