@@ -24,6 +24,11 @@
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)
 			- [`--ui5-config`](#--ui5-config)
+			- [`--log-level`](#--log-level)
+			- [`--verbose`](#--verbose)
+			- [`--perf`](#--perf)
+			- [`--silent`](#--silent)
+			- [`--version`](#--version)
 	- [Configuration](#configuration)
 		- [Configuration File Location](#configuration-file-location)
 		- [Supported Configuration File Names](#supported-configuration-file-names)
@@ -200,6 +205,53 @@ Set a path for the desired UI5 yaml config file (default: `./ui5.yaml`).
 **Example:**
 ```sh
 ui5lint --ui5-config ./configs/ui5-custom.yaml
+```
+
+#### `--log-level`
+
+Set the logging level (default: `info`).
+
+Possible values are: `silent`, `error`, `warn`, `info`, `perf`, `verbose`, `silly`
+
+**Example:**
+```sh
+ui5lint --log-level=warn
+```
+
+#### `--verbose`
+
+Enable verbose logging.
+
+**Example:**
+```sh
+ui5lint --verbose
+```
+
+#### `--perf`
+
+Enable performance measurements and related logging.
+
+**Example:**
+```sh
+ui5lint --perf
+```
+
+#### `--silent`
+
+Disable all log output.
+
+**Example:**
+```sh
+ui5lint --silent
+```
+
+#### `--version`
+
+Prints the current version and CLI script location.
+
+**Example:**
+```sh
+ui5lint --version
 ```
 
 ## Configuration
