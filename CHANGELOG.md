@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/SAP/ui5-linter/compare/v1.12.0...v1.12.1) (2025-04-02)
+
+
+### Performance Improvements
+
+* Improve lazy loading of TypeScript definitions ([492cbf8](https://github.com/SAP/ui5-linter/commit/492cbf834732878bfba45ab98fe9094fe74b29ba))
+
 ## [1.12.0](https://github.com/SAP/ui5-linter/compare/v1.11.0...v1.12.0) (2025-03-18)
 
 
