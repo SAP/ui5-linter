@@ -1801,7 +1801,7 @@ export default class SourceFileLinter {
 	}
 
 	findModuleForName(moduleName: string): ts.Symbol | undefined {
-		const moduleSymbol = this.ambientModuleCache.getModule("sap/base/assert"); //this.ambientModuleCache.getModule(moduleName);
+		const moduleSymbol = this.ambientModuleCache.getModule(moduleName);
 
 		if (!moduleSymbol) {
 			return;
