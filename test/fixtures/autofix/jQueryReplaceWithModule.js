@@ -10,7 +10,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	const myLog2 = jQuery.sap.log.getLogEntries();
 
 	const oLogListener = {};
-	oLogListener.onLogEntry: function(oLog) {
+	oLogListener.onLogEntry = function(oLog) {
 		//
 	};
 	jQuery.sap.log.addLogListener(oLogListener);
@@ -82,7 +82,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var allCoveredEvents = jQuery.sap.ControlEvents;
 	jQuery.sap.handleF6GroupNavigation(new jQuery.Event("keydown", {}));
 	var isMouseEventDelayed = jQuery.sap.isMouseEventDelayed();
-	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {});
+	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {}));
 	var touchEventMode = jQuery.sap.touchEventMode;
 	var keyCodeEnter = jQuery.sap.keycodes.ENTER;
 	var sapcollapseall = jQuery.sap.PseudoEvents.sapcollapseall;
@@ -96,8 +96,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.registerResourcePath("me/fancy/B", { url: "ui5/projectB/" });
 
 	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", "js"); // resolves to "resources/sap/m/Button.js"
-	var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"), // resolves to  "resources/sap/m/Button/"
-	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""), // resolves to "resources/sap/m/Button"
+	var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"); // resolves to  "resources/sap/m/Button/"
+	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
 	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
 });
