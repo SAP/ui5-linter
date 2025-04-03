@@ -9,12 +9,30 @@ export interface FixHints {
 	conditional?: boolean;
 }
 
+const jQuerySapModulesReplacements = new Map<string, string>([
+	["assert", "sap/base/assert"],
+]);
+
 export default class FixHintsGenerator {
 	constructor(
 		private resourcePath: string,
 		private ambientModuleCache: AmbientModuleCache
 	) {
 
+	}
+
+	getJquerySapFixHints(node: ts.AccessExpression, namespace: string | undefined): FixHints | undefined {
+		if (!namespace?.startsWith("jQuery.sap.")) {
+			return undefined;
+		}
+		const jQuerySapAccess = namespace.substring("jQuery.sap.".length);
+		const moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccess);
+		if (!moduleReplacement) {
+			return undefined;
+		}
+		return {
+			moduleName: moduleReplacement,
+		};
 	}
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
