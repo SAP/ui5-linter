@@ -38,7 +38,7 @@ export default function generateSolutionNoGlobals(
 
 		affectedNodesInfo.add({
 			moduleName: msg.fixHints.moduleName,
-			exportName: msg.fixHints.exportName,
+			exportNameToBeUsed: msg.fixHints.exportNameToBeUsed,
 			propertyAccess: msg.fixHints.propertyAccess,
 			position: {
 				line,
