@@ -4,7 +4,6 @@ import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterConte
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
-import generateSolutionJQueryDeprecations from "./solutions/jqueryDeprecations.js";
 import {getLogger} from "@ui5/logger";
 import {addDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
@@ -63,8 +62,6 @@ export interface Position {
 	pos: number;
 }
 export interface GlobalPropertyAccessNodeInfo {
-	globalVariableName: string;
-	namespace: string;
 	moduleName: string;
 	exportName?: string;
 	propertyAccess?: string;
@@ -246,17 +243,28 @@ function applyFixes(
 
 	const changeSet: ChangeSet[] = [];
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
-	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
-		existingModuleDeclarations = generateSolutionJQueryDeprecations(
-			checker, sourceFile, content,
-			messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[],
-			changeSet, []);
-	} else if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-		existingModuleDeclarations = generateSolutionNoGlobals(
-			checker, sourceFile, content,
-			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, []);
+	const messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS>[] = [];
+
+	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+		messages.push(
+			...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
+		);
 	}
+
+	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
+		messages.push(
+			...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
+		);
+	}
+
+	if (messages.length === 0) {
+		return undefined;
+	}
+
+	existingModuleDeclarations = generateSolutionNoGlobals(
+		checker, sourceFile, content,
+		messages,
+		changeSet, []);
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports
 	const identifiers = collectIdentifiers(sourceFile);

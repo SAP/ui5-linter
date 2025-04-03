@@ -18,7 +18,7 @@ const log = getLogger("linter:autofix:NoGlobals");
 
 export default function generateSolutionNoGlobals(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
-	messages: RawLintMessage<MESSAGE.NO_GLOBALS>[],
+	messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS>[],
 	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
 ) {
 	// Collect all global property access nodes
@@ -35,9 +35,8 @@ export default function generateSolutionNoGlobals(
 		const line = msg.position.line - 1;
 		const column = msg.position.column - 1;
 		const pos = sourceFile.getPositionOfLineAndCharacter(line, column);
+
 		affectedNodesInfo.add({
-			globalVariableName: msg.args.variableName,
-			namespace: msg.args.namespace,
 			moduleName: msg.fixHints.moduleName,
 			exportName: msg.fixHints.exportName,
 			propertyAccess: msg.fixHints.propertyAccess,
@@ -97,7 +96,7 @@ export default function generateSolutionNoGlobals(
 	ts.forEachChild(sourceFile, visitNode);
 	for (const nodeInfo of affectedNodesInfo) {
 		if (!nodeInfo.node) {
-			throw new Error(`Unable to find node for ${nodeInfo.globalVariableName}`);
+			throw new Error(`Unable to find node at position ${nodeInfo.position.line}:${nodeInfo.position.column}`);
 		}
 	}
 

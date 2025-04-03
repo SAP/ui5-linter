@@ -4,7 +4,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var aEntries = jQuery.sap.getUrlWhitelist();
 	jQuery.sap.validateUrl("https://example.com");
 	jQuery.sap.removeUrlWhitelist(0);
-	
+
 	jQuery.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
 	var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } });
 
@@ -28,7 +28,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var isWin = jQuery.os.win;
 	var isLinux = jQuery.os.linux;
 	var isMac = jQuery.os.mac;
-	
+
 	var rem = jQuery.sap.pxToRem("16px");
 	var px = jQuery.sap.remToPx("1rem");
 
@@ -77,5 +77,5 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 
 	var myFancyControl = jQuery(".fancyContainer").control();
 
-	var isBundle = jQuery.sap.resources.isBundle(new sap.base.i18n.ResourceBundle());
+	var isBundle = jQuery.sap.resources.isBundle({});
 });

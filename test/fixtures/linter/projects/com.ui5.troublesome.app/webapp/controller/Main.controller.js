@@ -4,6 +4,7 @@ sap.ui.define(["./BaseController", "sap/m/MessageBox"], function (BaseController
 	const MainController = BaseController.extend("com.ui5.troublesome.app.controller.Main", {
 		sayHello: function () {
 			MessageBox.show("Hello World!");
+			jQuery.sap.assert(true, "Hello World!");
 		},
 
 		globalVarsForAutofix() {
