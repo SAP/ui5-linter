@@ -63,7 +63,7 @@ export interface Position {
 }
 export interface GlobalPropertyAccessNodeInfo {
 	moduleName: string;
-	exportName?: string;
+	exportNameToBeUsed?: string;
 	propertyAccess?: string;
 	position: Position;
 	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;

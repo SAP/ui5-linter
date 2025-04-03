@@ -314,7 +314,10 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			const node: ts.Node = nodeInfo.node;
 			const nodeStart = node.getStart();
 			const nodeEnd = node.getEnd();
-			const nodeReplacement = `${identifier}`;
+			let nodeReplacement = `${identifier}`;
+			if ("exportNameToBeUsed" in nodeInfo && nodeInfo.exportNameToBeUsed) {
+				nodeReplacement += `.${nodeInfo.exportNameToBeUsed}`;
+			}
 
 			changeSet.push({
 				action: ChangeAction.REPLACE,
