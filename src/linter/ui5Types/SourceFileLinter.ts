@@ -1439,7 +1439,7 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.getFixHints(node);
+			const fixHints = this.#fixHintsGenerator?.getJquerySapFixHints(node, namespace);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
