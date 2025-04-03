@@ -3,16 +3,37 @@ import {AmbientModuleCache} from "./AmbientModuleCache.js";
 import {isConditionalAccess, isGlobalAssignment} from "./utils/utils.js";
 
 export interface FixHints {
+	/**
+	 * New module name to import from
+	 */
 	moduleName?: string;
-	exportName?: string;
+
+	/**
+	 * Name of the export to be used (based on the newly imported module)
+	 * e.g. for moduleName "sap/base/i18n/ResourceBundle" the exportNameToBeUsed is "create"
+	 */
+	exportNameToBeUsed?: string;
+
+	/**
+	 * String representation of the property access to be replaced
+	 */
 	propertyAccess?: string;
+
+	/**
+	 * Whether the access is conditional / probing / lazy
+	 * e.g. `if (window.sap.ui.layout) { ... }`
+	 */
 	conditional?: boolean;
 }
 
-const jQuerySapModulesReplacements = new Map<string, string>([
-	["assert", "sap/base/assert"],
+const jQuerySapModulesReplacements = new Map<string, FixHints>([
+	["assert", {
+		moduleName: "sap/base/assert",
+	}],
+	["resources", {
+		moduleName: "sap/base/i18n/ResourceBundle", exportNameToBeUsed: "create",
+	}],
 
-	// ["jQuery/sap/resources", "sap/base/i18n/ResourceBundle"],
 	// ["jQuery/sap/log", "sap/base/Log"],
 	// ["jQuery/sap/encodeCSS", "sap/base/security/encodeCSS"],
 	// ["jQuery/sap/encodeJS", "sap/base/security/encodeJS"],
@@ -186,9 +207,7 @@ export default class FixHintsGenerator {
 		if (!moduleReplacement) {
 			return undefined;
 		}
-		return {
-			moduleName: moduleReplacement,
-		};
+		return moduleReplacement;
 	}
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
@@ -271,7 +290,7 @@ export default class FixHintsGenerator {
 						return undefined;
 					}
 					return {
-						fixHints: {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")},
+						fixHints: {moduleName: libraryModuleName, propertyAccess: searchStack.join(".")},
 						propertyAccessNode: partNodes[searchStack.length - 1],
 					};
 				}
@@ -284,7 +303,7 @@ export default class FixHintsGenerator {
 			return undefined;
 		}
 		return {
-			fixHints: {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")},
+			fixHints: {moduleName: searchStack.join("/"), propertyAccess: searchStack.join(".")},
 			propertyAccessNode: partNodes[searchStack.length - 1],
 		};
 	}
