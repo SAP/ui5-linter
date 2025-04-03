@@ -2,7 +2,7 @@ import ts from "typescript";
 import path from "node:path/posix";
 import {getLogger} from "@ui5/logger";
 import SourceFileReporter from "./SourceFileReporter.js";
-import {ResourcePath, CoverageCategory, LintMetadata, FixHints} from "../LinterContext.js";
+import {ResourcePath, CoverageCategory, LintMetadata} from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import analyzeComponentJson from "./asyncComponentFlags.js";
 import {deprecatedLibraries, deprecatedThemes} from "../../utils/deprecations.js";
@@ -13,8 +13,8 @@ import {
 	getPropertyAssignmentsInObjectLiteralExpression,
 	findClassMember,
 	isClassMethod,
-	isGlobalAssignment,
-	isConditionalAccess,
+	isSourceFileOfPseudoModuleType,
+	isSourceFileOfTypeScriptLib,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -27,6 +27,7 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
+import FixHintsGenerator, {FixHints} from "./FixHintsGenerator.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -57,14 +58,6 @@ function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {
 	return sourceFile.fileName === "/types/@ui5/linter/types/jquery.sap.d.ts";
 }
 
-function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName.startsWith("/types/@ui5/linter/types/pseudo-modules/");
-}
-
-function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName.startsWith("/types/typescript/lib/");
-}
-
 export default class SourceFileLinter {
 	#reporter: SourceFileReporter;
 	#boundVisitNode: (node: ts.Node) => void;
@@ -73,6 +66,7 @@ export default class SourceFileLinter {
 	#hasTestStarterFindings: boolean;
 	#metadata: LintMetadata;
 	#xmlContents: {xml: string; pos: ts.LineAndCharacter; documentKind: "fragment" | "view"}[];
+	#fixHintsGenerator: FixHintsGenerator | null;
 
 	private resourcePath: ResourcePath;
 
@@ -97,6 +91,7 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
+		this.#fixHintsGenerator = this.fix ? new FixHintsGenerator(this.resourcePath, this.ambientModuleCache) : null;
 	}
 
 	async lint() {
@@ -1800,152 +1795,7 @@ export default class SourceFileLinter {
 		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
 	}
 
-	findModuleForName(moduleName: string): ts.Symbol | undefined {
-		const moduleSymbol = this.ambientModuleCache.getModule(moduleName);
-
-		if (!moduleSymbol) {
-			return;
-		}
-		const declarations = moduleSymbol.getDeclarations();
-		if (!declarations) {
-			throw new Error(`Could not find declarations for module: ${moduleName}`);
-		}
-		for (const decl of declarations) {
-			const sourceFile = decl.getSourceFile();
-			if (isSourceFileOfTypeScriptLib(sourceFile)) {
-				// Ignore any non-UI5 symbols
-				return;
-			}
-			if (isSourceFileOfPseudoModuleType(sourceFile)) {
-				// Ignore pseudo modules, we rather find them via probing for the library module
-				return;
-			}
-		}
-		return moduleSymbol;
-	}
-
-	isFixable(node: ts.CallExpression | ts.AccessExpression): boolean {
-		if (ts.isCallExpression(node)) {
-			return true;
-		}
-		if (isGlobalAssignment(node)) {
-			return false;
-		}
-		return true;
-	}
-
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
-		// Only collect fix hints when running in fix mode
-		if (!this.fix || !this.isFixable(node)) {
-			return undefined;
-		}
-
-		const result = this.getImportFromGlobal(node);
-		if (!result) {
-			return undefined;
-		}
-		const {fixHints, propertyAccessNode} = result;
-		if (
-			fixHints.moduleName &&
-			(
-				this.resourcePath === `/resources/${fixHints.moduleName}.js` ||
-				this.resourcePath === `/resources/${fixHints.moduleName}.ts`
-			)
-		) {
-			// Prevent adding imports to the module itself
-			return undefined;
-		}
-
-		// Check whether the access is conditional / probing / lazy
-		fixHints.conditional = isConditionalAccess(propertyAccessNode);
-
-		return fixHints;
-	}
-
-	isLibraryExportAccess(moduleSymbol: ts.Symbol, parts: string[]) {
-		// Check for access of unknown/private export or a global usage without a corresponding module
-		// e.g. when defining a shortcut for a sub-namespace like sap.ui.core.message
-		let currentSymbol: ts.Symbol | undefined = moduleSymbol;
-		let currentPart;
-		while (parts.length) {
-			currentPart = parts.shift();
-			currentSymbol = currentSymbol.exports?.get(currentPart as ts.__String);
-			if (!currentSymbol) {
-				return false;
-			}
-			// Only continue when symbol is a namespace, as only those have exports we want to check for
-			if (!(currentSymbol.flags & ts.SymbolFlags.Namespace)) {
-				return true;
-			}
-		}
-		return true;
-	}
-
-	getImportFromGlobal(
-		node: ts.CallExpression | ts.AccessExpression
-	): {fixHints: FixHints; propertyAccessNode: ts.Node} | undefined {
-		const parts: string[] = [];
-		const partNodes: ts.Node[] = [];
-
-		const firstPart = node.expression;
-		if (!ts.isIdentifier(firstPart)) {
-			return undefined;
-		}
-
-		if (firstPart.text !== "window" && firstPart.text !== "globalThis" && firstPart.text !== "self") {
-			parts.push(firstPart.text);
-			partNodes.push(firstPart);
-		}
-
-		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
-			}
-			parts.push(scanNode.name.text);
-			partNodes.push(scanNode);
-			scanNode = scanNode.parent;
-		}
-
-		let moduleSymbol;
-		const searchStack = [...parts];
-		let exportName;
-		while (!moduleSymbol && searchStack.length) {
-			const moduleName = searchStack.join("/");
-			if (moduleName === "sap/ui/core/Core") {
-				// Special case for sap.ui.core.Core:
-				// The global access provides the Core class, while the module import
-				// only provides the singleton instance.
-				// For now, we don't fix this case, because it is not a common pattern.
-				return undefined;
-			}
-			moduleSymbol = this.findModuleForName(moduleName);
-			if (!moduleSymbol) {
-				const libraryModuleName = `${moduleName}/library`;
-				moduleSymbol = this.findModuleForName(libraryModuleName);
-				if (moduleSymbol) {
-					exportName = parts[searchStack.length];
-					if (exportName && !this.isLibraryExportAccess(moduleSymbol, parts.slice(searchStack.length))) {
-						return undefined;
-					}
-					return {
-						fixHints: {moduleName: libraryModuleName, exportName, propertyAccess: searchStack.join(".")},
-						propertyAccessNode: partNodes[searchStack.length - 1],
-					};
-				}
-			}
-			if (!moduleSymbol) {
-				searchStack.pop();
-			}
-		}
-		if (!searchStack.length) {
-			return undefined;
-		}
-		return {
-			fixHints: {moduleName: searchStack.join("/"), exportName, propertyAccess: searchStack.join(".")},
-			propertyAccessNode: partNodes[searchStack.length - 1],
-		};
+		return this.#fixHintsGenerator?.getFixHints(node) ?? undefined;
 	}
 }
