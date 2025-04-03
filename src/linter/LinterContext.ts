@@ -4,17 +4,11 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import ts from "typescript";
+import {FixHints} from "./ui5Types/FixHintsGenerator.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
 export type ResourcePath = string; // Always POSIX
-
-export interface FixHints {
-	moduleName?: string;
-	exportName?: string;
-	propertyAccess?: string;
-	conditional?: boolean;
-}
 
 // Data types are structured very similar to the ESLint types for better compatibility into existing integrations:
 // https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type
