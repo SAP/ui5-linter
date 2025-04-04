@@ -1,7 +1,8 @@
 sap.ui.define([
 	"sap/m/Button", "sap/m/DateTimeInput", "sap/base/util/includes", "sap/ui/Device", "sap/ui/core/library", "sap/ui/generic/app/navigation/service/NavigationHandler",
-	"sap/ui/table/Table", "sap/ui/table/plugins/MultiSelectionPlugin", "sap/ui/core/Configuration", "sap/m/library"
-], function(Button, DateTimeInput, includes, Device, coreLib, NavigationHandler, Table, MultiSelectionPlugin, Configuration, mobileLib) {
+	"sap/ui/table/Table", "sap/ui/table/plugins/MultiSelectionPlugin", "sap/ui/core/Configuration", "sap/m/library",
+	"sap/m/Input", "sap/m/TileContent", "sap/ui/layout/form/SimpleForm"
+], function(Button, DateTimeInput, includes, Device, coreLib, NavigationHandler, Table, MultiSelectionPlugin, Configuration, mobileLib, Input, TileContent, SimpleForm) {
 	"use strict";
 	var dateTimeInput = new DateTimeInput(); // Control is deprecated. A finding only appears for the module dependency, not for the usage.
 
@@ -77,4 +78,21 @@ sap.ui.define([
 	// (via local function name)
 	const sapUiXmlView = sap.ui.xmlview;
 	const view3 = sapUiXmlView("com.ui5.troublesome.app.view.MyView");
+
+	const simpleForm = new SimpleForm({
+		layout: "ResponsiveLayout" // SimpleFormLayout.ResponsiveLayout is deprecated
+	});
+
+	const tileContent = new TileContent({
+		frameType: "TwoThirds" // FrameType.TwoThirds is deprecated
+	});
+
+	const input = new Input({
+		type: "Date" // InputType.Date is deprecated
+	});
+
+	// Negative test: ResponsiveGridLayout is not deprecated
+	const simpleForm2 = new SimpleForm({
+		layout: "ResponsiveGridLayout" // ResponsiveGridLayout is not deprecated
+	});
 });
