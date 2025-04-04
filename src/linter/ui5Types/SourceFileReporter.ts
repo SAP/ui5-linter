@@ -7,11 +7,11 @@ import LinterContext, {
 	CoverageInfo,
 	PositionInfo, PositionRange, ResourcePath,
 	RawLintMessage,
-	FixHints,
 } from "../LinterContext.js";
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
+import {FixHints} from "./FixHintsGenerator.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
