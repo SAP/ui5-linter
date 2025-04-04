@@ -27,14 +27,64 @@ export interface FixHints {
 }
 
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
+	// https://github.com/SAP/ui5-linter/issues/520
 	["assert", {
 		moduleName: "sap/base/assert",
 	}],
+	// https://github.com/SAP/ui5-linter/issues/522
+	["log", {
+		moduleName: "sap/base/Log",
+	}],
+	["log.addLogListener", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "addLogListener",
+	}],
+	["log.debug", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "debug",
+	}],
+	["log.error", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "error",
+	}],
+	["log.fatal", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "fatal",
+	}],
+	["log.getLevel", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
+	}],
+	["log.getLog", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
+	}],
+	["log.getLogEntries", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
+	}],
+	["log.getLogger", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogger",
+	}],
+	["log.info", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "info",
+	}],
+	["log.Level", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level",
+	}],
+	["log.logSupportInfo", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "logSupportInfo",
+	}],
+	["log.removeLogListener", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "removeLogListener",
+	}],
+	["log.trace", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "trace",
+	}],
+	["log.warning", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "warning",
+	}],
+	["log.isLoggable", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "isLoggable",
+	}],
+	// https://github.com/SAP/ui5-linter/issues/521
 	["resources", {
 		moduleName: "sap/base/i18n/ResourceBundle", exportNameToBeUsed: "create",
 	}],
 
-	// ["jQuery/sap/log", "sap/base/Log"],
 	// ["jQuery/sap/encodeCSS", "sap/base/security/encodeCSS"],
 	// ["jQuery/sap/encodeJS", "sap/base/security/encodeJS"],
 	// ["jQuery/sap/encodeURL", "sap/base/security/encodeURL"],
