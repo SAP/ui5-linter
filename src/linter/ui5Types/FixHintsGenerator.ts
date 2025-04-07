@@ -129,26 +129,49 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["unique", {
 		moduleName: "sap/base/util/array/uniqueSort",
 	}],
-	// // https://github.com/SAP/ui5-linter/issues/529
-	// ["jQuery/sap/equal", "sap/base/util/deepEqual"],
-	// ["jQuery/sap/each", "sap/base/util/each"],
-	// ["jQuery/sap/forIn", "sap/base/util/each"],
-	// ["jQuery/isPlainObject", "sap/base/util/isPlainObject"],
-	// ["jQuery/sap/FrameOptions", "sap/ui/security/FrameOptions"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/529
-	// ["jQuery/sap/parseJS", "sap/base/util/JSTokenizer"],
-	// ["jQuery/sap/extend", "sap/base/util/merge"],
+	// https://github.com/SAP/ui5-linter/issues/529
+	["equal", {
+		moduleName: "sap/base/util/deepEqual",
+	}],
+	["each", {
+		moduleName: "sap/base/util/each",
+	}],
+	["forIn", {
+		moduleName: "sap/base/util/each",
+	}],
+	["isPlainObject", {
+		moduleName: "sap/base/util/isPlainObject",
+	}],
+	["FrameOptions", {
+		moduleName: "sap/ui/security/FrameOptions",
+	}],
+	["parseJS", {
+		moduleName: "sap/base/util/JSTokenizer", exportNameToBeUsed: "parseJS",
+	}],
+	["extend", {
+		moduleName: "sap/base/util/merge",
+	}],
 	// // TODO: Replace with native window.performance.now()
 	// // ["jQuery.sap.now", ""],
-	// ["jQuery/sap/properties", "sap/base/util/Properties"],
-	// ["jQuery/sap/uid", "sap/base/util/uid"],
-	// ["jQuery/sap/Version", "sap/base/util/Version"],
-	// ["jQuery/sap/syncStyleClass", "sap/ui/core/syncStyleClass"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/529
-	// ["jQuery/sap/setObject", "sap/base/util/ObjectPath"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/529
-	// ["jQuery/sap/getObject", "sap/base/util/ObjectPath"],
-	
+	["properties", {
+		moduleName: "sap/base/util/Properties",
+	}],
+	["uid", {
+		moduleName: "sap/base/util/uid",
+	}],
+	["Version", {
+		moduleName: "sap/base/util/Version",
+	}],
+	["syncStyleClass", {
+		moduleName: "sap/ui/core/syncStyleClass",
+	}],
+	["setObject", {
+		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "set",
+	}],
+	["getObject", {
+		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "get",
+	}],
+
 	// ["jQuery/sap/containsOrEquals", "sap/ui/dom/containsOrEquals"],
 	// ["jQuery/sap/denormalizeScrollBeginRTL", "sap/ui/dom/denormalizeScrollBeginRTL"],
 	// ["jQuery/sap/denormalizeScrollLeftRTL", "sap/ui/dom/denormalizeScrollLeftRTL"],
