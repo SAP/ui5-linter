@@ -171,19 +171,38 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["getObject", {
 		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "get",
 	}],
+	// https://github.com/SAP/ui5-linter/issues/542
+	["containsOrEquals", {
+		moduleName: "sap/ui/dom/containsOrEquals",
+	}],
+	["denormalizeScrollBeginRTL", {
+		moduleName: "sap/ui/dom/denormalizeScrollBeginRTL",
+	}],
+	["denormalizeScrollLeftRTL", {
+		moduleName: "sap/ui/dom/denormalizeScrollLeftRTL",
+	}],
+	["ownerWindow", {
+		moduleName: "sap/ui/dom/getOwnerWindow",
+	}],
+	["scrollbarSize", {
+		moduleName: "sap/ui/dom/getScrollbarSize",
+	}],
+	["includeScript", {
+		moduleName: "sap/ui/dom/includeScript",
+	}],
+	["includeStylesheet", {
+		moduleName: "sap/ui/dom/includeStylesheet",
+	}],
+	["replaceDOM", {
+		moduleName: "sap/ui/dom/patch",
+	}],
+	["pxToRem", {
+		moduleName: "sap/ui/dom/units/Rem", exportNameToBeUsed: "fromPx",
+	}],
+	["remToPx", {
+		moduleName: "sap/ui/dom/units/Rem", exportNameToBeUsed: "toPx",
+	}],
 
-	// ["jQuery/sap/containsOrEquals", "sap/ui/dom/containsOrEquals"],
-	// ["jQuery/sap/denormalizeScrollBeginRTL", "sap/ui/dom/denormalizeScrollBeginRTL"],
-	// ["jQuery/sap/denormalizeScrollLeftRTL", "sap/ui/dom/denormalizeScrollLeftRTL"],
-	// ["jQuery/sap/ownerWindow", "sap/ui/dom/getOwnerWindow"],
-	// ["jQuery/sap/scrollbarSize", "sap/ui/dom/getScrollbarSize"],
-	// ["jQuery/sap/includeScript", "sap/ui/dom/includeScript"],
-	// ["jQuery/sap/includeStylesheet", "sap/ui/dom/includeStylesheet"],
-	// ["jQuery/sap/replaceDOM", "sap/ui/dom/patch"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/542
-	// ["jQuery/sap/pxToRem", "sap/ui/dom/units/Rem"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/542
-	// ["jQuery/sap/remToPx", "sap/ui/dom/units/Rem"],
 	// ["jQuery/sap/checkMouseEnterOrLeave", "sap/ui/events/checkMouseEnterOrLeave"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
 	// ["jQuery/sap/bindAnyEvent", "sap/ui/events/ControlEvents"],
