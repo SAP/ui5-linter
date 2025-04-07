@@ -103,12 +103,26 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["encodeXML", {
 		moduleName: "sap/base/security/encodeXML",
 	}],
-	// ["jQuery/sap/camelCase", "sap/base/strings/camelize"],
-	// ["jQuery/sap/charToUpperCase", "sap/base/strings/capitalize"],
-	// ["jQuery/sap/escapeRegExp", "sap/base/strings/escapeRegExp"],
-	// ["jQuery/sap/formatMessage", "sap/base/strings/formatMessage"],
-	// ["jQuery/sap/hashCode", "sap/base/strings/hash"],
-	// ["jQuery/sap/hyphen", "sap/base/strings/hyphenate"],
+	// https://github.com/SAP/ui5-linter/issues/527
+	["camelCase", {
+		moduleName: "sap/base/strings/camelize",
+	}],
+	["charToUpperCase", {
+		moduleName: "sap/base/strings/capitalize",
+	}],
+	["escapeRegExp", {
+		moduleName: "sap/base/strings/escapeRegExp",
+	}],
+	["formatMessage", {
+		moduleName: "sap/base/strings/formatMessage",
+	}],
+	["hashCode", {
+		moduleName: "sap/base/strings/hash",
+	}],
+	["hyphen", {
+		moduleName: "sap/base/strings/hyphenate",
+	}],
+
 	// ["jQuery/sap/arraySymbolDiff", "sap/base/util/array/diff"],
 	// ["jQuery/sap/unique", "sap/base/util/array/uniqueSort"],
 	// ["jQuery/sap/equal", "sap/base/util/deepEqual"],
