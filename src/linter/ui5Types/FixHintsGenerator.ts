@@ -122,9 +122,14 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["hyphen", {
 		moduleName: "sap/base/strings/hyphenate",
 	}],
-
-	// ["jQuery/sap/arraySymbolDiff", "sap/base/util/array/diff"],
-	// ["jQuery/sap/unique", "sap/base/util/array/uniqueSort"],
+	// https://github.com/SAP/ui5-linter/issues/528
+	["arraySymbolDiff", {
+		moduleName: "sap/base/util/array/diff",
+	}],
+	["unique", {
+		moduleName: "sap/base/util/array/uniqueSort",
+	}],
+	// // https://github.com/SAP/ui5-linter/issues/529
 	// ["jQuery/sap/equal", "sap/base/util/deepEqual"],
 	// ["jQuery/sap/each", "sap/base/util/each"],
 	// ["jQuery/sap/forIn", "sap/base/util/each"],
@@ -143,6 +148,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	// ["jQuery/sap/setObject", "sap/base/util/ObjectPath"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/529
 	// ["jQuery/sap/getObject", "sap/base/util/ObjectPath"],
+	
 	// ["jQuery/sap/containsOrEquals", "sap/ui/dom/containsOrEquals"],
 	// ["jQuery/sap/denormalizeScrollBeginRTL", "sap/ui/dom/denormalizeScrollBeginRTL"],
 	// ["jQuery/sap/denormalizeScrollLeftRTL", "sap/ui/dom/denormalizeScrollLeftRTL"],
