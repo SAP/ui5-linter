@@ -202,26 +202,40 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["remToPx", {
 		moduleName: "sap/ui/dom/units/Rem", exportNameToBeUsed: "toPx",
 	}],
-
-	// ["jQuery/sap/checkMouseEnterOrLeave", "sap/ui/events/checkMouseEnterOrLeave"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/bindAnyEvent", "sap/ui/events/ControlEvents"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/unbindAnyEvent", "sap/ui/events/ControlEvents"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/ControlEvents", "sap/ui/events/ControlEvents"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/handleF6GroupNavigation", "sap/ui/events/F6Navigation"],
-	// ["jQuery/sap/isMouseEventDelayed", "sap/ui/events/isMouseEventDelayed"],
-	// ["jQuery/sap/isSpecialKey", "sap/ui/events/isSpecialKey"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/touchEventMode", "sap/ui/events/jquery/EventSimulation"],
-	// // TODO: Might not work out of the box
-	// ["jQuery/sap/keycodes", "sap/ui/events/KeyCodes"],
-	// // TODO: Might not work out of the box
-	// ["jQuery/sap/PseudoEvents", "sap/ui/events/PseudoEvents"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/543
-	// ["jQuery/sap/disableTouchToMouseHandling", "sap/ui/events/TouchToMouseMapping"],
+	// https://github.com/SAP/ui5-linter/issues/543
+	["checkMouseEnterOrLeave", {
+		moduleName: "sap/ui/events/checkMouseEnterOrLeave",
+	}],
+	["bindAnyEvent", {
+		moduleName: "sap/ui/events/ControlEvents", exportNameToBeUsed: "bindAnyEvent",
+	}],
+	["unbindAnyEvent", {
+		moduleName: "sap/ui/events/ControlEvents", exportNameToBeUsed: "unbindAnyEvent",
+	}],
+	["ControlEvents", {
+		moduleName: "sap/ui/events/ControlEvents", exportNameToBeUsed: "events",
+	}],
+	["handleF6GroupNavigation", {
+		moduleName: "sap/ui/events/F6Navigation", exportNameToBeUsed: "handleF6GroupNavigation",
+	}],
+	["isMouseEventDelayed", {
+		moduleName: "sap/ui/events/isMouseEventDelayed",
+	}],
+	["isSpecialKey", {
+		moduleName: "sap/ui/events/isSpecialKey",
+	}],
+	["touchEventMode", {
+		moduleName: "sap/ui/events/jquery/EventSimulation", exportNameToBeUsed: "touchEventMode",
+	}],
+	["keycodes", {
+		moduleName: "sap/ui/events/KeyCodes",
+	}],
+	["PseudoEvents", {
+		moduleName: "sap/ui/events/PseudoEvents",
+	}],
+	["disableTouchToMouseHandling", {
+		moduleName: "sap/ui/events/TouchToMouseMapping", exportNameToBeUsed: "disableTouchToMouseHandling",
+	}],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
 	// ["jQuery/sap/measure/start", "sap/ui/performance/Measurement"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
