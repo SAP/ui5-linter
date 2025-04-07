@@ -84,13 +84,25 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["resources", {
 		moduleName: "sap/base/i18n/ResourceBundle", exportNameToBeUsed: "create",
 	}],
-
-	// ["jQuery/sap/encodeCSS", "sap/base/security/encodeCSS"],
-	// ["jQuery/sap/encodeJS", "sap/base/security/encodeJS"],
-	// ["jQuery/sap/encodeURL", "sap/base/security/encodeURL"],
-	// ["jQuery/sap/encodeURLParameters", "sap/base/security/encodeURLParameters"],
-	// ["jQuery/sap/encodeHTML", "sap/base/security/encodeXML"],
-	// ["jQuery/sap/encodeXML", "sap/base/security/encodeXML"],
+	// https://github.com/SAP/ui5-linter/issues/524
+	["encodeCSS", {
+		moduleName: "sap/base/security/encodeCSS",
+	}],
+	["encodeJS", {
+		moduleName: "sap/base/security/encodeJS",
+	}],
+	["encodeURL", {
+		moduleName: "sap/base/security/encodeURL",
+	}],
+	["encodeURLParameters", {
+		moduleName: "sap/base/security/encodeURLParameters",
+	}],
+	["encodeHTML", {
+		moduleName: "sap/base/security/encodeXML",
+	}],
+	["encodeXML", {
+		moduleName: "sap/base/security/encodeXML",
+	}],
 	// ["jQuery/sap/camelCase", "sap/base/strings/camelize"],
 	// ["jQuery/sap/charToUpperCase", "sap/base/strings/capitalize"],
 	// ["jQuery/sap/escapeRegExp", "sap/base/strings/escapeRegExp"],
