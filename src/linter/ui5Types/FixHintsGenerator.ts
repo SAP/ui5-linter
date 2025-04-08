@@ -285,49 +285,71 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["measure.unregisterAllMethods", {
 		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "unregisterAllMethods",
 	}],
+	// https://github.com/SAP/ui5-linter/issues/561
+	["fesr.setActive", {
+		moduleName: "sap/ui/performance/trace/FESR", exportNameToBeUsed: "setActive",
+	}],
+	["fesr.getActive", {
+		moduleName: "sap/ui/performance/trace/FESR", exportNameToBeUsed: "getActive",
+	}],
+	["fesr.addBusyDuration", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "addBusyDuration",
+	}],
+	["interaction.getActive", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "getActive",
+	}],
+	["interaction.setActive", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "setActive",
+	}],
+	["interaction.notifyStepStart", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "notifyStepStart",
+	}],
+	["interaction.notifyStepEnd", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "notifyStepEnd",
+	}],
+	["interaction.notifyEventStart", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "notifyEventStart",
+	}],
+	["interaction.notifyScrollEvent", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "notifyScrollEvent",
+	}],
+	["interaction.notifyEventEnd", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "notifyEventEnd",
+	}],
+	["interaction.setStepComponent", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "setStepComponent",
+	}],
+	["measure.clearInteractionMeasurements", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "clear",
+	}],
+	["measure.startInteraction", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "start",
+	}],
+	["measure.endInteraction", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "end",
+	}],
+	["measure.filterInteractionMeasurements", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "filter",
+	}],
+	["measure.getAllInteractionMeasurements", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "getAll",
+	}],
+	["measure.getPendingInteractionMeasurement", {
+		moduleName: "sap/ui/performance/trace/Interaction", exportNameToBeUsed: "getPending",
+	}],
+	["fesr.getCurrentTransactionId", {
+		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "getCurrentTransactionId",
+	}],
+	["fesr.getRootId", {
+		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "getRootId",
+	}],
+	["passport.setActive", {
+		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "setActive",
+	}],
+	["passport.traceFlags", {
+		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "traceFlags",
+	}],
 
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/fesr/setActive", "sap/ui/performance/trace/FESR"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/fesr/getActive", "sap/ui/performance/trace/FESR"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/fesr/addBusyDuration", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/getActive", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/setActive", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/notifyStepStart", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/notifyStepEnd", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/notifyEventStart", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/notifyScrollEvent", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/notifyEventEnd", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/interaction/setStepComponent", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/clearInteractionMeasurements", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/startInteraction", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/endInteraction", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/filterInteractionMeasurements", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/getAllInteractionMeasurements", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/measure/getPendingInteractionMeasurement", "sap/ui/performance/trace/Interaction"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/fesr/getCurrentTransactionId", "sap/ui/performance/trace/Passport"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/fesr/getRootId", "sap/ui/performance/trace/Passport"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/passport/setActive", "sap/ui/performance/trace/Passport"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
-	// ["jQuery/sap/passport/traceFlags", "sap/ui/performance/trace/Passport"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
 	// ["jQuery/sap/act", "sap/ui/util/ActivityDetection"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
