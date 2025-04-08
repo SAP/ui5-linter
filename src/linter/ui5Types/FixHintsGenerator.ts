@@ -349,23 +349,32 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["passport.traceFlags", {
 		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "traceFlags",
 	}],
-
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/act", "sap/ui/util/ActivityDetection"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/initMobile", "sap/ui/util/Mobile"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/setIcons", "sap/ui/util/Mobile"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/setMobileWebAppCapable", "sap/ui/util/Mobile"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/storage", "sap/ui/util/Storage"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/getParseError", "sap/ui/util/XMLHelper"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/parseXML", "sap/ui/util/XMLHelper"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/563
-	// ["jQuery/sap/serializeXML", "sap/ui/util/XMLHelper"],
+	// https://github.com/SAP/ui5-linter/issues/563
+	["act", {
+		moduleName: "sap/ui/util/ActivityDetection",
+	}],
+	["initMobile", {
+		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "init",
+	}],
+	["setIcons", {
+		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setIcons",
+	}],
+	["setMobileWebAppCapable", {
+		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setWebAppCapable",
+	}],
+	// TODO: Check how to append "new"
+	// ["storage", {
+	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "traceFlags",
+	// }],
+	["getParseError", {
+		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "getParseError",
+	}],
+	["parseXML", {
+		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "parse",
+	}],
+	["serializeXML", {
+		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "serialize",
+	}],
 ]);
 
 export default class FixHintsGenerator {
