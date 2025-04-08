@@ -236,38 +236,56 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["disableTouchToMouseHandling", {
 		moduleName: "sap/ui/events/TouchToMouseMapping", exportNameToBeUsed: "disableTouchToMouseHandling",
 	}],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/start", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/add", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/end", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/average", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/clear", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/filterMeasurements", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/getAllMeasurements", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/getMeasurement", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/pause", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/resume", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/getActive", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/setActive", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/remove", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/registerMethod", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/unregisterMethod", "sap/ui/performance/Measurement"],
-	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/555
-	// ["jQuery/sap/measure/unregisterAllMethods", "sap/ui/performance/Measurement"],
+	// https://github.com/SAP/ui5-linter/issues/555
+	["measure.start", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "start",
+	}],
+	["measure.add", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "add",
+	}],
+	["measure.end", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "end",
+	}],
+	["measure.average", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "average",
+	}],
+	["measure.clear", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "clear",
+	}],
+	["measure.filterMeasurements", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "filterMeasurements",
+	}],
+	["measure.getAllMeasurements", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "getAllMeasurements",
+	}],
+	["measure.getMeasurement", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "getMeasurement",
+	}],
+	["measure.pause", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "pause",
+	}],
+	["measure.resume", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "resume",
+	}],
+	["measure.getActive", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "getActive",
+	}],
+	["measure.setActive", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "setActive",
+	}],
+	["measure.remove", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "remove",
+	}],
+	["measure.registerMethod", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "registerMethod",
+	}],
+	["measure.unregisterMethod", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "unregisterMethod",
+	}],
+	["measure.unregisterAllMethods", {
+		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "unregisterAllMethods",
+	}],
+
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
 	// ["jQuery/sap/fesr/setActive", "sap/ui/performance/trace/FESR"],
 	// // TODO: Won't work out of the box. Requires additional changes. Check the example: https://github.com/SAP/ui5-linter/issues/561
