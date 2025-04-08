@@ -103,6 +103,21 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["encodeXML", {
 		moduleName: "sap/base/security/encodeXML",
 	}],
+
+	// https://github.com/SAP/ui5-linter/issues/525
+	["addUrlWhitelist", {
+		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "add",
+	}],
+	["clearUrlWhitelist", {
+		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "clear",
+	}],
+	["getUrlWhitelist", {
+		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "entries",
+	}],
+	["validateUrl", {
+		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "add",
+	}],
+
 	// https://github.com/SAP/ui5-linter/issues/527
 	["camelCase", {
 		moduleName: "sap/base/strings/camelize",
