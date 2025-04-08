@@ -1,0 +1,29 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:table="sap.ui.table"
+	xmlns:tablePlugins="sap.ui.table.plugins"
+	controllerName="com.myapp.controller.Main"
+>
+
+	<!-- ui5lint-disable-next-line no-deprecated-api -->
+	<DateTimeInput id="date-time-input" /> <!-- IGNORE: DateTimeInput is deprecated -->
+
+	<!-- ui5lint-disable -->
+	<Button id="button" blocked="true" /> <!-- IGNORE: Property "blocked" is deprecated -->
+	<!-- ui5lint-enable -->
+
+	<!-- ui5lint-disable-next-line no-deprecated-library -->
+	<Button id="button" blocked="true" /> <!-- REPORT: Property "blocked" is deprecated -->
+
+	<table:Table groupBy="some-column"> <!-- IGNORE: Association "groupBy" is deprecated --> <!-- ui5lint-disable-line -->
+			<table:plugins> <!-- IGNORE: Aggregation "plugins" is deprecated --> <!-- ui5lint-disable-line -->
+					<tablePlugins:MultiSelectionPlugin id="multi-selection-plugin" />
+			</table:plugins>
+	</table:Table>
+
+	<!-- ui5lint-disable -->
+	<SegmentedButton id="segmented-button"> <!-- IGNORE: Default aggregation "buttons" is deprecated -->
+		<Button id="segmented-button-inner" tap=".onButtonTap"/> <!-- IGNORE: Event "tap" is deprecated -->
+	</SegmentedButton>
+
+</mvc:View>

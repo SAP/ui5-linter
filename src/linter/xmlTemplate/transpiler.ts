@@ -1,4 +1,4 @@
-import {SaxEventType, SAXParser, Tag as SaxTag} from "sax-wasm";
+import {SaxEventType, SAXParser, Tag as SaxTag, Text as SaxText} from "sax-wasm";
 import {ReadStream} from "node:fs";
 import fs from "node:fs/promises";
 import {finished} from "node:stream/promises";
@@ -62,14 +62,18 @@ async function transpileXmlToJs(
 	const parser = new Parser(resourcePath, apiExtract, context, controllerByIdInfo);
 
 	// Initialize parser
-	const saxParser = new SAXParser(SaxEventType.OpenTag | SaxEventType.CloseTag);
+	const saxParser = new SAXParser(SaxEventType.OpenTag | SaxEventType.CloseTag | SaxEventType.Comment);
 
-	saxParser.eventHandler = (event, tag) => {
-		if (tag instanceof SaxTag) {
+	saxParser.eventHandler = (event, data) => {
+		if (data instanceof SaxTag) {
 			if (event === SaxEventType.OpenTag) {
-				parser.pushTag(tag.toJSON() as SaxTag);
+				parser.pushTag(data.toJSON() as SaxTag);
 			} else if (event === SaxEventType.CloseTag) {
-				parser.popTag(tag.toJSON() as SaxTag);
+				parser.popTag(data.toJSON() as SaxTag);
+			}
+		} else if (data instanceof SaxText) {
+			if (event === SaxEventType.Comment) {
+				parser.addComment(data.toJSON() as SaxText);
 			}
 		}
 	};

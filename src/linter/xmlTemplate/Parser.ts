@@ -3,7 +3,7 @@ import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
 import JSTokenizer from "./lib/JSTokenizer.js";
-import LinterContext, {PositionInfo} from "../LinterContext.js";
+import LinterContext, {Directive, PositionInfo} from "../LinterContext.js";
 import {TranspileResult} from "../LinterContext.js";
 import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
@@ -11,7 +11,7 @@ import {MESSAGE} from "../messages.js";
 import {ApiExtract} from "../../utils/ApiExtract.js";
 import ControllerByIdInfo from "./ControllerByIdInfo.js";
 import BindingLinter from "../binding/BindingLinter.js";
-import {Tag as SaxTag} from "sax-wasm";
+import {Tag as SaxTag, Text as SaxText} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
 import BindingParser from "../binding/lib/BindingParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
@@ -102,6 +102,7 @@ const SAP_UI_DT_NAMESPACE = "sap.ui.dt";
 const CUSTOM_DATA_NAMESPACE = "http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1";
 const CORE_NAMESPACE = "sap.ui.core";
 const PATTERN_LIBRARY_NAMESPACES = /^([a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)$/;
+const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*/;
 
 const enum DocumentKind {
 	View,
@@ -132,6 +133,7 @@ export default class Parser {
 	#xmlDocumentKind: DocumentKind;
 
 	#context: LinterContext;
+	#directives = new Set<Directive>();
 	#namespaceStack: NamespaceStackEntry[] = [];
 	#nodeStack: NodeDeclaration[] = [];
 
@@ -187,7 +189,33 @@ export default class Parser {
 		this._removeNamespacesForLevel(level);
 	}
 
+	addComment(comment: SaxText) {
+		if (!comment.value) {
+			return;
+		}
+		const match = DIRECTIVE_REGEX.exec(comment.value);
+		if (!match) {
+			return;
+		}
+		const action = match[1] as Directive["action"];
+		const scope = match[2] as Directive["scope"];
+		const ruleNames = match[3]?.split(",").map((rule) => rule.trim()) ?? [];
+
+		const position = toPosition(comment.start);
+		this.#directives.add({
+			action,
+			scope,
+			ruleNames,
+			line: position.line + 1,
+			column: position.column + 1,
+		});
+	}
+
 	generate(): TranspileResult {
+		if (this.#directives.size) {
+			// Add directives to the context
+			this.#context.getMetadata(this.#resourcePath).directives = this.#directives;
+		}
 		const {source, map} = this.#generator.getModuleContent();
 		return {
 			source,

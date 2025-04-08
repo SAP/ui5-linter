@@ -1,8 +1,13 @@
 import ts from "typescript";
-import {LintMetadata} from "../LinterContext.js";
+import {Directive, DirectiveAction, DirectiveScope, LintMetadata} from "../LinterContext.js";
+
+interface PossibleDirective extends Directive {
+	pos: number;
+	length: number;
+}
 
 export function findDirectives(sourceFile: ts.SourceFile, metadata: LintMetadata) {
-	metadata.directives = new Set<Directive>();
+	metadata.directives ??= new Set<Directive>();
 
 	const possibleDirectives = collectPossibleDirectives(sourceFile);
 	if (possibleDirectives.size === 0) {
@@ -14,7 +19,7 @@ export function findDirectives(sourceFile: ts.SourceFile, metadata: LintMetadata
 }
 
 function traverseAndFindDirectives(
-	node: ts.Node, sourceText: string, possibleDirectives: Set<Directive>, confirmedDirectives: Set<Directive>
+	node: ts.Node, sourceText: string, possibleDirectives: Set<PossibleDirective>, confirmedDirectives: Set<Directive>
 ) {
 	findDirectivesAroundNode(node, sourceText, possibleDirectives, confirmedDirectives);
 	node.getChildren().forEach((child) => {
@@ -23,7 +28,7 @@ function traverseAndFindDirectives(
 }
 
 function findDirectivesAroundNode(
-	node: ts.Node, sourceText: string, possibleDirectives: Set<Directive>, confirmedDirectives: Set<Directive>
+	node: ts.Node, sourceText: string, possibleDirectives: Set<PossibleDirective>, confirmedDirectives: Set<Directive>
 ) {
 	/*
 		// This is a comment
@@ -88,27 +93,15 @@ function findDirectivesAroundNode(
 */
 /* eslint-disable max-len */
 const directiveRegex =
-/*  | ----------------------------------------------- Multi-line comments -------------------------------------------- | ------------------------------------------ Single-line comments ------------------------------------| */
+/*  | ----------------------------------------------- Multi-line comments ----------------------------------------------- | ------------------------------------------ Single-line comments ----------------------------------------------------------------- | */
 	/\/\*\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?\*\/|\/\/\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?([ \t]+(?:[\w-]+[ \t]*,[ \t]*)*(?:[ \t]*[\w-]+))?[ \t]*,?[ \t]*(?:--.*)?$/mg;
-/*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                      |Dangling,| Description      |               |CG #4: action |    | CG #5: scope    | CG #6: rules                                       |Dangling,| Description | */
+/*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                      |Dangling,| Description    |               |CG #4: action |    | CG #5: scope    | CG #6: rules                                        |Dangling,| Description | */
 /* eslint-enable max-len */
-
-export type DirectiveAction = "enable" | "disable";
-export type DirectiveScope = "line" | "next-line" | undefined;
-export interface Directive {
-	action: DirectiveAction;
-	scope: DirectiveScope;
-	ruleNames: string[];
-	pos: number;
-	length: number;
-	line: number;
-	column: number;
-}
 
 export function collectPossibleDirectives(sourceFile: ts.SourceFile) {
 	const text = sourceFile.getFullText();
 	let match;
-	const comments = new Set<Directive>();
+	const comments = new Set<PossibleDirective>();
 	while ((match = directiveRegex.exec(text)) !== null) {
 		const action = (match[1] ?? match[4]) as DirectiveAction;
 		const scope = (match[2] ?? match[5]) as DirectiveScope;
