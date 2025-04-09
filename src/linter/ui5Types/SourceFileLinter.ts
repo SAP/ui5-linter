@@ -55,7 +55,10 @@ function isSourceFileOfUi5OrThirdPartyType(sourceFile: ts.SourceFile) {
 }
 
 function isSourceFileOfJquerySapType(sourceFile: ts.SourceFile) {
-	return sourceFile.fileName === "/types/@ui5/linter/types/jquery.sap.d.ts";
+	return [
+		"/types/@ui5/linter/types/jquery.sap.d.ts",
+		"/types/@ui5/linter/types/jquery.sap.mobile.d.ts",
+	].includes(sourceFile.fileName);
 }
 
 export default class SourceFileLinter {

@@ -73,7 +73,7 @@ sap.ui.define([], function () {
 	var isObjectPlainObject = jQuery.isPlainObject({}); // TODO: check if this is a jQuery.sap function. Not fixed yet
 	var parsedJS = jQuery.sap.parseJS("{name: 'me'}");
 	var clone = jQuery.sap.extend(true, {}, { name: "me" });
-	var timestampsnumber = jQuery.sap.now(); // TODO: Not fixed yet
+	var timestampsnumber = jQuery.sap.now();
 	var props = jQuery.sap.properties({ url: sap.ui.require.toUrl(sap.ui.require.toUrl("testdata/test.properties")) });
 	var myUid = jQuery.sap.uid();
 	var v = jQuery.sap.Version("3.6.2");
