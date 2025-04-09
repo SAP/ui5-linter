@@ -15,6 +15,17 @@ export interface FixHints {
 	exportNameToBeUsed?: string;
 
 	/**
+	 * Code to be replaced
+	 * In some cases the replacement is not a module import but could be a native API,
+	 * or a different function with different arguments.
+	 */
+	exportCodeToBeUsed?: string | {
+		name: string;
+		moduleNameIdentifier?: string;
+		args?: string[];
+	};
+
+	/**
 	 * String representation of the property access to be replaced
 	 */
 	propertyAccess?: string;
@@ -166,8 +177,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["extend", {
 		moduleName: "sap/base/util/merge",
 	}],
-	// // TODO: Replace with native window.performance.now()
-	// // ["jQuery.sap.now", ""],
+	["jQuery.sap.now", {
+		exportCodeToBeUsed: "window.performance.now",
+	}],
 	["properties", {
 		moduleName: "sap/base/util/Properties",
 	}],
@@ -390,6 +402,150 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["serializeXML", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "serialize",
 	}],
+
+	["device.is.standalone", {
+		exportCodeToBeUsed: "window.navigator.standalone",
+	}],
+	["support.retina", {
+		exportCodeToBeUsed: "window.devicePixelRatio >= 2",
+	}],
+	["startsWith", {
+		exportCodeToBeUsed: "$1.startsWith($2)",
+	}],
+	["startsWithIgnoreCase", {
+		exportCodeToBeUsed: "$1.toLowerCase().startsWith($2)",
+	}],
+	["endsWith", {
+		exportCodeToBeUsed: "$1.endsWith($2)",
+	}],
+	["endsWithIgnoreCase", {
+		exportCodeToBeUsed: "$1.toLowerCase().endsWith($2)",
+	}],
+	["padLeft", {
+		exportCodeToBeUsed: "$1.padStart($3, $2)",
+	}],
+	["padRight", {
+		exportCodeToBeUsed: "$1.padEnd($3, $2)",
+	}],
+	["delayedCall", {
+		exportCodeToBeUsed: "window.setTimeout($2[$3], $1, ...$4)",
+	}],
+	["clearDelayedCall", {
+		exportCodeToBeUsed: "window.clearTimeout($1)",
+	}],
+	["intervalCall", {
+		exportCodeToBeUsed: "window.setInterval($2[$3], $1, ...$4)",
+	}],
+	["clearIntervalCall", {
+		exportCodeToBeUsed: "window.clearInterval($1)",
+	}],
+	["domById", {
+		exportCodeToBeUsed: "window.document.getElementById($1)",
+	}],
+	["isEqualNode", {
+		exportCodeToBeUsed: "$1.isEqualNode($2)",
+	}],
+	["newObject", {
+		exportCodeToBeUsed: "structuredClone($1)",
+	}],
+	["getter", {
+		exportCodeToBeUsed: "function(value) { return function() { return value; }; }($1)",
+	}],
+	["inArray", {
+		exportCodeToBeUsed: "($2 ?? Array.prototype.indexOf.call($2, $1) : -1)",
+	}],
+	["isArray", {
+		exportCodeToBeUsed: "Array.isArray($1)",
+	}],
+	// https://github.com/SAP/ui5-linter/issues/531
+	["device.is.landscape", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "orientation.landscape",
+	}],
+	["device.is.portrait", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "orientation.portrait",
+	}],
+	["device.is.desktop", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "system.desktop",
+	}],
+	["device.is.phone", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "system.phone",
+	}],
+	["device.is.tablet", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "system.tablet",
+	}],
+	["device.is.android_phone", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.android && $moduleIdentifier.system.tablet",
+	}],
+	["device.is.android_tablet", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.android && $moduleIdentifier.system.tablet",
+	}],
+	["device.is.iphone", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.ios && $moduleIdentifier.system.phone",
+	}],
+	["device.is.ipad", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.ios && $moduleIdentifier.system.ipad",
+	}],
+
+	["os.os", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "os.name",
+	}],
+	["os.fVersion", { // TODO: Check for collisions. Does not work well
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "os.version",
+	}],
+	["os.version", {
+		moduleName: "sap/ui/Device",
+		exportNameToBeUsed: "os.versionStr",
+	}],
+	["os.Android", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"Android\"",
+	}],
+	["os.bb", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"bb\"",
+	}],
+	["os.iOS", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"iOS\"",
+	}],
+	["os.winphone", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"winphone\"",
+	}],
+	["os.win", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"win\"",
+	}],
+	["os.linux", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"linux\"",
+	}],
+	["os.mac", {
+		moduleName: "sap/ui/Device",
+		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"mac\"",
+	}],
+
+
+	// ["getModulePath", {
+	// 	exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+	// }],
+	// ["registerModulePath", {
+	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+	// }],
+	// ["registerResourcePath", {
+	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+	// }],
 ]);
 
 export default class FixHintsGenerator {
@@ -401,14 +557,28 @@ export default class FixHintsGenerator {
 	}
 
 	getJquerySapFixHints(node: ts.AccessExpression, namespace: string | undefined): FixHints | undefined {
-		if (!namespace?.startsWith("jQuery.sap.")) {
+		if (!namespace?.startsWith("jQuery.")) {
 			return undefined;
 		}
+		const jQueryAccess = namespace.substring("jQuery.".length);
 		const jQuerySapAccess = namespace.substring("jQuery.sap.".length);
-		const moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccess);
+		const moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccess) ??
+			jQuerySapModulesReplacements.get(jQueryAccess);
 		if (!moduleReplacement) {
 			return undefined;
 		}
+
+		if (moduleReplacement.exportCodeToBeUsed) {
+			const exportCodeToBeUsed = {name: moduleReplacement.exportCodeToBeUsed} as FixHints["exportCodeToBeUsed"];
+			if (node.parent?.parent &&
+				ts.isCallExpression(node.parent.parent) &&
+				typeof exportCodeToBeUsed === "object") {
+				exportCodeToBeUsed.args = node.parent.parent.arguments.map((arg) => arg.getText());
+			}
+
+			moduleReplacement.exportCodeToBeUsed = exportCodeToBeUsed;
+		}
+
 		return moduleReplacement;
 	}
 

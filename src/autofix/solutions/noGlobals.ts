@@ -1,13 +1,14 @@
 import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
-import type {
-	ChangeSet,
-	ExistingModuleDeclarationInfo,
-	GlobalPropertyAccessNodeInfo,
-	ModuleDeclarationInfo,
-	NewModuleDeclarationInfo,
-	Position,
+import {
+	ChangeAction,
+	type ChangeSet,
+	type ExistingModuleDeclarationInfo,
+	type GlobalPropertyAccessNodeInfo,
+	type ModuleDeclarationInfo,
+	type NewModuleDeclarationInfo,
+	type Position,
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
@@ -27,7 +28,7 @@ export default function generateSolutionNoGlobals(
 		if (!msg.position) {
 			throw new Error(`Unable to produce solution for message without position`);
 		}
-		if (!msg.fixHints?.moduleName) {
+		if (!msg.fixHints?.moduleName && !msg.fixHints?.exportCodeToBeUsed) {
 			// Skip global access without module name
 			continue;
 		}
@@ -37,8 +38,9 @@ export default function generateSolutionNoGlobals(
 		const pos = sourceFile.getPositionOfLineAndCharacter(line, column);
 
 		affectedNodesInfo.add({
-			moduleName: msg.fixHints.moduleName,
+			moduleName: msg.fixHints.moduleName ?? "",
 			exportNameToBeUsed: msg.fixHints.exportNameToBeUsed,
+			exportCodeToBeUsed: msg.fixHints.exportCodeToBeUsed,
 			propertyAccess: msg.fixHints.propertyAccess,
 			position: {
 				line,
@@ -138,12 +140,14 @@ export default function generateSolutionNoGlobals(
 			// throw new Error(`TODO: Implement handling for global access without module declaration`);
 		}
 
-		if (moduleDeclarationInfo && !moduleDeclarationInfo.importRequests.has(moduleName)) {
-			moduleDeclarationInfo.importRequests.set(moduleName, {
-				nodeInfos: [],
-			});
+		if (moduleName) {
+			if (moduleDeclarationInfo && !moduleDeclarationInfo.importRequests.has(moduleName)) {
+				moduleDeclarationInfo.importRequests.set(moduleName, {
+					nodeInfos: [],
+				});
+			}
+			moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
 		}
-		moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
 	}
 
 	return moduleDeclarations;

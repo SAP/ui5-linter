@@ -9,6 +9,7 @@ import {addDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
+import {type FixHints} from "../linter/ui5Types/FixHintsGenerator.js";
 
 const log = getLogger("linter:autofix");
 
@@ -64,6 +65,7 @@ export interface Position {
 export interface GlobalPropertyAccessNodeInfo {
 	moduleName: string;
 	exportNameToBeUsed?: string;
+	exportCodeToBeUsed?: FixHints["exportCodeToBeUsed"];
 	propertyAccess?: string;
 	position: Position;
 	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
@@ -271,6 +273,29 @@ function applyFixes(
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+
+		for (const [, {nodeInfos}] of moduleDeclarationInfo.importRequests) {
+			nodeInfos.forEach((nodeInfo) => {
+				if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
+					return;
+				}
+				const {node, exportCodeToBeUsed} = nodeInfo;
+
+				const value = typeof exportCodeToBeUsed === "string" ?
+					exportCodeToBeUsed :
+					exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
+						return acc?.replace(`$${index + 1}`, arg);
+					}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
+
+				const callNode = node;
+				changeSet.push({
+					action: ChangeAction.REPLACE,
+					start: callNode.getStart(),
+					end: callNode.getEnd(),
+					value,
+				});
+			});
+		}
 	}
 
 	if (changeSet.length === 0) {
