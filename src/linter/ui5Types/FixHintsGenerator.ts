@@ -177,7 +177,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["extend", {
 		moduleName: "sap/base/util/merge",
 	}],
-	["jQuery.sap.now", {
+	["now", { // TODO: Check: not working
 		exportCodeToBeUsed: "window.performance.now",
 	}],
 	["properties", {
