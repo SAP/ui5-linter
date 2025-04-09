@@ -71,10 +71,8 @@ async function transpileXmlToJs(
 			} else if (event === SaxEventType.CloseTag) {
 				parser.popTag(data.toJSON() as SaxTag);
 			}
-		} else if (data instanceof SaxText) {
-			if (event === SaxEventType.Comment) {
-				parser.addComment(data.toJSON() as SaxText);
-			}
+		} else if (data instanceof SaxText && event === SaxEventType.Comment) {
+			parser.parseComment(data.toJSON() as SaxText);
 		}
 	};
 

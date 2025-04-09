@@ -13,8 +13,13 @@ export default async function transpileHtml(
 	try {
 		const taskEnd = taskStart("Transpile HTML", resourcePath, true);
 		const report = new HtmlReporter(resourcePath, context);
-		const {scriptTags, stylesheetLinkTags} = await extractHTMLTags(contentStream);
+		const {extractedTags, directives} = await extractHTMLTags(contentStream);
 
+		if (directives.size) {
+			context.getMetadata(resourcePath).directives = directives;
+		}
+
+		const {scriptTags, stylesheetLinkTags} = extractedTags;
 		const bootstrapTag = findBootstrapTag(scriptTags);
 
 		if (bootstrapTag) {

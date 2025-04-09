@@ -14,6 +14,7 @@ import BindingLinter from "../binding/BindingLinter.js";
 import {Tag as SaxTag, Text as SaxText} from "sax-wasm";
 import EventHandlerResolver from "./lib/EventHandlerResolver.js";
 import BindingParser from "../binding/lib/BindingParser.js";
+import {extractDirective} from "../../utils/xmlParser.js";
 const log = getLogger("linter:xmlTemplate:Parser");
 
 export type Namespace = string;
@@ -102,7 +103,6 @@ const SAP_UI_DT_NAMESPACE = "sap.ui.dt";
 const CUSTOM_DATA_NAMESPACE = "http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1";
 const CORE_NAMESPACE = "sap.ui.core";
 const PATTERN_LIBRARY_NAMESPACES = /^([a-zA-Z_$][a-zA-Z0-9_$]*(\.[a-zA-Z_$][a-zA-Z0-9_$]*)*)$/;
-const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*/;
 
 const enum DocumentKind {
 	View,
@@ -189,26 +189,11 @@ export default class Parser {
 		this._removeNamespacesForLevel(level);
 	}
 
-	addComment(comment: SaxText) {
-		if (!comment.value) {
-			return;
+	parseComment(comment: SaxText) {
+		const directive = extractDirective(comment);
+		if (directive) {
+			this.#directives.add(directive);
 		}
-		const match = DIRECTIVE_REGEX.exec(comment.value);
-		if (!match) {
-			return;
-		}
-		const action = match[1] as Directive["action"];
-		const scope = match[2] as Directive["scope"];
-		const ruleNames = match[3]?.split(",").map((rule) => rule.trim()) ?? [];
-
-		const position = toPosition(comment.start);
-		this.#directives.add({
-			action,
-			scope,
-			ruleNames,
-			line: position.line + 1,
-			column: position.column + 1,
-		});
 	}
 
 	generate(): TranspileResult {

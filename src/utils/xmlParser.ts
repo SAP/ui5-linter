@@ -3,6 +3,7 @@ import {Detail, Reader, SaxEventType, SAXParser, Tag, Text} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
+import {Directive} from "../linter/LinterContext.js";
 const require = createRequire(import.meta.url);
 
 export function isSaxParserToJSON(tag: unknown): tag is Tag {
@@ -23,6 +24,28 @@ export function isSaxText(tag: unknown): tag is Text {
 		Object.prototype.hasOwnProperty.call(tag, "value");
 }
 
+const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*/;
+export function extractDirective(comment: Text): Directive | undefined {
+	if (!comment.value) {
+		return;
+	}
+	const match = DIRECTIVE_REGEX.exec(comment.value);
+	if (!match) {
+		return;
+	}
+	const action = match[1] as Directive["action"];
+	const scope = match[2] as Directive["scope"];
+	const ruleNames = match[3]?.split(",").map((rule) => rule.trim()) ?? [];
+
+	return {
+		action,
+		scope,
+		ruleNames,
+		line: comment.start.line + 1,
+		column: comment.start.character + 1,
+	};
+}
+
 let saxWasmBuffer: Buffer;
 async function initSaxWasm() {
 	if (!saxWasmBuffer) {
@@ -36,7 +59,7 @@ async function initSaxWasm() {
 export async function parseXML(
 	contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Reader<Detail>) => void) {
 	const saxWasmBuffer = await initSaxWasm();
-	const saxParser = new SAXParser(SaxEventType.CloseTag + SaxEventType.OpenTag);
+	const saxParser = new SAXParser(SaxEventType.CloseTag | SaxEventType.OpenTag | SaxEventType.Comment);
 
 	saxParser.eventHandler = parseHandler;
 
