@@ -331,6 +331,8 @@ UI5 linter supports directives similar to ESLint's configuration comments, allow
 
 ### Specifying Rules
 
+**JavaScript / TypeScript**
+
 You can disable specific rules by listing them after the directive. Rules must be separated by commas if several are given:
 
 * `/* ui5lint-disable no-deprecated-api */`
@@ -341,9 +343,23 @@ An explanation why a rule is disabled can be added after the rule name; it must 
 
 * `// ui5lint-disable-next-line no-deprecated-api -- explanation`
 
+**XML / HTML**
+
+* `<!-- ui5lint-disable no-deprecated-api -->`
+* `<!-- ui5lint-disable-next-line -->`
+
+Note that in XML and HTML files, depending on your browser runtime, the use of double-hyphen `--` is usually not allowed, making it impossible to add explanations as part of the directive. Please use separate comment blocks for this purpose.
+
+Also, since comments can't be placed inside XML and HTML tags, you might need to use `ui5lint-disable` and `ui5lint-enable` directives outside of the tags instead of `ui5lint-disable-line` or `ui5lint-disable-next-line`.
+
+**YAML**
+
+* `# ui5lint-disable no-deprecated-api`
+* `# ui5lint-disable-next-line`
+
 ### Scope
 
-Directives are currently supported in JavaScript and TypeScript files only; they are **not** supported in XML, YAML, HTML, or any other type of file.
+Directives are currently supported in JavaScript and TypeScript files as well as XML, HTML and YAML files.
 
 ## Node.js API
 

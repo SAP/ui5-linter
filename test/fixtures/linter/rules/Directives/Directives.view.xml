@@ -8,14 +8,18 @@
 	<!-- ui5lint-disable-next-line no-deprecated-api -->
 	<DateTimeInput id="date-time-input" /> <!-- IGNORE: DateTimeInput is deprecated -->
 
-	<!-- ui5lint-disable -->
+	<!--
+		ui5lint-disable
+		-- Actually the use of double-hyphen in comments like this is not recommended in XML and HTML
+	-->
 	<Button id="button" blocked="true" /> <!-- IGNORE: Property "blocked" is deprecated -->
-	<!-- ui5lint-enable -->
+	<!---ui5lint-enable----->
 
 	<!-- ui5lint-disable-next-line no-deprecated-library -->
 	<Button id="button" blocked="true" /> <!-- REPORT: Property "blocked" is deprecated -->
 
-	<table:Table groupBy="some-column"> <!-- IGNORE: Association "groupBy" is deprecated --> <!-- ui5lint-disable-line -->
+	<table:Table groupBy="some-column"> <!-- IGNORE: Association "groupBy" is deprecated --> <!-- ui5lint-disable-line
+	-->
 			<table:plugins> <!-- IGNORE: Aggregation "plugins" is deprecated --> <!-- ui5lint-disable-line -->
 					<tablePlugins:MultiSelectionPlugin id="multi-selection-plugin" />
 			</table:plugins>

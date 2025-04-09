@@ -24,8 +24,11 @@ export function isSaxText(tag: unknown): tag is Text {
 		Object.prototype.hasOwnProperty.call(tag, "value");
 }
 
-// This regex is derived from the multi-line variant defined in ui5types/directives.ts
-const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*/;
+/* The following regex is derived from the multi-line variant defined in ui5types/directives.ts
+	Note that this regex allows for double-hyphen comments, even though they are "not recommended" in XML and HTML as
+	per the spec and might not be allowed in some parsers: https://www.w3.org/TR/REC-xml/#sec-comments
+*/
+const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?$/;
 export function extractDirective(comment: Text): Directive | undefined {
 	if (!comment.value) {
 		return;

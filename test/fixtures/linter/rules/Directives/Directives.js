@@ -13,7 +13,7 @@ sap.ui.define([
 		tap: () => console.log("Tapped") // IGNORE: Event "tap" is deprecated
 	});
 
-	/* ui5lint-disable */
+	/* ui5lint-disable -- This is a comment */
 	btn.attachTap(function() { // IGNORE: Method "attachTap" is deprecated
 		console.log("Tapped");
 	});

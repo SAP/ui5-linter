@@ -6,7 +6,7 @@ framework:
   name: OpenUI5
   version: "1.130.0"
   libraries:
-    # ui5lint-disable-next-line
+    # ui5lint-disable-next-line -- This is a comment
     - name: sap.ui.commons
     - name: sap.ui.core
     - name: themelib_sap_horizon
