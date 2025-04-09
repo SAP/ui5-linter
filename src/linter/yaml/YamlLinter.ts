@@ -1,4 +1,4 @@
-import LinterContext from "../LinterContext.js";
+import LinterContext, {DirectiveAction, DirectiveScope} from "../LinterContext.js";
 import {deprecatedLibraries, deprecatedThemeLibraries} from "../../utils/deprecations.js";
 import {DataWithPosition, fromYaml, getPosition} from "data-with-position";
 import {MESSAGE} from "../messages.js";
@@ -20,6 +20,8 @@ interface YamlWithPosInfo extends DataWithPosition {
 		};
 	};
 }
+// This regex is derived from the single-line variant defined in ui5types/directives.ts
+const DIRECTIVE_REGEX = /#\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?([ \t]+(?:[\w-]+[ \t]*,[ \t]*)*(?:[ \t]*[\w-]+))?[ \t]*,?[ \t]*(?:--.*)?$/mg;
 
 export default class YamlLinter {
 	#content;
@@ -45,6 +47,8 @@ export default class YamlLinter {
 				const parsedYamlWithPosInfo: YamlWithPosInfo = this.#parseYaml(document);
 				// Analyze part content with line number offset
 				this.#analyzeYaml(parsedYamlWithPosInfo, lineNumberOffset);
+				this.#collectDirectives(document, lineNumberOffset);
+
 				// Update line number offset for next part
 				lineNumberOffset += document.split(/\r\n|\r|\n/g).length;
 			});
@@ -78,5 +82,30 @@ export default class YamlLinter {
 				);
 			}
 		});
+	}
+
+	#collectDirectives(content: string, offset: number) {
+		const matches = content.matchAll(DIRECTIVE_REGEX);
+		for (const match of matches) {
+			const action = (match[1] ?? match[4]) as DirectiveAction;
+			const scope = (match[2] ?? match[5]) as DirectiveScope;
+			const rules = match[3] ?? match[6];
+
+			let ruleNames = rules?.split(",") ?? [];
+			ruleNames = ruleNames.map((rule) => rule.trim());
+
+			// Determine line and column of match
+			const left = content.slice(0, match.index);
+			const line = (left.match(/\n/g) ?? []).length + 1 + offset;
+			const lastIndexOf = left.lastIndexOf("\n") + 1;
+			const column = match.index - lastIndexOf + 1;
+
+			this.#context.addDirective(this.#resourcePath, {
+				action,
+				scope, ruleNames,
+				line,
+				column,
+			});
+		}
 	}
 }

@@ -92,7 +92,7 @@ function findDirectivesAroundNode(
 	it would be impossible to know whether the code in the second line is part of the directive's description or not.
 */
 /* eslint-disable max-len */
-const directiveRegex =
+const DIRECTIVE_REGEX =
 /*  | ----------------------------------------------- Multi-line comments ----------------------------------------------- | ------------------------------------------ Single-line comments ----------------------------------------------------------------- | */
 	/\/\*\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*(?:--[\s\S]*?)?\*\/|\/\/\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?([ \t]+(?:[\w-]+[ \t]*,[ \t]*)*(?:[ \t]*[\w-]+))?[ \t]*,?[ \t]*(?:--.*)?$/mg;
 /*                  |CG #1: action |    | CG #2: scope    |  CG #3: rules                      |Dangling,| Description    |               |CG #4: action |    | CG #5: scope    | CG #6: rules                                        |Dangling,| Description | */
@@ -100,9 +100,9 @@ const directiveRegex =
 
 export function collectPossibleDirectives(sourceFile: ts.SourceFile) {
 	const text = sourceFile.getFullText();
-	let match;
 	const comments = new Set<PossibleDirective>();
-	while ((match = directiveRegex.exec(text)) !== null) {
+	const matches = text.matchAll(DIRECTIVE_REGEX);
+	for (const match of matches) {
 		const action = (match[1] ?? match[4]) as DirectiveAction;
 		const scope = (match[2] ?? match[5]) as DirectiveScope;
 		const rules = match[3] ?? match[6];

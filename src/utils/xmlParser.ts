@@ -24,6 +24,7 @@ export function isSaxText(tag: unknown): tag is Text {
 		Object.prototype.hasOwnProperty.call(tag, "value");
 }
 
+// This regex is derived from the multi-line variant defined in ui5types/directives.ts
 const DIRECTIVE_REGEX = /\s*ui5lint-(enable|disable)(?:-((?:next-)?line))?(\s+(?:[\w-]+\s*,\s*)*(?:\s*[\w-]+))?\s*,?\s*/;
 export function extractDirective(comment: Text): Directive | undefined {
 	if (!comment.value) {

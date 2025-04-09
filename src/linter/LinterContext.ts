@@ -225,6 +225,14 @@ export default class LinterContext {
 		this.getCoverageInfo(resourcePath).push(coverageInfo);
 	}
 
+	addDirective(resourcePath: ResourcePath, directive: Directive) {
+		const metadata = this.getMetadata(resourcePath);
+		if (!metadata.directives) {
+			metadata.directives = new Set<Directive>();
+		}
+		metadata.directives.add(directive);
+	}
+
 	#getMessageFromRawMessage<M extends MESSAGE>(rawMessage: RawLintMessage<M>): LintMessage {
 		const messageInfo = MESSAGE_INFO[rawMessage.id];
 		if (!messageInfo) {
