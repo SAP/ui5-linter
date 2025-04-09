@@ -536,7 +536,6 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"mac\"",
 	}],
 
-
 	// ["getModulePath", {
 	// 	exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
 	// }],

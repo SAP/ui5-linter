@@ -2,7 +2,6 @@ import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
 import {
-	ChangeAction,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
 	type GlobalPropertyAccessNodeInfo,

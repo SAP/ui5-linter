@@ -290,8 +290,8 @@ function applyFixes(
 				const callNode = node;
 				changeSet.push({
 					action: ChangeAction.REPLACE,
-					start: callNode.getStart(),
-					end: callNode.getEnd(),
+					start: callNode?.getStart() ?? 0,
+					end: callNode?.getEnd() ?? 0,
 					value,
 				});
 			});
