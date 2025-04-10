@@ -8,7 +8,7 @@ import {
 
 export default function generateSolutionCodeReplacer(
 	importRequests: ImportRequests, messages: RawLintMessage[], changeSet: ChangeSet[], sourceFile: ts.SourceFile) {
-	for (const {fixHints, position} of messages) {
+	for (const {fixHints, position, args} of messages) {
 		if (!fixHints || !("exportCodeToBeUsed" in fixHints) ||
 			!fixHints.exportCodeToBeUsed || !(typeof fixHints.exportCodeToBeUsed === "object") ||
 			!position) {
@@ -23,7 +23,7 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		const value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(`$${index + 1}`, arg);
+			return acc?.replace(`$${index + 1}`, patchArguments(arg, args.apiName));
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 
 		// Calculate the replacement position
@@ -40,5 +40,21 @@ export default function generateSolutionCodeReplacer(
 			end,
 			value,
 		});
+	}
+}
+
+function patchArguments(arg: string, apiName?: string) {
+	if (!["jQuery.sap.registerResourcePath", "jQuery.sap.registerModulePath"].includes(apiName ?? "")) {
+		return arg;
+	}
+
+	// jQuery.sap.registerResourcePath has a special case where the
+	// argument can be a string or an object
+	if (arg.startsWith("{") && arg.endsWith("}")) {
+		const matcher = /(?:['"]?\b(?:path|url)\b['"]?\s*:\s*)(['"][^'"]+['"])/;
+		const match = matcher.exec(arg);
+		return match?.[1] ?? arg;
+	} else {
+		return arg;
 	}
 }
