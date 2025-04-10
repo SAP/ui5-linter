@@ -10,6 +10,7 @@ import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.j
 import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
 import {type FixHints} from "../linter/ui5Types/FixHintsGenerator.js";
+import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
 
 const log = getLogger("linter:autofix");
 
@@ -272,30 +273,11 @@ function applyFixes(
 	const identifiers = collectIdentifiers(sourceFile);
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
+		// Resolve dependencies for the module declaration
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
-
-		for (const [, {nodeInfos}] of moduleDeclarationInfo.importRequests) {
-			nodeInfos.forEach((nodeInfo) => {
-				if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
-					return;
-				}
-				const {node, exportCodeToBeUsed} = nodeInfo;
-
-				const value = typeof exportCodeToBeUsed === "string" ?
-					exportCodeToBeUsed :
-					exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-						return acc?.replace(`$${index + 1}`, arg);
-					}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
-
-				const callNode = node;
-				changeSet.push({
-					action: ChangeAction.REPLACE,
-					start: callNode?.getStart() ?? 0,
-					end: callNode?.getEnd() ?? 0,
-					value,
-				});
-			});
-		}
+		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
+		// based on arguments' context
+		generateSolutionCodeReplacer(moduleDeclarationInfo.importRequests, changeSet);
 	}
 
 	if (changeSet.length === 0) {
