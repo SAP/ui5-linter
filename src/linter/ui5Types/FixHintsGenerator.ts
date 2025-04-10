@@ -546,10 +546,10 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	// https://github.com/SAP/ui5-linter/issues/588
 	["registerModulePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
 	}],
 	["registerResourcePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
 	}],
 ]);
 
