@@ -35,22 +35,6 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var indexOfEntity = jQuery.inArray("b", myData);
 	var isValueAnArray = jQuery.isArray(myData);
 	
-	// https://github.com/SAP/ui5-linter/issues/589
-	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", "js"); // resolves to "resources/sap/m/Button.js"
-	var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"); // resolves to  "resources/sap/m/Button/"
-	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
-
-	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
-	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
-	
-	// https://github.com/SAP/ui5-linter/issues/588
-	// TODO: Replacement depends on the arguments context
-	// jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
-	// jQuery.sap.registerModulePath("ui5.project.moduleB", { path: "/ui5/project/moduleB"});
-
-	// jQuery.sap.registerResourcePath("me/fancy/A", "ui5/projectA/");
-	// jQuery.sap.registerResourcePath("me/fancy/B", { url: "ui5/projectB/"});
-	
 	// https://github.com/SAP/ui5-linter/issues/530
 	// TODO: Replacement depends on the arguments context
 	// var currentParams = jQuery.sap.getUriParameters();
