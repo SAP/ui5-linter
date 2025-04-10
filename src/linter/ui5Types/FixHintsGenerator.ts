@@ -575,15 +575,22 @@ export default class FixHintsGenerator {
 
 		let exportCodeToBeUsed;
 		if (moduleReplacement.exportCodeToBeUsed) {
+			let current = node;
+			let callExpression;
+			while (current && ts.isPropertyAccessExpression(current.parent)) {
+				current = current.parent;
+			}
+			if (ts.isCallExpression(current.parent)) {
+				callExpression = current.parent;
+			}
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
-				solutionLength: (node.getEnd() - node.getStart()),
+				solutionLength: (current.getEnd() - current.getStart()),
 			} as FixHints["exportCodeToBeUsed"];
-			if (node.parent?.parent &&
-				ts.isCallExpression(node.parent.parent) &&
+			if (callExpression &&
 				typeof exportCodeToBeUsed === "object") {
-				exportCodeToBeUsed.args = node.parent.parent.arguments.map((arg) => arg.getText());
-				exportCodeToBeUsed.solutionLength = (node.parent.parent.getEnd() - node.parent.parent.getStart());
+				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => arg.getText());
+				exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
 			}
 		}
 
