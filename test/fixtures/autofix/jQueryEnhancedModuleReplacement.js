@@ -1,28 +1,28 @@
 sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
-	// // https://github.com/SAP/ui5-linter/issues/531
-	// var isLandscape = jQuery.device.is.landscape;
-	// var isPortait = jQuery.device.is.portrait;
-	// var isDesktop = jQuery.device.is.desktop;
-	// var isPhone = jQuery.device.is.phone;
-	// var isTablet = jQuery.device.is.tablet;
-	// var isAndroidPhone = jQuery.device.is.android_phone;
-	// var isAndroidTablet = jQuery.device.is.android_tablet;
-	// var isIPhone = jQuery.device.is.iphone;
-	// var isIPad = jQuery.device.is.ipad;
+	// https://github.com/SAP/ui5-linter/issues/531
+	var isLandscape = jQuery.device.is.landscape;
+	var isPortait = jQuery.device.is.portrait;
+	var isDesktop = jQuery.device.is.desktop;
+	var isPhone = jQuery.device.is.phone;
+	var isTablet = jQuery.device.is.tablet;
+	var isAndroidPhone = jQuery.device.is.android_phone;
+	var isAndroidTablet = jQuery.device.is.android_tablet;
+	var isIPhone = jQuery.device.is.iphone;
+	var isIPad = jQuery.device.is.ipad;
 
-	// // https://github.com/SAP/ui5-linter/issues/532
-	// var osName = jQuery.os.os;
-	// var osVersion = jQuery.os.fVersion;
-	// var osVersionString = jQuery.os.version;
-	// var isAndroid = jQuery.os.Android;
-	// var isBlueBerry = jQuery.os.bb;
-	// var isIOS = jQuery.os.iOS;
-	// var isWinPhone = jQuery.os.winphone;
-	// var isWin = jQuery.os.win;
-	// var isLinux = jQuery.os.linux;
-	// var isMac = jQuery.os.mac;
+	// https://github.com/SAP/ui5-linter/issues/532
+	var osName = jQuery.os.os;
+	var osVersion = jQuery.os.fVersion;
+	var osVersionString = jQuery.os.version;
+	var isAndroid = jQuery.os.Android;
+	var isBlueBerry = jQuery.os.bb;
+	var isIOS = jQuery.os.iOS;
+	var isWinPhone = jQuery.os.winphone;
+	var isWin = jQuery.os.win;
+	var isLinux = jQuery.os.linux;
+	var isMac = jQuery.os.mac;
 
-	// var myFancyControl = jQuery(".fancyContainer").control();
+	var myFancyControl = jQuery(".fancyContainer").control();
 
 	// https://github.com/SAP/ui5-linter/issues/588
 	jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
@@ -32,9 +32,9 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.registerResourcePath("me/fancy/B", { url: 'ui5/projectB/' });
 
 	// https://github.com/SAP/ui5-linter/issues/589
-	// var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", "js"); // resolves to "resources/sap/m/Button.js"
-	// var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"); // resolves to  "resources/sap/m/Button/"
-	// var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
-	// var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
-	// var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
+	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", "js"); // resolves to "resources/sap/m/Button.js"
+	var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"); // resolves to  "resources/sap/m/Button/"
+	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
+	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
+	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
 });
