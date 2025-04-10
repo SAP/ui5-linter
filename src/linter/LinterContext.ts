@@ -3,7 +3,6 @@ import {createReader} from "@ui5/fs/resourceFactory";
 import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
-import {Directive} from "./ui5Types/directives.js";
 import ts from "typescript";
 
 export type FilePattern = string; // glob patterns
@@ -98,6 +97,16 @@ export interface PositionInfo {
 export interface PositionRange {
 	start: PositionInfo;
 	end?: PositionInfo;
+}
+
+export type DirectiveAction = "enable" | "disable";
+export type DirectiveScope = "line" | "next-line" | undefined;
+export interface Directive {
+	action: DirectiveAction;
+	scope: DirectiveScope;
+	ruleNames: string[];
+	line: number;
+	column: number;
 }
 
 export interface LintMetadata {
@@ -214,6 +223,14 @@ export default class LinterContext {
 
 	addCoverageInfo(resourcePath: ResourcePath, coverageInfo: CoverageInfo) {
 		this.getCoverageInfo(resourcePath).push(coverageInfo);
+	}
+
+	addDirective(resourcePath: ResourcePath, directive: Directive) {
+		const metadata = this.getMetadata(resourcePath);
+		if (!metadata.directives) {
+			metadata.directives = new Set<Directive>();
+		}
+		metadata.directives.add(directive);
 	}
 
 	#getMessageFromRawMessage<M extends MESSAGE>(rawMessage: RawLintMessage<M>): LintMessage {

@@ -1,0 +1,13 @@
+specVersion: '4.0'
+metadata:
+  name: openui5-sample-app
+type: application
+framework:
+  name: OpenUI5
+  version: "1.130.0"
+  libraries:
+    # ui5lint-disable-next-line -- This is a comment
+    - name: sap.ui.commons
+    - name: sap.ui.core
+    - name: themelib_sap_horizon
+    - name: themelib_sap_belize # ui5lint-disable-line
