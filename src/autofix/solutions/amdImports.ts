@@ -318,18 +318,15 @@ function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]
 			if ("exportNameToBeUsed" in nodeInfo && nodeInfo.exportNameToBeUsed) {
 				nodeReplacement += `.${nodeInfo.exportNameToBeUsed}`;
 			}
-			if ("exportCodeToBeUsed" in nodeInfo &&
-				typeof nodeInfo.exportCodeToBeUsed === "object") {
-				nodeInfo.exportCodeToBeUsed.name =
-					nodeInfo.exportCodeToBeUsed.name.replaceAll("$moduleIdentifier", identifier);
-			}
 
-			changeSet.push({
-				action: ChangeAction.REPLACE,
-				start: nodeStart,
-				end: nodeEnd,
-				value: nodeReplacement,
-			});
+			if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
+				changeSet.push({
+					action: ChangeAction.REPLACE,
+					start: nodeStart,
+					end: nodeEnd,
+					value: nodeReplacement,
+				});
+			}
 		}
 	}
 }

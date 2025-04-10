@@ -21,6 +21,7 @@ export interface FixHints {
 	 */
 	exportCodeToBeUsed?: string | {
 		name: string;
+		solutionLength: number;
 		moduleNameIdentifier?: string;
 		args?: string[];
 	};
@@ -536,15 +537,20 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"mac\"",
 	}],
 
-	// ["getModulePath", {
-	// 	exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
-	// }],
-	// ["registerModulePath", {
-	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
-	// }],
-	// ["registerResourcePath", {
-	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
-	// }],
+	// https://github.com/SAP/ui5-linter/issues/589
+	["getModulePath", {
+		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+	}],
+	["getResourcePath", {
+		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+	}],
+	// https://github.com/SAP/ui5-linter/issues/588
+	["registerModulePath", {
+		exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+	}],
+	["registerResourcePath", {
+		exportCodeToBeUsed: "sap.ui.loader.config({paths:{$1: $2}})",
+	}],
 ]);
 
 export default class FixHintsGenerator {
@@ -567,18 +573,21 @@ export default class FixHintsGenerator {
 			return undefined;
 		}
 
+		let exportCodeToBeUsed;
 		if (moduleReplacement.exportCodeToBeUsed) {
-			const exportCodeToBeUsed = {name: moduleReplacement.exportCodeToBeUsed} as FixHints["exportCodeToBeUsed"];
+			exportCodeToBeUsed = {
+				name: moduleReplacement.exportCodeToBeUsed,
+				solutionLength: (node.getEnd() - node.getStart()),
+			} as FixHints["exportCodeToBeUsed"];
 			if (node.parent?.parent &&
 				ts.isCallExpression(node.parent.parent) &&
 				typeof exportCodeToBeUsed === "object") {
 				exportCodeToBeUsed.args = node.parent.parent.arguments.map((arg) => arg.getText());
+				exportCodeToBeUsed.solutionLength = (node.parent.parent.getEnd() - node.parent.parent.getStart());
 			}
-
-			moduleReplacement.exportCodeToBeUsed = exportCodeToBeUsed;
 		}
 
-		return moduleReplacement;
+		return {...moduleReplacement, exportCodeToBeUsed} as FixHints;
 	}
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
