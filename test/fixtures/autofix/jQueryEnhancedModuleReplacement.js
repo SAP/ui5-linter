@@ -1,4 +1,5 @@
 sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
+	// https://github.com/SAP/ui5-linter/issues/531
 	var isLandscape = jQuery.device.is.landscape;
 	var isPortait = jQuery.device.is.portrait;
 	var isDesktop = jQuery.device.is.desktop;
@@ -9,6 +10,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var isIPhone = jQuery.device.is.iphone;
 	var isIPad = jQuery.device.is.ipad;
 
+	// https://github.com/SAP/ui5-linter/issues/532
 	var osName = jQuery.os.os;
 	var osVersion = jQuery.os.fVersion;
 	var osVersionString = jQuery.os.version;
@@ -21,8 +23,6 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var isMac = jQuery.os.mac;
 
 	var myFancyControl = jQuery(".fancyContainer").control();
-
-	var isBundle = jQuery.sap.resources.isBundle({});
 
 	// https://github.com/SAP/ui5-linter/issues/588
 	jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
