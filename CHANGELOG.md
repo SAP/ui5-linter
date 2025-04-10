@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.13.0](https://github.com/SAP/ui5-linter/compare/v1.12.0...v1.13.0) (2025-04-10)
+
+
+### Features
+
+* **directives:** Add ui5lint-disable directives for XML, YAML and HTML ([#623](https://github.com/SAP/ui5-linter/issues/623)) ([fd20d12](https://github.com/SAP/ui5-linter/commit/fd20d1239874ac49928473e0134fffa35880e237))
+
+
+### Performance Improvements
+
+* Improve lazy loading of TypeScript definitions ([492cbf8](https://github.com/SAP/ui5-linter/commit/492cbf834732878bfba45ab98fe9094fe74b29ba))
+
 ## [1.12.0](https://github.com/SAP/ui5-linter/compare/v1.11.0...v1.12.0) (2025-03-18)
 
 
