@@ -263,10 +263,10 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/events/jquery/EventSimulation", exportNameToBeUsed: "touchEventMode",
 	}],
 	["keycodes", {
-		moduleName: "sap/ui/events/KeyCodes",
+		moduleName: "sap/ui/events/KeyCodes", exportCodeToBeUsed: "$moduleIdentifier",
 	}],
 	["PseudoEvents", {
-		moduleName: "sap/ui/events/PseudoEvents",
+		moduleName: "sap/ui/events/PseudoEvents", exportCodeToBeUsed: "$moduleIdentifier",
 	}],
 	["disableTouchToMouseHandling", {
 		moduleName: "sap/ui/events/TouchToMouseMapping", exportNameToBeUsed: "disableTouchToMouseHandling",
@@ -397,10 +397,9 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["setMobileWebAppCapable", {
 		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setWebAppCapable",
 	}],
-	// TODO: Check how to append "new"
-	// ["storage", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "traceFlags",
-	// }],
+	["storage", {
+		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new Storage($1, $2)",
+	}],
 	["getParseError", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "getParseError",
 	}],
@@ -576,10 +575,17 @@ export default class FixHintsGenerator {
 		if (!namespace?.startsWith("jQuery.")) {
 			return undefined;
 		}
-		const jQueryAccess = namespace.substring("jQuery.".length);
-		const jQuerySapAccess = namespace.substring("jQuery.sap.".length);
-		const moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccess) ??
-			jQuerySapModulesReplacements.get(jQueryAccess);
+
+		let moduleReplacement;
+		const jQueryAccessChunks = namespace.substring("jQuery.".length).split(".");
+		const jQuerySapAccessChunks = namespace.substring("jQuery.sap.".length).split(".");
+		while (!moduleReplacement && (jQuerySapAccessChunks.length || jQueryAccessChunks.length)) {
+			moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccessChunks.join(".")) ??
+				jQuerySapModulesReplacements.get(jQueryAccessChunks.join("."));
+
+			jQuerySapAccessChunks.pop();
+			jQueryAccessChunks.pop();
+		}
 		if (!moduleReplacement) {
 			return undefined;
 		}
