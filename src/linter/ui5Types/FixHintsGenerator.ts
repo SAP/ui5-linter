@@ -129,6 +129,13 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["validateUrl", {
 		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "add",
 	}],
+	["removeUrlWhitelist", {
+		moduleName: "sap/base/security/URLListValidator",
+		exportCodeToBeUsed: `var aCurrentEntries = $moduleIdentifier.entries();
+aCurrentEntries.splice($1, 1);
+$moduleIdentifier.clear();
+aCurrentEntries.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(protocol, host, port, path))`,
+	}],
 
 	// https://github.com/SAP/ui5-linter/issues/527
 	["camelCase", {

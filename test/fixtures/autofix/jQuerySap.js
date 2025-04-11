@@ -45,7 +45,7 @@ sap.ui.define([], function () {
 	jQuery.sap.clearUrlWhitelist();
 	var aEntries = jQuery.sap.getUrlWhitelist();
 	jQuery.sap.validateUrl("https://example.com");
-	jQuery.sap.removeUrlWhitelist(0); // TODO: Requires code to be written
+	jQuery.sap.removeUrlWhitelist(0);
 
 	// https://github.com/SAP/ui5-linter/issues/527
 	var textCamelVase = jQuery.sap.camelCase(" First Name Last ");
