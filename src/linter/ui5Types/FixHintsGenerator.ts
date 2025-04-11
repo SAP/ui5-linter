@@ -131,10 +131,10 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	["removeUrlWhitelist", {
 		moduleName: "sap/base/security/URLListValidator",
-		exportCodeToBeUsed: `var aCurrentEntries = $moduleIdentifier.entries();
-aCurrentEntries.splice($1, 1);
+		exportCodeToBeUsed: `var $identifier_1 = $moduleIdentifier.entries();
+$identifier_1.splice($1, 1);
 $moduleIdentifier.clear();
-aCurrentEntries.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(protocol, host, port, path))`,
+$identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(protocol, host, port, path))`,
 	}],
 
 	// https://github.com/SAP/ui5-linter/issues/527

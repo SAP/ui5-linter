@@ -277,7 +277,8 @@ function applyFixes(
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
 		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
 		// based on arguments' context
-		generateSolutionCodeReplacer(moduleDeclarationInfo.importRequests, messages, changeSet, sourceFile);
+		generateSolutionCodeReplacer(
+			moduleDeclarationInfo.importRequests, messages, changeSet, sourceFile, identifiers);
 	}
 
 	if (changeSet.length === 0) {

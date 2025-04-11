@@ -6,9 +6,27 @@ import {
 	type ChangeSet,
 } from "../autofix.js";
 import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
+import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 
+/**
+ * Replaces the existing code with a specific snippet.
+ * Important placeholders:
+ * - $moduleIdentifier: The identifier of the module (moduleName), if available
+ * - $identifier_1, $identifier_2, ...: Unique identifiers for the arguments
+ * - $1, $2, ...: The arguments of the function
+ *
+ * @example
+ * ["removeUrlWhitelist", {
+		moduleName: "sap/base/security/URLListValidator",
+		exportCodeToBeUsed: `var $identifier_1 = $moduleIdentifier.entries();
+ * $identifier_1.splice($1, 1);
+ * $moduleIdentifier.clear();
+ * $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(protocol, host, port, path))`,
+	}]
+ */
 export default function generateSolutionCodeReplacer(
-	importRequests: ImportRequests, messages: RawLintMessage[], changeSet: ChangeSet[], sourceFile: ts.SourceFile) {
+	importRequests: ImportRequests, messages: RawLintMessage[],
+	changeSet: ChangeSet[], sourceFile: ts.SourceFile, declaredIdentifiers: Set<string>) {
 	for (const {fixHints, position, args} of messages) {
 		const apiName = "apiName" in args ? args.apiName : undefined;
 		const patchedFixHints = patchMessageFixHints(fixHints, apiName);
@@ -24,6 +42,14 @@ export default function generateSolutionCodeReplacer(
 		if (moduleInfo?.identifier) {
 			exportCodeToBeUsed.name =
 				exportCodeToBeUsed.name.replaceAll("$moduleIdentifier", moduleInfo.identifier);
+		}
+		let identifierIndex = 1;
+		while (exportCodeToBeUsed.name.includes("$identifier")) {
+			const identifier = resolveUniqueName(apiName ?? moduleName ?? "j", declaredIdentifiers);
+			declaredIdentifiers.add(identifier);
+			exportCodeToBeUsed.name =
+				exportCodeToBeUsed.name.replaceAll(`$identifier_${identifierIndex}`, identifier);
+			identifierIndex++;
 		}
 
 		const value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
