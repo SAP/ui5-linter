@@ -5,6 +5,7 @@ import {
 	type ImportRequests,
 	type ChangeSet,
 } from "../autofix.js";
+import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
 
 export default function generateSolutionCodeReplacer(
 	importRequests: ImportRequests, messages: RawLintMessage[], changeSet: ChangeSet[], sourceFile: ts.SourceFile) {
@@ -15,7 +16,9 @@ export default function generateSolutionCodeReplacer(
 			continue;
 		}
 
-		const {exportCodeToBeUsed, moduleName} = fixHints;
+		const patchedFixHints = patchMessageFixHints(fixHints, args.apiName);
+
+		const {exportCodeToBeUsed, moduleName} = patchedFixHints;
 		const moduleInfo = moduleName ? importRequests.get(moduleName) : null;
 		if (moduleInfo?.identifier) {
 			exportCodeToBeUsed.name =
@@ -57,4 +60,19 @@ function patchArguments(arg: string, apiName?: string) {
 	} else {
 		return arg;
 	}
+}
+
+function patchMessageFixHints(fixHints: FixHints, apiName?: string) {
+	if (apiName !== "jQuery.sap.getUriParameters" ||
+		typeof fixHints.exportCodeToBeUsed !== "object" ||
+		!fixHints.exportCodeToBeUsed.args?.length) {
+		return fixHints;
+	}
+
+	const isQueryStringRegex = /\?[^\s#]+/g;
+	if (isQueryStringRegex.test(fixHints.exportCodeToBeUsed.args[0])) {
+		fixHints.exportCodeToBeUsed.name = "new URL($1).searchParams";
+	}
+
+	return fixHints;
 }
