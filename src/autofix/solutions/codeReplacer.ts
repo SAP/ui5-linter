@@ -90,17 +90,21 @@ function patchArguments(arg: string, apiName?: string) {
 }
 
 function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
-	if (apiName !== "jQuery.sap.getUriParameters" ||
-		!fixHints || !("exportCodeToBeUsed" in fixHints) ||
+	if (!fixHints || !("exportCodeToBeUsed" in fixHints) ||
 		!fixHints.exportCodeToBeUsed ||
-		!(typeof fixHints.exportCodeToBeUsed === "object") ||
-		!fixHints.exportCodeToBeUsed.args?.length) {
+		!(typeof fixHints.exportCodeToBeUsed === "object")) {
 		return fixHints;
 	}
 
-	const isQueryStringRegex = /\?[^\s#]+/g;
-	if (isQueryStringRegex.test(fixHints.exportCodeToBeUsed.args[0])) {
-		fixHints.exportCodeToBeUsed.name = "new URL($1).searchParams";
+	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.length) {
+		const isQueryStringRegex = /\?[^\s#]+/g;
+		if (isQueryStringRegex.test(fixHints.exportCodeToBeUsed.args[0])) {
+			fixHints.exportCodeToBeUsed.name = "new URL($1).searchParams";
+		}
+	} else if (apiName?.startsWith("jQuery.sap.keycodes")) {
+		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.keycodes", "$moduleIdentifier");
+	} else if (apiName?.startsWith("jQuery.sap.PseudoEvents")) {
+		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.PseudoEvents", "$moduleIdentifier");
 	}
 
 	return fixHints;
