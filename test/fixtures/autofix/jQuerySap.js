@@ -70,7 +70,7 @@ sap.ui.define([], function () {
 	jQuery.sap.forIn({ name: "you", age: 42 }, function (sKey, oValue) {
 		console.log("key: " + sKey + ", value: " + oValue);
 	});
-	var isObjectPlainObject = jQuery.isPlainObject({}); // TODO: check if this is a jQuery.sap function. Not fixed yet
+	var isObjectPlainObject = jQuery.isPlainObject({}); // Not converted! No deprecation info!
 	var parsedJS = jQuery.sap.parseJS("{name: 'me'}");
 	var clone = jQuery.sap.extend(true, {}, { name: "me" });
 	var timestampsnumber = jQuery.sap.now();
