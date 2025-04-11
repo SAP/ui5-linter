@@ -551,6 +551,10 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["registerResourcePath", {
 		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
 	}],
+	// https://github.com/SAP/ui5-linter/issues/530
+	["getUriParameters", {
+		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
+	}],
 ]);
 
 export default class FixHintsGenerator {
