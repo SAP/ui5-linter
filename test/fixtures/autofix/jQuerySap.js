@@ -104,8 +104,8 @@ sap.ui.define([], function () {
 	var isMouseEventDelayed = jQuery.sap.isMouseEventDelayed();
 	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {}));
 	var touchEventMode = jQuery.sap.touchEventMode;
-	var keyCodeEnter = jQuery.sap.keycodes.ENTER; // TODO: Check why it doesn't work
-	var sapcollapseall = jQuery.sap.PseudoEvents.sapcollapseall; // TODO: Check why it doesn't work
+	var keyCodeEnter = jQuery.sap.keycodes.ENTER;
+	var sapcollapseall = jQuery.sap.PseudoEvents.sapcollapseall;
 	jQuery.sap.disableTouchToMouseHandling();
 
 	// https://github.com/SAP/ui5-linter/issues/555
@@ -169,7 +169,11 @@ sap.ui.define([], function () {
 	});
 	jQuery.sap.setMobileWebAppCapable(true);
 
-	var store = jQuery.sap.storage(jQuery.sap.storage.Type.local, "mystore"); // TODO: Fix it
+	// TODO: Requires couple runs!
+	// 1. Replace global "jQuery.sap.storage.Type.local"
+	// 2. Replace the code with the following:
+	// -> var store = new Storage(Storage.Type.local, "mystore");
+	// var store = jQuery.sap.storage(jQuery.sap.storage.Type.local, "mystore");
 
 	var errorXML = "<?xml version=\"1.0\"><teamMembers><member firstName=\"Andreas\"</member></teamMembers>";
 	var parseError = jQuery.sap.getParseError(jQuery.sap.parseXML(errorXML));
