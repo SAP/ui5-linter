@@ -156,7 +156,7 @@ sap.ui.define([], function () {
 	var frameOptions = new jQuery.sap.FrameOptions();
 
 	// https://github.com/SAP/ui5-linter/issues/563
-	var isActivityDetectionActive = jQuery.sap.act.isActive(); // TODO: check why not fixed
+	var isActivityDetectionActive = jQuery.sap.act.isActive();
 
 	jQuery.sap.initMobile();
 	jQuery.sap.setIcons({
