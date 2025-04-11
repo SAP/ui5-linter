@@ -34,9 +34,4 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var myData = ["a", "b", "c"];
 	var indexOfEntity = jQuery.inArray("b", myData);
 	var isValueAnArray = jQuery.isArray(myData);
-	
-	// https://github.com/SAP/ui5-linter/issues/530
-	// TODO: Replacement depends on the arguments context
-	// var currentParams = jQuery.sap.getUriParameters();
-	// var paramsByUrl = jQuery.sap.getUriParameters("/service?x=1&y=2&z=true");
 });
