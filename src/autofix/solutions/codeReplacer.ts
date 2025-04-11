@@ -10,13 +10,14 @@ import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
 export default function generateSolutionCodeReplacer(
 	importRequests: ImportRequests, messages: RawLintMessage[], changeSet: ChangeSet[], sourceFile: ts.SourceFile) {
 	for (const {fixHints, position, args} of messages) {
-		if (!fixHints || !("exportCodeToBeUsed" in fixHints) ||
-			!fixHints.exportCodeToBeUsed || !(typeof fixHints.exportCodeToBeUsed === "object") ||
+		const apiName = "apiName" in args ? args.apiName : undefined;
+		const patchedFixHints = patchMessageFixHints(fixHints, apiName);
+
+		if (!patchedFixHints || !("exportCodeToBeUsed" in patchedFixHints) ||
+			!patchedFixHints.exportCodeToBeUsed || !(typeof patchedFixHints.exportCodeToBeUsed === "object") ||
 			!position) {
 			continue;
 		}
-
-		const patchedFixHints = patchMessageFixHints(fixHints, args.apiName);
 
 		const {exportCodeToBeUsed, moduleName} = patchedFixHints;
 		const moduleInfo = moduleName ? importRequests.get(moduleName) : null;
@@ -26,7 +27,7 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		const value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(`$${index + 1}`, patchArguments(arg, args.apiName));
+			return acc?.replace(`$${index + 1}`, patchArguments(arg, apiName));
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 
 		// Calculate the replacement position
@@ -62,9 +63,11 @@ function patchArguments(arg: string, apiName?: string) {
 	}
 }
 
-function patchMessageFixHints(fixHints: FixHints, apiName?: string) {
+function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	if (apiName !== "jQuery.sap.getUriParameters" ||
-		typeof fixHints.exportCodeToBeUsed !== "object" ||
+		!fixHints || !("exportCodeToBeUsed" in fixHints) ||
+		!fixHints.exportCodeToBeUsed ||
+		!(typeof fixHints.exportCodeToBeUsed === "object") ||
 		!fixHints.exportCodeToBeUsed.args?.length) {
 		return fixHints;
 	}
