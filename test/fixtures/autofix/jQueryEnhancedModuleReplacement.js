@@ -22,8 +22,6 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var isLinux = jQuery.os.linux;
 	var isMac = jQuery.os.mac;
 
-	var myFancyControl = jQuery(".fancyContainer").control();
-
 	// https://github.com/SAP/ui5-linter/issues/588
 	jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
 	jQuery.sap.registerModulePath("ui5.project.moduleB", { path: "/ui5/project/moduleB" });

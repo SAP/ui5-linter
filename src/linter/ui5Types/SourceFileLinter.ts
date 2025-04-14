@@ -931,11 +931,17 @@ export default class SourceFileLinter {
 
 		propName ??= reportNode.getText();
 
+		let fixHints: FixHints | undefined;
+		if (ts.isElementAccessExpression(exprNode) ||
+			ts.isPropertyAccessExpression(exprNode) ||
+			ts.isCallExpression(exprNode)) {
+			fixHints = this.getJquerySapFixHints(exprNode, this.extractNamespace(exprNode));
+		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
-		}, reportNode);
+		}, reportNode, fixHints);
 
 		if (
 			propName === "attachInit" && this.hasQUnitFileExtension() &&
@@ -1442,7 +1448,7 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.#fixHintsGenerator?.getJquerySapFixHints(node, namespace);
+			const fixHints = this.getJquerySapFixHints(node, namespace ?? "jQuery");
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
@@ -1610,7 +1616,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-				}, node, this.getFixHints(node));
+				}, node, this.getFixHints(node) ?? this.getJquerySapFixHints(node, namespace));
 			}
 		}
 	}
@@ -1800,5 +1806,9 @@ export default class SourceFileLinter {
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
 		return this.#fixHintsGenerator?.getFixHints(node) ?? undefined;
+	}
+
+	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string) {
+		return this.#fixHintsGenerator?.getJquerySapFixHints(node, namespace);
 	}
 }

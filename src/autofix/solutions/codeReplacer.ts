@@ -4,6 +4,7 @@ import {
 	ChangeAction,
 	type ImportRequests,
 	type ChangeSet,
+	type ReplaceChange,
 } from "../autofix.js";
 import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
@@ -59,10 +60,28 @@ export default function generateSolutionCodeReplacer(
 		// Calculate the replacement position
 		// It cannot be derived from the fixHintsGenerator as it works on the compiled source file.
 		// Just take the length of the old and the original start position
-		const line = position.line - 1;
-		const column = position.column - 1;
+		let pos;
+		if (moduleInfo?.nodeInfos) {
+			// For jQuery function deprecations, the node might only cover
+			// the deprecated method, but not the whole expression.
+			// Find the expression and update the position.
+			const nodeInfoAtPosition = moduleInfo.nodeInfos.find((nodeInfo) => {
+				return nodeInfo.position.line === (position.line - 1) &&
+					nodeInfo.position.column === (position.column - 1);
+			});
+
+			if (nodeInfoAtPosition?.node && !ts.isCallExpression(nodeInfoAtPosition.node) &&
+				ts.isPropertyAccessExpression(nodeInfoAtPosition.node) &&
+				nodeInfoAtPosition.node.expression && ts.isCallExpression(nodeInfoAtPosition.node.expression)) {
+				pos = sourceFile.getLineAndCharacterOfPosition(nodeInfoAtPosition.node.expression.pos);
+			}
+		}
+		const line = pos ? pos.line : (position.line - 1);
+		const column = pos ? (pos.character + 1) : (position.column - 1);
 		const start = sourceFile.getPositionOfLineAndCharacter(line, column);
 		const end = start + exportCodeToBeUsed.solutionLength;
+
+		cleanupChangeSet(changeSet, start, end);
 
 		changeSet.push({
 			action: ChangeAction.REPLACE,
@@ -70,6 +89,31 @@ export default function generateSolutionCodeReplacer(
 			end,
 			value,
 		});
+	}
+}
+
+// Avoid replacements on colliding position.
+// TODO: For future we need to find a way to merge the changes
+// Currently it skips replacements of an imported jQuery module variable as it is unnecessary.
+function cleanupChangeSet(changeSet: ChangeSet[], start: number, end: number) {
+	function isReplacementChangeSet(changeSet: ChangeSet): changeSet is ReplaceChange {
+		return changeSet.action === ChangeAction.REPLACE;
+	}
+
+	let i = 0;
+	while (changeSet[i]) {
+		const isReplacement = isReplacementChangeSet(changeSet[i]);
+		if (!isReplacement) {
+			i++;
+			continue;
+		}
+		const replacementSet = changeSet[i] as ReplaceChange;
+
+		if (start <= replacementSet.start && replacementSet.end <= end) {
+			changeSet.splice(i, 1);
+		} else {
+			i++;
+		}
 	}
 }
 
