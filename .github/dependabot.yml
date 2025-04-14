@@ -17,5 +17,4 @@ updates:
     prefix: "deps"
     prefix-development: "build(deps-dev)"
   ignore:
-    - dependency-name: "@sapui5/types" # Updated manually via "npm run update-sapui5-types"
     - dependency-name: "@types/node" # Should be manually kept in sync with the minimum supported Node.js version
