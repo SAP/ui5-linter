@@ -149,6 +149,16 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.keycodes", "$moduleIdentifier");
 	} else if (apiName?.startsWith("jQuery.sap.PseudoEvents")) {
 		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.PseudoEvents", "$moduleIdentifier");
+	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
+		// If no position is given or when it is negative or beyond the last character
+		// of the given string, the first character will be converted to upper case.
+		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1] ?? "0", 10);
+		if (charToUpperCase <= 0 || charToUpperCase > (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length) {
+			fixHints.exportCodeToBeUsed.args = [
+				fixHints.exportCodeToBeUsed.args?.[0] ?? "",
+				"0",
+			];
+		}
 	}
 
 	return fixHints;
