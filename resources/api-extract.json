@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.26"
+    "version": "1.120.29"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -3961,7 +3961,8 @@
         "showIcon",
         "convertLinksToAnchorTags",
         "convertedLinksDefaultTarget",
-        "maxCharacters"
+        "maxCharacters",
+        "disableStyleAttribute"
       ],
       "extends": "sap.m.ListItemBase"
     },
@@ -4025,7 +4026,8 @@
         "convertedLinksDefaultTarget",
         "height",
         "textDirection",
-        "textAlign"
+        "textAlign",
+        "disableStyleAttribute"
       ],
       "extends": "sap.ui.core.Control"
     },
@@ -7432,7 +7434,7 @@
         "headerFields",
         "toolbar",
         "uploader",
-        "_illustratedMessage"
+        "illustratedMessage"
       ],
       "defaultAggregation": "items",
       "event": [
@@ -21704,6 +21706,7 @@
       "property": [
         "title",
         "titleLevel",
+        "titleVisible",
         "visible",
         "importance"
       ],
