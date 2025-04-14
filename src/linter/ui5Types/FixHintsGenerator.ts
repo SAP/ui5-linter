@@ -561,6 +561,11 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["getUriParameters", {
 		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
 	}],
+	// https://github.com/SAP/ui5-linter/issues/578
+	["jQuery.fn.control", {
+		moduleName: "sap/ui/core/Element",
+		exportCodeToBeUsed: "$moduleIdentifier.closestTo($1)",
+	}],
 ]);
 
 export default class FixHintsGenerator {
@@ -571,21 +576,33 @@ export default class FixHintsGenerator {
 
 	}
 
-	getJquerySapFixHints(node: ts.AccessExpression, namespace: string | undefined): FixHints | undefined {
-		if (!namespace?.startsWith("jQuery.")) {
+	getJquerySapFixHints(node: ts.AccessExpression | ts.CallExpression,
+		namespace: string | undefined): FixHints | undefined {
+		if (!namespace?.startsWith("jQuery")) {
 			return undefined;
 		}
 
 		let moduleReplacement;
 		const jQueryAccessChunks = namespace.substring("jQuery.".length).split(".");
 		const jQuerySapAccessChunks = namespace.substring("jQuery.sap.".length).split(".");
-		while (!moduleReplacement && (jQuerySapAccessChunks.length || jQueryAccessChunks.length)) {
+		const jQueryFn = namespace.replace(/^jQuery\(.*\)\./g, "jQuery.fn.").split(".");
+		while (!moduleReplacement &&
+			(jQuerySapAccessChunks.length || jQueryAccessChunks.length || jQueryFn.length)) {
 			moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccessChunks.join(".")) ??
-				jQuerySapModulesReplacements.get(jQueryAccessChunks.join("."));
+				jQuerySapModulesReplacements.get(jQueryAccessChunks.join(".")) ??
+				jQuerySapModulesReplacements.get(jQueryFn.join("."));
 
 			jQuerySapAccessChunks.pop();
 			jQueryAccessChunks.pop();
+			jQueryFn.pop();
 		}
+
+		if (!moduleReplacement && namespace === "jQuery") {
+			moduleReplacement = {
+				moduleName: "sap/ui/thirdparty/jquery",
+			};
+		}
+
 		if (!moduleReplacement) {
 			return undefined;
 		}
@@ -604,10 +621,19 @@ export default class FixHintsGenerator {
 				name: moduleReplacement.exportCodeToBeUsed,
 				solutionLength: (current.getEnd() - current.getStart()),
 			} as FixHints["exportCodeToBeUsed"];
-			if (callExpression &&
-				typeof exportCodeToBeUsed === "object") {
-				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => arg.getText());
-				exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
+
+			if (typeof exportCodeToBeUsed === "object") {
+				let args: string[] = [];
+				// jQuery(".mySelector" /* args */).functionName()
+				if (ts.isCallExpression(node.expression)) {
+					args = args.concat(node.expression.arguments.map((arg) => arg.getText()));
+				}
+				// jQuery.sap.functionName(args)
+				if (callExpression) {
+					args = args.concat(callExpression.arguments.map((arg) => arg.getText()));
+					exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
+				}
+				exportCodeToBeUsed.args = args;
 			}
 		}
 
