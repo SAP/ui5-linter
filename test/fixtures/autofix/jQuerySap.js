@@ -50,6 +50,10 @@ sap.ui.define([], function () {
 	// https://github.com/SAP/ui5-linter/issues/527
 	var textCamelVase = jQuery.sap.camelCase(" First Name Last ");
 	var textUpperCase = jQuery.sap.charToUpperCase("myValue", 0);
+	var textUpperCase1 = jQuery.sap.charToUpperCase("myValue", 3);
+	var textUpperCase2 = jQuery.sap.charToUpperCase("myValue");
+	var textUpperCase3 = jQuery.sap.charToUpperCase("myValue", -5);
+	var textUpperCase4 = jQuery.sap.charToUpperCase("myValue", 99);
 	var textEscapedRegx = jQuery.sap.escapeRegExp("ab.c");
 	var textWithReplacedPlaceholder = jQuery.sap.formatMessage("Say '{0}'", ["Hello"]);
 	var hashCode = jQuery.sap.hashCode("test");
