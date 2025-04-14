@@ -143,7 +143,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	}],
 	["charToUpperCase", {
 		moduleName: "sap/base/strings/capitalize",
-		exportCodeToBeUsed: "$moduleIdentifier($1, $2)", // Needs special handling for edge cases
+		exportCodeToBeUsed: "$moduleIdentifier($1, $2)", // Has special handling for edge cases
 	}],
 	["escapeRegExp", {
 		moduleName: "sap/base/strings/escapeRegExp",
