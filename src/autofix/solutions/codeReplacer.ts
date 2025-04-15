@@ -54,7 +54,7 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		const value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(`$${index + 1}`, patchArguments(arg, apiName));
+			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), patchArguments(arg, apiName));
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 
 		// Calculate the replacement position
