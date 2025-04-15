@@ -349,7 +349,7 @@ An explanation why a rule is disabled can be added after the rule name; it must 
 * `<!-- ui5lint-disable-next-line -->`
 * `<Text tap=".onTap"/> <!-- ui5lint-disable-line no-deprecated-api -->`
 
-Note that in XML and HTML files, depending on your browser runtime, the use of double-hyphen `--` is usually not allowed, making it impossible to add explanations as part of the directive. Please use a separate comment statement in the same line of code for this purpose.
+In XML and HTML files, depending on your browser runtime, the use of a double-hyphen `--` is usually not allowed, making it impossible to append an explanation to your directive in the same way as shown above for JavaScript / TypeScript files. You need to insert a separate comment statement in the same line of code for this purpose:
 
 * `<!-- ui5lint-disable-next-line no-deprecated-api --> <!-- explanation -->`
 
