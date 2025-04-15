@@ -157,6 +157,9 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["hyphen", {
 		moduleName: "sap/base/strings/hyphenate",
 	}],
+	["isStringNFC", {
+		exportCodeToBeUsed: "$1.normalize(\"NFC\") === $1",
+	}],
 	// https://github.com/SAP/ui5-linter/issues/528
 	["arraySymbolDiff", {
 		moduleName: "sap/base/util/array/diff",
