@@ -301,6 +301,91 @@ export function addDependencies(
 	patchIdentifiers(importRequests, changeSet);
 }
 
+export function removeDependencies(
+	dependenciesToRemove: Set<string>,
+	moduleDeclarationInfo: ExistingModuleDeclarationInfo,
+	changeSet: ChangeSet[],
+	resourcePath: string,
+	declaredIdentifiers: Set<string>) {
+	const {moduleDeclaration} = moduleDeclarationInfo;
+	const {dependencies} = moduleDeclaration;
+	const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
+	const {dependencyMap} = createDependencyInfo(dependencies, resourcePath);
+
+	[...dependencyMap]
+		.filter(([moduleName]) => dependenciesToRemove.has(moduleName))
+		.forEach(([, existingDependency]) => {
+			// Update module dependencies removal
+			const {index} = existingDependency;
+			if (index >= 0 && dependencies?.elements[index]) {
+				// Update node information
+				const newElements = [...dependencies.elements];
+				newElements.splice(index, 1);
+				ts.factory.updateArrayLiteralExpression(dependencies,
+					ts.factory.createNodeArray(newElements));
+
+				// Update the source
+				let start = existingDependency.node.getFullStart();
+				let end = existingDependency.node.getEnd();
+
+				if (existingDependency.leadingComma) {
+					start = existingDependency.leadingComma.getFullStart();
+				} else if (existingDependency.trailingComma) {
+					end = existingDependency.trailingComma.getEnd();
+				}
+
+				changeSet.push({action: ChangeAction.DELETE, start, end});
+			}
+
+			// Update identifiers
+			if (index >= 0 &&
+				factory &&
+				(
+					ts.isFunctionExpression(factory) || ts.isFunctionDeclaration(factory) ||
+					ts.isArrowFunction(factory)
+				) &&
+				factory.parameters[index]) {
+				const syntaxList = getParameterSyntax(factory);
+				const syntaxChildren = syntaxList.syntaxList.getChildren();
+				const identifier = factory.parameters[index].getText();
+				const newParams = [...factory.parameters];
+				const [removedParam] = newParams.splice(index, 1);
+				const removedParamIndex = syntaxChildren.indexOf(removedParam);
+
+				let start = removedParam.getFullStart();
+				let end = removedParam.getEnd();
+				if (syntaxChildren[removedParamIndex - 1]?.kind === ts.SyntaxKind.CommaToken) {
+					start = syntaxChildren[removedParamIndex - 1].getFullStart();
+				} else if (syntaxChildren[removedParamIndex + 1]?.kind === ts.SyntaxKind.CommaToken) {
+					end = syntaxChildren[removedParamIndex + 1].getEnd();
+				}
+
+				// Update the source
+				changeSet.push({action: ChangeAction.DELETE, start, end});
+
+				// Update the factory function node info
+				if (ts.isFunctionExpression(factory)) {
+					ts.factory.updateFunctionExpression(
+						factory, factory.modifiers, factory.asteriskToken, factory.name,
+						factory.typeParameters, ts.factory.createNodeArray(newParams), factory.type, factory.body);
+				} else if (ts.isFunctionDeclaration(factory)) {
+					ts.factory.updateFunctionDeclaration(
+						factory, factory.modifiers, factory.asteriskToken, factory.name,
+						factory.typeParameters, ts.factory.createNodeArray(newParams), factory.type, factory.body);
+				} else if (ts.isArrowFunction(factory)) {
+					ts.factory.updateArrowFunction(
+						factory, factory.modifiers, factory.typeParameters, ts.factory.createNodeArray(newParams),
+						factory.type, factory.equalsGreaterThanToken, factory.body);
+				}
+
+				// Update identifiers Set
+				if (identifier && declaredIdentifiers.has(identifier)) {
+					declaredIdentifiers.delete(identifier);
+				}
+			}
+		});
+}
+
 function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
 	for (const {nodeInfos, identifier} of importRequests.values()) {
 		if (!identifier) {

@@ -5,7 +5,7 @@ import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getLogger} from "@ui5/logger";
-import {addDependencies} from "./solutions/amdImports.js";
+import {addDependencies, removeDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
@@ -282,8 +282,13 @@ function applyFixes(
 	const identifiers = collectIdentifiers(sourceFile);
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
+		// TODO: Remove hardcoded dependencies for removal
+		removeDependencies(new Set(["sap/base/strings/NormalizePolyfill", "jQuery.sap.unicode"]),
+			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+
 		// Resolve dependencies for the module declaration
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+
 		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
 		// based on arguments' context
 		generateSolutionCodeReplacer(
