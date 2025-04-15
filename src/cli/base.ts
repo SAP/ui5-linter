@@ -202,17 +202,17 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	if (format === "json") {
 		const jsonFormatter = new Json();
 		const filteredResults = applyQuietFilter(res);
-		process.stdout.write(jsonFormatter.format(filteredResults, details));
+		process.stdout.write(jsonFormatter.format(filteredResults, details, quiet));
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
 		const filteredResults = applyQuietFilter(res);
-		process.stdout.write(markdownFormatter.format(filteredResults, details, getVersion(), fix));
+		process.stdout.write(markdownFormatter.format(filteredResults, details, getVersion(), fix, quiet));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
 		const filteredResults = applyQuietFilter(res);
-		process.stderr.write(textFormatter.format(filteredResults, details, fix));
+		process.stderr.write(textFormatter.format(filteredResults, details, fix, quiet));
 	}
 	// Stop profiling after CLI finished execution
 	if (profile) {
