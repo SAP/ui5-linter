@@ -143,7 +143,16 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	}],
 	["charToUpperCase", {
 		moduleName: "sap/base/strings/capitalize",
-		exportCodeToBeUsed: "$moduleIdentifier($1, $2)", // Has special handling for edge cases
+		/* This migration requires special handling:
+			Since the capitalize module does not accept a position argument, this migration must
+			only be applied if it is the first character that is supposed to be capitalized.
+			In the legacy charToUpperCase API, this is controlled by the second argument ("position").
+			If it is omitted, set to zero, a negative number, or beyond the last character,
+			the first character is to be capitalized.
+			In all other cases, this migration must not be applied.
+		*/
+		// TODO MB: capitalize does not accept a second parameter
+		exportCodeToBeUsed: "$moduleIdentifier($1, $2)",
 	}],
 	["escapeRegExp", {
 		moduleName: "sap/base/strings/escapeRegExp",
@@ -178,6 +187,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/base/util/each",
 	}],
 	["isPlainObject", {
+		// TODO MB: jQuery.isPlainObject is a jQuery deprecation and currently out-of-scope for UI5 Linter
 		moduleName: "sap/base/util/isPlainObject",
 	}],
 	["FrameOptions", {
@@ -187,12 +197,24 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/base/util/JSTokenizer", exportNameToBeUsed: "parseJS",
 	}],
 	["extend", {
+		/* This migration requires special handling:
+			jQuery.sap.extends has an optional first argument "deep" which controls whether
+			a shallow or deep copy is performed.
+
+			In case of a shallow clone (default), Object.assign might be a suitable replacement?
+			TODO MB: Discuss with team. Documentation states "No actual replacement for shallow copies available"
+
+			Only in case of a deep clone (first argument is true; explicitly type "boolean"),
+			the merge module shall be used (omitting the first argument)
+		*/
 		moduleName: "sap/base/util/merge",
 	}],
 	["now", { // TODO: Check: not working
+		// TODO MB: Documentation and GH issue refers to "sap/base/util/now" as replacement
 		exportCodeToBeUsed: "window.performance.now",
 	}],
 	["properties", {
+		// TODO MB: Missing exportNameToBeUsed: "create"
 		moduleName: "sap/base/util/Properties",
 	}],
 	["uid", {
@@ -205,6 +227,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/core/syncStyleClass",
 	}],
 	["setObject", {
+		// TODO MB: Continuing here tomorrow, might need additional work see also
+		// https://github.com/SAP/ui5-migration/blob/36ba9b5b49907ad330dbe99dd67e80c743434172/src/tasks/helpers/replacers/GetObject.ts#L42
 		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "set",
 	}],
 	["getObject", {
