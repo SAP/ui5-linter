@@ -64,6 +64,90 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 
 # Benchmark Runs
 
+## April 16, 2025
+
+* UI5 linter [`b280174`](https://github.com/SAP/ui5-linter/commit/b280174ef69f6f9c5047f744fe9ac124dc35b8cd)
+* Node.js `v23.11.0`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 680.3 ± 20.5 | 646.6 | 710.4 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 1.546 ± 0.085 | 1.428 | 1.725 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.248 ± 0.048 | 2.169 | 2.324 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 4.997 ± 0.043 | 4.916 | 5.073 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 39.035 ± 0.941 | 37.507 | 40.811 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 40.936 ± 1.293 | 39.706 | 43.410 |
+
+## April 16, 2025
+
+* UI5 linter [`aacf7c7` (v1.12.0)](https://github.com/SAP/ui5-linter/commit/aacf7c792bbea3e2a42d33aa5ad70a7bdf173c6e)
+* Node.js `v23.11.0`
+* MacBook Pro M1 Max
+
+### themelib_sap_horizon
+
+| Mean [ms] | Min [ms] | Max [ms] |
+|---:|---:|---:|
+| 708.3 ± 55.3 | 617.1 | 801.0 |
+
+### openui5-sample-app
+
+Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 2.161 ± 0.046 | 2.094 | 2.215 |
+
+### sap.ui.testrecorder
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 3.423 ± 0.081 | 3.298 | 3.529 |
+
+### sap.ui.layout
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 5.738 ± 0.232 | 5.493 | 6.206 |
+
+### sap.m
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 39.656 ± 1.068 | 38.132 | 41.629 |
+
+### sap.ui.core
+
+| Mean [s] | Min [s] | Max [s] |
+|---:|---:|---:|
+| 41.364 ± 0.864 | 39.924 | 42.472 |
+
 ## October 28, 2024
 
 * UI5 linter [`31432b0`](https://github.com/SAP/ui5-linter/commit/31432b050a5b4a1dc446923331efa11b97652ef2)
