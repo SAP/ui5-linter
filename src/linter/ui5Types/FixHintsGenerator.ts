@@ -604,7 +604,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	// https://github.com/SAP/ui5-linter/issues/578
 	["jQuery.fn.control", {
 		moduleName: "sap/ui/core/Element",
-		exportCodeToBeUsed: "$moduleIdentifier.closestTo($1)",
+		exportCodeToBeUsed: "[$moduleIdentifier.closestTo($1)]",
 	}],
 ]);
 
