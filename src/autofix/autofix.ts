@@ -5,10 +5,12 @@ import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getLogger} from "@ui5/logger";
-import {addDependencies} from "./solutions/amdImports.js";
+import {addDependencies, removeDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
+import {type FixHints} from "../linter/ui5Types/FixHintsGenerator.js";
+import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
 
 const log = getLogger("linter:autofix");
 
@@ -42,7 +44,7 @@ interface InsertChange extends AbstractChangeSet {
 	value: string;
 }
 
-interface ReplaceChange extends AbstractChangeSet {
+export interface ReplaceChange extends AbstractChangeSet {
 	action: ChangeAction.REPLACE;
 	end: number;
 	value: string;
@@ -62,10 +64,9 @@ export interface Position {
 	pos: number;
 }
 export interface GlobalPropertyAccessNodeInfo {
-	globalVariableName: string;
-	namespace: string;
 	moduleName: string;
-	exportName?: string;
+	exportNameToBeUsed?: string;
+	exportCodeToBeUsed?: FixHints["exportCodeToBeUsed"];
 	propertyAccess?: string;
 	position: Position;
 	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
@@ -189,7 +190,9 @@ export default async function ({
 		const messagesById = getAutofixMessages(autofixResource);
 		// Currently only global access autofixes are supported
 		// This needs to stay aligned with the applyFixes function
-		if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+		if (messagesById.has(MESSAGE.NO_GLOBALS) ||
+			messagesById.has(MESSAGE.DEPRECATED_API_ACCESS) ||
+			messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
 			messages.set(autofixResource.resource.getPath(), messagesById);
 			resources.push(autofixResource.resource);
 		}
@@ -245,18 +248,54 @@ function applyFixes(
 
 	const changeSet: ChangeSet[] = [];
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
+	const messages: RawLintMessage<
+		MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
+
 	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-		existingModuleDeclarations = generateSolutionNoGlobals(
-			checker, sourceFile, content,
-			messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[],
-			changeSet, []);
+		messages.push(
+			...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
+		);
 	}
+
+	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
+		messages.push(
+			...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
+		);
+	}
+
+	if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
+		messages.push(
+			...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
+		);
+	}
+
+	if (messages.length === 0) {
+		return undefined;
+	}
+
+	existingModuleDeclarations = generateSolutionNoGlobals(
+		checker, sourceFile, content,
+		messages,
+		changeSet, []);
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports
 	const identifiers = collectIdentifiers(sourceFile);
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+		// TODO: Find a better way to define modules for removal
+		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
+
+		// Remove dependencies from the existing module declaration
+		removeDependencies(moduleRemovals,
+			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+
+		// Resolve dependencies for the module declaration
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
+
+		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
+		// based on arguments' context
+		generateSolutionCodeReplacer(
+			moduleDeclarationInfo.importRequests, messages, changeSet, sourceFile, identifiers);
 	}
 
 	if (changeSet.length === 0) {
