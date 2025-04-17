@@ -437,8 +437,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setWebAppCapable",
 	}],
 	["storage", {
-		// TODO MB: Probably should use $moduleIdentifier?
-		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new Storage($1, $2)",
+		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new $moduleIdentifier($1, $2)",
 	}],
 	["getParseError", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "getParseError",
@@ -456,32 +455,46 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["support.retina", {
 		exportCodeToBeUsed: "window.devicePixelRatio >= 2",
 	}],
+	// TODO: Shall we add validation for a string?
 	["startsWith", {
 		exportCodeToBeUsed: "$1.startsWith($2)",
 	}],
+	// TODO: Shall we add validation for a string?
 	["startsWithIgnoreCase", {
 		exportCodeToBeUsed: "$1.toLowerCase().startsWith($2)",
 	}],
+	// TODO: Shall we add validation for a string?
 	["endsWith", {
 		exportCodeToBeUsed: "$1.endsWith($2)",
 	}],
+	// TODO: Shall we add validation for a string?
 	["endsWithIgnoreCase", {
 		exportCodeToBeUsed: "$1.toLowerCase().endsWith($2)",
 	}],
+	// TODO: Shall we add validation for a string?
+	// jquery guard: jQuery.sap.assert(typeof sPadChar === 'string' && sPadChar)
 	["padLeft", {
 		exportCodeToBeUsed: "$1.padStart($3, $2)",
 	}],
+	// TODO: Shall we add validation for a string?
+	// jquery guard: jQuery.sap.assert(typeof sPadChar === 'string' && sPadChar)
 	["padRight", {
 		exportCodeToBeUsed: "$1.padEnd($3, $2)",
 	}],
+	// TODO: $3 can be a function, so it should be $3.bind($2).
+	// Also inside of the jquery.sap.delayedCall if $3 is a string, then
+	// $2[$3].bind($2), so we always have the correct context
 	["delayedCall", {
-		exportCodeToBeUsed: "window.setTimeout((typeof $3 === 'string' ? $2[$3] : $3.bind($2)), $1, ...$4)",
+		exportCodeToBeUsed: "window.setTimeout($2[$3], $1, ...$4)",
 	}],
 	["clearDelayedCall", {
 		exportCodeToBeUsed: "window.clearTimeout($1)",
 	}],
+	// TODO: $3 can be a function, so it should be $3.bind($2).
+	// Also inside of the jquery.sap.intervalCall if $3 is a string, then
+	// $2[$3].bind($2), so we always have the correct context
 	["intervalCall", {
-		exportCodeToBeUsed: "window.setInterval((typeof $3 === 'string' ? $2[$3] : $3.bind($2)), $1, ...$4)",
+		exportCodeToBeUsed: "window.setInterval($2[$3], $1, ...$4)",
 	}],
 	["clearIntervalCall", {
 		exportCodeToBeUsed: "window.clearInterval($1)",
