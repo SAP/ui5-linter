@@ -1,7 +1,7 @@
 import ts from "typescript";
 import path from "node:path/posix";
 import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
-import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+import {getPropertyNameText, resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 const LINE_LENGTH_LIMIT = 200;
 
 function resolveRelativeDependency(dependency: string, moduleName: string): string {
@@ -113,7 +113,8 @@ export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
 	changeSet: ChangeSet[],
 	resourcePath: string,
-	declaredIdentifiers: Set<string>
+	declaredIdentifiers: Set<string>,
+	dependenciesToRemove: Set<string>
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
@@ -131,9 +132,16 @@ export function addDependencies(
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
 	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(moduleDeclaration.dependencies, resourcePath);
-	let numberOfDependencies = dependencies?.length ?? 0;
+	const removedDepsIndices = dependencies?.reduce((acc, dep, index) => {
+		if (ts.isPropertyName(dep) && dependenciesToRemove.has(getPropertyNameText(dep) ?? "")) {
+			acc.push(index);
+		}
 
-	const parameters = factory.parameters;
+		return acc;
+	}, [] as number[]) ?? [];
+	let numberOfDependencies = dependencies?.filter((_dep, index) => !removedDepsIndices.includes(index)).length ?? 0;
+
+	const parameters = factory.parameters.filter((_dep, index) => !removedDepsIndices.includes(index));
 	const parameterSyntax = getParameterSyntax(factory);
 
 	const newDependencies: {
@@ -157,7 +165,10 @@ export function addDependencies(
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [requestedModuleName, importRequest] of importRequests) {
 		const dependencyModuleName = requestedModuleName;
-		const existingDependency = dependencyMap.get(requestedModuleName);
+		const existingDependency = dependenciesToRemove.has(requestedModuleName) ?
+			undefined :
+				dependencyMap.get(requestedModuleName);
+
 		if (existingDependency) {
 			// Reuse the existing dependency
 			// Check whether a parameter name already exists for this dependency

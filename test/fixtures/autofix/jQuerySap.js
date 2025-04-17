@@ -1,4 +1,4 @@
-sap.ui.define(["sap/base/strings/NormalizePolyfill"], function () {
+sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfill) {
 	// https://github.com/SAP/ui5-linter/issues/520
 	jQuery.sap.assert(false, "That's an assert");
 
