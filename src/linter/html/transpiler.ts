@@ -26,7 +26,7 @@ export default async function transpileHtml(
 			lintBootstrapAttributes(bootstrapTag, report);
 		}
 
-		detectTestStarter(resourcePath, scriptTags, context);
+		detectTestStarter(resourcePath, scriptTags, report);
 
 		scriptTags.forEach((tag) => {
 			// Tags with src attribute do not parse and run inline code
@@ -58,8 +58,8 @@ export default async function transpileHtml(
 	}
 }
 
-function detectTestStarter(resourcePath: ResourcePath, scriptTags: SaxTag[], context: LinterContext) {
-	const shouldBeMigrated = scriptTags.some((tag) => {
+function detectTestStarter(resourcePath: ResourcePath, scriptTags: SaxTag[], report: HtmlReporter) {
+	const tagToMigrate = scriptTags.find((tag) => {
 		const isTestsuiteQunitFile = /testsuite(?:\.[a-z][a-z0-9-]*)*\.qunit\.html$/.test(resourcePath);
 		return (isTestsuiteQunitFile && !tag.attributes.some((attr) => {
 			return attr.name.value.toLowerCase() === "src" &&
@@ -73,8 +73,8 @@ function detectTestStarter(resourcePath: ResourcePath, scriptTags: SaxTag[], con
 		}));
 	});
 
-	if (shouldBeMigrated) {
-		context.addLintingMessage(resourcePath, MESSAGE.PREFER_TEST_STARTER, undefined as never);
+	if (tagToMigrate) {
+		report.addMessage(MESSAGE.PREFER_TEST_STARTER, tagToMigrate);
 	}
 }
 
