@@ -282,12 +282,15 @@ function applyFixes(
 	const identifiers = collectIdentifiers(sourceFile);
 
 	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		// TODO: Remove hardcoded dependencies for removal
-		removeDependencies(new Set(["sap/base/strings/NormalizePolyfill", "jQuery.sap.unicode"]),
+		// TODO: Find a better way to define modules for removal
+		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
+
+		// Remove dependencies from the existing module declaration
+		removeDependencies(moduleRemovals,
 			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
 
 		// Resolve dependencies for the module declaration
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
 
 		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
 		// based on arguments' context
