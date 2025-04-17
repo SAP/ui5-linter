@@ -30,7 +30,8 @@ export default function generateSolutionCodeReplacer(
 	changeSet: ChangeSet[], sourceFile: ts.SourceFile, declaredIdentifiers: Set<string>) {
 	for (const {fixHints, position, args} of messages) {
 		const apiName = "apiName" in args ? args.apiName : undefined;
-		const patchedFixHints = patchMessageFixHints(fixHints, apiName);
+		const functionName = "functionName" in args ? args.functionName : undefined;
+		const patchedFixHints = patchMessageFixHints(fixHints, apiName ?? functionName);
 
 		if (!patchedFixHints || !("exportCodeToBeUsed" in patchedFixHints) ||
 			!patchedFixHints.exportCodeToBeUsed || !(typeof patchedFixHints.exportCodeToBeUsed === "object") ||
@@ -158,6 +159,17 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 				fixHints.exportCodeToBeUsed.args?.[0] ?? "",
 				"0",
 			];
+		}
+	} else if (apiName === "control" && fixHints.moduleName === "sap/ui/core/Element") {
+		const {args} = fixHints.exportCodeToBeUsed;
+		if (args && args.length === 1) {
+			// Default case. No needed to be handled specifically.
+		} else if (args && args.length === 2) {
+			fixHints.exportCodeToBeUsed.name = "$moduleIdentifier.closestTo($1)";
+		} else if (args && args.length === 3) {
+			fixHints.exportCodeToBeUsed.name = "$moduleIdentifier.closestTo($1, $3)";
+		} else {
+			fixHints.exportCodeToBeUsed = undefined; // We don't want to process in such a case
 		}
 	}
 
