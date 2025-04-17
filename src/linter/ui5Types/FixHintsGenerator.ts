@@ -227,8 +227,6 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/core/syncStyleClass",
 	}],
 	["setObject", {
-		// TODO MB: Continuing here tomorrow, might need additional work see also
-		// https://github.com/SAP/ui5-migration/blob/36ba9b5b49907ad330dbe99dd67e80c743434172/src/tasks/helpers/replacers/GetObject.ts#L42
 		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "set",
 	}],
 	["getObject", {
@@ -257,6 +255,9 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/dom/includeStylesheet",
 	}],
 	["replaceDOM", {
+		// TODO MB: "sap/ui/dom/patch" has been removed in
+		// https://github.com/SAP/openui5/commit/84ae02e870d8349acff17febeac6fb1404d6bb5a#diff-b54e0a67288dd55b118578ef716ece9c9ccf2a5c2ef6be53f90f636e4aa41b70
+		// Therefore this migration is not valid and should be removed
 		moduleName: "sap/ui/dom/patch",
 	}],
 	["pxToRem", {
@@ -285,21 +286,29 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/events/isMouseEventDelayed",
 	}],
 	["isSpecialKey", {
+		// Note: The new isSpecialKey module does not cover legacy edge cases where
+		// Event.key is not defined, e.g. when jQuery.Events are created manually
 		moduleName: "sap/ui/events/isSpecialKey",
 	}],
 	["touchEventMode", {
 		moduleName: "sap/ui/events/jquery/EventSimulation", exportNameToBeUsed: "touchEventMode",
 	}],
 	["keycodes", {
+		// TODO MB: Is the exportCodeToBeUsed attribute really required here?
 		moduleName: "sap/ui/events/KeyCodes", exportCodeToBeUsed: "$moduleIdentifier",
 	}],
 	["PseudoEvents", {
+		// TODO MB: Should use .events on new module
+		// See https://sapui5.hana.ondemand.com/sdk/#/api/jQuery.sap.PseudoEvents
 		moduleName: "sap/ui/events/PseudoEvents", exportCodeToBeUsed: "$moduleIdentifier",
 	}],
 	["disableTouchToMouseHandling", {
 		moduleName: "sap/ui/events/TouchToMouseMapping", exportNameToBeUsed: "disableTouchToMouseHandling",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/555
+
+	// TODO MB: Missing replacement for jQuery.sap.measure.getRequestTimings?
+	// https://sapui5.hana.ondemand.com/sdk/#/api/jQuery.sap.measure%23methods/jQuery.sap.measure.getRequestTimings
 	["measure.start", {
 		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "start",
 	}],
@@ -413,6 +422,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "traceFlags",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/563
+
+	// TODO MB: Possibly missing some replacements, see https://github.com/SAP/ui5-linter/issues/563
 	["act.isActive", {
 		moduleName: "sap/ui/util/ActivityDetection", exportNameToBeUsed: "isActive",
 	}],
@@ -426,6 +437,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setWebAppCapable",
 	}],
 	["storage", {
+		// TODO MB: Probably should use $moduleIdentifier?
 		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new Storage($1, $2)",
 	}],
 	["getParseError", {
