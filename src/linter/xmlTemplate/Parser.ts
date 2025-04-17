@@ -3,7 +3,7 @@ import he from "he";
 import ViewGenerator from "./generator/ViewGenerator.js";
 import FragmentGenerator from "./generator/FragmentGenerator.js";
 import JSTokenizer from "./lib/JSTokenizer.js";
-import LinterContext, {Directive, PositionInfo} from "../LinterContext.js";
+import LinterContext, {CoverageCategory, Directive, PositionInfo} from "../LinterContext.js";
 import {TranspileResult} from "../LinterContext.js";
 import AbstractGenerator from "./generator/AbstractGenerator.js";
 import {getLogger} from "@ui5/logger";
@@ -517,6 +517,33 @@ export default class Parser {
 					throw new Error(`Unexpected top-level aggregation declaration: ` +
 						`${aggregationName} in resource ${this.#resourcePath}`);
 				}
+				let pos;
+				if (parentNode) {
+					pos = {
+						start: {
+							line: parentNode.start.line + 1,
+							column: parentNode.start.column + 1,
+						},
+						end: {
+							line: parentNode.end.line + 1,
+							column: parentNode.end.column + 1,
+						},
+					};
+				} else {
+					pos = {
+						start: {line: 1, column: 1},
+						end: {line: 1, column: 1},
+					};
+				}
+				this.#context.addCoverageInfo(this.#resourcePath, {
+					category: CoverageCategory.UnknownControlAggregation,
+					line: pos.start.line,
+					column: pos.start.column,
+					endLine: pos.end.line,
+					endColumn: pos.end.column,
+					message: `Unable to analyze top-level aggregation "${aggregationName}". ` +
+						`Parent control could not be determined.`,
+				});
 				// In case of top-level aggregations in fragments, generate an sap.ui.core.Control instance and
 				// add the aggregation's content to it's dependents aggregation
 				const coreControl: ControlDeclaration = {

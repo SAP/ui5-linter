@@ -53,6 +53,7 @@ export interface LintMessage {
 
 export enum CoverageCategory {
 	CallExpressionUnknownType = 1,
+	UnknownControlAggregation = 2,
 }
 
 export interface CoverageInfo {
