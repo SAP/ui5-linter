@@ -475,13 +475,13 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "$1.padEnd($3, $2)",
 	}],
 	["delayedCall", {
-		exportCodeToBeUsed: "window.setTimeout($2[$3], $1, ...$4)",
+		exportCodeToBeUsed: "window.setTimeout((typeof $3 === 'string' ? $2[$3] : $3.bind($2)), $1, ...$4)",
 	}],
 	["clearDelayedCall", {
 		exportCodeToBeUsed: "window.clearTimeout($1)",
 	}],
 	["intervalCall", {
-		exportCodeToBeUsed: "window.setInterval($2[$3], $1, ...$4)",
+		exportCodeToBeUsed: "window.setInterval((typeof $3 === 'string' ? $2[$3] : $3.bind($2)), $1, ...$4)",
 	}],
 	["clearIntervalCall", {
 		exportCodeToBeUsed: "window.clearInterval($1)",
@@ -490,7 +490,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "window.document.getElementById($1)",
 	}],
 	["isEqualNode", {
-		exportCodeToBeUsed: "$1.isEqualNode($2)",
+		exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 	}],
 	["newObject", {
 		exportCodeToBeUsed: "structuredClone($1)",
@@ -499,7 +499,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "function(value) { return function() { return value; }; }($1)",
 	}],
 	["inArray", {
-		exportCodeToBeUsed: "($2 ?? Array.prototype.indexOf.call($2, $1) : -1)",
+		exportCodeToBeUsed: "($2 ? Array.prototype.indexOf.call($2, $1) : -1)",
 	}],
 	["isArray", {
 		exportCodeToBeUsed: "Array.isArray($1)",
@@ -584,9 +584,13 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	}],
 
 	// https://github.com/SAP/ui5-linter/issues/589
+	// TODO: jQuery.sap.getModulePath() has a second param sSuffix
+	// How is this handled in sap.ui.require.toUrl
 	["getModulePath", {
 		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
 	}],
+	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
+	// How is this handled in sap.ui.require.toUrl
 	["getResourcePath", {
 		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
 	}],
