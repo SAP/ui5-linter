@@ -2,6 +2,7 @@ import {Argv, ArgumentsCamelCase, CommandModule, MiddlewareFunction} from "yargs
 import {Text} from "../formatter/text.js";
 import {Json} from "../formatter/json.js";
 import {Markdown} from "../formatter/markdown.js";
+import {Html} from "../formatter/html.js";
 import {Coverage} from "../formatter/coverage.js";
 import {writeFile} from "node:fs/promises";
 import baseMiddleware from "./middlewares/base.js";
@@ -104,7 +105,7 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				describe: "Set the output format for the linter result",
 				default: "stylish",
 				type: "string",
-				choices: ["stylish", "json", "markdown"],
+				choices: ["stylish", "json", "markdown", "html"],
 			})
 			.option("ui5-config", {
 				describe: "Set a custom path for the UI5 Config (default: './ui5.yaml' if that file exists)",
@@ -182,6 +183,10 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
 		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix));
+		process.stdout.write("\n");
+	} else if (format === "html") {
+		const htmlFormatter = new Html();
+		process.stdout.write(htmlFormatter.format(res, details, getVersion(), fix));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);

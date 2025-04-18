@@ -21,6 +21,7 @@
 			- [`--details`](#--details)
 			- [`--format`](#--format)
 			- [`--fix`](#--fix)
+				- [Dry Run Mode](#dry-run-mode)
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)
 			- [`--ui5-config`](#--ui5-config)
@@ -150,7 +151,7 @@ ui5lint --details
 
 #### `--format`
 
-Choose the output format. Currently, `stylish` (default), `json` and `markdown` are supported.
+Choose the output format. Currently, `stylish` (default), `json`, `markdown` and `html` are supported.
 
 **Example:**
 ```sh
