@@ -1545,6 +1545,7 @@ declare module "sap/m/ValueCSSColor" {
 	 * 
 	 * Allowed values are {@link sap.ui.core.CSSColor}, {@link sap.m.ValueColor} or a less parameter name (string). In case the less parameter color cannot be determined, the validation fails. You need to check if less parameters are supported on control level. An empty string is also allowed and has the same effect as setting no color.
 	 *
+	 * @deprecated (since 1.135) - the concept has been discarded.
 	 * @public
 	*/
 	export default ValueCSSColor;

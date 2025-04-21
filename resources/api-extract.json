@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.134.1"
+    "version": "1.135.0"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -1467,6 +1467,24 @@
       ],
       "extends": "sap.fe.macros.MacroAPI"
     },
+    "sap.fe.macros.Field": {
+      "aggregation": [
+        "formatOptions"
+      ],
+      "event": [
+        "change",
+        "liveChange"
+      ],
+      "property": [
+        "contextPath",
+        "description",
+        "metaPath",
+        "readOnly",
+        "semanticObject",
+        "value"
+      ],
+      "extends": "sap.fe.macros.MacroAPI"
+    },
     "sap.fe.macros.KPITag": {
       "event": [
         "press"
@@ -1606,25 +1624,7 @@
         "semanticObject",
         "value"
       ],
-      "extends": "sap.fe.macros.controls.BuildingBlockWithTemplating"
-    },
-    "sap.fe.macros.Field": {
-      "aggregation": [
-        "formatOptions"
-      ],
-      "event": [
-        "change",
-        "liveChange"
-      ],
-      "property": [
-        "contextPath",
-        "description",
-        "metaPath",
-        "readOnly",
-        "semanticObject",
-        "value"
-      ],
-      "extends": "sap.fe.macros.MacroAPI"
+      "extends": "sap.ui.core.Control"
     },
     "sap.fe.macros.field.FieldFormatOptions": {
       "property": [
@@ -1757,12 +1757,15 @@
     "sap.fe.macros.table.Action": {
       "property": [
         "anchor",
+        "command",
         "enabled",
+        "enableOnSelect",
         "key",
         "placement",
         "press",
         "requiresSelection",
-        "text"
+        "text",
+        "visible"
       ],
       "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
     },
@@ -1772,13 +1775,43 @@
       ],
       "property": [
         "anchor",
+        "defaultAction",
         "key",
         "placement",
         "text"
       ],
       "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
     },
+    "sap.fe.macros.table.ActionGroupOverride": {
+      "aggregation": [
+        "actions"
+      ],
+      "property": [
+        "anchor",
+        "key",
+        "placement"
+      ],
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
+    },
+    "sap.fe.macros.table.ActionOverride": {
+      "property": [
+        "anchor",
+        "command",
+        "defaultValuesFunction",
+        "enableAutoScroll",
+        "enabled",
+        "enableOnSelect",
+        "key",
+        "navigateToInstance",
+        "placement",
+        "visible"
+      ],
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
+    },
     "sap.fe.macros.table.Column": {
+      "aggregation": [
+        "exportSettings"
+      ],
       "property": [
         "anchor",
         "header",
@@ -1792,15 +1825,59 @@
       ],
       "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
     },
+    "sap.fe.macros.table.ColumnExportSettings": {
+      "property": [
+        "property",
+        "template",
+        "type",
+        "width",
+        "wrap"
+      ],
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
+    },
+    "sap.fe.macros.table.ColumnOverride": {
+      "aggregation": [
+        "exportSettings"
+      ],
+      "property": [
+        "horizontalAlign",
+        "importance",
+        "key",
+        "width",
+        "widthIncludingColumnHeader"
+      ],
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
+    },
+    "sap.fe.macros.table.MassEdit": {
+      "aggregation": [
+        "customContent"
+      ],
+      "property": [
+        "ignoredFields",
+        "operationGroupingMode",
+        "visibleFields"
+      ],
+      "extends": "sap.fe.macros.controls.BuildingBlockObjectProperty"
+    },
+    "sap.fe.macros.table.QuickVariantSelection": {
+      "property": [
+        "paths",
+        "showCounts"
+      ],
+      "extends": "sap.fe.core.buildingBlocks.BuildingBlock"
+    },
     "sap.fe.macros.Table": {
       "aggregation": [
         "actions",
         "columns",
-        "noData"
+        "massEdit",
+        "noData",
+        "quickVariantSelection"
       ],
       "property": [
         "noData",
         "busy",
+        "condensedTableLayout",
         "contextPath",
         "creationMode",
         "disableCopyToClipboard",
@@ -1808,6 +1885,8 @@
         "enableExport",
         "enableFullScreen",
         "enablePaste",
+        "enablePastingOfComputedProperties",
+        "enableSelectAll",
         "exportRequestSize",
         "filterBar",
         "frozenColumnCount",
@@ -1822,6 +1901,7 @@
         "rowCount",
         "rowCountMode",
         "scrollThreshold",
+        "selectionLimit",
         "selectionMode",
         "type",
         "variantManagement",
@@ -1838,11 +1918,14 @@
       "aggregation": [
         "actions",
         "columns",
-        "noData"
+        "massEdit",
+        "noData",
+        "quickVariantSelection"
       ],
       "property": [
         "noData",
         "busy",
+        "condensedTableLayout",
         "contextPath",
         "creationMode",
         "disableCopyToClipboard",
@@ -1850,6 +1933,8 @@
         "enableExport",
         "enableFullScreen",
         "enablePaste",
+        "enablePastingOfComputedProperties",
+        "enableSelectAll",
         "exportRequestSize",
         "filterBar",
         "frozenColumnCount",
@@ -1864,6 +1949,7 @@
         "rowCount",
         "rowCountMode",
         "scrollThreshold",
+        "selectionLimit",
         "selectionMode",
         "type",
         "variantManagement",
@@ -1890,11 +1976,14 @@
       "aggregation": [
         "actions",
         "columns",
-        "noData"
+        "massEdit",
+        "noData",
+        "quickVariantSelection"
       ],
       "property": [
         "noData",
         "busy",
+        "condensedTableLayout",
         "contextPath",
         "creationMode",
         "disableCopyToClipboard",
@@ -1902,6 +1991,8 @@
         "enableExport",
         "enableFullScreen",
         "enablePaste",
+        "enablePastingOfComputedProperties",
+        "enableSelectAll",
         "exportRequestSize",
         "filterBar",
         "frozenColumnCount",
@@ -1919,6 +2010,7 @@
         "rowCount",
         "rowCountMode",
         "scrollThreshold",
+        "selectionLimit",
         "selectionMode",
         "type",
         "variantManagement",
@@ -1935,11 +2027,14 @@
       "aggregation": [
         "actions",
         "columns",
-        "noData"
+        "massEdit",
+        "noData",
+        "quickVariantSelection"
       ],
       "property": [
         "noData",
         "busy",
+        "condensedTableLayout",
         "contextPath",
         "creationMode",
         "disableCopyToClipboard",
@@ -1947,6 +2042,8 @@
         "enableExport",
         "enableFullScreen",
         "enablePaste",
+        "enablePastingOfComputedProperties",
+        "enableSelectAll",
         "exportRequestSize",
         "filterBar",
         "frozenColumnCount",
@@ -1964,6 +2061,7 @@
         "rowCount",
         "rowCountMode",
         "scrollThreshold",
+        "selectionLimit",
         "selectionMode",
         "type",
         "variantManagement",
@@ -3039,7 +3137,8 @@
         "rx",
         "ry",
         "title",
-        "showTitle"
+        "showTitle",
+        "stroke"
       ],
       "extends": "sap.gantt.simple.BaseShape"
     },
@@ -4530,7 +4629,8 @@
         "showIcon",
         "convertLinksToAnchorTags",
         "convertedLinksDefaultTarget",
-        "maxCharacters"
+        "maxCharacters",
+        "disableStyleAttribute"
       ],
       "extends": "sap.m.ListItemBase"
     },
@@ -7677,6 +7777,9 @@
       "extends": "sap.m.table.columnmenu.QuickActionBase"
     },
     "sap.m.table.columnmenu.QuickGroupItem": {
+      "aggregation": [
+        "quickAction"
+      ],
       "property": [
         "grouped"
       ],
@@ -7710,6 +7813,9 @@
       "extends": "sap.m.table.columnmenu.QuickActionBase"
     },
     "sap.m.table.columnmenu.QuickTotalItem": {
+      "aggregation": [
+        "quickAction"
+      ],
       "property": [
         "totaled"
       ],
@@ -8983,44 +9089,6 @@
         "enableReorder"
       ]
     },
-    "sap.sac.df.FlexAnalysis": {
-      "aggregation": [
-        "customPanels"
-      ],
-      "defaultAggregation": "customPanels",
-      "event": [
-        "onCellClick"
-      ],
-      "property": [
-        "title",
-        "showTitle",
-        "autoUpdate",
-        "configurationURI",
-        "configObject",
-        "configId",
-        "width",
-        "height",
-        "hideDesignPanel",
-        "hideStylePanel",
-        "hideMenuBar",
-        "hideStatusBar",
-        "hideToolBar",
-        "hideFilterLine",
-        "hideSideNavigation",
-        "hideLandingPage",
-        "systemName",
-        "dataSource",
-        "systemType",
-        "keepAliveInterval",
-        "clientIdentifier",
-        "dataProvider",
-        "multiDimModelId",
-        "metaPath",
-        "implicitVariableHandling",
-        "styleTemplateName"
-      ],
-      "extends": "sap.ui.core.Control"
-    },
     "sap.sac.df.Grid": {
       "event": [
         "onCellClick"
@@ -9038,7 +9106,9 @@
         "Calculations",
         "Commenting",
         "ContextMenuVariant",
-        "StylingPanelItems"
+        "StylingPanelItems",
+        "TableTemplates",
+        "TableTemplateSelection"
       ],
       "extends": "sap.ui.base.Object"
     },
@@ -9884,7 +9954,8 @@
         "iconSize",
         "coreNodeSize",
         "visible",
-        "altText"
+        "altText",
+        "nodeTitleBackground"
       ],
       "extends": "sap.suite.ui.commons.networkgraph.ElementBase"
     },
@@ -11161,6 +11232,7 @@
       ],
       "defaultAggregation": "items",
       "event": [
+        "itemPress",
         "itemSelect"
       ],
       "property": [
@@ -11222,6 +11294,7 @@
       ],
       "defaultAggregation": "item",
       "event": [
+        "itemPress",
         "itemSelect"
       ],
       "property": [
@@ -13297,7 +13370,8 @@
         "selectionVariant",
         "variantName",
         "valueTexts",
-        "semanticDates"
+        "semanticDates",
+        "tableSettings"
       ],
       "extends": "sap.ui.base.ManagedObject"
     },
@@ -14729,6 +14803,18 @@
       ],
       "extends": "sap.ui.fl.apply._internal.flexObjects.FlexObject"
     },
+    "sap.ui.fl.apply._internal.flexObjects.VariantChange": {
+      "property": [
+        "variantId"
+      ],
+      "extends": "sap.ui.fl.apply._internal.flexObjects.FlexObject"
+    },
+    "sap.ui.fl.apply._internal.flexObjects.VariantManagementChange": {
+      "property": [
+        "selector"
+      ],
+      "extends": "sap.ui.fl.apply._internal.flexObjects.FlexObject"
+    },
     "sap.ui.fl.apply._internal.flexState.DataSelector": {
       "property": [
         "parentDataSelector",
@@ -15101,6 +15187,9 @@
       "extends": "sap.ui.integration.editor.fields.viz.VizBase"
     },
     "sap.ui.integration.editor.fields.viz.IconSelect": {
+      "event": [
+        "change"
+      ],
       "property": [
         "value",
         "allowFile",
@@ -16487,6 +16576,7 @@
     },
     "sap.ui.richtexteditor.RichTextEditor": {
       "aggregation": [
+        "footer",
         "_toolbarWrapper",
         "customButtons"
       ],
@@ -19802,7 +19892,6 @@
     "sap.ui.vk.Viewer": {
       "aggregation": [
         "contentResources",
-        "overlay",
         "progressIndicator",
         "layout",
         "contentConnector",
@@ -19820,7 +19909,6 @@
         "urlClicked"
       ],
       "property": [
-        "enableOverlay",
         "enableSceneTree",
         "showSceneTree",
         "enableStepNavigation",
@@ -24558,6 +24646,7 @@
       "sap.f.IllustratedMessage": "(since 1.98) Use the {@link sap.m.IllustratedMessage} instead.",
       "sap.f.Illustration": "(since 1.98) Use the {@link sap.m.Illustration} instead.",
       "sap.fe.macros.chart.Chart": "(since 1.130) Use {@link sap.fe.macros.Chart } instead",
+      "sap.fe.macros.field.Field": "(since 1.135) Use {@link sap.fe.macros.Field } instead",
       "sap.gantt.AdhocLine": "(since 1.84) {@link sap.gantt.simple.AdhocLine} should be used instead.",
       "sap.gantt.config.BirdEyeGroup": "(since 1.64) the concept has been discarded.",
       "sap.gantt.config.ChartScheme": "(since 1.64) the concept has been discarded.",
@@ -24692,7 +24781,6 @@
       "sap.me.ProgressIndicator": "(since 1.14) This control is replaced by sap.m.ProgressIndicator",
       "sap.me.TabContainer": "(since 1.15.0) The functionality of this control is merged with the sap.m.IconTabBar. Please use the sap.m.IconTabBar instead! This control will not be supported anymore.",
       "sap.rules.ui.services.ExpressionLanguage": "(since 1.120.2) use the attribute astExpressionLanguage instead.",
-      "sap.sac.df.FlexAnalysis": "(since 1.132) Replaced by {@link sap.sac.df.DataAnalyzer DataAnalyzer} or {@link sap.sac.df.Grid Grid}.",
       "sap.suite.ui.commons.BulletChart": "(since 1.34) this control is a mere wrapper for sap.suite.ui.microchart.BulletMicroChart.",
       "sap.suite.ui.commons.BulletChartData": "(since 1.34) this control is a mere wrapper for sap.suite.ui.microchart.BulletMicroChartData.",
       "sap.suite.ui.commons.BusinessCard": "(since 1.32) Deprecated. Standard Fiori technology should be used.",
@@ -24845,6 +24933,7 @@
       "jQuery.sap.history": "(since 1.19.1) Please use {@link sap.ui.core.routing.Route} instead.",
       "jQuery.sap.log.Logger": "(since 1.58) use {@link module:sap/base/Log.getLogger} instead",
       "jQuery.sap.Version": "(since 1.58) use {@link module:sap/base/util/Version} instead",
+      "module:sap/base/i18n/ResourceBundle._getFallbackLocales": "(since 1.135) Use {@link sap.base.i18n.LanguageFallback.getFallbackLocales} instead.",
       "module:sap/base/util/UriParameters": "(since 1.119) See class description for details.",
       "sap.ui.app.Application": "(since 1.15.1) The Component class is enhanced to take care about the Application code.",
       "sap.ui.app.MockServer": "(since 1.15.1) The mock server code has been moved to sap.ui.core.util - see {@link sap.ui.core.util.MockServer}",
@@ -25264,6 +25353,46 @@
       "sap.m.DateTimeInputType.DateTime": "(since 1.32.8) Instead, use dedicated <code>sap.m.DatePicker</code> and <code>sap.m.TimePicker</code> controls.",
       "sap.m.DateTimeInputType.Time": "(since 1.32.8) Instead, use dedicated <code>sap.m.TimePicker</code> control.",
       "sap.m.FrameType.TwoThirds": "(since 1.48.0) ",
+      "sap.m.IllustratedMessageSize.Dialog": "(since 1.135) replaced by {@link sap.m.IllustratedMessageSize.Medium}",
+      "sap.m.IllustratedMessageSize.Dot": "(since 1.135) replaced by {@link sap.m.IllustratedMessageSize.ExtraSmall}",
+      "sap.m.IllustratedMessageSize.Scene": "(since 1.135) replaced by {@link sap.m.IllustratedMessageSize.Large}",
+      "sap.m.IllustratedMessageSize.Spot": "(since 1.135) replaced by {@link sap.m.IllustratedMessageSize.Small}",
+      "sap.m.IllustratedMessageType.AddColumn": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.AddingColumns}",
+      "sap.m.IllustratedMessageType.AddPeople": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.AddPeopleToCalendar}",
+      "sap.m.IllustratedMessageType.EmptyCalendar": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoActivities}",
+      "sap.m.IllustratedMessageType.EmptyList": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoEntries}",
+      "sap.m.IllustratedMessageType.ErrorScreen": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.UnableToUpload}",
+      "sap.m.IllustratedMessageType.FilterTable": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.FilteringColumns}",
+      "sap.m.IllustratedMessageType.GroupTable": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.GroupingColumns}",
+      "sap.m.IllustratedMessageType.NoDimensionsSet": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoChartData}",
+      "sap.m.IllustratedMessageType.NoMailV1": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoMail}",
+      "sap.m.IllustratedMessageType.NoSavedItemsV1": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoSavedItems}",
+      "sap.m.IllustratedMessageType.NoTasksV1": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoTasks}",
+      "sap.m.IllustratedMessageType.ReloadScreen": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}",
+      "sap.m.IllustratedMessageType.ResizeColumn": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.ResizingColumns}",
+      "sap.m.IllustratedMessageType.SearchEarth": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.BeforeSearch}",
+      "sap.m.IllustratedMessageType.SearchFolder": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoSearchResults}",
+      "sap.m.IllustratedMessageType.SimpleBalloon": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}",
+      "sap.m.IllustratedMessageType.SimpleBell": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoNotifications}",
+      "sap.m.IllustratedMessageType.SimpleCalendar": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoActivities}",
+      "sap.m.IllustratedMessageType.SimpleCheckMark": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.KeyTask}",
+      "sap.m.IllustratedMessageType.SimpleEmptyDoc": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoData}",
+      "sap.m.IllustratedMessageType.SimpleEmptyList": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoEntries}",
+      "sap.m.IllustratedMessageType.SimpleError": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.UnableToUpload}",
+      "sap.m.IllustratedMessageType.SimpleMagnifier": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.BeforeSearch}",
+      "sap.m.IllustratedMessageType.SimpleMail": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoMail}",
+      "sap.m.IllustratedMessageType.SimpleNoSavedItems": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoSavedItems}",
+      "sap.m.IllustratedMessageType.SimpleNotFoundMagnifier": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoSearchResults}",
+      "sap.m.IllustratedMessageType.SimpleReload": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.UnableToLoad}",
+      "sap.m.IllustratedMessageType.SimpleTask": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoTasks}",
+      "sap.m.IllustratedMessageType.SleepingBell": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoNotifications}",
+      "sap.m.IllustratedMessageType.SortColumn": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.SortingColumns}",
+      "sap.m.IllustratedMessageType.SuccessBalloon": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}",
+      "sap.m.IllustratedMessageType.SuccessCheckMark": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.KeyTask}",
+      "sap.m.IllustratedMessageType.SuccessHighFive": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.ReceiveAppreciation}",
+      "sap.m.IllustratedMessageType.SuccessScreen": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.KeyTask}",
+      "sap.m.IllustratedMessageType.Tent": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.NoData}",
+      "sap.m.IllustratedMessageType.UploadCollection": "(since 1.135) replaced by {@link sap.m.IllustratedMessageType.DragFilesToUpload}",
       "sap.m.InputType.Date": "(since 1.9.1) Please use dedicated {@link sap.m.DatePicker} to create date input.",
       "sap.m.InputType.Datetime": "(since 1.9.1) Please use dedicated {@link sap.m.DateTimePicker} control to create date-time input.",
       "sap.m.InputType.DatetimeLocale": "(since 1.9.1) Please use dedicated {@link sap.m.DateTimePicker} control create date-time input.",
@@ -25492,6 +25621,7 @@
       "sap.gantt.config.DEFAULT_TIME_AXIS": "(since 1.63) Using these constants may result in errors in your application. Use <code> new AxisTimeStrategyBase() </code> instead.",
       "sap.gantt.config.EMPTY_TOOLBAR_SCHEME": "(since 1.63) Using these constants may result in errors in your application.",
       "sap.m.InputODataSuggestProvider": "(since 1.120) In case of SAPUI5, see demokit sample 'Smart Field with ValueList Annotation'. In case of OpenUI5, see demokit sample 'Input - Suggestions - Dynamic'.",
+      "sap.m.ValueCSSColor": "(since 1.135) the concept has been discarded.",
       "sap.makit": "(since 1.38) MAKIT charts have been replaced with sap.viz and vizFrame in 1.38. This library will not be supported anymore from 1.38.",
       "sap.me": "(since 1.34) ",
       "sap.ui.commons": "(since 1.38) ",
@@ -25542,6 +25672,7 @@
       "sap.ui.fl.write._internal.connectors.ObjectStorageConnector": "(since 1.84) ",
       "sap.ui.generic.app.navigation": "(since 1.83.0) ",
       "sap.ui.generic.app.navigation.service": "(since 1.83.0) ",
+      "sap.ui.layout.cssgrid.CSSGridGapShortHand": "(since 1.135) use {@link sap.ui.core.CSSGapShortHand} instead",
       "sap.ui.layout.form.GridElementCells": "(since 1.67.0) as <code>sap.ui.commons</code> library is deprecated and the <code>GridLayout</code> must not be used in responsive applications. Please use <code>ResponsiveGridLayout</code> or <code>ColumnLayout</code> instead.",
       "module:sap/ui/mdc/odata/v4/ValueHelpDelegate": "This module should not be used and will be removed in future versions!",
       "sap.ui.mdc.enum": "(since 1.115.0) please see {@link sap.ui.mdc.enums}",
@@ -25583,6 +25714,7 @@
       "sap.ui.table.TreeAutoExpandMode": "(since 1.120) replaced by <code>sap.ui.model.TreeAutoExpandMode</code>"
     },
     "UI5Interface": {
+      "sap.tnt.IToolHeader": "(since 1.135) This interface is not needed anymore. The <code>ToolPage</code> now accepts any control as a header or subheader.",
       "sap.ui.commons.FormattedTextViewControl": "(since 1.38) the concept has been discarded.",
       "sap.ui.commons.ToolbarItem": "(since 1.38) (altogether with sap.ui.commons.Toolbar). Use sap.m.Toolbar instead.",
       "jQuery.sap.storage.Storage": "(since 1.120) Use {@link module:sap/ui/util/Storage sap/ui/util/Storage} instead.",

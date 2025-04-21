@@ -102,6 +102,7 @@ declare module "sap/ui/layout/cssgrid/CSSGridGapShortHand" {
 	/**
 	 * A string type that represents a short hand CSS grid gap.
 	 *
+	 * @deprecated (since 1.135) - use {@link sap.ui.core.CSSGapShortHand} instead
 	 * @public
 	 * @since 1.60.0
 	*/
