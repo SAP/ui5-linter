@@ -226,7 +226,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/core/syncStyleClass",
 	}],
 	["setObject", {
-		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "set",
+		// Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
+		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$moduleIdentifier.set($1, $2, $3)",
 	}],
 	["getObject", {
 		// TODO: Might not be able to migrate. API is not 1:1
