@@ -82,6 +82,8 @@ var v = jQuery.sap.Version("3.6.2");
 var v2 = new jQuery.sap.Version("3.6.2");
 myDialog = jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), myDialog);
 jQuery.sap.setObject.set("");
+jQuery.sap.setObject.set(undefined);
+jQuery.sap.setObject.set(null);
 jQuery.sap.setObject("foo.foo.foo", bar);
 jQuery.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
 var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } });
