@@ -175,7 +175,9 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	} else if (apiName === "jQuery.sap.setObject") {
 		const args = [];
 		fixHints.exportCodeToBeUsed.args ??= [];
-		if (!fixHints.exportCodeToBeUsed.args?.length || !fixHints.exportCodeToBeUsed.args[0]) {
+		if (!fixHints.exportCodeToBeUsed.args?.length ||
+			!fixHints.exportCodeToBeUsed.args[0] ||
+			["undefined", "null"].includes(fixHints.exportCodeToBeUsed.args[0])) {
 			fixHints.exportCodeToBeUsed.args[0] = "\"\"";
 		}
 		// Cleanup the code to prevent unnecessary putting of undefined values
