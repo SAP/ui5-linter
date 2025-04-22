@@ -229,7 +229,10 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "set",
 	}],
 	["getObject", {
-		moduleName: "sap/base/util/ObjectPath", exportNameToBeUsed: "get",
+		// TODO: Might not be able to migrate. API is not 1:1
+		// Getter creates empty object and sub objects with null values.
+		// Requires code touch
+		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$1 && $moduleIdentifier.get($1, $3)",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/542
 	["containsOrEquals", {
@@ -507,9 +510,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 	}],
 	["newObject", {
-		// TODO: Decide on structuredClone or {...object}
-		// structuredClone can throw an exception in some cases
-		exportCodeToBeUsed: "structuredClone($1)",
+		exportCodeToBeUsed: "Object.create($1 || null)",
 	}],
 	["getter", {
 		exportCodeToBeUsed: "function(value) { return function() { return value; }; }($1)",
