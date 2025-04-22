@@ -209,9 +209,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		*/
 		moduleName: "sap/base/util/merge",
 	}],
-	["now", { // TODO: Check: not working
-		// TODO MB: Documentation and GH issue refers to "sap/base/util/now" as replacement
-		exportCodeToBeUsed: "window.performance.now",
+	["now", {
+		moduleName: "sap/base/util/now",
 	}],
 	["properties", {
 		// TODO MB: Missing exportNameToBeUsed: "create"
@@ -283,7 +282,9 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/events/F6Navigation", exportNameToBeUsed: "handleF6GroupNavigation",
 	}],
 	["isMouseEventDelayed", {
-		moduleName: "sap/ui/events/isMouseEventDelayed",
+		// It used to be a property and now is a function that needs to be called
+		// TODO: Check why exportCodeToBeUsed breaks in tests
+		moduleName: "sap/ui/events/isMouseEventDelayed", // exportCodeToBeUsed: "$moduleIdentifier()",
 	}],
 	["isSpecialKey", {
 		// Note: The new isSpecialKey module does not cover legacy edge cases where
@@ -506,6 +507,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 	}],
 	["newObject", {
+		// TODO: Decide on structuredClone or {...object}
+		// structuredClone can throw an exception in some cases
 		exportCodeToBeUsed: "structuredClone($1)",
 	}],
 	["getter", {
