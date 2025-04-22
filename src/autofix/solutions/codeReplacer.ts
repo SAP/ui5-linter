@@ -54,9 +54,10 @@ export default function generateSolutionCodeReplacer(
 			identifierIndex++;
 		}
 
-		const value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
+		let value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
 			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), patchArguments(arg, apiName));
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
+		value = value.replaceAll(/\$\d+/g, "undefined"); // Some placeholders might be "empty" in the original code
 
 		// Calculate the replacement position
 		// It cannot be derived from the fixHintsGenerator as it works on the compiled source file.
