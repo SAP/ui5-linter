@@ -172,7 +172,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		} else {
 			fixHints.exportCodeToBeUsed = undefined; // We don't want to process in such a case
 		}
-	} else if (apiName === "jQuery.sap.setObject") {
+	} else if (["jQuery.sap.setObject", "jQuery.sap.getObject"].includes(apiName ?? "")) {
 		const args = [];
 		fixHints.exportCodeToBeUsed.args ??= [];
 		if (!fixHints.exportCodeToBeUsed.args?.length ||
@@ -180,12 +180,14 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			["undefined", "null"].includes(fixHints.exportCodeToBeUsed.args[0])) {
 			fixHints.exportCodeToBeUsed.args[0] = "\"\"";
 		}
-		// Cleanup the code to prevent unnecessary putting of undefined values
-		for (let i = 1; i <= fixHints.exportCodeToBeUsed.args.length; i++) {
-			args.push(`$${i}`);
-		}
+		if (apiName === "jQuery.sap.setObject") {
+			// Cleanup the code to prevent unnecessary putting of undefined values
+			for (let i = 1; i <= fixHints.exportCodeToBeUsed.args.length; i++) {
+				args.push(`$${i}`);
+			}
 
-		fixHints.exportCodeToBeUsed.name = `$moduleIdentifier.set(${args.join(", ")})`;
+			fixHints.exportCodeToBeUsed.name = `$moduleIdentifier.set(${args.join(", ")})`;
+		}
 	}
 
 	return fixHints;

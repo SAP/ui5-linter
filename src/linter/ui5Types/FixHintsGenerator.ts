@@ -233,7 +233,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		// TODO: Might not be able to migrate. API is not 1:1
 		// Getter creates empty object and sub objects with null values.
 		// Requires code touch
-		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$1 && $moduleIdentifier.get($1, $3)",
+		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$moduleIdentifier.get($1, $3)",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/542
 	["containsOrEquals", {

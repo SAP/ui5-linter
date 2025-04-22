@@ -88,7 +88,7 @@ jQuery.sap.setObject("foo.foo.foo", bar);
 jQuery.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
 var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } });
 
-https://github.com/SAP/ui5-linter/issues/586
+// https://github.com/SAP/ui5-linter/issues/586
 var myFancyControl = jQuery(".fancyContainer");
 
 // https://github.com/SAP/ui5-linter/issues/578
