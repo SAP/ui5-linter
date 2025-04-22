@@ -7,7 +7,7 @@ SPDX-PackageComment = "The code in this project may include calls to APIs (“AP
 [[annotations]]
 path = "**"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2024 SAP SE or an SAP affiliate company and UI5 linter contributors"
+SPDX-FileCopyrightText = "2025 SAP SE or an SAP affiliate company and UI5 linter contributors"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
@@ -20,7 +20,7 @@ SPDX-FileComment = "This file is a copy of sap/ui/core/mvc/EventHandlerResolver.
 [[annotations]]
 path = "src/linter/xmlTemplate/lib/JSTokenizer.js"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2009-2024 SAP SE or an SAP affiliate company"
+SPDX-FileCopyrightText = "2025 SAP SE or an SAP affiliate company"
 SPDX-License-Identifier = "Apache-2.0"
 SPDX-FileComment = "This file is a copy of sap/base/util/JSTokenizer.js from the OpenUI5 project."
 
@@ -62,7 +62,7 @@ SPDX-FileComment = "This file is a copy of sap/base/strings/escapeRegExp.js from
 [[annotations]]
 path = "src/formatter/lib/resolveLinks.ts"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2009-2024 SAP SE or an SAP affiliate company"
+SPDX-FileCopyrightText = "2025 SAP SE or an SAP affiliate company"
 SPDX-License-Identifier = "Apache-2.0"
 SPDX-FileComment = "This file contains parts of the https://github.com/SAP/ui5-builder file lib/processors/jsdoc/lib/transformApiJson.cjs which itself is a copy from the OpenUI5 file lib/jsdoc/transformApiJson.js."
 
@@ -76,7 +76,7 @@ SPDX-FileComment = "TypeScript definitions created from https://github.com/SAP/u
 [[annotations]]
 path = "test/fixtures/transpiler/amd/sapUiTestGenericUtils.js"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2009-2024 SAP SE or an SAP affiliate company"
+SPDX-FileCopyrightText = "2025 SAP SE or an SAP affiliate company"
 SPDX-License-Identifier = "Apache-2.0"
 SPDX-FileComment = "This file is a copy of sap/ui/test/generic/Utils.js from the OpenUI5 project."
 
