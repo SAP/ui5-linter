@@ -290,8 +290,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	}],
 	["isMouseEventDelayed", {
 		// It used to be a property and now is a function that needs to be called
-		// TODO: Check why exportCodeToBeUsed breaks in tests
-		moduleName: "sap/ui/events/isMouseEventDelayed", // exportCodeToBeUsed: "$moduleIdentifier()",
+		moduleName: "sap/ui/events/isMouseEventDelayed", exportCodeToBeUsed: "$moduleIdentifier()",
 	}],
 	["isSpecialKey", {
 		// Note: The new isSpecialKey module does not cover legacy edge cases where
@@ -677,7 +676,13 @@ export default class FixHintsGenerator {
 			while (current && ts.isPropertyAccessExpression(current.parent)) {
 				current = current.parent;
 			}
-			if (ts.isCallExpression(current.parent)) {
+
+			if (ts.isCallExpression(current.parent) &&
+			// if a prop is wrapped in a function, then current.parent is the call expression
+			// which is wrong. That's why check if parent expression is actually the current node
+			// which would ensure that the prop is actually a call expression.
+			// i.e. jQuery.sap.functionName(args) vs assert(jQuery.sap.functionName)
+				current.parent.expression === current) {
 				callExpression = current.parent;
 			}
 			exportCodeToBeUsed = {
