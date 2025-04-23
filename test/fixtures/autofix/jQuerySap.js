@@ -84,7 +84,13 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var v2 = new jQuery.sap.Version("3.6.2");
 	myDialog = jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), myDialog);
 	jQuery.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
+	jQuery.sap.setObject(undefined, "Miller", { name: { firstname: "me" } });
+	jQuery.sap.setObject("", "Miller", { name: { firstname: "me" } });
+	jQuery.sap.setObject(null, "Miller", { name: { firstname: "me" } });
 	var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } });
+	var myFirstName2 = jQuery.sap.getObject("", 0, { name: { firstname: "me" } });
+	var myFirstName3 = jQuery.sap.getObject(undefined, 0, { name: { firstname: "me" } });
+	var myFirstName4 = jQuery.sap.getObject(null, 0, { name: { firstname: "me" } });
 
 	// https://github.com/SAP/ui5-linter/issues/542
 	var isBChildOfAOrEqualA = jQuery.sap.containsOrEquals(document.getElementById("controlA"), document.getElementById("controlB"));

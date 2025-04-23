@@ -188,6 +188,10 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 
 			fixHints.exportCodeToBeUsed.name = `$moduleIdentifier.set(${args.join(", ")})`;
 		}
+	} else if (apiName === "jQuery.sap.getModulePath") {
+		if (fixHints.exportCodeToBeUsed.args?.[0]) {
+			fixHints.exportCodeToBeUsed.args[0] = fixHints.exportCodeToBeUsed.args[0].replaceAll(".", "/");
+		}
 	}
 
 	return fixHints;
