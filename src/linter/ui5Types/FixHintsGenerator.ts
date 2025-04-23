@@ -617,6 +617,10 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/530
+	// TODO: Discuss with the team!
+	// URLSearchParams returns an api close to getUriParameters.
+	// However, there are differences. For example .get() returns always a string | undefined
+	// whereas getUriParameters returns a string | string[] | undefined
 	["getUriParameters", {
 		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
 	}],
