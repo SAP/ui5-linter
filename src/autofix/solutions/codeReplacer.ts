@@ -212,6 +212,23 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // Too much uncertainty. We cannot process this case
 			log.verbose(`Autofix skipped for jQuery.sap.extend. Transpilation is too ambiguous.`);
 		}
+	} else if (["jQuery.sap.delayedCall", "jQuery.sap.intervalCall"].includes(apiName ?? "")) {
+		const args = fixHints.exportCodeToBeUsed.args ?? [];
+		if (args.length < 3) {
+			fixHints = undefined; // We don't know how to handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+			return fixHints;
+		}
+
+		let fnBinding = "$3.bind($2)";
+		if (/^("|'|`).*("|'|`)$/g.exec(args[2])) {
+			fnBinding = "$2[$3].bind($2)";
+		}
+
+		const apiCall = apiName === "jQuery.sap.delayedCall" ? "setTimeout" : "setInterval";
+		const callArgs = args.length > 3 ? `, ...$4` : "";
+		fixHints.exportCodeToBeUsed.name =
+			`window.${apiCall}(${fnBinding}, $1${callArgs})`;
 	}
 
 	return fixHints;

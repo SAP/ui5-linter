@@ -18,9 +18,13 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 
 	var myObject = {};
 	myObject.myFunction = function(param1, param2) {};
-	var delayedCallId = jQuery.sap.delayedCall(1000, myObject, "myFunction", ["myParam1", "myParam2"]);
+	var delayedCallId = jQuery.sap.delayedCall(1000, myObject, "myFunction");
+	var delayedCallId2 = jQuery.sap.delayedCall(1000, myObject, myObject.myFunction, ["myParam1"]);
+	var delayedCallId3 = jQuery.sap.delayedCall(1000, window, Array.isArray, ["myParam1"]);
 	jQuery.sap.clearDelayedCall(delayedCallId);
-	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction", ["myParam1", "myParam2"]);
+	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction");
+	var intervalCallId2 = jQuery.sap.intervalCall(1000, myObject, myObject.myFunction, ["myParam1"]);
+	var intervalCallId3 = jQuery.sap.intervalCall(1000, window, Array.isArray, ["myParam1"]);
 	jQuery.sap.clearIntervalCall(intervalCallId);
 
 	var element = jQuery.sap.domById("popup");
