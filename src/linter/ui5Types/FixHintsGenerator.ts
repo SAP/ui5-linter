@@ -211,7 +211,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 			Only in case of a deep clone (first argument is true; explicitly type "boolean"),
 			the merge module shall be used (omitting the first argument)
 		*/
-		moduleName: "sap/base/util/merge",
+		moduleName: "sap/base/util/merge", exportCodeToBeUsed: "$moduleIdentifier($1, $2, $3)",
 	}],
 	["now", {
 		moduleName: "sap/base/util/now",

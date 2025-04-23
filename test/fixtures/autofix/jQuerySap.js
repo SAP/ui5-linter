@@ -77,6 +77,14 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var isObjectPlainObject = jQuery.isPlainObject({});
 	var parsedJS = jQuery.sap.parseJS("{name: 'me'}");
 	var clone = jQuery.sap.extend(true, {}, { name: "me" });
+	var clone2 = jQuery.sap.extend({}, myObject);
+	var clone3 = jQuery.sap.extend([1, 2, 3], [6, 7, 8, 9]);
+	var clone4 = jQuery.sap.extend([1, undefined], [6, 7, 8, 9]);
+	var clone5 = jQuery.sap.extend(null, [1, null]);
+	var clone6 = jQuery.sap.extend(null, [1, null]);
+	var clone7 = jQuery.sap.extend(undefined, [undefined]);
+	var clone8 = jQuery.sap.extend(var1, var2); // Do not migrate. We don't know the types of var1 and var2
+	var clone9 = jQuery.sap.extend(12, [undefined]); // Do not migrate. We don't know how to handle this
 	var timestampsnumber = jQuery.sap.now();
 	var props = jQuery.sap.properties({ url: sap.ui.require.toUrl(sap.ui.require.toUrl("testdata/test.properties")) });
 	var myUid = jQuery.sap.uid();
