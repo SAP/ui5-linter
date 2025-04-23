@@ -145,11 +145,15 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		return fixHints;
 	}
 
-	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.length) {
-		const isQueryStringRegex = /\?[^\s#]+/g;
-		if (isQueryStringRegex.test(fixHints.exportCodeToBeUsed.args[0])) {
-			fixHints.exportCodeToBeUsed.name = "new URL($1).searchParams";
+	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.[0]) {
+		let dummyUrl = "";
+		try {
+			new URL(fixHints.exportCodeToBeUsed.args[0]);
+		} catch (_e) {
+			// Adding a domain to the URL to prevent errors and parse correctly the query string
+			dummyUrl = ", \"http://dummy.local\"";
 		}
+		fixHints.exportCodeToBeUsed.name = `new URL($1${dummyUrl}).searchParams`;
 	} else if (apiName?.startsWith("jQuery.sap.keycodes")) {
 		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.keycodes", "$moduleIdentifier");
 	} else if (apiName?.startsWith("jQuery.sap.PseudoEvents")) {
