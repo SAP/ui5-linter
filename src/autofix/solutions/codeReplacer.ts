@@ -8,6 +8,9 @@ import {
 } from "../autofix.js";
 import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+import {getLogger} from "@ui5/logger";
+
+const log = getLogger("linter:autofix:codeReplacer");
 
 /**
  * Replaces the existing code with a specific snippet.
@@ -173,7 +176,6 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed = undefined; // We don't want to process in such a case
 		}
 	} else if (["jQuery.sap.setObject", "jQuery.sap.getObject"].includes(apiName ?? "")) {
-		const args = [];
 		fixHints.exportCodeToBeUsed.args ??= [];
 		if (!fixHints.exportCodeToBeUsed.args?.length ||
 			!fixHints.exportCodeToBeUsed.args[0] ||
@@ -182,17 +184,44 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		}
 		if (apiName === "jQuery.sap.setObject") {
 			// Cleanup the code to prevent unnecessary putting of undefined values
-			for (let i = 1; i <= fixHints.exportCodeToBeUsed.args.length; i++) {
-				args.push(`$${i}`);
-			}
-
-			fixHints.exportCodeToBeUsed.name = `$moduleIdentifier.set(${args.join(", ")})`;
+			fixHints.exportCodeToBeUsed.name =
+				`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 		}
 	} else if (apiName === "jQuery.sap.getModulePath") {
 		if (fixHints.exportCodeToBeUsed.args?.[0]) {
 			fixHints.exportCodeToBeUsed.args[0] = fixHints.exportCodeToBeUsed.args[0].replaceAll(".", "/");
 		}
+	} else if (apiName === "jQuery.sap.extend") {
+		const args = fixHints.exportCodeToBeUsed.args ?? [];
+		const isObject = /^\{.*\}/g;
+		const isArray = /^\[.*\]/g;
+
+		if (["true", "null", "undefined"].includes(args[0]) ||
+			(args.length === 2 && isArray.exec(args[0])) ||
+			(args.length === 3 && isArray.exec(args[1]))) {
+			// Deep clone
+			fixHints.exportCodeToBeUsed.name =
+				`$moduleIdentifier(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args ?? [])})`;
+		} else if (args.length === 2 && isObject.exec(args[0])) {
+			fixHints.exportCodeToBeUsed.name = `{...$1, ...$2}`;
+			delete fixHints.moduleName;
+		} else if (args.length === 3 && isObject.exec(args[1])) {
+			fixHints.exportCodeToBeUsed.name = `{...$2, ...$3}`;
+			delete fixHints.moduleName;
+		} else {
+			fixHints = undefined; // Too much uncertainty. We cannot process this case
+			log.verbose(`Autofix skipped for jQuery.sap.extend. Transpilation is too ambiguous.`);
+		}
 	}
 
 	return fixHints;
+}
+
+function cleanRedundantArguments(availableArgs: string[]) {
+	const args = [];
+	for (let i = 1; i <= availableArgs.length; i++) {
+		args.push(`$${i}`);
+	}
+
+	return args.join(", ");
 }
