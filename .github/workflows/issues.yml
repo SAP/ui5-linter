@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: '00 20 * * *'
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   stale:
     name: Flag and close stale issues

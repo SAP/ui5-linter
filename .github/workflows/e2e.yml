@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+# No permissions are required for this workflow
+permissions: {}
+
 jobs:
   e2e:
     runs-on: ubuntu-24.04
