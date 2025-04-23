@@ -127,7 +127,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "entries",
 	}],
 	["validateUrl", {
-		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "add",
+		moduleName: "sap/base/security/URLListValidator", exportNameToBeUsed: "validate",
 	}],
 	["removeUrlWhitelist", {
 		moduleName: "sap/base/security/URLListValidator",
