@@ -46,6 +46,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/522
 	["log", {
 		moduleName: "sap/base/Log",
+		// exportCodeToBeUsed: "$moduleIdentifier.getLogger()", // TODO: This breaks. Check why
 	}],
 	["log.addLogListener", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "addLogListener",
@@ -61,6 +62,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	["log.getLevel", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
+	}],
+	["log.setLevel", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "setLevel",
 	}],
 	["log.getLog", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
@@ -213,8 +217,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/base/util/now",
 	}],
 	["properties", {
-		// TODO MB: Missing exportNameToBeUsed: "create"
-		moduleName: "sap/base/util/Properties",
+		moduleName: "sap/base/util/Properties", exportNameToBeUsed: "create",
 	}],
 	["uid", {
 		moduleName: "sap/base/util/uid",
