@@ -489,20 +489,14 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["padRight", {
 		exportCodeToBeUsed: "$1.padEnd($3, $2)",
 	}],
-	// TODO: $3 can be a function, so it should be $3.bind($2).
-	// Also inside of the jquery.sap.delayedCall if $3 is a string, then
-	// $2[$3].bind($2), so we always have the correct context
 	["delayedCall", {
-		exportCodeToBeUsed: "window.setTimeout($2[$3], $1, ...$4)",
+		exportCodeToBeUsed: "window.setTimeout($3.bind($2), $1)",
 	}],
 	["clearDelayedCall", {
 		exportCodeToBeUsed: "window.clearTimeout($1)",
 	}],
-	// TODO: $3 can be a function, so it should be $3.bind($2).
-	// Also inside of the jquery.sap.intervalCall if $3 is a string, then
-	// $2[$3].bind($2), so we always have the correct context
 	["intervalCall", {
-		exportCodeToBeUsed: "window.setInterval($2[$3], $1, ...$4)",
+		exportCodeToBeUsed: "window.setInterval($3.bind($2), $1)",
 	}],
 	["clearIntervalCall", {
 		exportCodeToBeUsed: "window.clearInterval($1)",
