@@ -936,7 +936,7 @@ export default class SourceFileLinter {
 		if (ts.isElementAccessExpression(exprNode) ||
 			ts.isPropertyAccessExpression(exprNode) ||
 			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode, this.extractNamespace(exprNode));
+			fixHints = this.getJquerySapFixHints(exprNode);
 		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
@@ -1449,7 +1449,7 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.getJquerySapFixHints(node, namespace ?? "jQuery");
+			const fixHints = this.getJquerySapFixHints(node);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
@@ -1617,7 +1617,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-				}, node, this.getFixHints(node) ?? this.getJquerySapFixHints(node, namespace));
+				}, node, this.getGlobalsFixHints(node));
 			}
 		}
 	}
@@ -1805,11 +1805,11 @@ export default class SourceFileLinter {
 		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
 	}
 
-	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
+	getGlobalsFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
 		return this.#fixHintsGenerator?.getGlobalsFixHints(node) ?? undefined;
 	}
 
-	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string) {
-		return this.#fixHintsGenerator?.getJquerySapFixHints(node, namespace);
+	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression) {
+		return this.#fixHintsGenerator?.getJquerySapFixHints(node);
 	}
 }

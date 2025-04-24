@@ -21,8 +21,8 @@ export default class FixHintsGenerator {
 	}
 
 	public getJquerySapFixHints(
-		node: ts.CallExpression | ts.AccessExpression, namespace: string
+		node: ts.CallExpression | ts.AccessExpression
 	): FixHints | undefined {
-		return this.jquerySapGenerator.getFixHints(node, namespace);
+		return this.jquerySapGenerator.getFixHints(node);
 	}
 }

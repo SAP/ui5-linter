@@ -81,6 +81,12 @@ export default class GlobalsFixHintsGenerator {
 		let exportName;
 		while (!moduleSymbol && searchStack.length) {
 			const moduleName = searchStack.join("/");
+			if (moduleName === "jQuery") {
+				return {
+					fixHints: {moduleName: "sap/ui/thirdparty/jquery", propertyAccess: searchStack.join(".")},
+					propertyAccessNode: partNodes[searchStack.length - 1],
+				};
+			}
 			moduleSymbol = this.ambientModuleCache.findModuleForName(moduleName);
 			if (!moduleSymbol) {
 				const libraryModuleName = `${moduleName}/library`;
