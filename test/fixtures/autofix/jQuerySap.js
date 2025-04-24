@@ -56,7 +56,8 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	// https://github.com/SAP/ui5-linter/issues/527
 	var textCamelVase = jQuery.sap.camelCase(" First Name Last ");
 	var textUpperCase = jQuery.sap.charToUpperCase("myValue", 0);
-	var textUpperCase1 = jQuery.sap.charToUpperCase("myValue", 3);
+	// capitalize does not have positional parameter, therefore we cannot migrate this case
+	var textUpperCase1 = jQuery.sap.charToUpperCase("myValue", 5);
 	var textUpperCase2 = jQuery.sap.charToUpperCase("myValue");
 	var textUpperCase3 = jQuery.sap.charToUpperCase("myValue", -5);
 	var textUpperCase4 = jQuery.sap.charToUpperCase("myValue", 99);

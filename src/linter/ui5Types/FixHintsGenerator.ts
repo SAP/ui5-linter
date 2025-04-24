@@ -45,7 +45,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	// https://github.com/SAP/ui5-linter/issues/522
 	["log", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.getLogger(\"\")",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.getLogger()",
 	}],
 	["log.addLogListener", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "addLogListener",
@@ -62,6 +62,18 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["log.fatal", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "fatal",
 	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
+	["log.info", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "info",
+	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
+	["log.trace", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "trace",
+	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
+	["log.warning", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "warning",
+	}],
 	["log.getLevel", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
 	}],
@@ -76,10 +88,6 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	["log.getLogger", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogger",
-	}],
-	// Note: Not 1:1 compatible. Does not return an instance of the logger
-	["log.info", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "info",
 	}],
 	["log.Level.NONE", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.NONE",
@@ -105,17 +113,14 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["log.Level", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "Level",
 	}],
+	["log.LogLevel", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level",
+	}],
 	["log.logSupportInfo", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "logSupportInfo",
 	}],
 	["log.removeLogListener", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "removeLogListener",
-	}],
-	["log.trace", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "trace",
-	}],
-	["log.warning", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "warning",
 	}],
 	["log.isLoggable", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "isLoggable",
@@ -180,7 +185,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 			In all other cases, this migration must not be applied.
 		*/
 		// TODO MB: capitalize does not accept a second parameter
-		exportCodeToBeUsed: "$moduleIdentifier($1, $2)",
+		exportCodeToBeUsed: "$moduleIdentifier($1)",
 	}],
 	["escapeRegExp", {
 		moduleName: "sap/base/strings/escapeRegExp",
