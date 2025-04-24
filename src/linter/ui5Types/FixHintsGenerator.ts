@@ -45,18 +45,20 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	// https://github.com/SAP/ui5-linter/issues/522
 	["log", {
-		moduleName: "sap/base/Log",
-		// exportCodeToBeUsed: "$moduleIdentifier.getLogger()", // TODO: This breaks. Check why
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.getLogger(\"\")",
 	}],
 	["log.addLogListener", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "addLogListener",
 	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.debug", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "debug",
 	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.error", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "error",
 	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.fatal", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "fatal",
 	}],
@@ -75,8 +77,30 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["log.getLogger", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogger",
 	}],
+	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.info", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "info",
+	}],
+	["log.Level.NONE", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.NONE",
+	}],
+	["log.Level.FATAL", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.FATAL",
+	}],
+	["log.Level.ERROR", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.ERROR",
+	}],
+	["log.Level.WARNING", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.WARNING",
+	}],
+	["log.Level.INFO", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.INFO",
+	}],
+	["log.Level.TRACE", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.TRACE",
+	}],
+	["log.Level.ALL", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.ALL",
 	}],
 	["log.Level", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "Level",
@@ -315,6 +339,12 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	// https://github.com/SAP/ui5-linter/issues/555
 
 	// TODO MB: Missing replacement for jQuery.sap.measure.getRequestTimings?
+	["measure.getRequestTimings", {
+		exportCodeToBeUsed: "performance.getEntriesByType(\"resource\")",
+	}],
+	["measure.setRequestBufferSize", {
+		exportCodeToBeUsed: "performance.setResourceTimingBufferSize($1)",
+	}],
 	// https://sapui5.hana.ondemand.com/sdk/#/api/jQuery.sap.measure%23methods/jQuery.sap.measure.getRequestTimings
 	["measure.start", {
 		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "start",
