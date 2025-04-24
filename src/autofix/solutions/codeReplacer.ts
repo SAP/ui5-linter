@@ -184,10 +184,6 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			dummyUrl = ", \"http://dummy.local\"";
 		}
 		fixHints.exportCodeToBeUsed.name = `new URL($1${dummyUrl}).searchParams`;
-	} else if (apiName?.startsWith("jQuery.sap.keycodes")) {
-		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.keycodes", "$moduleIdentifier");
-	} else if (apiName?.startsWith("jQuery.sap.PseudoEvents")) {
-		fixHints.exportCodeToBeUsed.name = apiName.replace("jQuery.sap.PseudoEvents", "$moduleIdentifier");
 	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
@@ -214,7 +210,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.args[0] = "\"\"";
 		}
 		if (apiName === "jQuery.sap.setObject") {
-			// Cleanup the code to prevent unnecessary putting of undefined values
+			// Cleanup the code to prevent unnecessary write of undefined values
 			fixHints.exportCodeToBeUsed.name =
 				`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 		}

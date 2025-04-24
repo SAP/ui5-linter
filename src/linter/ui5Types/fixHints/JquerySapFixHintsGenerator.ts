@@ -251,12 +251,12 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["includeStylesheet", {
 		moduleName: "sap/ui/dom/includeStylesheet",
 	}],
-	["replaceDOM", {
-		// TODO MB: "sap/ui/dom/patch" has been removed in
-		// https://github.com/SAP/openui5/commit/84ae02e870d8349acff17febeac6fb1404d6bb5a#diff-b54e0a67288dd55b118578ef716ece9c9ccf2a5c2ef6be53f90f636e4aa41b70
-		// Therefore this migration is not valid and should be removed
-		moduleName: "sap/ui/dom/patch",
-	}],
+	// ["replaceDOM", {
+	// 	// TODO MB: "sap/ui/dom/patch" has been removed in
+	// 	// https://github.com/SAP/openui5/commit/84ae02e870d8349acff17febeac6fb1404d6bb5a#diff-b54e0a67288dd55b118578ef716ece9c9ccf2a5c2ef6be53f90f636e4aa41b70
+	// 	// Therefore this migration is not valid and should be removed
+	// 	moduleName: "sap/ui/dom/patch",
+	// }],
 	["pxToRem", {
 		moduleName: "sap/ui/dom/units/Rem", exportNameToBeUsed: "fromPx",
 	}],
@@ -292,27 +292,22 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/events/jquery/EventSimulation", exportNameToBeUsed: "touchEventMode",
 	}],
 	["keycodes", {
-		// TODO MB: Is the exportCodeToBeUsed attribute really required here?
-		moduleName: "sap/ui/events/KeyCodes", exportCodeToBeUsed: "$moduleIdentifier",
+		moduleName: "sap/ui/events/KeyCodes",
 	}],
 	["PseudoEvents", {
-		// TODO MB: Should use .events on new module
 		// See https://sapui5.hana.ondemand.com/sdk/#/api/jQuery.sap.PseudoEvents
-		moduleName: "sap/ui/events/PseudoEvents", exportCodeToBeUsed: "$moduleIdentifier",
+		moduleName: "sap/ui/events/PseudoEvents", exportNameToBeUsed: "events",
 	}],
 	["disableTouchToMouseHandling", {
 		moduleName: "sap/ui/events/TouchToMouseMapping", exportNameToBeUsed: "disableTouchToMouseHandling",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/555
-
-	// TODO MB: Missing replacement for jQuery.sap.measure.getRequestTimings?
 	["measure.getRequestTimings", {
 		exportCodeToBeUsed: "performance.getEntriesByType(\"resource\")",
 	}],
 	["measure.setRequestBufferSize", {
 		exportCodeToBeUsed: "performance.setResourceTimingBufferSize($1)",
 	}],
-	// https://sapui5.hana.ondemand.com/sdk/#/api/jQuery.sap.measure%23methods/jQuery.sap.measure.getRequestTimings
 	["measure.start", {
 		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "start",
 	}],
