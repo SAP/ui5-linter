@@ -291,12 +291,11 @@ function applyFixes(
 
 		// Resolve dependencies for the module declaration
 		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
-
-		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
-		// based on arguments' context
-		generateSolutionCodeReplacer(
-			moduleDeclarationInfo.importRequests, messages, changeSet, sourceFile, identifiers);
 	}
+
+	// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
+	// based on arguments' context
+	generateSolutionCodeReplacer(existingModuleDeclarations, messages, changeSet, sourceFile, identifiers);
 
 	if (changeSet.length === 0) {
 		// No modifications needed

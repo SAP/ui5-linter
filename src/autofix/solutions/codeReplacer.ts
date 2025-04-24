@@ -1,10 +1,11 @@
 import ts from "typescript";
-import {RawLintMessage} from "../../linter/LinterContext.js";
+import {type PositionInfo, type RawLintMessage} from "../../linter/LinterContext.js";
 import {
 	ChangeAction,
-	type ImportRequests,
 	type ChangeSet,
 	type ReplaceChange,
+	type ExistingModuleDeclarationInfo,
+	type ImportRequests,
 } from "../autofix.js";
 import {type FixHints} from "../../linter/ui5Types/FixHintsGenerator.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
@@ -29,7 +30,7 @@ const log = getLogger("linter:autofix:codeReplacer");
 	}]
  */
 export default function generateSolutionCodeReplacer(
-	importRequests: ImportRequests, messages: RawLintMessage[],
+	moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>, messages: RawLintMessage[],
 	changeSet: ChangeSet[], sourceFile: ts.SourceFile, declaredIdentifiers: Set<string>) {
 	for (const {fixHints, position, args} of messages) {
 		const apiName = "apiName" in args ? args.apiName : undefined;
@@ -41,6 +42,9 @@ export default function generateSolutionCodeReplacer(
 			!position) {
 			continue;
 		}
+
+		// Find the imports from module declarations in the context/scope of the message
+		const importRequests = getContextImportRequests(sourceFile, moduleDeclarations, position);
 
 		const {exportCodeToBeUsed, moduleName} = patchedFixHints;
 		const moduleInfo = moduleName ? importRequests.get(moduleName) : null;
@@ -95,6 +99,31 @@ export default function generateSolutionCodeReplacer(
 			value,
 		});
 	}
+}
+
+const importRequestsCache = new Map<number, ImportRequests>();
+// Finds the imports from module declarations in the context/scope of the message
+function getContextImportRequests(
+	sourceFile: ts.SourceFile,
+	moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>,
+	messagePosInfo: PositionInfo) {
+	const importRequests: ImportRequests = new Map();
+	const position = sourceFile.getPositionOfLineAndCharacter(messagePosInfo.line - 1, messagePosInfo.column - 1);
+
+	if (importRequestsCache.has(position)) {
+		return importRequestsCache.get(position)!;
+	}
+
+	for (const [callExpression, moduleDeclarationInfo] of moduleDeclarations.entries()) {
+		if (callExpression.getStart() < position && position < callExpression.getEnd()) {
+			moduleDeclarationInfo.importRequests.forEach((value, key) => {
+				importRequests.set(key, value);
+			});
+		}
+	}
+
+	importRequestsCache.set(position, importRequests);
+	return importRequests;
 }
 
 // Avoid replacements on colliding position.
