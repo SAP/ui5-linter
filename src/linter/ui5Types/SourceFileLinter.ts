@@ -1913,6 +1913,13 @@ export default class SourceFileLinter {
 		let exportName;
 		while (!moduleSymbol && searchStack.length) {
 			const moduleName = searchStack.join("/");
+			if (moduleName === "sap/ui/core/Core") {
+				// Special case for sap.ui.core.Core:
+				// The global access provides the Core class, while the module import
+				// only provides the singleton instance.
+				// For now, we don't fix this case, because it is not a common pattern.
+				return undefined;
+			}
 			moduleSymbol = this.findModuleForName(moduleName);
 			if (!moduleSymbol) {
 				const libraryModuleName = `${moduleName}/library`;
