@@ -4,7 +4,7 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import ts from "typescript";
-import {FixHints} from "./ui5Types/FixHintsGenerator.js";
+import {FixHints} from "./ui5Types/fixHints/FixHints.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
