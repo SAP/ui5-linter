@@ -73,6 +73,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["log.Level.ALL", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.ALL",
 	}],
+	["log.Level.DEBUG", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "Level.DEBUG",
+	}],
 	["log.Level", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "Level",
 	}],
