@@ -1,6 +1,7 @@
 import ts from "typescript";
 import type {FixHints} from "./FixHints.js";
 
+// jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/520
 	["assert", {
@@ -451,12 +452,6 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "serialize",
 	}],
 
-	["device.is.standalone", {
-		exportCodeToBeUsed: "window.navigator.standalone",
-	}],
-	["support.retina", {
-		exportCodeToBeUsed: "window.devicePixelRatio >= 2",
-	}],
 	// TODO: Shall we add validation for a string?
 	["startsWith", {
 		exportCodeToBeUsed: "$1.startsWith($2)",
@@ -507,12 +502,51 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["getter", {
 		exportCodeToBeUsed: "function(value) { return function() { return value; }; }($1)",
 	}],
+
+	// https://github.com/SAP/ui5-linter/issues/589
+	// TODO: jQuery.sap.getModulePath() has a second param sSuffix
+	// How is this handled in sap.ui.require.toUrl
+	["getModulePath", {
+		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+	}],
+	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
+	// How is this handled in sap.ui.require.toUrl
+	["getResourcePath", {
+		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+	}],
+	// https://github.com/SAP/ui5-linter/issues/588
+	["registerModulePath", {
+		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
+	}],
+	["registerResourcePath", {
+		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
+	}],
+	// https://github.com/SAP/ui5-linter/issues/530
+	// TODO: Discuss with the team!
+	// URLSearchParams returns an api close to getUriParameters.
+	// However, there are differences. For example .get() returns always a string | undefined
+	// whereas getUriParameters returns a string | string[] | undefined
+	["getUriParameters", {
+		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
+	}],
+]);
+
+// jQuery.*
+const jQueryReplacements = new Map<string, FixHints>([
 	["inArray", {
 		exportCodeToBeUsed: "($2 ? Array.prototype.indexOf.call($2, $1) : -1)",
 	}],
 	["isArray", {
 		exportCodeToBeUsed: "Array.isArray($1)",
 	}],
+
+	["support.retina", {
+		exportCodeToBeUsed: "window.devicePixelRatio >= 2",
+	}],
+	["device.is.standalone", {
+		exportCodeToBeUsed: "window.navigator.standalone",
+	}],
+
 	// https://github.com/SAP/ui5-linter/issues/531
 	["device.is.landscape", {
 		moduleName: "sap/ui/Device",
@@ -555,7 +589,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/Device",
 		exportNameToBeUsed: "os.name",
 	}],
-	["os.fVersion", { // TODO: Check for collisions. Does not work well
+	["os.fVersion", {
 		moduleName: "sap/ui/Device",
 		exportNameToBeUsed: "os.version",
 	}],
@@ -591,66 +625,74 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/Device",
 		exportCodeToBeUsed: "$moduleIdentifier.os.name === \"mac\"",
 	}],
+]);
 
-	// https://github.com/SAP/ui5-linter/issues/589
-	// TODO: jQuery.sap.getModulePath() has a second param sSuffix
-	// How is this handled in sap.ui.require.toUrl
-	["getModulePath", {
-		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
-	}],
-	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
-	// How is this handled in sap.ui.require.toUrl
-	["getResourcePath", {
-		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
-	}],
-	// https://github.com/SAP/ui5-linter/issues/588
-	["registerModulePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
-	}],
-	["registerResourcePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
-	}],
-	// https://github.com/SAP/ui5-linter/issues/530
-	// TODO: Discuss with the team!
-	// URLSearchParams returns an api close to getUriParameters.
-	// However, there are differences. For example .get() returns always a string | undefined
-	// whereas getUriParameters returns a string | string[] | undefined
-	["getUriParameters", {
-		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
-	}],
+// jQuery.fn.* / jQuery().*
+const jQueryPluginReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/578
-	["jQuery.fn.control", {
+	["control", {
 		moduleName: "sap/ui/core/Element",
 		exportCodeToBeUsed: "[$moduleIdentifier.closestTo($1)]",
 	}],
 ]);
 
 export default class JquerySapFixHintsGenerator {
-	getFixHints(node: ts.AccessExpression | ts.CallExpression,
-		namespace: string | undefined): FixHints | undefined {
-		if (!namespace?.startsWith("jQuery")) {
-			return undefined;
+	getFixHints(node: ts.AccessExpression | ts.CallExpression): FixHints | undefined {
+		const parts: string[] = [];
+		const partNodes: ts.Node[] = [];
+		let isJQueryFnAccess = false;
+
+		const firstPart = node.expression;
+		if (!ts.isIdentifier(firstPart)) {
+			if (!ts.isCallExpression(firstPart)) {
+				return undefined;
+			}
+			if (ts.isIdentifier(firstPart.expression) &&
+				firstPart.expression.text === "jQuery") {
+				isJQueryFnAccess = true;
+			} else {
+				return undefined;
+			}
+		} else {
+			if (firstPart.text !== "window" && firstPart.text !== "globalThis" && firstPart.text !== "self") {
+				parts.push(firstPart.text);
+				partNodes.push(firstPart);
+			}
+		}
+
+		let scanNode: ts.Node = node;
+		while (ts.isPropertyAccessExpression(scanNode)) {
+			if (!ts.isIdentifier(scanNode.name)) {
+				throw new Error(
+					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
+					ts.SyntaxKind[scanNode.name.kind]);
+			}
+			parts.push(scanNode.name.text);
+			partNodes.push(scanNode);
+			scanNode = scanNode.parent;
 		}
 
 		let moduleReplacement;
-		const jQueryAccessChunks = namespace.substring("jQuery.".length).split(".");
-		const jQuerySapAccessChunks = namespace.substring("jQuery.sap.".length).split(".");
-		const jQueryFn = namespace.replace(/^jQuery\(.*\)\./g, "jQuery.fn.").split(".");
-		while (!moduleReplacement &&
-			(jQuerySapAccessChunks.length || jQueryAccessChunks.length || jQueryFn.length)) {
-			moduleReplacement = jQuerySapModulesReplacements.get(jQuerySapAccessChunks.join(".")) ??
-				jQuerySapModulesReplacements.get(jQueryAccessChunks.join(".")) ??
-				jQuerySapModulesReplacements.get(jQueryFn.join("."));
-
-			jQuerySapAccessChunks.pop();
-			jQueryAccessChunks.pop();
-			jQueryFn.pop();
+		const searchStack = [...parts];
+		while (!moduleReplacement && searchStack.length) {
+			if (isJQueryFnAccess) {
+				// jQuery.fn.methodName
+				moduleReplacement = jQueryPluginReplacements.get(searchStack.join("."));
+			} else if (searchStack[0] === "jQuery" && searchStack[1] === "sap") {
+				moduleReplacement = jQuerySapModulesReplacements.get(searchStack.slice(2).join("."));
+			} else if (searchStack[0] === "jQuery") {
+				if (searchStack.length > 1) {
+					moduleReplacement = jQueryReplacements.get(searchStack.slice(1).join("."));
+				}
+			}
+			if (!moduleReplacement) {
+				searchStack.pop();
+			}
 		}
 
-		if (!moduleReplacement && namespace === "jQuery") {
-			moduleReplacement = {
-				moduleName: "sap/ui/thirdparty/jquery",
-			};
+		if (moduleReplacement && !isJQueryFnAccess) {
+			// Make sure that only the actual API is replaced, not anything that comes afterwards
+			moduleReplacement.propertyAccess = searchStack.join(".");
 		}
 
 		if (!moduleReplacement) {

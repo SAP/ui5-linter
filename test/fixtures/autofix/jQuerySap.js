@@ -82,6 +82,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 		console.log("key: " + sKey + ", value: " + oValue);
 	});
 	var isObjectPlainObject = jQuery.isPlainObject({});
+	var isObjectPlainObject2 = window.jQuery.isPlainObject({}); // TODO: window.jQuery is not detected as global access
 	var parsedJS = jQuery.sap.parseJS("{name: 'me'}");
 	var clone = jQuery.sap.extend(true, {}, { name: "me" });
 	var clone2 = jQuery.sap.extend({}, myObject);
@@ -125,6 +126,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.bindAnyEvent(myEventHandler);
 	jQuery.sap.unbindAnyEvent(myEventHandler);
 	var allCoveredEvents = jQuery.sap.ControlEvents;
+	var numberOfEvents = jQuery.sap.ControlEvents.length;
 	jQuery.sap.handleF6GroupNavigation(new jQuery.Event("keydown", {}));
 	var isMouseEventDelayed = jQuery.sap.isMouseEventDelayed();
 	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {}));
