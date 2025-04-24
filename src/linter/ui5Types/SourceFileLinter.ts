@@ -102,7 +102,9 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
-		this.#fixHintsGenerator = this.fix ? new FixHintsGenerator(this.resourcePath, this.ambientModuleCache) : null;
+		this.#fixHintsGenerator = this.fix ?
+			new FixHintsGenerator(this.resourcePath, this.ambientModuleCache, this.manifestContent) :
+			null;
 	}
 
 	async lint() {
@@ -915,7 +917,7 @@ export default class SourceFileLinter {
 		if (ts.isElementAccessExpression(exprNode) ||
 			ts.isPropertyAccessExpression(exprNode) ||
 			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode);
+			fixHints = this.getJquerySapFixHints(exprNode) ?? this.getCoreFixHints(exprNode);
 		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
@@ -1789,5 +1791,9 @@ export default class SourceFileLinter {
 
 	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression) {
 		return this.#fixHintsGenerator?.getJquerySapFixHints(node);
+	}
+
+	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression) {
+		return this.#fixHintsGenerator?.getCoreFixHints(node);
 	}
 }

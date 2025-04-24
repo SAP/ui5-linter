@@ -118,27 +118,14 @@ export default function generateSolutionCodeReplacer(
 		// Calculate the replacement position
 		// It cannot be derived from the fixHintsGenerator as it works on the compiled source file.
 		// Just take the length of the old and the original start position
-		let pos, originalLengthNode = nodeInfo.node;
-
-		// For jQuery function deprecations, the node might only cover
-		// the deprecated method, but not the whole expression.
-		// Find the expression and update the position.
-		if (!ts.isCallExpression(nodeInfo.node) &&
-			ts.isPropertyAccessExpression(nodeInfo.node) &&
-			nodeInfo.node.expression && ts.isCallExpression(nodeInfo.node.expression)) {
-			pos = sourceFile.getLineAndCharacterOfPosition(nodeInfo.node.expression.pos);
-		}
+		let originalLengthNode = nodeInfo.node;
 
 		if (ts.isCallExpression(nodeInfo.node.parent) &&
 			nodeInfo.node.parent.expression === nodeInfo.node) {
 			originalLengthNode = nodeInfo.node.parent;
 		}
-
-		const originalLength = originalLengthNode.getEnd() - originalLengthNode.getStart();
-		const line = pos ? pos.line : (position.line - 1);
-		const column = pos ? (pos.character + 1) : (position.column - 1);
-		const start = sourceFile.getPositionOfLineAndCharacter(line, column);
-		const end = start + originalLength;
+		const start = originalLengthNode.getStart();
+		const end = originalLengthNode.getEnd();
 
 		cleanupChangeSet(changeSet, start, end);
 

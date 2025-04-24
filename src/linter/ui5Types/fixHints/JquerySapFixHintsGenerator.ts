@@ -1,6 +1,7 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints, FixHintsArgsType} from "./FixHints.js";
 import {isAssignment, isExpectedValueExpression} from "../utils/utils.js";
+import {extractNamespace} from "../utils/utils.js";
 
 // jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
@@ -690,39 +691,20 @@ export default class JquerySapFixHintsGenerator {
 		if (!this.isFixable(node)) {
 			return undefined;
 		}
-		const parts: string[] = [];
-		const partNodes: ts.Node[] = [];
-		let isJQueryFnAccess = false;
 
+		if (!ts.isIdentifier(node.expression)) {
+			if (!ts.isCallExpression(node.expression)) {
+				return undefined;
+			}
+		}
+
+		const namespace = extractNamespace(node);
+		const parts = namespace ? namespace.split(".") : [];
 		const firstPart = node.expression;
-		if (!ts.isIdentifier(firstPart)) {
-			if (!ts.isCallExpression(firstPart)) {
-				return undefined;
-			}
-			if (ts.isIdentifier(firstPart.expression) &&
-				["jQuery", "$"].includes(firstPart.expression.text)) {
-				isJQueryFnAccess = true;
-			} else {
-				return undefined;
-			}
-		} else {
-			if (firstPart.text !== "window" && firstPart.text !== "globalThis" && firstPart.text !== "self") {
-				parts.push(firstPart.text);
-				partNodes.push(firstPart);
-			}
-		}
-
-		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
-			}
-			parts.push(scanNode.name.text);
-			partNodes.push(scanNode);
-			scanNode = scanNode.parent;
-		}
+		const isJQueryFnAccess = !ts.isIdentifier(firstPart) &&
+			ts.isCallExpression(firstPart) &&
+			ts.isIdentifier(firstPart.expression) &&
+			["jQuery", "$"].includes(firstPart.expression.text);
 
 		let moduleReplacement;
 		const searchStack = [...parts];
@@ -775,20 +757,18 @@ export default class JquerySapFixHintsGenerator {
 				isExpectedValue: isExpectedValueExpression(current),
 			} as ExportCodeToBeUsed;
 
-			if (typeof exportCodeToBeUsed === "object") {
-				let args: FixHintsArgsType = [];
-				// jQuery(".mySelector" /* args */).functionName()
-				if (ts.isCallExpression(node.expression)) {
-					args = args.concat(node.expression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg?.kind})));
-				}
-				// jQuery.sap.functionName(args)
-				if (callExpression) {
-					args = args.concat(callExpression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg?.kind})));
-				}
-				exportCodeToBeUsed.args = args;
+			let args: FixHintsArgsType = [];
+			// jQuery(".mySelector" /* args */).functionName()
+			if (ts.isCallExpression(node.expression)) {
+				args = args.concat(node.expression.arguments.map((arg) =>
+					({value: arg.getText(), kind: arg?.kind})));
 			}
+			// jQuery.sap.functionName(args)
+			if (callExpression) {
+				args = args.concat(callExpression.arguments.map((arg) =>
+					({value: arg.getText(), kind: arg?.kind})));
+			}
+			exportCodeToBeUsed.args = args;
 		}
 
 		return {...moduleReplacement, exportCodeToBeUsed} as FixHints;
