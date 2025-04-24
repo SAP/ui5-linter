@@ -192,11 +192,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
 		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1] ?? "0", 10);
-		if (charToUpperCase <= 0 || charToUpperCase > (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length) {
-			fixHints.exportCodeToBeUsed.args = [
-				fixHints.exportCodeToBeUsed.args?.[0] ?? "",
-				"0",
-			];
+		if (charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length) {
+			fixHints = undefined; // We cannot handle this case
 		}
 	} else if (apiName === "control" && fixHints.moduleName === "sap/ui/core/Element") {
 		const {args} = fixHints.exportCodeToBeUsed;
