@@ -35,6 +35,7 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {resolveNamespace} from "./utils/utils.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -102,7 +103,9 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
-		this.#fixHintsGenerator = this.fix ? new FixHintsGenerator(this.resourcePath, this.ambientModuleCache) : null;
+		this.#fixHintsGenerator = this.fix ?
+			new FixHintsGenerator(this.resourcePath, this.ambientModuleCache, this.manifestContent) :
+			null;
 	}
 
 	async lint() {
