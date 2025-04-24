@@ -39,7 +39,8 @@ export default function generateSolutionCodeReplacer(
 
 		if (!patchedFixHints || !("exportCodeToBeUsed" in patchedFixHints) ||
 			!patchedFixHints.exportCodeToBeUsed || !(typeof patchedFixHints.exportCodeToBeUsed === "object") ||
-			!position) {
+			!position ||
+			!moduleDeclarations.size) {
 			continue;
 		}
 

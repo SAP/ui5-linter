@@ -6,6 +6,12 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	const bundle = jQuery.sap.resources({
 		url: "resources/i18n.properties"
 	});
+	// Respect the context
+	sap.ui.require(["sap/base/i18n/ResourceBundle"], function (innerScopeResourceBundle) {
+		const bundle = jQuery.sap.resources({
+			url: "resources/i18n.properties"
+		});
+	});
 
 	// https://github.com/SAP/ui5-linter/issues/522
 	const logObject = jQuery.sap.log;
