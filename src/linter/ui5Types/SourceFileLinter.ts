@@ -27,7 +27,8 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
-import FixHintsGenerator, {FixHints} from "./FixHintsGenerator.js";
+import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
+import {FixHints} from "./fixHints/FixHints.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -1805,7 +1806,7 @@ export default class SourceFileLinter {
 	}
 
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
-		return this.#fixHintsGenerator?.getFixHints(node) ?? undefined;
+		return this.#fixHintsGenerator?.getGlobalsFixHints(node) ?? undefined;
 	}
 
 	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression, namespace: string) {
