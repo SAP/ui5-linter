@@ -478,18 +478,18 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["padRight", {
 		exportCodeToBeUsed: "$1.padEnd($3, $2)",
 	}],
-	["delayedCall", {
-		exportCodeToBeUsed: "window.setTimeout($3.bind($2), $1)",
-	}],
-	["clearDelayedCall", {
-		exportCodeToBeUsed: "window.clearTimeout($1)",
-	}],
-	["intervalCall", {
-		exportCodeToBeUsed: "window.setInterval($3.bind($2), $1)",
-	}],
-	["clearIntervalCall", {
-		exportCodeToBeUsed: "window.clearInterval($1)",
-	}],
+	// ["delayedCall", {
+	// 	exportCodeToBeUsed: "window.setTimeout($3.bind($2), $1)",
+	// }],
+	// ["clearDelayedCall", {
+	// 	exportCodeToBeUsed: "window.clearTimeout($1)",
+	// }],
+	// ["intervalCall", {
+	// 	exportCodeToBeUsed: "window.setInterval($3.bind($2), $1)",
+	// }],
+	// ["clearIntervalCall", {
+	// 	exportCodeToBeUsed: "window.clearInterval($1)",
+	// }],
 	["domById", {
 		exportCodeToBeUsed: "window.document.getElementById($1)",
 	}],
