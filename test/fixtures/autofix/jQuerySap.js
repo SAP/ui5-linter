@@ -127,6 +127,10 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.unbindAnyEvent(myEventHandler);
 	var allCoveredEvents = jQuery.sap.ControlEvents;
 	var numberOfEvents = jQuery.sap.ControlEvents.length;
+	assert.equal(jQuery.sap.ControlEvents.length, aBrowserEvents.length, "Number of basic browser events correct");
+	for (var i = 0; i < aBrowserEvents.length; i++) {
+		assert.ok(jQuery.sap.ControlEvents.indexOf(aBrowserEvents[i]) >= 0, "Event " + aBrowserEvents[i] + " contained in jQuery.sap.ControlEvents");
+	}
 	jQuery.sap.handleF6GroupNavigation(new jQuery.Event("keydown", {}));
 	var isMouseEventDelayed = jQuery.sap.isMouseEventDelayed();
 	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {}));
