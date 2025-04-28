@@ -35,6 +35,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
 	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
+	var oMainDataSource = {settings: {localUri: "sap.ui.core.odata.v2.metadata.xml"}};
+	jQuery.sap.getModulePath(oMainDataSource.settings.localUri.replace(".xml", ""), ".xml"),
 
 	// https://github.com/SAP/ui5-linter/issues/530
 	var currentParams = jQuery.sap.getUriParameters();
