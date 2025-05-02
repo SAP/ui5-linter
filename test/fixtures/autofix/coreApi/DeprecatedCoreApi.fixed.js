@@ -4,10 +4,15 @@ sap.ui.define(["sap/ui/core/Core",
 	"sap/base/i18n/Localization",
 	"sap/ui/core/Control",
 	"sap/ui/core/Element",
-	"sap/ui/core/Component"
-	], function(Core, Theming, IntervalTrigger, Localization, Control, Element, Component) {
+	"sap/ui/core/Component",
+	"sap/ui/core/EventBus",
+	"sap/ui/core/Lib",
+	"sap/ui/core/StaticArea",
+	"sap/ui/core/tmpl/Template",
+	"sap/ui/Device"
+	], function(Core, Theming, IntervalTrigger, Localization, Control, Element, Component, EventBus, Lib, StaticArea, Template, Device) {
 	Theming.applyTheme("themeName");
-	Core.applyTheme("custom_theme", "find/my/theme/here");
+	Core.applyTheme("customTheme", "find/my/theme/here");
 
 	Core.ready(function() {console.log();});
 
@@ -47,4 +52,34 @@ sap.ui.define(["sap/ui/core/Core",
 	(Element.getActiveElement()) ? Element.getId(Element.getActiveElement()) : Core.getCurrentFocusedControlId();
 
 	Element.getElementById("elementId");
+
+	EventBus.getInstance();
+
+	Lib.getResourceBundleFor("sap.ui.core", "en_US");
+
+	StaticArea.getDomRef();
+
+	Template.byId("templateId");
+
+	Core.initLibrary({
+		name: "sap.ui.core",
+		version: "1.0.0",
+		dependencies: ["sap.ui.core"],
+		noLibraryCSS: true,
+		types: ["type1", "type2"],
+		interfaces: ["interface1", "interface2"],
+		elements: ["element1", "element2"],
+		controls: ["control1", "control2"],
+		extensions: {
+			someExtension: {}
+		}
+	});
+
+	Device.browser.mobile;
+
+	StaticArea.contains(oDomRef);
+
+	Lib.load({name: "sap.ui.core", url: "find/my/lib/here"});
+
+	Theming.notifyContentDensityChanged();
 });
