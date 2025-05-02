@@ -59,8 +59,13 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	// capitalize does not have positional parameter, therefore we cannot migrate this case
 	var textUpperCase1 = jQuery.sap.charToUpperCase("myValue", 5);
 	var textUpperCase2 = jQuery.sap.charToUpperCase("myValue");
+	// Positions less than 0 or greater than the string length will capitalize the first letter
 	var textUpperCase3 = jQuery.sap.charToUpperCase("myValue", -5);
 	var textUpperCase4 = jQuery.sap.charToUpperCase("myValue", 99);
+	const xy = "myValue";
+	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 1);
+	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 3); // Can't be migrated
+	var textUpperCase2 = jQuery.sap.charToUpperCase(someFunc(), 99); // Can't be migrated
 	var textEscapedRegx = jQuery.sap.escapeRegExp("ab.c");
 	var textWithReplacedPlaceholder = jQuery.sap.formatMessage("Say '{0}'", ["Hello"]);
 	var hashCode = jQuery.sap.hashCode("test");

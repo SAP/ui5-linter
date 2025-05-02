@@ -425,8 +425,6 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "traceFlags",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/563
-
-	// TODO MB: Possibly missing some replacements, see https://github.com/SAP/ui5-linter/issues/563
 	["act.isActive", {
 		moduleName: "sap/ui/util/ActivityDetection", exportNameToBeUsed: "isActive",
 	}],
