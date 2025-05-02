@@ -1,6 +1,6 @@
 sap.ui.define(["sap/ui/core/Core",], function(Core) {
 	Core.applyTheme("themeName");
-	Core.applyTheme("custom_theme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
+	Core.applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
 
 	Core.attachInit(function() {console.log();});
 
@@ -39,6 +39,35 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 	Core.getCurrentFocusedControlId();
 
 	Core.getElementById("elementId");
-	//TODO:
+
+	Core.getEventBus();
+
+	Core.getLibraryResourceBundle("sap.ui.core", "en_US", "true");
+
+	Core.getStaticAreaRef();
+
+	Core.getTemplate("templateId");
+
+	Core.initLibrary({
+		name: "sap.ui.core",
+		version: "1.0.0",
+		dependencies: ["sap.ui.core"],
+		noLibraryCSS: true,
+		types: ["type1", "type2"],
+		interfaces: ["interface1", "interface2"],
+		elements: ["element1", "element2"],
+		controls: ["control1", "control2"],
+		extensions: {
+			someExtension: {}
+		}
+	});
+
+	Core.isMobile();
+
+	Core.isStaticAreaRef(oDomRef);
+
+	Core.loadLibrary("sap.ui.core", "find/my/lib/here");
+
+	Core.notifyContentDensityChanged();
 
 });
