@@ -11,6 +11,7 @@ import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
 import {type FixHints} from "../linter/ui5Types/fixHints/FixHints.js";
 import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
+import generateXmlSolutionDeprecatedApi from "./solutions/generateXmlSolutionDeprecatedApi.js";
 
 const log = getLogger("linter:autofix");
 
@@ -185,22 +186,27 @@ export default async function ({
 }: AutofixOptions): Promise<AutofixResult> {
 	// Group messages by ID and only process files for which fixes are available
 	const messages = new Map<string, Map<MESSAGE, RawLintMessage[]>>();
-	const resources: Resource[] = [];
+	const jsResources: Resource[] = [];
+	const xmlResources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
 		const messagesById = getAutofixMessages(autofixResource);
-		// Currently only global access autofixes are supported
-		// This needs to stay aligned with the applyFixes function
+		// Set of supported message IDs needs to stay aligned with the applyFixes function
 		if (messagesById.has(MESSAGE.NO_GLOBALS) ||
 			messagesById.has(MESSAGE.DEPRECATED_API_ACCESS) ||
+			messagesById.has(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS) ||
 			messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
 			messages.set(autofixResource.resource.getPath(), messagesById);
-			resources.push(autofixResource.resource);
+			if (autofixResource.resource.getPath().endsWith(".xml")) {
+				xmlResources.push(autofixResource.resource);
+			} else {
+				jsResources.push(autofixResource.resource);
+			}
 		}
 	}
 
 	const sourceFiles: SourceFiles = new Map();
 	const resourcePaths = [];
-	for (const resource of resources) {
+	for (const resource of jsResources) {
 		const resourcePath = resource.getPath();
 		const sourceFile = ts.createSourceFile(
 			resource.getPath(),
@@ -221,7 +227,7 @@ export default async function ({
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		log.verbose(`Applying autofixes to ${resourcePath}`);
-		const newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
+		const newContent = applyFixesJs(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
@@ -237,10 +243,18 @@ export default async function ({
 		}
 	}
 
+	for (const resource of xmlResources) {
+		const resourcePath = resource.getPath();
+		const newContent = await applyFixesXml(resource, messages.get(resourcePath)!);
+		if (newContent) {
+			res.set(resourcePath, newContent);
+		}
+	}
+
 	return res;
 }
 
-function applyFixes(
+function applyFixesJs(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
 	messagesById: Map<MESSAGE, RawLintMessage[]>
 ): string | undefined {
@@ -299,6 +313,28 @@ function applyFixes(
 
 	if (changeSet.length === 0) {
 		// No modifications needed
+		return undefined;
+	}
+	return applyChanges(content, changeSet);
+}
+
+async function applyFixesXml(
+	resource: Resource,
+	messagesById: Map<MESSAGE, RawLintMessage[]>
+): Promise<string | undefined> {
+	const changeSet: ChangeSet[] = [];
+	const messages: RawLintMessage<MESSAGE.DEPRECATED_PROPERTY_OF_CLASS>[] = [];
+
+	if (messagesById.has(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS)) {
+		messages.push(
+			...messagesById.get(
+				MESSAGE.DEPRECATED_PROPERTY_OF_CLASS) as RawLintMessage<MESSAGE.DEPRECATED_PROPERTY_OF_CLASS>[]
+		);
+	}
+	const content = await resource.getString();
+	await generateXmlSolutionDeprecatedApi(messages, changeSet, content, resource);
+
+	if (changeSet.length === 0) {
 		return undefined;
 	}
 	return applyChanges(content, changeSet);

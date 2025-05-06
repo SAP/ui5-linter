@@ -1,5 +1,5 @@
 import type {ReadStream} from "node:fs";
-import {Detail, Reader, SaxEventType, SAXParser, Tag, Text} from "sax-wasm";
+import {Detail, Reader, SaxEvent, SaxEventType, SAXParser, Tag, Text} from "sax-wasm";
 import {finished} from "node:stream/promises";
 import fs from "node:fs/promises";
 import {createRequire} from "node:module";
@@ -61,9 +61,10 @@ async function initSaxWasm() {
 }
 
 export async function parseXML(
-	contentStream: ReadStream, parseHandler: (type: SaxEventType, tag: Reader<Detail>) => void) {
+	contentStream: ReadStream, parseHandler: typeof SAXParser.prototype.eventHandler,
+	events: number = SaxEventType.CloseTag | SaxEventType.OpenTag | SaxEventType.Comment) {
 	const saxWasmBuffer = await initSaxWasm();
-	const saxParser = new SAXParser(SaxEventType.CloseTag | SaxEventType.OpenTag | SaxEventType.Comment);
+	const saxParser = new SAXParser(events);
 
 	saxParser.eventHandler = parseHandler;
 
@@ -72,7 +73,7 @@ export async function parseXML(
 		throw new Error("Unknown error during WASM Initialization");
 	}
 
-	// stream from a file in the current directory
+	// Start the stream
 	contentStream.on("data", (chunk: Uint8Array) => {
 		try {
 			saxParser.write(chunk);
