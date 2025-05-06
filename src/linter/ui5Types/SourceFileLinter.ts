@@ -701,12 +701,12 @@ export default class SourceFileLinter {
 				if (!ts.isPropertyAssignment(prop)) {
 					return;
 				}
-				const propertyName = getPropertyNameText(prop.name);
-				if (!propertyName) {
+				const propertyNameText = getPropertyNameText(prop.name);
+				if (!propertyNameText) {
 					return;
 				}
 				const propertySymbol = getSymbolForPropertyInConstructSignatures(
-					possibleConstructSignatures, argIdx, propertyName
+					possibleConstructSignatures, argIdx, propertyNameText
 				);
 				if (!propertySymbol) {
 					return;
@@ -715,13 +715,22 @@ export default class SourceFileLinter {
 				if (!deprecationInfo) {
 					return;
 				}
+
+				const propertyName = propertySymbol.escapedName as string;
+				const className = this.checker.typeToString(nodeType);
+				let fixHints;
+				if (moduleDeclaration?.name.text) {
+					fixHints = this.getDeprecatedClassPropertyFixHints(
+						prop, propertyName, moduleDeclaration.name.text);
+				}
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
 					{
-						propertyName: propertySymbol.escapedName as string,
-						className: this.checker.typeToString(nodeType),
+						propertyName,
+						className,
 						details: deprecationInfo.messageDetails,
 					},
-					prop
+					prop,
+					fixHints
 				);
 			});
 		});
@@ -1811,5 +1820,9 @@ export default class SourceFileLinter {
 
 	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression) {
 		return this.#fixHintsGenerator?.getJquerySapFixHints(node);
+	}
+
+	getDeprecatedClassPropertyFixHints(node: ts.PropertyAssignment, propertyName: string, className: string) {
+		return this.#fixHintsGenerator?.getDeprecatedClassPropertyFixHints(node, propertyName, className);
 	}
 }

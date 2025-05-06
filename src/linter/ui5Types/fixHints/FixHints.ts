@@ -39,4 +39,7 @@ export interface FixHints {
 	 * e.g. `if (window.sap.ui.layout) { ... }`
 	 */
 	conditional?: boolean;
+
+	classProperty?: string;
+	classPropertyToBeUsed?: string;
 }
