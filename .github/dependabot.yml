@@ -18,3 +18,6 @@ updates:
     prefix-development: "build(deps-dev)"
   ignore:
     - dependency-name: "@types/node" # Should be manually kept in sync with the minimum supported Node.js version
+    - dependency-name: "@sapui5/types" # Major/minor updates should be done manually
+      # Only perform patch updates (i.e. ignore major/minor updates)
+      update-types: ["version-update:semver-major", "version-update:semver-minor"]
