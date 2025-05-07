@@ -150,11 +150,18 @@ ui5lint --details
 
 #### `--format`
 
-Choose the output format. Currently, `stylish` (default), `json` and `markdown` are supported.
+Choose the output format. Currently, `stylish` (default), `json`, and `markdown` are supported.  
 
 **Example:**
 ```sh
 ui5lint --format json
+```
+
+To save the output to a file, use the `>` operator (works on macOS, Linux, and Windows):
+
+**Save to File:**
+```sh
+ui5lint --format markdown > ui5-linter-findings.md
 ```
 
 #### `--fix`
