@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, {SyntaxKind} from "typescript";
 import {type PositionInfo, type RawLintMessage} from "../../linter/LinterContext.js";
 import {
 	ChangeAction,
@@ -63,7 +63,7 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		let value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), patchArguments(arg, apiName));
+			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), patchArguments(arg.value, apiName));
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 		value = value.replaceAll(/\$\d+/g, "undefined"); // Some placeholders might be "empty" in the original code
 
@@ -178,7 +178,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.[0]) {
 		let dummyUrl = "";
 		try {
-			new URL(fixHints.exportCodeToBeUsed.args[0]);
+			new URL(fixHints.exportCodeToBeUsed.args[0].value);
 		} catch (_e) {
 			// Adding a domain to the URL to prevent errors and parse correctly the query string
 			dummyUrl = ", \"http://dummy.local\"";
@@ -187,10 +187,10 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
-		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1] ?? "0", 10);
-		const isStringValue = /^("|'|`){1}.*("|'|`){1}$/gi.test(fixHints.exportCodeToBeUsed?.args?.[0] ?? "");
+		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1]?.value ?? "0", 10);
+		const isStringValue = fixHints.exportCodeToBeUsed?.args?.[0].kind === SyntaxKind.StringLiteral;
 		if (!isStringValue ||
-			(charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length)) {
+			(charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0].value ?? "").length)) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for jQuery.sap.charToUpperCase. Transpilation is too ambiguous.`);
 		}
@@ -209,8 +209,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		fixHints.exportCodeToBeUsed.args ??= [];
 		if (!fixHints.exportCodeToBeUsed.args?.length ||
 			!fixHints.exportCodeToBeUsed.args[0] ||
-			["undefined", "null"].includes(fixHints.exportCodeToBeUsed.args[0])) {
-			fixHints.exportCodeToBeUsed.args[0] = "\"\"";
+			["undefined", "null"].includes(fixHints.exportCodeToBeUsed.args[0].value)) {
+			fixHints.exportCodeToBeUsed.args[0].value = "\"\"";
 		}
 		if (apiName === "jQuery.sap.setObject") {
 			// Cleanup the code to prevent unnecessary write of undefined values
@@ -221,23 +221,21 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		fixHints.exportCodeToBeUsed.name = `sap.ui.require.toUrl(($1)?.replaceAll(".", "/")) + $2`;
 	} else if (apiName === "jQuery.sap.extend") {
 		const args = fixHints.exportCodeToBeUsed.args ?? [];
-		const isObject = /^\{.*\}/g;
-		const isArray = /^\[.*\]/g;
 
-		if (args[0] === "true") {
+		if (args[0].kind === SyntaxKind.TrueKeyword) {
 			// Deep clone
 			fixHints.exportCodeToBeUsed.name =
 			`$moduleIdentifier($2, $3)`;
-		} else if (["null", "undefined"].includes(args[0]) ||
-			(args.length === 2 && isArray.exec(args[0])) ||
-			(args.length === 3 && isArray.exec(args[1]))) {
+		} else if (["null", "undefined"].includes(args[0].value) ||
+			(args.length === 2 && args[0].kind === SyntaxKind.ArrayLiteralExpression) ||
+			(args.length === 3 && args[1].kind === SyntaxKind.ArrayLiteralExpression)) {
 			// Deep clone
 			fixHints.exportCodeToBeUsed.name =
 				`$moduleIdentifier(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args ?? [])})`;
-		} else if (args.length === 2 && isObject.exec(args[0])) {
+		} else if (args.length === 2 && args[0].kind === SyntaxKind.ObjectLiteralExpression) {
 			fixHints.exportCodeToBeUsed.name = `{...$1, ...$2}`;
 			delete fixHints.moduleName;
-		} else if (args.length === 3 && isObject.exec(args[1])) {
+		} else if (args.length === 3 && args[1].kind === SyntaxKind.ObjectLiteralExpression) {
 			fixHints.exportCodeToBeUsed.name = `{...$2, ...$3}`;
 			delete fixHints.moduleName;
 		} else {
@@ -253,7 +251,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		}
 
 		let fnBinding = "$3.bind($2)";
-		if (/^("|'|`).*("|'|`)$/g.exec(args[2])) {
+		if (args[2].kind === SyntaxKind.StringLiteral) {
 			fnBinding = "$2[$3].bind($2)";
 		}
 
@@ -266,7 +264,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	return fixHints;
 }
 
-function cleanRedundantArguments(availableArgs: string[]) {
+function cleanRedundantArguments(availableArgs: {value: string}[]) {
 	const args = [];
 	for (let i = 1; i <= availableArgs.length; i++) {
 		args.push(`$${i}`);
