@@ -424,10 +424,12 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["passport.traceFlags", {
 		moduleName: "sap/ui/performance/trace/Passport", exportNameToBeUsed: "traceFlags",
 	}],
+	// Do not migrate this case.
+	// sap/ui/util/ActivityDetection is a private module!
 	// https://github.com/SAP/ui5-linter/issues/563
-	["act.isActive", {
-		moduleName: "sap/ui/util/ActivityDetection", exportNameToBeUsed: "isActive",
-	}],
+	// ["act.isActive", {
+	// 	moduleName: "sap/ui/util/ActivityDetection", exportNameToBeUsed: "isActive",
+	// }],
 	["initMobile", {
 		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "init",
 	}],
