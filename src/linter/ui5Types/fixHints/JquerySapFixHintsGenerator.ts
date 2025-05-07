@@ -1,5 +1,5 @@
 import ts from "typescript";
-import type {FixHints} from "./FixHints.js";
+import type {FixHints, FixHintsArgsType} from "./FixHints.js";
 
 // jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
@@ -720,14 +720,16 @@ export default class JquerySapFixHintsGenerator {
 			} as FixHints["exportCodeToBeUsed"];
 
 			if (typeof exportCodeToBeUsed === "object") {
-				let args: string[] = [];
+				let args: FixHintsArgsType = [];
 				// jQuery(".mySelector" /* args */).functionName()
 				if (ts.isCallExpression(node.expression)) {
-					args = args.concat(node.expression.arguments.map((arg) => arg.getText()));
+					args = args.concat(node.expression.arguments.map((arg) =>
+						({value: arg.getText(), kind: arg.kind})));
 				}
 				// jQuery.sap.functionName(args)
 				if (callExpression) {
-					args = args.concat(callExpression.arguments.map((arg) => arg.getText()));
+					args = args.concat(callExpression.arguments.map((arg) =>
+						({value: arg.getText(), kind: arg.kind})));
 					exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
 				}
 				exportCodeToBeUsed.args = args;

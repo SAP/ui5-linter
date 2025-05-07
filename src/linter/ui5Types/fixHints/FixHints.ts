@@ -1,3 +1,9 @@
+import ts from "typescript";
+
+export type FixHintsArgsType = {
+	value: string;
+	kind: ts.SyntaxKind;
+}[];
 export interface FixHints {
 	/**
 	 * New module name to import from
@@ -19,7 +25,7 @@ export interface FixHints {
 		name: string;
 		solutionLength: number;
 		moduleNameIdentifier?: string;
-		args?: string[];
+		args?: FixHintsArgsType;
 	};
 
 	/**
