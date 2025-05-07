@@ -229,7 +229,11 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		const isObject = /^\{.*\}/g;
 		const isArray = /^\[.*\]/g;
 
-		if (["true", "null", "undefined"].includes(args[0]) ||
+		if (args[0] === "true") {
+			// Deep clone
+			fixHints.exportCodeToBeUsed.name =
+			`$moduleIdentifier($2, $3)`;
+		} else if (["null", "undefined"].includes(args[0]) ||
 			(args.length === 2 && isArray.exec(args[0])) ||
 			(args.length === 3 && isArray.exec(args[1]))) {
 			// Deep clone
