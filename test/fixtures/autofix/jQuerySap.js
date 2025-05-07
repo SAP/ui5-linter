@@ -193,6 +193,8 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var frameOptions = new jQuery.sap.FrameOptions();
 
 	// https://github.com/SAP/ui5-linter/issues/563
+	// Do not migrate this case.
+	// sap/ui/util/ActivityDetection is a private module!
 	var isActivityDetectionActive = jQuery.sap.act.isActive();
 
 	jQuery.sap.initMobile();
