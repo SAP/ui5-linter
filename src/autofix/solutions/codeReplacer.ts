@@ -192,6 +192,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		if (!isStringValue ||
 			(charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length)) {
 			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for jQuery.sap.charToUpperCase. Transpilation is too ambiguous.`);
 		}
 	} else if (apiName === "control" && fixHints.moduleName === "sap/ui/core/Element") {
 		const {args} = fixHints.exportCodeToBeUsed;
