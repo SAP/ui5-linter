@@ -150,6 +150,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 			If it is omitted, set to zero, a negative number, or beyond the last character,
 			the first character is to be capitalized.
 			In all other cases, this migration must not be applied.
+			If the first argument is not a string, the migration must not be applied either.
 		*/
 		exportCodeToBeUsed: "$moduleIdentifier($1)",
 	}],
@@ -504,10 +505,8 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	}],
 
 	// https://github.com/SAP/ui5-linter/issues/589
-	// TODO: jQuery.sap.getModulePath() has a second param sSuffix
-	// How is this handled in sap.ui.require.toUrl
 	["getModulePath", {
-		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
+		exportCodeToBeUsed: `sap.ui.require.toUrl(($1)?.replaceAll(".", "/"))`,
 	}],
 	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
 	// How is this handled in sap.ui.require.toUrl

@@ -30,9 +30,11 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.registerResourcePath("me/fancy/B", { url: 'ui5/projectB/' });
 
 	// https://github.com/SAP/ui5-linter/issues/589
-	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", "js"); // resolves to "resources/sap/m/Button.js"
+	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", ".js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath2 = jQuery.sap.getModulePath("sap.m.Button", "/"); // resolves to  "resources/sap/m/Button/"
 	var buttonPath3 = jQuery.sap.getModulePath("sap.m.Button", ""); // resolves to "resources/sap/m/Button"
+	var buttonPath3 = jQuery.sap.getModulePath(["sap", "m", "Button"].join("."), ""); // resolves to "resources/sap/m/Button"
+	var buttonPath3 = jQuery.sap.getModulePath("sap." + "m." + "Button", ".js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap/m/Button.js"
 	var oMainDataSource = {settings: {localUri: "sap.ui.core.odata.v2.metadata.xml"}};

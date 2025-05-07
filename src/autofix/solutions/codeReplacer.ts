@@ -189,9 +189,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		// of the given string, the first character will be converted to upper case.
 		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1] ?? "0", 10);
 		const isStringValue = /^("|'|`){1}.*("|'|`){1}$/gi.test(fixHints.exportCodeToBeUsed?.args?.[0] ?? "");
-		if ((!isStringValue && charToUpperCase) ||
-			(isStringValue &&
-				charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length)) {
+		if (!isStringValue ||
+			(charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0] ?? "").length)) {
 			fixHints = undefined; // We cannot handle this case
 		}
 	} else if (apiName === "control" && fixHints.moduleName === "sap/ui/core/Element") {
@@ -217,16 +216,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name =
 				`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 		}
-	} else if (apiName === "jQuery.sap.getModulePath") {
-		if (fixHints.exportCodeToBeUsed.args?.[0] && /^"(.*)"$/g.exec(fixHints.exportCodeToBeUsed.args[0])) {
-			fixHints.exportCodeToBeUsed.args[0] = fixHints.exportCodeToBeUsed.args[0].replaceAll(".", "/");
-
-			if (fixHints.exportCodeToBeUsed.args?.[1]) {
-				fixHints.exportCodeToBeUsed.name = "sap.ui.require.toUrl($1 + $2)";
-			}
-		} else {
-			fixHints = undefined; // We cannot handle this case
-		}
+	} else if (apiName === "jQuery.sap.getModulePath" && fixHints.exportCodeToBeUsed.args?.[1]) {
+		fixHints.exportCodeToBeUsed.name = `sap.ui.require.toUrl(($1)?.replaceAll(".", "/")) + $2`;
 	} else if (apiName === "jQuery.sap.extend") {
 		const args = fixHints.exportCodeToBeUsed.args ?? [];
 		const isObject = /^\{.*\}/g;
