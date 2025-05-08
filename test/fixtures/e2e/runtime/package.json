@@ -1,0 +1,9 @@
+{
+	"name": "ui5linter.test.e2e.runtime",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"test": "ui5-test-runner --start serve --global-timeout 30s --url http://localhost:8055/test-resources/ui5linter/test/e2e/runtime/qunit/testsuite.qunit.html",
+		"serve": "ui5 serve --port 8055"
+	}
+}

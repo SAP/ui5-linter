@@ -36,7 +36,7 @@
 		"clean-lib": "rimraf lib",
 		"clean-test-tmp": "rimraf test/tmp",
 		"coverage": "npm run clean-coverage && nyc ava --node-arguments=\"--experimental-loader=@istanbuljs/esm-loader-hook\"",
-		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp,@ui5/linter",
+		"depcheck": "depcheck --ignores @commitlint/config-conventional,@istanbuljs/esm-loader-hook,rimraf,sap,mycomp,@ui5/linter,@ui5/cli,ui5-test-runner",
 		"hooks:pre-push": "npm run lint:commit",
 		"lint": "eslint .",
 		"lint:commit": "commitlint -e",
@@ -104,6 +104,7 @@
 		"@types/yauzl-promise": "^4.0.1",
 		"@ui5-language-assistant/semantic-model": "^3.3.1",
 		"@ui5-language-assistant/semantic-model-types": "^3.3.1",
+		"@ui5/cli": "^4.0.15",
 		"ava": "^6.3.0",
 		"depcheck": "^1.4.7",
 		"eslint": "^9.26.0",
@@ -116,6 +117,7 @@
 		"sinon": "^20.0.0",
 		"tsx": "^4.19.4",
 		"typescript-eslint": "^8.32.0",
+		"ui5-test-runner": "^5.7.0",
 		"yauzl-promise": "^4.0.0"
 	}
 }
