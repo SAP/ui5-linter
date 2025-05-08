@@ -204,7 +204,7 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 			Only in case of a deep clone (first argument is true; explicitly type "boolean"),
 			the merge module shall be used (omitting the first argument)
 		*/
-		moduleName: "sap/base/util/merge", exportCodeToBeUsed: "$moduleIdentifier($1, $2, $3)",
+		moduleName: "sap/base/util/merge", exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
 	}],
 	["now", {
 		moduleName: "sap/base/util/now",
