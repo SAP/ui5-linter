@@ -461,9 +461,8 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["endsWith", {
 		exportCodeToBeUsed: "$1.endsWith($2)",
 	}],
-	// TODO: Shall we add validation for a string?
 	["endsWithIgnoreCase", {
-		exportCodeToBeUsed: "$1.toLowerCase().endsWith($2)",
+		exportCodeToBeUsed: "$1.toUpperCase().endsWith($2.toUpperCase())",
 	}],
 	// TODO: Shall we add validation for a string?
 	// jquery guard: jQuery.sap.assert(typeof sPadChar === 'string' && sPadChar)
