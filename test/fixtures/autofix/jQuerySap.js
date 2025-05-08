@@ -109,10 +109,10 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.setObject(undefined, "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject("", "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject(null, "Miller", { name: { firstname: "me" } });
-	var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } });
-	var myFirstName2 = jQuery.sap.getObject("", 0, { name: { firstname: "me" } });
-	var myFirstName3 = jQuery.sap.getObject(undefined, 0, { name: { firstname: "me" } });
-	var myFirstName4 = jQuery.sap.getObject(null, 0, { name: { firstname: "me" } });
+	var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } }); // Do not migrate.
+	var myFirstName2 = jQuery.sap.getObject("", 0, { name: { firstname: "me" } }); // Do not migrate.
+	var myFirstName3 = jQuery.sap.getObject(undefined, 0, { name: { firstname: "me" } }); // Do not migrate.
+	var myFirstName4 = jQuery.sap.getObject(null, 0, { name: { firstname: "me" } }); // Do not migrate.
 
 	// https://github.com/SAP/ui5-linter/issues/542
 	var isBChildOfAOrEqualA = jQuery.sap.containsOrEquals(document.getElementById("controlA"), document.getElementById("controlB"));
