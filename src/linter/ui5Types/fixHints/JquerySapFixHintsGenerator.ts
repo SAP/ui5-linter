@@ -199,10 +199,11 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 			a shallow or deep copy is performed.
 
 			In case of a shallow clone (default), Object.assign might be a suitable replacement?
-			TODO MB: Discuss with team. Documentation states "No actual replacement for shallow copies available"
 
 			Only in case of a deep clone (first argument is true; explicitly type "boolean"),
 			the merge module shall be used (omitting the first argument)
+
+			Note: migrate only if the first argument is explicitly deep clone (true)
 		*/
 		moduleName: "sap/base/util/merge", exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
 	}],
@@ -253,9 +254,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/dom/includeStylesheet",
 	}],
 	// ["replaceDOM", {
-	// 	// TODO MB: "sap/ui/dom/patch" has been removed in
-	// 	// https://github.com/SAP/openui5/commit/84ae02e870d8349acff17febeac6fb1404d6bb5a#diff-b54e0a67288dd55b118578ef716ece9c9ccf2a5c2ef6be53f90f636e4aa41b70
-	// 	// Therefore this migration is not valid and should be removed
+	// 	"sap/ui/dom/patch" has been removed in
+	// 	https://github.com/SAP/openui5/commit/84ae02e870d8349acff17febeac6fb1404d6bb5a#diff-b54e0a67288dd55b118578ef716ece9c9ccf2a5c2ef6be53f90f636e4aa41b70
+	// 	Therefore this migration is not valid and should be removed
 	// 	moduleName: "sap/ui/dom/patch",
 	// }],
 	["pxToRem", {
@@ -451,8 +452,6 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["serializeXML", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "serialize",
 	}],
-
-	// TODO: Shall we add validation for a string?
 	["startsWith", {
 		exportCodeToBeUsed: "$1.startsWith($2)",
 	}],

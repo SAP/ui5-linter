@@ -274,6 +274,15 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		} else {
 			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
 		}
+	} else if ([
+		"jQuery.sap.startsWith",
+	].includes(apiName ?? "")) {
+		if (!fixHints.exportCodeToBeUsed.args?.length) {
+			fixHints = undefined; // It's invalid string
+			log.verbose(`Autofix skipped for ${apiName}. Invalid (non-string) input.`);
+		} else if (fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].value = `(${fixHints.exportCodeToBeUsed.args[0].value} || "")`;
+		}
 	}
 
 	return fixHints;
