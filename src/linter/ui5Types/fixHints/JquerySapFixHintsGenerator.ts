@@ -286,11 +286,12 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	// 	// It used to be a property and now is a function that needs to be called
 	// 	moduleName: "sap/ui/events/isMouseEventDelayed", exportCodeToBeUsed: "$moduleIdentifier()",
 	// }],
-	["isSpecialKey", {
-		// Note: The new isSpecialKey module does not cover legacy edge cases where
-		// Event.key is not defined, e.g. when jQuery.Events are created manually
-		moduleName: "sap/ui/events/isSpecialKey",
-	}],
+	// Cannot provide full compatibility for this case.
+	// ["isSpecialKey", {
+	// 	// Note: The new isSpecialKey module does not cover legacy edge cases where
+	// 	// Event.key is not defined, e.g. when jQuery.Events are created manually
+	// 	moduleName: "sap/ui/events/isSpecialKey",
+	// }],
 	["touchEventMode", {
 		moduleName: "sap/ui/events/jquery/EventSimulation", exportNameToBeUsed: "touchEventMode",
 	}],
