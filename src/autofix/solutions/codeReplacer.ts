@@ -277,16 +277,20 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	} else if ([
 		"jQuery.sap.startsWith",
 		"jQuery.sap.startsWithIgnoreCase",
+		"jQuery.sap.endsWith",
 	].includes(apiName ?? "")) {
 		if (!fixHints.exportCodeToBeUsed.args?.length) {
 			fixHints = undefined; // It's invalid string
 			log.verbose(`Autofix skipped for ${apiName}. Invalid (non-string) input.`);
-		} else if (fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
+		}
+
+		if (fixHints?.exportCodeToBeUsed?.args?.[0] &&
+			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
 			fixHints.exportCodeToBeUsed.args[0].value = `(${fixHints.exportCodeToBeUsed.args[0].value} || "")`;
 		}
 
-		if (apiName === "jQuery.sap.startsWithIgnoreCase" &&
-			fixHints?.exportCodeToBeUsed?.args?.[1].kind !== SyntaxKind.StringLiteral) {
+		if (fixHints?.exportCodeToBeUsed?.args?.[1] &&
+			fixHints?.exportCodeToBeUsed.args[1].kind !== SyntaxKind.StringLiteral) {
 			fixHints.exportCodeToBeUsed.args[1].value = `(${fixHints.exportCodeToBeUsed.args[1].value} || "")`;
 		}
 	}
