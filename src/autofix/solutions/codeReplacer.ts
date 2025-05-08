@@ -275,6 +275,14 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 				.includes(fixHints.exportCodeToBeUsed.args[0].kind)) {
 			fixHints.exportCodeToBeUsed.name = "Object.create($1 || null)";
 		}
+	} else if (apiName === "jQuery.sap.domById") {
+		if (!fixHints.exportCodeToBeUsed.args?.length ||
+			fixHints.exportCodeToBeUsed.args[0].value === ""
+		) {
+			fixHints.exportCodeToBeUsed.name = "null";
+		} else if (fixHints.exportCodeToBeUsed.args[1]) {
+			fixHints.exportCodeToBeUsed.name = `$2.document.getElementById($1)`;
+		}
 	}
 
 	return fixHints;
