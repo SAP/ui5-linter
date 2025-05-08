@@ -138,6 +138,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 		assert.ok(jQuery.sap.ControlEvents.indexOf(aBrowserEvents[i]) >= 0, "Event " + aBrowserEvents[i] + " contained in jQuery.sap.ControlEvents");
 	}
 	jQuery.sap.handleF6GroupNavigation(new jQuery.Event("keydown", {}));
+	// Do not migrate this case. Private & deprecated module
 	var isMouseEventDelayed = jQuery.sap.isMouseEventDelayed();
 	var isSpecialKey = jQuery.sap.isSpecialKey(new jQuery.Event("keydown", {}));
 	var touchEventMode = jQuery.sap.touchEventMode;

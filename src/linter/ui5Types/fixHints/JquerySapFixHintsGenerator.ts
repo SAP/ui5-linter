@@ -280,10 +280,12 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["handleF6GroupNavigation", {
 		moduleName: "sap/ui/events/F6Navigation", exportNameToBeUsed: "handleF6GroupNavigation",
 	}],
-	["isMouseEventDelayed", {
-		// It used to be a property and now is a function that needs to be called
-		moduleName: "sap/ui/events/isMouseEventDelayed", exportCodeToBeUsed: "$moduleIdentifier()",
-	}],
+	// Do not migrate this case.
+	// Private & deprecated module
+	// ["isMouseEventDelayed", {
+	// 	// It used to be a property and now is a function that needs to be called
+	// 	moduleName: "sap/ui/events/isMouseEventDelayed", exportCodeToBeUsed: "$moduleIdentifier()",
+	// }],
 	["isSpecialKey", {
 		// Note: The new isSpecialKey module does not cover legacy edge cases where
 		// Event.key is not defined, e.g. when jQuery.Events are created manually
