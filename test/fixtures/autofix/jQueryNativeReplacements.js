@@ -33,6 +33,9 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 
 	var person = {firstname: "Peter", lastname: "Miller" };
 	var newObj = jQuery.sap.newObject(person);
+	var newObj2 = jQuery.sap.newObject();
+	var newObj3 = jQuery.sap.newObject(null);
+	var newObj4 = jQuery.sap.newObject({});
 	var getPerson = jQuery.sap.getter(person);
 
 	var myData = ["a", "b", "c"];

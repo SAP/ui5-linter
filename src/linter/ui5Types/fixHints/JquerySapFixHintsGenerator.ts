@@ -497,7 +497,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 	}],
 	["newObject", {
-		exportCodeToBeUsed: "Object.create($1 || null)",
+		exportCodeToBeUsed: "Object.create($1)",
 	}],
 	["getter", {
 		exportCodeToBeUsed: "((value) => () => value)($1)",
