@@ -181,7 +181,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			new URL(fixHints.exportCodeToBeUsed.args[0].value);
 		} catch (_e) {
 			// Adding a domain to the URL to prevent errors and parse correctly the query string
-			dummyUrl = ", \"http://dummy.local\"";
+			dummyUrl = ", \"http://example.com\"";
 		}
 		fixHints.exportCodeToBeUsed.name = `new URL($1${dummyUrl}).searchParams`;
 	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
