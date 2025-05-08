@@ -520,13 +520,13 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/530
-	// TODO: Discuss with the team!
+	// Do not migrate.
 	// URLSearchParams returns an api close to getUriParameters.
 	// However, there are differences. For example .get() returns always a string | undefined
 	// whereas getUriParameters returns a string | string[] | undefined
-	["getUriParameters", {
-		exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
-	}],
+	// ["getUriParameters", {
+	// 	exportCodeToBeUsed: "new URLSearchParams(window.location.search)",
+	// }],
 ]);
 
 // jQuery.*

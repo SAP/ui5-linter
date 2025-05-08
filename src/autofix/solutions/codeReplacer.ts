@@ -267,10 +267,10 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name = `$2.document.getElementById($1)`;
 		}
 	} else if (apiName === "jQuery.sap.registerModulePath") {
-		if (fixHints.exportCodeToBeUsed.args?.[1]?.kind === SyntaxKind.StringLiteral) {
-			fixHints.exportCodeToBeUsed.args[1].value = fixHints.exportCodeToBeUsed.args[1].value.replaceAll(".", "/");
+		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].value = fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
 		} else {
-			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {$1: $2.replaceAll(".", "/")}})`;
+			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
 		}
 	}
 
