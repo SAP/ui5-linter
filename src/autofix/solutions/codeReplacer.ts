@@ -63,7 +63,7 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		let value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), patchArguments(arg.value, apiName));
+			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), arg.value);
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 		value = value.replaceAll(/\$\d+/g, "undefined"); // Some placeholders might be "empty" in the original code
 
@@ -152,22 +152,6 @@ function cleanupChangeSet(changeSet: ChangeSet[], start: number, end: number) {
 	}
 }
 
-function patchArguments(arg: string, apiName?: string) {
-	if (!["jQuery.sap.registerResourcePath", "jQuery.sap.registerModulePath"].includes(apiName ?? "")) {
-		return arg;
-	}
-
-	// jQuery.sap.registerResourcePath has a special case where the
-	// argument can be a string or an object
-	if (arg.startsWith("{") && arg.endsWith("}")) {
-		const matcher = /(?:['"]?\b(?:path|url)\b['"]?\s*:\s*)(['"][^'"]+['"])/;
-		const match = matcher.exec(arg);
-		return match?.[1] ?? arg;
-	} else {
-		return arg;
-	}
-}
-
 function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	if (!fixHints || !("exportCodeToBeUsed" in fixHints) ||
 		!fixHints.exportCodeToBeUsed ||
@@ -176,14 +160,14 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	}
 
 	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.[0]) {
-		let dummyUrl = "";
+		let probingUrl = "";
 		try {
 			new URL(fixHints.exportCodeToBeUsed.args[0].value);
 		} catch (_e) {
 			// Adding a domain to the URL to prevent errors and parse correctly the query string
-			dummyUrl = ", \"http://example.com\"";
+			probingUrl = ", \"http://example.com\"";
 		}
-		fixHints.exportCodeToBeUsed.name = `new URL($1${dummyUrl}).searchParams`;
+		fixHints.exportCodeToBeUsed.name = `new URL($1${probingUrl}).searchParams`;
 	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
@@ -268,11 +252,24 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		} else if (fixHints.exportCodeToBeUsed.args[1]) {
 			fixHints.exportCodeToBeUsed.name = `$2.document.getElementById($1)`;
 		}
-	} else if (apiName === "jQuery.sap.registerModulePath") {
-		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
-			fixHints.exportCodeToBeUsed.args[0].value = fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
+	} else if (["jQuery.sap.registerResourcePath", "jQuery.sap.registerModulePath"].includes(apiName ?? "")) {
+		if (apiName === "jQuery.sap.registerModulePath") {
+			if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
+				fixHints.exportCodeToBeUsed.args[0].value =
+					fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
+			} else {
+				fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
+			}
+		}
+
+		if (fixHints.exportCodeToBeUsed.args?.[1]?.kind === SyntaxKind.StringLiteral) {
+			const arg = fixHints.exportCodeToBeUsed.args[1]?.value;
+			const matcher = /(?:['"]?\b(?:path|url)\b['"]?\s*:\s*)(['"][^'"]+['"])/;
+			const match = matcher.exec(arg);
+			fixHints.exportCodeToBeUsed.args[1].value = match?.[1] ?? arg;
 		} else {
-			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
+			fixHints = undefined; // We don't know how to handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
 	} else if ([
 		"jQuery.sap.startsWith",
