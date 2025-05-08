@@ -253,7 +253,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["includeScript", {
 		moduleName: "sap/ui/dom/includeScript",
 	}],
-	["includeStylesheet", {
+	["includeStyleSheet", {
 		moduleName: "sap/ui/dom/includeStylesheet",
 	}],
 	// ["replaceDOM", {
