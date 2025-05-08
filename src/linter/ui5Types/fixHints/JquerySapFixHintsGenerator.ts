@@ -186,10 +186,6 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 	["forIn", {
 		moduleName: "sap/base/util/each",
 	}],
-	// ["isPlainObject", {
-	// 	// TODO MB: jQuery.isPlainObject is a jQuery deprecation and currently out-of-scope for UI5 Linter
-	// 	moduleName: "sap/base/util/isPlainObject",
-	// }],
 	["FrameOptions", {
 		moduleName: "sap/ui/security/FrameOptions",
 	}],
