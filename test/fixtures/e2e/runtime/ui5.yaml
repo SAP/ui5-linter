@@ -1,0 +1,9 @@
+specVersion: "4.0"
+metadata:
+  name: ui5linter.test.e2e.runtime
+type: library
+framework:
+  name: OpenUI5
+  version: "1.120.30"
+  libraries:
+    - name: sap.ui.core

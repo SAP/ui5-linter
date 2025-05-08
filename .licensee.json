@@ -11,7 +11,9 @@
     "@sapui5/types": "^1.120.4",
     "callsite": "1.0.0",
     "deep-freeze-strict": "1.1.1",
-    "yesno": "0.4.0"
+    "yesno": "0.4.0",
+    "map-stream": "0.1.0",
+    "pause-stream": "0.0.11"
   },
   "corrections": true
 }
