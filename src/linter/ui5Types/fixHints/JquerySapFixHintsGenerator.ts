@@ -505,7 +505,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 
 	// https://github.com/SAP/ui5-linter/issues/589
 	["getModulePath", {
-		exportCodeToBeUsed: `sap.ui.require.toUrl(($1)?.replaceAll(".", "/"))`,
+		exportCodeToBeUsed: `sap.ui.require.toUrl($1)`,
 	}],
 	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
 	// How is this handled in sap.ui.require.toUrl

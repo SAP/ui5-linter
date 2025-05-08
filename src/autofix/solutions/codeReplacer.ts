@@ -217,8 +217,16 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name =
 				`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 		}
-	} else if (apiName === "jQuery.sap.getModulePath" && fixHints.exportCodeToBeUsed.args?.[1]) {
-		fixHints.exportCodeToBeUsed.name = `sap.ui.require.toUrl(($1)?.replaceAll(".", "/")) + $2`;
+	} else if (apiName === "jQuery.sap.getModulePath") {
+		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].value = fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
+		} else {
+			fixHints.exportCodeToBeUsed.name = `sap.ui.require.toUrl(($1)?.replaceAll(".", "/"))`;
+		}
+
+		if (fixHints.exportCodeToBeUsed.args?.[1]) {
+			fixHints.exportCodeToBeUsed.name += " + $2";
+		}
 	} else if (apiName === "jQuery.sap.extend") {
 		const args = fixHints.exportCodeToBeUsed.args ?? [];
 
