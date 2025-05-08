@@ -28,6 +28,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.clearIntervalCall(intervalCallId);
 
 	var element = jQuery.sap.domById("popup");
+	var element2 = jQuery.sap.domById("popup", globalThis);
+	var element3 = jQuery.sap.domById();
 	const divList = document.getElementsByTagName("div");
 	var isEqNode = jQuery.sap.isEqualNode(divList[0], divList[0]);
 
