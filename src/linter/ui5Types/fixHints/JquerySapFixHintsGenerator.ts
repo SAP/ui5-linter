@@ -500,7 +500,7 @@ $identifier_1.forEach(({protocol, host, port, path}) => $moduleIdentifier.add(pr
 		exportCodeToBeUsed: "Object.create($1 || null)",
 	}],
 	["getter", {
-		exportCodeToBeUsed: "function(value) { return function() { return value; }; }($1)",
+		exportCodeToBeUsed: "((value) => () => value)($1)",
 	}],
 
 	// https://github.com/SAP/ui5-linter/issues/589
