@@ -280,19 +280,34 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		"jQuery.sap.endsWith",
 		"jQuery.sap.endsWithIgnoreCase",
 	].includes(apiName ?? "")) {
-		if (!fixHints.exportCodeToBeUsed.args?.length) {
-			fixHints = undefined; // It's invalid string
-			log.verbose(`Autofix skipped for ${apiName}. Invalid (non-string) input.`);
-		}
-
 		if (fixHints?.exportCodeToBeUsed?.args?.[0] &&
 			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
 			fixHints.exportCodeToBeUsed.args[0].value = `(${fixHints.exportCodeToBeUsed.args[0].value} || "")`;
 		}
-
 		if (fixHints?.exportCodeToBeUsed?.args?.[1] &&
 			fixHints?.exportCodeToBeUsed.args[1].kind !== SyntaxKind.StringLiteral) {
 			fixHints.exportCodeToBeUsed.args[1].value = `(${fixHints.exportCodeToBeUsed.args[1].value} || "")`;
+		}
+
+		if (!fixHints.exportCodeToBeUsed.args?.length) {
+			fixHints = undefined; // It's invalid string
+			log.verbose(`Autofix skipped for ${apiName}. Invalid (non-string) input.`);
+		}
+	} else if ([
+		"jQuery.sap.padLeft",
+		"jQuery.sap.padRight",
+	].includes(apiName ?? "")) {
+		if (fixHints?.exportCodeToBeUsed?.args?.[0] &&
+			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].value = `(${fixHints.exportCodeToBeUsed.args[0].value} || "")`;
+		}
+		if (!fixHints?.exportCodeToBeUsed?.args?.[1] ||
+			fixHints?.exportCodeToBeUsed.args[1].kind !== SyntaxKind.StringLiteral ||
+			// String literals are enclosed in double quotes, so the length of an empty string is 2
+			fixHints?.exportCodeToBeUsed.args[1].value.length > 3) {
+			// API not compatible if the second argument is not a string or string with lenght <> 1
+			fixHints = undefined;
+			log.verbose(`Autofix skipped for ${apiName}.`);
 		}
 	}
 
