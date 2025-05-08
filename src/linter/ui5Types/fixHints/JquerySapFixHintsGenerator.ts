@@ -507,8 +507,6 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["getModulePath", {
 		exportCodeToBeUsed: `sap.ui.require.toUrl($1)`,
 	}],
-	// TODO: jQuery.sap.getResourcePath() has a second param sSuffix
-	// How is this handled in sap.ui.require.toUrl
 	["getResourcePath", {
 		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
 	}],
