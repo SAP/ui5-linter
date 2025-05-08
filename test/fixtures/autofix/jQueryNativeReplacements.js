@@ -10,6 +10,9 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var isStandAlone = jQuery.device.is.standalone;
 	var retinaDisplay = jQuery.support.retina;
 	var startsWithH = jQuery.sap.startsWith("Hello", "H");
+	var startsWithH2 = jQuery.sap.startsWith();
+	var startText = "Hello";
+	var startsWithH3 = jQuery.sap.startsWith(startText, "H");
 	var startsWithHOrh = jQuery.sap.startsWithIgnoreCase("Hello", "h");
 	var endsWithY = jQuery.sap.endsWith("Hello Y", "Y");
 	var endsWithYOry = jQuery.sap.endsWithIgnoreCase("Hello Y", "y");
