@@ -278,6 +278,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		"jQuery.sap.startsWith",
 		"jQuery.sap.startsWithIgnoreCase",
 		"jQuery.sap.endsWith",
+		"jQuery.sap.endsWithIgnoreCase",
 	].includes(apiName ?? "")) {
 		if (!fixHints.exportCodeToBeUsed.args?.length) {
 			fixHints = undefined; // It's invalid string

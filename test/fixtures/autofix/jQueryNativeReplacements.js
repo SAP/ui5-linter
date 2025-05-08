@@ -21,6 +21,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var endsWithY2 = jQuery.sap.endsWith("Hello Y", startsWithLetter);
 	var endsWithY3 = jQuery.sap.endsWith(startText, startsWithLetter);
 	var endsWithYOry = jQuery.sap.endsWithIgnoreCase("Hello Y", "y");
+	var endsWithYOry2 = jQuery.sap.endsWithIgnoreCase(startText, "y");
+	var endsWithYOry3 = jQuery.sap.endsWithIgnoreCase(startText, startsWithLetter);
 	var padLeft = jQuery.sap.padLeft("a", "0", 4); // returns "000a";
 	var padRight = jQuery.sap.padRight("a", "0", 4); // returns "a000";
 
