@@ -455,11 +455,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["startsWith", {
 		exportCodeToBeUsed: "$1.startsWith($2)",
 	}],
-	// TODO: Shall we add validation for a string?
 	["startsWithIgnoreCase", {
 		exportCodeToBeUsed: "$1.toUpperCase().startsWith($2.toUpperCase())",
 	}],
-	// TODO: Shall we add validation for a string?
 	["endsWith", {
 		exportCodeToBeUsed: "$1.endsWith($2)",
 	}],
