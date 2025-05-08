@@ -228,25 +228,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name += " + $2";
 		}
 	} else if (apiName === "jQuery.sap.extend") {
-		const args = fixHints.exportCodeToBeUsed.args ?? [];
-
-		if (args[0].kind === SyntaxKind.TrueKeyword) {
-			// Deep clone
-			fixHints.exportCodeToBeUsed.name =
-			`$moduleIdentifier($2, $3)`;
-		} else if (["null", "undefined"].includes(args[0].value) ||
-			(args.length === 2 && args[0].kind === SyntaxKind.ArrayLiteralExpression) ||
-			(args.length === 3 && args[1].kind === SyntaxKind.ArrayLiteralExpression)) {
-			// Deep clone
-			fixHints.exportCodeToBeUsed.name =
-				`$moduleIdentifier(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args ?? [])})`;
-		} else if (args.length === 2 && args[0].kind === SyntaxKind.ObjectLiteralExpression) {
-			fixHints.exportCodeToBeUsed.name = `{...$1, ...$2}`;
-			delete fixHints.moduleName;
-		} else if (args.length === 3 && args[1].kind === SyntaxKind.ObjectLiteralExpression) {
-			fixHints.exportCodeToBeUsed.name = `{...$2, ...$3}`;
-			delete fixHints.moduleName;
-		} else {
+		// Only explicit deep merge can be safely migrated
+		if (fixHints.exportCodeToBeUsed.args?.[0].kind !== SyntaxKind.TrueKeyword) {
 			fixHints = undefined; // Too much uncertainty. We cannot process this case
 			log.verbose(`Autofix skipped for jQuery.sap.extend. Transpilation is too ambiguous.`);
 		}
@@ -282,6 +265,12 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name = "null";
 		} else if (fixHints.exportCodeToBeUsed.args[1]) {
 			fixHints.exportCodeToBeUsed.name = `$2.document.getElementById($1)`;
+		}
+	} else if (apiName === "jQuery.sap.registerModulePath") {
+		if (fixHints.exportCodeToBeUsed.args?.[1]?.kind === SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[1].value = fixHints.exportCodeToBeUsed.args[1].value.replaceAll(".", "/");
+		} else {
+			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {$1: $2.replaceAll(".", "/")}})`;
 		}
 	}
 
