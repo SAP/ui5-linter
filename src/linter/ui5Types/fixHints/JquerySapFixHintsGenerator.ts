@@ -225,12 +225,11 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		// Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
 		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$moduleIdentifier.set($1, $2, $3)",
 	}],
-	["getObject", {
-		// TODO: Might not be able to migrate. API is not 1:1
-		// Getter creates empty object and sub objects with null values.
-		// Requires code touch
-		moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$moduleIdentifier.get($1, $3)",
-	}],
+	// ["getObject", {
+	// 	// Do not migrate. API is not 1:1
+	// 	// jQuery.sap.getObject creates empty object and sub objects with null values.
+	// 	moduleName: "sap/base/util/ObjectPath", exportCodeToBeUsed: "$moduleIdentifier.get($1, $3)",
+	// }],
 	// https://github.com/SAP/ui5-linter/issues/542
 	["containsOrEquals", {
 		moduleName: "sap/ui/dom/containsOrEquals",
