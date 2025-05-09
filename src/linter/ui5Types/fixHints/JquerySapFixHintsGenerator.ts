@@ -16,27 +16,27 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.debug", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "debug",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.debug",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.error", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "error",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.error",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.fatal", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "fatal",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.fatal",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.info", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "info",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.info",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.trace", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "trace",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.trace",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.warning", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "warning",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.warning",
 	}],
 	["log.getLevel", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
@@ -289,8 +289,8 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	// }],
 	// Cannot provide full compatibility for this case.
 	// ["isSpecialKey", {
-	// 	// Note: The new isSpecialKey module does not cover legacy edge cases where
-	// 	// Event.key is not defined, e.g. when jQuery.Events are created manually
+	// Note: The new isSpecialKey module does not cover legacy edge cases where
+	// Event.key is not defined, e.g. when jQuery.Events are created manually
 	// 	moduleName: "sap/ui/events/isSpecialKey",
 	// }],
 	["touchEventMode", {
@@ -360,6 +360,15 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	["measure.unregisterAllMethods", {
 		moduleName: "sap/ui/performance/Measurement", exportNameToBeUsed: "unregisterAllMethods",
+	}],
+	["measure.getRequestTimings", {
+		exportCodeToBeUsed: "performance.getEntriesByType(\"resource\")",
+	}],
+	["measure.clearRequestTimings", {
+		exportCodeToBeUsed: "performance.clearResourceTimings()",
+	}],
+	["measure.setRequestBufferSize", {
+		exportCodeToBeUsed: "performance.setResourceTimingBufferSize($1)",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/561
 	["fesr.setActive", {
@@ -689,7 +698,7 @@ export default class JquerySapFixHintsGenerator {
 
 		let exportCodeToBeUsed;
 		if (moduleReplacement.exportCodeToBeUsed) {
-			let current = node;
+			let current: ts.Node = node;
 			let callExpression;
 			while (current && ts.isPropertyAccessExpression(current.parent)) {
 				current = current.parent;
@@ -703,21 +712,37 @@ export default class JquerySapFixHintsGenerator {
 				current.parent.expression === current) {
 				callExpression = current.parent;
 			}
+
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
+				solutionLength: (current.getEnd() - current.getStart()),
+				isExpressionStatement: false,
 			} as FixHints["exportCodeToBeUsed"];
 
+			let isExpressionStatement = false;
+			while (current && !isExpressionStatement) {
+				if (ts.isVariableDeclaration(current) ||
+					// ts.isExpressionStatement(current) ||
+					ts.isVariableStatement(current)) {
+					isExpressionStatement = true;
+				}
+				current = current.parent;
+			}
+
 			if (typeof exportCodeToBeUsed === "object") {
+				exportCodeToBeUsed.isExpressionStatement = isExpressionStatement;
+
 				let args: FixHintsArgsType = [];
 				// jQuery(".mySelector" /* args */).functionName()
 				if (ts.isCallExpression(node.expression)) {
 					args = args.concat(node.expression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg.kind})));
+						({value: arg.getText(), kind: arg?.kind})));
 				}
 				// jQuery.sap.functionName(args)
 				if (callExpression) {
 					args = args.concat(callExpression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg.kind})));
+						({value: arg.getText(), kind: arg?.kind})));
+					exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
 				}
 				exportCodeToBeUsed.args = args;
 			}
