@@ -26,7 +26,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
 	jQuery.sap.registerModulePath("ui5.project.moduleB", { path: "/ui5/project/moduleB" });
 	var moduleName = "ui5.project.moduleC";
-	jQuery.sap.(moduleName, { path: "/ui5/project/moduleC" });
+	jQuery.sap.registerModulePath(moduleName, { path: "/ui5/project/moduleC" });
 
 	jQuery.sap.registerResourcePath("me/fancy/A", "ui5/projectA/");
 	jQuery.sap.registerResourcePath("me/fancy/B", { url: 'ui5/projectB/' });

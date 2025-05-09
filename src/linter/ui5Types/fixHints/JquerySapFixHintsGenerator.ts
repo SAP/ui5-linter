@@ -727,7 +727,6 @@ export default class JquerySapFixHintsGenerator {
 
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
-				solutionLength: (current.getEnd() - current.getStart()),
 				isExpressionStatement: false,
 			} as FixHints["exportCodeToBeUsed"];
 
@@ -761,7 +760,6 @@ export default class JquerySapFixHintsGenerator {
 				if (callExpression) {
 					args = args.concat(callExpression.arguments.map((arg) =>
 						({value: arg.getText(), kind: arg?.kind})));
-					exportCodeToBeUsed.solutionLength = (callExpression.getEnd() - callExpression.getStart());
 				}
 				exportCodeToBeUsed.args = args;
 			}
