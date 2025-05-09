@@ -10,8 +10,6 @@ updates:
   directory: "/"
   schedule:
     interval: "daily"
-  reviewers:
-  - "SAP/ui5-foundation"
   versioning-strategy: increase
   commit-message:
     prefix: "deps"
