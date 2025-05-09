@@ -626,11 +626,14 @@ const jQueryReplacements = new Map<string, FixHints>([
 
 // jQuery.fn.* / jQuery().*
 const jQueryPluginReplacements = new Map<string, FixHints>([
+	// Do not migrate this case.
+	// It could be not only jQuery(".selector"), but also other jQuery
+	// methods that we cannot convert as DOM selector, like for example jQuery(".selector").eq(3)
 	// https://github.com/SAP/ui5-linter/issues/578
-	["control", {
-		moduleName: "sap/ui/core/Element",
-		exportCodeToBeUsed: "[$moduleIdentifier.closestTo($1)]",
-	}],
+	// ["control", {
+	// 	moduleName: "sap/ui/core/Element",
+	// 	exportCodeToBeUsed: "[$moduleIdentifier.closestTo($1)]",
+	// }],
 ]);
 
 export default class JquerySapFixHintsGenerator {
