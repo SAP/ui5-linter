@@ -26,10 +26,11 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.registerModulePath("ui5.project.moduleA", "/ui5/project/moduleA");
 	jQuery.sap.registerModulePath("ui5.project.moduleB", { path: "/ui5/project/moduleB" });
 	var moduleName = "ui5.project.moduleC";
-	jQuery.sap.registerModulePath(moduleName, { path: "/ui5/project/moduleC" });
+	jQuery.sap.(moduleName, { path: "/ui5/project/moduleC" });
 
 	jQuery.sap.registerResourcePath("me/fancy/A", "ui5/projectA/");
 	jQuery.sap.registerResourcePath("me/fancy/B", { url: 'ui5/projectB/' });
+	jQuery.sap.registerResourcePath(moduleName, { url: 'ui5/projectC/' });
 
 	// https://github.com/SAP/ui5-linter/issues/589
 	var buttonPath1 = jQuery.sap.getModulePath("sap.m.Button", ".js"); // resolves to "resources/sap/m/Button.js"

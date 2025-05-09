@@ -256,21 +256,19 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints.exportCodeToBeUsed.name = `$2.document.getElementById($1)`;
 		}
 	} else if (["jQuery.sap.registerResourcePath", "jQuery.sap.registerModulePath"].includes(apiName ?? "")) {
-		if (apiName === "jQuery.sap.registerModulePath") {
-			if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
-				fixHints.exportCodeToBeUsed.args[0].value =
-					fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
-			} else {
-				fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
-			}
+		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].value =
+				fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
+		} else {
+			fixHints.exportCodeToBeUsed.name = `sap.ui.loader.config({paths: {[$1.replaceAll(".", "/")]: $2}})`;
 		}
 
-		if (fixHints.exportCodeToBeUsed.args?.[1]?.kind === SyntaxKind.StringLiteral) {
+		if (fixHints.exportCodeToBeUsed.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
 			const arg = fixHints.exportCodeToBeUsed.args[1]?.value;
 			const matcher = /(?:['"]?\b(?:path|url)\b['"]?\s*:\s*)(['"][^'"]+['"])/;
 			const match = matcher.exec(arg);
 			fixHints.exportCodeToBeUsed.args[1].value = match?.[1] ?? arg;
-		} else {
+		} else if (fixHints.exportCodeToBeUsed.args?.[1]?.kind !== SyntaxKind.StringLiteral) {
 			fixHints = undefined; // We don't know how to handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
