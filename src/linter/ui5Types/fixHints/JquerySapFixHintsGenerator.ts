@@ -727,7 +727,6 @@ export default class JquerySapFixHintsGenerator {
 
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
-				isExpressionStatement: false,
 			} as FixHints["exportCodeToBeUsed"];
 
 			let isAssignmentStatement = false;
@@ -736,7 +735,7 @@ export default class JquerySapFixHintsGenerator {
 					ts.isBinaryExpression(current) ||
 					ts.isVariableStatement(current) ||
 					ts.isConditionalExpression(current) ||
-					// Chining
+					// Chaining
 					(ts.isPropertyAccessExpression(current) &&
 						ts.isCallExpression(current.expression) &&
 						ts.isPropertyAccessExpression(current.expression.parent) &&
