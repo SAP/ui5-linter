@@ -5,13 +5,25 @@ import {
 	type ChangeSet,
 	type ReplaceChange,
 	type ExistingModuleDeclarationInfo,
-	type ImportRequests,
+	getModuleDeclarationForPosition,
+	DeprecatedApiAccessNode,
+	GlobalPropertyAccessNodeInfo,
 } from "../autofix.js";
 import {type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 import {getLogger} from "@ui5/logger";
 
 const log = getLogger("linter:autofix:codeReplacer");
+
+function findNodeInfoAtPosition(
+	nodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[],
+	position: PositionInfo
+): DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo | undefined {
+	return nodeInfos.find((nodeInfo) => {
+		return nodeInfo.position.line === (position.line - 1) &&
+			nodeInfo.position.column === (position.column - 1);
+	});
+}
 
 /**
  * Replaces the existing code with a specific snippet.
@@ -45,10 +57,14 @@ export default function generateSolutionCodeReplacer(
 		}
 
 		// Find the imports from module declarations in the context/scope of the message
-		const importRequests = getContextImportRequests(sourceFile, moduleDeclarations, position);
+		const moduleDeclaration = getModuleDeclarationForPosition(
+			sourceFile.getPositionOfLineAndCharacter(position.line - 1, position.column - 1),
+			moduleDeclarations
+		);
+		const importRequests = moduleDeclaration?.importRequests;
 
 		const {exportCodeToBeUsed, moduleName} = patchedFixHints;
-		const moduleInfo = moduleName ? importRequests.get(moduleName) : null;
+		const moduleInfo = moduleName ? importRequests?.get(moduleName) : null;
 		if (moduleInfo?.identifier) {
 			exportCodeToBeUsed.name =
 				exportCodeToBeUsed.name.replaceAll("$moduleIdentifier", moduleInfo.identifier);
@@ -67,29 +83,41 @@ export default function generateSolutionCodeReplacer(
 		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
 		value = value.replaceAll(/\$\d+/g, "undefined"); // Some placeholders might be "empty" in the original code
 
+		let nodeInfo: DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo | undefined;
+		if (moduleInfo?.nodeInfos) {
+			nodeInfo = findNodeInfoAtPosition(moduleInfo.nodeInfos, position);
+		} else if (moduleDeclaration?.additionalNodeInfos) {
+			nodeInfo = findNodeInfoAtPosition(moduleDeclaration?.additionalNodeInfos, position);
+		}
+
+		if (!nodeInfo?.node) {
+			throw new Error(`Unable to produce solution for message: ${JSON.stringify({fixHints, position, args})}`);
+		}
+
 		// Calculate the replacement position
 		// It cannot be derived from the fixHintsGenerator as it works on the compiled source file.
 		// Just take the length of the old and the original start position
-		let pos;
-		if (moduleInfo?.nodeInfos) {
-			// For jQuery function deprecations, the node might only cover
-			// the deprecated method, but not the whole expression.
-			// Find the expression and update the position.
-			const nodeInfoAtPosition = moduleInfo.nodeInfos.find((nodeInfo) => {
-				return nodeInfo.position.line === (position.line - 1) &&
-					nodeInfo.position.column === (position.column - 1);
-			});
+		let pos, originalLengthNode = nodeInfo.node;
 
-			if (nodeInfoAtPosition?.node && !ts.isCallExpression(nodeInfoAtPosition.node) &&
-				ts.isPropertyAccessExpression(nodeInfoAtPosition.node) &&
-				nodeInfoAtPosition.node.expression && ts.isCallExpression(nodeInfoAtPosition.node.expression)) {
-				pos = sourceFile.getLineAndCharacterOfPosition(nodeInfoAtPosition.node.expression.pos);
-			}
+		// For jQuery function deprecations, the node might only cover
+		// the deprecated method, but not the whole expression.
+		// Find the expression and update the position.
+		if (!ts.isCallExpression(nodeInfo.node) &&
+			ts.isPropertyAccessExpression(nodeInfo.node) &&
+			nodeInfo.node.expression && ts.isCallExpression(nodeInfo.node.expression)) {
+			pos = sourceFile.getLineAndCharacterOfPosition(nodeInfo.node.expression.pos);
 		}
+
+		if (ts.isCallExpression(nodeInfo.node.parent) &&
+			nodeInfo.node.parent.expression === nodeInfo.node) {
+			originalLengthNode = nodeInfo.node.parent;
+		}
+
+		const originalLength = originalLengthNode.getEnd() - originalLengthNode.getStart();
 		const line = pos ? pos.line : (position.line - 1);
 		const column = pos ? (pos.character + 1) : (position.column - 1);
 		const start = sourceFile.getPositionOfLineAndCharacter(line, column);
-		const end = start + exportCodeToBeUsed.solutionLength;
+		const end = start + originalLength;
 
 		cleanupChangeSet(changeSet, start, end);
 
@@ -100,31 +128,6 @@ export default function generateSolutionCodeReplacer(
 			value,
 		});
 	}
-}
-
-const importRequestsCache = new Map<number, ImportRequests>();
-// Finds the imports from module declarations in the context/scope of the message
-function getContextImportRequests(
-	sourceFile: ts.SourceFile,
-	moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>,
-	messagePosInfo: PositionInfo) {
-	const importRequests: ImportRequests = new Map();
-	const position = sourceFile.getPositionOfLineAndCharacter(messagePosInfo.line - 1, messagePosInfo.column - 1);
-
-	if (importRequestsCache.has(position)) {
-		return importRequestsCache.get(position)!;
-	}
-
-	for (const [callExpression, moduleDeclarationInfo] of moduleDeclarations.entries()) {
-		if (callExpression.getStart() < position && position < callExpression.getEnd()) {
-			moduleDeclarationInfo.importRequests.forEach((value, key) => {
-				importRequests.set(key, value);
-			});
-		}
-	}
-
-	importRequestsCache.set(position, importRequests);
-	return importRequests;
 }
 
 // Avoid replacements on colliding position.
