@@ -25,6 +25,7 @@ export interface FixHints {
 		name: string;
 		moduleNameIdentifier?: string;
 		args?: FixHintsArgsType;
+		isAssignmentStatement?: boolean;
 	};
 
 	/**

@@ -309,6 +309,17 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined;
 			log.verbose(`Autofix skipped for ${apiName}.`);
 		}
+	} else if ([
+		"jQuery.sap.log.debug",
+		"jQuery.sap.log.error",
+		"jQuery.sap.log.fatal",
+		"jQuery.sap.log.info",
+		"jQuery.sap.log.trace",
+		"jQuery.sap.log.warning",
+	].includes(apiName ?? "") && fixHints?.exportCodeToBeUsed.isAssignmentStatement) {
+		// API not compatible
+		fixHints = undefined;
+		log.verbose(`Autofix skipped for ${apiName}.`);
 	}
 
 	return fixHints;
