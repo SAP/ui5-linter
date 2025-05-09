@@ -10,6 +10,8 @@ sap.ui.define([], function () {
 	const logObject = jQuery.
 	sap.
 	log;
+
+	// Line breaks between property access and call
 	const myLogger = jQuery.
 	sap.
 	log.

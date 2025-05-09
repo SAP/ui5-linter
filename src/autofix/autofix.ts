@@ -88,12 +88,14 @@ export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDec
 export interface ExistingModuleDeclarationInfo {
 	moduleDeclaration: ModuleDeclaration | RequireExpression;
 	importRequests: ImportRequests;
+	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
 }
 
 export interface NewModuleDeclarationInfo {
 	declareCall: ts.CallExpression;
 	requireCalls: Map<string, ts.CallExpression[]>;
 	importRequests: ImportRequests;
+	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
 	endPos?: number;
 }
 
@@ -175,6 +177,27 @@ function getAutofixMessages(resource: AutofixResource) {
 	}
 
 	return messagesById;
+}
+
+export function getModuleDeclarationForPosition(
+	position: number, moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>
+): ModuleDeclarationInfo | undefined {
+	const potentialDeclarations: {declaration: ModuleDeclarationInfo; start: number}[] = [];
+	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
+		const {moduleDeclaration} = moduleDeclarationInfo;
+		const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
+		if (!factory || factory.getStart() > position || factory.getEnd() < position) {
+			continue;
+		}
+		potentialDeclarations.push({
+			declaration: moduleDeclarationInfo,
+			start: factory.getStart(),
+		});
+	}
+	// Sort by start position so that the declaration closest to the position is returned
+	// This is relevant in case of nested sap.ui.require calls
+	potentialDeclarations.sort((a, b) => a.start - b.start);
+	return potentialDeclarations.pop()?.declaration;
 }
 
 export default async function ({

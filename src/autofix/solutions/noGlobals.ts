@@ -69,6 +69,7 @@ export default function generateSolutionNoGlobals(
 					moduleDeclarations.set(node, {
 						moduleDeclaration: parseModuleDeclaration(node.arguments, checker),
 						importRequests: new Map(),
+						additionalNodeInfos: [],
 					});
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
@@ -83,6 +84,7 @@ export default function generateSolutionNoGlobals(
 						moduleDeclarations.set(node, {
 							moduleDeclaration: requireExpression,
 							importRequests: new Map(),
+							additionalNodeInfos: [],
 						});
 					}
 				} catch (err) {
@@ -146,6 +148,9 @@ export default function generateSolutionNoGlobals(
 				});
 			}
 			moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
+		} else {
+			// We have a replacement without introducing a new module, e.g. replacement by native API usage
+			moduleDeclarationInfo?.additionalNodeInfos.push(nodeInfo);
 		}
 	}
 

@@ -23,7 +23,6 @@ export interface FixHints {
 	 */
 	exportCodeToBeUsed?: string | {
 		name: string;
-		solutionLength: number;
 		moduleNameIdentifier?: string;
 		args?: FixHintsArgsType;
 	};
