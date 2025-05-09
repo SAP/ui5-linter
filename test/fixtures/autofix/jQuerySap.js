@@ -164,6 +164,9 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var isRegisterSuccessful = jQuery.sap.measure.registerMethod("measureC", myFunctionObject, "myFunction");
 	var isUnregisterSuccessful = jQuery.sap.measure.unregisterMethod("measureC", myFunctionObject, "myFunction");
 	jQuery.sap.measure.unregisterAllMethods();
+	var timings = jQuery.sap.measure.getRequestTimings();
+	jQuery.sap.measure.clearRequestTimings();
+	jQuery.sap.measure.setRequestBufferSize(100)
 
 	// https://github.com/SAP/ui5-linter/issues/561
 	await jQuery.sap.fesr.setActive(true);
