@@ -452,6 +452,15 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["storage", {
 		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new $moduleIdentifier($1, $2)",
 	}],
+	["storage.Storage", {
+		moduleName: "sap/ui/util/Storage",
+	}],
+	["storage.Type.local", {
+		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "$moduleIdentifier.Type.local",
+	}],
+	["storage.Type.session", {
+		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "$moduleIdentifier.Type.session",
+	}],
 	["getParseError", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "getParseError",
 	}],

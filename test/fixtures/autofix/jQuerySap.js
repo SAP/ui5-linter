@@ -216,7 +216,8 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	// 1. Replace global "jQuery.sap.storage.Type.local"
 	// 2. Replace the code with the following:
 	// -> var store = new Storage(Storage.Type.local, "mystore");
-	// var store = jQuery.sap.storage(jQuery.sap.storage.Type.local, "mystore");
+	var store = jQuery.sap.storage(jQuery.sap.storage.Type.local, "mystore");
+	var store2 = new jQuery.sap.storage.Storage(jQuery.sap.storage.Type.local, "mystore");
 
 	var errorXML = "<?xml version=\"1.0\"><teamMembers><member firstName=\"Andreas\"</member></teamMembers>";
 	var parseError = jQuery.sap.getParseError(jQuery.sap.parseXML(errorXML));
