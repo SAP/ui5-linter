@@ -731,18 +731,25 @@ export default class JquerySapFixHintsGenerator {
 				isExpressionStatement: false,
 			} as FixHints["exportCodeToBeUsed"];
 
-			let isExpressionStatement = false;
-			while (current && !isExpressionStatement) {
+			let isAssignmentStatement = false;
+			while (current && !isAssignmentStatement) {
 				if (ts.isVariableDeclaration(current) ||
-					// ts.isExpressionStatement(current) ||
-					ts.isVariableStatement(current)) {
-					isExpressionStatement = true;
+					ts.isBinaryExpression(current) ||
+					ts.isVariableStatement(current) ||
+					ts.isConditionalExpression(current) ||
+					// Chining
+					(ts.isPropertyAccessExpression(current) &&
+						ts.isCallExpression(current.expression) &&
+						ts.isPropertyAccessExpression(current.expression.parent) &&
+						ts.isCallExpression(current.expression.parent.expression))
+				) {
+					isAssignmentStatement = true;
 				}
 				current = current.parent;
 			}
 
 			if (typeof exportCodeToBeUsed === "object") {
-				exportCodeToBeUsed.isExpressionStatement = isExpressionStatement;
+				exportCodeToBeUsed.isAssignmentStatement = isAssignmentStatement;
 
 				let args: FixHintsArgsType = [];
 				// jQuery(".mySelector" /* args */).functionName()

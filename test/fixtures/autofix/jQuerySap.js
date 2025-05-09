@@ -37,6 +37,16 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.log.info("This is a info log message");
 	jQuery.sap.log.trace("This is a trace log message");
 	jQuery.sap.log.warning("This is a warning log message");
+	
+	// Do not migrate those!
+	jQuery.sap.log.debug().info();
+	var debugInfo = jQuery.sap.log.debug();
+	var info = {
+		debug: jQuery.sap.log.debug()
+	};
+	jQuery.sap.log.debug() ?? jQuery.sap.log.info();
+	jQuery.sap.log.debug() ? "a" : "b";
+	jQuery.sap.log.debug(), jQuery.sap.log.info();
 
 	// https://github.com/SAP/ui5-linter/issues/524
 	const myCSS = jQuery.sap.encodeCSS("+");
