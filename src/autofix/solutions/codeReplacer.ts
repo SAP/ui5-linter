@@ -61,7 +61,14 @@ export default function generateSolutionCodeReplacer(
 			sourceFile.getPositionOfLineAndCharacter(position.line - 1, position.column - 1),
 			moduleDeclarations
 		);
-		const importRequests = moduleDeclaration?.importRequests;
+
+		// Message is not in the context of a module declaration (e.g. top-level code)
+		if (!moduleDeclaration) {
+			log.verbose(`Autofix skipped for message: ${JSON.stringify({fixHints, position, args})}`);
+			continue;
+		}
+
+		const importRequests = moduleDeclaration.importRequests;
 
 		const {exportCodeToBeUsed, moduleName} = patchedFixHints;
 		const moduleInfo = moduleName ? importRequests?.get(moduleName) : null;
@@ -86,8 +93,8 @@ export default function generateSolutionCodeReplacer(
 		let nodeInfo: DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo | undefined;
 		if (moduleInfo?.nodeInfos) {
 			nodeInfo = findNodeInfoAtPosition(moduleInfo.nodeInfos, position);
-		} else if (moduleDeclaration?.additionalNodeInfos) {
-			nodeInfo = findNodeInfoAtPosition(moduleDeclaration?.additionalNodeInfos, position);
+		} else if (moduleDeclaration.additionalNodeInfos) {
+			nodeInfo = findNodeInfoAtPosition(moduleDeclaration.additionalNodeInfos, position);
 		}
 
 		if (!nodeInfo?.node) {
