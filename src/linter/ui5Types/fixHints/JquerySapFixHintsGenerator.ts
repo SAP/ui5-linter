@@ -529,12 +529,13 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/588
-	["registerModulePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
-	}],
-	["registerResourcePath", {
-		exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
-	}],
+	// Do not migrate for now. Migration is still unstable.
+	// ["registerModulePath", {
+	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
+	// }],
+	// ["registerResourcePath", {
+	// 	exportCodeToBeUsed: "sap.ui.loader.config({paths: {$1: $2}})",
+	// }],
 	// https://github.com/SAP/ui5-linter/issues/530
 	// Do not migrate.
 	// URLSearchParams returns an api close to getUriParameters.
