@@ -173,7 +173,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
 		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1]?.value ?? "0", 10);
-		const isStringValue = fixHints.exportCodeToBeUsed?.args?.[0].kind === SyntaxKind.StringLiteral;
+		const isStringValue = fixHints.exportCodeToBeUsed?.args?.[0]?.kind === SyntaxKind.StringLiteral;
 		if (!isStringValue ||
 			(charToUpperCase > 0 && charToUpperCase <= (fixHints.exportCodeToBeUsed?.args?.[0].value ?? "").length)) {
 			fixHints = undefined; // We cannot handle this case
