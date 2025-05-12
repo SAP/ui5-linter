@@ -213,7 +213,7 @@ function camelize(str: string): string {
 	});
 }
 
-export function isGlobalAssignment(node: ts.AccessExpression): boolean {
+export function isAssignment(node: ts.AccessExpression): boolean {
 	let currentNode: ts.Node | undefined = node;
 	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
 		if (!currentNode.parent) {

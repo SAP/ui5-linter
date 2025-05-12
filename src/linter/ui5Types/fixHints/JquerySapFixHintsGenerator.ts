@@ -1,5 +1,6 @@
 import ts from "typescript";
 import type {FixHints, FixHintsArgsType} from "./FixHints.js";
+import {isAssignment} from "../utils/utils.js";
 
 // jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
@@ -650,7 +651,20 @@ const jQueryPluginReplacements = new Map<string, FixHints>([
 ]);
 
 export default class JquerySapFixHintsGenerator {
+	private isFixable(node: ts.CallExpression | ts.AccessExpression): boolean {
+		if (ts.isCallExpression(node)) {
+			return true;
+		}
+		if (isAssignment(node)) {
+			return false;
+		}
+		return true;
+	}
+
 	getFixHints(node: ts.AccessExpression | ts.CallExpression): FixHints | undefined {
+		if (!this.isFixable(node)) {
+			return undefined;
+		}
 		const parts: string[] = [];
 		const partNodes: ts.Node[] = [];
 		let isJQueryFnAccess = false;

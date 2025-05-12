@@ -1,6 +1,6 @@
 import ts from "typescript";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
-import {isConditionalAccess, isGlobalAssignment} from "../utils/utils.js";
+import {isConditionalAccess, isAssignment} from "../utils/utils.js";
 import type {FixHints} from "./FixHints.js";
 
 export default class GlobalsFixHintsGenerator {
@@ -42,7 +42,7 @@ export default class GlobalsFixHintsGenerator {
 		if (ts.isCallExpression(node)) {
 			return true;
 		}
-		if (isGlobalAssignment(node)) {
+		if (isAssignment(node)) {
 			return false;
 		}
 		return true;
