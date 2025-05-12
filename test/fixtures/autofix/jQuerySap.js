@@ -116,7 +116,9 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var v2 = new jQuery.sap.Version("3.6.2");
 	myDialog = jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), myDialog);
 	jQuery.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
+	$.sap.setObject("name.lastname", "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject(undefined, "Miller", { name: { firstname: "me" } });
+	$.sap.setObject(undefined, "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject("", "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject(null, "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject();
@@ -128,6 +130,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	// https://github.com/SAP/ui5-linter/issues/542
 	var isBChildOfAOrEqualA = jQuery.sap.containsOrEquals(document.getElementById("controlA"), document.getElementById("controlB"));
 	var iScrollBegin = jQuery.sap.denormalizeScrollBeginRTL(100);
+	var iScrollBegin2 = $.sap.denormalizeScrollBeginRTL(100);
 	var iScrollLeft = jQuery.sap.denormalizeScrollLeftRTL(101, document.getElementById("controlA"));
 	var ownerWindow = jQuery.sap.ownerWindow(document.getElementById("controlA"));
 	var size = jQuery.sap.scrollbarSize("myclassA", true);

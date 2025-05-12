@@ -660,7 +660,7 @@ export default class JquerySapFixHintsGenerator {
 				return undefined;
 			}
 			if (ts.isIdentifier(firstPart.expression) &&
-				firstPart.expression.text === "jQuery") {
+				["jQuery", "$"].includes(firstPart.expression.text)) {
 				isJQueryFnAccess = true;
 			} else {
 				return undefined;
@@ -690,9 +690,9 @@ export default class JquerySapFixHintsGenerator {
 			if (isJQueryFnAccess) {
 				// jQuery.fn.methodName
 				moduleReplacement = jQueryPluginReplacements.get(searchStack.join("."));
-			} else if (searchStack[0] === "jQuery" && searchStack[1] === "sap") {
+			} else if (["jQuery", "$"].includes(searchStack[0]) && searchStack[1] === "sap") {
 				moduleReplacement = jQuerySapModulesReplacements.get(searchStack.slice(2).join("."));
-			} else if (searchStack[0] === "jQuery") {
+			} else if (["jQuery", "$"].includes(searchStack[0])) {
 				if (searchStack.length > 1) {
 					moduleReplacement = jQueryReplacements.get(searchStack.slice(1).join("."));
 				}

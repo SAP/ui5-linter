@@ -88,7 +88,7 @@ export default class GlobalsFixHintsGenerator {
 				// For now, we don't fix this case, because it is not a common pattern.
 				return undefined;
 			}
-			if (moduleName === "jQuery") {
+			if (moduleName === "jQuery" || moduleName === "$") {
 				return {
 					fixHints: {moduleName: "sap/ui/thirdparty/jquery", propertyAccess: searchStack.join(".")},
 					propertyAccessNode: partNodes[searchStack.length - 1],
