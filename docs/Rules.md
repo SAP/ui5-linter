@@ -13,6 +13,7 @@
 	- [no-implicit-globals](#no-implicit-globals)
 	- [no-pseudo-modules](#no-pseudo-modules)
 	- [parsing-error](#parsing-error)
+	- [autofix-error](#autofix-error)
 	- [prefer-test-starter](#prefer-test-starter)
 	- [ui5-class-declaration](#ui5-class-declaration)
 	- [unsupported-api-usage](#unsupported-api-usage)
@@ -98,6 +99,10 @@ Checks for dependencies to pseudo modules in the code.
 ## parsing-error
 
 Syntax/parsing errors that appear during the linting process are reported with this rule.
+
+## autofix-error
+
+An expected autofix could not be applied. This is likely a UI5 linter internal issue. Please report this using the bug report template: [github.com/SAP/ui5-linter/issues/](https://github.com/SAP/ui5-linter/issues/new?template=bug-report.md)
 
 ## prefer-test-starter
 

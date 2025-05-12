@@ -13,6 +13,7 @@ export const RULES = {
 	"no-implicit-globals": "no-implicit-globals",
 	"no-pseudo-modules": "no-pseudo-modules",
 	"parsing-error": "parsing-error",
+	"autofix-error": "autofix-error",
 	"ui5-class-declaration": "ui5-class-declaration",
 	"unsupported-api-usage": "unsupported-api-usage",
 	"prefer-test-starter": "prefer-test-starter",
@@ -65,6 +66,7 @@ export enum MESSAGE {
 	NO_ODATA_GLOBALS,
 	NOT_STATIC_CONTROL_RENDERER,
 	PARSING_ERROR,
+	AUTOFIX_ERROR,
 	PARTIALLY_DEPRECATED_CORE_ROUTER,
 	PARTIALLY_DEPRECATED_CREATE_COMPONENT,
 	PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA,
@@ -449,6 +451,15 @@ export const MESSAGE_INFO = {
 
 		message: ({message}: {message: string}) => message,
 		details: () => `Check the source file for syntax errors`,
+	},
+
+	[MESSAGE.AUTOFIX_ERROR]: {
+		severity: LintMessageSeverity.Warning,
+		ruleId: RULES["autofix-error"],
+
+		message: ({message}: {message: string}) => message,
+		details: () => `An expected autofix could not be applied. This is likely a UI5 linter internal issue. ` +
+			`Please report this using the bug report template: https://github.com/SAP/ui5-linter/issues/new?template=bug-report.md`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {

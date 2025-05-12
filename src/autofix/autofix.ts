@@ -244,7 +244,17 @@ export default async function ({
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		log.verbose(`Applying autofixes to ${resourcePath}`);
-		const newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
+		let newContent;
+		try {
+			newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
+		} catch (err) {
+			if (err instanceof Error) {
+				log.verbose(`Error while applying autofix to ${resourcePath}: ${err}`);
+				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message: err.message});
+				continue;
+			}
+			throw err;
+		}
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
@@ -252,7 +262,7 @@ export default async function ({
 					jsErrors.map((d) => d.messageText as string).join(", ");
 				log.verbose(message);
 				log.verbose(resourcePath + ":\n" + newContent);
-				context.addLintingMessage(resourcePath, MESSAGE.PARSING_ERROR, {message});
+				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});
 			} else {
 				log.verbose(`Autofix applied to ${resourcePath}`);
 				res.set(resourcePath, newContent);
