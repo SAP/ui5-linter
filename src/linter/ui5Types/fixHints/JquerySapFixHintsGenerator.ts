@@ -16,27 +16,27 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.debug", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.debug($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.debug($1, $2, $3, $4)",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.error", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.error($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.error($1, $2, $3, $4)",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.fatal", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.fatal($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.fatal($1, $2, $3, $4)",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.info", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.info($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.info($1, $2, $3, $4)",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.trace", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.trace($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.trace($1, $2, $3, $4)",
 	}],
 	// Note: Not 1:1 compatible. Does not return an instance of the logger
 	["log.warning", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.warning($1)",
+		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.warning($1, $2, $3, $4)",
 	}],
 	["log.getLevel", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",

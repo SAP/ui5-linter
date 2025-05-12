@@ -278,10 +278,19 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		"jQuery.sap.log.info",
 		"jQuery.sap.log.trace",
 		"jQuery.sap.log.warning",
-	].includes(apiName ?? "") && fixHints?.exportCodeToBeUsed.isAssignmentStatement) {
-		// API not compatible
-		fixHints = undefined;
-		log.verbose(`Autofix skipped for ${apiName}.`);
+	].includes(apiName ?? "")) {
+		if (fixHints?.exportCodeToBeUsed.isAssignmentStatement) {
+			// API not compatible
+			fixHints = undefined;
+			log.verbose(`Autofix skipped for ${apiName}.`);
+		} else {
+			const fnName = apiName?.split(".").pop() ?? "";
+			if (fnName && fixHints && typeof fixHints.exportCodeToBeUsed === "object" &&
+				fixHints.exportCodeToBeUsed.args) {
+				fixHints.exportCodeToBeUsed.name =
+					`$moduleIdentifier.${fnName}(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
+			}
+		}
 	}
 
 	return fixHints;
