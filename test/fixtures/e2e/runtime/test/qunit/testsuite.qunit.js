@@ -13,6 +13,9 @@ sap.ui.define(() => {
 		},
 		tests: {
 			"Globals": {},
+			"jQuery.sap.log": {},
+			"jQuery.sap.startsWith": {},
+			"jQuery.sap.endsWith": {},
 		}
 	};
 });
