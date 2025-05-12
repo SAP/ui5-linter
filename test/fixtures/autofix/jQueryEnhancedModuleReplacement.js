@@ -41,6 +41,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	
 	var buttonPath4 = jQuery.sap.getResourcePath("sap/m/Button.js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath5 = jQuery.sap.getResourcePath("sap.m/Button.js"); // resolves to "resources/sap.m/Button.js"
+	var buttonPath6 = jQuery.sap.getResourcePath("sap.m/Button", ".js"); // resolves to "resources/sap.m/Button.js"
 	var buttonPath1 = jQuery.sap.getModulePath("sap/m/Button", ".js"); // resolves to "resources/sap/m/Button.js"
 	var buttonPath2 = jQuery.sap.getModulePath("sap/m/Button", "/"); // resolves to  "resources/sap/m/Button/"
 	var buttonPath3 = jQuery.sap.getModulePath("sap/m/Button", ""); // resolves to "resources/sap/m/Button"
