@@ -162,16 +162,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		return fixHints;
 	}
 
-	if (apiName === "jQuery.sap.getUriParameters" && fixHints.exportCodeToBeUsed.args?.[0]) {
-		let probingUrl = "";
-		try {
-			new URL(fixHints.exportCodeToBeUsed.args[0].value);
-		} catch (_e) {
-			// Adding a domain to the URL to prevent errors and parse correctly the query string
-			probingUrl = ", \"http://example.com\"";
-		}
-		fixHints.exportCodeToBeUsed.name = `new URL($1${probingUrl}).searchParams`;
-	} else if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
+	if (apiName?.startsWith("jQuery.sap.charToUpperCase")) {
 		// If no position is given or when it is negative or beyond the last character
 		// of the given string, the first character will be converted to upper case.
 		const charToUpperCase = parseInt(fixHints.exportCodeToBeUsed?.args?.[1]?.value ?? "0", 10);
@@ -181,18 +172,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for jQuery.sap.charToUpperCase. Transpilation is too ambiguous.`);
 		}
-	} else if (apiName === "control" && fixHints.moduleName === "sap/ui/core/Element") {
-		const {args} = fixHints.exportCodeToBeUsed;
-		if (args && args.length === 1) {
-			// Default case. No needed to be handled specifically.
-		} else if (args && args.length === 2) {
-			fixHints.exportCodeToBeUsed.name = "$moduleIdentifier.closestTo($1)";
-		} else if (args && args.length === 3) {
-			fixHints.exportCodeToBeUsed.name = "$moduleIdentifier.closestTo($1, $3)";
-		} else {
-			fixHints.exportCodeToBeUsed = undefined; // We don't want to process in such a case
-		}
-	} else if (["jQuery.sap.setObject", "jQuery.sap.getObject"].includes(apiName ?? "")) {
+	} else if (apiName === "jQuery.sap.setObject") {
 		fixHints.exportCodeToBeUsed.args ??= [];
 		if (!fixHints.exportCodeToBeUsed.args?.length ||
 			!fixHints.exportCodeToBeUsed.args[0] ||
@@ -202,11 +182,9 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			}
 			fixHints.exportCodeToBeUsed.args[0].value = "\"\"";
 		}
-		if (apiName === "jQuery.sap.setObject") {
-			// Cleanup the code to prevent unnecessary write of undefined values
-			fixHints.exportCodeToBeUsed.name =
-				`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
-		}
+		// Cleanup the code to prevent unnecessary write of undefined values
+		fixHints.exportCodeToBeUsed.name =
+			`$moduleIdentifier.set(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 	} else if (apiName === "jQuery.sap.getModulePath") {
 		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind === SyntaxKind.StringLiteral) {
 			fixHints.exportCodeToBeUsed.args[0].value = fixHints.exportCodeToBeUsed.args[0].value.replaceAll(".", "/");
@@ -225,23 +203,6 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // Too much uncertainty. We cannot process this case
 			log.verbose(`Autofix skipped for jQuery.sap.extend. Transpilation is too ambiguous.`);
 		}
-	} else if (["jQuery.sap.delayedCall", "jQuery.sap.intervalCall"].includes(apiName ?? "")) {
-		const args = fixHints.exportCodeToBeUsed.args ?? [];
-		if (args.length < 3) {
-			fixHints = undefined; // We don't know how to handle this case
-			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-			return fixHints;
-		}
-
-		let fnBinding = "$3.bind($2)";
-		if (args[2].kind === SyntaxKind.StringLiteral) {
-			fnBinding = "$2[$3].bind($2)";
-		}
-
-		const apiCall = apiName === "jQuery.sap.delayedCall" ? "setTimeout" : "setInterval";
-		const callArgs = args.length > 3 ? `, ...$4` : "";
-		fixHints.exportCodeToBeUsed.name =
-			`window.${apiCall}(${fnBinding}, $1${callArgs})`;
 	} else if (apiName === "jQuery.sap.newObject") {
 		if (!fixHints.exportCodeToBeUsed.args?.length) {
 			fixHints.exportCodeToBeUsed.name = "Object.create(null)";
