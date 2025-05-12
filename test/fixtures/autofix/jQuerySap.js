@@ -37,7 +37,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.log.info("This is a info log message");
 	jQuery.sap.log.trace("This is a trace log message");
 	jQuery.sap.log.warning("This is a warning log message");
-	
+
 	// Do not migrate those!
 	jQuery.sap.log.debug().info();
 	var debugInfo = jQuery.sap.log.debug();
@@ -55,7 +55,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	const myURLParameters = jQuery.sap.encodeURLParameters({ a: true, b: "d e" });
 	const myHTML = jQuery.sap.encodeHTML("<p>My Text</p>");
 	const myXML = jQuery.sap.encodeXML("<Text text=\"MyText\" />");
-	
+
 	// https://github.com/SAP/ui5-linter/issues/525
 	jQuery.sap.addUrlWhitelist("https", "example.com", 1337, "path");
 	jQuery.sap.clearUrlWhitelist();
@@ -119,6 +119,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	jQuery.sap.setObject(undefined, "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject("", "Miller", { name: { firstname: "me" } });
 	jQuery.sap.setObject(null, "Miller", { name: { firstname: "me" } });
+	jQuery.sap.setObject();
 	var myFirstName = jQuery.sap.getObject("name.firstname", 0, { name: { firstname: "me" } }); // Do not migrate.
 	var myFirstName2 = jQuery.sap.getObject("", 0, { name: { firstname: "me" } }); // Do not migrate.
 	var myFirstName3 = jQuery.sap.getObject(undefined, 0, { name: { firstname: "me" } }); // Do not migrate.
@@ -181,7 +182,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	// https://github.com/SAP/ui5-linter/issues/561
 	await jQuery.sap.fesr.setActive(true);
 	var isFESRActive = jQuery.sap.fesr.getActive();
-	
+
 	jQuery.sap.fesr.addBusyDuration(33);
 	await jQuery.sap.interaction.setActive(true);
 	var isInteractionTrackingActive = jQuery.sap.interaction.getActive();
@@ -197,12 +198,12 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], function (NormalizePolyfil
 	var filteredMeasurements = jQuery.sap.measure.filterInteractionMeasurements(() => true);
 	var allMeasurements = jQuery.sap.measure.getAllInteractionMeasurements();
 	var pendigngMeasurement = jQuery.sap.measure.getPendingInteractionMeasurement();
-	
+
 	var transactionId = jQuery.sap.fesr.getCurrentTransactionId();
 	var rootId = jQuery.sap.fesr.getRootId()
 	jQuery.sap.passport.setActive(true);
 	var traceLevel = jQuery.sap.passport.traceFlags("medium");
-	
+
 	// https://github.com/SAP/ui5-linter/issues/562
 	var frameOptions = new jQuery.sap.FrameOptions();
 
