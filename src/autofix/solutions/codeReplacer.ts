@@ -9,7 +9,7 @@ import {
 	DeprecatedApiAccessNode,
 	GlobalPropertyAccessNodeInfo,
 } from "../autofix.js";
-import {type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
+import {ExportCodeToBeUsed, type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 import {getLogger} from "@ui5/logger";
 
@@ -22,6 +22,26 @@ function findNodeInfoAtPosition(
 	return nodeInfos.find((nodeInfo) => {
 		return nodeInfo.position.line === (position.line - 1) &&
 			nodeInfo.position.column === (position.column - 1);
+	});
+}
+
+function replaceCodePlaceholders(
+	exportCodeToBeUsed: ExportCodeToBeUsed
+) {
+	if (typeof exportCodeToBeUsed === "string" || !exportCodeToBeUsed) {
+		return exportCodeToBeUsed;
+	}
+	return exportCodeToBeUsed.name.replace(/\$(\d+)/g, (match: string, group1: string) => {
+		const argIndex = parseInt(group1);
+		if (isNaN(argIndex) || argIndex < 1 || argIndex > (exportCodeToBeUsed.args?.length ?? 0)) {
+			return match;
+		}
+		const arg = exportCodeToBeUsed.args?.[argIndex - 1];
+		if (arg) {
+			return arg.value;
+		} else {
+			return match;
+		}
 	});
 }
 
@@ -85,10 +105,7 @@ export default function generateSolutionCodeReplacer(
 			identifierIndex++;
 		}
 
-		let value = exportCodeToBeUsed.args?.reduce((acc, arg, index) => {
-			return acc?.replace(new RegExp(`\\$${index + 1}(?!\\d)`, "g"), arg.value);
-		}, exportCodeToBeUsed.name ?? "") ?? exportCodeToBeUsed.name;
-		value = value.replaceAll(/\$\d+/g, "undefined"); // Some placeholders might be "empty" in the original code
+		const value = replaceCodePlaceholders(exportCodeToBeUsed);
 
 		let nodeInfo: DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo | undefined;
 		if (moduleInfo?.nodeInfos) {

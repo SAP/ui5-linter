@@ -16,6 +16,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	jQuery.sap.startsWith(null, "H"); // Throws an exception, but is that way in the legacy code
 	var startsWithH3 = jQuery.sap.startsWith(startText, "H");
 	var startsWithH3 = jQuery.sap.startsWith(startText, startsWithLetter);
+	var $1 = "$123"; // Usage of special characters for RegExp replacement should not cause issues
+	var sName = jQuery.sap.startsWith($1,'$') ? $1 : encodeURIComponent($1);
 	var startsWithHOrh = jQuery.sap.startsWithIgnoreCase("Hello", "h");
 	var startsWithHOrh2 = jQuery.sap.startsWithIgnoreCase(startText, startsWithLetter);
 	var startsWithHOrh3 = jQuery.sap.startsWithIgnoreCase(startText, startsWithLetter);

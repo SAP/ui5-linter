@@ -4,6 +4,12 @@ export type FixHintsArgsType = {
 	value: string;
 	kind: ts.SyntaxKind;
 }[];
+export interface ExportCodeToBeUsed {
+	name: string;
+	moduleNameIdentifier?: string;
+	args?: FixHintsArgsType;
+	isAssignmentStatement?: boolean;
+}
 export interface FixHints {
 	/**
 	 * New module name to import from
@@ -21,12 +27,7 @@ export interface FixHints {
 	 * In some cases the replacement is not a module import but could be a native API,
 	 * or a different function with different arguments.
 	 */
-	exportCodeToBeUsed?: string | {
-		name: string;
-		moduleNameIdentifier?: string;
-		args?: FixHintsArgsType;
-		isAssignmentStatement?: boolean;
-	};
+	exportCodeToBeUsed?: string | ExportCodeToBeUsed;
 
 	/**
 	 * String representation of the property access to be replaced
