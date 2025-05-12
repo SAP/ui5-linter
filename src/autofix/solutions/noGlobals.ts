@@ -2,12 +2,11 @@ import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
 import {
+	getModuleDeclarationForPosition,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
 	type GlobalPropertyAccessNodeInfo,
-	type ModuleDeclarationInfo,
 	type NewModuleDeclarationInfo,
-	type Position,
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
@@ -103,28 +102,9 @@ export default function generateSolutionNoGlobals(
 		}
 	}
 
-	function getModuleDeclarationForPosition(position: Position): ModuleDeclarationInfo | undefined {
-		const potentialDeclarations: {declaration: ModuleDeclarationInfo; start: number}[] = [];
-		for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
-			const {moduleDeclaration} = moduleDeclarationInfo;
-			const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
-			if (!factory || factory.getStart() > position.pos || factory.getEnd() < position.pos) {
-				continue;
-			}
-			potentialDeclarations.push({
-				declaration: moduleDeclarationInfo,
-				start: factory.getStart(),
-			});
-		}
-		// Sort by start position so that the declaration closest to the position is returned
-		// This is relevant in case of nested sap.ui.require calls
-		potentialDeclarations.sort((a, b) => a.start - b.start);
-		return potentialDeclarations.pop()?.declaration;
-	}
-
 	for (const nodeInfo of affectedNodesInfo) {
 		const {moduleName, position} = nodeInfo;
-		let moduleDeclarationInfo: ModuleDeclarationInfo | undefined = getModuleDeclarationForPosition(position);
+		let moduleDeclarationInfo = getModuleDeclarationForPosition(position.pos, moduleDeclarations);
 		if (!moduleDeclarationInfo) {
 			if (!newModuleDeclarations.length) {
 				// throw new Error(`TODO: Implement handling for global access without module declaration`);
