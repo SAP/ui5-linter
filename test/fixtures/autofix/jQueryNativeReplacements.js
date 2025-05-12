@@ -13,13 +13,19 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var startsWithH2 = jQuery.sap.startsWith();
 	var startText = "Hello";
 	var startsWithLetter = "h";
+	jQuery.sap.startsWith(null, "H"); // Throws an exception, but is that way in the legacy code
 	var startsWithH3 = jQuery.sap.startsWith(startText, "H");
 	var startsWithH3 = jQuery.sap.startsWith(startText, startsWithLetter);
 	var startsWithHOrh = jQuery.sap.startsWithIgnoreCase("Hello", "h");
 	var startsWithHOrh2 = jQuery.sap.startsWithIgnoreCase(startText, startsWithLetter);
+	var startsWithHOrh3 = jQuery.sap.startsWithIgnoreCase(startText, startsWithLetter);
+	var startsWithHOrh4 = jQuery.sap.startsWithIgnoreCase(startText, 10);
+	var startsWithHOrh4 = jQuery.sap.startsWithIgnoreCase(startText, null);
 	var endsWithY = jQuery.sap.endsWith("Hello Y", "Y");
 	var endsWithY2 = jQuery.sap.endsWith("Hello Y", startsWithLetter);
 	var endsWithY3 = jQuery.sap.endsWith(startText, startsWithLetter);
+	var endsWithY4 = jQuery.sap.endsWith("abcde", 10);
+	var endsWithY5 = jQuery.sap.endsWith("abcde", null);
 	var endsWithYOry = jQuery.sap.endsWithIgnoreCase("Hello Y", "y");
 	var endsWithYOry2 = jQuery.sap.endsWithIgnoreCase(startText, "y");
 	var endsWithYOry3 = jQuery.sap.endsWithIgnoreCase(startText, startsWithLetter);

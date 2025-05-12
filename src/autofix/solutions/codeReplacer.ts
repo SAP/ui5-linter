@@ -243,12 +243,26 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		"jQuery.sap.endsWithIgnoreCase",
 	].includes(apiName ?? "")) {
 		if (fixHints?.exportCodeToBeUsed?.args?.[0] &&
-			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral) {
+			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.StringLiteral &&
+			// Special case, throws an exception and is expected effect
+			fixHints.exportCodeToBeUsed.args[0].kind !== SyntaxKind.NullKeyword) {
 			fixHints.exportCodeToBeUsed.args[0].value = `(${fixHints.exportCodeToBeUsed.args[0].value} || "")`;
 		}
-		if (fixHints?.exportCodeToBeUsed?.args?.[1] &&
+		if (["jQuery.sap.startsWithIgnoreCase", "jQuery.sap.endsWithIgnoreCase"].includes(apiName ?? "") &&
+			fixHints?.exportCodeToBeUsed?.args?.[1] &&
 			fixHints?.exportCodeToBeUsed.args[1].kind !== SyntaxKind.StringLiteral) {
-			fixHints.exportCodeToBeUsed.args[1].value = `(${fixHints.exportCodeToBeUsed.args[1].value} || "")`;
+			if ([SyntaxKind.NumericLiteral, SyntaxKind.NullKeyword]
+				.includes(fixHints.exportCodeToBeUsed.args[1].kind)) {
+				fixHints.exportCodeToBeUsed.args[1].value = `"${fixHints.exportCodeToBeUsed.args[1].value}"`;
+			} else {
+				fixHints.exportCodeToBeUsed.args[1].value = `(${fixHints.exportCodeToBeUsed.args[1].value} || "")`;
+			}
+		}
+
+		// If the second argument is an empty string, always return false
+		if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.StringLiteral &&
+			["", "\"\""].includes(fixHints.exportCodeToBeUsed.args[1].value)) {
+			fixHints.exportCodeToBeUsed.name = "false";
 		}
 
 		if (!fixHints.exportCodeToBeUsed.args?.length) {
