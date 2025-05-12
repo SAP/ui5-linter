@@ -9,28 +9,17 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 	Core.attachIntervalTimer(function() {console.log();});
 	Core.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
 
-	Core.attachLocalizationChanged(function() {console.log();});
-	Core.attachLocalizationChanged(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
-
-	Core.attachThemeChanged(function() {console.log();});
-	Core.attachThemeChanged(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
-
 	Core.byFieldGroupId("id");
 	Core.byFieldGroupId(["id", "id2"]);
 
 	Core.byId("id");
 
-	Core.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string
-	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // First argument is an object
+	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object and inside async:true to be autofixable
+	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
+	Core.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
 	Core.detachIntervalTimer(function() {console.log();});
 	Core.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
-
-	Core.detachLocalizationChanged(function() {console.log();});
-	Core.detachLocalizationChanged(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
-
-	Core.detachThemeChanged(function() {console.log();});
-	Core.detachThemeChanged(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
 
 	Core.getComponent("componentId");
 
@@ -42,21 +31,20 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 
 	Core.getEventBus();
 
-	Core.getLibraryResourceBundle("sap.ui.core", "en_US", "true");
+	Core.getLibraryResourceBundle("sap.ui.core", "en_US");
+	Core.getLibraryResourceBundle("sap.ui.core", "en_US", "true"); // bAsync is true (not autofixable)
 
 	Core.getStaticAreaRef();
 
-	Core.getTemplate("templateId");
-
 	Core.initLibrary({
-		name: "sap.ui.core",
 		version: "1.0.0",
+		name: "sap.ui.core",
 		dependencies: ["sap.ui.core"],
-		noLibraryCSS: true,
 		types: ["type1", "type2"],
 		interfaces: ["interface1", "interface2"],
-		elements: ["element1", "element2"],
 		controls: ["control1", "control2"],
+		elements: ["element1", "element2"],
+		noLibraryCSS: true,
 		extensions: {
 			someExtension: {}
 		}
@@ -66,7 +54,12 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 
 	Core.isStaticAreaRef(oDomRef);
 
-	Core.loadLibrary("sap.ui.core", "find/my/lib/here");
+	Core.loadLibrary("sap.ui.core");
+	Core.loadLibrary("sap.ui.core", true);
+	Core.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
+	Core.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async:false (not autofixable)
+	Core.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
+	Core.loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
 
 	Core.notifyContentDensityChanged();
 
