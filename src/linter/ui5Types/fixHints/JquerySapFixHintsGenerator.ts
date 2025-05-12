@@ -96,9 +96,10 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["resources", {
 		moduleName: "sap/base/i18n/ResourceBundle", exportNameToBeUsed: "create",
 	}],
-	["resources.isBundle", {
-		moduleName: "sap/base/i18n/ResourceBundle", exportCodeToBeUsed: "new $moduleIdentifier instanceof $1",
-	}],
+	// Disabled as requires second run for the $1 arg
+	// ["resources.isBundle", {
+	// 	moduleName: "sap/base/i18n/ResourceBundle", exportCodeToBeUsed: "new $moduleIdentifier instanceof $1",
+	// }],
 	// https://github.com/SAP/ui5-linter/issues/524
 	["encodeCSS", {
 		moduleName: "sap/base/security/encodeCSS",

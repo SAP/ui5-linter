@@ -5,7 +5,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	// 1. Replace global "new sap.base.i18n.ResourceBundle()"
 	// 2. Replace the code with the following:
 	// -> var isBundle = new ResourceBundle() instanceof ResourceBundle;
-	var isBundle = jQuery.sap.resources.isBundle(new sap.base.i18n.ResourceBundle());
+	// var isBundle = jQuery.sap.resources.isBundle(new sap.base.i18n.ResourceBundle());
 
 	var isStandAlone = jQuery.device.is.standalone;
 	var retinaDisplay = jQuery.support.retina;
