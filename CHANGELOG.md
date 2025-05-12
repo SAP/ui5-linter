@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.13.1](https://github.com/SAP/ui5-linter/compare/v1.13.0...v1.13.1) (2025-05-12)
+
+
+### Bug Fixes
+
+* **autofix:** Do not fix global access of Core module ([#641](https://github.com/SAP/ui5-linter/issues/641)) ([cfb5886](https://github.com/SAP/ui5-linter/commit/cfb588673a40256c2d8bdd979fb413eefca63971))
+
+
+### Dependencies
+
+* Bump @sapui5/types from 1.120.29 to 1.120.30 ([509382f](https://github.com/SAP/ui5-linter/commit/509382f00439e1800c44fa0bd6a934354392c451))
+* Bump globals from 16.0.0 to 16.1.0 ([6293fcc](https://github.com/SAP/ui5-linter/commit/6293fcc285f4b873f82544fe765b0cdc63ae21ba))
+
 ## [1.13.0](https://github.com/SAP/ui5-linter/compare/v1.12.0...v1.13.0) (2025-04-16)
 
 
