@@ -197,6 +197,9 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		if (!fixHints.exportCodeToBeUsed.args?.length ||
 			!fixHints.exportCodeToBeUsed.args[0] ||
 			["undefined", "null"].includes(fixHints.exportCodeToBeUsed.args[0].value)) {
+			if (!fixHints.exportCodeToBeUsed.args.length) {
+				fixHints.exportCodeToBeUsed.args = [{value: "\"\"", kind: SyntaxKind.UndefinedKeyword}];
+			}
 			fixHints.exportCodeToBeUsed.args[0].value = "\"\"";
 		}
 		if (apiName === "jQuery.sap.setObject") {
