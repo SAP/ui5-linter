@@ -206,7 +206,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		fixHints.exportCodeToBeUsed.name += " + $2";
 	} else if (apiName === "jQuery.sap.extend") {
 		// Only explicit deep merge can be safely migrated
-		if (fixHints.exportCodeToBeUsed.args?.[0].kind !== SyntaxKind.TrueKeyword) {
+		if (fixHints.exportCodeToBeUsed.args?.[0]?.kind !== SyntaxKind.TrueKeyword) {
 			fixHints = undefined; // Too much uncertainty. We cannot process this case
 			log.verbose(`Autofix skipped for jQuery.sap.extend. Transpilation is too ambiguous.`);
 		}
