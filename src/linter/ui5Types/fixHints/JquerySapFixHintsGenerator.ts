@@ -9,9 +9,11 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/base/assert",
 	}],
 	// https://github.com/SAP/ui5-linter/issues/522
-	["log", {
-		moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.getLogger()",
-	}],
+	// Do not migrate this case. No alternative. Log.getLogger() returns a new instance while
+	// jQuery.sap.log is a singleton.
+	// ["log", {
+	// 	moduleName: "sap/base/Log", exportCodeToBeUsed: "$moduleIdentifier.getLogger()",
+	// }],
 	["log.addLogListener", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "addLogListener",
 	}],
@@ -42,9 +44,10 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["log.getLevel", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
 	}],
-	["log.setLevel", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "setLevel",
-	}],
+	// TODO: Do not migrate this case for now- too many edge cases.
+	// ["log.setLevel", {
+	// 	moduleName: "sap/base/Log", exportNameToBeUsed: "setLevel",
+	// }],
 	["log.getLog", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
 	}],

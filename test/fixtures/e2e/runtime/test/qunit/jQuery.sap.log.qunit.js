@@ -26,6 +26,7 @@ sap.ui.define(() => {
 	});
 
 	QUnit.test("MethodChaining", function (assert){
+		/* ui5lint-disable no-deprecated-api */
 		var log = jQuery.sap.log.setLevel(jQuery.sap.log.Level.INFO);
 		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
 		log = log.error("Error message");
@@ -38,5 +39,6 @@ sap.ui.define(() => {
 		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
 		log = log.trace("Trace message");
 		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
+		/* ui5lint-enable no-deprecated-api */
 	});
 });
