@@ -15,6 +15,9 @@ sap.ui.define(() => {
 		assert.ok(!(jQuery.sap.startsWith("abcde", "")), "'abcde' doesn't start with ''");
 		assert.ok(!(jQuery.sap.startsWith("abcde", 10)), "'abcde' doesn't start with '10'");
 		assert.ok(!(jQuery.sap.startsWith("abcde", null)), "'abcde' doesn't start with null");
+
+		const emptyString = "";
+		assert.ok(!(jQuery.sap.startsWith("abcde", emptyString)), "'abcde' doesn't start with ''");
 	});
 
 	QUnit.test("StartsWithFailed", function (assert) {
@@ -36,6 +39,9 @@ sap.ui.define(() => {
 		assert.ok(!(jQuery.sap.startsWithIgnoreCase("abcdE", "")), "'abcdE' doesn't start with ''");
 		assert.ok(!(jQuery.sap.startsWithIgnoreCase("abcdE", 10)), "'abcdE' doesn't start with '10'");
 		assert.ok(!(jQuery.sap.startsWithIgnoreCase("abcdE", null)), "'abcdE' doesn't start with null");
+
+		const emptyString = "";
+		assert.ok(!(jQuery.sap.startsWithIgnoreCase("abcdE", emptyString)), "'abcdE' doesn't start with ''");
 	});
 
 	QUnit.test("StartsWithIgnoreCaseFailed", function (assert) {

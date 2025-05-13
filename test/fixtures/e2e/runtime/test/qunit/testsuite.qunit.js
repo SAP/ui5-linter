@@ -21,7 +21,8 @@ sap.ui.define(() => {
 			"jQuery.sap.newObject": {},
 			"jQuery.sap.setObject": {},
 			"jQuery.sap.startsWith": {},
-			
+			"jQuery.sap.pad": {},
+
 		}
 	};
 });

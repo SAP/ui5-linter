@@ -13,6 +13,9 @@ sap.ui.define(() => {
 		assert.ok(!(jQuery.sap.endsWith("abcde", "")), "'abcde' doesn't end with ''");
 		assert.ok(!(jQuery.sap.endsWith("abcde", 10)), "'abcde' doesn't end with '10'");
 		assert.ok(!(jQuery.sap.endsWith("abcde", null)), "'abcde' doesn't end with null");
+
+		const emptyString = "";
+		assert.ok(!(jQuery.sap.endsWith("abcde", emptyString)), "'abcde' doesn't end with ''");
 	});
 
 	QUnit.test("EndsWithFailed", function (assert) {
@@ -33,6 +36,9 @@ sap.ui.define(() => {
 		assert.ok(!(jQuery.sap.endsWithIgnoreCase("abcdE", "")), "'abcdE' doesn't end with ''");
 		assert.ok(!(jQuery.sap.endsWithIgnoreCase("abcdE", 10)), "'abcdE' doesn't end with '10'");
 		assert.ok(!(jQuery.sap.endsWithIgnoreCase("abcdE", null)), "'abcdE' doesn't end with null");
+
+		const emptyString = "";
+		assert.ok(!(jQuery.sap.endsWithIgnoreCase("abcdE", emptyString)), "'abcdE' doesn't end with ''");
 	});
 
 	QUnit.test("EndsWithIgnoreCaseFailed", function (assert) {

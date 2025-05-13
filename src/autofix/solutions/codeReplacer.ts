@@ -280,15 +280,16 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			}
 		}
 
-		// If the second argument is an empty string, always return false
-		if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.StringLiteral &&
-			["", "\"\""].includes(fixHints.exportCodeToBeUsed.args[1].value)) {
-			fixHints.exportCodeToBeUsed.name = "false";
-		}
-
-		if (!fixHints.exportCodeToBeUsed.args?.length) {
-			fixHints = undefined; // It's invalid string
-			log.verbose(`Autofix skipped for ${apiName}. Invalid (non-string) input.`);
+		// If there are no arguments, we cannot migrate.
+		// If the second argument is an empty string, we can't migrate as the built-in String API
+		// returns true instead of false in that case.
+		// For this reason, we can only safely replace a call when the second argument is a non-empty string.
+		if (
+			!fixHints.exportCodeToBeUsed.args?.length ||
+			fixHints?.exportCodeToBeUsed?.args?.[1]?.kind !== SyntaxKind.StringLiteral ||
+			["", "\"\"", "''"].includes(fixHints.exportCodeToBeUsed.args[1].value)
+		) {
+			fixHints = undefined; // API not compatible
 		}
 	} else if ([
 		"jQuery.sap.padLeft",

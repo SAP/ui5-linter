@@ -3,8 +3,13 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 
 	var isStandAlone = jQuery.device.is.standalone;
 	var retinaDisplay = jQuery.support.retina;
+	var emptyString = "";
 	var startsWithH = jQuery.sap.startsWith("Hello", "H");
 	var startsWithH2 = jQuery.sap.startsWith();
+	var startsWithEmptyString = jQuery.sap.startsWith("Hello", emptyString); // Should not be replaced as the old API returns false for empty string but built-in String#startsWith returns true
+	var startsWithEmptyString2 = jQuery.sap.startsWith("Hello", ""); // Should not be replaced as the old API returns false for empty string but built-in String#startsWith returns true
+	var startsWithEmptyString3 = jQuery.sap.startsWith("Hello", ''); // Should not be replaced as the old API returns false for empty string but built-in String#startsWith returns true
+	var startsWithEmptyString4 = jQuery.sap.startsWith("Hello", ``); // Should not be replaced as the old API returns false for empty string but built-in String#startsWith returns true
 	var startText = "Hello";
 	var startsWithLetter = "h";
 	jQuery.sap.startsWith(null, "H"); // Throws an exception, but is that way in the legacy code
@@ -22,6 +27,8 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var endsWithY3 = jQuery.sap.endsWith(startText, startsWithLetter);
 	var endsWithY4 = jQuery.sap.endsWith("abcde", 10);
 	var endsWithY5 = jQuery.sap.endsWith("abcde", null);
+	var endsWithEmptyString = jQuery.sap.endsWith("Hello", emptyString); // Should not be replaced as the old API returns false for empty string but built-in String#endsWith returns true
+	var endsWithEmptyString2 = jQuery.sap.endsWith("Hello", ""); // Should not be replaced as the old API returns false for empty string but built-in String#endsWith returns true
 	var endsWithYOry = jQuery.sap.endsWithIgnoreCase("Hello Y", "y");
 	var endsWithYOry2 = jQuery.sap.endsWithIgnoreCase(startText, "y");
 	var endsWithYOry3 = jQuery.sap.endsWithIgnoreCase(startText, startsWithLetter);
@@ -29,10 +36,12 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var padLeft2 = jQuery.sap.padLeft("a", "0000", 4);
 	var padLeft3 = jQuery.sap.padLeft(startsWithLetter, "0", 4);
 	var padLeft4 = jQuery.sap.padLeft(startsWithLetter, startsWithLetter, 4);
+	var padLeft5 = jQuery.sap.padLeft(startsWithLetter, startText, 8); // Should not be replaced as "startText" is more than one char and the old API behaves differently
 	var padRight = jQuery.sap.padRight("a", "0", 4);
 	var padRight2 = jQuery.sap.padRight("a", "0000", 4);
 	var padRight3 = jQuery.sap.padRight(startsWithLetter, "0", 4);
 	var padRight4 = jQuery.sap.padRight(startsWithLetter, startsWithLetter, 4);
+	var padRight5 = jQuery.sap.padRight(startsWithLetter, startText, 8); // Should not be replaced as "startText" is more than one char and the old API behaves differently
 
 	var myObject = {};
 	myObject.myFunction = function(param1, param2) {};
