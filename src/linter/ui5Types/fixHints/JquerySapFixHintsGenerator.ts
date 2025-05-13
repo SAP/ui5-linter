@@ -781,7 +781,7 @@ export default class JquerySapFixHintsGenerator {
 					ts.isVariableStatement(current) ||
 					ts.isConditionalExpression(current) ||
 					// Argument of a function call
-					(current.parent && ts.isCallExpression(current.parent) &&
+					(ts.isCallExpression(current) && ts.isCallExpression(current.parent) &&
 						current.parent.arguments.some((arg) => arg === current)) ||
 						// Chaining
 						(ts.isPropertyAccessExpression(current) &&
