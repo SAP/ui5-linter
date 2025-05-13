@@ -8,7 +8,7 @@ export interface ExportCodeToBeUsed {
 	name: string;
 	moduleNameIdentifier?: string;
 	args?: FixHintsArgsType;
-	isAssignmentStatement?: boolean;
+	isExpectedValue?: boolean;
 }
 export interface FixHints {
 	/**

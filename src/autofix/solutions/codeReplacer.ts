@@ -315,7 +315,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		"jQuery.sap.log.trace",
 		"jQuery.sap.log.warning",
 	].includes(apiName ?? "")) {
-		if (fixHints?.exportCodeToBeUsed.isAssignmentStatement) {
+		if (fixHints?.exportCodeToBeUsed.isExpectedValue) {
 			// API not compatible
 			fixHints = undefined;
 			log.verbose(`Autofix skipped for ${apiName}.`);

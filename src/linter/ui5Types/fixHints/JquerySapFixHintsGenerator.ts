@@ -774,13 +774,15 @@ export default class JquerySapFixHintsGenerator {
 
 			// Check whether the return value of the call expression is assigned to a variable,
 			// passed to another function or used elsewhere.
-			let isAssignmentStatement = false;
-			while (current && !isAssignmentStatement) {
+			let isExpectedValue = false;
+			while (current && !isExpectedValue) {
 				if (ts.isVariableDeclaration(current) ||
 					ts.isBinaryExpression(current) ||
 					ts.isVariableStatement(current) ||
 					ts.isConditionalExpression(current) ||
 					ts.isParenthesizedExpression(current) ||
+					ts.isReturnStatement(current) ||
+					ts.isArrowFunction(current) ||
 					// Argument of a function call
 					(ts.isCallExpression(current) && ts.isCallExpression(current.parent) &&
 						current.parent.arguments.some((arg) => arg === current)) ||
@@ -790,13 +792,13 @@ export default class JquerySapFixHintsGenerator {
 							ts.isPropertyAccessExpression(current.expression.parent) &&
 							ts.isCallExpression(current.expression.parent.expression))
 				) {
-					isAssignmentStatement = true;
+					isExpectedValue = true;
 				}
 				current = current.parent;
 			}
 
 			if (typeof exportCodeToBeUsed === "object") {
-				exportCodeToBeUsed.isAssignmentStatement = isAssignmentStatement;
+				exportCodeToBeUsed.isExpectedValue = isExpectedValue;
 
 				let args: FixHintsArgsType = [];
 				// jQuery(".mySelector" /* args */).functionName()
