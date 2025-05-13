@@ -88,12 +88,14 @@ export default class GlobalsFixHintsGenerator {
 				// For now, we don't fix this case, because it is not a common pattern.
 				return undefined;
 			}
-			if (moduleName === "jQuery" || moduleName === "$") {
-				return {
-					fixHints: {moduleName: "sap/ui/thirdparty/jquery", propertyAccess: searchStack.join(".")},
-					propertyAccessNode: partNodes[searchStack.length - 1],
-				};
-			}
+			// TODO: Handle global usage of jQuery/$, to be replaced with an import of sap/ui/thirdparty/jquery
+			// Note that there might be more handling needed than just this code here.
+			// if (moduleName === "jQuery" || moduleName === "$") {
+			// 	return {
+			// 		fixHints: {moduleName: "sap/ui/thirdparty/jquery", propertyAccess: searchStack.join(".")},
+			// 		propertyAccessNode: partNodes[searchStack.length - 1],
+			// 	};
+			// }
 			moduleSymbol = this.ambientModuleCache.findModuleForName(moduleName);
 			if (!moduleSymbol) {
 				const libraryModuleName = `${moduleName}/library`;
