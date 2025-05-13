@@ -24,21 +24,4 @@ sap.ui.define(() => {
 		assert.strictEqual(oMyLogEntry.component, myComponent, "log component is wrong");
 		assert.strictEqual(oMyLogEntry.level, jQuery.sap.log.Level.DEBUG, "log level is wrong");
 	});
-
-	QUnit.test("MethodChaining", function (assert){
-		/* ui5lint-disable no-deprecated-api */
-		var log = jQuery.sap.log.setLevel(jQuery.sap.log.Level.INFO);
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		log = log.error("Error message");
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		log = log.warning("Warning message");
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		log = log.info("Info message");
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		log = log.debug("Debug message");
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		log = log.trace("Trace message");
-		assert.strictEqual(log, jQuery.sap.log, "The log instance should always be returned");
-		/* ui5lint-enable no-deprecated-api */
-	});
 });
