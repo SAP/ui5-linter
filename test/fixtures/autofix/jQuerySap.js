@@ -54,6 +54,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	const debug = (msg, logger) => logger ? logger(msg) : jQuery.sap.log.debug(msg);
 	debug("msg 2", jQuery.sap.log.debug("msg 1"));
 	debug("msg 2", (jQuery.sap.log.debug("msg 1")));
+	debug("msg 2", ((((jQuery.sap.log.debug("msg 1"))))));
 	var debugInfo = jQuery.sap.log.debug();
 	var info = {
 		debug: jQuery.sap.log.debug()
