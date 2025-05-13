@@ -17,7 +17,7 @@ test.serial("Compare 'ui5lint --fix' com.ui5.troublesome.app result snapshots", 
 		});
 
 	for (const file of projectFiles) {
-		const content = await readFile(path.join(file.path, file.name), {encoding: "utf-8"});
+		const content = await readFile(path.join(file.parentPath || file.path, file.name), {encoding: "utf-8"});
 		t.snapshot(`${file.name}:\n${content}`);
 	}
 });
