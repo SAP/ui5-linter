@@ -134,22 +134,29 @@ function createProgram(inputFileNames: string[], host: ts.CompilerHost): ts.Prog
 	return ts.createProgram(inputFileNames, compilerOptions, host);
 }
 
-function getJsErrors(code: string, resourcePath: string) {
-	const sourceFile = ts.createSourceFile(
+function createSourceFile(resourcePath: string, code: string) {
+	return ts.createSourceFile(
 		resourcePath,
 		code,
-		ts.ScriptTarget.ES2022,
-		true,
-		ts.ScriptKind.JS
+		{
+			languageVersion: ts.ScriptTarget.ES2022,
+			jsDocParsingMode: ts.JSDocParsingMode.ParseNone,
+		}
 	);
+}
 
-	const host = createCompilerHost(new Map([[resourcePath, sourceFile]]));
-	const program = createProgram([resourcePath], host);
+function getJsErrorsForSourceFile(sourceFile: ts.SourceFile, program: ts.Program) {
 	const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
-
 	return diagnostics.filter(function (d) {
 		return d.file === sourceFile && d.category === ts.DiagnosticCategory.Error;
 	});
+}
+
+function getJsErrors(code: string, resourcePath: string) {
+	const sourceFile = createSourceFile(resourcePath, code);
+	const host = createCompilerHost(new Map([[resourcePath, sourceFile]]));
+	const program = createProgram([resourcePath], host);
+	return getJsErrorsForSourceFile(sourceFile, program);
 }
 
 function getAutofixMessages(resource: AutofixResource) {
@@ -243,6 +250,15 @@ export default async function ({
 	const checker = program.getTypeChecker();
 	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
+		// Checking for syntax errors in the original source file.
+		// We should not apply autofixes to files with syntax errors
+		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program);
+		if (existingJsErrors.length) {
+			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error in original source file : ` +
+				`${existingJsErrors.map((d) => d.messageText as string).join(", ")}`);
+			continue;
+		}
+
 		log.verbose(`Applying autofixes to ${resourcePath}`);
 		let newContent;
 		try {
