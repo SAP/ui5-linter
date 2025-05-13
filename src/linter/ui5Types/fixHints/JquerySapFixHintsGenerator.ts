@@ -45,9 +45,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
 	}],
 	// TODO: Do not migrate this case for now- too many edge cases.
-	["log.setLevel", {
-		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogger().setLevel",
-	}],
+	// ["log.setLevel", {
+	// 	moduleName: "sap/base/Log", exportNameToBeUsed: "setLevel",
+	// }],
 	["log.getLog", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
 	}],
