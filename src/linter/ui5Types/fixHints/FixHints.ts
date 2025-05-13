@@ -24,7 +24,7 @@ export interface FixHints {
 
 	/**
 	 * Code to be replaced
-	 * In some cases the replacement is not a module import but could be a native API,
+	 * In some cases the replacement is not a module import but could be a Web API,
 	 * or a different function with different arguments.
 	 */
 	exportCodeToBeUsed?: string | ExportCodeToBeUsed;
