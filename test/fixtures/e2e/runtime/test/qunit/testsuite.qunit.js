@@ -13,9 +13,15 @@ sap.ui.define(() => {
 		},
 		tests: {
 			"Globals": {},
-			"jQuery.sap.log": {},
-			"jQuery.sap.startsWith": {},
+			"jQuery.sap.charToUpperCase": {},
 			"jQuery.sap.endsWith": {},
+			"jQuery.sap.extend": {},
+			"jQuery.sap.getModuleResourcePath": {},
+			"jQuery.sap.log": {},
+			"jQuery.sap.newObject": {},
+			"jQuery.sap.setObject": {},
+			"jQuery.sap.startsWith": {},
+			
 		}
 	};
 });

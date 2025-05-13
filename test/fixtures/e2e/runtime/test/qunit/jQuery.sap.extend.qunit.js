@@ -1,6 +1,8 @@
 /*global QUnit */
-sap.ui.define(() => {
+sap.ui.define(["sap/base/util/isEmptyObject"], (isEmptyObject) => {
 	"use strict";
+
+	var myObject;
 
 	QUnit.module("jQuery.sap.extend", {
 		beforeEach: function () {
