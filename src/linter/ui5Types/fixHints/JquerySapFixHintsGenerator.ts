@@ -45,9 +45,9 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLevel",
 	}],
 	// TODO: Do not migrate this case for now- too many edge cases.
-	// ["log.setLevel", {
-	// 	moduleName: "sap/base/Log", exportNameToBeUsed: "setLevel",
-	// }],
+	["log.setLevel", {
+		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogger().setLevel",
+	}],
 	["log.getLog", {
 		moduleName: "sap/base/Log", exportNameToBeUsed: "getLogEntries",
 	}],
@@ -457,41 +457,39 @@ const jQuerySapModulesReplacements = new Map<string, FixHints>([
 	["setMobileWebAppCapable", {
 		moduleName: "sap/ui/util/Mobile", exportNameToBeUsed: "setWebAppCapable",
 	}],
-	// Do not migrate Storage for now.
-	// jQuery.sap.storage has caching which is not supported by the new API.
-	// ["storage", {
-	// 	moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new $moduleIdentifier($1, $2)",
-	// }],
-	// ["storage.Storage", {
-	// 	moduleName: "sap/ui/util/Storage",
-	// }],
-	// ["storage.Type.local", {
-	// 	moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "$moduleIdentifier.Type.local",
-	// }],
-	// ["storage.Type.session", {
-	// 	moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "$moduleIdentifier.Type.session",
-	// }],
-	// ["storage.isSupported", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "isSupported",
-	// }],
-	// ["storage.clear", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "clear",
-	// }],
-	// ["storage.get", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "get",
-	// }],
-	// ["storage.getType", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "getType",
-	// }],
-	// ["storage.put", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "put",
-	// }],
-	// ["storage.remove", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "remove",
-	// }],
-	// ["storage.removeAll", {
-	// 	moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "removeAll",
-	// }],
+	["storage", {
+		moduleName: "sap/ui/util/Storage", exportCodeToBeUsed: "new $moduleIdentifier($1, $2)",
+	}],
+	["storage.Storage", {
+		moduleName: "sap/ui/util/Storage",
+	}],
+	["storage.Type.local", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "Type.local",
+	}],
+	["storage.Type.session", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "Type.session",
+	}],
+	["storage.isSupported", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "isSupported",
+	}],
+	["storage.clear", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "clear",
+	}],
+	["storage.get", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "get",
+	}],
+	["storage.getType", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "getType",
+	}],
+	["storage.put", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "put",
+	}],
+	["storage.remove", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "remove",
+	}],
+	["storage.removeAll", {
+		moduleName: "sap/ui/util/Storage", exportNameToBeUsed: "removeAll",
+	}],
 	["getParseError", {
 		moduleName: "sap/ui/util/XMLHelper", exportNameToBeUsed: "getParseError",
 	}],
