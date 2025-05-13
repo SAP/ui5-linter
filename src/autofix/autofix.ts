@@ -9,7 +9,7 @@ import {addDependencies, removeDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
-import {type FixHints} from "../linter/ui5Types/fixHints/FixHints.js";
+import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
 import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
 
 const log = getLogger("linter:autofix");
@@ -66,7 +66,7 @@ export interface Position {
 export interface GlobalPropertyAccessNodeInfo {
 	moduleName: string;
 	exportNameToBeUsed?: string;
-	exportCodeToBeUsed?: FixHints["exportCodeToBeUsed"];
+	exportCodeToBeUsed?: ExportCodeToBeUsed;
 	propertyAccess?: string;
 	position: Position;
 	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;

@@ -28,9 +28,6 @@ function findNodeInfoAtPosition(
 function replaceCodePlaceholders(
 	exportCodeToBeUsed: ExportCodeToBeUsed
 ) {
-	if (typeof exportCodeToBeUsed === "string" || !exportCodeToBeUsed) {
-		return exportCodeToBeUsed;
-	}
 	return exportCodeToBeUsed.name.replace(/\$(\d+)/g, (match: string, group1: string) => {
 		const argIndex = parseInt(group1);
 		if (isNaN(argIndex) || argIndex < 1 || argIndex > (exportCodeToBeUsed.args?.length ?? 0)) {

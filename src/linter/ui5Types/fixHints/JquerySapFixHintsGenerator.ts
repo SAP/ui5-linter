@@ -1,5 +1,5 @@
 import ts from "typescript";
-import type {FixHints, FixHintsArgsType} from "./FixHints.js";
+import type {ExportCodeToBeUsed, FixHints, FixHintsArgsType} from "./FixHints.js";
 import {isAssignment} from "../utils/utils.js";
 
 // jQuery.sap.*
@@ -770,8 +770,10 @@ export default class JquerySapFixHintsGenerator {
 
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
-			} as FixHints["exportCodeToBeUsed"];
+			} as ExportCodeToBeUsed;
 
+			// Check whether the return value of the call expression is assigned to a variable,
+			// passed to another function or used elsewhere.
 			let isAssignmentStatement = false;
 			while (current && !isAssignmentStatement) {
 				if (ts.isVariableDeclaration(current) ||

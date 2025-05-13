@@ -30,6 +30,10 @@ export default function generateSolutionNoGlobals(
 			// Skip global access without module name
 			continue;
 		}
+		if (typeof msg.fixHints?.exportCodeToBeUsed === "string") {
+			// String should have been converted to an object when creating the FixHint
+			continue;
+		}
 		// TypeScript lines and columns are 0-based
 		const line = msg.position.line - 1;
 		const column = msg.position.column - 1;

@@ -38,6 +38,11 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.log.trace("This is a trace log message");
 	jQuery.sap.log.warning("This is a warning log message");
 
+	var fnLogError = function() {
+		// TODO: This call could be migrated but currently it is not
+		jQuery.sap.log.error("This is a error log message");
+	};
+
 	var myLogMessage = "This is a debug message";
 	var myDetails = "These are the details";
 	var myComponent = "jquery.sap.logger.jsunit";
