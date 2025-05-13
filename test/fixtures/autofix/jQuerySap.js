@@ -43,7 +43,8 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var myComponent = "jquery.sap.logger.jsunit";
 	jQuery.sap.log.debug(myLogMessage, myDetails, myComponent, function () {});
 
-	// Do not migrate those!
+	// The old API always returns a logger instance. So in case the return value
+	// is accessed, the call should not be migrated:
 	jQuery.sap.log.debug().info();
 	var debugInfo = jQuery.sap.log.debug();
 	var info = {
