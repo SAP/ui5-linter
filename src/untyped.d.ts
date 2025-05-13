@@ -157,3 +157,20 @@ declare module "@ui5/logger/writers/Console" {
 declare module "json-source-map" {
 	export function parse<T>(content: string): T;
 }
+
+declare module "fs" {
+	export interface Dirent {
+		/**
+		* The base path that this `fs.Dirent` object refers to.
+		* @since v20.12.0
+		*/
+		parentPath: string;
+
+		/**
+		* Alias for `dirent.parentPath`.
+		* @since v20.1.0
+		* @deprecated Since v20.12.0
+		*/
+		path: string;
+	}
+}

@@ -99,7 +99,7 @@ export function createTestsForFixtures(fixturesPath: string, fix = false) {
 		}).map((dirEntries) => {
 			return path.posix.join(
 				// Resolve relative path OS dependant, but do the join in POSIX format
-				path.relative(fixturesPath, dirEntries.path),
+				path.relative(fixturesPath, dirEntries.parentPath || dirEntries.path),
 				dirEntries.name
 			);
 		});
@@ -140,7 +140,7 @@ export function createTestsForFixtures(fixturesPath: string, fix = false) {
 	} catch (err) {
 		if (err instanceof Error) {
 			throw new Error(
-				`Failed to list files of directory ${fixturesPath}: ${err.message}`);
+				`Failed to list files of directory ${fixturesPath}: ${err.message}`, {cause: err});
 		}
 		throw err;
 	}
