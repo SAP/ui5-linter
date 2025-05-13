@@ -129,7 +129,7 @@ export default function generateSolutionNoGlobals(
 			}
 			moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
 		} else {
-			// We have a replacement without introducing a new module, e.g. replacement by native API usage
+			// We have a replacement without introducing a new module, e.g. replacement by Web API usage
 			moduleDeclarationInfo?.additionalNodeInfos.push(nodeInfo);
 		}
 	}
