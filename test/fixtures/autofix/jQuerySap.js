@@ -67,6 +67,12 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		return jQuery.sap.log.error("FOO");
 	}
 	doSomething(() => jQuery.sap.log.error("FOO"));
+	doSomethingElse(() => {
+		return jQuery.sap.log.error("FOO")
+	});
+	doSomethingElseToo(() => {
+		jQuery.sap.log.error("FOO")
+	});
 
 	// https://github.com/SAP/ui5-linter/issues/524
 	const myCSS = jQuery.sap.encodeCSS("+");
