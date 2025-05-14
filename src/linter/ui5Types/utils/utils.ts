@@ -231,6 +231,11 @@ export function isAssignment(node: ts.AccessExpression): boolean {
 export function isExpectedValueExpression(node: ts.Node): boolean {
 	let isExpectedValue = false;
 	while (node && !isExpectedValue) {
+		// Whether the function returns a value
+		if (!ts.isReturnStatement(node) && node.parent && ts.isBlock(node.parent)) {
+			break;
+		}
+
 		if (ts.isVariableDeclaration(node) ||
 			ts.isBinaryExpression(node) ||
 			ts.isVariableStatement(node) ||
