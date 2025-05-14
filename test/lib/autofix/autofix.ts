@@ -82,20 +82,19 @@ test("autofix: Parsing error after applying fixes", async (t) => {
 	t.deepEqual(linterContext.generateLintResults(), [
 		{
 			coverageInfo: [],
-			errorCount: 1,
-			fatalErrorCount: 1,
+			errorCount: 0,
+			fatalErrorCount: 0,
+			warningCount: 1,
 			filePath: "/resources/file.js",
 			messages: [
 				{
 					column: undefined,
-					fatal: true,
 					line: undefined,
 					message: "Syntax error after applying autofix for '/resources/file.js': ')' expected.",
-					ruleId: "parsing-error",
-					severity: 2,
+					ruleId: "autofix-error",
+					severity: 1,
 				},
 			],
-			warningCount: 0,
 		},
 	]);
 });

@@ -1,13 +1,12 @@
 import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
-import type {
-	ChangeSet,
-	ExistingModuleDeclarationInfo,
-	GlobalPropertyAccessNodeInfo,
-	ModuleDeclarationInfo,
-	NewModuleDeclarationInfo,
-	Position,
+import {
+	getModuleDeclarationForPosition,
+	type ChangeSet,
+	type ExistingModuleDeclarationInfo,
+	type GlobalPropertyAccessNodeInfo,
+	type NewModuleDeclarationInfo,
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
@@ -18,7 +17,7 @@ const log = getLogger("linter:autofix:NoGlobals");
 
 export default function generateSolutionNoGlobals(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
-	messages: RawLintMessage<MESSAGE.NO_GLOBALS>[],
+	messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[],
 	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
 ) {
 	// Collect all global property access nodes
@@ -27,19 +26,23 @@ export default function generateSolutionNoGlobals(
 		if (!msg.position) {
 			throw new Error(`Unable to produce solution for message without position`);
 		}
-		if (!msg.fixHints?.moduleName) {
+		if (!msg.fixHints?.moduleName && !msg.fixHints?.exportCodeToBeUsed) {
 			// Skip global access without module name
+			continue;
+		}
+		if (typeof msg.fixHints?.exportCodeToBeUsed === "string") {
+			// String should have been converted to an object when creating the FixHint
 			continue;
 		}
 		// TypeScript lines and columns are 0-based
 		const line = msg.position.line - 1;
 		const column = msg.position.column - 1;
 		const pos = sourceFile.getPositionOfLineAndCharacter(line, column);
+
 		affectedNodesInfo.add({
-			globalVariableName: msg.args.variableName,
-			namespace: msg.args.namespace,
-			moduleName: msg.fixHints.moduleName,
-			exportName: msg.fixHints.exportName,
+			moduleName: msg.fixHints.moduleName ?? "",
+			exportNameToBeUsed: msg.fixHints.exportNameToBeUsed,
+			exportCodeToBeUsed: msg.fixHints.exportCodeToBeUsed,
 			propertyAccess: msg.fixHints.propertyAccess,
 			position: {
 				line,
@@ -69,6 +72,7 @@ export default function generateSolutionNoGlobals(
 					moduleDeclarations.set(node, {
 						moduleDeclaration: parseModuleDeclaration(node.arguments, checker),
 						importRequests: new Map(),
+						additionalNodeInfos: [],
 					});
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
@@ -83,6 +87,7 @@ export default function generateSolutionNoGlobals(
 						moduleDeclarations.set(node, {
 							moduleDeclaration: requireExpression,
 							importRequests: new Map(),
+							additionalNodeInfos: [],
 						});
 					}
 				} catch (err) {
@@ -97,32 +102,13 @@ export default function generateSolutionNoGlobals(
 	ts.forEachChild(sourceFile, visitNode);
 	for (const nodeInfo of affectedNodesInfo) {
 		if (!nodeInfo.node) {
-			throw new Error(`Unable to find node for ${nodeInfo.globalVariableName}`);
+			throw new Error(`Unable to find node at position ${nodeInfo.position.line}:${nodeInfo.position.column}`);
 		}
-	}
-
-	function getModuleDeclarationForPosition(position: Position): ModuleDeclarationInfo | undefined {
-		const potentialDeclarations: {declaration: ModuleDeclarationInfo; start: number}[] = [];
-		for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
-			const {moduleDeclaration} = moduleDeclarationInfo;
-			const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
-			if (!factory || factory.getStart() > position.pos || factory.getEnd() < position.pos) {
-				continue;
-			}
-			potentialDeclarations.push({
-				declaration: moduleDeclarationInfo,
-				start: factory.getStart(),
-			});
-		}
-		// Sort by start position so that the declaration closest to the position is returned
-		// This is relevant in case of nested sap.ui.require calls
-		potentialDeclarations.sort((a, b) => a.start - b.start);
-		return potentialDeclarations.pop()?.declaration;
 	}
 
 	for (const nodeInfo of affectedNodesInfo) {
 		const {moduleName, position} = nodeInfo;
-		let moduleDeclarationInfo: ModuleDeclarationInfo | undefined = getModuleDeclarationForPosition(position);
+		let moduleDeclarationInfo = getModuleDeclarationForPosition(position.pos, moduleDeclarations);
 		if (!moduleDeclarationInfo) {
 			if (!newModuleDeclarations.length) {
 				// throw new Error(`TODO: Implement handling for global access without module declaration`);
@@ -139,12 +125,17 @@ export default function generateSolutionNoGlobals(
 			// throw new Error(`TODO: Implement handling for global access without module declaration`);
 		}
 
-		if (moduleDeclarationInfo && !moduleDeclarationInfo.importRequests.has(moduleName)) {
-			moduleDeclarationInfo.importRequests.set(moduleName, {
-				nodeInfos: [],
-			});
+		if (moduleName) {
+			if (moduleDeclarationInfo && !moduleDeclarationInfo.importRequests.has(moduleName)) {
+				moduleDeclarationInfo.importRequests.set(moduleName, {
+					nodeInfos: [],
+				});
+			}
+			moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
+		} else {
+			// We have a replacement without introducing a new module, e.g. replacement by Web API usage
+			moduleDeclarationInfo?.additionalNodeInfos.push(nodeInfo);
 		}
-		moduleDeclarationInfo?.importRequests.get(moduleName)!.nodeInfos.push(nodeInfo);
 	}
 
 	return moduleDeclarations;

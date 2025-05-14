@@ -7,7 +7,7 @@ import lintDotLibrary from "./dotLibrary/linter.js";
 import lintFileTypes from "./fileTypes/linter.js";
 import {taskStart} from "../utils/perf.js";
 import TypeLinter from "./ui5Types/TypeLinter.js";
-import LinterContext, {LintResult, LinterParameters, LinterOptions} from "./LinterContext.js";
+import LinterContext, {LintResult, LinterParameters, LinterOptions, RawLintMessage} from "./LinterContext.js";
 import {createReader, createResource} from "@ui5/fs/resourceFactory";
 import {mergeIgnorePatterns, resolveReader} from "./linter.js";
 import {UI5LintConfigType} from "../utils/ConfigManager.js";
@@ -15,6 +15,7 @@ import type SharedLanguageService from "./ui5Types/SharedLanguageService.js";
 import autofix, {AutofixResource} from "../autofix/autofix.js";
 import {writeFile} from "node:fs/promises";
 import {FSToVirtualPathOptions, transformVirtualPathToFilePath} from "../utils/virtualPathToFilePath.js";
+import {MESSAGE} from "./messages.js";
 import {getLogger} from "@ui5/logger";
 import path from "node:path";
 import {JSONSchemaForSAPUI5Namespace, SAPJSONSchemaForWebApplicationManifestFile} from "../manifest.js";
@@ -81,10 +82,21 @@ export default async function lintWorkspace(
 				...options,
 				fix: false,
 			};
+			const autofixContext = context;
 			context = await runLintWorkspace(
 				workspace, filePathsWorkspace, optionsAfterFix, config, patternsMatch,
 				libraryDependencies, sharedLanguageService
 			);
+
+			for (const {filePath, rawMessages} of autofixContext.generateRawLintResults()) {
+				// Find autofix errors
+				rawMessages.forEach((msg) => {
+					if (msg.id === MESSAGE.AUTOFIX_ERROR) {
+						context.addLintingMessage(
+							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args);
+					}
+				});
+			}
 
 			// Update fixed files on the filesystem
 			if (process.env.UI5LINT_FIX_DRY_RUN) {

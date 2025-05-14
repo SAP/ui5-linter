@@ -1,6 +1,14 @@
 import ts from "typescript";
 import {getUniqueName} from "./UniqueNameCreator.js";
 
+export function isSourceFileOfTypeScriptLib(sourceFile: ts.SourceFile) {
+	return sourceFile.fileName.startsWith("/types/typescript/lib/");
+}
+
+export function isSourceFileOfPseudoModuleType(sourceFile: ts.SourceFile) {
+	return sourceFile.fileName.startsWith("/types/@ui5/linter/types/pseudo-modules/");
+}
+
 /**
  * Returns the text of a PropertyName node.
  * This function will not return the source code text of the node, but the text that can be
@@ -205,7 +213,7 @@ function camelize(str: string): string {
 	});
 }
 
-export function isGlobalAssignment(node: ts.AccessExpression): boolean {
+export function isAssignment(node: ts.AccessExpression): boolean {
 	let currentNode: ts.Node | undefined = node;
 	while (ts.isPropertyAccessExpression(currentNode) || ts.isElementAccessExpression(currentNode)) {
 		if (!currentNode.parent) {

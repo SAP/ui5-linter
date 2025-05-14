@@ -13,8 +13,12 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 			if (node.text !== firstPropAccess) {
 				throw new Error(`Expected node to be ${firstPropAccess} but got ${node.getText()}`);
 			}
+			if (!propertyAccessChain.length) {
+				return scanNode;
+			}
 		}
 	}
+
 	while (ts.isPropertyAccessExpression(scanNode.parent) || ts.isElementAccessExpression(scanNode.parent)) {
 		scanNode = scanNode.parent;
 		if (matchPropertyAccess) {
