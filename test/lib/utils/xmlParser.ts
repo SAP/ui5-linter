@@ -1,5 +1,5 @@
 import test from "ava";
-import {parseXML} from "../../../src/utils/xmlParser.js";
+import {parseXml} from "../../../src/utils/xmlParser.js";
 import {ReadStream} from "node:fs";
 import {Readable} from "node:stream";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
@@ -36,7 +36,7 @@ test("Test xmlParser with .library", async (t) => {
 
 	// Call SAXParser with the contentStream
 	const libs: SaxTag[] = [];
-	await parseXML(contentStream, (event, tag) => {
+	await parseXml(contentStream, (event, tag) => {
 		if (tag instanceof SaxTag &&
 			event === SaxEventType.CloseTag &&
 			tag.value === "libraryName") {
