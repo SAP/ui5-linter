@@ -782,7 +782,7 @@ export default class JquerySapFixHintsGenerator {
 					ts.isConditionalExpression(current) ||
 					ts.isParenthesizedExpression(current) ||
 					ts.isReturnStatement(current) ||
-					// () => jQuery.sap.log.error("FOO"); Explicit return in ana arrow function
+					// () => jQuery.sap.log.error("FOO"); Explicit return in an arrow function
 					(ts.isArrowFunction(current) && !ts.isBlock(current.body)) ||
 					// Argument of a function call
 					(ts.isCallExpression(current) && ts.isCallExpression(current.parent) &&
