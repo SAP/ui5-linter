@@ -11,6 +11,8 @@ import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
 import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
 import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
+import Fix from "../linter/ui5Types/fixHints/Fix.js";
+import generatedChanges from "./solutions/generatedChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -322,10 +324,23 @@ function applyFixes(
 		return undefined;
 	}
 
+	const fixMessages: typeof messages = [];
+	const fixHintMessages: typeof messages = [];
+	messages.forEach((msg) => {
+		if (msg.fixHints instanceof Fix) {
+			fixMessages.push(msg);
+		} else {
+			fixHintMessages.push(msg);
+		}
+	});
+
+	generatedChanges(checker, sourceFile, content, fixMessages, changeSet);
+
 	existingModuleDeclarations = generateSolutionNoGlobals(
 		checker, sourceFile, content,
-		messages,
+		fixHintMessages,
 		changeSet, []);
+
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports
 	const identifiers = collectIdentifiers(sourceFile);
@@ -344,7 +359,7 @@ function applyFixes(
 
 	// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
 	// based on arguments' context
-	generateSolutionCodeReplacer(existingModuleDeclarations, messages, changeSet, sourceFile, identifiers);
+	generateSolutionCodeReplacer(existingModuleDeclarations, fixHintMessages, changeSet, sourceFile, identifiers);
 
 	if (changeSet.length === 0) {
 		// No modifications needed

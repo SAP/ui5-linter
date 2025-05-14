@@ -3,10 +3,9 @@ import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {MESSAGE} from "../../linter/messages.js";
 import {
 	getModuleDeclarationForPosition,
+	Position,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
-	type GlobalPropertyAccessNodeInfo,
-	type NewModuleDeclarationInfo,
 } from "../autofix.js";
 import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../utils.js";
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
@@ -16,38 +15,36 @@ import Fix from "../../linter/ui5Types/fixHints/Fix.js";
 
 const log = getLogger("linter:autofix:NoGlobals");
 
-export default function generateSolutionNoGlobals(
+interface NodeSearchInfo {
+	position: Position;
+	fix: Fix;
+	nodeType: ts.SyntaxKind;
+}
+
+export default function generatedChanges(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
 	messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[],
-	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
+	changeSet: ChangeSet[]
 ) {
 	// Collect all global property access nodes
-	const affectedNodesInfo = new Set<GlobalPropertyAccessNodeInfo>();
+	const nodeSearchInfo = new Set<NodeSearchInfo>();
 	for (const msg of messages) {
-		if (msg.fixHints instanceof Fix) {
+		if (!(msg.fixHints instanceof Fix)) {
 			continue;
 		}
-		if (!msg.position) {
-			throw new Error(`Unable to produce solution for message without position`);
-		}
-		if (!msg.fixHints?.moduleName && !msg.fixHints?.exportCodeToBeUsed) {
-			// Skip global access without module name
-			continue;
-		}
-		if (typeof msg.fixHints?.exportCodeToBeUsed === "string") {
-			// String should have been converted to an object when creating the FixHint
-			continue;
+		let fixStart = msg.fixHints.getStartPosition();
+		fixStart ??= msg.position;
+		if (!fixStart) {
+			throw new Error(`Unable to find fix start position for message ${msg.id}`);
 		}
 		// TypeScript lines and columns are 0-based
-		const line = msg.position.line - 1;
-		const column = msg.position.column - 1;
+		const line = fixStart.line - 1;
+		const column = fixStart.column - 1;
 		const pos = sourceFile.getPositionOfLineAndCharacter(line, column);
 
-		affectedNodesInfo.add({
-			moduleName: msg.fixHints.moduleName ?? "",
-			exportNameToBeUsed: msg.fixHints.exportNameToBeUsed,
-			exportCodeToBeUsed: msg.fixHints.exportCodeToBeUsed,
-			propertyAccess: msg.fixHints.propertyAccess,
+		nodeSearchInfo.add({
+			fix: msg.fixHints,
+			nodeType: msg.fixHints.getNodeType(),
 			position: {
 				line,
 				column,
@@ -59,7 +56,7 @@ export default function generateSolutionNoGlobals(
 	const moduleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
 
 	function visitNode(node: ts.Node) {
-		for (const nodeInfo of affectedNodesInfo) {
+		for (const nodeInfo of nodeSearchInfo) {
 			if (node.getStart() === nodeInfo.position.pos) {
 				if (!ts.isIdentifier(node)) {
 					continue;

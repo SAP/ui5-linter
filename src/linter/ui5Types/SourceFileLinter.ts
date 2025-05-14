@@ -29,6 +29,7 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {createDeprecatedPropertyAccessFix, createJquerySapAccessExpressionFix} from "./fixHints/FixFactory.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -1449,11 +1450,12 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.getJquerySapFixHints(node);
+			// const fixHints = this.getJquerySapFixHints(node);
+			const fix = createJquerySapAccessExpressionFix(node);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, node, fixHints);
+			}, node, fix);
 		} else {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
