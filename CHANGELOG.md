@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/SAP/ui5-linter/compare/v1.13.1...v1.14.0) (2025-05-15)
+
+
+### Features
+
+* Autofix deprecated jQuery.sap APIs ([#614](https://github.com/SAP/ui5-linter/issues/614)) ([1dda012](https://github.com/SAP/ui5-linter/commit/1dda01216deb7dec8c3dd1dd83712ce5166172f3))
+
 ## [1.13.1](https://github.com/SAP/ui5-linter/compare/v1.13.0...v1.13.1) (2025-05-12)
 
 
