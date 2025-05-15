@@ -65,15 +65,17 @@ export class Markdown {
 		});
 
 		let summary = "## Summary\n\n";
-		if (quiet) {
-			summary +=
-				`> ${totalErrorCount} ${totalErrorCount === 1 ? "problem" : "problems"} ` +
-				`(${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"})  \n`;
-		} else {
-			summary +=
-				`> ${totalErrorCount + totalWarningCount} problems ` +
-				`(${totalErrorCount} errors, ${totalWarningCount} warnings)  \n`;
+		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
+		let warningsText = "";
+		if (!quiet) {
+			warningsText = `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
 		}
+
+		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
+		const problemsText = `${totalCount} ${totalCount === 1 ? "problem" : "problems"}`;
+
+		summary += `> ${problemsText} (${errorsText}${warningsText})  \n`;
+
 		if (totalFatalErrorCount) {
 			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
 		}

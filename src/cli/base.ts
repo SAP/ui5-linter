@@ -10,7 +10,6 @@ import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 import {getVersion} from "./version.js";
 import {ui5lint} from "../index.js";
-import type {LintResult} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export interface LinterArg {
@@ -180,39 +179,37 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		ui5Config,
 	});
 
-	// Define a simple function to filter a single result set
-	const applyQuietFilter = (results: LintResult[]): LintResult[] => {
-		if (!quiet) {
-			return results;
+	// Apply quiet mode filtering directly to the results if needed
+	if (quiet) {
+		// Filter out warnings from all result objects
+		for (const result of res) {
+			// Keep only error messages (severity === 2)
+			result.messages = result.messages.filter((msg) => msg.severity === LintMessageSeverity.Error);
+			// Reset warning counts
+			result.warningCount = 0;
+			// Reset fixableWarningCount if it exists
+			if ("fixableWarningCount" in result) {
+				result.fixableWarningCount = 0;
+			}
 		}
-		return results.map((file) => ({
-			...file,
-			messages: file.messages.filter((msg) => msg.severity === LintMessageSeverity.Error),
-			warningCount: 0,
-			fixableWarningCount: 0,
-		}));
-	};
+	}
 
 	if (coverage) {
 		const coverageFormatter = new Coverage();
-		const filteredResults = applyQuietFilter(res);
-		await writeFile("ui5lint-report.html", await coverageFormatter.format(filteredResults, new Date()));
+		await writeFile("ui5lint-report.html", await coverageFormatter.format(res, new Date()));
 	}
 
 	if (format === "json") {
 		const jsonFormatter = new Json();
-		const filteredResults = applyQuietFilter(res);
-		process.stdout.write(jsonFormatter.format(filteredResults, details, quiet));
+		process.stdout.write(jsonFormatter.format(res, details, quiet));
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
-		const filteredResults = applyQuietFilter(res);
-		process.stdout.write(markdownFormatter.format(filteredResults, details, getVersion(), fix, quiet));
+		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix, quiet));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
-		const filteredResults = applyQuietFilter(res);
-		process.stderr.write(textFormatter.format(filteredResults, details, fix, quiet));
+		process.stderr.write(textFormatter.format(res, details, fix, quiet));
 	}
 	// Stop profiling after CLI finished execution
 	if (profile) {

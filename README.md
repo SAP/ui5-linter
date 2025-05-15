@@ -21,7 +21,6 @@
 			- [`--details`](#--details)
 			- [`--format`](#--format)
 			- [`--fix`](#--fix)
-				- [Dry Run Mode](#dry-run-mode)
 			- [`--quiet`](#--quiet)
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)

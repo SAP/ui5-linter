@@ -28,7 +28,7 @@ export class Json {
 					filePath: oLintedFile.filePath,
 					messages: aFileMessages,
 					errorCount: oLintedFile.errorCount,
-					warningCount: quiet ? 0 : oLintedFile.warningCount,
+					warningCount: oLintedFile.warningCount,
 					fatalErrorCount: oLintedFile.fatalErrorCount,
 				});
 			}

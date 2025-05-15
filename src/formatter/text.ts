@@ -101,22 +101,19 @@ export class Text {
 			summaryColor = chalk.yellow;
 		}
 
-		// In quiet mode, only mention errors in the summary
-		if (quiet) {
-			this.#writeln(
-				summaryColor(
-					`${totalErrorCount} ${totalErrorCount === 1 ? "problem" : "problems"} ` +
-					`(${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"})`
-				)
-			);
-		} else {
-			this.#writeln(
-				summaryColor(
-					`${totalErrorCount + totalWarningCount} problems ` +
-					`(${totalErrorCount} errors, ${totalWarningCount} warnings)`
-				)
-			);
+		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
+		let warningsText = "";
+		if (!quiet) {
+			warningsText = `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
 		}
+
+		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
+		const problemsText = `${totalCount} ${totalCount === 1 ? "problem" : "problems"}`;
+
+		this.#writeln(
+			summaryColor(`${problemsText} (${errorsText}${warningsText})`)
+		);
+
 		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
 			this.#writeln("   Run \"ui5lint --fix\" to resolve all auto-fixable problems\n");
 		}
