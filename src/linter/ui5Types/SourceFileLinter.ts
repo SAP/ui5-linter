@@ -1812,4 +1812,8 @@ export default class SourceFileLinter {
 	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression) {
 		return this.#fixHintsGenerator?.getJquerySapFixHints(node);
 	}
+
+	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression) {
+		return this.#fixHintsGenerator?.getCoreFixHints(node);
+	}
 }
