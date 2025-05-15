@@ -21,7 +21,7 @@ interface NodeSearchInfo {
 	nodeType: ts.SyntaxKind;
 }
 
-export default function generatedChanges(
+export default function generateChanges(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
 	messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[],
 	changeSet: ChangeSet[]

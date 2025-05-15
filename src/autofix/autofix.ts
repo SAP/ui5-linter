@@ -12,7 +12,7 @@ import {collectIdentifiers} from "./utils.js";
 import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
 import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
 import Fix from "../linter/ui5Types/fixHints/Fix.js";
-import generatedChanges from "./solutions/generatedChanges.js";
+import generateChanges from "./solutions/generateChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -334,13 +334,12 @@ function applyFixes(
 		}
 	});
 
-	generatedChanges(checker, sourceFile, content, fixMessages, changeSet);
+	generateChanges(checker, sourceFile, content, fixMessages, changeSet);
 
 	existingModuleDeclarations = generateSolutionNoGlobals(
 		checker, sourceFile, content,
 		fixHintMessages,
 		changeSet, []);
-
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports
 	const identifiers = collectIdentifiers(sourceFile);

@@ -1,24 +1,41 @@
 import ts from "typescript";
 import Fix from "./Fix.js";
-import {FixMetadata} from "./FixMetadata.js";
+import {ChangeSet} from "../../../autofix/autofix.js";
+import {PositionInfo} from "../../LinterContext.js";
 
 export default class FixJquerySapLog extends Fix {
-	static create(node: ts.Node): FixJquerySapLog {
-		if (!ts.isCallExpression(node)) {
-			throw new Error("Invalid node type");
-		}
-		return new FixJquerySapLog(node);
-	}
+	private nodeKind: ts.SyntaxKind;
+	private propertyAccess: string;
+	private startPosition: PositionInfo;
 
 	constructor(node: ts.Node) {
+		super();
+		this.nodeKind = node.kind;
+		this.propertyAccess = "";
+	}
+
+	getSolution(): ChangeSet[] {
+		throw new Error("Method not implemented.");
+	}
+
+	getStartPosition(): PositionInfo | undefined {
 
 	}
 
-	getSolutions(solutionGenerator: SolutionGenerator) {
-
+	getNodeType(): ts.SyntaxKind {
+		return this.nodeKind;
 	}
 
-	getPosition() {
+	getNodePropertyAccess(): string {
+		return this.propertyAccess;
+	}
 
+	static create(node: ts.Node): FixJquerySapLog | undefined {
+		if (!ts.isCallExpression(node)) {
+			// Only call expressions can be fixed as we need to check whether
+			// the return value is used
+			return undefined;
+		}
+		return new FixJquerySapLog(node);
 	}
 }
