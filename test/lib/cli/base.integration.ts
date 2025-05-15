@@ -34,16 +34,15 @@ test.afterEach.always(() => {
 test.serial("ui5lint --format json", async (t) => {
 	const {cli, consoleLogStub, processCwdStub, processStdoutWriteStub, processExitStub} = t.context;
 
-	// Instead of testing actual process.exitCode
-	const before = process.exitCode;
 	await cli.parseAsync(["--format", "json"]);
-	t.not(before, process.exitCode, "Exit code was changed");
-	process.exitCode = 0; // Reset immediately
 
 	t.is(consoleLogStub.callCount, 0, "console.log should not be used");
 	t.true(processCwdStub.callCount > 0, "process.cwd was called");
 	t.is(processStdoutWriteStub.callCount, 2, "process.stdout.write was called twice");
 	t.is(processExitStub.callCount, 0, "process.exit got never called");
+	t.is(process.exitCode, 1, "process.exitCode was set to 1");
+	// cleanup: reset exit code in order not to fail the test (it cannot be stubbed with sinon)
+	process.exitCode = 0;
 
 	const resultProcessStdoutJSON = processStdoutWriteStub.firstCall.firstArg;
 	let parsedJson: LintResult[];
@@ -67,12 +66,11 @@ test.serial("ui5lint --format markdown", async (t) => {
 	t.true(processCwdStub.callCount > 0, "process.cwd was called");
 	t.is(processStdoutWriteStub.callCount, 2, "process.stdout.write was called twice");
 	t.is(processExitStub.callCount, 0, "process.exit got never called");
-
-	// Reset immediately
+	t.is(process.exitCode, 1, "process.exitCode was set to 1");
+	// cleanup: reset exit code in order not to fail the test (it cannot be stubbed with sinon)
 	process.exitCode = 0;
 
 	const resultProcessStdoutMarkdown = processStdoutWriteStub.firstCall.firstArg;
-	t.true(resultProcessStdoutMarkdown.length > 0, "Output is not empty");
 	t.true(resultProcessStdoutMarkdown.startsWith("# UI5 Linter Report"),
 		"Output starts with the expected Markdown header");
 
