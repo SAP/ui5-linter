@@ -189,6 +189,41 @@ test.serial("ui5lint --ui5-config", async (t) => {
 	});
 });
 
+test.serial("ui5lint --quiet", async (t) => {
+	const {cli, ui5lint, formatText} = t.context;
+
+	// Create a mock result with both errors and warnings
+	const lintResultWithErrorsAndWarnings: LintResult = {
+		filePath: "test.js",
+		messages: [
+			{ruleId: "rule1", severity: 1, message: "Warning message"}, // Warning
+			{ruleId: "rule2", severity: 2, message: "Error message"}, // Error
+		],
+		coverageInfo: [],
+		errorCount: 1,
+		fatalErrorCount: 0,
+		warningCount: 1,
+	};
+
+	// Override the default result with our custom one
+	ui5lint.resolves([lintResultWithErrorsAndWarnings]);
+
+	await cli.parseAsync(["--quiet"]);
+
+	t.true(ui5lint.calledOnce, "Linter is called");
+
+	// Verify that formatText is called with filtered results containing only errors
+	t.true(formatText.calledOnce, "Text formatter has been called");
+
+	const formatterResults = formatText.getCall(0).args[0];
+	t.is(formatterResults[0].messages.length, 1, "Only error messages are included");
+	t.is(formatterResults[0].messages[0].severity, 2, "Only messages with severity 2 (error) are kept");
+	t.is(formatterResults[0].warningCount, 0, "Warning count is reset to 0");
+	t.is(process.exitCode, 1, "Exit code is reset to 1");
+	// reset process.exitCode
+	process.exitCode = 0;
+});
+
 test.serial("ui5lint path/to/file.js glob/**/*", async (t) => {
 	const {cli, ui5lint} = t.context;
 
