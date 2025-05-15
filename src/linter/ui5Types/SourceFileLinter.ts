@@ -15,6 +15,11 @@ import {
 	isClassMethod,
 	isSourceFileOfPseudoModuleType,
 	isSourceFileOfTypeScriptLib,
+	getSymbolModuleDeclaration,
+	getUi5TypeInfoFromSymbol,
+	Ui5TypeInfoKind,
+	isGlobalThis,
+	extractNamespace,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -665,10 +670,16 @@ export default class SourceFileLinter {
 		}
 		const classType = this.checker.getTypeAtLocation(node.expression);
 
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
-		if (moduleDeclaration?.name.text === "sap/ui/core/routing/Router") {
+		const ui5TypeInfo = getUi5TypeInfoFromSymbol(nodeType.symbol);
+		if (
+			ui5TypeInfo?.kind === Ui5TypeInfoKind.Module &&
+			ui5TypeInfo.module === "sap/ui/core/routing/Router"
+		) {
 			this.#analyzeNewCoreRouter(node);
-		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
+		} else if (
+			ui5TypeInfo?.kind === Ui5TypeInfoKind.Module &&
+			ui5TypeInfo.module === "sap/ui/model/odata/v4/ODataModel"
+		) {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
 			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
@@ -727,47 +738,6 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
-		const propAccessChain: string[] = [];
-		propAccessChain.push(node.expression.getText());
-
-		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
-			}
-			propAccessChain.push(scanNode.name.text);
-			scanNode = scanNode.parent;
-		}
-		return propAccessChain.join(".");
-	}
-
-	/**
-	 * Extracts the sap.ui API namespace from a symbol name and a module declaration
-	 * (from @sapui5/types sap.ui.core.d.ts), e.g. sap.ui.view.
-	 */
-	extractSapUiNamespace(symbolName: string, moduleDeclaration: ts.ModuleDeclaration): string | undefined {
-		const namespace: string[] = [];
-		let currentModuleDeclaration: ts.Node | undefined = moduleDeclaration;
-		while (
-			currentModuleDeclaration &&
-			ts.isModuleDeclaration(currentModuleDeclaration) &&
-			currentModuleDeclaration.flags & ts.NodeFlags.Namespace
-		) {
-			namespace.unshift(currentModuleDeclaration.name.text);
-			currentModuleDeclaration = currentModuleDeclaration.parent?.parent;
-		}
-
-		if (!namespace.length) {
-			return undefined;
-		} else {
-			namespace.push(symbolName);
-			return namespace.join(".");
-		}
-	}
-
 	getDeprecationText(deprecatedTag: ts.JSDocTagInfo): string {
 		// (Workaround) There's an issue in some UI5 TS definition versions and where the
 		// deprecation text gets merged with the description. Splitting on double
@@ -822,71 +792,73 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		const moduleDeclaration = this.getSymbolModuleDeclaration(exprType.symbol);
+		const ui5TypeInfo = getUi5TypeInfoFromSymbol(exprType.symbol);
 		let globalApiName;
-
-		if (exprType.symbol && moduleDeclaration) {
-			const symbolName = exprType.symbol.getName();
-			const moduleName = moduleDeclaration.name.text;
+		if (ui5TypeInfo) {
 			const nodeType = this.checker.getTypeAtLocation(node);
-			globalApiName = this.extractSapUiNamespace(symbolName, moduleDeclaration);
+			if (ui5TypeInfo.kind === Ui5TypeInfoKind.Module) {
+				const symbolName = ui5TypeInfo.name;
+				const moduleName = ui5TypeInfo.module;
+				if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
+					// Check for sap/ui/core/Lib.init usages
+					this.#analyzeLibInitCall(node, exprNode);
+				} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
+					this.#analyzeParametersGetCall(node);
+				} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
+					this.#analyzeCreateComponentCall(node);
+				} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
+					this.#analyzeJsonModelLoadDataCall(node);
+				} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
+					this.#analyzeOdataModelV2CreateEntry(node);
+				} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
+					this.#analyzeMobileInit(node);
+				} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
+					this.#analyzeThemingSetTheme(node);
+				} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
+					this.#analyzeViewCreate(node);
+				} else if (
+					(symbolName === "load" && moduleName === "sap/ui/core/Fragment") ||
+					// Controller#loadFragment calls Fragment.load internally
+					(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
+				) {
+					this.#analyzeFragmentLoad(node, symbolName);
+				} else if (this.hasQUnitFileExtension() &&
+					!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
+					symbolName === "ready" && moduleName === "sap/ui/core/Core") {
+					this.#reportTestStarter(node);
+				} else if (symbolName === "applySettings" &&
+					nodeType.symbol?.declarations?.some((declaration) =>
+						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
+					this.#analyzeNewAndApplySettings(node);
+				} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
+					moduleName === "sap/ui/base/ManagedObject" &&
+					node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
+					this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
+				} else if (symbolName.startsWith("bind") &&
+					nodeType.symbol?.declarations?.some((declaration) =>
+						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
+						node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+					// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
+					// Check decapitalized version of the property name as well.
+					const propName = symbolName.replace("bind", "");
+					const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
 
-			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
-				// Check for sap/ui/core/Lib.init usages
-				this.#analyzeLibInitCall(node, exprNode);
-			} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
-				this.#analyzeParametersGetCall(node);
-			} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
-				this.#analyzeCreateComponentCall(node);
-			} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
-				this.#analyzeJsonModelLoadDataCall(node);
-			} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
-				this.#analyzeOdataModelV2CreateEntry(node);
-			} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
-				this.#analyzeMobileInit(node);
-			} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
-				this.#analyzeThemingSetTheme(node);
-			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
-				this.#analyzeViewCreate(node);
-			} else if (
-				(symbolName === "load" && moduleName === "sap/ui/core/Fragment") ||
-				// Controller#loadFragment calls Fragment.load internally
-				(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
-			) {
-				this.#analyzeFragmentLoad(node, symbolName);
-			} else if (this.hasQUnitFileExtension() &&
-				!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
-				symbolName === "ready" && moduleName === "sap/ui/core/Core") {
-				this.#reportTestStarter(node);
-			} else if (symbolName === "applySettings" &&
-				nodeType.symbol?.declarations?.some((declaration) =>
-					this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
-				this.#analyzeNewAndApplySettings(node);
-			} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
-				moduleName === "sap/ui/base/ManagedObject" &&
-				node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
-				this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
-			} else if (symbolName.startsWith("bind") &&
-				nodeType.symbol?.declarations?.some((declaration) =>
-					this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
-					node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
-				// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
-				// Check decapitalized version of the property name as well.
-				const propName = symbolName.replace("bind", "");
-				const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
-
-				if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
-					this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
+					if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
+						this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
+					}
+				} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
+					this.#extractXmlFromJs(node, "XMLView.create");
 				}
-			} else if (
-				globalApiName === "sap.ui.view" ||
-				globalApiName === "sap.ui.xmlview" ||
-				globalApiName === "sap.ui.fragment" ||
-				globalApiName === "sap.ui.xmlfragment"
-			) {
-				this.#extractXmlFromJs(node, globalApiName);
-			} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
-				this.#extractXmlFromJs(node, "XMLView.create");
+			} else {
+				globalApiName = ui5TypeInfo.namespace;
+				if (
+					ui5TypeInfo.namespace === "sap.ui.view" ||
+					ui5TypeInfo.namespace === "sap.ui.xmlview" ||
+					ui5TypeInfo.namespace === "sap.ui.fragment" ||
+					ui5TypeInfo.namespace === "sap.ui.xmlfragment"
+				) {
+					this.#extractXmlFromJs(node, ui5TypeInfo.namespace);
+				}
 			}
 		}
 
@@ -919,7 +891,7 @@ export default class SourceFileLinter {
 				additionalMessage = `of module '${this.checker.typeToString(lhsExprType)}'`;
 			} else if (ts.isPropertyAccessExpression(exprNode)) {
 				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
-				additionalMessage = `(${this.extractNamespace(exprNode)})`;
+				additionalMessage = `(${extractNamespace(exprNode)})`;
 			}
 		} else if (globalApiName) {
 			additionalMessage = `(${globalApiName})`;
@@ -950,14 +922,6 @@ export default class SourceFileLinter {
 		) {
 			this.#reportTestStarter(reportNode);
 		}
-	}
-
-	getSymbolModuleDeclaration(symbol: ts.Symbol) {
-		let parent = symbol.valueDeclaration?.parent;
-		while (parent && !ts.isModuleDeclaration(parent)) {
-			parent = parent.parent;
-		}
-		return parent;
 	}
 
 	#analyzeLibInitCall(
@@ -1384,7 +1348,7 @@ export default class SourceFileLinter {
 	*/
 	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propNames: string[]) {
 		const controlAmbientModule =
-			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
+			getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
 		let classArg;
 		if (controlAmbientModule?.body && ts.isModuleBlock(controlAmbientModule.body)) {
@@ -1446,7 +1410,7 @@ export default class SourceFileLinter {
 		}
 		let namespace;
 		if (ts.isPropertyAccessExpression(node)) {
-			namespace = this.extractNamespace(node);
+			namespace = extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
 			const fixHints = this.getJquerySapFixHints(node);
@@ -1480,14 +1444,6 @@ export default class SourceFileLinter {
 					`could not be determined`,
 			});
 		}
-	}
-
-	isGlobalThis(nodeType: string) {
-		return [
-			"Window & typeof globalThis",
-			"typeof globalThis",
-			// "Window", // top and parent will resolve to this string, however they are still treated as type 'any'
-		].includes(nodeType);
 	}
 
 	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
@@ -1592,7 +1548,7 @@ export default class SourceFileLinter {
 
 			// Get the NodeType in order to check whether this is indirect global access via Window
 			const nodeType = this.checker.getTypeAtLocation(exprNode);
-			if (this.isGlobalThis(this.checker.typeToString(nodeType))) {
+			if (isGlobalThis(this.checker.typeToString(nodeType))) {
 				// In case of Indirect global access we need to check for
 				// a global UI5 variable on the right side of the expression instead of left
 				if (ts.isPropertyAccessExpression(node)) {
@@ -1613,7 +1569,7 @@ export default class SourceFileLinter {
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
-				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
+				const namespace = extractNamespace((node as ts.PropertyAccessExpression));
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
@@ -1632,7 +1588,7 @@ export default class SourceFileLinter {
 			return true;
 		}
 
-		const propAccess = this.extractNamespace(node);
+		const propAccess = extractNamespace(node);
 		return [
 			"sap.ui.define",
 			"sap.ui.require",
