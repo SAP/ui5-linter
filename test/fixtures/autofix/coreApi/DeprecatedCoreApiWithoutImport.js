@@ -14,7 +14,7 @@ sap.ui.define([], function() {
 
 	sap.ui.getCore().byId("id");
 
-	sap.ui.getCore().createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object and inside async:true to be autofixable
+	sap.ui.getCore().createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
 	sap.ui.getCore().createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
 	sap.ui.getCore().createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
@@ -54,13 +54,12 @@ sap.ui.define([], function() {
 
 	sap.ui.getCore().isStaticAreaRef(oDomRef);
 
-	sap.ui.getCore().loadLibrary("sap.ui.core");
 	sap.ui.getCore().loadLibrary("sap.ui.core", true);
 	sap.ui.getCore().loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
-	sap.ui.getCore().loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async:false (not autofixable)
+	sap.ui.getCore().loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
 	sap.ui.getCore().loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
 	sap.ui.getCore().loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
+	sap.ui.getCore().loadLibrary("sap.ui.core"); // async omitted (not autofixable)
 
 	sap.ui.getCore().notifyContentDensityChanged();
-
 });

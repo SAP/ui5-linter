@@ -14,7 +14,7 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 
 	Core.byId("id");
 
-	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object and inside async:true to be autofixable
+	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
 	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
 	Core.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
@@ -54,13 +54,12 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 
 	Core.isStaticAreaRef(oDomRef);
 
-	Core.loadLibrary("sap.ui.core");
 	Core.loadLibrary("sap.ui.core", true);
 	Core.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
-	Core.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async:false (not autofixable)
+	Core.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
 	Core.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
 	Core.loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
+	Core.loadLibrary("sap.ui.core"); // async omitted (not autofixable)
 
 	Core.notifyContentDensityChanged();
-
 });

@@ -1,7 +1,6 @@
 sap.ui.define(["sap/ui/core/Core",
 	"sap/ui/core/Theming",
 	"sap/ui/core/IntervalTrigger",
-	"sap/base/i18n/Localization",
 	"sap/ui/core/Control",
 	"sap/ui/core/Element",
 	"sap/ui/core/Component",
@@ -10,7 +9,7 @@ sap.ui.define(["sap/ui/core/Core",
 	"sap/ui/core/StaticArea",
 	"sap/ui/core/tmpl/Template",
 	"sap/ui/Device"
-	], function(Core, Theming, IntervalTrigger, Localization, Control, Element, Component, EventBus, Lib, StaticArea, Template, Device) {
+	], function(Core, Theming, IntervalTrigger, Control, Element, Component, EventBus, Lib, StaticArea, Template, Device) {
 	Theming.applyTheme("themeName");
 	Core.applyTheme("customTheme", "find/my/theme/here");
 
@@ -38,14 +37,14 @@ sap.ui.define(["sap/ui/core/Core",
 	Element.getElementById("controlId");
 
 	// Use replacement only if Element.getActiveElement() is != undefined:
-	(Element.getActiveElement()) ? Element.getId(Element.getActiveElement()) : Core.getCurrentFocusedControlId();
+	Element.getActiveElement()?.getId() || null;
 
 	Element.getElementById("elementId");
 
 	EventBus.getInstance();
 
 	Lib.getResourceBundleFor("sap.ui.core", "en_US");
-	Core.getLibraryResourceBundle("sap.ui.core", "en_US", "true");
+	Core.getLibraryResourceBundle("sap.ui.core", "en_US", true);
 
 	StaticArea.getDomRef();
 
@@ -68,11 +67,11 @@ sap.ui.define(["sap/ui/core/Core",
 	StaticArea.getDomRef() === oDomRef;
 
 	Lib.load({name: "sap.ui.core"});
-	Lib.load({name: "sap.ui.core"});
 	Lib.load({name: "sap.ui.core", url: "find/my/lib/here"});
 	Core.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"});
 	Core.loadLibrary("sap.ui.core", {url: "find/my/lib/here"});
 	Core.loadLibrary("sap.ui.core", "find/my/lib/here");
+	Core.loadLibrary("sap.ui.core");
 
 	Theming.notifyContentDensityChanged();
 });
