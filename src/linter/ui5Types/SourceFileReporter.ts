@@ -12,6 +12,7 @@ import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {Ui5TypeInfo} from "./utils/utils.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
@@ -20,6 +21,7 @@ interface ReporterCoverageInfo extends CoverageInfo {
 interface SourceFileMessageOptions {
 	node?: ts.Node;
 	fixHints?: FixHints;
+	ui5TypeInfo?: Ui5TypeInfo;
 }
 
 export default class SourceFileReporter {
@@ -60,7 +62,7 @@ export default class SourceFileReporter {
 			line: 1,
 			column: 1,
 		};
-		const {node, fixHints} = options;
+		const {node, fixHints, ui5TypeInfo} = options;
 		if (node) {
 			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
@@ -72,7 +74,7 @@ export default class SourceFileReporter {
 
 		args ??= null as unknown as MessageArgs[M];
 
-		this.#rawMessages.push({id, args, position, fixHints});
+		this.#rawMessages.push({id, args, position, fixHints, ui5TypeInfo});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
