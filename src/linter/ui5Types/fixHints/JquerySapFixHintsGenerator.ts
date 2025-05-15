@@ -1,6 +1,6 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints, FixHintsArgsType} from "./FixHints.js";
-import {isAssignment} from "../utils/utils.js";
+import {isAssignment, isExpectedValueExpression} from "../utils/utils.js";
 
 // jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
@@ -770,36 +770,12 @@ export default class JquerySapFixHintsGenerator {
 
 			exportCodeToBeUsed = {
 				name: moduleReplacement.exportCodeToBeUsed,
+				// Check whether the return value of the call expression is assigned to a variable,
+				// passed to another function or used elsewhere.
+				isExpectedValue: isExpectedValueExpression(current),
 			} as ExportCodeToBeUsed;
 
-			// Check whether the return value of the call expression is assigned to a variable,
-			// passed to another function or used elsewhere.
-			let isExpectedValue = false;
-			while (current && !isExpectedValue) {
-				if (ts.isVariableDeclaration(current) ||
-					ts.isBinaryExpression(current) ||
-					ts.isVariableStatement(current) ||
-					ts.isConditionalExpression(current) ||
-					ts.isParenthesizedExpression(current) ||
-					ts.isReturnStatement(current) ||
-					ts.isArrowFunction(current) ||
-					// Argument of a function call
-					(ts.isCallExpression(current) && ts.isCallExpression(current.parent) &&
-						current.parent.arguments.some((arg) => arg === current)) ||
-						// Chaining
-						(ts.isPropertyAccessExpression(current) &&
-							ts.isCallExpression(current.expression) &&
-							ts.isPropertyAccessExpression(current.expression.parent) &&
-							ts.isCallExpression(current.expression.parent.expression))
-				) {
-					isExpectedValue = true;
-				}
-				current = current.parent;
-			}
-
 			if (typeof exportCodeToBeUsed === "object") {
-				exportCodeToBeUsed.isExpectedValue = isExpectedValue;
-
 				let args: FixHintsArgsType = [];
 				// jQuery(".mySelector" /* args */).functionName()
 				if (ts.isCallExpression(node.expression)) {

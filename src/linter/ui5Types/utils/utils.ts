@@ -228,6 +228,39 @@ export function isAssignment(node: ts.AccessExpression): boolean {
 	return false;
 }
 
+export function isExpectedValueExpression(node: ts.Node): boolean {
+	let isExpectedValue = false;
+	while (node && !isExpectedValue) {
+		// Whether the function returns a value
+		if (!ts.isReturnStatement(node) && node.parent && ts.isBlock(node.parent)) {
+			break;
+		}
+
+		if (ts.isVariableDeclaration(node) ||
+			ts.isBinaryExpression(node) ||
+			ts.isVariableStatement(node) ||
+			ts.isConditionalExpression(node) ||
+			ts.isParenthesizedExpression(node) ||
+			ts.isReturnStatement(node) ||
+			// () => jQuery.sap.log.error("FOO"); Explicit return in an arrow function
+			(ts.isArrowFunction(node) && !ts.isBlock(node.body)) ||
+			// Argument of a function call
+			(ts.isCallExpression(node) && ts.isCallExpression(node.parent) &&
+				node.parent.arguments.some((arg) => arg === node)) ||
+				// Chaining
+				(ts.isPropertyAccessExpression(node) &&
+					ts.isCallExpression(node.expression) &&
+					ts.isPropertyAccessExpression(node.expression.parent) &&
+					ts.isCallExpression(node.expression.parent.expression))
+		) {
+			isExpectedValue = true;
+		}
+		node = node.parent;
+	}
+
+	return isExpectedValue;
+}
+
 export function isConditionalAccess(node: ts.Node): boolean {
 	const parent = node.parent;
 	if (!parent) {

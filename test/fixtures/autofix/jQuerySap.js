@@ -38,11 +38,6 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.log.trace("This is a trace log message");
 	jQuery.sap.log.warning("This is a warning log message");
 
-	var fnLogError = function() {
-		// TODO: This call could be migrated but currently it is not
-		jQuery.sap.log.error("This is a error log message");
-	};
-
 	var myLogMessage = "This is a debug message";
 	var myDetails = "These are the details";
 	var myComponent = "jquery.sap.logger.jsunit";
@@ -63,10 +58,33 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.log.debug() ? "a" : "b";
 	jQuery.sap.log.debug(), jQuery.sap.log.info();
 	
+	var fnLogError = function() {
+		jQuery.sap.log.error("This is a error log message");
+	};
+	const a = x = jQuery.sap.log.warning("This is a warning log message");
+	const b = jQuery.sap.log.warning("This is a warning log message") ?? jQuery.sap.log.debug("This is a debug log message");
+	const c = jQuery.sap.log.warning("This is a warning log message") || jQuery.sap.log.debug("This is a debug log message");
+	if (jQuery.sap.log.warning("This is a warning log message") &&
+		jQuery.sap.log.debug("This is a debug log message")) {
+		// Do something
+	}
+	if (jQuery.sap.log.warning("This is a warning log message") ||
+		jQuery.sap.log.debug("This is a debug log message")) {
+		// Do something
+	}
 	function log() {
 		return jQuery.sap.log.error("FOO");
 	}
+	doSomething(() => ({log: jQuery.sap.log.error("FOO")}));
 	doSomething(() => jQuery.sap.log.error("FOO"));
+	doSomethingElse(() => {
+		jQuery.sap.log.warning("FOO");
+		return jQuery.sap.log.error("FOO")
+	});
+	doSomethingElseToo(() => {
+		jQuery.sap.log.error("FOO");
+		return 42;
+	});
 
 	// https://github.com/SAP/ui5-linter/issues/524
 	const myCSS = jQuery.sap.encodeCSS("+");
