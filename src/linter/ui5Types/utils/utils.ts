@@ -287,3 +287,62 @@ export function isConditionalAccess(node: ts.Node): boolean {
 
 	return false;
 }
+
+export function extractNamespace(
+	node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression
+): string {
+	const propAccessChain: string[] = [];
+	propAccessChain.push(node.expression.getText());
+
+	let scanNode: ts.Node = node;
+	while (ts.isPropertyAccessExpression(scanNode)) {
+		if (!ts.isIdentifier(scanNode.name)) {
+			throw new Error(
+				`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
+				ts.SyntaxKind[scanNode.name.kind]);
+		}
+		propAccessChain.push(scanNode.name.text);
+		scanNode = scanNode.parent;
+	}
+	return propAccessChain.join(".");
+}
+
+export function isGlobalThis(nodeType: string) {
+	return [
+		"Window & typeof globalThis",
+		"typeof globalThis",
+		// "Window", // top and parent will resolve to this string, however they are still treated as type 'any'
+	].includes(nodeType);
+}
+
+export function getSymbolModuleDeclaration(symbol: ts.Symbol) {
+	let parent = symbol.valueDeclaration?.parent;
+	while (parent && !ts.isModuleDeclaration(parent)) {
+		parent = parent.parent;
+	}
+	return parent;
+}
+
+/**
+ * Extracts the sap.ui API namespace from a symbol name and a module declaration
+ * (from @sapui5/types sap.ui.core.d.ts), e.g. sap.ui.view.
+ */
+export function extractSapUiNamespace(symbolName: string, moduleDeclaration: ts.ModuleDeclaration): string | undefined {
+	const namespace: string[] = [];
+	let currentModuleDeclaration: ts.Node | undefined = moduleDeclaration;
+	while (
+		currentModuleDeclaration &&
+		ts.isModuleDeclaration(currentModuleDeclaration) &&
+		currentModuleDeclaration.flags & ts.NodeFlags.Namespace
+	) {
+		namespace.unshift(currentModuleDeclaration.name.text);
+		currentModuleDeclaration = currentModuleDeclaration.parent?.parent;
+	}
+
+	if (!namespace.length) {
+		return undefined;
+	} else {
+		namespace.push(symbolName);
+		return namespace.join(".");
+	}
+}
