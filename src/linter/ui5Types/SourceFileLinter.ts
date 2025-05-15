@@ -15,6 +15,10 @@ import {
 	isClassMethod,
 	isSourceFileOfPseudoModuleType,
 	isSourceFileOfTypeScriptLib,
+	getSymbolModuleDeclaration,
+	isGlobalThis,
+	extractNamespace,
+	extractSapUiNamespace,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -665,7 +669,7 @@ export default class SourceFileLinter {
 		}
 		const classType = this.checker.getTypeAtLocation(node.expression);
 
-		const moduleDeclaration = this.getSymbolModuleDeclaration(nodeType.symbol);
+		const moduleDeclaration = getSymbolModuleDeclaration(nodeType.symbol);
 		if (moduleDeclaration?.name.text === "sap/ui/core/routing/Router") {
 			this.#analyzeNewCoreRouter(node);
 		} else if (moduleDeclaration?.name.text === "sap/ui/model/odata/v4/ODataModel") {
@@ -727,47 +731,6 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
-		const propAccessChain: string[] = [];
-		propAccessChain.push(node.expression.getText());
-
-		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
-			}
-			propAccessChain.push(scanNode.name.text);
-			scanNode = scanNode.parent;
-		}
-		return propAccessChain.join(".");
-	}
-
-	/**
-	 * Extracts the sap.ui API namespace from a symbol name and a module declaration
-	 * (from @sapui5/types sap.ui.core.d.ts), e.g. sap.ui.view.
-	 */
-	extractSapUiNamespace(symbolName: string, moduleDeclaration: ts.ModuleDeclaration): string | undefined {
-		const namespace: string[] = [];
-		let currentModuleDeclaration: ts.Node | undefined = moduleDeclaration;
-		while (
-			currentModuleDeclaration &&
-			ts.isModuleDeclaration(currentModuleDeclaration) &&
-			currentModuleDeclaration.flags & ts.NodeFlags.Namespace
-		) {
-			namespace.unshift(currentModuleDeclaration.name.text);
-			currentModuleDeclaration = currentModuleDeclaration.parent?.parent;
-		}
-
-		if (!namespace.length) {
-			return undefined;
-		} else {
-			namespace.push(symbolName);
-			return namespace.join(".");
-		}
-	}
-
 	getDeprecationText(deprecatedTag: ts.JSDocTagInfo): string {
 		// (Workaround) There's an issue in some UI5 TS definition versions and where the
 		// deprecation text gets merged with the description. Splitting on double
@@ -822,14 +785,14 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		const moduleDeclaration = this.getSymbolModuleDeclaration(exprType.symbol);
+		const moduleDeclaration = getSymbolModuleDeclaration(exprType.symbol);
 		let globalApiName;
 
 		if (exprType.symbol && moduleDeclaration) {
 			const symbolName = exprType.symbol.getName();
 			const moduleName = moduleDeclaration.name.text;
 			const nodeType = this.checker.getTypeAtLocation(node);
-			globalApiName = this.extractSapUiNamespace(symbolName, moduleDeclaration);
+			globalApiName = extractSapUiNamespace(symbolName, moduleDeclaration);
 
 			if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 				// Check for sap/ui/core/Lib.init usages
@@ -919,7 +882,7 @@ export default class SourceFileLinter {
 				additionalMessage = `of module '${this.checker.typeToString(lhsExprType)}'`;
 			} else if (ts.isPropertyAccessExpression(exprNode)) {
 				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
-				additionalMessage = `(${this.extractNamespace(exprNode)})`;
+				additionalMessage = `(${extractNamespace(exprNode)})`;
 			}
 		} else if (globalApiName) {
 			additionalMessage = `(${globalApiName})`;
@@ -950,14 +913,6 @@ export default class SourceFileLinter {
 		) {
 			this.#reportTestStarter(reportNode);
 		}
-	}
-
-	getSymbolModuleDeclaration(symbol: ts.Symbol) {
-		let parent = symbol.valueDeclaration?.parent;
-		while (parent && !ts.isModuleDeclaration(parent)) {
-			parent = parent.parent;
-		}
-		return parent;
 	}
 
 	#analyzeLibInitCall(
@@ -1384,7 +1339,7 @@ export default class SourceFileLinter {
 	*/
 	#isPropertyBinding(node: ts.NewExpression | ts.CallExpression, propNames: string[]) {
 		const controlAmbientModule =
-			this.getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
+			getSymbolModuleDeclaration(this.checker.getTypeAtLocation(node).symbol);
 
 		let classArg;
 		if (controlAmbientModule?.body && ts.isModuleBlock(controlAmbientModule.body)) {
@@ -1446,7 +1401,7 @@ export default class SourceFileLinter {
 		}
 		let namespace;
 		if (ts.isPropertyAccessExpression(node)) {
-			namespace = this.extractNamespace(node);
+			namespace = extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
 			const fixHints = this.getJquerySapFixHints(node);
@@ -1480,14 +1435,6 @@ export default class SourceFileLinter {
 					`could not be determined`,
 			});
 		}
-	}
-
-	isGlobalThis(nodeType: string) {
-		return [
-			"Window & typeof globalThis",
-			"typeof globalThis",
-			// "Window", // top and parent will resolve to this string, however they are still treated as type 'any'
-		].includes(nodeType);
 	}
 
 	analyzeExportedValuesByLib(node: ts.PropertyAccessExpression | ts.ElementAccessExpression) {
@@ -1592,7 +1539,7 @@ export default class SourceFileLinter {
 
 			// Get the NodeType in order to check whether this is indirect global access via Window
 			const nodeType = this.checker.getTypeAtLocation(exprNode);
-			if (this.isGlobalThis(this.checker.typeToString(nodeType))) {
+			if (isGlobalThis(this.checker.typeToString(nodeType))) {
 				// In case of Indirect global access we need to check for
 				// a global UI5 variable on the right side of the expression instead of left
 				if (ts.isPropertyAccessExpression(node)) {
@@ -1613,7 +1560,7 @@ export default class SourceFileLinter {
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
-				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
+				const namespace = extractNamespace((node as ts.PropertyAccessExpression));
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
@@ -1632,7 +1579,7 @@ export default class SourceFileLinter {
 			return true;
 		}
 
-		const propAccess = this.extractNamespace(node);
+		const propAccess = extractNamespace(node);
 		return [
 			"sap.ui.define",
 			"sap.ui.require",
