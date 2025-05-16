@@ -1,7 +1,7 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints, FixHintsArgsType} from "./FixHints.js";
 import {isAssignment, isExpectedValueExpression} from "../utils/utils.js";
-import {resolveNamespace} from "../../../autofix/utils.js";
+import {resolveNamespace} from "../utils/utils.js";
 
 // jQuery.sap.*
 const jQuerySapModulesReplacements = new Map<string, FixHints>([
@@ -690,6 +690,12 @@ export default class JquerySapFixHintsGenerator {
 	getFixHints(node: ts.AccessExpression | ts.CallExpression): FixHints | undefined {
 		if (!this.isFixable(node)) {
 			return undefined;
+		}
+
+		if (!ts.isIdentifier(node.expression)) {
+			if (!ts.isCallExpression(node.expression)) {
+				return undefined;
+			}
 		}
 
 		const namespace = resolveNamespace(node);

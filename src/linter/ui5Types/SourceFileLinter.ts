@@ -29,6 +29,7 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {resolveNamespace} from "./utils/utils.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -727,23 +728,6 @@ export default class SourceFileLinter {
 		});
 	}
 
-	extractNamespace(node: ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression): string {
-		const propAccessChain: string[] = [];
-		propAccessChain.push(node.expression.getText());
-
-		let scanNode: ts.Node = node;
-		while (ts.isPropertyAccessExpression(scanNode)) {
-			if (!ts.isIdentifier(scanNode.name)) {
-				throw new Error(
-					`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-					ts.SyntaxKind[scanNode.name.kind]);
-			}
-			propAccessChain.push(scanNode.name.text);
-			scanNode = scanNode.parent;
-		}
-		return propAccessChain.join(".");
-	}
-
 	/**
 	 * Extracts the sap.ui API namespace from a symbol name and a module declaration
 	 * (from @sapui5/types sap.ui.core.d.ts), e.g. sap.ui.view.
@@ -919,7 +903,7 @@ export default class SourceFileLinter {
 				additionalMessage = `of module '${this.checker.typeToString(lhsExprType)}'`;
 			} else if (ts.isPropertyAccessExpression(exprNode)) {
 				// left-hand-side is a module or namespace, e.g. "module.deprecatedMethod()"
-				additionalMessage = `(${this.extractNamespace(exprNode)})`;
+				additionalMessage = `(${resolveNamespace(exprNode) ?? ""})`;
 			}
 		} else if (globalApiName) {
 			additionalMessage = `(${globalApiName})`;
@@ -936,7 +920,7 @@ export default class SourceFileLinter {
 		if (ts.isElementAccessExpression(exprNode) ||
 			ts.isPropertyAccessExpression(exprNode) ||
 			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode);
+			fixHints = this.getJquerySapFixHints(exprNode) ?? this.getCoreFixHints(exprNode);
 		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
@@ -1446,7 +1430,7 @@ export default class SourceFileLinter {
 		}
 		let namespace;
 		if (ts.isPropertyAccessExpression(node)) {
-			namespace = this.extractNamespace(node);
+			namespace = resolveNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
 			const fixHints = this.getJquerySapFixHints(node);
@@ -1613,7 +1597,7 @@ export default class SourceFileLinter {
 			if (symbol && this.isSymbolOfUi5OrThirdPartyType(symbol) &&
 				!((ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
 					this.isAllowedPropertyAccess(node))) {
-				const namespace = this.extractNamespace((node as ts.PropertyAccessExpression));
+				const namespace = resolveNamespace((node as ts.PropertyAccessExpression)) ?? "";
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
@@ -1632,7 +1616,7 @@ export default class SourceFileLinter {
 			return true;
 		}
 
-		const propAccess = this.extractNamespace(node);
+		const propAccess = resolveNamespace(node) ?? "";
 		return [
 			"sap.ui.define",
 			"sap.ui.require",
