@@ -32,7 +32,7 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 	Core.getEventBus();
 
 	Core.getLibraryResourceBundle("sap.ui.core", "en_US");
-	Core.getLibraryResourceBundle("sap.ui.core", "en_US", "true"); // bAsync is true (not autofixable)
+	Core.getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
 	Core.getStaticAreaRef();
 
