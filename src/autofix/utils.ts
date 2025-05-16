@@ -1,33 +1,6 @@
 import ts from "typescript";
 import {getPropertyNameText} from "../linter/ui5Types/utils/utils.js";
 
-export function resolveNamespace(node: ts.AccessExpression | ts.CallExpression): string | undefined {
-	const firstPart = node.expression;
-	const parts: string[] = [];
-	if (!ts.isIdentifier(firstPart)) {
-		if (!ts.isCallExpression(firstPart)) {
-			return undefined;
-		}
-	} else {
-		if (firstPart.text !== "window" && firstPart.text !== "globalThis" && firstPart.text !== "self") {
-			parts.push(firstPart.text);
-		}
-	}
-
-	let scanNode: ts.Node = node;
-	while (ts.isPropertyAccessExpression(scanNode)) {
-		if (!ts.isIdentifier(scanNode.name)) {
-			throw new Error(
-				`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
-				ts.SyntaxKind[scanNode.name.kind]);
-		}
-		parts.push(scanNode.name.text);
-		scanNode = scanNode.parent;
-	}
-
-	return parts.join(".");
-}
-
 export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyAccess?: string):
 	ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression {
 	type Candidate = ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
