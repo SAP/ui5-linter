@@ -259,8 +259,21 @@ const _coreModulesReplacements = new Map<string, FixHints>([
 ]);
 
 export default class CoreFixHintsGenerator {
-	getFixHints(_node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
-		// console.log("CoreFixHintsGenerator.getFixHints");
-		return;
+	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
+		if (!ts.isPropertyAccessExpression(node)) {
+			return undefined;
+		}
+		const moduleName = node.expression.getText();
+		if (moduleName !== "Core" && moduleName !== "sap.ui.getCore()") {
+			return undefined;
+		}
+
+		const methodName = node.name.getText();
+		const replacementEntry = _coreModulesReplacements.get(methodName);
+		if (replacementEntry) {
+			return replacementEntry;
+		}
+
+		return undefined;
 	}
 }
