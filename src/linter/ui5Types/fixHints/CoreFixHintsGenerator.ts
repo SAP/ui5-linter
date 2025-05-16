@@ -1,7 +1,7 @@
 import ts from "typescript";
 import type {FixHints} from "./FixHints.js";
 
-const coreModulesReplacements = new Map<string, FixHints>([
+const _coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
 	["attachInit", {
 		exportNameToBeUsed: "ready",
@@ -183,7 +183,7 @@ const coreModulesReplacements = new Map<string, FixHints>([
 
 	// Migration not possible
 	// API has been removed, migration likely involves more than removing the usage
-	// There is a public replacement for the most common use case that checks the 
+	// There is a public replacement for the most common use case that checks the
 	// result for a single library (Library.isLoaded(name))
 	// ["getLoadedLibraries", {}],
 
@@ -259,7 +259,8 @@ const coreModulesReplacements = new Map<string, FixHints>([
 ]);
 
 export default class CoreFixHintsGenerator {
-	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
+	getFixHints(_node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
+		// console.log("CoreFixHintsGenerator.getFixHints");
 		return;
 	}
 }
