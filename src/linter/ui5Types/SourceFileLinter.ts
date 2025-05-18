@@ -29,6 +29,8 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {createDeprecatedCallExpressionFix, createDeprecatedPropertyAccessFix, createJquerySapAccessExpressionFix, createJquerySapCallExpressionFix} from "./fixHints/FixFactory.js";
+import Fix from "./fixHints/Fix.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -932,17 +934,24 @@ export default class SourceFileLinter {
 
 		propName ??= reportNode.getText();
 
-		let fixHints: FixHints | undefined;
-		if (ts.isElementAccessExpression(exprNode) ||
-			ts.isPropertyAccessExpression(exprNode) ||
-			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode);
-		}
+		// let fixHints: FixHints | undefined;
+		// if (ts.isElementAccessExpression(exprNode) ||
+		// 	ts.isPropertyAccessExpression(exprNode) ||
+		// 	ts.isCallExpression(exprNode)) {
+		// 	fixHints = this.getJquerySapFixHints(exprNode);
+		// }
+		// let fix: Fix | undefined;
+		// if (ts.isCallExpression(exprNode)) {
+		// 	fix = createDeprecatedCallExpressionFix(exprNode, this.#reporter.getPositionsForNode(exprNode).start);
+		// } else if (ts.isPropertyAccessExpression(exprNode) || ts.isElementAccessExpression(exprNode)) {
+		// 	fix = createDeprecatedPropertyAccessFix(exprNode, this.#reporter.getPositionsForNode(exprNode).start);
+		// }
+		const fix = createDeprecatedCallExpressionFix(node, this.#reporter.getPositionsForNode(node).start);
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
-		}, reportNode, fixHints);
+		}, reportNode, fix);
 
 		if (
 			propName === "attachInit" && this.hasQUnitFileExtension() &&
@@ -1449,17 +1458,18 @@ export default class SourceFileLinter {
 			namespace = this.extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.getJquerySapFixHints(node);
+			const fix = createJquerySapAccessExpressionFix(node, this.#reporter.getPositionsForNode(node).start);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, node, fixHints);
+			}, node, fix);
 		} else {
+			const fix = createDeprecatedPropertyAccessFix(node, this.#reporter.getPositionsForNode(node).start);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
 				namespace,
 				details: deprecationInfo.messageDetails,
-			}, node);
+			}, node, fix);
 		}
 		return true;
 	}
