@@ -5,6 +5,7 @@ import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import ts from "typescript";
 import {FixHints} from "./ui5Types/fixHints/FixHints.js";
+import {Ui5TypeInfo} from "./ui5Types/utils/utils.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
@@ -31,6 +32,7 @@ export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	args: MessageArgs[M];
 	position?: PositionInfo;
 	fixHints?: FixHints;
+	ui5TypeInfo?: Ui5TypeInfo;
 }
 
 export interface LintMessage {
@@ -43,6 +45,7 @@ export interface LintMessage {
 	column?: number | undefined; // 1 based to be aligned with most IDEs
 	endLine?: number | undefined;
 	endColumn?: number | undefined;
+	ui5TypeInfo?: Ui5TypeInfo;
 }
 
 export enum CoverageCategory {
@@ -242,6 +245,7 @@ export default class LinterContext {
 			line: rawMessage.position ? rawMessage.position.line : undefined,
 			column: rawMessage.position ? rawMessage.position.column : undefined,
 			message: messageFunc(rawMessage.args || {}),
+			ui5TypeInfo: rawMessage.ui5TypeInfo,
 		};
 
 		if (this.#includeMessageDetails) {

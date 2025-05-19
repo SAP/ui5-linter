@@ -62,7 +62,7 @@ export default class SourceFileReporter {
 			line: 1,
 			column: 1,
 		};
-		const {node, fixHints} = options;
+		const {node, fixHints, ui5TypeInfo} = options;
 		if (node) {
 			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
@@ -74,7 +74,7 @@ export default class SourceFileReporter {
 
 		args ??= null as unknown as MessageArgs[M];
 
-		this.#rawMessages.push({id, args, position, fixHints});
+		this.#rawMessages.push({id, args, position, fixHints, ui5TypeInfo});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
