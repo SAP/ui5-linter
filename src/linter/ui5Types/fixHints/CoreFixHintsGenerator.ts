@@ -1,7 +1,8 @@
 import ts from "typescript";
 import type {FixHints} from "./FixHints.js";
+import {resolveNamespace} from "../utils/utils.js";
 
-const _coreModulesReplacements = new Map<string, FixHints>([
+const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
 	["attachInit", {
 		exportNameToBeUsed: "ready",
@@ -268,12 +269,13 @@ export default class CoreFixHintsGenerator {
 			return undefined;
 		}
 
-		const methodName = node.name.getText();
-		const replacementEntry = _coreModulesReplacements.get(methodName);
-		if (replacementEntry) {
-			return replacementEntry;
+		const namespace = resolveNamespace(node);
+		const methodName = namespace?.split(".").pop() ?? "";
+		const moduleReplacement = coreModulesReplacements.get(methodName);
+		if (!moduleReplacement) {
+			return undefined;
 		}
 
-		return undefined;
+		return {...moduleReplacement};
 	}
 }
