@@ -320,6 +320,23 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
+	} else if (["attachIntervalTimer", "detachIntervalTimer"].includes(apiName ?? "")) {
+		if ((fixHints?.exportCodeToBeUsed?.args?.length ?? 0) > 1) {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (apiName === "loadLibrary") {
+		if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
+			const libOptionsExpression = fixHints.exportCodeToBeUsed.args[1].value;
+			const match = /["']?async["']?\s*:\s*(true|false)/i.exec(libOptionsExpression);
+			if (match?.[1] !== "true") {
+				fixHints = undefined; // We cannot handle this case
+				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+			}
+		} else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind !== SyntaxKind.TrueKeyword) {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
 	}
 
 	return fixHints;
