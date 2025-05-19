@@ -1,6 +1,7 @@
 sap.ui.define([], function() {
 	sap.ui.getCore().applyTheme("themeName");
 	sap.ui.getCore().applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
+	sap.ui.getCore().applyTheme("customTheme", undefined); // Can be autofixed when the 2nd argument is undefined
 
 	sap.ui.getCore().attachInit(function() {console.log();});
 
