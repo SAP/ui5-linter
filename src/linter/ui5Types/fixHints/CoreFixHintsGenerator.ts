@@ -310,11 +310,11 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/StaticArea",
 		exportCodeToBeUsed: "$moduleIdentifier.getDomRef() === $1",
 	}],
-	// // TODO: Migrate only if second argument is omitted or undefined
-	// ["applyTheme", {
-	// 	moduleName: "sap/ui/core/Theming",
-	// 	exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
-	// }],
+	// Migrate only if second argument is omitted or undefined
+	["applyTheme", {
+		moduleName: "sap/ui/core/Theming",
+		exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
+	}],
 	// // TODO: Do not migrate if second argument is provided.
 	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
 	// ["attachIntervalTimer", {
