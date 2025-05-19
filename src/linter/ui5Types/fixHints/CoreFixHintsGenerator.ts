@@ -267,7 +267,7 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// ["unregisterPlugin", {}],
 ]);
 
-const _coreModulesReplacements = new Map<string, FixHints>([
+const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
 	["attachInit", {
 		exportNameToBeUsed: "ready",
