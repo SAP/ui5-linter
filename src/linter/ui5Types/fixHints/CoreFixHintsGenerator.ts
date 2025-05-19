@@ -270,10 +270,10 @@ const coreModulesReplacements = new Map<string, FixHints>([
 const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
 	["attachInit", {
-		exportNameToBeUsed: "ready",
+		moduleName: "sap/ui/core/Core", exportNameToBeUsed: "ready",
 	}],
 	["attachInitEvent", {
-		exportNameToBeUsed: "ready",
+		moduleName: "sap/ui/core/Core", exportNameToBeUsed: "ready",
 	}],
 	["getControl", {
 		moduleName: "sap/ui/core/Element", exportNameToBeUsed: "getElementById",
@@ -294,11 +294,12 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/Lib", exportNameToBeUsed: "init",
 	}],
 	["isMobile", {
-		moduleName: "sap/ui/Device", exportNameToBeUsed: "browser.mobile",
+		moduleName: "sap/ui/Device", exportCodeToBeUsed: "$moduleIdentifier.browser.mobile",
 	}],
 	["notifyContentDensityChanged", {
 		moduleName: "sap/ui/core/Theming", exportNameToBeUsed: "notifyContentDensityChanged",
 	}],
+	// TODO: Check why not working
 	["byFieldGroupId", {
 		exportNameToBeUsed: "sap.ui.core.Control.getControlsByFieldGroupId",
 	}],
@@ -309,45 +310,48 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/StaticArea",
 		exportCodeToBeUsed: "$moduleIdentifier.getDomRef() === $1",
 	}],
-	// TODO: Migrate only if second argument is omitted or undefined
-	["applyTheme", {
-		moduleName: "sap/ui/core/Theming",
-		exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
-	}],
-	// TODO: Do not migrate if second argument is provided.
-	// We can't generate a ".bind" call since detaching wouldn't be possible anymore
-	["attachIntervalTimer", {
-		moduleName: "sap/ui/core/IntervalTrigger",
-		exportCodeToBeUsed: "$moduleIdentifier.addListener($1, $2)",
-	}],
-	// TODO: Individual arguments must be mapped to "options" object
-	// The new API has no sync loading option, replacement is only safe when the options contain async:true
-	["loadLibrary", {
-		exportCodeToBeUsed: "sap.ui.core.Lib.load({})",
-	}],
-	// TODO: Individual arguments must be mapped to "options" object.
-	// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-	// Only when the first argument is an object defining async: true a migration is possible.
-	["createComponent", {
-		exportCodeToBeUsed: "sap.ui.core.Component.create({})",
-	}],
-	// TODO: Do not migrate if second argument is provided.
-	// We can't generate a ".bind" call since detaching wouldn't be possible anymore
-	["detachIntervalTimer", {
-		moduleName: "sap/ui/core/IntervalTrigger",
-		exportCodeToBeUsed: "$moduleIdentifier.removeListener($1, $2)",
-	}],
-	// Note that alternative replacement Component.get is meanwhile deprecated, too
-	["getComponent", {
-		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
-	}],
-	// TODO: Parameter bAsync has to be omitted or set to false since the new API returns
-	// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
-	// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
-	// TODO: To be discussed: sLibrary must be a library, that might not be easy to check
-	["getLibraryResourceBundle", {
-		moduleName: "sap/ui/core/Lib", exportNameToBeUsed: "getResourceBundleFor",
-	}],
+	// // TODO: Migrate only if second argument is omitted or undefined
+	// ["applyTheme", {
+	// 	moduleName: "sap/ui/core/Theming",
+	// 	exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
+	// }],
+	// // TODO: Do not migrate if second argument is provided.
+	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
+	// ["attachIntervalTimer", {
+	// 	moduleName: "sap/ui/core/IntervalTrigger",
+	// 	exportCodeToBeUsed: "$moduleIdentifier.addListener($1, $2)",
+	// }],
+	// // TODO: Individual arguments must be mapped to "options" object
+	// // The new API has no sync loading option, replacement is only safe when the options contain async:true
+	// ["loadLibrary", {
+	// 	exportCodeToBeUsed: "sap.ui.core.Lib.load({})",
+	// }],
+	// // TODO: Individual arguments must be mapped to "options" object.
+	// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+	// // Only when the first argument is an object defining async: true a migration is possible.
+	// ["createComponent", {
+	// 	exportCodeToBeUsed: "sap.ui.core.Component.create({})",
+	// }],
+	// // TODO: Do not migrate if second argument is provided.
+	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
+	// ["detachIntervalTimer", {
+	// 	moduleName: "sap/ui/core/IntervalTrigger",
+	// 	exportCodeToBeUsed: "$moduleIdentifier.removeListener($1, $2)",
+	// }],
+	// // Note that alternative replacement Component.get is meanwhile deprecated, too
+	// ["getComponent", {
+	// 	moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
+	// }],
+	// // TODO: Parameter bAsync has to be omitted or set to false since the new API returns
+	// // the resource bundle synchronously. When bAsync is true, the new API is not a replacement
+	// // as it does not return a promise. In an await expression, it would be okay, but otherwise not.
+	// // TODO: To be discussed: sLibrary must be a library, that might not be easy to check
+	// ["getLibraryResourceBundle", {
+	// 	moduleName: "sap/ui/core/Lib", exportNameToBeUsed: "getResourceBundleFor",
+	// }],
+
+
+
 
 	// No direct replacement available
 	// ... but further calls on the result should be fixable. Can we detect and remove remaining calls (dead code)?
