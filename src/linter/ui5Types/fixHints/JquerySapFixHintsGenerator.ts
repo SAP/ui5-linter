@@ -757,20 +757,18 @@ export default class JquerySapFixHintsGenerator {
 				isExpectedValue: isExpectedValueExpression(current),
 			} as ExportCodeToBeUsed;
 
-			if (typeof exportCodeToBeUsed === "object") {
-				let args: FixHintsArgsType = [];
-				// jQuery(".mySelector" /* args */).functionName()
-				if (ts.isCallExpression(node.expression)) {
-					args = args.concat(node.expression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg?.kind})));
-				}
-				// jQuery.sap.functionName(args)
-				if (callExpression) {
-					args = args.concat(callExpression.arguments.map((arg) =>
-						({value: arg.getText(), kind: arg?.kind})));
-				}
-				exportCodeToBeUsed.args = args;
+			let args: FixHintsArgsType = [];
+			// jQuery(".mySelector" /* args */).functionName()
+			if (ts.isCallExpression(node.expression)) {
+				args = args.concat(node.expression.arguments.map((arg) =>
+					({value: arg.getText(), kind: arg?.kind})));
 			}
+			// jQuery.sap.functionName(args)
+			if (callExpression) {
+				args = args.concat(callExpression.arguments.map((arg) =>
+					({value: arg.getText(), kind: arg?.kind})));
+			}
+			exportCodeToBeUsed.args = args;
 		}
 
 		return {...moduleReplacement, exportCodeToBeUsed} as FixHints;
