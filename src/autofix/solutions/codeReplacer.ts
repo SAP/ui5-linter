@@ -314,6 +314,12 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 					`$moduleIdentifier.${fnName}(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 			}
 		}
+	} else if (apiName === "applyTheme" && fixHints?.moduleName === "sap/ui/core/Theming") {
+		if ((fixHints?.exportCodeToBeUsed?.args?.length ?? 0) > 1 &&
+			fixHints?.exportCodeToBeUsed?.args?.[1]?.value !== "undefined") {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
 	}
 
 	return fixHints;
