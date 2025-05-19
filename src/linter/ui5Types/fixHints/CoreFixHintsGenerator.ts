@@ -326,10 +326,10 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// ["createComponent", {
 	// 	exportCodeToBeUsed: "sap.ui.core.Component.create({})",
 	// }],
-	// // Note that alternative replacement Component.get is meanwhile deprecated, too
-	// ["getComponent", {
-	// 	moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
-	// }],
+	// Note that alternative replacement Component.get is meanwhile deprecated, too
+	["getComponent", {
+		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
+	}],
 	// // TODO: Parameter bAsync has to be omitted or set to false since the new API returns
 	// // the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 	// // as it does not return a promise. In an await expression, it would be okay, but otherwise not.
