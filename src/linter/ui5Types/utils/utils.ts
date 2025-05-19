@@ -328,17 +328,16 @@ export enum Ui5TypeInfoKind {
 	Global,
 }
 
-interface Ui5TypeInfo {
-	kind: Ui5TypeInfoKind;
-}
+export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5GlobalTypeInfo;
 
-interface Ui5ModuleTypeInfo extends Ui5TypeInfo {
+interface Ui5ModuleTypeInfo {
 	module: string;
+	namespace?: string;
 	name: string;
 	kind: Ui5TypeInfoKind.Module;
 }
 
-interface Ui5GlobalTypeInfo extends Ui5TypeInfo {
+interface Ui5GlobalTypeInfo {
 	namespace: string;
 	kind: Ui5TypeInfoKind.Global;
 }
@@ -346,7 +345,7 @@ interface Ui5GlobalTypeInfo extends Ui5TypeInfo {
 /**
  * Extracts module / global type information from UI5 symbols.
  */
-export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5ModuleTypeInfo | Ui5GlobalTypeInfo | undefined {
+export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undefined {
 	let currentNode: ts.Node | undefined = symbol.valueDeclaration;
 	if (!currentNode) {
 		return undefined;
@@ -366,13 +365,11 @@ export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5ModuleTypeInfo |
 		}
 		currentNode = currentNode.parent;
 	}
-	if (globalNamespace.length && module) {
-		throw new Error("Unexpected symbol with both namespace and module name");
-	}
 	if (module) {
 		return {
 			kind: Ui5TypeInfoKind.Module,
 			module,
+			namespace: globalNamespace.join("."),
 			name,
 		};
 	} else {

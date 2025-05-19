@@ -169,7 +169,10 @@ export default class SourceFileLinter {
 			this.analyzeObjectBindingPattern(node as ts.ObjectBindingPattern);
 		} else if (node.kind === ts.SyntaxKind.ImportDeclaration) {
 			this.analyzeImportDeclaration(node as ts.ImportDeclaration); // Check for deprecation
-		} else if (this.#isComponent && this.isUi5ClassDeclaration(node, "sap/ui/core/Component")) {
+		} else if (
+			this.#isComponent && ts.isClassDeclaration(node) &&
+			this.isUi5ClassDeclaration(node, "sap/ui/core/Component")
+		) {
 			analyzeComponentJson({
 				classDeclaration: node,
 				manifestContent: this.manifestContent,
@@ -183,6 +186,7 @@ export default class SourceFileLinter {
 			ts.isPropertyDeclaration(node) &&
 			getPropertyNameText(node.name) === "metadata" &&
 			node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.StaticKeyword) &&
+			ts.isClassDeclaration(node.parent) &&
 			this.isUi5ClassDeclaration(node.parent, "sap/ui/base/ManagedObject")
 		) {
 			const visitMetadataNodes = (childNode: ts.Node) => {
@@ -193,7 +197,7 @@ export default class SourceFileLinter {
 				ts.forEachChild(childNode, visitMetadataNodes);
 			};
 			ts.forEachChild(node, visitMetadataNodes);
-		} else if (this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
+		} else if (ts.isClassDeclaration(node) && this.isUi5ClassDeclaration(node, "sap/ui/core/Control")) {
 			this.analyzeControlRendererDeclaration(node);
 			this.analyzeControlRerenderMethod(node);
 		} else if (ts.isPropertyAssignment(node) && getPropertyNameText(node.name) === "theme") {
@@ -204,10 +208,7 @@ export default class SourceFileLinter {
 		ts.forEachChild(node, this.#boundVisitNode);
 	}
 
-	isUi5ClassDeclaration(node: ts.Node, baseClassModule: string | string[]): node is ts.ClassDeclaration {
-		if (!ts.isClassDeclaration(node)) {
-			return false;
-		}
+	isUi5ClassDeclaration(node: ts.ClassDeclaration, baseClassModule: string | string[]): boolean {
 		const baseClassModules = Array.isArray(baseClassModule) ? baseClassModule : [baseClassModule];
 		const baseClasses = baseClassModules.map((baseClassModule) => {
 			return {module: baseClassModule, name: baseClassModule.split("/").pop()};
@@ -263,7 +264,7 @@ export default class SourceFileLinter {
 			const nonStaticRender = findClassMember(node, "renderer");
 			if (nonStaticRender) {
 				// Renderer must be a static member
-				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER, {className}, nonStaticRender);
+				this.#reporter.addMessage(MESSAGE.NOT_STATIC_CONTROL_RENDERER, {className}, {node: nonStaticRender});
 				return;
 			}
 
@@ -279,7 +280,7 @@ export default class SourceFileLinter {
 			}
 
 			// No definition of renderer causes the runtime to load the corresponding Renderer module synchronously
-			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, node);
+			this.#reporter.addMessage(MESSAGE.MISSING_CONTROL_RENDERER_DECLARATION, {className}, {node});
 			return;
 		}
 
@@ -300,7 +301,7 @@ export default class SourceFileLinter {
 				// Declaration as string requires sync loading of renderer module
 				this.#reporter.addMessage(MESSAGE.CONTROL_RENDERER_DECLARATION_STRING, {
 					className, rendererName,
-				}, rendererMember.initializer);
+				}, {node: rendererMember.initializer});
 			}
 
 			// Analyze renderer property when it's referenced by a variable or even another module
@@ -400,7 +401,7 @@ export default class SourceFileLinter {
 				// but reporting might be in ControlRenderer
 				const nodeSourceFile = nodeToHighlight.getSourceFile();
 				this.typeLinter.getSourceFileReporter(nodeSourceFile)
-					.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, nodeToHighlight);
+					.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, null, {node: nodeToHighlight});
 			}
 
 			this.analyzeIconCallInRenderMethod(node);
@@ -417,7 +418,7 @@ export default class SourceFileLinter {
 			// but reporting might be in ControlRenderer
 			const nodeSourceFile = node.getSourceFile();
 			this.typeLinter.getSourceFileReporter(nodeSourceFile)
-				.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, node);
+				.addMessage(MESSAGE.NO_DEPRECATED_RENDERER, null, {node});
 
 			this.analyzeIconCallInRenderMethod(node);
 		}
@@ -501,7 +502,7 @@ export default class SourceFileLinter {
 				// but reporting might be in ControlRenderer, so we have to use the corresponding reporter
 				const nodeSourceFile = childNode.getSourceFile();
 				this.typeLinter.getSourceFileReporter(nodeSourceFile)
-					.addMessage(MESSAGE.NO_ICON_POOL_RENDERER, childNode);
+					.addMessage(MESSAGE.NO_ICON_POOL_RENDERER, null, {node: childNode});
 			}
 			ts.forEachChild(childNode, findIconCallExpression);
 		};
@@ -524,7 +525,7 @@ export default class SourceFileLinter {
 		if (!rerenderMember || !isClassMethod(rerenderMember, this.checker)) {
 			return;
 		}
-		this.#reporter.addMessage(MESSAGE.NO_CONTROL_RERENDER_OVERRIDE, {className}, rerenderMember);
+		this.#reporter.addMessage(MESSAGE.NO_CONTROL_RERENDER_OVERRIDE, {className}, {node: rerenderMember});
 	}
 
 	analyzeMetadataProperty(node: ts.PropertyAssignment) {
@@ -542,7 +543,7 @@ export default class SourceFileLinter {
 						this.#reporter.addMessage(MESSAGE.DEPRECATED_INTERFACE, {
 							interfaceName: interfaceName,
 							details: deprecationInfo.text,
-						}, elem);
+						}, {node: elem});
 					}
 				});
 			}
@@ -554,7 +555,7 @@ export default class SourceFileLinter {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 						typeName: nodeType,
 						details: deprecationInfo.text,
-					}, element);
+					}, {node: element});
 				}
 			});
 		} else if (type === "defaultValue") {
@@ -574,7 +575,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 					typeName: defaultValueType,
 					details: deprecationInfo.text,
-				}, node);
+				}, {node});
 			}
 		// This one is too generic and should always be at the last place
 		// It's for "types" and event arguments' types
@@ -591,12 +592,12 @@ export default class SourceFileLinter {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_CLASS, {
 						className: nodeType,
 						details: deprecationInfo.text,
-					}, node.initializer);
+					}, {node: node.initializer});
 				} else if (deprecationInfo?.symbolKind === "UI5Typedef" || deprecationInfo?.symbolKind === "UI5Enum") {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_TYPE, {
 						typeName: nodeType,
 						details: deprecationInfo.text,
-					}, node.initializer);
+					}, {node: node.initializer});
 				}
 			});
 		}
@@ -613,7 +614,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: node.text,
 				details: deprecationInfo.messageDetails,
-			}, node);
+			}, {node});
 			return true;
 		}
 		return false;
@@ -643,7 +644,7 @@ export default class SourceFileLinter {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 						apiName: identifier.text,
 						details: deprecationInfo.messageDetails,
-					}, element.name);
+					}, {node: element.name});
 					return;
 				}
 			}
@@ -682,7 +683,9 @@ export default class SourceFileLinter {
 		) {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
-			(declaration) => this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
+			(declaration) => ts.isClassDeclaration(declaration) &&
+				this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))
+		) {
 			const originalFilename = this.#metadata?.xmlCompiledResource;
 			// Do not process xml-s. This case would be handled separately within the BindingParser
 			if (!originalFilename ||
@@ -732,7 +735,7 @@ export default class SourceFileLinter {
 						className: this.checker.typeToString(nodeType),
 						details: deprecationInfo.messageDetails,
 					},
-					prop
+					{node: prop}
 				);
 			});
 		});
@@ -828,6 +831,7 @@ export default class SourceFileLinter {
 					this.#reportTestStarter(node);
 				} else if (symbolName === "applySettings" &&
 					nodeType.symbol?.declarations?.some((declaration) =>
+						ts.isClassDeclaration(declaration) &&
 						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
 					this.#analyzeNewAndApplySettings(node);
 				} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
@@ -836,6 +840,7 @@ export default class SourceFileLinter {
 					this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
 				} else if (symbolName.startsWith("bind") &&
 					nodeType.symbol?.declarations?.some((declaration) =>
+						ts.isClassDeclaration(declaration) &&
 						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
 						node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
 					// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
@@ -914,7 +919,11 @@ export default class SourceFileLinter {
 			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
-		}, reportNode, fixHints);
+		}, {
+			node: reportNode,
+			fixHints,
+			ui5TypeInfo: getUi5TypeInfoFromSymbol(deprecationInfo.symbol),
+		});
 
 		if (
 			propName === "attachInit" && this.hasQUnitFileExtension() &&
@@ -958,7 +967,7 @@ export default class SourceFileLinter {
 
 			this.#reporter.addMessage(MESSAGE.LIB_INIT_API_VERSION, {
 				libInitFunction: importedVarName,
-			}, nodeToHighlight);
+			}, {node: nodeToHighlight});
 		}
 
 		if (initArg) {
@@ -989,14 +998,14 @@ export default class SourceFileLinter {
 			if (deprecatedLibraries.includes(curLibName)) {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_LIBRARY, {
 					libraryName: curLibName,
-				}, dependency);
+				}, {node: dependency});
 			}
 		});
 	}
 
 	#reportTestStarter(node: ts.Node) {
 		if (!this.#hasTestStarterFindings) {
-			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, node);
+			this.#reporter.addMessage(MESSAGE.PREFER_TEST_STARTER, null, {node});
 			this.#hasTestStarterFindings = true;
 		}
 	}
@@ -1096,7 +1105,7 @@ export default class SourceFileLinter {
 			return;
 		}
 
-		this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET, node);
+		this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_PARAMETERS_GET, null, {node});
 	}
 
 	#analyzeCreateComponentCall(node: ts.CallExpression) {
@@ -1109,7 +1118,7 @@ export default class SourceFileLinter {
 		);
 
 		if (asyncNode?.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, asyncNode);
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CREATE_COMPONENT, null, {node: asyncNode});
 		}
 	}
 
@@ -1123,11 +1132,13 @@ export default class SourceFileLinter {
 		);
 
 		if (batchGroupId) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, batchGroupId);
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY, null, {
+				node: batchGroupId,
+			});
 		}
 		if (properties && ts.isArrayLiteralExpression(properties.initializer)) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY,
-				properties);
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_ODATA_MODEL_V2_CREATE_ENTRY_PROPERTIES_ARRAY, null,
+				{node: properties});
 		}
 	}
 
@@ -1140,7 +1151,7 @@ export default class SourceFileLinter {
 		if (asyncArg.kind === ts.SyntaxKind.FalseKeyword) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
 				paramName: "bAsync",
-			}, asyncArg);
+			}, {node: asyncArg});
 		}
 
 		if (node.arguments.length < 6) {
@@ -1150,7 +1161,7 @@ export default class SourceFileLinter {
 		if (cacheArg.kind === ts.SyntaxKind.FalseKeyword) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_JSON_MODEL_LOAD_DATA, {
 				paramName: "bCache",
-			}, cacheArg);
+			}, {node: cacheArg});
 		}
 	}
 
@@ -1166,12 +1177,12 @@ export default class SourceFileLinter {
 		if (homeIconArg) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
 				paramName: "homeIcon",
-			}, homeIconArg);
+			}, {node: homeIconArg});
 		}
 		if (homeIconPrecomposedArg) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_MOBILE_INIT, {
 				paramName: "homeIconPrecomposed",
-			}, homeIconPrecomposedArg);
+			}, {node: homeIconPrecomposedArg});
 		}
 	}
 
@@ -1183,7 +1194,7 @@ export default class SourceFileLinter {
 		if (deprecatedThemes.includes(themeName)) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
 				themeName,
-			}, node.arguments[0]);
+			}, {node: node.arguments[0]});
 		}
 	}
 
@@ -1197,7 +1208,7 @@ export default class SourceFileLinter {
 		);
 
 		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
-			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, node);
+			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, null, {node});
 		}
 	}
 
@@ -1211,7 +1222,9 @@ export default class SourceFileLinter {
 		);
 
 		if (synchronizationModeProb) {
-			this.#reporter.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, synchronizationModeProb);
+			this.#reporter.addMessage(MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, {}, {
+				node: synchronizationModeProb,
+			});
 		}
 	}
 
@@ -1228,7 +1241,7 @@ export default class SourceFileLinter {
 			if (DEPRECATED_VIEW_TYPES.includes(typeValue)) {
 				this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_VIEW_CREATE, {
 					typeValue,
-				}, node);
+				}, {node});
 			}
 		}
 
@@ -1253,11 +1266,11 @@ export default class SourceFileLinter {
 				if (symbolName === "load") {
 					this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_FRAGMENT_LOAD, {
 						typeValue,
-					}, node);
+					}, {node});
 				} else {
 					this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CONTROLLER_LOAD_FRAGMENT, {
 						typeValue,
-					}, node);
+					}, {node});
 				}
 			}
 		}
@@ -1302,7 +1315,7 @@ export default class SourceFileLinter {
 				it should be detected since the runtime cannot resolve it
 				even if a 'formatter' variable is imported: */
 				if (prop.name.getText() === "formatter") {
-					this.#reporter.addMessage(MESSAGE.STRING_FOR_FORMATTER_VALUE_IN_JS, prop.initializer);
+					this.#reporter.addMessage(MESSAGE.STRING_FOR_FORMATTER_VALUE_IN_JS, null, {node: prop.initializer});
 				} else {
 					propertyField = prop;
 				}
@@ -1384,7 +1397,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 				variableName: node.text,
 				namespace: moduleName,
-			}, node);
+			}, {node});
 		}
 	}
 
@@ -1417,13 +1430,13 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, node, fixHints);
+			}, {node, fixHints});
 		} else {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
 				namespace,
 				details: deprecationInfo.messageDetails,
-			}, node);
+			}, {node});
 		}
 		return true;
 	}
@@ -1533,7 +1546,7 @@ export default class SourceFileLinter {
 				].join("."),
 				libraryName: potentialLibImport,
 			},
-			(ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression));
+			{node: (ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression)});
 		}
 	}
 
@@ -1573,7 +1586,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-				}, node, this.getGlobalsFixHints(node));
+				}, {node, fixHints: this.getGlobalsFixHints(node)});
 			}
 		}
 	}
@@ -1626,7 +1639,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT, {
 					moduleName,
 					details: deprecationInfo.messageDetails,
-				}, moduleSpecifierNode);
+				}, {node: moduleSpecifierNode});
 			}
 		}
 
@@ -1647,7 +1660,7 @@ export default class SourceFileLinter {
 						importName,
 						moduleName,
 						details: deprecationInfo.messageDetails,
-					}, namedImportElement);
+					}, {node: namedImportElement});
 				}
 			}
 		}
@@ -1672,13 +1685,13 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(
 					MESSAGE.NO_DIRECT_ENUM_ACCESS,
 					{moduleName},
-					moduleSpecifierNode
+					{node: moduleSpecifierNode}
 				);
 			} else { // Data Type
 				this.#reporter.addMessage(
 					MESSAGE.NO_DIRECT_DATATYPE_ACCESS,
 					{moduleName},
-					moduleSpecifierNode
+					{node: moduleSpecifierNode}
 				);
 			}
 		}
@@ -1753,7 +1766,7 @@ export default class SourceFileLinter {
 		if (isTestStarterStructure && deprecatedThemes.includes(themeName)) {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_THEME, {
 				themeName,
-			}, node);
+			}, {node});
 		}
 	}
 
