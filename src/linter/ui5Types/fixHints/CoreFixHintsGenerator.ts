@@ -301,7 +301,7 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	}],
 	// TODO: Check why not working
 	["byFieldGroupId", {
-		exportNameToBeUsed: "sap.ui.core.Control.getControlsByFieldGroupId",
+		exportCodeToBeUsed: "sap.ui.core.Control.getControlsByFieldGroupId($1)",
 	}],
 	["getCurrentFocusedControlId", {
 		moduleName: "sap/ui/core/Element", exportNameToBeUsed: "getActiveElement()?.getId",
@@ -315,28 +315,16 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/Theming",
 		exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
 	}],
-	// // TODO: Do not migrate if second argument is provided.
-	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
-	// ["attachIntervalTimer", {
-	// 	moduleName: "sap/ui/core/IntervalTrigger",
-	// 	exportCodeToBeUsed: "$moduleIdentifier.addListener($1, $2)",
-	// }],
 	// // TODO: Individual arguments must be mapped to "options" object
 	// // The new API has no sync loading option, replacement is only safe when the options contain async:true
 	// ["loadLibrary", {
-	// 	exportCodeToBeUsed: "sap.ui.core.Lib.load({})",
+	// 	exportCodeToBeUsed: "sap.ui.core.Lib.load($1, $2)",
 	// }],
 	// // TODO: Individual arguments must be mapped to "options" object.
 	// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
 	// // Only when the first argument is an object defining async: true a migration is possible.
 	// ["createComponent", {
 	// 	exportCodeToBeUsed: "sap.ui.core.Component.create({})",
-	// }],
-	// // TODO: Do not migrate if second argument is provided.
-	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
-	// ["detachIntervalTimer", {
-	// 	moduleName: "sap/ui/core/IntervalTrigger",
-	// 	exportCodeToBeUsed: "$moduleIdentifier.removeListener($1, $2)",
 	// }],
 	// // Note that alternative replacement Component.get is meanwhile deprecated, too
 	// ["getComponent", {
@@ -350,8 +338,22 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// 	moduleName: "sap/ui/core/Lib", exportNameToBeUsed: "getResourceBundleFor",
 	// }],
 
-
-
+	// TODO: Can't be safely migrated for now. The callback function might have code
+	// that has to be migrated, too. MagicString will throw an exception.
+	// The same as jQuery.sap.delayedCall case
+	//
+	// // Do not migrate if second argument is provided.
+	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
+	// ["attachIntervalTimer", {
+	// 	moduleName: "sap/ui/core/IntervalTrigger",
+	// 	exportCodeToBeUsed: "$moduleIdentifier.addListener($1)",
+	// }],
+	// // Do not migrate if second argument is provided.
+	// // We can't generate a ".bind" call since detaching wouldn't be possible anymore
+	// ["detachIntervalTimer", {
+	// 	moduleName: "sap/ui/core/IntervalTrigger",
+	// 	exportCodeToBeUsed: "$moduleIdentifier.removeListener($1, $2)",
+	// }],
 
 	// No direct replacement available
 	// ... but further calls on the result should be fixable. Can we detect and remove remaining calls (dead code)?
