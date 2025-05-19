@@ -5,6 +5,8 @@ declare module "sap/chart/coloring/GradationDivergingColorScheme" {
 
 	/**
 	 * Enumeration for supported Gradation diverging color scheme in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'coloring.GradationDivergingColorScheme'.
 	 *
 	 * @public
 	*/
@@ -16,6 +18,8 @@ declare module "sap/chart/coloring/GradationSaturation" {
 
 	/**
 	 * Enumeration for supported Gradation color saturation in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'coloring.GradationSaturation'.
 	 *
 	 * @public
 	*/
@@ -27,6 +31,8 @@ declare module "sap/chart/coloring/GradationSingleColorScheme" {
 
 	/**
 	 * Enumeration for supported Gradation single color scheme in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'coloring.GradationSingleColorScheme'.
 	 *
 	 * @public
 	*/
@@ -38,6 +44,8 @@ declare module "sap/chart/coloring/GradationTargetColorScheme" {
 
 	/**
 	 * Enumeration for supported Gradation target color scheme in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'coloring.GradationTargetColorScheme'.
 	 *
 	 * @public
 	*/
@@ -49,6 +57,8 @@ declare module "sap/chart/coloring/ImprovementDirectionType" {
 
 	/**
 	 * Enumeration for supported ImprovementDirection types in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'coloring.ImprovementDirectionType'.
 	 *
 	 * @public
 	*/
@@ -60,6 +70,8 @@ declare module "sap/chart/MessageId" {
 
 	/**
 	 * Enumeration for supported message types in analytical chart.
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'MessageId'.
 	 *
 	 * @public
 	*/
@@ -71,6 +83,8 @@ declare module "sap/chart/SelectionBehavior" {
 
 	/**
 	 * Enumeration for supported selection behavior in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'SelectionBehavior'.
 	 *
 	 * @public
 	*/
@@ -82,6 +96,8 @@ declare module "sap/chart/SelectionMode" {
 
 	/**
 	 * Enumeration for supported selection mode in analytical chart
+	 * 
+	 * This enum is part of the 'sap/chart/library' module export and must be accessed by the property 'SelectionMode'.
 	 *
 	 * @public
 	*/

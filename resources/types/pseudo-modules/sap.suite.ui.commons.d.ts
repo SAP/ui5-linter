@@ -5,6 +5,8 @@ declare module "sap/suite/ui/commons/BulletChartMode" {
 
 	/**
 	 * Enumeration of possible BulletChart display modes.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'BulletChartMode'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.suite.ui.microchart.BulletMicroChartModeType should be used.
 	 * @public
@@ -17,6 +19,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderComparisonOperatorType" {
 
 	/**
 	 * Comparison operators supported by the calculation builder.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderComparisonOperatorType'.
 	 *
 	 * @public
 	*/
@@ -28,6 +32,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderFunctionType" {
 
 	/**
 	 * Functions supported by the calculation builder.<br> To add a custom function, use {@link sap.suite.ui.commons.CalculationBuilderFunction}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderFunctionType'.
 	 *
 	 * @public
 	*/
@@ -39,6 +45,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderItemType" {
 
 	/**
 	 * The types of items (operands) that can be used in a calculation builder expression.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderItemType'.
 	 *
 	 * @public
 	*/
@@ -50,6 +58,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderLayoutType" {
 
 	/**
 	 * Layout of the calculation builder.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderLayoutType'.
 	 *
 	 * @public
 	*/
@@ -61,6 +71,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderLogicalOperatorType" {
 
 	/**
 	 * Logical operators supported by the calculation builder.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderLogicalOperatorType'.
 	 *
 	 * @public
 	*/
@@ -72,6 +84,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderOperatorType" {
 
 	/**
 	 * Arithmetic operators supported by the calculation builder.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderOperatorType'.
 	 *
 	 * @public
 	*/
@@ -83,6 +97,8 @@ declare module "sap/suite/ui/commons/CalculationBuilderValidationMode" {
 
 	/**
 	 * Types of expression validation that define when the expression entered into the {@link sap.suite.ui.commons.CalculationBuilder} is validated.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CalculationBuilderValidationMode'.
 	 *
 	 * @public
 	*/
@@ -94,6 +110,8 @@ declare module "sap/suite/ui/commons/CommonBackground" {
 
 	/**
 	 * Enumeration of possible theme specific background colors.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'CommonBackground'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. Moved to sapui5.runtime.
 	 * @public
@@ -106,6 +124,8 @@ declare module "sap/suite/ui/commons/ComparisonChartView" {
 
 	/**
 	 * The view of the ComparisonChart.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ComparisonChartView'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.suite.ui.microchart.ComparisonMicroChartViewType should be used.
 	 * @public
@@ -118,6 +138,8 @@ declare module "sap/suite/ui/commons/DeviationIndicator" {
 
 	/**
 	 * The marker for the deviation trend.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'DeviationIndicator'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. Moved to sapui5.runtime.
 	 * @public
@@ -130,6 +152,8 @@ declare module "sap/suite/ui/commons/FacetOverviewHeight" {
 
 	/**
 	 * Enumeration of possible FacetOverview height settings.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'FacetOverviewHeight'.
 	 *
 	 * @deprecated (since 1.32) - Deprecated. Object page should be used instead.
 	 * @public
@@ -142,6 +166,8 @@ declare module "sap/suite/ui/commons/FilePickerModes" {
 
 	/**
 	 * Modes for the {@link sap.suite.ui.commons.CloudFilePicker}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'FilePickerModes'.
 	 *
 	 * @public
 	*/
@@ -153,6 +179,8 @@ declare module "sap/suite/ui/commons/FilePickerType" {
 
 	/**
 	 * Runtime mode for the {@link sap.suite.ui.commons.CloudFilePicker}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'FilePickerType'.
 	 *
 	 * @public
 	*/
@@ -164,6 +192,8 @@ declare module "sap/suite/ui/commons/FrameType" {
 
 	/**
 	 * Enumeration of possible frame types.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'FrameType'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. Moved to openUI5.
 	 * @public
@@ -176,6 +206,8 @@ declare module "sap/suite/ui/commons/HeaderContainerView" {
 
 	/**
 	 * The list of possible HeaderContainer views.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'HeaderContainerView'.
 	 *
 	 * @deprecated (since 1.48) - This control is deprecated since 1.48. Please use the equivalent sap.ui.core.Orientation.
 	 * @public
@@ -188,6 +220,8 @@ declare module "sap/suite/ui/commons/ImageEditorContainerButton" {
 
 	/**
 	 * Action buttons for the {@link sap.suite.ui.commons.imageeditor.ImageEditorContainer}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ImageEditorContainerButton'.
 	 *
 	 * @public
 	*/
@@ -199,6 +233,8 @@ declare module "sap/suite/ui/commons/ImageEditorContainerMode" {
 
 	/**
 	 * Mode types for {@link sap.suite.ui.commons.imageeditor.ImageEditorContainer}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ImageEditorContainerMode'.
 	 *
 	 * @public
 	*/
@@ -210,6 +246,8 @@ declare module "sap/suite/ui/commons/ImageEditorMode" {
 
 	/**
 	 * Mode types for {@link sap.suite.ui.commons.imageeditor.ImageEditor}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ImageEditorMode'.
 	 *
 	 * @public
 	*/
@@ -221,6 +259,8 @@ declare module "sap/suite/ui/commons/ImageFormat" {
 
 	/**
 	 * Image file format.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ImageFormat'.
 	 *
 	 * @public
 	*/
@@ -232,6 +272,8 @@ declare module "sap/suite/ui/commons/InfoTileSize" {
 
 	/**
 	 * Enumeration of possible PointTile size settings.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'InfoTileSize'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.m.InfoTileSize should be used.
 	 * @public
@@ -244,6 +286,8 @@ declare module "sap/suite/ui/commons/InfoTileTextColor" {
 
 	/**
 	 * Enumeration of possible InfoTile text color settings.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'InfoTileTextColor'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.m.InfoTileTextColor should be used.
 	 * @public
@@ -256,6 +300,8 @@ declare module "sap/suite/ui/commons/InfoTileValueColor" {
 
 	/**
 	 * Enumeration of possible InfoTile value color settings.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'InfoTileValueColor'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.m.InfoTileValueColor should be used.
 	 * @public
@@ -263,22 +309,13 @@ declare module "sap/suite/ui/commons/InfoTileValueColor" {
 	export default InfoTileValueColor;
 }
 
-declare module "sap/suite/ui/commons/LayoutType" {
-	import {LayoutType} from "sap/suite/ui/commons/library";
-
-	/**
-	 * Supported Layout Types for {@link sap.suite.ui.commons.BaseContainer}.
-	 *
-	 * @public
-	*/
-	export default LayoutType;
-}
-
 declare module "sap/suite/ui/commons/LoadState" {
 	import {LoadState} from "sap/suite/ui/commons/library";
 
 	/**
 	 * Enumeration of possible load states for LoadableView.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'LoadState'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.m.LoadState should be used.
 	 * @public
@@ -291,6 +328,8 @@ declare module "sap/suite/ui/commons/MicroAreaChartView" {
 
 	/**
 	 * The list of possible MicroAreaChart views.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'MicroAreaChartView'.
 	 *
 	 * @deprecated (since 1.34) - Deprecated. sap.suite.ui.microchart.AreaMicroChartViewType should be used.
 	 * @public
@@ -303,6 +342,8 @@ declare module "sap/suite/ui/commons/MicroProcessFlowRenderType" {
 
 	/**
 	 * Options that define how the micro process flow should be rendered inside its parent container. <br>These options can be useful when the width of the parent container does not allow for all nodes in the micro process flow to be displayed on the same line.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'MicroProcessFlowRenderType'.
 	 *
 	 * @public
 	*/
@@ -314,6 +355,8 @@ declare module "sap/suite/ui/commons/networkgraph/ActionButtonPosition" {
 
 	/**
 	 * Position of a custom action button.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.ActionButtonPosition'.
 	 *
 	 * @public
 	*/
@@ -325,6 +368,8 @@ declare module "sap/suite/ui/commons/networkgraph/BackgroundColor" {
 
 	/**
 	 * Background color for the network graph.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.BackgroundColor'.
 	 *
 	 * @public
 	*/
@@ -336,6 +381,8 @@ declare module "sap/suite/ui/commons/networkgraph/ElementStatus" {
 
 	/**
 	 * Semantic type of the node status.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.ElementStatus'.
 	 *
 	 * @public
 	*/
@@ -347,6 +394,8 @@ declare module "sap/suite/ui/commons/networkgraph/HeaderCheckboxState" {
 
 	/**
 	 * States of the Header checkbox.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.HeaderCheckboxState'.
 	 *
 	 * @public
 	*/
@@ -358,6 +407,8 @@ declare module "sap/suite/ui/commons/networkgraph/LayoutRenderType" {
 
 	/**
 	 * Types of layout algorithms that define the visual features and layout of the network graph.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.LayoutRenderType'.
 	 *
 	 * @public
 	*/
@@ -369,6 +420,8 @@ declare module "sap/suite/ui/commons/networkgraph/LineArrowOrientation" {
 
 	/**
 	 * Direction of the arrow on the connector line.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.LineArrowOrientation'.
 	 *
 	 * @public
 	*/
@@ -380,6 +433,8 @@ declare module "sap/suite/ui/commons/networkgraph/LineArrowPosition" {
 
 	/**
 	 * Position of the arrow on a connector line.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.LineArrowPosition'.
 	 *
 	 * @public
 	*/
@@ -391,6 +446,8 @@ declare module "sap/suite/ui/commons/networkgraph/LineType" {
 
 	/**
 	 * Type of connector line used in the network graph.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.LineType'.
 	 *
 	 * @public
 	*/
@@ -402,6 +459,8 @@ declare module "sap/suite/ui/commons/networkgraph/NodePlacement" {
 
 	/**
 	 * Type of node placement for Layered Algorithm. See {@link https://rtsys.informatik.uni-kiel.de/confluence/display/KIELER/KLay+Layered+Layout+Options#KLayLayeredLayoutOptions-nodePlacement}
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.NodePlacement'.
 	 *
 	 * @public
 	*/
@@ -413,6 +472,8 @@ declare module "sap/suite/ui/commons/networkgraph/NodeShape" {
 
 	/**
 	 * Shape of a node in a network graph.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.NodeShape'.
 	 *
 	 * @public
 	*/
@@ -424,6 +485,8 @@ declare module "sap/suite/ui/commons/networkgraph/Orientation" {
 
 	/**
 	 * Orientation of layered layout.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.Orientation'.
 	 *
 	 * @public
 	*/
@@ -435,6 +498,8 @@ declare module "sap/suite/ui/commons/networkgraph/RenderType" {
 
 	/**
 	 * Determines how nodes are rendered. For optimal performance and usability, it is recommended that you use HTML, which allows you to avoid dealing with SVG limitations.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'networkgraph.RenderType'.
 	 *
 	 * @public
 	*/
@@ -446,6 +511,8 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionLabelState" {
 
 	/**
 	 * Describes the state of a connection label.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowConnectionLabelState'.
 	 *
 	 * @public
 	*/
@@ -457,6 +524,8 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionState" {
 
 	/**
 	 * Describes the state of a connection.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowConnectionState'.
 	 *
 	 * @public
 	*/
@@ -468,6 +537,8 @@ declare module "sap/suite/ui/commons/ProcessFlowConnectionType" {
 
 	/**
 	 * Describes the type of a connection.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowConnectionType'.
 	 *
 	 * @public
 	*/
@@ -479,6 +550,8 @@ declare module "sap/suite/ui/commons/ProcessFlowDisplayState" {
 
 	/**
 	 * The ProcessFlow calculates the ProcessFlowDisplayState based on the 'focused' and 'highlighted' properties of each node.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowDisplayState'.
 	 *
 	 * @public
 	*/
@@ -490,6 +563,8 @@ declare module "sap/suite/ui/commons/ProcessFlowLaneState" {
 
 	/**
 	 * This type is used in the 'state' property of the ProcessFlowLaneHeader. For example, app developers can set the status of the lane header if lanes are displayed without documents. If the complete process flow is displayed (that is, if the lane header is displayed with documents underneath), the given state values of the lane header are ignored and will be calculated in the ProcessFlow according to the current state of the documents.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowLaneState'.
 	 *
 	 * @public
 	*/
@@ -501,6 +576,8 @@ declare module "sap/suite/ui/commons/ProcessFlowNodeState" {
 
 	/**
 	 * Describes the state connected to the content it is representing in the Process Flow Node. The state is also displayed in the Process Flow Lane Header as a color segment of the donut.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowNodeState'.
 	 *
 	 * @public
 	*/
@@ -512,6 +589,8 @@ declare module "sap/suite/ui/commons/ProcessFlowNodeType" {
 
 	/**
 	 * Describes the type of a node. The type value could be single or aggregated. With this type, the application can define if several nodes should be displayed as one aggregated node in a path per column to represent a grouping of semantically equal nodes.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowNodeType'.
 	 *
 	 * @public
 	*/
@@ -523,6 +602,8 @@ declare module "sap/suite/ui/commons/ProcessFlowZoomLevel" {
 
 	/**
 	 * The zoom level defines level of details for the node and how much space the process flow requires.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ProcessFlowZoomLevel'.
 	 *
 	 * @public
 	*/
@@ -534,6 +615,8 @@ declare module "sap/suite/ui/commons/SelectionModes" {
 
 	/**
 	 * File selection mode(Upload) for the {@link sap.suite.ui.commons.CloudFilePicker}.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'SelectionModes'.
 	 *
 	 * @public
 	*/
@@ -545,11 +628,29 @@ declare module "sap/suite/ui/commons/SelectionState" {
 
 	/**
 	 * SelectionState
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'SelectionState'.
 	 *
 	 * @deprecated (since 1.48) - This Enumeration is deprecated as it is not used anywhere.
 	 * @public
 	*/
 	export default SelectionState;
+}
+
+declare module "sap/suite/ui/commons/SemanticColorType" {
+	import {SemanticColorType} from "sap/suite/ui/commons/library";
+
+	/**
+	 * Colors to highlight certain network graph elements.
+	 * 
+	 * Instead of the <code>ValueState</code>, semantic colors must be defined by the application.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'SemanticColorType'.
+	 *
+	 * @public
+	 * @since 1.129
+	*/
+	export default SemanticColorType;
 }
 
 declare module "sap/suite/ui/commons/statusindicator/FillingDirectionType" {
@@ -559,6 +660,8 @@ declare module "sap/suite/ui/commons/statusindicator/FillingDirectionType" {
 	 * The direction of animation.<br>
 	 * 
 	 * The direction types <code>Up</code>, <code>Down</code>, <code>Left</code>, and <code>Right</code> are available when {@link sap.suite.ui.commons.statusindicator.FillingType} is set to <code>Linear</code>.<br> The direction types <code>Clockwise</code> and <code>Counterclockwise</code> are available when {@link sap.suite.ui.commons.statusindicator.FillingType} is set to <code>Circular</code>.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.FillingDirectionType'.
 	 *
 	 * @public
 	*/
@@ -570,6 +673,8 @@ declare module "sap/suite/ui/commons/statusindicator/FillingType" {
 
 	/**
 	 * The type of filling.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.FillingType'.
 	 *
 	 * @public
 	*/
@@ -581,6 +686,8 @@ declare module "sap/suite/ui/commons/statusindicator/HorizontalAlignmentType" {
 
 	/**
 	 * The horizontal alignment of the status indicator within its parent container.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.HorizontalAlignmentType'.
 	 *
 	 * @public
 	*/
@@ -592,6 +699,8 @@ declare module "sap/suite/ui/commons/statusindicator/LabelPositionType" {
 
 	/**
 	 * Position of the label, relative to the status indicator.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.LabelPositionType'.
 	 *
 	 * @public
 	*/
@@ -603,6 +712,8 @@ declare module "sap/suite/ui/commons/statusindicator/SizeType" {
 
 	/**
 	 * Predefined sizes of the status indicator.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.SizeType'.
 	 *
 	 * @public
 	*/
@@ -614,6 +725,8 @@ declare module "sap/suite/ui/commons/statusindicator/VerticalAlignmentType" {
 
 	/**
 	 * The vertical alignment of the status indicator within its parent container.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'statusindicator.VerticalAlignmentType'.
 	 *
 	 * @public
 	*/
@@ -625,6 +738,8 @@ declare module "sap/suite/ui/commons/taccount/TAccountPanelState" {
 
 	/**
 	 * The state of the {@link sap.suite.ui.commons.taccount.TAccountPanel} that defines how T accounts included in the panel are displayed.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'taccount.TAccountPanelState'.
 	 *
 	 * @public
 	*/
@@ -636,6 +751,8 @@ declare module "sap/suite/ui/commons/ThingGroupDesign" {
 
 	/**
 	 * Defines the way how UnifiedThingGroup control is rendered.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ThingGroupDesign'.
 	 *
 	 * @deprecated (since 1.32) - Deprecated. Object page should be used instead.
 	 * @public
@@ -648,6 +765,8 @@ declare module "sap/suite/ui/commons/TimelineAlignment" {
 
 	/**
 	 * The alignment of timeline posts relative to the timeline axis.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'TimelineAlignment'.
 	 *
 	 * @public
 	*/
@@ -659,6 +778,8 @@ declare module "sap/suite/ui/commons/TimelineAxisOrientation" {
 
 	/**
 	 * Defines the orientation of the timeline axis.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'TimelineAxisOrientation'.
 	 *
 	 * @public
 	*/
@@ -670,6 +791,8 @@ declare module "sap/suite/ui/commons/TimelineFilterType" {
 
 	/**
 	 * Filter type for the timeline.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'TimelineFilterType'.
 	 *
 	 * @public
 	*/
@@ -681,6 +804,8 @@ declare module "sap/suite/ui/commons/TimelineGroupType" {
 
 	/**
 	 * Type of grouping for timeline entries.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'TimelineGroupType'.
 	 *
 	 * @public
 	*/
@@ -692,6 +817,8 @@ declare module "sap/suite/ui/commons/TimelineScrollingFadeout" {
 
 	/**
 	 * Type of the fadeout effect applied to the upper and lower margins of the visible timeline area.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'TimelineScrollingFadeout'.
 	 *
 	 * @deprecated (since 1.54.0) - Not Fiori.
 	 * @public
@@ -704,6 +831,8 @@ declare module "sap/suite/ui/commons/ValueStatus" {
 
 	/**
 	 * Marker for the key value status.
+	 * 
+	 * This enum is part of the 'sap/suite/ui/commons/library' module export and must be accessed by the property 'ValueStatus'.
 	 *
 	 * @deprecated (since 1.32) - Deprecated. Numeric content or any other standard Fiori control should be used instead.
 	 * @public
