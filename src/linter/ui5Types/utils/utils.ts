@@ -362,16 +362,23 @@ export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undef
 				module = currentNode.name.text;
 				break;
 			}
+		} else if (ts.isInterfaceDeclaration(currentNode) &&
+			currentNode.name.text === "JQuery"
+		) {
+			module = "jQuery";
 		}
 		currentNode = currentNode.parent;
 	}
 	if (module) {
-		return {
+		const info: Ui5ModuleTypeInfo = {
 			kind: Ui5TypeInfoKind.Module,
 			module,
-			namespace: globalNamespace.join("."),
 			name,
 		};
+		if (globalNamespace.length > 0) {
+			info.namespace = globalNamespace.join(".");
+		}
+		return info;
 	} else {
 		globalNamespace.push(name);
 		return {

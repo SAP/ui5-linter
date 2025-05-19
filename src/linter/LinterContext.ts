@@ -245,8 +245,12 @@ export default class LinterContext {
 			line: rawMessage.position ? rawMessage.position.line : undefined,
 			column: rawMessage.position ? rawMessage.position.column : undefined,
 			message: messageFunc(rawMessage.args || {}),
-			ui5TypeInfo: rawMessage.ui5TypeInfo,
 		};
+
+		// Prevent undefined values from being set
+		if (rawMessage.ui5TypeInfo) {
+			message.ui5TypeInfo = rawMessage.ui5TypeInfo;
+		}
 
 		if (this.#includeMessageDetails) {
 			const detailsFunc = messageInfo.details as (args: MessageArgs[M]) => string | undefined;
