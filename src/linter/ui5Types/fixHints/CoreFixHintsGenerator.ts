@@ -299,7 +299,6 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	["notifyContentDensityChanged", {
 		moduleName: "sap/ui/core/Theming", exportNameToBeUsed: "notifyContentDensityChanged",
 	}],
-	// TODO: Check why not working
 	["byFieldGroupId", {
 		exportCodeToBeUsed: "sap.ui.core.Control.getControlsByFieldGroupId($1)",
 	}],
@@ -315,17 +314,17 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/Theming",
 		exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
 	}],
-	// // TODO: Individual arguments must be mapped to "options" object
-	// // The new API has no sync loading option, replacement is only safe when the options contain async:true
-	// ["loadLibrary", {
-	// 	exportCodeToBeUsed: "sap.ui.core.Lib.load($1, $2)",
-	// }],
-	// // TODO: Individual arguments must be mapped to "options" object.
-	// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-	// // Only when the first argument is an object defining async: true a migration is possible.
-	// ["createComponent", {
-	// 	exportCodeToBeUsed: "sap.ui.core.Component.create({})",
-	// }],
+	// Individual arguments must be mapped to "options" object
+	// The new API has no sync loading option, replacement is only safe when the options contain async:true
+	["loadLibrary", {
+		exportCodeToBeUsed: "sap.ui.core.Lib.load($1)",
+	}],
+	// TODO: Individual arguments must be mapped to "options" object.
+	// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+	// Only when the first argument is an object defining async: true a migration is possible.
+	["createComponent", {
+		exportCodeToBeUsed: "sap.ui.core.Component.create({})",
+	}],
 	// Note that alternative replacement Component.get is meanwhile deprecated, too
 	["getComponent", {
 		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
