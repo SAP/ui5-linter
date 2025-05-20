@@ -12,6 +12,7 @@ import {
 import {ExportCodeToBeUsed, type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 import {getLogger} from "@ui5/logger";
+import { url } from "inspector";
 
 const log = getLogger("linter:autofix:codeReplacer");
 
@@ -346,6 +347,20 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			};
 			fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
 			fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
+		} else {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (apiName === "createComponent") {
+		if (fixHints?.exportCodeToBeUsed?.args?.[0]?.kind === SyntaxKind.ObjectLiteralExpression) {
+			const componentOptionsExpression =
+				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[0].value);
+			if (componentOptionsExpression.async === true) {
+				fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(componentOptionsExpression);
+			} else {
+				fixHints = undefined; // We cannot handle this case
+				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+			}
 		} else {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
