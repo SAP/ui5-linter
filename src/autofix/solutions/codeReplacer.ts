@@ -12,7 +12,6 @@ import {
 import {ExportCodeToBeUsed, type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 import {getLogger} from "@ui5/logger";
-import { url } from "inspector";
 
 const log = getLogger("linter:autofix:codeReplacer");
 
@@ -365,6 +364,10 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
+	} else if (apiName === "getLibraryResourceBundle" &&
+		fixHints?.exportCodeToBeUsed?.args?.[2]?.kind === SyntaxKind.TrueKeyword) {
+		fixHints = undefined; // The new API is async
+		log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 	}
 
 	return fixHints;
@@ -388,7 +391,7 @@ function extractKeyValuePairs(jsonLikeStr: string) {
 			value = false;
 		} else if (rawValue === "null") {
 			value = null;
-		} else if (!isNaN(rawValue)) {
+		} else if (!isNaN(Number(rawValue))) {
 			value = parseFloat(rawValue);
 		} else {
 			value = rawValue; // fallback
