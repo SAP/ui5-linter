@@ -12,7 +12,6 @@ import {
 import {ExportCodeToBeUsed, type FixHints} from "../../linter/ui5Types/fixHints/FixHints.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 import {getLogger} from "@ui5/logger";
-import { url } from "inspector";
 
 const log = getLogger("linter:autofix:codeReplacer");
 
