@@ -319,11 +319,11 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	["loadLibrary", {
 		exportCodeToBeUsed: "sap.ui.core.Lib.load($1)",
 	}],
-	// TODO: Individual arguments must be mapped to "options" object.
+	// Individual arguments must be mapped to "options" object.
 	// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
 	// Only when the first argument is an object defining async: true a migration is possible.
 	["createComponent", {
-		exportCodeToBeUsed: "sap.ui.core.Component.create({})",
+		exportCodeToBeUsed: "sap.ui.core.Component.create($1)",
 	}],
 	// Note that alternative replacement Component.get is meanwhile deprecated, too
 	["getComponent", {
