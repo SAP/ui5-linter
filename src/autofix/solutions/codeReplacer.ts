@@ -362,10 +362,25 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
-	} else if (apiName === "getLibraryResourceBundle" &&
-		fixHints?.exportCodeToBeUsed?.args?.[2]?.kind === SyntaxKind.TrueKeyword) {
-		fixHints = undefined; // The new API is async
-		log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+	} else if (apiName === "getLibraryResourceBundle") {
+		// Handling fallback in the legacy API
+		if (!fixHints?.exportCodeToBeUsed?.args?.[0] ||
+			fixHints?.exportCodeToBeUsed?.args?.[0]?.value === "undefined") {
+			fixHints.exportCodeToBeUsed.args ??= [];
+			fixHints.exportCodeToBeUsed.args[0] = {value: "\"sap.ui.core\"", kind: SyntaxKind.StringLiteral};
+		}
+
+		fixHints.exportCodeToBeUsed.name = `$moduleIdentifier` +
+			`.getResourceBundleFor(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args ?? [])})`;
+
+		// If any of the arguments is a boolean with value true, the return value is a promise
+		// and is not compatible with the new API
+		if ([fixHints?.exportCodeToBeUsed?.args?.[0]?.kind,
+			fixHints?.exportCodeToBeUsed?.args?.[1]?.kind,
+			fixHints?.exportCodeToBeUsed?.args?.[2]?.kind].includes(SyntaxKind.TrueKeyword)) {
+			fixHints = undefined; // The new API is async
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
 	}
 
 	return fixHints;
