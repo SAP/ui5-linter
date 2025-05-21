@@ -20,6 +20,7 @@ import {
 	Ui5TypeInfoKind,
 	isGlobalThis,
 	extractNamespace,
+	Ui5TypeInfo,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -50,6 +51,7 @@ const ALLOWED_RENDERER_API_VERSIONS = ["2", "4"];
 interface DeprecationInfo {
 	symbol: ts.Symbol;
 	messageDetails: string;
+	ui5TypeInfo?: Ui5TypeInfo;
 }
 
 function isSourceFileOfUi5Type(sourceFile: ts.SourceFile) {
@@ -614,7 +616,7 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: node.text,
 				details: deprecationInfo.messageDetails,
-			}, {node});
+			}, {node, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 			return true;
 		}
 		return false;
@@ -644,7 +646,7 @@ export default class SourceFileLinter {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 						apiName: identifier.text,
 						details: deprecationInfo.messageDetails,
-					}, {node: element.name});
+					}, {node: element.name, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 					return;
 				}
 			}
@@ -735,7 +737,7 @@ export default class SourceFileLinter {
 						className: this.checker.typeToString(nodeType),
 						details: deprecationInfo.messageDetails,
 					},
-					{node: prop}
+					{node: prop, ui5TypeInfo: deprecationInfo.ui5TypeInfo}
 				);
 			});
 		});
@@ -755,7 +757,7 @@ export default class SourceFileLinter {
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 			if (deprecatedTag) {
 				const deprecationInfo: DeprecationInfo = {
-					symbol, messageDetails: "",
+					symbol, messageDetails: "", ui5TypeInfo: getUi5TypeInfoFromSymbol(symbol),
 				};
 				if (this.messageDetails) {
 					deprecationInfo.messageDetails = this.getDeprecationText(deprecatedTag);
@@ -800,7 +802,7 @@ export default class SourceFileLinter {
 		if (ui5TypeInfo) {
 			const nodeType = this.checker.getTypeAtLocation(node);
 			if (ui5TypeInfo.kind === Ui5TypeInfoKind.Module) {
-				const symbolName = ui5TypeInfo.name;
+				const symbolName = ui5TypeInfo.export;
 				const moduleName = ui5TypeInfo.module;
 				if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 					// Check for sap/ui/core/Lib.init usages
@@ -922,7 +924,7 @@ export default class SourceFileLinter {
 		}, {
 			node: reportNode,
 			fixHints,
-			ui5TypeInfo: getUi5TypeInfoFromSymbol(deprecationInfo.symbol),
+			ui5TypeInfo: deprecationInfo.ui5TypeInfo,
 		});
 
 		if (
@@ -1430,13 +1432,13 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, {node, fixHints});
+			}, {node, fixHints, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 		} else {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
 				namespace,
 				details: deprecationInfo.messageDetails,
-			}, {node});
+			}, {node, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 		}
 		return true;
 	}
@@ -1639,7 +1641,7 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT, {
 					moduleName,
 					details: deprecationInfo.messageDetails,
-				}, {node: moduleSpecifierNode});
+				}, {node: moduleSpecifierNode, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 			}
 		}
 
@@ -1660,7 +1662,7 @@ export default class SourceFileLinter {
 						importName,
 						moduleName,
 						details: deprecationInfo.messageDetails,
-					}, {node: namedImportElement});
+					}, {node: namedImportElement, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
 				}
 			}
 		}

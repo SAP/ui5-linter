@@ -331,9 +331,10 @@ export enum Ui5TypeInfoKind {
 export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5GlobalTypeInfo;
 
 interface Ui5ModuleTypeInfo {
-	module: string;
-	namespace?: string;
-	name: string;
+	module: string; // module name (slash separated)
+	export: string; // complete export name with namespaces
+	basename?: string; // local name without namespaces
+	name?: string; // e.g. DataType name
 	kind: Ui5TypeInfoKind.Module;
 }
 
@@ -352,11 +353,11 @@ export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undef
 	}
 	const name = symbol.name;
 	let module: string | undefined;
-	const globalNamespace = [];
+	const namespace = [];
 	while (currentNode) {
 		if (ts.isModuleDeclaration(currentNode)) {
 			if (currentNode.flags & ts.NodeFlags.Namespace) {
-				globalNamespace.unshift(currentNode.name.text);
+				namespace.unshift(currentNode.name.text);
 			} else if (currentNode.parent && ts.isSourceFile(currentNode.parent)) {
 				// Only consider top-level module declarations
 				module = currentNode.name.text;
@@ -373,17 +374,15 @@ export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undef
 		const info: Ui5ModuleTypeInfo = {
 			kind: Ui5TypeInfoKind.Module,
 			module,
-			name,
+			export: namespace.length ? (namespace.join(".") + "." + name) : name,
+			basename: name,
 		};
-		if (globalNamespace.length > 0) {
-			info.namespace = globalNamespace.join(".");
-		}
 		return info;
 	} else {
-		globalNamespace.push(name);
+		namespace.push(name);
 		return {
 			kind: Ui5TypeInfoKind.Global,
-			namespace: globalNamespace.join("."),
+			namespace: namespace.join("."),
 		};
 	}
 }
