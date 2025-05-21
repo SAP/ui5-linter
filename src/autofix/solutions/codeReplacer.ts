@@ -367,7 +367,9 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		if (!fixHints?.exportCodeToBeUsed?.args?.[0] ||
 			fixHints?.exportCodeToBeUsed?.args?.[0]?.value === "undefined") {
 			fixHints.exportCodeToBeUsed.args ??= [];
-			fixHints.exportCodeToBeUsed.args[0] = {value: "\"sap.ui.core\"", kind: SyntaxKind.StringLiteral};
+			fixHints.exportCodeToBeUsed.args[0] = {
+				value: "\"sap.ui.core\"", kind: SyntaxKind.StringLiteral, ui5Type: "library",
+			};
 		}
 
 		fixHints.exportCodeToBeUsed.name = `$moduleIdentifier` +
