@@ -1,6 +1,7 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
 import {isExpectedValueExpression, resolveNamespace} from "../utils/utils.js";
+import {AmbientModuleCache} from "../AmbientModuleCache.js";
 
 const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
@@ -265,6 +266,12 @@ const coreModulesReplacements = new Map<string, FixHints>([
 ]);
 
 export default class CoreFixHintsGenerator {
+	constructor(
+		private ambientModuleCache: AmbientModuleCache
+	) {
+
+	}
+
 	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
 		if (!ts.isPropertyAccessExpression(node)) {
 			return undefined;
@@ -301,11 +308,22 @@ export default class CoreFixHintsGenerator {
 
 			// Extract arguments from the call expression
 			if (callExpression) {
-				exportCodeToBeUsed.args = callExpression.arguments.map((arg) =>
-					({value: arg.getText(), kind: arg?.kind}));
+				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => ({
+					value: arg.getText(),
+					kind: arg?.kind,
+					ui5Type: this.isPotentialUi5Library(arg) ? "library" : undefined,
+				}));
 			}
 		}
 
 		return {...moduleReplacement, exportCodeToBeUsed};
+	}
+
+	isPotentialUi5Library(node: ts.Node): boolean {
+		if (!("text" in node) || typeof node.text !== "string") {
+			return false;
+		}
+
+		return !!this.ambientModuleCache.findModuleForName(node.text.replaceAll(".", "/") + "/library");
 	}
 }

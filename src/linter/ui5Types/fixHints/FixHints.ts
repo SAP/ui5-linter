@@ -3,6 +3,7 @@ import ts from "typescript";
 export type FixHintsArgsType = {
 	value: string;
 	kind: ts.SyntaxKind;
+	ui5Type?: string;
 }[];
 export interface ExportCodeToBeUsed {
 	name: string;

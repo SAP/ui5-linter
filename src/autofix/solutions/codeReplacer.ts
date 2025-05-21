@@ -377,7 +377,8 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		// and is not compatible with the new API
 		if ([fixHints?.exportCodeToBeUsed?.args?.[0]?.kind,
 			fixHints?.exportCodeToBeUsed?.args?.[1]?.kind,
-			fixHints?.exportCodeToBeUsed?.args?.[2]?.kind].includes(SyntaxKind.TrueKeyword)) {
+			fixHints?.exportCodeToBeUsed?.args?.[2]?.kind].includes(SyntaxKind.TrueKeyword) ||
+			fixHints?.exportCodeToBeUsed?.args?.[0]?.ui5Type !== "library") {
 			fixHints = undefined; // The new API is async
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
