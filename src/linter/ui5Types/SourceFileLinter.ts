@@ -727,6 +727,19 @@ export default class SourceFileLinter {
 				if (!propertySymbol) {
 					return;
 				}
+
+				/*
+
+				// For ui5TypeInfo:
+				// We could check whether an InterfaceDeclaration is a Settings object
+				// so that we know that the property is a UI5 metadata
+
+				this.checker.isTypeAssignableTo(
+					this.checker.getTypeFromTypeNode(propertySymbol.valueDeclaration.parent),
+					this.checker.getTypeFromTypeNode(propertySymbol.valueDeclaration.parent.heritageClauses[0].types[0])
+				)
+				*/
+
 				const deprecationInfo = this.getDeprecationInfo(propertySymbol);
 				if (!deprecationInfo) {
 					return;
