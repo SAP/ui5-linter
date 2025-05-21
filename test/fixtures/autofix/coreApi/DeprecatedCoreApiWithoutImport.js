@@ -33,6 +33,9 @@ sap.ui.define([], function() {
 	sap.ui.getCore().getEventBus();
 
 	sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", "en_US");
+	sap.ui.getCore().getLibraryResourceBundle(); // Should fall back to "sap.ui.core"
+	sap.ui.getCore().getLibraryResourceBundle(true); // bAsync is true (not autofixable)
+	sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", true); // bAsync is true (not autofixable)
 	sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
 	sap.ui.getCore().getStaticAreaRef();
