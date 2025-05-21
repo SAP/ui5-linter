@@ -354,9 +354,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 		if (fixHints?.exportCodeToBeUsed?.args?.[0]?.kind === SyntaxKind.ObjectLiteralExpression) {
 			const componentOptionsExpression =
 				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[0].value);
-			if (componentOptionsExpression.async === true) {
-				fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(componentOptionsExpression);
-			} else {
+			if (componentOptionsExpression.async !== true) {
 				fixHints = undefined; // We cannot handle this case
 				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 			}
@@ -374,7 +372,7 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 }
 
 function extractKeyValuePairs(jsonLikeStr: string) {
-	const regex = /["']?([\w$]+)["']?\s*:\s*(true|false|null|["'][^"']*["']|[0-9.+-eE]+)/g;
+	const regex = /["']?([\w$]+)["']?\s*:\s*(true|false|null|["'][^"']*["']|[+,\-./0-9:;<=>?@A-Z\\[\\\\]^_`a-e\]+)/g;
 	const pairs = {} as Record<string, unknown>;
 	let match;
 	while ((match = regex.exec(jsonLikeStr)) !== null) {
