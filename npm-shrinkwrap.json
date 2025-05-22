@@ -59,7 +59,7 @@
 				"sinon": "^20.0.0",
 				"tsx": "^4.19.4",
 				"typescript-eslint": "^8.32.1",
-				"ui5-test-runner": "^5.7.0",
+				"ui5-test-runner": "^5.7.1",
 				"yauzl-promise": "^4.0.0"
 			},
 			"engines": {
@@ -16864,10 +16864,11 @@
 			}
 		},
 		"node_modules/punyexpr": {
-			"version": "1.1.1",
-			"resolved": "https://registry.npmjs.org/punyexpr/-/punyexpr-1.1.1.tgz",
-			"integrity": "sha512-83x1qn4d0U4WDLbZZFEVDKQXRAaKX/GKKhS1TF8lQr1w9/p7F+PX8tFZ+UpQCIVOp6UzJV6njqUCnMSq3WpmzQ==",
-			"dev": true
+			"version": "1.0.4",
+			"resolved": "https://registry.npmjs.org/punyexpr/-/punyexpr-1.0.4.tgz",
+			"integrity": "sha512-4tldIGB5Sk0pSuKjVv1KxniTmZb8Fuh3OAU7+esEz6NjsRTrkN3ZJBKRCUyZsHR/pmGggnH8kjy66vutfXpEMQ==",
+			"dev": true,
+			"license": "MIT"
 		},
 		"node_modules/pupa": {
 			"version": "3.1.0",
@@ -18285,15 +18286,16 @@
 			}
 		},
 		"node_modules/ui5-test-runner": {
-			"version": "5.7.0",
-			"resolved": "https://registry.npmjs.org/ui5-test-runner/-/ui5-test-runner-5.7.0.tgz",
-			"integrity": "sha512-j+O9G4I6Fuf1svgtBwophDx9XLjfjQ/I/Wz1gmFQJbuDJc4j8GbmAgfIzl1Ll1WkcrBNYTCBM/5VYEHqHzdyiA==",
+			"version": "5.7.1",
+			"resolved": "https://registry.npmjs.org/ui5-test-runner/-/ui5-test-runner-5.7.1.tgz",
+			"integrity": "sha512-koat5taIPEnmFSwCG9IXT+kI9oOnnGcs6czoEjti6djAKs4klKIRSDhiXHUVFBTLMuDaf2ZLkPAEdBLrJORXRw==",
 			"dev": true,
+			"license": "MIT",
 			"dependencies": {
 				"commander": "^12.1.0",
 				"ps-tree": "^1.2.0",
 				"punybind": "^1.2.1",
-				"punyexpr": "^1.0.4",
+				"punyexpr": "1.0.4",
 				"reserve": "2.2.0"
 			},
 			"bin": {
