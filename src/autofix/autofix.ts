@@ -11,6 +11,8 @@ import {Resource} from "@ui5/fs";
 import {collectIdentifiers} from "./utils.js";
 import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
 import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
+import Fix from "../linter/ui5Types/fixHints/Fix.js";
+import generateChanges from "./solutions/generateChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -79,8 +81,8 @@ export interface DeprecatedApiAccessNode {
 }
 
 export type ImportRequests = Map<string, {
-	nodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-	identifier?: string;
+	nodeInfos?: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
+	identifier: string;
 }>;
 
 export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
@@ -322,29 +324,43 @@ function applyFixes(
 		return undefined;
 	}
 
-	existingModuleDeclarations = generateSolutionNoGlobals(
-		checker, sourceFile, content,
-		messages,
-		changeSet, []);
+	const fixMessages: typeof messages = [];
+	const fixHintMessages: typeof messages = [];
+	messages.forEach((msg) => {
+		if (msg.fixHints instanceof Fix) {
+			fixMessages.push(msg);
+		} else {
+			fixHintMessages.push(msg);
+		}
+	});
 
-	// Collect all identifiers in the source file to ensure unique names when adding imports
-	const identifiers = collectIdentifiers(sourceFile);
+	if (fixMessages.length) {
+		generateChanges(resourcePath, checker, sourceFile, content, fixMessages, changeSet);
+	} else {
+		existingModuleDeclarations = generateSolutionNoGlobals(
+			checker, sourceFile, content,
+			fixHintMessages,
+			changeSet, []);
 
-	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		// TODO: Find a better way to define modules for removal
-		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
+		// Collect all identifiers in the source file to ensure unique names when adding imports
+		const identifiers = collectIdentifiers(sourceFile);
 
-		// Remove dependencies from the existing module declaration
-		removeDependencies(moduleRemovals,
-			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+		for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
+			// TODO: Find a better way to define modules for removal
+			const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
 
-		// Resolve dependencies for the module declaration
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
+			// Remove dependencies from the existing module declaration
+			removeDependencies(moduleRemovals,
+				moduleDeclarationInfo, changeSet, resourcePath, identifiers);
+
+			// Resolve dependencies for the module declaration
+			addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
+		}
+
+		// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
+		// based on arguments' context
+		generateSolutionCodeReplacer(existingModuleDeclarations, fixHintMessages, changeSet, sourceFile, identifiers);
 	}
-
-	// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
-	// based on arguments' context
-	generateSolutionCodeReplacer(existingModuleDeclarations, messages, changeSet, sourceFile, identifiers);
 
 	if (changeSet.length === 0) {
 		// No modifications needed

@@ -5,6 +5,7 @@ import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import ts from "typescript";
 import {FixHints} from "./ui5Types/fixHints/FixHints.js";
+import Fix from "./ui5Types/fixHints/Fix.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
@@ -30,7 +31,7 @@ export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	id: M;
 	args: MessageArgs[M];
 	position?: PositionInfo;
-	fixHints?: FixHints;
+	fixHints?: FixHints | Fix;
 }
 
 export interface LintMessage {

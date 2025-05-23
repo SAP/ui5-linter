@@ -12,12 +12,14 @@ import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import Fix from "./fixHints/Fix.js";
+import {createJquerySapAccessExpressionFix} from "./fixHints/FixFactory.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
 
-function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | FixHints | undefined): node is ts.Node {
+function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | FixHints | Fix | undefined): node is ts.Node {
 	return !!node && "getSourceFile" in node && typeof node.getSourceFile === "function";
 }
 
@@ -54,10 +56,11 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node, fixHints?: FixHints): void;
-	addMessage<M extends MESSAGE>(id: M, node: ts.Node, fixHints?: FixHints): void;
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node, fixHints?: FixHints | Fix): void;
+	addMessage<M extends MESSAGE>(id: M, node: ts.Node, fixHints?: FixHints | Fix): void;
 	addMessage<M extends MESSAGE>(
-		id: M, argsOrNode: MessageArgs[M] | ts.Node, nodeOrFixHints?: ts.Node | FixHints, fixHints?: FixHints
+		id: M, argsOrNode: MessageArgs[M] | ts.Node,
+		nodeOrFixHints?: ts.Node | FixHints | Fix, fixHints?: FixHints | Fix
 	) {
 		if (!argsOrNode) {
 			throw new Error("Invalid arguments: Missing second argument");
@@ -84,7 +87,7 @@ export default class SourceFileReporter {
 			column: 1,
 		};
 		if (node) {
-			const {start} = this.#getPositionsForNode(node);
+			const {start} = this.getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
 			position.line = start.line;
 			position.column = start.column;
@@ -96,7 +99,7 @@ export default class SourceFileReporter {
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
-		const {start} = this.#getPositionsForNode(node);
+		const {start} = this.getPositionsForNode(node);
 		const coverageInfo: CoverageInfo = {
 			category,
 			// One-based to be aligned with most IDEs
@@ -114,7 +117,7 @@ export default class SourceFileReporter {
 		this.#coverageInfo.push(coverageInfo);
 	}
 
-	#getPositionsForNode(node: ts.Node): PositionRange {
+	getPositionsForNode(node: ts.Node): PositionRange {
 		return getPositionsForNode({
 			node,
 			sourceFile: this.#sourceFile,
