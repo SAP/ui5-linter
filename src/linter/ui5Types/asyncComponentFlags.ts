@@ -333,7 +333,7 @@ function reportComponentResults({
 	manifestContent: string | undefined;
 }) {
 	if (!analysisResult.hasManifestDefinition && !!manifestContent) {
-		reporter.addMessage(MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION, classDeclaration);
+		reporter.addMessage(MESSAGE.COMPONENT_MISSING_MANIFEST_DECLARATION, null, {node: classDeclaration});
 	}
 }
 
@@ -367,7 +367,7 @@ function reportUiComponentResults({
 			reporter.addMessage(MESSAGE.COMPONENT_MISSING_ASYNC_INTERFACE, {
 				componentFileName,
 				asyncFlagMissingIn,
-			}, classDeclaration);
+			}, {node: classDeclaration});
 		}
 	} else {
 		const {pointers} = jsonMap.parse<jsonSourceMapType>(manifestContent ?? "{}");
@@ -384,7 +384,7 @@ function reportUiComponentResults({
 			} else {
 				reporter.addMessage(MESSAGE.COMPONENT_REDUNDANT_ASYNC_FLAG, {
 					asyncFlagLocation: pointerKey,
-				}, classDeclaration);
+				}, {node: classDeclaration});
 			}
 		};
 

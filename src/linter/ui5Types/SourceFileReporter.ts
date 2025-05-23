@@ -12,13 +12,16 @@ import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {Ui5TypeInfo} from "./utils/utils.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
 
-function isTsNode<M extends MESSAGE>(node: ts.Node | MessageArgs[M] | FixHints | undefined): node is ts.Node {
-	return !!node && "getSourceFile" in node && typeof node.getSourceFile === "function";
+interface SourceFileMessageOptions {
+	node?: ts.Node;
+	fixHints?: FixHints;
+	ui5TypeInfo?: Ui5TypeInfo;
 }
 
 export default class SourceFileReporter {
@@ -54,35 +57,12 @@ export default class SourceFileReporter {
 		this.#coverageInfo = context.getCoverageInfo(this.#originalResourcePath);
 	}
 
-	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M], node: ts.Node, fixHints?: FixHints): void;
-	addMessage<M extends MESSAGE>(id: M, node: ts.Node, fixHints?: FixHints): void;
-	addMessage<M extends MESSAGE>(
-		id: M, argsOrNode: MessageArgs[M] | ts.Node, nodeOrFixHints?: ts.Node | FixHints, fixHints?: FixHints
-	) {
-		if (!argsOrNode) {
-			throw new Error("Invalid arguments: Missing second argument");
-		}
-		let args: MessageArgs[M];
-		let node: ts.Node;
-		if (isTsNode(argsOrNode)) {
-			node = argsOrNode;
-			args = null as unknown as MessageArgs[M];
-			if (!isTsNode(nodeOrFixHints)) {
-				fixHints = nodeOrFixHints;
-			}
-		} else {
-			args = argsOrNode;
-			if (isTsNode(nodeOrFixHints)) {
-				node = nodeOrFixHints;
-			} else {
-				throw new Error("Invalid arguments: Expected third argument to be a ts.Node");
-			}
-		}
-
+	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M] | null, options: SourceFileMessageOptions): void {
 		const position: PositionInfo = {
 			line: 1,
 			column: 1,
 		};
+		const {node, fixHints, ui5TypeInfo} = options;
 		if (node) {
 			const {start} = this.#getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
@@ -92,7 +72,9 @@ export default class SourceFileReporter {
 			// endColumn = end.column + 1;
 		}
 
-		this.#rawMessages.push({id, args, position, fixHints});
+		args ??= null as unknown as MessageArgs[M];
+
+		this.#rawMessages.push({id, args, position, fixHints, ui5TypeInfo});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
