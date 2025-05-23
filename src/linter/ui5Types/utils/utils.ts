@@ -287,3 +287,21 @@ export function isConditionalAccess(node: ts.Node): boolean {
 
 	return false;
 }
+
+export function resolveNamespace(node: ts.AccessExpression | ts.CallExpression): string | undefined {
+	const parts: string[] = [];
+
+	let scanNode: ts.Node = node;
+	parts.push(node.expression.getText());
+	while (ts.isPropertyAccessExpression(scanNode)) {
+		if (!ts.isIdentifier(scanNode.name)) {
+			throw new Error(
+				`Unexpected PropertyAccessExpression node: Expected name to be identifier but got ` +
+				ts.SyntaxKind[scanNode.name.kind]);
+		}
+		parts.push(scanNode.name.text);
+		scanNode = scanNode.parent;
+	}
+
+	return parts.join(".");
+}

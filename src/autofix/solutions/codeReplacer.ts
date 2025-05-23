@@ -118,27 +118,14 @@ export default function generateSolutionCodeReplacer(
 		// Calculate the replacement position
 		// It cannot be derived from the fixHintsGenerator as it works on the compiled source file.
 		// Just take the length of the old and the original start position
-		let pos, originalLengthNode = nodeInfo.node;
-
-		// For jQuery function deprecations, the node might only cover
-		// the deprecated method, but not the whole expression.
-		// Find the expression and update the position.
-		if (!ts.isCallExpression(nodeInfo.node) &&
-			ts.isPropertyAccessExpression(nodeInfo.node) &&
-			nodeInfo.node.expression && ts.isCallExpression(nodeInfo.node.expression)) {
-			pos = sourceFile.getLineAndCharacterOfPosition(nodeInfo.node.expression.pos);
-		}
+		let originalLengthNode = nodeInfo.node;
 
 		if (ts.isCallExpression(nodeInfo.node.parent) &&
 			nodeInfo.node.parent.expression === nodeInfo.node) {
 			originalLengthNode = nodeInfo.node.parent;
 		}
-
-		const originalLength = originalLengthNode.getEnd() - originalLengthNode.getStart();
-		const line = pos ? pos.line : (position.line - 1);
-		const column = pos ? (pos.character + 1) : (position.column - 1);
-		const start = sourceFile.getPositionOfLineAndCharacter(line, column);
-		const end = start + originalLength;
+		const start = originalLengthNode.getStart();
+		const end = originalLengthNode.getEnd();
 
 		cleanupChangeSet(changeSet, start, end);
 
@@ -327,9 +314,108 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 					`$moduleIdentifier.${fnName}(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 			}
 		}
+	} else if (apiName === "applyTheme" && fixHints?.moduleName === "sap/ui/core/Theming") {
+		if ((fixHints?.exportCodeToBeUsed?.args?.length ?? 0) > 1 &&
+			fixHints?.exportCodeToBeUsed?.args?.[1]?.value !== "undefined") {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (["attachIntervalTimer", "detachIntervalTimer"].includes(apiName ?? "")) {
+		if ((fixHints?.exportCodeToBeUsed?.args?.length ?? 0) > 1) {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (apiName === "loadLibrary") {
+		if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
+			const libOptionsExpression =
+				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[1].value) as {async: boolean; url?: string};
+			if (libOptionsExpression.async === true) {
+				const newArg = {
+					name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
+					url: libOptionsExpression.url,
+				};
+				fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
+				fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
+			} else {
+				fixHints = undefined; // We cannot handle this case
+				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+			}
+		} else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.TrueKeyword) {
+			const newArg = {
+				name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
+			};
+			fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
+			fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
+		} else {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (apiName === "createComponent") {
+		if (fixHints?.exportCodeToBeUsed?.args?.[0]?.kind === SyntaxKind.ObjectLiteralExpression) {
+			const componentOptionsExpression =
+				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[0].value);
+			if (componentOptionsExpression.async !== true) {
+				fixHints = undefined; // We cannot handle this case
+				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+			}
+		} else {
+			fixHints = undefined; // We cannot handle this case
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
+	} else if (apiName === "getLibraryResourceBundle") {
+		// Handling fallback in the legacy API
+		if (!fixHints?.exportCodeToBeUsed?.args?.[0] ||
+			fixHints?.exportCodeToBeUsed?.args?.[0]?.value === "undefined") {
+			fixHints.exportCodeToBeUsed.args ??= [];
+			fixHints.exportCodeToBeUsed.args[0] = {
+				value: "\"sap.ui.core\"", kind: SyntaxKind.StringLiteral, ui5Type: "library",
+			};
+		}
+
+		fixHints.exportCodeToBeUsed.name = `$moduleIdentifier` +
+			`.getResourceBundleFor(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args ?? [])})`;
+
+		// If any of the arguments is a boolean with value true, the return value is a promise
+		// and is not compatible with the new API
+		if ([fixHints?.exportCodeToBeUsed?.args?.[0]?.kind,
+			fixHints?.exportCodeToBeUsed?.args?.[1]?.kind,
+			fixHints?.exportCodeToBeUsed?.args?.[2]?.kind].includes(SyntaxKind.TrueKeyword) ||
+			fixHints?.exportCodeToBeUsed?.args?.[0]?.ui5Type !== "library") {
+			fixHints = undefined; // The new API is async
+			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		}
 	}
 
 	return fixHints;
+}
+
+function extractKeyValuePairs(jsonLikeStr: string) {
+	const regex = /["']?([\w$]+)["']?\s*:\s*(true|false|null|["'][^"']*["']|[+,\-./0-9:;<=>?@A-Z\\[\\\\]^_`a-e\]+)/g;
+	const pairs = {} as Record<string, unknown>;
+	let match;
+	while ((match = regex.exec(jsonLikeStr)) !== null) {
+		const key = match[1];
+		const rawValue = match[2];
+		let value;
+
+		// Convert to appropriate JS type
+		if (/^["'].*["']$/.test(rawValue)) {
+			value = rawValue.slice(1, -1); // remove quotes
+		} else if (rawValue === "true") {
+			value = true;
+		} else if (rawValue === "false") {
+			value = false;
+		} else if (rawValue === "null") {
+			value = null;
+		} else if (!isNaN(Number(rawValue))) {
+			value = parseFloat(rawValue);
+		} else {
+			value = rawValue; // fallback
+		}
+
+		pairs[key] = value;
+	}
+	return pairs;
 }
 
 function cleanRedundantArguments(availableArgs: {value: string}[]) {
