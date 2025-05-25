@@ -37,7 +37,7 @@
 				"@eslint/js": "^9.15.0",
 				"@istanbuljs/esm-loader-hook": "^0.3.0",
 				"@istanbuljs/nyc-config-typescript": "^1.0.2",
-				"@stylistic/eslint-plugin": "^4.2.0",
+				"@stylistic/eslint-plugin": "^4.4.0",
 				"@types/he": "^1.2.3",
 				"@types/node": "20.11.0",
 				"@types/sinon": "^17.0.4",
@@ -3222,9 +3222,9 @@
 			}
 		},
 		"node_modules/@npmcli/package-json": {
-			"version": "6.1.1",
-			"resolved": "https://registry.npmjs.org/@npmcli/package-json/-/package-json-6.1.1.tgz",
-			"integrity": "sha512-d5qimadRAUCO4A/Txw71VM7UrRZzV+NPclxz/dc+M6B2oYwjWTjqh8HA/sGQgs9VZuJ6I/P7XIAlJvgrl27ZOw==",
+			"version": "6.2.0",
+			"resolved": "https://registry.npmjs.org/@npmcli/package-json/-/package-json-6.2.0.tgz",
+			"integrity": "sha512-rCNLSB/JzNvot0SEyXqWZ7tX2B5dD2a1br2Dp0vSYVo5jh8Z0EZ7lS9TsZ1UtziddB1UfNUaMCc538/HztnJGA==",
 			"dependencies": {
 				"@npmcli/git": "^6.0.0",
 				"glob": "^10.2.2",
@@ -3609,12 +3609,12 @@
 			}
 		},
 		"node_modules/@stylistic/eslint-plugin": {
-			"version": "4.2.0",
-			"resolved": "https://registry.npmjs.org/@stylistic/eslint-plugin/-/eslint-plugin-4.2.0.tgz",
-			"integrity": "sha512-8hXezgz7jexGHdo5WN6JBEIPHCSFyyU4vgbxevu4YLVS5vl+sxqAAGyXSzfNDyR6xMNSH5H1x67nsXcYMOHtZA==",
+			"version": "4.4.0",
+			"resolved": "https://registry.npmjs.org/@stylistic/eslint-plugin/-/eslint-plugin-4.4.0.tgz",
+			"integrity": "sha512-bIh/d9X+OQLCAMdhHtps+frvyjvAM4B1YlSJzcEEhl7wXLIqPar3ngn9DrHhkBOrTA/z9J0bUMtctAspe0dxdQ==",
 			"dev": true,
 			"dependencies": {
-				"@typescript-eslint/utils": "^8.23.0",
+				"@typescript-eslint/utils": "^8.32.1",
 				"eslint-visitor-keys": "^4.2.0",
 				"espree": "^10.3.0",
 				"estraverse": "^5.3.0",
@@ -4050,7 +4050,6 @@
 			"integrity": "sha512-hNdmP4g7kizPw9fihmjrEr6daQZISy2oSHoA2dnpjqnUhqRBmzIix4lGNpPgczdbeQtoAgvCPpE9h1UsXyumEQ==",
 			"dev": true,
 			"hasShrinkwrap": true,
-			"license": "Apache-2.0",
 			"dependencies": {
 				"@ui5/builder": "^4.0.7",
 				"@ui5/fs": "^4.0.1",
@@ -12055,9 +12054,9 @@
 			"integrity": "sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA=="
 		},
 		"node_modules/electron-to-chromium": {
-			"version": "1.5.155",
-			"resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.155.tgz",
-			"integrity": "sha512-ps5KcGGmwL8VaeJlvlDlu4fORQpv3+GIcF5I3f9tUKUlJ/wsysh6HU8P5L1XWRYeXfA0oJd4PyM8ds8zTFf6Ng==",
+			"version": "1.5.157",
+			"resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.157.tgz",
+			"integrity": "sha512-/0ybgsQd1muo8QlnuTpKwtl0oX5YMlUGbm8xyqgDU00motRkKFFbUJySAQBWcY79rVqNLWIWa87BGVGClwAB2w==",
 			"dev": true
 		},
 		"node_modules/emittery": {
@@ -13098,9 +13097,9 @@
 			}
 		},
 		"node_modules/get-tsconfig": {
-			"version": "4.10.0",
-			"resolved": "https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.10.0.tgz",
-			"integrity": "sha512-kGzZ3LWWQcGIAmg6iWvXn0ei6WDtV26wzHRMwDSzmAbcXrTEXxHy6IehI6/4eT6VRKyMP1eF1VqwrVUmE/LR7A==",
+			"version": "4.10.1",
+			"resolved": "https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.10.1.tgz",
+			"integrity": "sha512-auHyJ4AgMz7vgS8Hp3N6HXSmlMdUyhSUrfBF16w153rxtLIEOE+HGqaBppczZvnHLqQJfiHotCYpNhl0lUROFQ==",
 			"dev": true,
 			"dependencies": {
 				"resolve-pkg-maps": "^1.0.0"
@@ -16867,8 +16866,7 @@
 			"version": "1.0.4",
 			"resolved": "https://registry.npmjs.org/punyexpr/-/punyexpr-1.0.4.tgz",
 			"integrity": "sha512-4tldIGB5Sk0pSuKjVv1KxniTmZb8Fuh3OAU7+esEz6NjsRTrkN3ZJBKRCUyZsHR/pmGggnH8kjy66vutfXpEMQ==",
-			"dev": true,
-			"license": "MIT"
+			"dev": true
 		},
 		"node_modules/pupa": {
 			"version": "3.1.0",
@@ -17267,9 +17265,9 @@
 			}
 		},
 		"node_modules/rimraf/node_modules/jackspeak": {
-			"version": "4.1.0",
-			"resolved": "https://registry.npmjs.org/jackspeak/-/jackspeak-4.1.0.tgz",
-			"integrity": "sha512-9DDdhb5j6cpeitCbvLO7n7J4IxnbM6hoF6O1g4HQ5TfhvvKN8ywDM7668ZhMHRqVmxqhps/F6syWK2KcPxYlkw==",
+			"version": "4.1.1",
+			"resolved": "https://registry.npmjs.org/jackspeak/-/jackspeak-4.1.1.tgz",
+			"integrity": "sha512-zptv57P3GpL+O0I7VdMJNBZCu+BPHVQUk55Ft8/QCJjTVxrnJHuVuX/0Bl2A6/+2oyR/ZMEuFKwmzqqZ/U5nPQ==",
 			"dev": true,
 			"dependencies": {
 				"@isaacs/cliui": "^8.0.2"
@@ -18290,7 +18288,6 @@
 			"resolved": "https://registry.npmjs.org/ui5-test-runner/-/ui5-test-runner-5.7.1.tgz",
 			"integrity": "sha512-koat5taIPEnmFSwCG9IXT+kI9oOnnGcs6czoEjti6djAKs4klKIRSDhiXHUVFBTLMuDaf2ZLkPAEdBLrJORXRw==",
 			"dev": true,
-			"license": "MIT",
 			"dependencies": {
 				"commander": "^12.1.0",
 				"ps-tree": "^1.2.0",
