@@ -79,7 +79,7 @@
 		"chalk": "^5.4.1",
 		"data-with-position": "^0.5.0",
 		"figures": "^6.1.0",
-		"globals": "^16.1.0",
+		"globals": "^16.2.0",
 		"he": "^1.2.0",
 		"json-source-map": "^0.6.1",
 		"magic-string": "^0.30.17",
