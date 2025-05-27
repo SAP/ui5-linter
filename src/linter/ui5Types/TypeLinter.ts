@@ -114,7 +114,9 @@ export default class TypeLinter {
 				continue;
 			}
 			let manifestContent;
-			if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
+			if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts") ||
+				// Manifest contains information that is needed for autofixing
+				applyAutofix) {
 				const res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
 				if (res) {
 					manifestContent = await res.getString();
