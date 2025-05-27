@@ -10,4 +10,10 @@ sap.ui.define([], function() {
 		}
 	};
 
+	// Delete can't be fixed in case the module export is deleted
+	delete sap.ushell.Container;
+
+	 // Deleting an inner property of a global module access can be fixed
+	delete sap.ushell.Container.getService;
+
 });

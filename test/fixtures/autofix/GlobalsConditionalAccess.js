@@ -27,7 +27,7 @@ sap.ui.define([], function() {
 		console.log("Button prototype has someMethod");
 	}
 
-	// // Should be replaced, as there is no lazy dependency to Button in this module
+	// Should be replaced, as there is no lazy dependency to Button in this module
 	const oButton = new sap.m.Button();
 
 });
