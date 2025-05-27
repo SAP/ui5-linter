@@ -32,6 +32,15 @@ export default class GlobalsFixHintsGenerator {
 			return undefined;
 		}
 
+		// Check for usage of "delete" keyword with the module export, which is not fixable
+		// as only an identifier would remain after the autofix, which would not be valid.
+		if (
+			ts.isDeleteExpression(propertyAccessNode.parent) &&
+			propertyAccessNode.parent.expression === propertyAccessNode
+		) {
+			return undefined;
+		}
+
 		// Check whether the access is conditional / probing / lazy
 		fixHints.conditional = isConditionalAccess(propertyAccessNode);
 
