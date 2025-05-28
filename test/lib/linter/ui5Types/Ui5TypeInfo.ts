@@ -6,11 +6,60 @@ import ts from "typescript";
 import {getSymbolForPropertyInConstructSignatures} from "../../../../src/linter/ui5Types/utils/utils.js";
 import {getUi5TypeInfoFromSymbol, Ui5TypeInfoKind} from "../../../../src/linter/ui5Types/Ui5TypeInfo.js";
 
+class TestContext {
+	constructor(
+		public program: ts.Program,
+		public checker: ts.TypeChecker,
+		public sourceFile: ts.SourceFile
+	) {}
+
+	getFirstExpressionStatement(): ts.ExpressionStatement {
+		const firstStatement = this.sourceFile.statements.find(
+			(statement): statement is ts.ExpressionStatement => ts.isExpressionStatement(statement)
+		);
+		if (firstStatement && ts.isExpressionStatement(firstStatement)) {
+			return firstStatement;
+		}
+		throw new Error("No ExpressionStatement found in the source file.");
+	}
+
+	getFirstNewExpression(): ts.NewExpression {
+		const expression = this.getFirstExpressionStatement().expression;
+		if (ts.isNewExpression(expression)) {
+			return expression;
+		}
+		throw new Error("No NewExpression found in the source file.");
+	}
+
+	getFirstCallExpression(): ts.CallExpression {
+		const expression = this.getFirstExpressionStatement().expression;
+		if (ts.isCallExpression(expression)) {
+			return expression;
+		}
+		throw new Error("No CallExpression found in the source file.");
+	}
+
+	getConstructorPropertyAssignmentSymbol(
+		newExpression: ts.NewExpression, propertyName: string
+	): ts.Symbol | undefined {
+		const classType = this.checker.getTypeAtLocation(newExpression.expression);
+		const objectLiteralExpression = newExpression.arguments?.[0] as ts.ObjectLiteralExpression;
+		const propertyAssignment = objectLiteralExpression.properties.find(
+			(prop) => ts.isPropertyAssignment(prop) && prop.name.getText() === propertyName
+		) as ts.PropertyAssignment | undefined;
+
+		if (propertyAssignment) {
+			return getSymbolForPropertyInConstructSignatures(
+				classType.getConstructSignatures(), 0, propertyName
+			);
+		}
+		return undefined;
+	}
+}
+
 const test = anyTest as TestFn<{
 	sharedLanguageService: SharedLanguageService;
-	initTestContext: (sourceFileContent: string) => Promise<{
-		program: ts.Program; checker: ts.TypeChecker; sourceFile: ts.SourceFile;
-	}>;
+	initTestContext: (sourceFileContent: string) => Promise<TestContext>;
 }>;
 
 // Note: Tests in this file are serial because they use a shared language service instance.
@@ -38,13 +87,9 @@ test.before((t) => {
 
 		const program = sharedLanguageService.getProgram();
 		const checker = program.getTypeChecker();
-		const sourceFile = program.getSourceFile("/resources/test/test.js");
+		const sourceFile = program.getSourceFile("/resources/test/test.js")!;
 
-		return {
-			program,
-			checker,
-			sourceFile: sourceFile!,
-		};
+		return new TestContext(program, checker, sourceFile);
 	};
 });
 
@@ -55,7 +100,7 @@ test.afterEach.always((t) => {
 });
 
 test.serial("TypeInfo: sap/m/Button 'tap' event", async (t) => {
-	const {checker, sourceFile} = await t.context.initTestContext(`
+	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/m/Button"], function(Button) {
 			new Button({
 				tap: function() {}
@@ -63,27 +108,10 @@ test.serial("TypeInfo: sap/m/Button 'tap' event", async (t) => {
 		});`
 	);
 
-	const expressionStatement = sourceFile.statements[1] as ts.ExpressionStatement;
-	t.is(ts.SyntaxKind[expressionStatement.kind], "ExpressionStatement");
-	const newExpression = expressionStatement.expression as ts.NewExpression;
-	t.is(ts.SyntaxKind[newExpression.kind], "NewExpression");
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "tap")!;
 
-	const classType = checker.getTypeAtLocation(newExpression.expression);
-
-	const objectLiteralExpression = newExpression.arguments?.[0] as ts.ObjectLiteralExpression;
-	t.is(ts.SyntaxKind[objectLiteralExpression.kind], "ObjectLiteralExpression");
-
-	const tapPropertyAssignment = objectLiteralExpression.properties[0] as ts.PropertyAssignment;
-	t.is(ts.SyntaxKind[tapPropertyAssignment.kind], "PropertyAssignment");
-
-	const propertySymbol = getSymbolForPropertyInConstructSignatures(
-		classType.getConstructSignatures(), 0, (tapPropertyAssignment.name as ts.Identifier).text
-	)!;
-
-	t.is(propertySymbol.name, "tap");
-
-	const ui5TypeInfo = getUi5TypeInfoFromSymbol(propertySymbol);
-	t.deepEqual(ui5TypeInfo, {
+	t.deepEqual(getUi5TypeInfoFromSymbol(propertySymbol), {
 		kind: Ui5TypeInfoKind.Module,
 		module: "sap/m/Button",
 		export: "tap",
@@ -92,22 +120,32 @@ test.serial("TypeInfo: sap/m/Button 'tap' event", async (t) => {
 });
 
 test.serial("TypeInfo: sap/ui/core/Core 'byId' method", async (t) => {
-	const {checker, sourceFile} = await t.context.initTestContext(`
+	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/core/Core"], function(Core) {
 			Core.byId("test");
 		});`
 	);
 
-	const expressionStatement = sourceFile.statements[1] as ts.ExpressionStatement;
-	t.is(ts.SyntaxKind[expressionStatement.kind], "ExpressionStatement");
-	const callExpression = expressionStatement.expression as ts.CallExpression;
-	t.is(ts.SyntaxKind[callExpression.kind], "CallExpression");
+	const callExpression = testContext.getFirstCallExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(callExpression.expression)!;
 
-	const symbol = checker.getSymbolAtLocation(callExpression.expression)!;
-	t.is(symbol.name, "byId");
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/Core",
+		export: "byId",
+		basename: "byId",
+	});
+});
 
-	const ui5TypeInfo = getUi5TypeInfoFromSymbol(symbol);
-	t.deepEqual(ui5TypeInfo, {
+test.serial("TypeInfo: sap.ui.getCore().byId", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.getCore().byId("test");`
+	);
+
+	const callExpression = testContext.getFirstCallExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(callExpression.expression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
 		kind: Ui5TypeInfoKind.Module,
 		module: "sap/ui/core/Core",
 		export: "byId",
