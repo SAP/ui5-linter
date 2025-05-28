@@ -37,7 +37,7 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/Theming", exportNameToBeUsed: "notifyContentDensityChanged",
 	}],
 	["byFieldGroupId", {
-		exportCodeToBeUsed: "sap.ui.core.Control.getControlsByFieldGroupId($1)",
+		moduleName: "sap/ui/core/Control", exportCodeToBeUsed: "$moduleIdentifier.getControlsByFieldGroupId($1)",
 	}],
 	["getCurrentFocusedControlId", {
 		moduleName: "sap/ui/core/Element", exportNameToBeUsed: "getActiveElement()?.getId",
