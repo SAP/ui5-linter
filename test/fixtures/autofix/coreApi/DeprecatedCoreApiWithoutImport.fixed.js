@@ -7,10 +7,9 @@ sap.ui.define(["sap/ui/core/Core",
 	"sap/ui/core/EventBus",
 	"sap/ui/core/Lib",
 	"sap/ui/core/StaticArea",
-	"sap/ui/core/tmpl/Template",
 	"sap/ui/Device"
-	], function(Core, Theming, IntervalTrigger, Control, Element, Component, EventBus, Lib, StaticArea, Template, Device) {
-	Theming.applyTheme("themeName");
+	], function(Core, Theming, IntervalTrigger, Control, Element, Component, EventBus, Lib, StaticArea, Device) {
+	Theming.setTheme("themeName");
 	Core.applyTheme("customTheme", "find/my/theme/here");
 
 	Core.ready(function() {console.log();});
