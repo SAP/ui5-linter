@@ -13,8 +13,7 @@ export default class FixHintsGenerator {
 
 	constructor(
 		resourcePath: string,
-		ambientModuleCache: AmbientModuleCache,
-		manifestContent?: string
+		ambientModuleCache: AmbientModuleCache
 	) {
 		this.globalsGenerator = new GlobalsFixHintsGenerator(resourcePath, ambientModuleCache);
 		this.jquerySapGenerator = new JquerySapFixHintsGenerator();
