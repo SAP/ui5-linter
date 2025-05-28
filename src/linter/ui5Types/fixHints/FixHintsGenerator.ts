@@ -4,7 +4,7 @@ import GlobalsFixHintsGenerator from "./GlobalsFixHintsGenerator.js";
 import JquerySapFixHintsGenerator from "./JquerySapFixHintsGenerator.js";
 import CoreFixHintsGenerator from "./CoreFixHintsGenerator.js";
 import {FixHints} from "./FixHints.js";
-import type {Ui5TypeInfo} from "../utils/utils.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export default class FixHintsGenerator {
 	private globalsGenerator: GlobalsFixHintsGenerator;
