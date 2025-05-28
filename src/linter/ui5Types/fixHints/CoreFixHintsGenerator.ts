@@ -268,8 +268,7 @@ const coreModulesReplacements = new Map<string, FixHints>([
 
 export default class CoreFixHintsGenerator {
 	constructor(
-		private ambientModuleCache: AmbientModuleCache,
-		private manifestContent?: string
+		private ambientModuleCache: AmbientModuleCache
 	) {
 
 	}
