@@ -70,9 +70,9 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 	// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
 	// TODO: To be discussed: sLibrary must be a library, that might not be easy to check
-	["getLibraryResourceBundle", {
-		moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.getResourceBundleFor($1, $2)",
-	}],
+	// ["getLibraryResourceBundle", {
+	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.getResourceBundleFor($1, $2)",
+	// }],
 
 	// TODO: Can't be safely migrated for now. The callback function might have code
 	// that has to be migrated, too. MagicString will throw an exception.
