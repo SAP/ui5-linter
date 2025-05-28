@@ -335,6 +335,8 @@ export default class CoreFixHintsGenerator {
 
 		if (manifestLibs[potentialLibNamespace]) {
 			return true;
+		} else if (manifest?.["sap.app"]?.id === potentialLibNamespace) {
+			return true;
 		}
 
 		// Extract the namespace from the virtual path
