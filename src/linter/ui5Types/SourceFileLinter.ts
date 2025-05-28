@@ -102,9 +102,7 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
-		this.#fixHintsGenerator = this.fix ?
-			new FixHintsGenerator(this.resourcePath, this.ambientModuleCache, this.manifestContent) :
-			null;
+		this.#fixHintsGenerator = this.fix ? new FixHintsGenerator(this.resourcePath, this.ambientModuleCache) : null;
 	}
 
 	async lint() {
