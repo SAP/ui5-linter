@@ -2,7 +2,6 @@ import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
 import {isExpectedValueExpression, extractNamespace} from "../utils/utils.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
-import type {SAPJSONSchemaForWebApplicationManifestFile} from "../../../manifest.d.ts";
 
 const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
