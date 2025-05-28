@@ -187,7 +187,6 @@ function testDefinition(
 				result.filePath = resultFileName;
 			}
 		});
-		t.snapshot(res);
 
 		if (fix) {
 			t.is(t.context.autofixSpy.callCount, 1);
@@ -198,6 +197,8 @@ function testDefinition(
 				t.snapshot(content, `AutofixResult: ${filePath}`);
 			}
 		}
+
+		t.snapshot(res, `LintResult: ${testName}`);
 	});
 }
 
