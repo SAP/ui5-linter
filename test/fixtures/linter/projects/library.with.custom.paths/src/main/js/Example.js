@@ -3,10 +3,8 @@
  */
 
 // Provides control library.with.custom.paths.Example.
-sap.ui.define(["./library", "sap/ui/core/Control", "./ExampleRenderer", "sap/ui/core/Lib"], function (library, Control, ExampleRenderer, Lib) {
+sap.ui.define(["./library", "sap/ui/core/Control", "./ExampleRenderer"], function (library, Control, ExampleRenderer) {
 	"use strict";
-	
-	sap.ui.getCore().getLibraryResourceBundle("library.with.custom.paths", "en_US");
 
 	// refer to library types
 	var ExampleColor = library.ExampleColor;
