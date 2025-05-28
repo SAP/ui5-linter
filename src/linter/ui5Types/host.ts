@@ -80,6 +80,39 @@ function addSapui5TypesMappingToCompilerOptions(
 	});
 }
 
+const DEFAULT_COMPILER_OPTIONS: ts.CompilerOptions = {
+	target: ts.ScriptTarget.ES2022,
+	module: ts.ModuleKind.ES2022,
+	// Skip lib check to speed up linting. Libs should generally be fine,
+	// we might want to add a unit test doing the check during development
+	skipLibCheck: true,
+	// Include standard typescript libraries for ES2022 and DOM support
+	lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
+	// Disable lib replacement lookup as we don't rely on it
+	libReplacement: false,
+	// Allow and check JavaScript files since this is everything we'll do here
+	allowJs: true,
+	checkJs: false,
+	strict: true,
+	noImplicitAny: false,
+	strictNullChecks: false,
+	strictPropertyInitialization: false,
+	rootDir: "/",
+	// Library modules (e.g. sap/ui/core/library.js) do not have a default export but
+	// instead have named exports e.g. for enums defined in the module.
+	// However, in current JavaScript code (UI5 AMD) the whole object is exported, as there are no
+	// named exports outside of ES Modules / TypeScript.
+	// This property compensates this gap and tries to all usage of default imports where actually
+	// no default export is defined.
+	// NOTE: This setting should not be used when analyzing TypeScript code, as it would allow
+	// using an default import on library modules, which is not intended.
+	// A better solution:
+	// During transpilation, for every library module (where no default export exists),
+	// an "import * as ABC" instead of a default import is created.
+	// This logic needs to be in sync with the generator for UI5 TypeScript definitions.
+	allowSyntheticDefaultImports: true,
+};
+
 export type FileContents = Map<ResourcePath, string>;
 
 export async function createVirtualLanguageServiceHost(
@@ -89,10 +122,15 @@ export async function createVirtualLanguageServiceHost(
 	projectScriptVersion: string,
 	libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"]
 ): Promise<ts.LanguageServiceHost> {
+	const compilerOptions = {
+		...DEFAULT_COMPILER_OPTIONS,
+		...options,
+	};
+
 	const silly = log.isLevelEnabled("silly");
 
-	options.typeRoots = ["/types"];
-	options.types = [];
+	compilerOptions.typeRoots = ["/types"];
+	compilerOptions.types = [];
 
 	const typePathMappings = new Map<string, string>();
 	addPathMappingForPackage("typescript", typePathMappings);
@@ -115,19 +153,15 @@ export async function createVirtualLanguageServiceHost(
 	));
 
 	// Add all types except @sapui5/types which will be handled below
-	options.types.push(...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"));
+	compilerOptions.types.push(...typePackageDirs.filter((dir) => dir !== "/types/@sapui5/types/"));
 
 	// Adds types / mappings for all @sapui5/types
 	addSapui5TypesMappingToCompilerOptions(
-		await collectSapui5TypesFiles(), options, context, libraryDependencies);
+		await collectSapui5TypesFiles(), compilerOptions, context, libraryDependencies);
 
 	// Create regex matching all path mapping keys
 	const pathMappingRegex = new RegExp(
 		`^\\/types\\/(${Array.from(typePathMappings.keys()).join("|").replaceAll("/", "\\/")})\\/(.*)`);
-
-	if (!options.rootDir) {
-		throw new Error(`Missing option 'rootDir'`);
-	}
 
 	function mapToTypePath(fileName: string): string | undefined {
 		const pkgName = fileName.match(pathMappingRegex);
@@ -166,13 +200,13 @@ export async function createVirtualLanguageServiceHost(
 	}
 
 	if (silly) {
-		log.silly(`compilerOptions: ${JSON.stringify(options, null, 2)}`);
+		log.silly(`compilerOptions: ${JSON.stringify(compilerOptions, null, 2)}`);
 	}
 
 	return {
 
 		getCompilationSettings: () => {
-			return options;
+			return compilerOptions;
 		},
 
 		getScriptFileNames: () => {
@@ -228,7 +262,7 @@ export async function createVirtualLanguageServiceHost(
 			if (silly) {
 				log.silly(`getCurrentDirectory`);
 			}
-			return options.rootDir ?? "/";
+			return compilerOptions.rootDir ?? "/";
 		},
 
 		readFile: (fileName) => {
