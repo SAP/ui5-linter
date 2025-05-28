@@ -152,3 +152,21 @@ test.serial("TypeInfo: sap.ui.getCore().byId", async (t) => {
 		basename: "byId",
 	});
 });
+
+test.serial("TypeInfo: sap/ui/base/Object 'extend' static method", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/base/Object"], function(BaseObject) {
+			BaseObject.isObjectA(new BaseObject(), "sap.ui.base.Object");
+		});`
+	);
+
+	const callExpression = testContext.getFirstCallExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(callExpression.expression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/base/Object",
+		export: "isObjectA",
+		basename: "isObjectA",
+	});
+});
