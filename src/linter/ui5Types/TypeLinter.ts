@@ -16,39 +16,6 @@ import {JSONSchemaForSAPUI5Namespace} from "../../manifest.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
-const DEFAULT_OPTIONS: ts.CompilerOptions = {
-	target: ts.ScriptTarget.ES2022,
-	module: ts.ModuleKind.ES2022,
-	// Skip lib check to speed up linting. Libs should generally be fine,
-	// we might want to add a unit test doing the check during development
-	skipLibCheck: true,
-	// Include standard typescript libraries for ES2022 and DOM support
-	lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
-	// Disable lib replacement lookup as we don't rely on it
-	libReplacement: false,
-	// Allow and check JavaScript files since this is everything we'll do here
-	allowJs: true,
-	checkJs: false,
-	strict: true,
-	noImplicitAny: false,
-	strictNullChecks: false,
-	strictPropertyInitialization: false,
-	rootDir: "/",
-	// Library modules (e.g. sap/ui/core/library.js) do not have a default export but
-	// instead have named exports e.g. for enums defined in the module.
-	// However, in current JavaScript code (UI5 AMD) the whole object is exported, as there are no
-	// named exports outside of ES Modules / TypeScript.
-	// This property compensates this gap and tries to all usage of default imports where actually
-	// no default export is defined.
-	// NOTE: This setting should not be used when analyzing TypeScript code, as it would allow
-	// using an default import on library modules, which is not intended.
-	// A better solution:
-	// During transpilation, for every library module (where no default export exists),
-	// an "import * as ABC" instead of a default import is created.
-	// This logic needs to be in sync with the generator for UI5 TypeScript definitions.
-	allowSyntheticDefaultImports: true,
-};
-
 export default class TypeLinter {
 	#sharedLanguageService: SharedLanguageService;
 	#compilerOptions: ts.CompilerOptions;
@@ -69,7 +36,7 @@ export default class TypeLinter {
 		this.#workspace = workspace;
 		this.#filePathsWorkspace = filePathsWorkspace;
 		this.#libraryDependencies = libraryDependencies;
-		this.#compilerOptions = {...DEFAULT_OPTIONS};
+		this.#compilerOptions = {};
 
 		const namespace = context.getNamespace();
 		if (namespace) {
