@@ -39,6 +39,14 @@ class TestContext {
 		throw new Error("No CallExpression found in the source file.");
 	}
 
+	getFirstPropertyAccessExpression(): ts.PropertyAccessExpression {
+		const expression = this.getFirstExpressionStatement().expression;
+		if (ts.isPropertyAccessExpression(expression)) {
+			return expression;
+		}
+		throw new Error("No PropertyAccessExpression found in the source file.");
+	}
+
 	getConstructorPropertyAssignmentSymbol(
 		newExpression: ts.NewExpression, propertyName: string
 	): ts.Symbol | undefined {
@@ -170,3 +178,95 @@ test.serial("TypeInfo: sap/ui/base/Object 'extend' static method", async (t) => 
 		basename: "isObjectA",
 	});
 });
+
+test.serial("TypeInfo: ENUM", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
+			coreLibrary.AccessibleRole;
+		});`
+	);
+
+	const propertyAccessExpression = testContext.getFirstPropertyAccessExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(propertyAccessExpression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/library",
+		export: "AccessibleRole",
+		basename: "AccessibleRole",
+	});
+});
+
+test.serial("TypeInfo: ENUM value", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
+			coreLibrary.AccessibleRole.Alert;
+		});`
+	);
+
+	const propertyAccessExpression = testContext.getFirstPropertyAccessExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(propertyAccessExpression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/library",
+		export: "Alert",
+		basename: "Alert",
+	});
+});
+
+test.serial("TypeInfo: ENUM in namespace", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
+			coreLibrary.routing.HistoryDirection;
+		});`
+	);
+
+	const propertyAccessExpression = testContext.getFirstPropertyAccessExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(propertyAccessExpression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/library",
+		export: "routing.HistoryDirection",
+		basename: "HistoryDirection",
+	});
+});
+
+test.serial("TypeInfo: ENUM value in namespace", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
+			coreLibrary.routing.HistoryDirection.Forwards;
+		});`
+	);
+
+	const propertyAccessExpression = testContext.getFirstPropertyAccessExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(propertyAccessExpression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/library",
+		export: "routing.Forwards",
+		basename: "Forwards",
+	});
+});
+
+/* TODO
+test.serial("TypeInfo: DataType", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
+			coreLibrary.AbsoluteCSSSize;
+		});`
+	);
+
+	const propertyAccessExpression = testContext.getFirstPropertyAccessExpression();
+	const symbol = testContext.checker.getSymbolAtLocation(propertyAccessExpression)!;
+
+	t.deepEqual(getUi5TypeInfoFromSymbol(symbol), {
+		kind: Ui5TypeInfoKind.Module,
+		module: "sap/ui/core/library",
+		export: "routing.Forwards",
+		basename: "Forwards",
+	});
+});
+*/

@@ -1,23 +1,60 @@
 import ts from "typescript";
 
 export enum Ui5TypeInfoKind {
-	Module,
 	Global,
+	Module,
+	Library,
+	MetadataProperty,
+	MetadataEvent,
+	MetadataAggregation,
+	MetadataAssociation,
+	Method,
+	Property,
+	StaticMethod,
+	StaticProperty,
 }
 
-export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5GlobalTypeInfo;
+export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5GlobalTypeInfo | Ui5LibraryTypeInfo |
+	Ui5MetadataTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo;
 
-interface Ui5ModuleTypeInfo {
-	module: string; // module name (slash separated)
-	export: string; // complete export name with namespaces
-	basename?: string; // local name without namespaces
-	name?: string; // e.g. DataType name
-	kind: Ui5TypeInfoKind.Module;
+interface BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind;
 }
 
-interface Ui5GlobalTypeInfo {
-	namespace: string;
+interface Ui5GlobalTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.Global;
+	namespace: string;
+}
+
+interface Ui5LibraryTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Library;
+	name: string; // e.g. "sap.ui.core", extracted from the .d.ts filename
+}
+
+interface Ui5ModuleTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Module;
+	module: string; // module name (slash separated)
+	name?: string; // e.g. DataType name ???
+	library: Ui5LibraryTypeInfo;
+}
+
+interface Ui5MetadataTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.MetadataProperty | Ui5TypeInfoKind.MetadataEvent |
+		Ui5TypeInfoKind.MetadataAggregation | Ui5TypeInfoKind.MetadataAssociation;
+	name: string;
+	module: Ui5ModuleTypeInfo;
+}
+
+interface Ui5MethodTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Method | Ui5TypeInfoKind.StaticMethod;
+	name: string;
+	module: Ui5ModuleTypeInfo;
+}
+
+interface Ui5PropertyTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Property | Ui5TypeInfoKind.StaticProperty;
+	name: string;
+	module: Ui5ModuleTypeInfo;
 }
 
 /**
