@@ -12,7 +12,7 @@ import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
 import {FixHints} from "./fixHints/FixHints.js";
-import {Ui5TypeInfo} from "./utils/utils.js";
+import {Ui5TypeInfo} from "./Ui5TypeInfo.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;

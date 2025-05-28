@@ -16,11 +16,8 @@ import {
 	isSourceFileOfPseudoModuleType,
 	isSourceFileOfTypeScriptLib,
 	getSymbolModuleDeclaration,
-	getUi5TypeInfoFromSymbol,
-	Ui5TypeInfoKind,
 	isGlobalThis,
 	extractNamespace,
-	Ui5TypeInfo,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -35,6 +32,7 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind} from "./Ui5TypeInfo.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
