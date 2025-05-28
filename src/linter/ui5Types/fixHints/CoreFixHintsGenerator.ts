@@ -314,38 +314,10 @@ export default class CoreFixHintsGenerator {
 				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => ({
 					value: arg.getText(),
 					kind: arg?.kind,
-					ui5Type: this.isPotentialUi5Library(arg) ? "library" : undefined,
 				}));
 			}
 		}
 
 		return {...moduleReplacement, exportCodeToBeUsed};
-	}
-
-	isPotentialUi5Library(node: ts.Node): boolean {
-		if (!("text" in node) || typeof node.text !== "string") {
-			return false;
-		}
-
-		const potentialLibNamespace = node.text;
-
-		// Check libs from the manifest
-		const manifest = JSON.parse(this.manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
-		const manifestLibs = manifest["sap.ui5"]?.dependencies?.libs ?? {};
-
-		if (manifestLibs[potentialLibNamespace]) {
-			return true;
-		}
-
-		// Extract the namespace from the virtual path
-		const {fileName} = node.getSourceFile();
-		if (fileName.startsWith("/resources")) {
-			const libNamespace = fileName.split("/").slice(2, -1).join(".");
-			if (libNamespace === potentialLibNamespace) {
-				return true;
-			}
-		}
-
-		return !!this.ambientModuleCache.findModuleForName(potentialLibNamespace.replaceAll(".", "/") + "/library");
 	}
 }
