@@ -325,75 +325,9 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
-	} else if (apiName === "loadLibrary") {
-		if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
-			const libOptionsExpression =
-				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[1].value) as {async: boolean; url?: string};
-			if (libOptionsExpression.async === true) {
-				const newArg = {
-					name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-					url: libOptionsExpression.url,
-				};
-				fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-				fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-			} else {
-				fixHints = undefined; // We cannot handle this case
-				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-			}
-		} else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.TrueKeyword) {
-			const newArg = {
-				name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-			};
-			fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-			fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-		} else {
-			fixHints = undefined; // We cannot handle this case
-			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-		}
-	} else if (apiName === "createComponent") {
-		if (fixHints?.exportCodeToBeUsed?.args?.[0]?.kind === SyntaxKind.ObjectLiteralExpression) {
-			const componentOptionsExpression =
-				extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[0].value);
-			if (componentOptionsExpression.async !== true) {
-				fixHints = undefined; // We cannot handle this case
-				log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-			}
-		} else {
-			fixHints = undefined; // We cannot handle this case
-			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-		}
 	}
 
 	return fixHints;
-}
-
-function extractKeyValuePairs(jsonLikeStr: string) {
-	const regex = /["']?([\w$]+)["']?\s*:\s*(true|false|null|["'][^"']*["']|[+,\-./0-9:;<=>?@A-Z\\[\\\\]^_`a-e\]+)/g;
-	const pairs = {} as Record<string, unknown>;
-	let match;
-	while ((match = regex.exec(jsonLikeStr)) !== null) {
-		const key = match[1];
-		const rawValue = match[2];
-		let value;
-
-		// Convert to appropriate JS type
-		if (/^["'].*["']$/.test(rawValue)) {
-			value = rawValue.slice(1, -1); // remove quotes
-		} else if (rawValue === "true") {
-			value = true;
-		} else if (rawValue === "false") {
-			value = false;
-		} else if (rawValue === "null") {
-			value = null;
-		} else if (!isNaN(Number(rawValue))) {
-			value = parseFloat(rawValue);
-		} else {
-			value = rawValue; // fallback
-		}
-
-		pairs[key] = value;
-	}
-	return pairs;
 }
 
 function cleanRedundantArguments(availableArgs: {value: string}[]) {
