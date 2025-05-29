@@ -54,15 +54,15 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	}],
 	// Individual arguments must be mapped to "options" object
 	// The new API has no sync loading option, replacement is only safe when the options contain async:true
-	["loadLibrary", {
-		moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.load($1)",
-	}],
-	// Individual arguments must be mapped to "options" object.
-	// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-	// Only when the first argument is an object defining async: true a migration is possible.
-	["createComponent", {
-		moduleName: "sap/ui/core/Component", exportCodeToBeUsed: "$moduleIdentifier.create($1)",
-	}],
+	// ["loadLibrary", {
+	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.load($1)",
+	// }],
+	// // Individual arguments must be mapped to "options" object.
+	// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+	// // Only when the first argument is an object defining async: true a migration is possible.
+	// ["createComponent", {
+	// 	moduleName: "sap/ui/core/Component", exportCodeToBeUsed: "$moduleIdentifier.create($1)",
+	// }],
 	// Note that alternative replacement Component.get is meanwhile deprecated, too
 	["getComponent", {
 		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
