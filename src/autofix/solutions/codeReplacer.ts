@@ -388,35 +388,6 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 	return fixHints;
 }
 
-function extractKeyValuePairs(jsonLikeStr: string) {
-	const regex = /["']?([\w$]+)["']?\s*:\s*(true|false|null|["'][^"']*["']|[+,\-./0-9:;<=>?@A-Z\\[\\\\]^_`a-e\]+)/g;
-	const pairs = {} as Record<string, unknown>;
-	let match;
-	while ((match = regex.exec(jsonLikeStr)) !== null) {
-		const key = match[1];
-		const rawValue = match[2];
-		let value;
-
-		// Convert to appropriate JS type
-		if (/^["'].*["']$/.test(rawValue)) {
-			value = rawValue.slice(1, -1); // remove quotes
-		} else if (rawValue === "true") {
-			value = true;
-		} else if (rawValue === "false") {
-			value = false;
-		} else if (rawValue === "null") {
-			value = null;
-		} else if (!isNaN(Number(rawValue))) {
-			value = parseFloat(rawValue);
-		} else {
-			value = rawValue; // fallback
-		}
-
-		pairs[key] = value;
-	}
-	return pairs;
-}
-
 function cleanRedundantArguments(availableArgs: {value: string}[]) {
 	const args = [];
 	for (let i = 1; i <= availableArgs.length; i++) {
