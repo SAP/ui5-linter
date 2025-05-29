@@ -950,7 +950,8 @@ export default class SourceFileLinter {
 		if (ts.isElementAccessExpression(exprNode) ||
 			ts.isPropertyAccessExpression(exprNode) ||
 			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode) ?? this.getCoreFixHints(exprNode);
+			fixHints = this.getJquerySapFixHints(exprNode) ??
+				this.getCoreFixHints(exprNode, deprecationInfo.ui5TypeInfo);
 		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
@@ -1882,7 +1883,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression) {
-		return this.#fixHintsGenerator?.getCoreFixHints(node);
+	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo: ui5TypeInfo) {
+		return this.#fixHintsGenerator?.getCoreFixHints(node, ui5TypeInfo);
 	}
 }
