@@ -31,7 +31,7 @@ export default class FixHintsGenerator {
 	}
 
 	public getCoreFixHints(node: ts.CallExpression | ts.AccessExpression,
-		ui5TypeInfo: Ui5TypeInfo): FixHints | undefined {
+		ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
 		return this.coreGenerator.getFixHints(node, ui5TypeInfo);
 	}
 }
