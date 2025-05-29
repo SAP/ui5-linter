@@ -41,7 +41,8 @@ const coreModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/Control", exportCodeToBeUsed: "$moduleIdentifier.getControlsByFieldGroupId($1)",
 	}],
 	["getCurrentFocusedControlId", {
-		moduleName: "sap/ui/core/Element", exportNameToBeUsed: "getActiveElement()?.getId",
+		// The legacy API used to return null if no control was focused.
+		moduleName: "sap/ui/core/Element", exportCodeToBeUsed: "$moduleIdentifier.getActiveElement()?.getId() || null",
 	}],
 	["isStaticAreaRef", {
 		moduleName: "sap/ui/core/StaticArea",
