@@ -1883,7 +1883,7 @@ export default class SourceFileLinter {
 		}
 	}
 
-	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo: ui5TypeInfo) {
+	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo) {
 		return this.#fixHintsGenerator?.getCoreFixHints(node, ui5TypeInfo);
 	}
 }
