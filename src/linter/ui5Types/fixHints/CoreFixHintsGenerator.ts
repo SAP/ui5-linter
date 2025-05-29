@@ -2,6 +2,7 @@ import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
 import {isExpectedValueExpression, extractNamespace} from "../utils/utils.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
+import type {Ui5TypeInfo} from "../utils/utils.js";
 
 const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
@@ -273,12 +274,13 @@ export default class CoreFixHintsGenerator {
 
 	}
 
-	getFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
+	getFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo: Ui5TypeInfo): FixHints | undefined {
 		if (!ts.isPropertyAccessExpression(node)) {
 			return undefined;
 		}
-		const moduleName = node.expression.getText();
-		if (moduleName !== "Core" && moduleName !== "sap.ui.getCore()") {
+
+		if ("module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core" &&
+			"namespace" in ui5TypeInfo && ui5TypeInfo.namespace !== "sap.ui.getCore") {
 			return undefined;
 		}
 

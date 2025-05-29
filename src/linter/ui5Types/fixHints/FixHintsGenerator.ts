@@ -4,6 +4,7 @@ import GlobalsFixHintsGenerator from "./GlobalsFixHintsGenerator.js";
 import JquerySapFixHintsGenerator from "./JquerySapFixHintsGenerator.js";
 import CoreFixHintsGenerator from "./CoreFixHintsGenerator.js";
 import {FixHints} from "./FixHints.js";
+import type {Ui5TypeInfo} from "../utils/utils.js";
 
 export default class FixHintsGenerator {
 	private globalsGenerator: GlobalsFixHintsGenerator;
@@ -29,7 +30,8 @@ export default class FixHintsGenerator {
 		return this.jquerySapGenerator.getFixHints(node);
 	}
 
-	public getCoreFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
-		return this.coreGenerator.getFixHints(node);
+	public getCoreFixHints(node: ts.CallExpression | ts.AccessExpression,
+		ui5TypeInfo: Ui5TypeInfo): FixHints | undefined {
+		return this.coreGenerator.getFixHints(node, ui5TypeInfo);
 	}
 }
