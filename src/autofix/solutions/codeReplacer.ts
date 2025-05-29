@@ -320,11 +320,6 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 			fixHints = undefined; // We cannot handle this case
 			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
 		}
-	} else if (["attachIntervalTimer", "detachIntervalTimer"].includes(apiName ?? "")) {
-		if ((fixHints?.exportCodeToBeUsed?.args?.length ?? 0) > 1) {
-			fixHints = undefined; // We cannot handle this case
-			log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-		}
 	}
 
 	return fixHints;
