@@ -274,12 +274,13 @@ export default class CoreFixHintsGenerator {
 
 	}
 
-	getFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo: Ui5TypeInfo): FixHints | undefined {
+	getFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
 		if (!ts.isPropertyAccessExpression(node)) {
 			return undefined;
 		}
 
-		if ("module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core" &&
+		if (ui5TypeInfo &&
+			"module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core" &&
 			"namespace" in ui5TypeInfo && ui5TypeInfo.namespace !== "sap.ui.getCore") {
 			return undefined;
 		}
