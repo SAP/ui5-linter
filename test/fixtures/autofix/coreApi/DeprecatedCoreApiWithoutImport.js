@@ -1,7 +1,10 @@
 sap.ui.define([], function() {
 	const globalCore = sap.ui.getCore();
-	
-	globalCore.attachInit(function() {console.log();});
+
+	sap.ui.getCore().applyTheme("themeName");
+	sap.ui.getCore().applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
+	sap.ui.getCore().applyTheme("customTheme", undefined); // Can be autofixed when the 2nd argument is undefined
+
 	sap.ui.getCore().attachInit(function() {console.log();});
 
 	globalCore.attachInitEvent(function() {console.log();});
@@ -13,10 +16,14 @@ sap.ui.define([], function() {
 	globalCore.byId("id");
 	sap.ui.getCore().byId("id");
 
-	globalCore.getControl("controlId");
+	globalCore.getComponent("componentId");
+	sap.ui.getCore().getComponent("componentId");
+
 	sap.ui.getCore().getControl("controlId");
 
-	globalCore.getElementById("elementId");
+	globalCore.getCurrentFocusedControlId();
+	sap.ui.getCore().getCurrentFocusedControlId();
+
 	sap.ui.getCore().getElementById("elementId");
 
 	globalCore.getEventBus();
