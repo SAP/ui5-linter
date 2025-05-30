@@ -16,6 +16,15 @@ sap.ui.define([], function() {
 	globalCore.byId("id");
 	sap.ui.getCore().byId("id");
 
+	sap.ui.getCore().createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
+	globalCore.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
+	sap.ui.getCore().createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
+
+	// sap.ui.getCore().attachIntervalTimer(function() {console.log();});
+	// globalCore.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	// sap.ui.getCore().detachIntervalTimer(function() {console.log();});
+	// globalCore.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
+
 	globalCore.getComponent("componentId");
 	sap.ui.getCore().getComponent("componentId");
 
@@ -28,6 +37,13 @@ sap.ui.define([], function() {
 
 	globalCore.getEventBus();
 	sap.ui.getCore().getEventBus();
+
+	sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", "en_US");
+	sap.ui.getCore().getLibraryResourceBundle(); // Should fall back to "sap.ui.core"
+	globalCore.getLibraryResourceBundle("unknown.lib"); // Do not migrate unknown libraries
+	sap.ui.getCore().getLibraryResourceBundle(true); // bAsync is true (not autofixable)
+	globalCore.getLibraryResourceBundle("sap.ui.core", true); // bAsync is true (not autofixable)
+	sap.ui.getCore().getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
 	globalCore.getStaticAreaRef();
 	sap.ui.getCore().getStaticAreaRef();
@@ -51,6 +67,13 @@ sap.ui.define([], function() {
 
 	globalCore.isStaticAreaRef(oDomRef);
 	sap.ui.getCore().isStaticAreaRef(oDomRef);
+
+	sap.ui.getCore().loadLibrary("sap.ui.core", true);
+	sap.ui.getCore().loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
+	sap.ui.getCore().loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
+	globalCore.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
+	sap.ui.getCore().loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
+	globalCore.loadLibrary("sap.ui.core"); // async omitted (not autofixable)
 
 	globalCore.notifyContentDensityChanged();
 	sap.ui.getCore().notifyContentDensityChanged();
