@@ -1,10 +1,13 @@
 sap.ui.define([], function() {
+	const globalCore = sap.ui.getCore();
 	sap.ui.getCore().applyTheme("themeName");
 	sap.ui.getCore().applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
 	sap.ui.getCore().applyTheme("customTheme", undefined); // Can be autofixed when the 2nd argument is undefined
 
+	globalCore.attachInit(function() {console.log();});
 	sap.ui.getCore().attachInit(function() {console.log();});
 
+	globalCore.attachInitEvent(function() {console.log();});
 	sap.ui.getCore().attachInitEvent(function() {console.log();});
 
 	sap.ui.getCore().attachIntervalTimer(function() {console.log();});
@@ -24,10 +27,12 @@ sap.ui.define([], function() {
 
 	sap.ui.getCore().getComponent("componentId");
 
+	globalCore.getControl("controlId");
 	sap.ui.getCore().getControl("controlId");
 
 	sap.ui.getCore().getCurrentFocusedControlId();
 
+	globalCore.getElementById("elementId");
 	sap.ui.getCore().getElementById("elementId");
 
 	sap.ui.getCore().getEventBus();
@@ -55,8 +60,10 @@ sap.ui.define([], function() {
 		}
 	});
 
+	globalCore.isMobile();
 	sap.ui.getCore().isMobile();
 
+	globalCore.isStaticAreaRef(oDomRef);
 	sap.ui.getCore().isStaticAreaRef(oDomRef);
 
 	sap.ui.getCore().loadLibrary("sap.ui.core", true);
