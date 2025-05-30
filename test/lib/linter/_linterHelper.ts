@@ -57,7 +57,9 @@ export async function createMockedLinterModules() {
 export function assertExpectedLintResults(
 	t: ExecutionContext, res: LintResult[], basePath: string, filePaths: string[]) {
 	res.forEach((lintResult) => {
-		if (!filePaths.includes(lintResult.filePath)) {
+		// Normalize file paths to POSIX format
+		if (!filePaths.includes(lintResult.filePath) &&
+			!filePaths.includes(path.posix.normalize(lintResult.filePath.replace(/\\/g, "/")))) {
 			t.fail(
 				`Unexpected lint result for file ${lintResult.filePath}. Expected: ${filePaths.join(", ")}. ` +
 				`Result: ${JSON.stringify(lintResult)}`
