@@ -1,4 +1,6 @@
 import ts from "typescript";
+import {loadApiExtract} from "../../utils/ApiExtract.js";
+import {getSymbolModuleDeclaration} from "./utils/utils.js";
 
 export enum Ui5TypeInfoKind {
 	Global,
@@ -42,7 +44,7 @@ interface Ui5MetadataTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.MetadataProperty | Ui5TypeInfoKind.MetadataEvent |
 		Ui5TypeInfoKind.MetadataAggregation | Ui5TypeInfoKind.MetadataAssociation;
 	name: string;
-	module: Ui5ModuleTypeInfo;
+	className: string; // e.g. "sap.ui.core.Control"
 }
 
 interface Ui5MethodTypeInfo extends BaseUi5TypeInfo {
@@ -57,17 +59,48 @@ interface Ui5PropertyTypeInfo extends BaseUi5TypeInfo {
 	module: Ui5ModuleTypeInfo;
 }
 
+// TODO: Use an actual type check for this, e.g. by getting the actual MO settings interface declaration
+// and using checker.isTypeAssignableTo
+function isInterfaceInheritingFromManagedObjectSettings(node: ts.InterfaceDeclaration): boolean {
+	if (!node.heritageClauses) {
+		return false;
+	}
+	for (const clause of node.heritageClauses) {
+		if (clause.token !== ts.SyntaxKind.ExtendsKeyword) {
+			continue;
+		}
+		for (const type of clause.types) {
+			if (!ts.isIdentifier(type.expression)) {
+				return false;
+			}
+			switch (type.expression.text) {
+				case "$ControlSettings":
+				case "$ElementSettings":
+				case "$ManagedObjectSettings":
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+// TODO: Re-use the existing shared instance
+const apiExtract = await loadApiExtract();
+
 /**
  * Extracts module / global type information from UI5 symbols.
  */
-export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undefined {
-	let currentNode: ts.Node | undefined = symbol.valueDeclaration;
-	if (!currentNode) {
+export function getUi5TypeInfoFromSymbol(
+	symbol: ts.Symbol
+): Ui5TypeInfo | undefined {
+	if (!symbol.valueDeclaration) {
 		return undefined;
 	}
+	let currentNode: ts.Node = symbol.valueDeclaration;
 	const name = symbol.name;
 	let module: string | undefined;
 	const namespace = [];
+
 	while (currentNode) {
 		if (ts.isModuleDeclaration(currentNode)) {
 			if (currentNode.flags & ts.NodeFlags.Namespace) {
@@ -85,6 +118,34 @@ export function getUi5TypeInfoFromSymbol(symbol: ts.Symbol): Ui5TypeInfo | undef
 		currentNode = currentNode.parent;
 	}
 	if (module) {
+		if (ts.isPropertySignature(symbol.valueDeclaration)) {
+			// Potentially a UI5 metadata property in a constructor call
+			const parent = symbol.valueDeclaration.parent;
+			if (ts.isInterfaceDeclaration(parent) && isInterfaceInheritingFromManagedObjectSettings(parent)) {
+				// This is a UI5 metadata property
+				const className = module.replace(/\//g, ".");
+				if (className) {
+					let kind: Ui5TypeInfoKind | undefined = undefined;
+					if (apiExtract.isProperty(className, name)) {
+						kind = Ui5TypeInfoKind.MetadataProperty;
+					} else if (apiExtract.isAggregation(className, name)) {
+						kind = Ui5TypeInfoKind.MetadataAggregation;
+					} else if (apiExtract.isAssociation(className, name)) {
+						kind = Ui5TypeInfoKind.MetadataAssociation;
+					} else if (apiExtract.isEvent(className, name)) {
+						kind = Ui5TypeInfoKind.MetadataEvent;
+					}
+					if (kind) {
+						return {
+							kind,
+							name,
+							className,
+						};
+					}
+				}
+			}
+		}
+
 		const info: Ui5ModuleTypeInfo = {
 			kind: Ui5TypeInfoKind.Module,
 			module,

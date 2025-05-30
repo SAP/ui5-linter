@@ -4,7 +4,7 @@ import LinterContext from "../../../../src/linter/LinterContext.js";
 import SharedLanguageService from "../../../../src/linter/ui5Types/SharedLanguageService.js";
 import ts from "typescript";
 import {getSymbolForPropertyInConstructSignatures} from "../../../../src/linter/ui5Types/utils/utils.js";
-import {getUi5TypeInfoFromSymbol, Ui5TypeInfoKind} from "../../../../src/linter/ui5Types/Ui5TypeInfo.js";
+import {getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind} from "../../../../src/linter/ui5Types/Ui5TypeInfo.js";
 
 class TestContext {
 	constructor(
@@ -107,6 +107,75 @@ test.afterEach.always((t) => {
 	t.context.sharedLanguageService.release();
 });
 
+test.serial("TypeInfo: sap/m/Button 'text' property", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/m/Button"], function(Button) {
+			new Button({
+				text: function() {}
+			});
+		});`
+	);
+
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "text")!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.MetadataProperty,
+		name: "text",
+		className: "sap.m.Button",
+	} as Ui5TypeInfo);
+});
+
+test.serial("TypeInfo: sap/m/Button 'ariaDescribedBy' association", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/m/Button"], function(Button) {
+			new Button({
+				ariaDescribedBy: ["describedBy"]
+			});
+		});`
+	);
+
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "ariaDescribedBy")!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.MetadataAssociation,
+		name: "ariaDescribedBy",
+		className: "sap.m.Button",
+	} as Ui5TypeInfo);
+});
+
+test.serial("TypeInfo: sap/ui/table/Table 'rows' aggregation", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/table/Table"], function(Table) {
+			new Table({
+				rows: []
+			});
+		});`
+	);
+
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "rows")!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.MetadataAggregation,
+		name: "rows",
+		className: "sap.ui.table.Table",
+	} as Ui5TypeInfo);
+});
+
 test.serial("TypeInfo: sap/m/Button 'tap' event", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/m/Button"], function(Button) {
@@ -119,12 +188,15 @@ test.serial("TypeInfo: sap/m/Button 'tap' event", async (t) => {
 	const newExpression = testContext.getFirstNewExpression();
 	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "tap")!;
 
-	t.deepEqual(getUi5TypeInfoFromSymbol(propertySymbol), {
-		kind: Ui5TypeInfoKind.Module,
-		module: "sap/m/Button",
-		export: "tap",
-		basename: "tap",
-	});
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.MetadataEvent,
+		name: "tap",
+		className: "sap.m.Button",
+	} as Ui5TypeInfo);
 });
 
 test.serial("TypeInfo: sap/ui/core/Core 'byId' method", async (t) => {
@@ -179,7 +251,7 @@ test.serial("TypeInfo: sap/ui/base/Object 'extend' static method", async (t) => 
 	});
 });
 
-test.serial("TypeInfo: ENUM", async (t) => {
+test.serial("TypeInfo: Enum", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
 			coreLibrary.AccessibleRole;
@@ -197,7 +269,7 @@ test.serial("TypeInfo: ENUM", async (t) => {
 	});
 });
 
-test.serial("TypeInfo: ENUM value", async (t) => {
+test.serial("TypeInfo: Enum value", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
 			coreLibrary.AccessibleRole.Alert;
@@ -215,7 +287,7 @@ test.serial("TypeInfo: ENUM value", async (t) => {
 	});
 });
 
-test.serial("TypeInfo: ENUM in namespace", async (t) => {
+test.serial("TypeInfo: Enum in namespace", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
 			coreLibrary.routing.HistoryDirection;
@@ -233,7 +305,7 @@ test.serial("TypeInfo: ENUM in namespace", async (t) => {
 	});
 });
 
-test.serial("TypeInfo: ENUM value in namespace", async (t) => {
+test.serial("TypeInfo: Enum value in namespace", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
 			coreLibrary.routing.HistoryDirection.Forwards;
