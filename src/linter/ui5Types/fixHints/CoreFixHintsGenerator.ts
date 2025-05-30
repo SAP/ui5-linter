@@ -1,6 +1,6 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
-import {isExpectedValueExpression, extractNamespace} from "../utils/utils.js";
+import {isExpectedValueExpression} from "../utils/utils.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import type {Ui5TypeInfo} from "../utils/utils.js";
 
