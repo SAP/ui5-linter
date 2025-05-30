@@ -1,6 +1,6 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
-import {isExpectedValueExpression} from "../utils/utils.js";
+import {isExpectedValueExpression, Ui5TypeInfoKind} from "../utils/utils.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import type {Ui5TypeInfo} from "../utils/utils.js";
 
@@ -280,8 +280,7 @@ export default class CoreFixHintsGenerator {
 		}
 
 		if (!ui5TypeInfo ||
-			("module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core") ||
-			("namespace" in ui5TypeInfo && ui5TypeInfo.namespace !== "sap.ui.getCore")) {
+			(ui5TypeInfo.kind === Ui5TypeInfoKind.Module && ui5TypeInfo.module !== "sap/ui/core/Core")) {
 			return undefined;
 		}
 
