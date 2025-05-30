@@ -285,8 +285,7 @@ export default class CoreFixHintsGenerator {
 			return undefined;
 		}
 
-		const namespace = extractNamespace(node);
-		const methodName = namespace?.split(".").pop() ?? "";
+		const methodName = "export" in ui5TypeInfo ? ui5TypeInfo.export ?? "" : "";
 		const moduleReplacement = coreModulesReplacements.get(methodName);
 		if (!moduleReplacement) {
 			return undefined;
