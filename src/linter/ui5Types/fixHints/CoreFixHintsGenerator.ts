@@ -280,7 +280,8 @@ export default class CoreFixHintsGenerator {
 		}
 
 		if (!ui5TypeInfo ||
-			(ui5TypeInfo.kind === Ui5TypeInfoKind.Module && ui5TypeInfo.module !== "sap/ui/core/Core")) {
+			ui5TypeInfo.kind !== Ui5TypeInfoKind.Module ||
+			ui5TypeInfo.module !== "sap/ui/core/Core") {
 			return undefined;
 		}
 

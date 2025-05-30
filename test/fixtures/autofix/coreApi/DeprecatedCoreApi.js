@@ -1,43 +1,43 @@
-sap.ui.define(["sap/ui/core/Core",], function(Core) {
-	Core.applyTheme("themeName");
-	Core.applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
-	Core.applyTheme("customTheme", undefined); // Can be migrated when the 2nd argument is undefined
+sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
+	CoreRenamed.applyTheme("themeName");
+	CoreRenamed.applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.applyTheme("customTheme", undefined); // Can be migrated when the 2nd argument is undefined
 
-	Core.attachInit(function() {console.log();});
+	CoreRenamed.attachInit(function() {console.log();});
 
-	Core.attachInitEvent(function() {console.log();});
+	CoreRenamed.attachInitEvent(function() {console.log();});
 
-	Core.attachIntervalTimer(function() {console.log();});
-	Core.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.attachIntervalTimer(function() {console.log();});
+	CoreRenamed.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
 
-	Core.byFieldGroupId("id");
-	Core.byFieldGroupId(["id", "id2"]);
+	CoreRenamed.byFieldGroupId("id");
+	CoreRenamed.byFieldGroupId(["id", "id2"]);
 
-	Core.byId("id");
+	CoreRenamed.byId("id");
 
-	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
-	Core.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
-	Core.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
+	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
+	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
+	CoreRenamed.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
-	Core.detachIntervalTimer(function() {console.log();});
-	Core.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.detachIntervalTimer(function() {console.log();});
+	CoreRenamed.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
 
-	Core.getComponent("componentId");
+	CoreRenamed.getComponent("componentId");
 
-	Core.getControl("controlId");
+	CoreRenamed.getControl("controlId");
 
-	Core.getCurrentFocusedControlId();
+	CoreRenamed.getCurrentFocusedControlId();
 
-	Core.getElementById("elementId");
+	CoreRenamed.getElementById("elementId");
 
-	Core.getEventBus();
+	CoreRenamed.getEventBus();
 
-	Core.getLibraryResourceBundle("sap.ui.core", "en_US");
-	Core.getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
+	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US");
+	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
-	Core.getStaticAreaRef();
+	CoreRenamed.getStaticAreaRef();
 
-	Core.initLibrary({
+	CoreRenamed.initLibrary({
 		version: "1.0.0",
 		name: "sap.ui.core",
 		dependencies: ["sap.ui.core"],
@@ -51,16 +51,16 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 		}
 	});
 
-	Core.isMobile();
+	CoreRenamed.isMobile();
 
-	Core.isStaticAreaRef(oDomRef);
+	CoreRenamed.isStaticAreaRef(oDomRef);
 
-	Core.loadLibrary("sap.ui.core", true);
-	Core.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
-	Core.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
-	Core.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
-	Core.loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
-	Core.loadLibrary("sap.ui.core"); // async omitted (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core", true);
+	CoreRenamed.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
+	CoreRenamed.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core"); // async omitted (not autofixable)
 
-	Core.notifyContentDensityChanged();
+	CoreRenamed.notifyContentDensityChanged();
 });
