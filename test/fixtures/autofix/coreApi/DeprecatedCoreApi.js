@@ -12,6 +12,15 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 
 	CoreRenamed.byId("id");
 
+	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
+	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
+	CoreRenamed.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
+
+	// CoreRenamed.attachIntervalTimer(function() {console.log();});
+	// CoreRenamed.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	// CoreRenamed.detachIntervalTimer(function() {console.log();});
+	// CoreRenamed.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
+
 	CoreRenamed.getComponent("componentId");
 
 	CoreRenamed.getControl("controlId");
@@ -21,6 +30,9 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 	CoreRenamed.getElementById("elementId");
 
 	CoreRenamed.getEventBus();
+
+	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US");
+	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
 	CoreRenamed.getStaticAreaRef();
 
@@ -41,6 +53,13 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 	CoreRenamed.isMobile();
 
 	CoreRenamed.isStaticAreaRef(oDomRef);
+
+	CoreRenamed.loadLibrary("sap.ui.core", true);
+	CoreRenamed.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
+	CoreRenamed.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core", {url: "find/my/lib/here"}); // async omitted (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core", "find/my/lib/here"); // async omitted (not autofixable)
+	CoreRenamed.loadLibrary("sap.ui.core"); // async omitted (not autofixable)
 
 	CoreRenamed.notifyContentDensityChanged();
 });
