@@ -3,6 +3,7 @@ import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
 import {isExpectedValueExpression, Ui5TypeInfoKind} from "../utils/utils.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import type {Ui5TypeInfo} from "../utils/utils.js";
+import type {SAPJSONSchemaForWebApplicationManifestFile} from "../../../manifest.js";
 
 const coreModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/619
@@ -54,15 +55,15 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	}],
 	// Individual arguments must be mapped to "options" object
 	// The new API has no sync loading option, replacement is only safe when the options contain async:true
-	// ["loadLibrary", {
-	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.load($1)",
-	// }],
-	// // Individual arguments must be mapped to "options" object.
-	// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-	// // Only when the first argument is an object defining async: true a migration is possible.
-	// ["createComponent", {
-	// 	moduleName: "sap/ui/core/Component", exportCodeToBeUsed: "$moduleIdentifier.create($1)",
-	// }],
+	["loadLibrary", {
+		moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.load($1)",
+	}],
+	// Individual arguments must be mapped to "options" object.
+	// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+	// Only when the first argument is an object defining async: true a migration is possible.
+	["createComponent", {
+		moduleName: "sap/ui/core/Component", exportCodeToBeUsed: "$moduleIdentifier.create($1)",
+	}],
 	// Note that alternative replacement Component.get is meanwhile deprecated, too
 	["getComponent", {
 		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
@@ -70,10 +71,10 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// Parameter bAsync has to be omitted or set to false since the new API returns
 	// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 	// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
-	// TODO: To be discussed: sLibrary must be a library, that might not be easy to check
-	// ["getLibraryResourceBundle", {
-	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.getResourceBundleFor($1, $2)",
-	// }],
+	// sLibrary must be a library.
+	["getLibraryResourceBundle", {
+		moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.getResourceBundleFor($1, $2)",
+	}],
 
 	// TODO: Can't be safely migrated for now. The callback function might have code
 	// that has to be migrated, too. MagicString will throw an exception.
@@ -266,10 +267,10 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// Migration not possible
 	// ["unregisterPlugin", {}],
 ]);
-
 export default class CoreFixHintsGenerator {
 	constructor(
-		private ambientModuleCache: AmbientModuleCache
+		private ambientModuleCache: AmbientModuleCache,
+		private manifestContent?: string
 	) {
 
 	}
@@ -314,10 +315,40 @@ export default class CoreFixHintsGenerator {
 				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => ({
 					value: arg.getText(),
 					kind: arg?.kind,
+					ui5Type: this.isPotentialUi5Library(arg) ? "library" : undefined,
 				}));
 			}
 		}
 
 		return {...moduleReplacement, exportCodeToBeUsed};
+	}
+
+	isPotentialUi5Library(node: ts.Node): boolean {
+		if (!("text" in node) || typeof node.text !== "string") {
+			return false;
+		}
+
+		const potentialLibNamespace = node.text;
+
+		// Check libs from the manifest
+		const manifest = JSON.parse(this.manifestContent ?? "{}") as SAPJSONSchemaForWebApplicationManifestFile;
+		const manifestLibs = manifest["sap.ui5"]?.dependencies?.libs ?? {};
+
+		if (manifestLibs[potentialLibNamespace]) {
+			return true;
+		} else if (manifest?.["sap.app"]?.id === potentialLibNamespace) {
+			return true;
+		}
+
+		// Extract the namespace from the virtual path
+		const {fileName} = node.getSourceFile();
+		if (fileName.startsWith("/resources")) {
+			const libNamespace = fileName.split("/").slice(2, -1).join(".");
+			if (libNamespace === potentialLibNamespace) {
+				return true;
+			}
+		}
+
+		return !!this.ambientModuleCache.findModuleForName(potentialLibNamespace.replaceAll(".", "/") + "/library");
 	}
 }

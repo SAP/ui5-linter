@@ -13,11 +13,12 @@ export default class FixHintsGenerator {
 
 	constructor(
 		resourcePath: string,
-		ambientModuleCache: AmbientModuleCache
+		ambientModuleCache: AmbientModuleCache,
+		manifestContent?: string
 	) {
 		this.globalsGenerator = new GlobalsFixHintsGenerator(resourcePath, ambientModuleCache);
 		this.jquerySapGenerator = new JquerySapFixHintsGenerator();
-		this.coreGenerator = new CoreFixHintsGenerator(ambientModuleCache);
+		this.coreGenerator = new CoreFixHintsGenerator(ambientModuleCache, manifestContent);
 	}
 
 	public getGlobalsFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
