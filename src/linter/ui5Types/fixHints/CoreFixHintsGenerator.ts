@@ -279,9 +279,9 @@ export default class CoreFixHintsGenerator {
 			return undefined;
 		}
 
-		if (ui5TypeInfo &&
-			"module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core" &&
-			"namespace" in ui5TypeInfo && ui5TypeInfo.namespace !== "sap.ui.getCore") {
+		if (!ui5TypeInfo ||
+			("module" in ui5TypeInfo && ui5TypeInfo.module !== "sap/ui/core/Core") ||
+			("namespace" in ui5TypeInfo && ui5TypeInfo.namespace !== "sap.ui.getCore")) {
 			return undefined;
 		}
 
