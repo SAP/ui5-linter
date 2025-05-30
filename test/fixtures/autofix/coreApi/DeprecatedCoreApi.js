@@ -1,4 +1,8 @@
 sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
+	CoreRenamed.applyTheme("themeName");
+	CoreRenamed.applyTheme("customTheme", "find/my/theme/here"); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.applyTheme("customTheme", undefined); // Can be migrated when the 2nd argument is undefined
+
 	CoreRenamed.attachInit(function() {console.log();});
 
 	CoreRenamed.attachInitEvent(function() {console.log();});
@@ -8,7 +12,11 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 
 	CoreRenamed.byId("id");
 
+	CoreRenamed.getComponent("componentId");
+
 	CoreRenamed.getControl("controlId");
+
+	CoreRenamed.getCurrentFocusedControlId();
 
 	CoreRenamed.getElementById("elementId");
 
