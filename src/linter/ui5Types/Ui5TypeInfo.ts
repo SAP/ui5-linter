@@ -134,11 +134,6 @@ export function getUi5TypeInfoFromSymbol(
 		return undefined;
 	}
 	const sourceFile = symbol.valueDeclaration.getSourceFile();
-	if (!sourceFile) {
-		// All symbols need to have a source file
-		// as we are extracting the library name from the .d.ts filename
-		return undefined;
-	}
 	const node = symbol.valueDeclaration;
 	let currentNode: ts.Declaration = symbol.valueDeclaration;
 	let currentNamespaceTypeInfo: Ui5NamespaceTypeInfo | undefined;
@@ -163,10 +158,6 @@ export function getUi5TypeInfoFromSymbol(
 				moduleName = currentNode.name.text;
 				break;
 			}
-		} else if (ts.isInterfaceDeclaration(currentNode) &&
-			currentNode.name.text === "JQuery"
-		) {
-			moduleName = "jQuery";
 		}
 		currentNode = currentNode.parent as ts.Declaration;
 	}

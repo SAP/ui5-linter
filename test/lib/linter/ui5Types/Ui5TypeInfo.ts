@@ -14,6 +14,14 @@ class TestContext {
 		public sourceFile: ts.SourceFile
 	) {}
 
+	getFirstStatement(): ts.Statement {
+		const firstStatement = this.sourceFile.statements[0];
+		if (firstStatement) {
+			return firstStatement;
+		}
+		throw new Error("No statements found in the source file.");
+	}
+
 	getFirstExpressionStatement(): ts.ExpressionStatement {
 		const firstStatement = this.sourceFile.statements.find(
 			(statement): statement is ts.ExpressionStatement => ts.isExpressionStatement(statement)
@@ -69,19 +77,25 @@ class TestContext {
 const test = anyTest as TestFn<{
 	sharedLanguageService: SharedLanguageService;
 	apiExtract: ApiExtract;
-	initTestContext: (sourceFileContent: string) => Promise<TestContext>;
+	initTestContext: (sourceFileContent: string, options?: InitTestContextOptions) => Promise<TestContext>;
 }>;
 
 // Note: Tests in this file are serial because they use a shared language service instance.
 
+interface InitTestContextOptions {
+	ts?: boolean; // If true, the source file is treated as TypeScript
+}
+
 test.before(async (t) => {
 	t.context.sharedLanguageService = new SharedLanguageService();
 	t.context.apiExtract = await loadApiExtract();
-	t.context.initTestContext = async (sourceFileContent: string) => {
+	t.context.initTestContext = async (sourceFileContent: string, options?: InitTestContextOptions) => {
 		const sharedLanguageService = t.context.sharedLanguageService;
 
+		const extension = options?.ts ? ".ts" : ".js";
+		const fileName = `/resources/test/test${extension}`;
 		const fileContents = new Map<string, string>([
-			["/resources/test/test.js", sourceFileContent],
+			[fileName, sourceFileContent],
 		]);
 		const sourceMaps = new Map<string, string>();
 		const context = new LinterContext({
@@ -98,7 +112,7 @@ test.before(async (t) => {
 
 		const program = sharedLanguageService.getProgram();
 		const checker = program.getTypeChecker();
-		const sourceFile = program.getSourceFile("/resources/test/test.js")!;
+		const sourceFile = program.getSourceFile(fileName)!;
 
 		return new TestContext(program, checker, sourceFile);
 	};
@@ -108,6 +122,22 @@ test.afterEach.always((t) => {
 	// Ensure to always release the shared language service after each test
 	// so that the next test can acquire it again.
 	t.context.sharedLanguageService.release();
+});
+
+test.serial("TypeInfo: Symbol without valueDeclaration", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		interface MyInterface {}
+	`, {ts: true});
+
+	const interfaceDeclaration = testContext.getFirstStatement() as ts.InterfaceDeclaration;
+
+	// A symbol from an interface identifier does not have a valueDeclaration.
+	const symbol = testContext.checker.getSymbolAtLocation(interfaceDeclaration.name)!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		symbol, t.context.apiExtract
+	);
+	t.is(ui5TypeInfo, undefined);
 });
 
 test.serial("TypeInfo: sap/m/Button 'text' property", async (t) => {
