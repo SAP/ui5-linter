@@ -776,6 +776,11 @@ export default class SourceFileLinter {
 	}
 
 	analyzeCallExpression(node: ts.CallExpression) {
+		// Note: Always retrieving the type of the call expression causes the type checker to analyze the
+		// return type, which seems to improve the accuracy of the type information.
+		// See NoDeprecatedApi test case "ControllerByIdThisContext.js"
+		this.checker.getTypeAtLocation(node);
+
 		const exprNode = node.expression;
 		const exprType = this.checker.getTypeAtLocation(exprNode);
 		if (!exprType?.symbol || !this.isSymbolOfUi5OrThirdPartyType(exprType.symbol)) {
@@ -807,7 +812,6 @@ export default class SourceFileLinter {
 		const ui5TypeInfo = getUi5TypeInfoFromSymbol(exprType.symbol, this.apiExtract);
 		let globalApiName;
 		if (ui5TypeInfo) {
-			const nodeType = this.checker.getTypeAtLocation(node);
 			if (ui5TypeInfo.kind === Ui5TypeInfoKind.Function) {
 				const namespace = getNamespace(ui5TypeInfo);
 				if (namespace) {
@@ -826,6 +830,10 @@ export default class SourceFileLinter {
 				if (moduleTypeInfo) {
 					const moduleName = moduleTypeInfo.name;
 					const symbolName = ui5TypeInfo.name;
+					let instanceType: ts.Type | undefined = undefined;
+					if (ts.isElementAccessExpression(exprNode) || ts.isPropertyAccessExpression(exprNode)) {
+						instanceType = this.checker.getTypeAtLocation(exprNode.expression);
+					}
 					if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
 						// Check for sap/ui/core/Lib.init usages
 						this.#analyzeLibInitCall(node, exprNode);
@@ -854,7 +862,7 @@ export default class SourceFileLinter {
 						symbolName === "ready" && moduleName === "sap/ui/core/Core") {
 						this.#reportTestStarter(node);
 					} else if (symbolName === "applySettings" &&
-						nodeType.symbol?.declarations?.some((declaration) =>
+						instanceType?.symbol?.declarations?.some((declaration) =>
 							ts.isClassDeclaration(declaration) &&
 							this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
 						this.#analyzeNewAndApplySettings(node);
@@ -863,7 +871,7 @@ export default class SourceFileLinter {
 						node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
 						this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
 					} else if (symbolName.startsWith("bind") &&
-						nodeType.symbol?.declarations?.some((declaration) =>
+						instanceType?.symbol?.declarations?.some((declaration) =>
 							ts.isClassDeclaration(declaration) &&
 							this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
 							node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
