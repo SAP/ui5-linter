@@ -65,22 +65,27 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 	// setRTL()
 	// setTheme()
 	// setTimezone()
+
 	["getLanguageTag", {
 		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.getLanguageTag().toString()",
 	}],
+
 	// TODO: Complex replacement: Discuss: Old API returns boolean, new API returns AnimationMode. How to migrate?
+	// (-> 2 new module imports) How to setup this map entry?
 	// getAnimation()
+
 	["getFormatLocale", {
 		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.getFormatLocale().toString()",
 	}],
-	// getLocale() //TODO: Complex replacement:
-	// 			"Configuration.getLocale()" needs to be replaced with "new Locale(Localization.getLanguageTag())".
-	//			(-> 2 new module imports) How to setup this map entry?
+
+	// TODO: Complex replacement:
+	// "Configuration.getLocale()" needs to be replaced with "new Locale(Localization.getLanguageTag())".
+	// (-> 2 new module imports) How to setup this map entry?
+	// getLocale()
 
 	// Migration not possible
 	// Old API is sync and new API is async
-	// getVersion() // MR: Discuss: New API needs wrapper around the replacement
-
+	// getVersion()
 ]);
 
 export default class ConfigurationFixHintsGenerator {
