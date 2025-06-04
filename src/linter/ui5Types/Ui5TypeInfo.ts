@@ -11,7 +11,6 @@ export enum Ui5TypeInfoKind {
 	MetadataEvent,
 	MetadataAggregation,
 	MetadataAssociation,
-	Constructor,
 	Function,
 	Method,
 	Property,
@@ -22,7 +21,7 @@ export enum Ui5TypeInfoKind {
 }
 
 export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5ClassTypeInfo | Ui5NamespaceTypeInfo |
-	Ui5MetadataTypeInfo | Ui5ConstructorTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo |
+	Ui5MetadataTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo |
 	Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo;
 
 interface BaseUi5TypeInfo {
@@ -58,11 +57,6 @@ interface Ui5MetadataTypeInfo extends BaseUi5TypeInfo {
 		Ui5TypeInfoKind.MetadataAggregation | Ui5TypeInfoKind.MetadataAssociation;
 	name: string;
 	parent: Ui5ManagedObjectSettingsTypeInfo;
-}
-
-interface Ui5ConstructorTypeInfo extends BaseUi5TypeInfo {
-	kind: Ui5TypeInfoKind.Constructor;
-	parent: Ui5ClassTypeInfo;
 }
 
 interface Ui5FunctionTypeInfo extends BaseUi5TypeInfo {
@@ -261,8 +255,9 @@ function createMangedObjectSettingsTypeInfo(node: ts.Declaration, moduleName: st
 	}
 }
 
-function createClassTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo):
-	Ui5ConstructorTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo | Ui5ClassTypeInfo | undefined {
+function createClassTypeInfo(
+	node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
+): Ui5MethodTypeInfo | Ui5PropertyTypeInfo | Ui5ClassTypeInfo | undefined {
 	if (ts.isClassDeclaration(node) && node.name) {
 		return {
 			kind: Ui5TypeInfoKind.Class,
@@ -283,14 +278,6 @@ function createClassTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInfo | U
 		name: node.parent.name.text,
 		parent,
 	};
-
-	if (ts.isConstructorDeclaration(node)) {
-		// TODO: Difference between interface and class?
-		return {
-			kind: Ui5TypeInfoKind.Constructor,
-			parent: classTypeInfo,
-		};
-	}
 
 	if (ts.isMethodSignature(node) || ts.isMethodDeclaration(node)) {
 		const name = getPropertyNameText(node.name);
@@ -318,8 +305,9 @@ function createClassTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInfo | U
 	}
 }
 
-function createEnumTypeInfo(node: ts.EnumDeclaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo):
-	Ui5EnumTypeInfo | undefined {
+function createEnumTypeInfo(
+	node: ts.EnumDeclaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
+): Ui5EnumTypeInfo | undefined {
 	if (!ts.isEnumDeclaration(node)) {
 		return;
 	}
@@ -330,8 +318,9 @@ function createEnumTypeInfo(node: ts.EnumDeclaration, parent: Ui5ModuleTypeInfo 
 	};
 }
 
-function createEnumMemberTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo):
-	Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | undefined {
+function createEnumMemberTypeInfo(
+	node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
+): Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | undefined {
 	if (ts.isEnumDeclaration(node)) {
 		return createEnumTypeInfo(node, parent);
 	}
@@ -354,8 +343,9 @@ function createEnumMemberTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInf
 	};
 }
 
-function createFunctionTypeInfo(node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo):
-	Ui5FunctionTypeInfo | undefined {
+function createFunctionTypeInfo(
+	node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
+): Ui5FunctionTypeInfo | undefined {
 	if (!ts.isFunctionDeclaration(node) && !ts.isFunctionExpression(node) && !ts.isArrowFunction(node)) {
 		return;
 	}
