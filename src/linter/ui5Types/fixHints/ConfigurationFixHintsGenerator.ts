@@ -1,7 +1,6 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
 import {isExpectedValueExpression, Ui5TypeInfoKind} from "../utils/utils.js";
-import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import type {Ui5TypeInfo} from "../utils/utils.js";
 
 const configurationModulesReplacements = new Map<string, FixHints>([
@@ -86,5 +85,49 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 
 export default class ConfigurationFixHintsGenerator {
 	getFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
+		if (!ts.isPropertyAccessExpression(node)) {
+			return undefined;
+		}
+
+		if (!ui5TypeInfo ||
+			ui5TypeInfo.kind !== Ui5TypeInfoKind.Module ||
+			ui5TypeInfo.module !== "sap/ui/core/Configuration") {
+			return undefined;
+		}
+
+		const methodName = "export" in ui5TypeInfo ? ui5TypeInfo.export ?? "" : "";
+		const moduleReplacement = configurationModulesReplacements.get(methodName);
+		if (!moduleReplacement) {
+			return undefined;
+		}
+
+		let exportCodeToBeUsed;
+		if (moduleReplacement.exportCodeToBeUsed) {
+			exportCodeToBeUsed = {
+				name: moduleReplacement.exportCodeToBeUsed,
+				// Check whether the return value of the call expression is assigned to a variable,
+				// passed to another function or used elsewhere.
+				isExpectedValue: isExpectedValueExpression(node),
+			} as ExportCodeToBeUsed;
+
+			let callExpression;
+			if (ts.isCallExpression(node.parent) &&
+				// if a prop is wrapped in a function, then current.parent is the call expression
+				// which is wrong. That's why check if parent expression is actually the current node
+				// which would ensure that the prop is actually a call expression.
+				node.parent.expression === node) {
+				callExpression = node.parent;
+			}
+
+			// Extract arguments from the call expression
+			if (callExpression) {
+				exportCodeToBeUsed.args = callExpression.arguments.map((arg) => ({
+					value: arg.getText(),
+					kind: arg?.kind,
+				}));
+			}
+		}
+
+		return {...moduleReplacement, exportCodeToBeUsed};
 	}
 }
