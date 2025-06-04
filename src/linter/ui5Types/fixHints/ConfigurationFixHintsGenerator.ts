@@ -58,7 +58,7 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/security/Security", exportNameToBeUsed: "setSecurityTokenHandlers",
 	}],
 
-	// TODO: MR: Discuss: Old API returns this, but new API returns undefined. Is this problematic?
+	// TODO: Complex replacements: Old API returns this, but new API returns undefined.
 	// setCalendarType()
 	// setCalendarWeekNumbering()
 	// setFormatLocale()
@@ -69,13 +69,18 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 	["getLanguageTag", {
 		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.getLanguageTag().toString()",
 	}],
-	// TODO:
-	// getAnimation() //TODO: MR: Discuss: Old API returns boolean, new API returns AnimationMode. How to migrate?
-	// getFormatLocale()
-	// getLocale() //TODO: MR: Discuss:
+	// TODO: Complex replacement: Discuss: Old API returns boolean, new API returns AnimationMode. How to migrate?
+	// getAnimation()
+	["getFormatLocale", {
+		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.getFormatLocale().toString()",
+	}],
+	// getLocale() //TODO: Complex replacement:
 	// 			"Configuration.getLocale()" needs to be replaced with "new Locale(Localization.getLanguageTag())".
 	//			(-> 2 new module imports) How to setup this map entry?
-	// getVersion() //TODO: MR: Discuss: New API needs wrapper around the replacement
+
+	// Migration not possible
+	// Old API is sync and new API is async
+	// getVersion() // MR: Discuss: New API needs wrapper around the replacement
 
 ]);
 
