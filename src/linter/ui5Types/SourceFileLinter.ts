@@ -1817,4 +1817,8 @@ export default class SourceFileLinter {
 	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo) {
 		return this.#fixHintsGenerator?.getCoreFixHints(node, ui5TypeInfo);
 	}
+
+	getConfigFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo) {
+		return this.#fixHintsGenerator?.getConfigFixHints(node, ui5TypeInfo);
+	}
 }

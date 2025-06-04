@@ -5,11 +5,13 @@ import JquerySapFixHintsGenerator from "./JquerySapFixHintsGenerator.js";
 import CoreFixHintsGenerator from "./CoreFixHintsGenerator.js";
 import {FixHints} from "./FixHints.js";
 import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
+import ConfigurationFixHintsGenerator from "./ConfigurationFixHintsGenerator.js";
 
 export default class FixHintsGenerator {
 	private globalsGenerator: GlobalsFixHintsGenerator;
 	private jquerySapGenerator: JquerySapFixHintsGenerator;
 	private coreGenerator: CoreFixHintsGenerator;
+	private configGenerator: ConfigurationFixHintsGenerator;
 
 	constructor(
 		resourcePath: string,
@@ -18,6 +20,7 @@ export default class FixHintsGenerator {
 		this.globalsGenerator = new GlobalsFixHintsGenerator(resourcePath, ambientModuleCache);
 		this.jquerySapGenerator = new JquerySapFixHintsGenerator();
 		this.coreGenerator = new CoreFixHintsGenerator(ambientModuleCache);
+		this.configGenerator = new ConfigurationFixHintsGenerator();
 	}
 
 	public getGlobalsFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
@@ -33,5 +36,10 @@ export default class FixHintsGenerator {
 	public getCoreFixHints(node: ts.CallExpression | ts.AccessExpression,
 		ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
 		return this.coreGenerator.getFixHints(node, ui5TypeInfo);
+	}
+
+	public getConfigFixHints(node: ts.CallExpression | ts.AccessExpression,
+		ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
+		return this.configGenerator.getFixHints(node, ui5TypeInfo);
 	}
 }
