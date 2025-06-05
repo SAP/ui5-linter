@@ -11,17 +11,21 @@ import LinterContext, {
 import {MESSAGE} from "../messages.js";
 import {MessageArgs} from "../MessageArgs.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
-import {FixHints} from "./fixHints/FixHints.js";
 import {Ui5TypeInfo} from "./Ui5TypeInfo.js";
+import Fix from "./fix/Fix.js";
 
 interface ReporterCoverageInfo extends CoverageInfo {
 	node: ts.Node;
 }
 
 interface SourceFileMessageOptions {
+	/**
+	 * Optional node which will be used to determine the position of the linting message.
+	 * If no node is provided, the first column of the first line of the source file will be used.
+	 */
 	node?: ts.Node;
-	fixHints?: FixHints;
 	ui5TypeInfo?: Ui5TypeInfo;
+	fix?: Fix;
 }
 
 export default class SourceFileReporter {
@@ -58,27 +62,27 @@ export default class SourceFileReporter {
 	}
 
 	addMessage<M extends MESSAGE>(id: M, args: MessageArgs[M] | null, options: SourceFileMessageOptions): void {
-		const position: PositionInfo = {
-			line: 1,
-			column: 1,
-		};
-		const {node, fixHints, ui5TypeInfo} = options;
+		let position: PositionInfo;
+		const {node, ui5TypeInfo, fix} = options;
 		if (node) {
-			const {start} = this.#getPositionsForNode(node);
+			const {start} = this.getPositionsForNode(node);
 			// One-based to be aligned with most IDEs
-			position.line = start.line;
-			position.column = start.column;
-			// endLine = end.line + 1;
-			// endColumn = end.column + 1;
+			position = start;
+		} else {
+			// If no node is provided, use the first column of the first line of the source file
+			position = {
+				line: 1,
+				column: 1,
+			};
 		}
 
 		args ??= null as unknown as MessageArgs[M];
 
-		this.#rawMessages.push({id, args, position, fixHints, ui5TypeInfo});
+		this.#rawMessages.push({id, args, position, fix, ui5TypeInfo});
 	}
 
 	addCoverageInfo({node, message, messageDetails, category}: ReporterCoverageInfo) {
-		const {start} = this.#getPositionsForNode(node);
+		const {start} = this.getPositionsForNode(node);
 		const coverageInfo: CoverageInfo = {
 			category,
 			// One-based to be aligned with most IDEs
@@ -96,7 +100,7 @@ export default class SourceFileReporter {
 		this.#coverageInfo.push(coverageInfo);
 	}
 
-	#getPositionsForNode(node: ts.Node): PositionRange {
+	getPositionsForNode(node: ts.Node): PositionRange {
 		return getPositionsForNode({
 			node,
 			sourceFile: this.#sourceFile,

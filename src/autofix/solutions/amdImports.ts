@@ -1,7 +1,9 @@
 import ts from "typescript";
 import path from "node:path/posix";
-import {ChangeAction, ImportRequests, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
-import {getPropertyNameText, resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+import {ChangeAction, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
+import {getPropertyNameText} from "../../linter/ui5Types/utils/utils.js";
+import {RequireExpression} from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
+import {ModuleDeclaration} from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 const LINE_LENGTH_LIMIT = 200;
 
 function resolveRelativeDependency(dependency: string, moduleName: string): string {
@@ -15,7 +17,51 @@ interface DependencyMapValue {
 	trailingComma?: ts.Token<ts.SyntaxKind.CommaToken>;
 }
 
-function createDependencyInfo(dependencyArray: ts.ArrayLiteralExpression | undefined, resourcePath: string) {
+const NO_PARAM_FOR_DEPENDENCY = Symbol("noParamForDependency");
+const UNSUPPORTED_PARAM_FOR_DEPENDENCY = Symbol("unsupportedParamForDependency");
+export type Dependencies = Map<string,
+	string | typeof NO_PARAM_FOR_DEPENDENCY | typeof UNSUPPORTED_PARAM_FOR_DEPENDENCY>;
+
+export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireExpression, resourcePath: string) {
+	const dependencies: Dependencies = new Map(); // Module name to identifier
+	if (!moduleDeclaration.dependencies) {
+		return dependencies;
+	}
+	const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
+	if (!factory || !ts.isFunctionLike(factory)) {
+		throw new Error("Invalid factory function");
+	}
+	const dependencyArray = moduleDeclaration.dependencies;
+	const moduleName =
+		resourcePath.startsWith("/resources/") ? resourcePath.substring("/resources/".length) : undefined;
+	for (let i = 0; i < dependencyArray.elements.length; i++) {
+		const element = dependencyArray.elements[i];
+		if (!ts.isStringLiteralLike(element)) {
+			continue;
+		}
+		let dependencyText = element.text;
+		if (moduleName && dependencyText.startsWith(".")) {
+			dependencyText = resolveRelativeDependency(dependencyText, moduleName);
+		}
+
+		if (!dependencies.has(dependencyText)) {
+			const param = factory.parameters[i];
+			let identifier;
+			if (!param) {
+				identifier = NO_PARAM_FOR_DEPENDENCY;
+			} else if (ts.isIdentifier(param.name)) {
+				identifier = getParameterDeclarationText(param)!;
+			} else {
+				// Some sort of binding pattern, e.g. ({foo, bar}) => { or ([foo, bar]) => {
+				identifier = UNSUPPORTED_PARAM_FOR_DEPENDENCY;
+			}
+			dependencies.set(dependencyText, identifier);
+		}
+	}
+	return dependencies;
+}
+
+export function createDependencyInfo(dependencyArray: ts.ArrayLiteralExpression | undefined, resourcePath: string) {
 	const moduleName =
 		resourcePath.startsWith("/resources/") ? resourcePath.substring("/resources/".length) : undefined;
 	const dependencyMap = new Map<string, DependencyMapValue>();
@@ -113,7 +159,7 @@ export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
 	changeSet: ChangeSet[],
 	resourcePath: string,
-	declaredIdentifiers: Set<string>,
+	// declaredIdentifiers: Set<string>,
 	dependenciesToRemove: Set<string>
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
@@ -163,31 +209,30 @@ export function addDependencies(
 	const insertParametersAfterIndex = insertDependenciesAfterIndex;
 
 	// Check whether requested imports are already available in the list of dependencies
-	for (const [requestedModuleName, importRequest] of importRequests) {
-		const dependencyModuleName = requestedModuleName;
-		const existingDependency = dependenciesToRemove.has(requestedModuleName) ?
-			undefined :
-				dependencyMap.get(requestedModuleName);
+	for (const [dependencyModuleName, importRequest] of importRequests) {
+		// const dependencyModuleName = requestedModuleName;
+		// const existingDependency = dependenciesToRemove.has(requestedModuleName) ?
+		// 	undefined :
+		// 		dependencyMap.get(requestedModuleName);
 
-		if (existingDependency) {
-			// Reuse the existing dependency
-			// Check whether a parameter name already exists for this dependency
-			// Lookup needs to be based on the same index of the parameter in the factory function
-			const existingParameter = parameters[existingDependency.index];
-			if (existingParameter) {
-				// Existing parameter can be reused
-				importRequest.identifier = getParameterDeclarationText(existingParameter);
-				continue;
-			}
-		}
+		// if (existingDependency) {
+		// 	// Reuse the existing dependency
+		// 	// Check whether a parameter name already exists for this dependency
+		// 	// Lookup needs to be based on the same index of the parameter in the factory function
+		// 	const existingParameter = parameters[existingDependency.index];
+		// 	if (existingParameter) {
+		// 		// Existing parameter can be reused
+		// 		importRequest.identifier = getParameterDeclarationText(existingParameter);
+		// 		continue;
+		// 	}
+		// }
 		// Add a new module dependency. Handing of missing parameters is done later
-		const identifier = resolveUniqueName(dependencyModuleName, declaredIdentifiers);
-		declaredIdentifiers.add(identifier);
-		importRequest.identifier = identifier;
+		// const identifier = resolveUniqueName(dependencyModuleName, declaredIdentifiers);
+		// declaredIdentifiers.add(identifier);
+		// importRequest.identifier = identifier;
 		newDependencies.push({
 			moduleName: dependencyModuleName,
-			identifier,
-			existingDependency,
+			identifier: importRequest.identifier,
 		});
 	}
 
@@ -309,7 +354,7 @@ export function addDependencies(
 	}
 
 	// Patch identifiers
-	patchIdentifiers(importRequests, changeSet);
+	// patchIdentifiers(importRequests, changeSet);
 }
 
 export function removeDependencies(
@@ -397,35 +442,38 @@ export function removeDependencies(
 		});
 }
 
-function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
-	for (const {nodeInfos, identifier} of importRequests.values()) {
-		if (!identifier) {
-			throw new Error("No identifier found for import");
-		}
+// function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
+// 	for (const {nodeInfos, identifier} of importRequests.values()) {
+// 		if (!identifier) {
+// 			throw new Error("No identifier found for import");
+// 		}
+// 		if (!nodeInfos) {
+// 			return;
+// 		}
 
-		for (const nodeInfo of nodeInfos) {
-			if (!nodeInfo.node) {
-				continue;
-			}
-			const node: ts.Node = nodeInfo.node;
-			const nodeStart = node.getStart();
-			const nodeEnd = node.getEnd();
-			let nodeReplacement = `${identifier}`;
-			if ("exportNameToBeUsed" in nodeInfo && nodeInfo.exportNameToBeUsed) {
-				nodeReplacement += `.${nodeInfo.exportNameToBeUsed}`;
-			}
+// 		for (const nodeInfo of nodeInfos) {
+// 			if (!nodeInfo.node) {
+// 				continue;
+// 			}
+// 			const node: ts.Node = nodeInfo.node;
+// 			const nodeStart = node.getStart();
+// 			const nodeEnd = node.getEnd();
+// 			let nodeReplacement = `${identifier}`;
+// 			if ("exportNameToBeUsed" in nodeInfo && nodeInfo.exportNameToBeUsed) {
+// 				nodeReplacement += `.${nodeInfo.exportNameToBeUsed}`;
+// 			}
 
-			if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
-				changeSet.push({
-					action: ChangeAction.REPLACE,
-					start: nodeStart,
-					end: nodeEnd,
-					value: nodeReplacement,
-				});
-			}
-		}
-	}
-}
+// 			if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
+// 				changeSet.push({
+// 					action: ChangeAction.REPLACE,
+// 					start: nodeStart,
+// 					end: nodeEnd,
+// 					value: nodeReplacement,
+// 				});
+// 			}
+// 		}
+// 	}
+// }
 
 function extractIdentifierSeparator(input: string) {
 	const match = /^(\s)+/.exec(input);

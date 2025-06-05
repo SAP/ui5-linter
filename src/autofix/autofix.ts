@@ -3,14 +3,11 @@ import MagicString from "magic-string";
 import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import generateSolutionNoGlobals from "./solutions/noGlobals.js";
 import {getLogger} from "@ui5/logger";
-import {addDependencies, removeDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
-import {collectIdentifiers} from "./utils.js";
 import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
-import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
+import generateChanges from "./solutions/generateChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -79,8 +76,8 @@ export interface DeprecatedApiAccessNode {
 }
 
 export type ImportRequests = Map<string, {
-	nodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-	identifier?: string;
+	nodeInfos?: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
+	identifier: string;
 }>;
 
 export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
@@ -161,6 +158,7 @@ function getJsErrors(code: string, resourcePath: string) {
 
 function getAutofixMessages(resource: AutofixResource) {
 	// Collect modules of which at least one message has the conditional fixHint flag set
+	/*
 	const conditionalModuleAccess = new Set<string>();
 	for (const msg of resource.messages) {
 		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
@@ -169,14 +167,16 @@ function getAutofixMessages(resource: AutofixResource) {
 			conditionalModuleAccess.add(msg.fixHints.moduleName);
 		}
 	}
-
+	*/
 	// Group messages by id
 	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
 	for (const msg of resource.messages) {
+		/*
 		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
 			// Skip messages with conditional fixHints
 			continue;
 		}
+		*/
 		if (!messagesById.has(msg.id)) {
 			messagesById.set(msg.id, []);
 		}
@@ -218,14 +218,8 @@ export default async function ({
 	const resources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
 		const messagesById = getAutofixMessages(autofixResource);
-		// Currently only global access autofixes are supported
-		// This needs to stay aligned with the applyFixes function
-		if (messagesById.has(MESSAGE.NO_GLOBALS) ||
-			messagesById.has(MESSAGE.DEPRECATED_API_ACCESS) ||
-			messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
-			messages.set(autofixResource.resource.getPath(), messagesById);
-			resources.push(autofixResource.resource);
-		}
+		messages.set(autofixResource.resource.getPath(), messagesById);
+		resources.push(autofixResource.resource);
 	}
 
 	const sourceFiles: SourceFiles = new Map();
@@ -296,59 +290,39 @@ function applyFixes(
 	const content = sourceFile.getFullText();
 
 	const changeSet: ChangeSet[] = [];
-	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
-	const messages: RawLintMessage<
-		MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
+	// let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
+	// const messages: RawLintMessage<
+	// 	MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
 
-	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-		messages.push(
-			...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
-		);
-	}
+	// if (messagesById.has(MESSAGE.NO_GLOBALS)) {
+	// 	messages.push(
+	// 		...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
+	// 	);
+	// }
 
-	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
-		messages.push(
-			...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
-		);
-	}
+	// if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
+	// 	messages.push(
+	// 		...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
+	// 	);
+	// }
 
-	if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
-		messages.push(
-			...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
-		);
-	}
+	// if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
+	// 	messages.push(
+	// 		...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
+	// 	);
+	// }
 
-	if (messages.length === 0) {
+	if (messagesById.size === 0) {
 		return undefined;
 	}
+	const messages = Array.from(messagesById.values()).flat();
 
-	existingModuleDeclarations = generateSolutionNoGlobals(
-		checker, sourceFile, content,
-		messages,
-		changeSet, []);
-
-	// Collect all identifiers in the source file to ensure unique names when adding imports
-	const identifiers = collectIdentifiers(sourceFile);
-
-	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		// TODO: Find a better way to define modules for removal
-		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
-
-		// Remove dependencies from the existing module declaration
-		removeDependencies(moduleRemovals,
-			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
-
-		// Resolve dependencies for the module declaration
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
-	}
-
-	// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
-	// based on arguments' context
-	generateSolutionCodeReplacer(existingModuleDeclarations, messages, changeSet, sourceFile, identifiers);
+	const fixes = messages.filter((msg) => !!msg.fix);
+	generateChanges(resourcePath, checker, sourceFile, content, fixes, changeSet);
 
 	if (changeSet.length === 0) {
 		// No modifications needed
-		return undefined;
+		return;
 	}
 	return applyChanges(content, changeSet);
 }
