@@ -4,8 +4,8 @@ import {resolveLinks} from "../formatter/lib/resolveLinks.js";
 import {LintMessageSeverity, MESSAGE, MESSAGE_INFO} from "./messages.js";
 import {MessageArgs} from "./MessageArgs.js";
 import ts from "typescript";
-import {FixHints} from "./ui5Types/fixHints/FixHints.js";
 import {Ui5TypeInfo} from "./ui5Types/Ui5TypeInfo.js";
+import Fix from "./ui5Types/fix/Fix.js";
 
 export type FilePattern = string; // glob patterns
 export type FilePath = string; // Platform-dependent path
@@ -31,7 +31,7 @@ export interface RawLintMessage<M extends MESSAGE = MESSAGE> {
 	id: M;
 	args: MessageArgs[M];
 	position?: PositionInfo;
-	fixHints?: FixHints;
+	fix?: Fix;
 	ui5TypeInfo?: Ui5TypeInfo;
 }
 

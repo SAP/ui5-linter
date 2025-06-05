@@ -64,7 +64,7 @@ export default function generateSolutionCodeReplacer(
 	for (const {fixHints, position, args} of messages) {
 		const apiName = "apiName" in args ? args.apiName : undefined;
 		const functionName = "functionName" in args ? args.functionName : undefined;
-		const patchedFixHints = patchMessageFixHints(fixHints, apiName ?? functionName);
+		const patchedFixHints = patchMessageFixHints(fixHints as FixHints, apiName ?? functionName);
 
 		if (!patchedFixHints || !("exportCodeToBeUsed" in patchedFixHints) ||
 			!patchedFixHints.exportCodeToBeUsed || !(typeof patchedFixHints.exportCodeToBeUsed === "object") ||

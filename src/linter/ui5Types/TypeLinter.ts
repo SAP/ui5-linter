@@ -13,6 +13,7 @@ import type SharedLanguageService from "./SharedLanguageService.js";
 import SourceFileReporter from "./SourceFileReporter.js";
 import {AmbientModuleCache} from "./AmbientModuleCache.js";
 import {JSONSchemaForSAPUI5Namespace} from "../../manifest.js";
+import type FixFactory from "./fix/FixFactory.js";
 
 const log = getLogger("linter:ui5Types:TypeLinter");
 
@@ -25,6 +26,7 @@ export default class TypeLinter {
 	#sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 	#sourceFileReporters = new Map<string, SourceFileReporter>();
 	#libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"];
+	#fixFactory: FixFactory | undefined;
 
 	constructor(
 		{workspace, filePathsWorkspace, context}: LinterParameters,
@@ -100,10 +102,15 @@ export default class TypeLinter {
 		let ambientModuleCache = new AmbientModuleCache(checker.getAmbientModules());
 
 		const apiExtract = await loadApiExtract();
+		let fixFactory: FixFactory | undefined;
+		if (this.#context.getApplyAutofix()) {
+			// Dynamic import of fix factory to avoid loading it if not needed
+			const {default: FixFactory} = await import("./fix/FixFactory.js");
+			fixFactory = await FixFactory.create(checker, ambientModuleCache);
+		}
 
 		const reportCoverage = this.#context.getReportCoverage();
 		const messageDetails = this.#context.getIncludeMessageDetails();
-		const applyAutofix = this.#context.getApplyAutofix();
 		const typeCheckDone = taskStart("Linting all transpiled resources");
 		for (const sourceFile of program.getSourceFiles()) {
 			if (sourceFile.isDeclarationFile || !pathsToLint.includes(sourceFile.fileName)) {
@@ -127,8 +134,9 @@ export default class TypeLinter {
 			const linter = new SourceFileLinter(
 				this,
 				sourceFile,
-				checker, reportCoverage, messageDetails, applyAutofix,
-				apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache, manifestContent
+				checker, reportCoverage, messageDetails,
+				apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache,
+				fixFactory, manifestContent
 			);
 			await linter.lint();
 			linterDone();
@@ -167,7 +175,7 @@ export default class TypeLinter {
 				const linter = new SourceFileLinter(
 					this,
 					sourceFile,
-					checker, reportCoverage, messageDetails, applyAutofix,
+					checker, reportCoverage, messageDetails,
 					apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache
 				);
 				await linter.lint();

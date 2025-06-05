@@ -12,6 +12,7 @@ import {findGreatestAccessExpression, matchPropertyAccessExpression} from "../ut
 import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import parseRequire from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
+import Fix from "../../linter/ui5Types/fix/Fix.js";
 
 const log = getLogger("linter:autofix:NoGlobals");
 
@@ -23,6 +24,9 @@ export default function generateSolutionNoGlobals(
 	// Collect all global property access nodes
 	const affectedNodesInfo = new Set<GlobalPropertyAccessNodeInfo>();
 	for (const msg of messages) {
+		if (msg.fixHints instanceof Fix) {
+			continue;
+		}
 		if (!msg.position) {
 			throw new Error(`Unable to produce solution for message without position`);
 		}
@@ -125,6 +129,7 @@ export default function generateSolutionNoGlobals(
 			// throw new Error(`TODO: Implement handling for global access without module declaration`);
 		}
 
+		/*
 		if (moduleName) {
 			if (moduleDeclarationInfo && !moduleDeclarationInfo.importRequests.has(moduleName)) {
 				moduleDeclarationInfo.importRequests.set(moduleName, {
@@ -136,6 +141,7 @@ export default function generateSolutionNoGlobals(
 			// We have a replacement without introducing a new module, e.g. replacement by Web API usage
 			moduleDeclarationInfo?.additionalNodeInfos.push(nodeInfo);
 		}
+		*/
 	}
 
 	return moduleDeclarations;
