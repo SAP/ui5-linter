@@ -776,11 +776,6 @@ export default class SourceFileLinter {
 	}
 
 	analyzeCallExpression(node: ts.CallExpression) {
-		// Note: Always retrieving the type of the call expression causes the type checker to analyze the
-		// return type, which seems to improve the accuracy of the type information.
-		// See NoDeprecatedApi test case "ControllerByIdThisContext.js"
-		this.checker.getTypeAtLocation(node);
-
 		const exprNode = node.expression;
 		const exprType = this.checker.getTypeAtLocation(exprNode);
 		if (!exprType?.symbol || !this.isSymbolOfUi5OrThirdPartyType(exprType.symbol)) {
@@ -789,6 +784,11 @@ export default class SourceFileLinter {
 			}
 			return;
 		}
+
+		// Note: Always retrieving the type of the call expression causes the type checker to analyze the
+		// return type, which seems to improve the accuracy of the type information.
+		// See NoDeprecatedApi test case "ControllerByIdThisContext.js"
+		this.checker.getTypeAtLocation(node);
 
 		if (ts.isNewExpression(exprNode)) {
 			// e.g. new Class()();
