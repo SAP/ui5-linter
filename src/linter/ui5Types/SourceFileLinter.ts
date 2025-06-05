@@ -16,11 +16,8 @@ import {
 	isSourceFileOfPseudoModuleType,
 	isSourceFileOfTypeScriptLib,
 	getSymbolModuleDeclaration,
-	getUi5TypeInfoFromSymbol,
-	Ui5TypeInfoKind,
 	isGlobalThis,
 	extractNamespace,
-	Ui5TypeInfo,
 } from "./utils/utils.js";
 import {taskStart} from "../../utils/perf.js";
 import {getPositionsForNode} from "../../utils/nodePosition.js";
@@ -35,6 +32,9 @@ import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
 import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
 import {FixHints} from "./fixHints/FixHints.js";
+import {
+	getModuleTypeInfo, getNamespace, getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind,
+} from "./Ui5TypeInfo.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -673,15 +673,22 @@ export default class SourceFileLinter {
 		}
 		const classType = this.checker.getTypeAtLocation(node.expression);
 
-		const ui5TypeInfo = getUi5TypeInfoFromSymbol(nodeType.symbol);
+		const ui5TypeInfo = getUi5TypeInfoFromSymbol(nodeType.symbol, this.apiExtract);
+		if (!ui5TypeInfo) {
+			return;
+		}
+		const ui5ModuleTypeInfo = getModuleTypeInfo(ui5TypeInfo);
+		if (!ui5ModuleTypeInfo) {
+			return;
+		}
 		if (
-			ui5TypeInfo?.kind === Ui5TypeInfoKind.Module &&
-			ui5TypeInfo.module === "sap/ui/core/routing/Router"
+			ui5ModuleTypeInfo?.kind === Ui5TypeInfoKind.Module &&
+			ui5ModuleTypeInfo.name === "sap/ui/core/routing/Router"
 		) {
 			this.#analyzeNewCoreRouter(node);
 		} else if (
-			ui5TypeInfo?.kind === Ui5TypeInfoKind.Module &&
-			ui5TypeInfo.module === "sap/ui/model/odata/v4/ODataModel"
+			ui5ModuleTypeInfo?.kind === Ui5TypeInfoKind.Module &&
+			ui5ModuleTypeInfo.name === "sap/ui/model/odata/v4/ODataModel"
 		) {
 			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
@@ -757,7 +764,7 @@ export default class SourceFileLinter {
 			const deprecatedTag = jsdocTags.find((tag) => tag.name === "deprecated");
 			if (deprecatedTag) {
 				const deprecationInfo: DeprecationInfo = {
-					symbol, messageDetails: "", ui5TypeInfo: getUi5TypeInfoFromSymbol(symbol),
+					symbol, messageDetails: "", ui5TypeInfo: getUi5TypeInfoFromSymbol(symbol, this.apiExtract),
 				};
 				if (this.messageDetails) {
 					deprecationInfo.messageDetails = this.getDeprecationText(deprecatedTag);
@@ -778,6 +785,11 @@ export default class SourceFileLinter {
 			return;
 		}
 
+		// Note: Always retrieving the type of the call expression causes the type checker to analyze the
+		// return type, which seems to improve the accuracy of the type information.
+		// See NoDeprecatedApi test case "ControllerByIdThisContext.js"
+		this.checker.getTypeAtLocation(node);
+
 		if (ts.isNewExpression(exprNode)) {
 			// e.g. new Class()();
 			// This is usually unexpected and there are currently no known deprecations of functions
@@ -797,74 +809,84 @@ export default class SourceFileLinter {
 			throw new Error(`Unhandled CallExpression expression syntax: ${ts.SyntaxKind[exprNode.kind]}`);
 		}
 
-		const ui5TypeInfo = getUi5TypeInfoFromSymbol(exprType.symbol);
+		const ui5TypeInfo = getUi5TypeInfoFromSymbol(exprType.symbol, this.apiExtract);
 		let globalApiName;
 		if (ui5TypeInfo) {
-			const nodeType = this.checker.getTypeAtLocation(node);
-			if (ui5TypeInfo.kind === Ui5TypeInfoKind.Module) {
-				const symbolName = ui5TypeInfo.export;
-				const moduleName = ui5TypeInfo.module;
-				if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
-					// Check for sap/ui/core/Lib.init usages
-					this.#analyzeLibInitCall(node, exprNode);
-				} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
-					this.#analyzeParametersGetCall(node);
-				} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
-					this.#analyzeCreateComponentCall(node);
-				} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
-					this.#analyzeJsonModelLoadDataCall(node);
-				} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
-					this.#analyzeOdataModelV2CreateEntry(node);
-				} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
-					this.#analyzeMobileInit(node);
-				} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
-					this.#analyzeThemingSetTheme(node);
-				} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
-					this.#analyzeViewCreate(node);
-				} else if (
-					(symbolName === "load" && moduleName === "sap/ui/core/Fragment") ||
-					// Controller#loadFragment calls Fragment.load internally
-					(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
-				) {
-					this.#analyzeFragmentLoad(node, symbolName);
-				} else if (this.hasQUnitFileExtension() &&
-					!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
-					symbolName === "ready" && moduleName === "sap/ui/core/Core") {
-					this.#reportTestStarter(node);
-				} else if (symbolName === "applySettings" &&
-					nodeType.symbol?.declarations?.some((declaration) =>
-						ts.isClassDeclaration(declaration) &&
-						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
-					this.#analyzeNewAndApplySettings(node);
-				} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
-					moduleName === "sap/ui/base/ManagedObject" &&
-					node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
-					this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
-				} else if (symbolName.startsWith("bind") &&
-					nodeType.symbol?.declarations?.some((declaration) =>
-						ts.isClassDeclaration(declaration) &&
-						this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
-						node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
-					// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the property.
-					// Check decapitalized version of the property name as well.
-					const propName = symbolName.replace("bind", "");
-					const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
-
-					if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
-						this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
+			if (ui5TypeInfo.kind === Ui5TypeInfoKind.Function) {
+				const namespace = getNamespace(ui5TypeInfo);
+				if (namespace) {
+					globalApiName = namespace + "." + ui5TypeInfo.name;
+					if (
+						globalApiName === "sap.ui.view" ||
+						globalApiName === "sap.ui.xmlview" ||
+						globalApiName === "sap.ui.fragment" ||
+						globalApiName === "sap.ui.xmlfragment"
+					) {
+						this.#extractXmlFromJs(node, globalApiName);
 					}
-				} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
-					this.#extractXmlFromJs(node, "XMLView.create");
 				}
-			} else {
-				globalApiName = ui5TypeInfo.namespace;
-				if (
-					ui5TypeInfo.namespace === "sap.ui.view" ||
-					ui5TypeInfo.namespace === "sap.ui.xmlview" ||
-					ui5TypeInfo.namespace === "sap.ui.fragment" ||
-					ui5TypeInfo.namespace === "sap.ui.xmlfragment"
-				) {
-					this.#extractXmlFromJs(node, ui5TypeInfo.namespace);
+			} else if ("name" in ui5TypeInfo) {
+				const moduleTypeInfo = getModuleTypeInfo(ui5TypeInfo);
+				if (moduleTypeInfo) {
+					const moduleName = moduleTypeInfo.name;
+					const symbolName = ui5TypeInfo.name;
+					let instanceType: ts.Type | undefined = undefined;
+					if (ts.isElementAccessExpression(exprNode) || ts.isPropertyAccessExpression(exprNode)) {
+						instanceType = this.checker.getTypeAtLocation(exprNode.expression);
+					}
+					if (symbolName === "init" && moduleName === "sap/ui/core/Lib") {
+						// Check for sap/ui/core/Lib.init usages
+						this.#analyzeLibInitCall(node, exprNode);
+					} else if (symbolName === "get" && moduleName === "sap/ui/core/theming/Parameters") {
+						this.#analyzeParametersGetCall(node);
+					} else if (symbolName === "createComponent" && moduleName === "sap/ui/core/Component") {
+						this.#analyzeCreateComponentCall(node);
+					} else if (symbolName === "loadData" && moduleName === "sap/ui/model/json/JSONModel") {
+						this.#analyzeJsonModelLoadDataCall(node);
+					} else if (symbolName === "createEntry" && moduleName === "sap/ui/model/odata/v2/ODataModel") {
+						this.#analyzeOdataModelV2CreateEntry(node);
+					} else if (symbolName === "init" && moduleName === "sap/ui/util/Mobile") {
+						this.#analyzeMobileInit(node);
+					} else if (symbolName === "setTheme" && moduleName === "sap/ui/core/Theming") {
+						this.#analyzeThemingSetTheme(node);
+					} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/View") {
+						this.#analyzeViewCreate(node);
+					} else if (
+						(symbolName === "load" && moduleName === "sap/ui/core/Fragment") ||
+						// Controller#loadFragment calls Fragment.load internally
+						(symbolName === "loadFragment" && moduleName === "sap/ui/core/mvc/Controller")
+					) {
+						this.#analyzeFragmentLoad(node, symbolName);
+					} else if (this.hasQUnitFileExtension() &&
+						!VALID_TESTSUITE.test(this.sourceFile.fileName) &&
+						symbolName === "ready" && moduleName === "sap/ui/core/Core") {
+						this.#reportTestStarter(node);
+					} else if (symbolName === "applySettings" &&
+						instanceType?.symbol?.declarations?.some((declaration) =>
+							ts.isClassDeclaration(declaration) &&
+							this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))) {
+						this.#analyzeNewAndApplySettings(node);
+					} else if (["bindProperty", "bindAggregation"].includes(symbolName) &&
+						moduleName === "sap/ui/base/ManagedObject" &&
+						node.arguments[1] && ts.isObjectLiteralExpression(node.arguments[1])) {
+						this.#analyzePropertyBindings(node.arguments[1], ["type", "formatter"]);
+					} else if (symbolName.startsWith("bind") &&
+						instanceType?.symbol?.declarations?.some((declaration) =>
+							ts.isClassDeclaration(declaration) &&
+							this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject")) &&
+							node.arguments[0] && ts.isObjectLiteralExpression(node.arguments[0])) {
+						// Setting names in UI5 are case sensitive. So, we're not sure of the exact name of the
+						// property.
+						// Check decapitalized version of the property name as well.
+						const propName = symbolName.replace("bind", "");
+						const alternativePropName = propName.charAt(0).toLowerCase() + propName.slice(1);
+
+						if (this.#isPropertyBinding(node, [propName, alternativePropName])) {
+							this.#analyzePropertyBindings(node.arguments[0], ["type", "formatter"]);
+						}
+					} else if (symbolName === "create" && moduleName === "sap/ui/core/mvc/XMLView") {
+						this.#extractXmlFromJs(node, "XMLView.create");
+					}
 				}
 			}
 		}
