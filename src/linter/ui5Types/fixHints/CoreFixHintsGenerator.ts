@@ -39,21 +39,21 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	["byFieldGroupId", {
 		moduleName: "sap/ui/core/Control", exportCodeToBeUsed: "$moduleIdentifier.getControlsByFieldGroupId($1)",
 	}],
+	["getCurrentFocusedControlId", {
+		// The legacy API used to return null if no control was focused.
+		moduleName: "sap/ui/core/Element", exportCodeToBeUsed: "$moduleIdentifier.getActiveElement()?.getId() || null",
+	}],
 	["isStaticAreaRef", {
 		moduleName: "sap/ui/core/StaticArea",
 		exportCodeToBeUsed: "$moduleIdentifier.getDomRef() === $1",
 	}],
-	// TODO: The legacy API return null if the control is not found.
-	// ["getCurrentFocusedControlId", {
-	// 	moduleName: "sap/ui/core/Element", exportNameToBeUsed: "getActiveElement()?.getId",
-	// }],
-	// // Migrate only if second argument is omitted or undefined
-	// ["applyTheme", {
-	// 	moduleName: "sap/ui/core/Theming",
-	// 	exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
-	// }],
-	// // Individual arguments must be mapped to "options" object
-	// // The new API has no sync loading option, replacement is only safe when the options contain async:true
+	// Migrate only if second argument is omitted or undefined
+	["applyTheme", {
+		moduleName: "sap/ui/core/Theming",
+		exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
+	}],
+	// Individual arguments must be mapped to "options" object
+	// The new API has no sync loading option, replacement is only safe when the options contain async:true
 	// ["loadLibrary", {
 	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.load($1)",
 	// }],
@@ -63,14 +63,14 @@ const coreModulesReplacements = new Map<string, FixHints>([
 	// ["createComponent", {
 	// 	moduleName: "sap/ui/core/Component", exportCodeToBeUsed: "$moduleIdentifier.create($1)",
 	// }],
-	// // Note that alternative replacement Component.get is meanwhile deprecated, too
-	// ["getComponent", {
-	// 	moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
-	// }],
-	// // Parameter bAsync has to be omitted or set to false since the new API returns
-	// // the resource bundle synchronously. When bAsync is true, the new API is not a replacement
-	// // as it does not return a promise. In an await expression, it would be okay, but otherwise not.
-	// // TODO: To be discussed: sLibrary must be a library, that might not be easy to check
+	// Note that alternative replacement Component.get is meanwhile deprecated, too
+	["getComponent", {
+		moduleName: "sap/ui/core/Component", exportNameToBeUsed: "getComponentById",
+	}],
+	// Parameter bAsync has to be omitted or set to false since the new API returns
+	// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
+	// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
+	// TODO: To be discussed: sLibrary must be a library, that might not be easy to check
 	// ["getLibraryResourceBundle", {
 	// 	moduleName: "sap/ui/core/Lib", exportCodeToBeUsed: "$moduleIdentifier.getResourceBundleFor($1, $2)",
 	// }],
