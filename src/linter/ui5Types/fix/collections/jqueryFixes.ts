@@ -85,7 +85,7 @@ f.declareModule("jQuery", [
 			moduleName: "sap/base/security/encodeURLParameters",
 		})),
 		f.namespace("encodeHTML", accessExpressionFix({
-			moduleName: "sap/base/security/encodeHTML",
+			moduleName: "sap/base/security/encodeXML",
 		})),
 		f.namespace("encodeXML", accessExpressionFix({
 			moduleName: "sap/base/security/encodeXML",
@@ -123,6 +123,7 @@ f.declareModule("jQuery", [
 		})),
 		f.namespace("hashCode", accessExpressionFix({
 			moduleName: "sap/base/strings/hashCode",
+			preferredIdentifier: "hash",
 		})),
 		f.namespace("hyphen", accessExpressionFix({
 			moduleName: "sap/base/strings/hyphenate",
@@ -239,11 +240,9 @@ f.declareModule("jQuery", [
 			moduleName: "sap/ui/events/jquery/EventSimulation",
 		})),
 		f.namespace("keycodes", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
 			moduleName: "sap/ui/events/KeyCodes",
 		})),
 		f.namespace("PseudoEvents", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
 			moduleName: "sap/ui/events/PseudoEvents",
 			propertyAccess: "events",
 		})),
@@ -253,17 +252,17 @@ f.declareModule("jQuery", [
 		})),
 		f.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
 			f.namespace("getRequestTimings", callExpressionGeneratorFix({
-				global: "performance",
+				globalName: "performance",
 				generator(ctx, moduleIdentifierName) {
 					return `${moduleIdentifierName}.getEntriesByType("resource")`;
 				},
 			})),
 			f.namespace("clearRequestTimings", accessExpressionFix({
-				global: "performance",
+				globalName: "performance",
 				propertyAccess: "clearResourceTimings",
 			})),
 			f.namespace("setRequestBufferSize", accessExpressionFix({
-				global: "performance",
+				globalName: "performance",
 				propertyAccess: "setResourceTimingBufferSize",
 			})),
 			f.namespace("start", accessExpressionFix({
@@ -436,7 +435,6 @@ f.declareModule("jQuery", [
 		f.namespace("storage", [
 			f.namespace("Storage", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
-				propertyAccess: "Storage",
 			})),
 			f.namespace("Type", [
 				f.namespace("local", accessExpressionFix({
@@ -485,12 +483,12 @@ f.declareModule("jQuery", [
 			moduleName: "sap/ui/util/XMLHelper",
 		})),
 		f.namespace("parseXML", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
 			moduleName: "sap/ui/util/XMLHelper",
+			propertyAccess: "parse",
 		})),
 		f.namespace("serializeXML", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
 			moduleName: "sap/ui/util/XMLHelper",
+			propertyAccess: "serialize",
 		})),
 		f.namespace("startsWith", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "$1.startsWith($2)",
@@ -534,7 +532,7 @@ f.declareModule("jQuery", [
 		})),
 		f.namespace("padLeft", callExpressionGeneratorFix<{defaultString: boolean}>({
 			// exportCodeToBeUsed: "$1.padStart($3, $2)",
-			validateArguments: (ctx, arg1, arg2) => {
+			validateArguments: (ctx, checker, arg1, arg2) => {
 				if (arg1 && !ts.isStringLiteralLike(arg1)) {
 					ctx.defaultString = true;
 				}
@@ -555,7 +553,7 @@ f.declareModule("jQuery", [
 		})),
 		f.namespace("padRight", callExpressionGeneratorFix<{defaultString: boolean}>({
 			// exportCodeToBeUsed: "$1.padEnd($3, $2)",
-			validateArguments: (ctx, arg1, arg2) => {
+			validateArguments: (ctx, checker, arg1, arg2) => {
 				if (arg1 && !ts.isStringLiteralLike(arg1)) {
 					ctx.defaultString = true;
 				}
@@ -575,7 +573,7 @@ f.declareModule("jQuery", [
 			},
 		})),
 		f.namespace("domById", callExpressionGeneratorFix({
-			global: "window.document",
+			globalName: "document",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
 				return true;
@@ -608,7 +606,7 @@ f.declareModule("jQuery", [
 			},
 		})),
 		f.namespace("getModulePath", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/589
-			global: "sap.ui.require",
+			globalName: "sap.ui.require",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
 				return true;
@@ -619,7 +617,7 @@ f.declareModule("jQuery", [
 			},
 		})),
 		f.namespace("getResourcePath", callExpressionGeneratorFix({
-			global: "sap.ui.require",
+			globalName: "sap.ui.require",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
 				return true;
@@ -630,6 +628,9 @@ f.declareModule("jQuery", [
 			},
 		})),
 	]),
+
+	// jQuery.*
+	// TODO
 ]);
 
 /**
@@ -737,14 +738,22 @@ class CharToUpperCaseFix extends CallExpressionFix {
 
 		if (node.arguments.length === 2) {
 			const positionArg = node.arguments[1];
-			if (!ts.isNumericLiteral(positionArg)) {
+			if (!ts.isNumericLiteral(positionArg) &&
+				(!ts.isPrefixUnaryExpression(positionArg) || !ts.isNumericLiteral(positionArg.operand))) {
 				// Second argument must be a numeric literal if provided
 				return false;
 			}
-			const positionValue = parseInt(positionArg.text, 10);
-			if (positionValue > 0 && positionValue < stringLength) {
-				// If the position is greater than 0 and less than the string length, we cannot apply the fix
-				return false;
+			if (ts.isPrefixUnaryExpression(positionArg)) {
+				// If it's a prefix unary expression, we need to check whether it is a negative number
+				if (positionArg.operator !== ts.SyntaxKind.MinusToken) {
+					return false;
+				}
+			} else {
+				const positionValue = parseInt(positionArg.text, 10);
+				if (positionValue > 0 && positionValue < stringLength) {
+					// If the position is greater than 0 and less than the string length, we cannot apply the fix
+					return false;
+				}
 			}
 		}
 		// Fix can be applied

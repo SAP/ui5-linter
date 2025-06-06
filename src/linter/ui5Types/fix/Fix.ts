@@ -8,6 +8,11 @@ export interface ModuleDependencyRequest {
 	preferredIdentifier?: string;
 }
 
+export interface GlobalAccessRequest {
+	globalName: string;
+	usagePosition: number;
+}
+
 export interface SourceCodeRange {
 	start: number;
 	end: number;
@@ -44,7 +49,9 @@ export default abstract class Fix {
 
 	abstract getNewModuleDependencies(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined;
 	// abstract getObsoleteModuleDependencies(): ModuleImportRequest | ModuleImportRequest[];
+	abstract getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined;
 
 	abstract setIdentifierForDependency(identifier: string, moduleName: string): void;
+	abstract setIdentifierForGlobal(identifier: string, globalName: string): void;
 	abstract generateChanges(): ChangeSet | ChangeSet[] | undefined;
 }

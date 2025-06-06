@@ -8,8 +8,8 @@ import getJqueryFixInfo, {JqueryFixInfo} from "./getJqueryFixInfo.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import getGlobalFix from "./getGlobalFix.js";
 import GlobalFix from "./GlobalFix.js";
-import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
 import CallExpressionGeneratorFix, {CallExpressionGeneratorFixParams} from "./CallExpressionGeneratorFix.js";
+import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
 
 const AUTOFIX_COLLECTIONS = [
 	"sapUiCoreFixes",

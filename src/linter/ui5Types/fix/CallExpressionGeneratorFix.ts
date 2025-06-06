@@ -12,15 +12,22 @@ export interface CallExpressionGeneratorFixParams<GeneratorContext extends objec
 	mustNotUseReturnValue?: boolean;
 
 	/**
-	 * If set, the provided function will be used to generate the change action
+	 * The generator function will be used to determine the value of the replacement, affecting
+	 * the whole call expression
 	 *
 	 * If the return value is undefined, no change will be generated
 	 */
 	generator: (
-		ctx: GeneratorContext, moduleIdentifierName: string | undefined, ...args: string[]
+		ctx: GeneratorContext, identifierName: string | undefined, ...args: string[]
 	) => string | undefined;
 
-	validateArguments?: (ctx: GeneratorContext, ...args: ts.Expression[]) => boolean;
+	/**
+	 * Validate the arguments of the call expression, optionally using the provided checker
+	 *
+	 * This hook may also collect information that affects the generator. For that, it can store
+	 * information in the provided context object, which can be retrieved later in the generator function
+	 */
+	validateArguments?: (ctx: GeneratorContext, checker: ts.TypeChecker, ...args: ts.Expression[]) => boolean;
 }
 
 export default class CallExpressionGeneratorFix<GeneratorContext extends object> extends BaseFix {
@@ -31,7 +38,7 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 		super(params);
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _checker: ts.TypeChecker) {
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
@@ -41,7 +48,7 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 			return false;
 		}
 		if (this.params.validateArguments) {
-			if (!this.params.validateArguments(this.generatorContext, ...node.arguments)) {
+			if (!this.params.validateArguments(this.generatorContext, checker, ...node.arguments)) {
 				return false;
 			}
 		}
@@ -66,7 +73,7 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 
 		// Collect arguments for the generator function
 		this.generatorArgs = node.arguments.map((arg) => {
-			return arg.getText();
+			return arg.getFullText();
 		});
 		this.startPos = node.getStart(sourceFile);
 		this.endPos = node.getEnd();
@@ -84,9 +91,13 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 			// and the fix can not be applied.
 			return;
 		}
+		if (this.params.globalName && !this.globalIdentifierName) {
+			// This should not happen
+			throw new Error("Global identifier has not been provided");
+		}
 
 		const value = this.params.generator(
-			this.generatorContext, this.params.global ?? this.moduleIdentifierName, ...this.generatorArgs);
+			this.generatorContext, this.globalIdentifierName ?? this.moduleIdentifierName, ...this.generatorArgs);
 		if (!value) {
 			return;
 		}

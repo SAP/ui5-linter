@@ -12,10 +12,20 @@ export interface BaseFixParams {
 	 */
 	preferredIdentifier?: string;
 
+	// Not yet implemented: Requesting multiple modules
+	// modules?: Omit<ModuleDependencyRequest, "usagePosition">[];
+
 	/**
-	 * Name of the global variable to use in the fix (e.g. "document")
+	 * Name of a global variable to use in the fix (e.g. "document")
+	 *
+	 * The fix will be provided with the identifier name or property access to use via
+	 * the setIdentifierForDependency method.
+	 *
+	 * For example, if there is already a conflicting identifier within the same file,
+	 * the fix will be provided with an alternative like "globalThis.document"
 	 */
-	global?: string;
+	globalName?: string;
+
 	/**
 	 * Property access on the module or global
 	 *
@@ -29,6 +39,7 @@ export default abstract class BaseFix extends Fix {
 	protected startPos: number | undefined;
 	protected endPos: number | undefined;
 	protected moduleIdentifierName: string | undefined;
+	protected globalIdentifierName: string | undefined;
 	protected sourcePosition: PositionInfo | undefined;
 
 	constructor(protected params: BaseFixParams) {
@@ -49,6 +60,10 @@ export default abstract class BaseFix extends Fix {
 		this.moduleIdentifierName = identifier;
 	}
 
+	setIdentifierForGlobal(identifier: string) {
+		this.globalIdentifierName = identifier;
+	}
+
 	getNewModuleDependencies() {
 		if (this.startPos === undefined) {
 			throw new Error("Start position is not defined");
@@ -59,6 +74,19 @@ export default abstract class BaseFix extends Fix {
 		return {
 			moduleName: this.params.moduleName,
 			preferredIdentifier: this.params.preferredIdentifier,
+			usagePosition: this.startPos,
+		};
+	}
+
+	getNewGlobalAccess() {
+		if (this.startPos === undefined) {
+			throw new Error("Start position is not defined");
+		}
+		if (!this.params.globalName) {
+			return;
+		}
+		return {
+			globalName: this.params.globalName,
 			usagePosition: this.startPos,
 		};
 	}
