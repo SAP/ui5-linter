@@ -55,8 +55,16 @@ test("getPropertyNameText - computed property name", (t) => {
 	t.is(getPropertyNameText(node), "test");
 });
 
-test("getPropertyNameText - invalid node", (t) => {
+test("getPropertyNameText - computed property name with numeric literal", (t) => {
 	const node = factory.createComputedPropertyName(factory.createNumericLiteral(123));
+	t.is(getPropertyNameText(node), "123");
+});
+
+test("getPropertyNameText - unary expression is not supported", (t) => {
+	const node = factory.createComputedPropertyName(factory.createPrefixUnaryExpression(
+		ts.SyntaxKind.MinusToken,
+		factory.createNumericLiteral(123)
+	));
 	t.is(getPropertyNameText(node), undefined);
 });
 

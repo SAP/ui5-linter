@@ -28,11 +28,13 @@ export function getPropertyNameText(node: ts.PropertyName): string | undefined {
 		ts.isPrivateIdentifier(node)
 	) {
 		return node.text;
-	} else if (ts.isComputedPropertyName(node) && ts.isStringLiteralLike(node.expression)) {
-		return node.expression.text;
-	} else {
-		return undefined;
+	} else if (ts.isComputedPropertyName(node)) {
+		if (ts.isStringLiteralLike(node.expression) || ts.isNumericLiteral(node.expression)) {
+			return node.expression.text;
+		}
 	}
+
+	return undefined;
 }
 
 /**

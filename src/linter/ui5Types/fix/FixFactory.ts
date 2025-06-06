@@ -6,8 +6,8 @@ import type Ui5TypeInfoMatcher from "../Ui5TypeInfoMatcher.js";
 import {getModuleTypeInfo, Ui5TypeInfo, Ui5TypeInfoKind} from "../Ui5TypeInfo.js";
 import getJqueryFixInfo, {JqueryFixInfo} from "./getJqueryFixInfo.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
-import getGlobalFix from "./getGlobalFix.js";
-import GlobalFix from "./GlobalFix.js";
+import getGlobalFixInfo, {GlobalFixInfo} from "./getGlobalFixInfo.js";
+import GlobalFix, {GlobalFixParams} from "./GlobalFix.js";
 import CallExpressionGeneratorFix, {CallExpressionGeneratorFixParams} from "./CallExpressionGeneratorFix.js";
 import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
 
@@ -91,8 +91,8 @@ export default class FixFactory {
 		};
 	}
 
-	getGlobalFix(node: ts.CallExpression | ts.AccessExpression, resourcePath: string): GlobalFix | undefined {
-		return getGlobalFix(node, resourcePath, this.ambientModuleCache);
+	getGlobalFixInfo(node: ts.CallExpression | ts.AccessExpression): GlobalFixInfo | undefined {
+		return getGlobalFixInfo(node, this.ambientModuleCache);
 	}
 }
 
