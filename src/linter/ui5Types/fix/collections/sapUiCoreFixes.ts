@@ -1,38 +1,38 @@
 import ts from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
-import {AccessExpressionFixScope} from "../AccessExpressionFix.js";
 import {
 	FixTypeInfoFilter,
 	accessExpressionFix,
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
+import {FixScope} from "../BaseFix.js";
 
 const f: FixTypeInfoFilter = new Ui5TypeInfoMatcher("sap.ui.core");
 export default f;
 f.declareModule("sap/ui/core/Core", [
 	f.class("Core", [
 		...f.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
-			scope: AccessExpressionFixScope.FirstAccessExpression,
+			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Core",
 			propertyAccess: "ready",
 		})),
 		...f.methods(["getControl", "getElementById", "byId"], accessExpressionFix({
-			scope: AccessExpressionFixScope.FirstAccessExpression,
+			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Element",
 			propertyAccess: "getElementById",
 		})),
 		f.method("getEventBus", accessExpressionFix({
-			scope: AccessExpressionFixScope.FirstAccessExpression,
+			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
 		})),
 		f.method("getStaticAreaRef", accessExpressionFix({
-			scope: AccessExpressionFixScope.FirstAccessExpression,
+			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/StaticArea",
 			propertyAccess: "getDomRef",
 		})),
 		f.method("initLibrary", accessExpressionFix({
-			scope: AccessExpressionFixScope.FirstAccessExpression,
+			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Lib",
 			propertyAccess: "init",
 		})),
@@ -43,7 +43,7 @@ f.declareModule("sap/ui/core/Core", [
 			},
 		})),
 		f.method("notifyContentDensityChanged", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/core/Theming",
 		})),
 		f.method("getCurrentFocusedControlId", callExpressionGeneratorFix({

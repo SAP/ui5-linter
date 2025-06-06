@@ -35,6 +35,40 @@ export interface BaseFixParams {
 	propertyAccess?: string;
 }
 
+export enum FixScope {
+	/**
+	 * Replace the whole expression
+	 *
+	 * Call expression example: "sap.module.method()" for a call expression
+	 * Access expression example: "sap.module.property"
+	 */
+	FullExpression = 0,
+	/**
+	 * Replace the first child of the expression
+	 *
+	 * Call expression example: "sap.module.method"
+	 * Access expression example: "sap.module"
+	 */
+	FirstChild = 1,
+	/**
+	 * Replace the second child of the expression
+	 *
+	 * Call expression example: "sap.module"
+	 * Access expression example: "sap"
+	 */
+	SecondChild = 2,
+	/**
+	 * Replace the third child of the expression
+	 *
+	 * Call expression example: "sap"
+	 */
+	ThirdChild = 3,
+	/**
+	 * Replace the fourth child of the expression
+	 */
+	FourthChild = 4,
+}
+
 export default abstract class BaseFix extends Fix {
 	protected startPos: number | undefined;
 	protected endPos: number | undefined;
