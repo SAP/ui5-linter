@@ -1,8 +1,7 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import BaseFix, {BaseFixParams} from "./BaseFix.js";
-import {AccessExpressionFixScope} from "./AccessExpressionFix.js";
+import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
 
 export interface AccessExpressionGeneratorFixParams extends BaseFixParams {
 	/**
@@ -14,7 +13,7 @@ export interface AccessExpressionGeneratorFixParams extends BaseFixParams {
 	 *
 	 * If not set, the default value is 0.
 	 */
-	scope?: number | AccessExpressionFixScope;
+	scope?: number | FixScope;
 
 	/**
 	 * The generator function will be used to determine the value of the replacement, affecting

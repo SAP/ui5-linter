@@ -1,26 +1,7 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import BaseFix, {BaseFixParams} from "./BaseFix.js";
-
-export enum AccessExpressionFixScope {
-	/**
-	 * Replace the full access expression, e.g. "sap.module.property"
-	 */
-	FirstAccessExpression = 0,
-	/**
-	 * Replace the second level of access expression, e.g. "sap.module"
-	 */
-	SecondAccessExpression = 1,
-	/**
-	 * Replace the third level of access expression, e.g. "sap"
-	 */
-	ThirdAccessExpression = 2,
-	/**
-	 * Replace the fourth level of access expression
-	 */
-	FourthAccessExpression = 3,
-}
+import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
 
 export interface AccessExpressionFixParams extends BaseFixParams {
 	/**
@@ -32,7 +13,7 @@ export interface AccessExpressionFixParams extends BaseFixParams {
 	 *
 	 * If not set, the default value is 0.
 	 */
-	scope?: number | AccessExpressionFixScope;
+	scope?: number | FixScope;
 }
 
 /**

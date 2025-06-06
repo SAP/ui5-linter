@@ -2,30 +2,7 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import {isExpectedValueExpression} from "../utils/utils.js";
-import BaseFix, {BaseFixParams} from "./BaseFix.js";
-
-export enum CallExpressionFixScope {
-	/**
-	 * Replace the whole call expression, e.g. "sap.module.method()"
-	 */
-	CallExpression = 0,
-	/**
-	 * Replace the call expression without the arguments, e.g. "sap.module.method"
-	 */
-	FirstAccessExpression = 1,
-	/**
-	 * Replace the second level of access expression, e.g. "sap.module"
-	 */
-	SecondAccessExpression = 2,
-	/**
-	 * Replace the third level of access expression, e.g. "sap"
-	 */
-	ThirdAccessExpression = 3,
-	/**
-	 * Replace the fourth level of access expression
-	 */
-	FourthAccessExpression = 4,
-}
+import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
 
 export interface CallExpressionFixParams extends BaseFixParams {
 	/**
@@ -44,7 +21,7 @@ export interface CallExpressionFixParams extends BaseFixParams {
 	 *
 	 * If not set, the default value is 1.
 	 */
-	scope?: number | CallExpressionFixScope;
+	scope?: number | FixScope;
 	/**
 	 * Whether to add a "new" keyword before the expression
 	 */

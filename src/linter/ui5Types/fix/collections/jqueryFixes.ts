@@ -1,10 +1,10 @@
 import ts from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
 import {FixTypeInfoFilter, accessExpressionFix, callExpressionFix, callExpressionGeneratorFix} from "../FixFactory.js";
-import CallExpressionFix, {CallExpressionFixScope} from "../CallExpressionFix.js";
+import CallExpressionFix from "../CallExpressionFix.js";
 import {ChangeAction} from "../../../../autofix/autofix.js";
-import {AccessExpressionFixScope} from "../AccessExpressionFix.js";
 import {PositionInfo} from "../../../LinterContext.js";
+import {FixScope} from "../BaseFix.js";
 
 /**
  * NOTE: Since jQuery.sap APIs are not fully typed, we generate a "mocked" UI5 Type Info in module "getJqueryFixInfo.ts"
@@ -29,7 +29,7 @@ f.declareModule("jQuery", [
 			...f.namespaces(["debug", "error", "fatal", "info", "trace", "warning"],
 				callExpressionFix({
 					moduleName: "sap/base/Log",
-					scope: CallExpressionFixScope.SecondAccessExpression,
+					scope: FixScope.SecondChild,
 					// Log.debug/warn/info/etc return "void", but the legacy
 					// jQuery.log.debug was returning "this". Therefore a replacement
 					// is only safe if the return value is not used in the code
@@ -37,7 +37,7 @@ f.declareModule("jQuery", [
 				})),
 			f.namespace("getLevel", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("getLog", accessExpressionFix({
 				moduleName: "sap/base/Log",
@@ -45,27 +45,27 @@ f.declareModule("jQuery", [
 			})),
 			f.namespace("getLogEntries", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("addLogListener", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("removeLogListener", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("getLogger", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("logSupportInfo", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 			f.namespace("isLoggable", accessExpressionFix({
 				moduleName: "sap/base/Log",
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 			})),
 		]),
 		f.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
@@ -148,7 +148,7 @@ f.declareModule("jQuery", [
 			moduleName: "sap/ui/security/FrameOptions",
 		})),
 		f.namespace("parseJS", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/base/util/JSTokenizer",
 		})),
 
@@ -220,11 +220,11 @@ f.declareModule("jQuery", [
 			moduleName: "sap/ui/events/checkMouseEnterOrLeave",
 		})),
 		f.namespace("bindAnyEvent", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/ControlEvents",
 		})),
 		f.namespace("unbindAnyEvent", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/ControlEvents",
 		})),
 		f.namespace("ControlEvents", accessExpressionFix({
@@ -232,11 +232,11 @@ f.declareModule("jQuery", [
 			propertyAccess: "events",
 		})),
 		f.namespace("handleF6GroupNavigation", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/F6Navigation",
 		})),
 		f.namespace("touchEventMode", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/jquery/EventSimulation",
 		})),
 		f.namespace("keycodes", accessExpressionFix({
@@ -247,7 +247,7 @@ f.declareModule("jQuery", [
 			propertyAccess: "events",
 		})),
 		f.namespace("disableTouchToMouseHandling", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/TouchToMouseMapping",
 		})),
 		f.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
@@ -266,67 +266,67 @@ f.declareModule("jQuery", [
 				propertyAccess: "setResourceTimingBufferSize",
 			})),
 			f.namespace("start", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("add", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("end", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("average", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("clear", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("filterMeasurements", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("getAllMeasurements", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("getMeasurement", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("pause", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("resume", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("getActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("setActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("remove", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("registerMethod", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("unregisterMethod", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("unregisterAllMethods", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
 			f.namespace("clearInteractionMeasurements", accessExpressionFix({
@@ -356,57 +356,57 @@ f.declareModule("jQuery", [
 		]), // measure
 		f.namespace("fesr", [ // https://github.com/SAP/ui5-linter/issues/561
 			f.namespace("setActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/FESR",
 			})),
 			f.namespace("getActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/FESR",
 			})),
 			f.namespace("addBusyDuration", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("getCurrentTransactionId", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Passport",
 			})),
 			f.namespace("getRootId", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Passport",
 			})),
 		]),
 		f.namespace("interaction", [
 			f.namespace("getActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("setActive", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("notifyStepStart", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("notifyStepEnd", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("notifyEventStart", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("notifyScrollEvent", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("notifyEventEnd", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 			f.namespace("setStepComponent", accessExpressionFix({
-				scope: AccessExpressionFixScope.SecondAccessExpression,
+				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 		]), // interaction
@@ -479,7 +479,7 @@ f.declareModule("jQuery", [
 			newExpression: true,
 		})),
 		f.namespace("getParseError", accessExpressionFix({
-			scope: AccessExpressionFixScope.SecondAccessExpression,
+			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/util/XMLHelper",
 		})),
 		f.namespace("parseXML", accessExpressionFix({
@@ -643,7 +643,7 @@ class IsStringNfcFix extends CallExpressionFix {
 
 	constructor() {
 		super({
-			scope: CallExpressionFixScope.CallExpression,
+			scope: FixScope.FullExpression,
 		});
 	}
 
@@ -705,7 +705,7 @@ class CharToUpperCaseFix extends CallExpressionFix {
 	constructor() {
 		super({
 			moduleName: "sap/base/strings/capitalize",
-			scope: CallExpressionFixScope.CallExpression,
+			scope: FixScope.FullExpression,
 		});
 	}
 
