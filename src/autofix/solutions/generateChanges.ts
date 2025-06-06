@@ -1,6 +1,5 @@
 import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
-import {MESSAGE} from "../../linter/messages.js";
 import {
 	Position,
 	type ChangeSet,
@@ -33,6 +32,7 @@ interface DependencyRequest {
 	moduleName: string;
 	preferredIdentifier?: string;
 	usagePosition: number;
+	blockNewImport?: boolean;
 	fix: Fix;
 }
 
@@ -161,6 +161,7 @@ export default function generateChanges(
 
 	const conflicts = findRangeConflicts(fixRanges);
 	const dependencyRequests = new Set<DependencyRequest>();
+	const blockedModuleImports = new Set<string>();
 	const globalAccessRequests = new Set<GlobalAccessRequest>();
 	for (const nodeInfo of nodeSearchInfo) {
 		if (conflicts.includes(nodeInfo.fix)) {
@@ -171,44 +172,45 @@ export default function generateChanges(
 		// Collect new dependencies
 		const newDependencies = nodeInfo.fix.getNewModuleDependencies();
 		if (Array.isArray(newDependencies)) {
-			for (const {moduleName, preferredIdentifier, usagePosition} of newDependencies) {
+			for (const depRequest of newDependencies) {
 				dependencyRequests.add({
-					moduleName,
-					preferredIdentifier,
-					usagePosition,
+					...depRequest,
 					fix: nodeInfo.fix,
 				});
+				if (depRequest.blockNewImport) {
+					// If the request blocks new imports, add it to the blocked module imports
+					blockedModuleImports.add(depRequest.moduleName);
+				}
 			}
 		} else if (newDependencies) {
-			const {moduleName, preferredIdentifier, usagePosition} = newDependencies;
+			const depRequest = newDependencies;
 			dependencyRequests.add({
-				moduleName,
-				preferredIdentifier,
-				usagePosition,
+				...depRequest,
 				fix: nodeInfo.fix,
 			});
+			if (depRequest.blockNewImport) {
+				// If the request blocks new imports, add it to the blocked module imports
+				blockedModuleImports.add(depRequest.moduleName);
+			}
 		}
 
 		// Collect new global access
 		const newGlobalAccess = nodeInfo.fix.getNewGlobalAccess();
 		if (Array.isArray(newGlobalAccess)) {
-			for (const {globalName, usagePosition} of newGlobalAccess) {
+			for (const globalAccess of newGlobalAccess) {
 				globalAccessRequests.add({
-					globalName,
-					usagePosition,
+					...globalAccess,
 					fix: nodeInfo.fix,
 				});
 			}
 		} else if (newGlobalAccess) {
-			const {globalName, usagePosition} = newGlobalAccess;
+			const globalAccess = newGlobalAccess;
 			globalAccessRequests.add({
-				globalName,
-				usagePosition,
+				...globalAccess,
 				fix: nodeInfo.fix,
 			});
 		}
 	}
-
 	const dependencyDeclarations: DependencyDeclarations[] = [];
 	for (const [moduleDeclaration, moduleDeclarationInfo] of moduleDeclarations) {
 		const deps = getDependencies(moduleDeclarationInfo.moduleDeclaration, resourcePath);
@@ -218,6 +220,25 @@ export default function generateChanges(
 			end: moduleDeclaration.getEnd(),
 			dependencies: deps,
 		});
+	}
+
+	// Handle blocked module imports
+	if (dependencyDeclarations.length) {
+		for (const topLevelDep of dependencyDeclarations[0].dependencies.keys()) {
+			if (blockedModuleImports.has(topLevelDep)) {
+				// If the blocked module is already imported in the top-level module declaration,
+				// lift the block
+				blockedModuleImports.delete(topLevelDep);
+			}
+		}
+	}
+	for (const depRequest of dependencyRequests) {
+		if (blockedModuleImports.has(depRequest.moduleName)) {
+			// If the request is for a module that is blocked from being imported by another fix
+			// (e.g. because a probing/conditional access has been detected), delete the request
+			// this will cause the fix to not be applied
+			dependencyRequests.delete(depRequest);
+		}
 	}
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports

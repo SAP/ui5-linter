@@ -19,7 +19,8 @@ interface DependencyMapValue {
 
 const NO_PARAM_FOR_DEPENDENCY = Symbol("noParamForDependency");
 const UNSUPPORTED_PARAM_FOR_DEPENDENCY = Symbol("unsupportedParamForDependency");
-export type Dependencies = Map<string,
+type ModuleName = string;
+export type Dependencies = Map<ModuleName,
 	string | typeof NO_PARAM_FOR_DEPENDENCY | typeof UNSUPPORTED_PARAM_FOR_DEPENDENCY>;
 
 export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireExpression, resourcePath: string) {

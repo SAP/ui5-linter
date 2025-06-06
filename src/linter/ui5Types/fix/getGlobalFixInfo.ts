@@ -1,11 +1,16 @@
 import ts from "typescript";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
-import {isAssignment, isConditionalAccess} from "../utils/utils.js";
-import GlobalFix, {GlobalFixParams} from "./GlobalFix.js";
+import {isAssignment} from "../utils/utils.js";
 
-export default function getGlobalFix(
-	node: ts.CallExpression | ts.AccessExpression, resourcePath: string, ambientModuleCache: AmbientModuleCache
-): GlobalFix | undefined {
+export interface GlobalFixInfo {
+	moduleName: string;
+	propertyAccessStack: string[];
+	relevantNode: ts.Node;
+}
+
+export default function getGlobalFixInfo(
+	node: ts.CallExpression | ts.AccessExpression, ambientModuleCache: AmbientModuleCache
+): GlobalFixInfo | undefined {
 	if (ts.isCallExpression(node)) {
 		if (!ts.isIdentifier(node.expression) || !["$", "jQuery"].includes(node.expression.text)) {
 			return;
@@ -19,41 +24,13 @@ export default function getGlobalFix(
 		return;
 	}
 
-	const result = getImportFromGlobal(node, ambientModuleCache);
-	if (!result) {
-		return undefined;
-	}
-	const {fixParams, propertyAccessNode} = result;
-	if (
-		fixParams.moduleName &&
-		(
-			resourcePath === `/resources/${fixParams.moduleName}.js` ||
-			resourcePath === `/resources/${fixParams.moduleName}.ts`
-		)
-	) {
-		// Prevent adding imports to the module itself
-		return undefined;
-	}
-
-	// Check for usage of "delete" keyword with the module export, which is not fixable
-	// as only an identifier would remain after the autofix, which would not be valid.
-	if (
-		ts.isDeleteExpression(propertyAccessNode.parent) &&
-		propertyAccessNode.parent.expression === propertyAccessNode
-	) {
-		return undefined;
-	}
-
-	// Check whether the access is conditional / probing / lazy
-	// fixParams.isConditional = isConditionalAccess(propertyAccessNode);
-
-	return new GlobalFix(fixParams);
+	return getImportFromGlobal(node, ambientModuleCache);
 }
 
 function getImportFromGlobal(
 	node: ts.CallExpression | ts.AccessExpression,
 	ambientModuleCache: AmbientModuleCache
-): {fixParams: GlobalFixParams; propertyAccessNode: ts.Node} | undefined {
+): GlobalFixInfo | undefined {
 	const parts: string[] = [];
 	const partNodes: ts.Node[] = [];
 
@@ -109,8 +86,9 @@ function getImportFromGlobal(
 					return undefined;
 				}
 				return {
-					fixParams: {moduleName: libraryModuleName, propertyAccessStack: searchStack.reverse()},
-					propertyAccessNode: partNodes[searchStack.length - 1],
+					moduleName: libraryModuleName,
+					propertyAccessStack: searchStack.reverse(),
+					relevantNode: partNodes[searchStack.length - 1],
 				};
 			}
 		}
@@ -122,8 +100,9 @@ function getImportFromGlobal(
 		return undefined;
 	}
 	return {
-		fixParams: {moduleName: searchStack.join("/"), propertyAccessStack: searchStack.reverse()},
-		propertyAccessNode: partNodes[searchStack.length - 1],
+		moduleName: searchStack.join("/"),
+		propertyAccessStack: searchStack.reverse(),
+		relevantNode: partNodes[searchStack.length - 1],
 	};
 }
 

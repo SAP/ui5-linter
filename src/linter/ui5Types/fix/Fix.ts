@@ -6,6 +6,7 @@ export interface ModuleDependencyRequest {
 	moduleName: string;
 	usagePosition: number;
 	preferredIdentifier?: string;
+	blockNewImport?: boolean;
 }
 
 export interface GlobalAccessRequest {

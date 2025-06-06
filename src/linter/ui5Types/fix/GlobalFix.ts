@@ -2,10 +2,12 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import Fix from "./Fix.js";
+import {isConditionalAccess} from "../utils/utils.js";
 
 export interface GlobalFixParams {
 	moduleName: string;
 	propertyAccessStack: string[];
+	resourcePath: string;
 };
 
 /**
@@ -15,8 +17,9 @@ export interface GlobalFixParams {
 export default class GlobalFix extends Fix {
 	private startPos: number | undefined;
 	private endPos: number | undefined;
-	private identifier: string | undefined;
+	private moduleIdentifier: string | undefined;
 	private sourcePosition: PositionInfo | undefined;
+	private isConditional: boolean | undefined;
 
 	constructor(private params: GlobalFixParams) {
 		super();
@@ -26,7 +29,19 @@ export default class GlobalFix extends Fix {
 		if (!ts.isPropertyAccessExpression(node) && !ts.isElementAccessExpression(node) && !ts.isCallExpression(node)) {
 			return false;
 		}
-		// TODO: Add checks for delete expression and conditional access here
+		if (this.params.resourcePath === `/resources/${this.params.moduleName}.js` ||
+			this.params.resourcePath === `/resources/${this.params.moduleName}.ts`) {
+			// Prevent adding imports to the module itself
+			return false;
+		}
+
+		// Check for usage of "delete" keyword with the module export, which is not fixable
+		// as only an identifier would remain after the autofix, which would not be valid.
+		if (ts.isDeleteExpression(node.parent) && node.parent.expression === node) {
+			return false;
+		}
+		// Check whether the access is conditional / probing / lazy
+		this.isConditional = isConditionalAccess(node);
 		this.sourcePosition = sourcePosition;
 		return true;
 	}
@@ -68,7 +83,7 @@ export default class GlobalFix extends Fix {
 	}
 
 	setIdentifierForDependency(identifier: string) {
-		this.identifier = identifier;
+		this.moduleIdentifier = identifier;
 	}
 
 	getNewModuleDependencies() {
@@ -81,19 +96,28 @@ export default class GlobalFix extends Fix {
 		return {
 			moduleName: this.params.moduleName,
 			usagePosition: this.startPos,
+			blockNewImport: this.isConditional,
 		};
+	}
+
+	getNewGlobalAccess() {
+		return undefined;
+	}
+
+	setIdentifierForGlobal() {
+		return;
 	}
 
 	generateChanges() {
 		if (this.startPos === undefined || this.endPos === undefined) {
 			throw new Error("Start and end position are not defined");
 		}
-		if (!this.identifier) {
+		if (!this.moduleIdentifier) {
 			// Identifier has not been set. This can happen if the relevant position is not inside a
 			// module definition or require block. Therefore the fix can not be applied.
 			return;
 		}
-		let value = this.identifier;
+		const value = this.moduleIdentifier;
 		return {
 			action: ChangeAction.REPLACE,
 			start: this.startPos,

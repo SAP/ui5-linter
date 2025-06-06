@@ -539,7 +539,7 @@ f.declareModule("jQuery", [
 				if (!arg2 || !ts.isStringLiteralLike(arg2) ||
 					// String literals are enclosed in double quotes, so the length of an empty string is 2
 					arg2.text.length > 3) {
-					// API not compatible if the second argument is not a string or string with lenght <> 1
+					// API not compatible if the second argument is not a string or string with length <> 1
 					return false;
 				}
 				return true;
@@ -560,7 +560,7 @@ f.declareModule("jQuery", [
 				if (!arg2 || !ts.isStringLiteralLike(arg2) ||
 					// String literals are enclosed in double quotes, so the length of an empty string is 2
 					arg2.text.length > 3) {
-					// API not compatible if the second argument is not a string or string with lenght <> 1
+					// API not compatible if the second argument is not a string or string with length <> 1
 					return false;
 				}
 				return true;
@@ -733,7 +733,7 @@ class CharToUpperCaseFix extends CallExpressionFix {
 			this.argIdentifierName = stringArg.text;
 		} else {
 			stringLength = stringArg.text.length;
-			this.argStringValue = stringArg.getText();
+			this.argStringValue = stringArg.getFullText();
 		}
 
 		if (node.arguments.length === 2) {

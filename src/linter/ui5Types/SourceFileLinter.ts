@@ -35,6 +35,7 @@ import {
 } from "./Ui5TypeInfo.js";
 import FixFactory from "./fix/FixFactory.js";
 import Fix from "./fix/Fix.js";
+import GlobalFix from "./fix/GlobalFix.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -1859,10 +1860,15 @@ export default class SourceFileLinter {
 	}
 
 	getGlobalFix(node: ts.CallExpression | ts.AccessExpression): Fix | undefined {
-		const fix = this.fixFactory?.getGlobalFix(node, this.sourceFile.fileName);
-		if (fix) {
-			const position = this.#reporter.getPositionsForNode(node);
-			if (fix.visitLinterNode(node, position.start)) {
+		const fixInfo = this.fixFactory?.getGlobalFixInfo(node);
+		if (fixInfo) {
+			const fix = new GlobalFix({
+				moduleName: fixInfo.moduleName,
+				propertyAccessStack: fixInfo.propertyAccessStack,
+				resourcePath: this.resourcePath,
+			});
+			const position = this.#reporter.getPositionsForNode(fixInfo.relevantNode);
+			if (fix.visitLinterNode(fixInfo.relevantNode, position.start)) {
 				return fix;
 			}
 		}
