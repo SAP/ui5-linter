@@ -17,8 +17,8 @@ interface DependencyMapValue {
 	trailingComma?: ts.Token<ts.SyntaxKind.CommaToken>;
 }
 
-const NO_PARAM_FOR_DEPENDENCY = Symbol("noParamForDependency");
-const UNSUPPORTED_PARAM_FOR_DEPENDENCY = Symbol("unsupportedParamForDependency");
+export const NO_PARAM_FOR_DEPENDENCY = Symbol("noParamForDependency");
+export const UNSUPPORTED_PARAM_FOR_DEPENDENCY = Symbol("unsupportedParamForDependency");
 type ModuleName = string;
 export type Dependencies = Map<ModuleName,
 	string | typeof NO_PARAM_FOR_DEPENDENCY | typeof UNSUPPORTED_PARAM_FOR_DEPENDENCY>;
@@ -211,27 +211,12 @@ export function addDependencies(
 
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [dependencyModuleName, importRequest] of importRequests) {
-		// const dependencyModuleName = requestedModuleName;
-		// const existingDependency = dependenciesToRemove.has(requestedModuleName) ?
-		// 	undefined :
-		// 		dependencyMap.get(requestedModuleName);
-
-		// if (existingDependency) {
-		// 	// Reuse the existing dependency
-		// 	// Check whether a parameter name already exists for this dependency
-		// 	// Lookup needs to be based on the same index of the parameter in the factory function
-		// 	const existingParameter = parameters[existingDependency.index];
-		// 	if (existingParameter) {
-		// 		// Existing parameter can be reused
-		// 		importRequest.identifier = getParameterDeclarationText(existingParameter);
-		// 		continue;
-		// 	}
-		// }
-		// Add a new module dependency. Handing of missing parameters is done later
-		// const identifier = resolveUniqueName(dependencyModuleName, declaredIdentifiers);
-		// declaredIdentifiers.add(identifier);
-		// importRequest.identifier = identifier;
+		const existingDependency = dependenciesToRemove.has(dependencyModuleName) ?
+			undefined :
+				dependencyMap.get(dependencyModuleName);
+		// Add a new dependency
 		newDependencies.push({
+			existingDependency,
 			moduleName: dependencyModuleName,
 			identifier: importRequest.identifier,
 		});

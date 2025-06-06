@@ -11,7 +11,7 @@ import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseMod
 import parseRequire from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
 import Fix from "../../linter/ui5Types/fix/Fix.js";
-import {addDependencies, Dependencies, getDependencies, removeDependencies} from "./amdImports.js";
+import {addDependencies, Dependencies, getDependencies, NO_PARAM_FOR_DEPENDENCY, removeDependencies} from "./amdImports.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 
 const log = getLogger("linter:autofix:NoGlobals");
@@ -323,6 +323,19 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 				decl.start <= position && decl.end >= position) {
 				// Dependency request can be fulfilled directly
 				fix.setIdentifierForDependency(depIdentifier, moduleName);
+				dependencyRequests.delete(dependencyRequest); // Request fulfilled
+				break;
+			} else if (depIdentifier === NO_PARAM_FOR_DEPENDENCY) {
+				// A dependency is declared, but the parameter is missing
+				// Create a unique name if the preferred identifier is already in use
+				// Use the first preferred identifier
+				const identifier = resolveUniqueName(moduleName, identifiers);
+
+				identifiers.add(identifier);
+				decl.moduleDeclarationInfo.importRequests.set(moduleName, {
+					identifier,
+				});
+				dependencyRequest.fix.setIdentifierForDependency(identifier, moduleName);
 				dependencyRequests.delete(dependencyRequest); // Request fulfilled
 				break;
 			}
