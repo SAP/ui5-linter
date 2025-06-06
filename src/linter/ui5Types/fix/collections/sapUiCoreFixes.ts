@@ -1,71 +1,71 @@
 import ts from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
 import {
-	FixTypeInfoFilter,
+	FixTypeInfoMatcher,
 	accessExpressionFix,
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
 
-const f: FixTypeInfoFilter = new Ui5TypeInfoMatcher("sap.ui.core");
-export default f;
-f.declareModule("sap/ui/core/Core", [
-	f.class("Core", [
-		...f.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
+const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("sap.ui.core");
+export default t;
+t.declareModule("sap/ui/core/Core", [
+	t.class("Core", [
+		...t.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Core",
 			propertyAccess: "ready",
 		})),
-		...f.methods(["getControl", "getElementById", "byId"], accessExpressionFix({
+		...t.methods(["getControl", "getElementById", "byId"], accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Element",
 			propertyAccess: "getElementById",
 		})),
-		f.method("getEventBus", accessExpressionFix({
+		t.method("getEventBus", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
 		})),
-		f.method("getStaticAreaRef", accessExpressionFix({
+		t.method("getStaticAreaRef", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/StaticArea",
 			propertyAccess: "getDomRef",
 		})),
-		f.method("initLibrary", accessExpressionFix({
+		t.method("initLibrary", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Lib",
 			propertyAccess: "init",
 		})),
-		f.method("isMobile", callExpressionGeneratorFix({
+		t.method("isMobile", callExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
 			generator: (ctx, moduleIdentifier) => {
 				return `${moduleIdentifier}.browser.mobile`;
 			},
 		})),
-		f.method("notifyContentDensityChanged", accessExpressionFix({
+		t.method("notifyContentDensityChanged", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/core/Theming",
 		})),
-		f.method("getCurrentFocusedControlId", callExpressionGeneratorFix({
+		t.method("getCurrentFocusedControlId", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Element",
 			// The legacy API used to return null if no control was focused.
 			generator: (ctx, moduleIdentifier) => {
 				return `${moduleIdentifier}.getActiveElement()?.getId() || null`;
 			},
 		})),
-		f.method("byFieldGroupId", callExpressionGeneratorFix({
+		t.method("byFieldGroupId", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Control",
 			generator: (ctx, moduleIdentifier, arg1) => {
 				return `${moduleIdentifier}.getControlsByFieldGroupId(${arg1})`;
 			},
 		})),
-		f.method("isStaticAreaRef", callExpressionGeneratorFix({
+		t.method("isStaticAreaRef", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/StaticArea",
 			generator: (ctx, moduleIdentifier, arg1) => {
 				return `${moduleIdentifier}.getDomRef() === ${arg1}`;
 			},
 		})),
-		f.method("applyTheme", callExpressionGeneratorFix({
+		t.method("applyTheme", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Theming",
 			validateArguments: (ctx, checker, arg1, arg2) => {
 				// Migrate only if second argument is omitted or undefined
@@ -78,7 +78,7 @@ f.declareModule("sap/ui/core/Core", [
 				return `${moduleIdentifier}.setTheme(${arg1})`;
 			},
 		})),
-		f.method("getComponent", accessExpressionFix({
+		t.method("getComponent", accessExpressionFix({
 			moduleName: "sap/ui/core/Component",
 			propertyAccess: "getComponentById",
 		})),

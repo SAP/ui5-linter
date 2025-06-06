@@ -26,7 +26,6 @@ export default class TypeLinter {
 	#sourceMaps = new Map<string, string>(); // Maps a source path to source map content
 	#sourceFileReporters = new Map<string, SourceFileReporter>();
 	#libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"];
-	#fixFactory: FixFactory | undefined;
 
 	constructor(
 		{workspace, filePathsWorkspace, context}: LinterParameters,

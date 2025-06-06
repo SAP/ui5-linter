@@ -7,7 +7,6 @@ import {getModuleTypeInfo, Ui5TypeInfo, Ui5TypeInfoKind} from "../Ui5TypeInfo.js
 import getJqueryFixInfo, {JqueryFixInfo} from "./getJqueryFixInfo.js";
 import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import getGlobalFixInfo, {GlobalFixInfo} from "./getGlobalFixInfo.js";
-import GlobalFix, {GlobalFixParams} from "./GlobalFix.js";
 import CallExpressionGeneratorFix, {CallExpressionGeneratorFixParams} from "./CallExpressionGeneratorFix.js";
 import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
 
@@ -17,21 +16,21 @@ const AUTOFIX_COLLECTIONS = [
 ];
 
 interface FixCollection {
-	default: FixTypeInfoFilter;
+	default: FixTypeInfoMatcher;
 };
 
 export type FixCallback = () => Fix;
-export type FixTypeInfoFilter = Ui5TypeInfoMatcher<FixCallback>;
+export type FixTypeInfoMatcher = Ui5TypeInfoMatcher<FixCallback>;
 
 export default class FixFactory {
 	private constructor(
 		private checker: ts.TypeChecker,
 		private ambientModuleCache: AmbientModuleCache,
-		private collections: Map<string, FixTypeInfoFilter>
+		private collections: Map<string, FixTypeInfoMatcher>
 	) {}
 
 	static async create(checker: ts.TypeChecker, ambientModuleCache: AmbientModuleCache) {
-		const collections = new Map<string, FixTypeInfoFilter>();
+		const collections = new Map<string, FixTypeInfoMatcher>();
 		for (const collectionName of AUTOFIX_COLLECTIONS) {
 			const {default: filter} = await import(`./collections/${collectionName}.js`) as FixCollection;
 			const libraryName = filter.getLibraryName();
