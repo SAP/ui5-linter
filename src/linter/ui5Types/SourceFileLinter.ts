@@ -30,11 +30,12 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
-import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
-import {FixHints} from "./fixHints/FixHints.js";
 import {
 	getModuleTypeInfo, getNamespace, getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind,
 } from "./Ui5TypeInfo.js";
+import FixFactory from "./fix/FixFactory.js";
+import Fix from "./fix/Fix.js";
+import GlobalFix from "./fix/GlobalFix.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -77,7 +78,6 @@ export default class SourceFileLinter {
 	#hasTestStarterFindings: boolean;
 	#metadata: LintMetadata;
 	#xmlContents: {xml: string; pos: ts.LineAndCharacter; documentKind: "fragment" | "view"}[];
-	#fixHintsGenerator: FixHintsGenerator | null;
 
 	private resourcePath: ResourcePath;
 
@@ -87,11 +87,11 @@ export default class SourceFileLinter {
 		private checker: ts.TypeChecker,
 		private reportCoverage = false,
 		private messageDetails = false,
-		private fix = false,
 		private apiExtract: ApiExtract,
 		private filePathsWorkspace: AbstractAdapter,
 		private workspace: AbstractAdapter,
 		private ambientModuleCache: AmbientModuleCache,
+		private fixFactory?: FixFactory,
 		private manifestContent?: string
 	) {
 		this.#reporter = typeLinter.getSourceFileReporter(sourceFile);
@@ -102,7 +102,6 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
-		this.#fixHintsGenerator = this.fix ? new FixHintsGenerator(this.resourcePath, this.ambientModuleCache) : null;
 	}
 
 	async lint() {
@@ -616,7 +615,11 @@ export default class SourceFileLinter {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: node.text,
 				details: deprecationInfo.messageDetails,
-			}, {node, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+			}, {
+				node,
+				ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+				fix: this.getFix(node, deprecationInfo.ui5TypeInfo),
+			});
 			return true;
 		}
 		return false;
@@ -646,7 +649,11 @@ export default class SourceFileLinter {
 					this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 						apiName: identifier.text,
 						details: deprecationInfo.messageDetails,
-					}, {node: element.name, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+					}, {
+						node: element.name,
+						ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+						fix: this.getFix(element, deprecationInfo.ui5TypeInfo),
+					});
 					return;
 				}
 			}
@@ -744,7 +751,11 @@ export default class SourceFileLinter {
 						className: this.checker.typeToString(nodeType),
 						details: deprecationInfo.messageDetails,
 					},
-					{node: prop, ui5TypeInfo: deprecationInfo.ui5TypeInfo}
+					{
+						node: prop,
+						ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+						fix: this.getFix(prop, deprecationInfo.ui5TypeInfo),
+					}
 				);
 			});
 		});
@@ -933,21 +944,14 @@ export default class SourceFileLinter {
 
 		propName ??= reportNode.getText();
 
-		let fixHints: FixHints | undefined;
-		if (ts.isElementAccessExpression(exprNode) ||
-			ts.isPropertyAccessExpression(exprNode) ||
-			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode) ??
-				this.getCoreFixHints(exprNode, deprecationInfo.ui5TypeInfo);
-		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
 			additionalMessage,
 			details: deprecationInfo.messageDetails,
 		}, {
 			node: reportNode,
-			fixHints,
 			ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+			fix: this.getFix(node, deprecationInfo.ui5TypeInfo),
 		});
 
 		if (
@@ -1458,17 +1462,24 @@ export default class SourceFileLinter {
 			namespace = extractNamespace(node);
 		}
 		if (this.isSymbolOfJquerySapType(deprecationInfo.symbol)) {
-			const fixHints = this.getJquerySapFixHints(node);
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_API_ACCESS, {
 				apiName: namespace ?? "jQuery.sap",
 				details: deprecationInfo.messageDetails,
-			}, {node, fixHints, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+			}, {
+				node,
+				ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+				fix: this.getJqueryFix(node),
+			});
 		} else {
 			this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY, {
 				propertyName: deprecationInfo.symbol.escapedName as string,
 				namespace,
 				details: deprecationInfo.messageDetails,
-			}, {node, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+			}, {
+				node,
+				ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+				fix: this.getFix(node, deprecationInfo.ui5TypeInfo),
+			});
 		}
 		return true;
 	}
@@ -1618,7 +1629,10 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.NO_GLOBALS, {
 					variableName: symbol.getName(),
 					namespace,
-				}, {node, fixHints: this.getGlobalsFixHints(node)});
+				}, {
+					node,
+					fix: this.getGlobalFix(node),
+				});
 			}
 		}
 	}
@@ -1671,7 +1685,11 @@ export default class SourceFileLinter {
 				this.#reporter.addMessage(MESSAGE.DEPRECATED_MODULE_IMPORT, {
 					moduleName,
 					details: deprecationInfo.messageDetails,
-				}, {node: moduleSpecifierNode, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+				}, {
+					node: moduleSpecifierNode,
+					ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+					fix: this.getFix(moduleSpecifierNode, deprecationInfo.ui5TypeInfo),
+				});
 			}
 		}
 
@@ -1692,7 +1710,11 @@ export default class SourceFileLinter {
 						importName,
 						moduleName,
 						details: deprecationInfo.messageDetails,
-					}, {node: namedImportElement, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+					}, {
+						node: namedImportElement,
+						ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+						fix: this.getFix(namedImportElement, deprecationInfo.ui5TypeInfo),
+					});
 				}
 			}
 		}
@@ -1806,15 +1828,49 @@ export default class SourceFileLinter {
 		return QUNIT_FILE_EXTENSION.test(this.sourceFile.fileName);
 	}
 
-	getGlobalsFixHints(node: ts.CallExpression | ts.AccessExpression): FixHints | undefined {
-		return this.#fixHintsGenerator?.getGlobalsFixHints(node) ?? undefined;
+	getFix(node: ts.Node, ui5TypeInfo: Ui5TypeInfo | undefined): Fix | undefined {
+		if (!this.fixFactory || !ui5TypeInfo) {
+			return;
+		}
+		const fix = this.fixFactory.getFix(node, ui5TypeInfo);
+		if (fix) {
+			const position = this.#reporter.getPositionsForNode(node);
+			if (fix.visitLinterNode(node, position.start, this.checker)) {
+				return fix;
+			}
+		}
 	}
 
-	getJquerySapFixHints(node: ts.CallExpression | ts.AccessExpression) {
-		return this.#fixHintsGenerator?.getJquerySapFixHints(node);
+	getJqueryFix(node: ts.Node): Fix | undefined {
+		if (!this.fixFactory) {
+			return;
+		}
+		const fixInfo = this.fixFactory.getJqueryFixInfo(node);
+		if (!fixInfo) {
+			return;
+		}
+		const {relevantNode, ui5TypeInfo} = fixInfo;
+		const fix = this.fixFactory.getFix(relevantNode, ui5TypeInfo);
+		if (fix) {
+			const position = this.#reporter.getPositionsForNode(relevantNode);
+			if (fix.visitLinterNode(relevantNode, position.start, this.checker)) {
+				return fix;
+			}
+		}
 	}
 
-	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo) {
-		return this.#fixHintsGenerator?.getCoreFixHints(node, ui5TypeInfo);
+	getGlobalFix(node: ts.CallExpression | ts.AccessExpression): Fix | undefined {
+		const fixInfo = this.fixFactory?.getGlobalFixInfo(node);
+		if (fixInfo) {
+			const fix = new GlobalFix({
+				moduleName: fixInfo.moduleName,
+				propertyAccessStack: fixInfo.propertyAccessStack,
+				resourcePath: this.resourcePath,
+			});
+			const position = this.#reporter.getPositionsForNode(fixInfo.relevantNode);
+			if (fix.visitLinterNode(fixInfo.relevantNode, position.start)) {
+				return fix;
+			}
+		}
 	}
 }
