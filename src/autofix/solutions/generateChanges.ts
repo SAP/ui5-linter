@@ -1,6 +1,7 @@
 import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {
+    getFactoryPosition,
 	Position,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
@@ -212,15 +213,24 @@ export default function generateChanges(
 		}
 	}
 	const dependencyDeclarations: DependencyDeclarations[] = [];
-	for (const [moduleDeclaration, moduleDeclarationInfo] of moduleDeclarations) {
+	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
 		const deps = getDependencies(moduleDeclarationInfo.moduleDeclaration, resourcePath);
+		const {start, end} = getFactoryPosition(moduleDeclarationInfo);
 		dependencyDeclarations.push({
 			moduleDeclarationInfo,
-			start: moduleDeclaration.getStart(),
-			end: moduleDeclaration.getEnd(),
+			start,
+			end,
 			dependencies: deps,
 		});
 	}
+	// Sort declarations by start position of the factory/callback
+	dependencyDeclarations.sort((a, b) => {
+		if (a.start !== b.start) {
+			return a.start - b.start;
+		}
+		// If the start positions are the same, sort by end position
+		return a.end - b.end;
+	});
 
 	// Handle blocked module imports
 	if (dependencyDeclarations.length) {
