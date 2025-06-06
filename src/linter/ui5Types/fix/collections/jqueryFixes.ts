@@ -1,6 +1,6 @@
 import ts from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
-import {FixTypeInfoFilter, accessExpressionFix, callExpressionFix, callExpressionGeneratorFix} from "../FixFactory.js";
+import {FixTypeInfoMatcher, accessExpressionFix, callExpressionFix, callExpressionGeneratorFix} from "../FixFactory.js";
 import CallExpressionFix from "../CallExpressionFix.js";
 import {ChangeAction} from "../../../../autofix/autofix.js";
 import {PositionInfo} from "../../../LinterContext.js";
@@ -13,20 +13,20 @@ import {FixScope} from "../BaseFix.js";
  * Therefore, the filters expressed here MUST ALWAYS USE NAMESPACE, regardless of the actual type.
 */
 
-const f: FixTypeInfoFilter = new Ui5TypeInfoMatcher("jquery");
-export default f;
+const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("jquery");
+export default t;
 
-f.declareModule("jQuery", [
-	f.namespace("sap", [
-		f.namespace("assert", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/520
+t.declareModule("jQuery", [
+	t.namespace("sap", [
+		t.namespace("assert", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/520
 			moduleName: "sap/base/assert",
 		})),
-		f.namespace("log", [ // https://github.com/SAP/ui5-linter/issues/522
-			...f.namespaces(["Level", "LogLevel"], accessExpressionFix({
+		t.namespace("log", [ // https://github.com/SAP/ui5-linter/issues/522
+			...t.namespaces(["Level", "LogLevel"], accessExpressionFix({
 				moduleName: "sap/base/Log",
 				propertyAccess: "Level",
 			})),
-			...f.namespaces(["debug", "error", "fatal", "info", "trace", "warning"],
+			...t.namespaces(["debug", "error", "fatal", "info", "trace", "warning"],
 				callExpressionFix({
 					moduleName: "sap/base/Log",
 					scope: FixScope.SecondChild,
@@ -35,119 +35,119 @@ f.declareModule("jQuery", [
 					// is only safe if the return value is not used in the code
 					mustNotUseReturnValue: true,
 				})),
-			f.namespace("getLevel", accessExpressionFix({
+			t.namespace("getLevel", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("getLog", accessExpressionFix({
+			t.namespace("getLog", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				propertyAccess: "getLogEntries",
 			})),
-			f.namespace("getLogEntries", accessExpressionFix({
+			t.namespace("getLogEntries", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("addLogListener", accessExpressionFix({
+			t.namespace("addLogListener", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("removeLogListener", accessExpressionFix({
+			t.namespace("removeLogListener", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("getLogger", accessExpressionFix({
+			t.namespace("getLogger", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("logSupportInfo", accessExpressionFix({
+			t.namespace("logSupportInfo", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
-			f.namespace("isLoggable", accessExpressionFix({
+			t.namespace("isLoggable", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
 		]),
-		f.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+		t.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",
 		})),
-		f.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
+		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
 			moduleName: "sap/base/security/encodeCSS",
 		})),
-		f.namespace("encodeJS", accessExpressionFix({
+		t.namespace("encodeJS", accessExpressionFix({
 			moduleName: "sap/base/security/encodeJS",
 		})),
-		f.namespace("encodeURL", accessExpressionFix({
+		t.namespace("encodeURL", accessExpressionFix({
 			moduleName: "sap/base/security/encodeURL",
 		})),
-		f.namespace("encodeURLParameters", accessExpressionFix({
+		t.namespace("encodeURLParameters", accessExpressionFix({
 			moduleName: "sap/base/security/encodeURLParameters",
 		})),
-		f.namespace("encodeHTML", accessExpressionFix({
+		t.namespace("encodeHTML", accessExpressionFix({
 			moduleName: "sap/base/security/encodeXML",
 		})),
-		f.namespace("encodeXML", accessExpressionFix({
+		t.namespace("encodeXML", accessExpressionFix({
 			moduleName: "sap/base/security/encodeXML",
 		})),
-		f.namespace("addUrlWhitelist", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/525
+		t.namespace("addUrlWhitelist", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/525
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "add",
 		})),
-		f.namespace("clearUrlWhitelist", accessExpressionFix({
+		t.namespace("clearUrlWhitelist", accessExpressionFix({
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "clear",
 		})),
-		f.namespace("getUrlWhitelist", accessExpressionFix({
+		t.namespace("getUrlWhitelist", accessExpressionFix({
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "entries",
 		})),
-		f.namespace("validateUrl", accessExpressionFix({
+		t.namespace("validateUrl", accessExpressionFix({
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "validate",
 		})),
-		f.namespace("camelCase", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/527
+		t.namespace("camelCase", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/527
 			moduleName: "sap/base/strings/camelize",
 		})),
-		f.namespace("charToUpperCase", () => {
+		t.namespace("charToUpperCase", () => {
 			return new CharToUpperCaseFix();
 		}),
-		f.namespace("escapeRegExp", accessExpressionFix({
+		t.namespace("escapeRegExp", accessExpressionFix({
 			moduleName: "sap/base/strings/escapeRegExp",
 		})),
-		f.namespace("formatMessage", accessExpressionFix({
+		t.namespace("formatMessage", accessExpressionFix({
 			moduleName: "sap/base/strings/formatMessage",
 		})),
-		f.namespace("formatMessage", accessExpressionFix({
+		t.namespace("formatMessage", accessExpressionFix({
 			moduleName: "sap/base/strings/formatMessage",
 		})),
-		f.namespace("hashCode", accessExpressionFix({
+		t.namespace("hashCode", accessExpressionFix({
 			moduleName: "sap/base/strings/hashCode",
 			preferredIdentifier: "hash",
 		})),
-		f.namespace("hyphen", accessExpressionFix({
+		t.namespace("hyphen", accessExpressionFix({
 			moduleName: "sap/base/strings/hyphenate",
 		})),
-		f.namespace("isStringNFC", () => new IsStringNfcFix()),
-		f.namespace("arraySymbolDiff", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/528
+		t.namespace("isStringNFC", () => new IsStringNfcFix()),
+		t.namespace("arraySymbolDiff", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/528
 			moduleName: "sap/base/util/array/diff",
 		})),
-		f.namespace("unique", accessExpressionFix({
+		t.namespace("unique", accessExpressionFix({
 			moduleName: "sap/base/util/array/uniqueSort",
 		})),
-		f.namespace("equal", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/529
+		t.namespace("equal", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/529
 			moduleName: "sap/base/util/deepEqual",
 		})),
-		f.namespace("each", accessExpressionFix({
+		t.namespace("each", accessExpressionFix({
 			moduleName: "sap/base/util/each",
 		})),
-		f.namespace("forIn", accessExpressionFix({
+		t.namespace("forIn", accessExpressionFix({
 			moduleName: "sap/base/util/each",
 		})),
-		f.namespace("FrameOptions", accessExpressionFix({
+		t.namespace("FrameOptions", accessExpressionFix({
 			moduleName: "sap/ui/security/FrameOptions",
 		})),
-		f.namespace("parseJS", accessExpressionFix({
+		t.namespace("parseJS", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/base/util/JSTokenizer",
 		})),
@@ -167,310 +167,310 @@ f.declareModule("jQuery", [
 		// 	moduleName: "sap/base/util/merge",
 		// 	exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
 		// })),
-		f.namespace("now", accessExpressionFix({
+		t.namespace("now", accessExpressionFix({
 			moduleName: "sap/base/util/now",
 		})),
-		f.namespace("properties", accessExpressionFix({
+		t.namespace("properties", accessExpressionFix({
 			moduleName: "sap/base/util/Properties",
 			propertyAccess: "create",
 		})),
-		f.namespace("uid", accessExpressionFix({
+		t.namespace("uid", accessExpressionFix({
 			moduleName: "sap/base/util/uid",
 		})),
-		f.namespace("Version", accessExpressionFix({
+		t.namespace("Version", accessExpressionFix({
 			moduleName: "sap/base/util/Version",
 		})),
-		f.namespace("syncStyleClass", accessExpressionFix({
+		t.namespace("syncStyleClass", accessExpressionFix({
 			moduleName: "sap/ui/core/syncStyleClass",
 		})),
 		// f.namespace("setObject", accessExpressionFix({
 		// 	// TODO: Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
 		// 	// moduleName: "sap/base/util/ObjectPath",
 		// })),
-		f.namespace("containsOrEquals", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/542
+		t.namespace("containsOrEquals", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/542
 			moduleName: "sap/ui/dom/containsOrEquals",
 		})),
-		f.namespace("denormalizeScrollBeginRTL", accessExpressionFix({
+		t.namespace("denormalizeScrollBeginRTL", accessExpressionFix({
 			moduleName: "sap/ui/dom/denormalizeScrollBeginRTL",
 		})),
-		f.namespace("denormalizeScrollLeftRTL", accessExpressionFix({
+		t.namespace("denormalizeScrollLeftRTL", accessExpressionFix({
 			moduleName: "sap/ui/dom/denormalizeScrollLeftRTL",
 		})),
-		f.namespace("ownerWindow", accessExpressionFix({
+		t.namespace("ownerWindow", accessExpressionFix({
 			moduleName: "sap/ui/dom/getOwnerWindow",
 		})),
-		f.namespace("scrollbarSize", accessExpressionFix({
+		t.namespace("scrollbarSize", accessExpressionFix({
 			moduleName: "sap/ui/dom/getScrollbarSize",
 		})),
-		f.namespace("includeScript", accessExpressionFix({
+		t.namespace("includeScript", accessExpressionFix({
 			moduleName: "sap/ui/dom/includeScript",
 		})),
-		f.namespace("includeStyleSheet", accessExpressionFix({
+		t.namespace("includeStyleSheet", accessExpressionFix({
 			moduleName: "sap/ui/dom/includeStylesheet",
 		})),
-		f.namespace("pxToRem", accessExpressionFix({
+		t.namespace("pxToRem", accessExpressionFix({
 			moduleName: "sap/ui/dom/units/Rem",
 			propertyAccess: "fromPx",
 		})),
-		f.namespace("remToPx", accessExpressionFix({
+		t.namespace("remToPx", accessExpressionFix({
 			moduleName: "sap/ui/dom/units/Rem",
 			propertyAccess: "toPx",
 		})),
-		f.namespace("checkMouseEnterOrLeave", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/543
+		t.namespace("checkMouseEnterOrLeave", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/543
 			moduleName: "sap/ui/events/checkMouseEnterOrLeave",
 		})),
-		f.namespace("bindAnyEvent", accessExpressionFix({
+		t.namespace("bindAnyEvent", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/ControlEvents",
 		})),
-		f.namespace("unbindAnyEvent", accessExpressionFix({
+		t.namespace("unbindAnyEvent", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/ControlEvents",
 		})),
-		f.namespace("ControlEvents", accessExpressionFix({
+		t.namespace("ControlEvents", accessExpressionFix({
 			moduleName: "sap/ui/events/ControlEvents",
 			propertyAccess: "events",
 		})),
-		f.namespace("handleF6GroupNavigation", accessExpressionFix({
+		t.namespace("handleF6GroupNavigation", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/F6Navigation",
 		})),
-		f.namespace("touchEventMode", accessExpressionFix({
+		t.namespace("touchEventMode", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/jquery/EventSimulation",
 		})),
-		f.namespace("keycodes", accessExpressionFix({
+		t.namespace("keycodes", accessExpressionFix({
 			moduleName: "sap/ui/events/KeyCodes",
 		})),
-		f.namespace("PseudoEvents", accessExpressionFix({
+		t.namespace("PseudoEvents", accessExpressionFix({
 			moduleName: "sap/ui/events/PseudoEvents",
 			propertyAccess: "events",
 		})),
-		f.namespace("disableTouchToMouseHandling", accessExpressionFix({
+		t.namespace("disableTouchToMouseHandling", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/TouchToMouseMapping",
 		})),
-		f.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
-			f.namespace("getRequestTimings", callExpressionGeneratorFix({
+		t.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
+			t.namespace("getRequestTimings", callExpressionGeneratorFix({
 				globalName: "performance",
 				generator(ctx, moduleIdentifierName) {
 					return `${moduleIdentifierName}.getEntriesByType("resource")`;
 				},
 			})),
-			f.namespace("clearRequestTimings", accessExpressionFix({
+			t.namespace("clearRequestTimings", accessExpressionFix({
 				globalName: "performance",
 				propertyAccess: "clearResourceTimings",
 			})),
-			f.namespace("setRequestBufferSize", accessExpressionFix({
+			t.namespace("setRequestBufferSize", accessExpressionFix({
 				globalName: "performance",
 				propertyAccess: "setResourceTimingBufferSize",
 			})),
-			f.namespace("start", accessExpressionFix({
+			t.namespace("start", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("add", accessExpressionFix({
+			t.namespace("add", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("end", accessExpressionFix({
+			t.namespace("end", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("average", accessExpressionFix({
+			t.namespace("average", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("clear", accessExpressionFix({
+			t.namespace("clear", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("filterMeasurements", accessExpressionFix({
+			t.namespace("filterMeasurements", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("getAllMeasurements", accessExpressionFix({
+			t.namespace("getAllMeasurements", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("getMeasurement", accessExpressionFix({
+			t.namespace("getMeasurement", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("pause", accessExpressionFix({
+			t.namespace("pause", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("resume", accessExpressionFix({
+			t.namespace("resume", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("getActive", accessExpressionFix({
+			t.namespace("getActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("setActive", accessExpressionFix({
+			t.namespace("setActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("remove", accessExpressionFix({
+			t.namespace("remove", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("registerMethod", accessExpressionFix({
+			t.namespace("registerMethod", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("unregisterMethod", accessExpressionFix({
+			t.namespace("unregisterMethod", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("unregisterAllMethods", accessExpressionFix({
+			t.namespace("unregisterAllMethods", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/Measurement",
 			})),
-			f.namespace("clearInteractionMeasurements", accessExpressionFix({
+			t.namespace("clearInteractionMeasurements", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "clear",
 			})),
-			f.namespace("startInteraction", accessExpressionFix({
+			t.namespace("startInteraction", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "start",
 			})),
-			f.namespace("endInteraction", accessExpressionFix({
+			t.namespace("endInteraction", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "end",
 			})),
-			f.namespace("filterInteractionMeasurements", accessExpressionFix({
+			t.namespace("filterInteractionMeasurements", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "filter",
 			})),
-			f.namespace("getAllInteractionMeasurements", accessExpressionFix({
+			t.namespace("getAllInteractionMeasurements", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "getAll",
 			})),
-			f.namespace("getPendingInteractionMeasurement", accessExpressionFix({
+			t.namespace("getPendingInteractionMeasurement", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Interaction",
 				propertyAccess: "getPending",
 			})),
 		]), // measure
-		f.namespace("fesr", [ // https://github.com/SAP/ui5-linter/issues/561
-			f.namespace("setActive", accessExpressionFix({
+		t.namespace("fesr", [ // https://github.com/SAP/ui5-linter/issues/561
+			t.namespace("setActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/FESR",
 			})),
-			f.namespace("getActive", accessExpressionFix({
+			t.namespace("getActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/FESR",
 			})),
-			f.namespace("addBusyDuration", accessExpressionFix({
+			t.namespace("addBusyDuration", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("getCurrentTransactionId", accessExpressionFix({
+			t.namespace("getCurrentTransactionId", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Passport",
 			})),
-			f.namespace("getRootId", accessExpressionFix({
+			t.namespace("getRootId", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Passport",
 			})),
 		]),
-		f.namespace("interaction", [
-			f.namespace("getActive", accessExpressionFix({
+		t.namespace("interaction", [
+			t.namespace("getActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("setActive", accessExpressionFix({
+			t.namespace("setActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("notifyStepStart", accessExpressionFix({
+			t.namespace("notifyStepStart", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("notifyStepEnd", accessExpressionFix({
+			t.namespace("notifyStepEnd", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("notifyEventStart", accessExpressionFix({
+			t.namespace("notifyEventStart", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("notifyScrollEvent", accessExpressionFix({
+			t.namespace("notifyScrollEvent", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("notifyEventEnd", accessExpressionFix({
+			t.namespace("notifyEventEnd", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
-			f.namespace("setStepComponent", accessExpressionFix({
+			t.namespace("setStepComponent", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/Interaction",
 			})),
 		]), // interaction
-		f.namespace("passport", [
-			f.namespace("setActive", accessExpressionFix({
+		t.namespace("passport", [
+			t.namespace("setActive", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Passport",
 				propertyAccess: "setActive",
 			})),
-			f.namespace("traceFlags", accessExpressionFix({
+			t.namespace("traceFlags", accessExpressionFix({
 				moduleName: "sap/ui/performance/trace/Passport",
 				propertyAccess: "traceFlags",
 			})),
 		]),
-		f.namespace("initMobile", accessExpressionFix({
+		t.namespace("initMobile", accessExpressionFix({
 			moduleName: "sap/ui/util/Mobile",
 			propertyAccess: "init",
 		})),
-		f.namespace("setIcons", accessExpressionFix({
+		t.namespace("setIcons", accessExpressionFix({
 			moduleName: "sap/ui/util/Mobile",
 			propertyAccess: "setIcons",
 		})),
-		f.namespace("setMobileWebAppCapable", accessExpressionFix({
+		t.namespace("setMobileWebAppCapable", accessExpressionFix({
 			moduleName: "sap/ui/util/Mobile",
 			propertyAccess: "setWebAppCapable",
 		})),
-		f.namespace("storage", [
-			f.namespace("Storage", accessExpressionFix({
+		t.namespace("storage", [
+			t.namespace("Storage", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 			})),
-			f.namespace("Type", [
-				f.namespace("local", accessExpressionFix({
+			t.namespace("Type", [
+				t.namespace("local", accessExpressionFix({
 					moduleName: "sap/ui/util/Storage",
 					propertyAccess: "Type.local",
 				})),
-				f.namespace("session", accessExpressionFix({
+				t.namespace("session", accessExpressionFix({
 					moduleName: "sap/ui/util/Storage",
 					propertyAccess: "Type.session",
 				})),
 			]),
-			f.namespace("isSupported", accessExpressionFix({
+			t.namespace("isSupported", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "isSupported",
 			})),
-			f.namespace("clear", accessExpressionFix({
+			t.namespace("clear", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "clear",
 			})),
-			f.namespace("get", accessExpressionFix({
+			t.namespace("get", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "get",
 			})),
-			f.namespace("getType", accessExpressionFix({
+			t.namespace("getType", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "getType",
 			})),
-			f.namespace("put", accessExpressionFix({
+			t.namespace("put", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "put",
 			})),
-			f.namespace("remove", accessExpressionFix({
+			t.namespace("remove", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "remove",
 			})),
-			f.namespace("removeAll", accessExpressionFix({
+			t.namespace("removeAll", accessExpressionFix({
 				moduleName: "sap/ui/util/Storage",
 				propertyAccess: "removeAll",
 			})),
@@ -478,19 +478,19 @@ f.declareModule("jQuery", [
 			moduleName: "sap/ui/util/Storage",
 			newExpression: true,
 		})),
-		f.namespace("getParseError", accessExpressionFix({
+		t.namespace("getParseError", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/util/XMLHelper",
 		})),
-		f.namespace("parseXML", accessExpressionFix({
+		t.namespace("parseXML", accessExpressionFix({
 			moduleName: "sap/ui/util/XMLHelper",
 			propertyAccess: "parse",
 		})),
-		f.namespace("serializeXML", accessExpressionFix({
+		t.namespace("serializeXML", accessExpressionFix({
 			moduleName: "sap/ui/util/XMLHelper",
 			propertyAccess: "serialize",
 		})),
-		f.namespace("startsWith", callExpressionGeneratorFix({
+		t.namespace("startsWith", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "$1.startsWith($2)",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -500,7 +500,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.startsWith(${arg2})`;
 			},
 		})),
-		f.namespace("startsWithIgnoreCase", callExpressionGeneratorFix({
+		t.namespace("startsWithIgnoreCase", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "$1.toUpperCase().startsWith($2.toUpperCase())",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -510,7 +510,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.toUpperCase().startsWith(${arg2}.toUpperCase())`;
 			},
 		})),
-		f.namespace("endsWith", callExpressionGeneratorFix({
+		t.namespace("endsWith", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "$1.endsWith($2)",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -520,7 +520,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.endsWith(${arg2})`;
 			},
 		})),
-		f.namespace("endsWithIgnoreCase", callExpressionGeneratorFix({
+		t.namespace("endsWithIgnoreCase", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "$1.toUpperCase().endsWith($2.toUpperCase())",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -530,7 +530,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.toUpperCase().endsWith(${arg2}.toUpperCase())`;
 			},
 		})),
-		f.namespace("padLeft", callExpressionGeneratorFix<{defaultString: boolean}>({
+		t.namespace("padLeft", callExpressionGeneratorFix<{defaultString: boolean}>({
 			// exportCodeToBeUsed: "$1.padStart($3, $2)",
 			validateArguments: (ctx, checker, arg1, arg2) => {
 				if (arg1 && !ts.isStringLiteralLike(arg1)) {
@@ -551,7 +551,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.padStart(${arg3}, ${arg2})`;
 			},
 		})),
-		f.namespace("padRight", callExpressionGeneratorFix<{defaultString: boolean}>({
+		t.namespace("padRight", callExpressionGeneratorFix<{defaultString: boolean}>({
 			// exportCodeToBeUsed: "$1.padEnd($3, $2)",
 			validateArguments: (ctx, checker, arg1, arg2) => {
 				if (arg1 && !ts.isStringLiteralLike(arg1)) {
@@ -572,7 +572,7 @@ f.declareModule("jQuery", [
 				return `${arg1}.padEnd(${arg3}, ${arg2})`;
 			},
 		})),
-		f.namespace("domById", callExpressionGeneratorFix({
+		t.namespace("domById", callExpressionGeneratorFix({
 			globalName: "document",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -583,13 +583,13 @@ f.declareModule("jQuery", [
 				return `${moduleIdentifier}.getElementById(${arg1})`;
 			},
 		})),
-		f.namespace("isEqualNode", callExpressionGeneratorFix({
+		t.namespace("isEqualNode", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 			generator: (ctx, _, arg1, arg2) => {
 				return `!!${arg1}?.isEqualNode(${arg2})`;
 			},
 		})),
-		f.namespace("newObject", callExpressionGeneratorFix({
+		t.namespace("newObject", callExpressionGeneratorFix({
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
 				return true;
@@ -599,13 +599,13 @@ f.declareModule("jQuery", [
 				return `Object.create(${arg1})`;
 			},
 		})),
-		f.namespace("getter", callExpressionGeneratorFix({
+		t.namespace("getter", callExpressionGeneratorFix({
 			// exportCodeToBeUsed: "((value) => () => value)($1)",
 			generator: (ctx, _, arg1) => {
 				return `((value) => () => value)(${arg1})`;
 			},
 		})),
-		f.namespace("getModulePath", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/589
+		t.namespace("getModulePath", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/589
 			globalName: "sap.ui.require",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
@@ -616,7 +616,7 @@ f.declareModule("jQuery", [
 				return `${moduleIdentifier}.toUrl(${arg1})`;
 			},
 		})),
-		f.namespace("getResourcePath", callExpressionGeneratorFix({
+		t.namespace("getResourcePath", callExpressionGeneratorFix({
 			globalName: "sap.ui.require",
 			validateArguments: () => {
 				// TODO: Add checks, see codeReplacer.ts
