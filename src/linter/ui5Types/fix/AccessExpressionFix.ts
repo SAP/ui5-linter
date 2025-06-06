@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
+import {isAssignment} from "../utils/utils.js";
 
 export interface AccessExpressionFixParams extends BaseFixParams {
 	/**
@@ -30,6 +31,9 @@ export default class AccessExpressionFix extends BaseFix {
 		if (!ts.isPropertyAccessExpression(node) && !ts.isElementAccessExpression(node) && !ts.isCallExpression(node)) {
 			// CallExpression is acceptable as well since the starting position is the same as the contained
 			// access expression
+			return false;
+		}
+		if (!ts.isCallExpression(node) && isAssignment(node)) {
 			return false;
 		}
 		this.sourcePosition = sourcePosition;
