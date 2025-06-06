@@ -36,6 +36,12 @@ interface DependencyRequest {
 	fix: Fix;
 }
 
+interface GlobalAccessRequest {
+	globalName: string;
+	usagePosition: number;
+	fix: Fix;
+}
+
 interface DependencyDeclarations {
 	moduleDeclarationInfo: ExistingModuleDeclarationInfo;
 	start: number;
@@ -155,17 +161,15 @@ export default function generateChanges(
 
 	const conflicts = findRangeConflicts(fixRanges);
 	const dependencyRequests = new Set<DependencyRequest>();
+	const globalAccessRequests = new Set<GlobalAccessRequest>();
 	for (const nodeInfo of nodeSearchInfo) {
 		if (conflicts.includes(nodeInfo.fix)) {
 			nodeSearchInfo.delete(nodeInfo);
 			continue;
 		}
+
 		// Collect new dependencies
 		const newDependencies = nodeInfo.fix.getNewModuleDependencies();
-		if (!newDependencies) {
-			// No new dependencies, continue
-			continue;
-		}
 		if (Array.isArray(newDependencies)) {
 			for (const {moduleName, preferredIdentifier, usagePosition} of newDependencies) {
 				dependencyRequests.add({
@@ -175,11 +179,30 @@ export default function generateChanges(
 					fix: nodeInfo.fix,
 				});
 			}
-		} else {
+		} else if (newDependencies) {
 			const {moduleName, preferredIdentifier, usagePosition} = newDependencies;
 			dependencyRequests.add({
 				moduleName,
 				preferredIdentifier,
+				usagePosition,
+				fix: nodeInfo.fix,
+			});
+		}
+
+		// Collect new global access
+		const newGlobalAccess = nodeInfo.fix.getNewGlobalAccess();
+		if (Array.isArray(newGlobalAccess)) {
+			for (const {globalName, usagePosition} of newGlobalAccess) {
+				globalAccessRequests.add({
+					globalName,
+					usagePosition,
+					fix: nodeInfo.fix,
+				});
+			}
+		} else if (newGlobalAccess) {
+			const {globalName, usagePosition} = newGlobalAccess;
+			globalAccessRequests.add({
+				globalName,
 				usagePosition,
 				fix: nodeInfo.fix,
 			});
@@ -202,6 +225,7 @@ export default function generateChanges(
 
 	// Sort dependency requests into declarations
 	mergeDependencyRequests(dependencyRequests, dependencyDeclarations, identifiers);
+	processGlobalRequests(globalAccessRequests, identifiers);
 
 	// Create changes for new and removed dependencies
 	for (const [defineCall, moduleDeclarationInfo] of moduleDeclarations) {
@@ -404,5 +428,21 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 			// Set the identifier for the fix
 			request.fix.setIdentifierForDependency(identifier, moduleName);
 		}
+	}
+}
+
+function processGlobalRequests(globalAccessRequests: Set<GlobalAccessRequest>, identifiers: Set<string>) {
+	for (const globalAccessRequest of globalAccessRequests) {
+		const {globalName, fix} = globalAccessRequest;
+
+		if (!identifiers.has(globalName)) {
+			// If the global name is not already in use, we can use it directly
+			fix.setIdentifierForGlobal(globalName, globalName);
+			continue;
+		}
+		// If the global name is already in use, prefix it with globalThis
+		const identifier = `globalThis.${globalName}`;
+		identifiers.add(identifier);
+		fix.setIdentifierForGlobal(identifier, globalName);
 	}
 }

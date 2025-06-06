@@ -111,8 +111,12 @@ export default class CallExpressionFix extends BaseFix {
 			// and the fix can not be applied.
 			return;
 		}
+		if (this.params.globalName && !this.globalIdentifierName) {
+			// This should not happen
+			throw new Error("Global identifier has not been provided");
+		}
 
-		let value = this.params.global ?? this.moduleIdentifierName;
+		let value = this.globalIdentifierName ?? this.moduleIdentifierName;
 		if (!value) {
 			return;
 		}

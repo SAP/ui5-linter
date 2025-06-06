@@ -67,18 +67,15 @@ f.declareModule("sap/ui/core/Core", [
 		})),
 		f.method("applyTheme", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Theming",
-			validateArguments: (ctx, arg1, arg2) => {
+			validateArguments: (ctx, checker, arg1, arg2) => {
 				// Migrate only if second argument is omitted or undefined
 				if (!arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined")) {
 					return true;
 				}
 				return false;
 			},
-			generator: (ctx, moduleIdentifier, arg1, arg2) => {
-				// TODO: Validating in the generator is bad practice
-				if (!arg2 || arg2 === "undefined") {
-					return `${moduleIdentifier}.setTheme(${arg1})`;
-				}
+			generator: (ctx, moduleIdentifier, arg1) => {
+				return `${moduleIdentifier}.setTheme(${arg1})`;
 			},
 		})),
 		f.method("getComponent", accessExpressionFix({

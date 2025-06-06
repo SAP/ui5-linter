@@ -2,14 +2,27 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
+import {AccessExpressionFixScope} from "./AccessExpressionFix.js";
 
 export interface AccessExpressionGeneratorFixParams extends BaseFixParams {
 	/**
-	 * If set, the provided function will be used to generate the change action
+	 * Which scope, i.e. number of access expression counting from the root should the replacement affect.
+	 * Examples for the code "sap.module.property":
+	 * - "scope = 0" will replace the whole "sap.module.property"
+	 * - "scope = 1" will replace "sap.module.method"
+	 * - "scope = 2" will replace "sap.module"
+	 *
+	 * If not set, the default value is 0.
+	 */
+	scope?: number | AccessExpressionFixScope;
+
+	/**
+	 * The generator function will be used to determine the value of the replacement, affecting
+	 * the whole access expression
 	 *
 	 * If the return value is undefined, no change will be generated
 	 */
-	generator: (this: object, moduleIdentifierName: string | undefined) => string | undefined;
+	generator: (identifierName: string | undefined) => string | undefined;
 }
 
 /**
@@ -77,6 +90,14 @@ export default class AccessExpressionGeneratorFix extends BaseFix {
 			}
 		}
 
+		let relevantNode: ts.Node = node;
+		for (let i = 0; i < (this.params.scope ?? 0); i++) {
+			if (!ts.isPropertyAccessExpression(relevantNode) &&
+				!ts.isElementAccessExpression(relevantNode)) {
+				return false;
+			}
+			relevantNode = relevantNode.expression;
+		}
 		this.startPos = node.getStart(sourceFile);
 		this.endPos = node.getEnd();
 		return true;
@@ -86,9 +107,20 @@ export default class AccessExpressionGeneratorFix extends BaseFix {
 		if (this.startPos === undefined || this.endPos === undefined) {
 			throw new Error("Start and end position are not defined");
 		}
+		if (this.params.moduleName && !this.moduleIdentifierName) {
+			// The identifier for the requested module has not been set
+			// This can happen for example if the position of the autofix is not inside
+			// a module definition or require block. Therefore the required dependency can not be added
+			// and the fix can not be applied.
+			return;
+		}
+		if (this.params.globalName && !this.globalIdentifierName) {
+			// This should not happen
+			throw new Error("Global identifier has not been provided");
+		}
 
 		// If a generator function is provided, use it to generate the change
-		const value = this.params.generator(this.params.global ?? this.moduleIdentifierName);
+		const value = this.params.generator(this.globalIdentifierName ?? this.moduleIdentifierName);
 		if (!value) {
 			return;
 		}
