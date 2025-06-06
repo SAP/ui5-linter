@@ -207,6 +207,18 @@ export function getModuleDeclarationForPosition(
 	return potentialDeclarations.pop()?.declaration;
 }
 
+export function getFactoryPosition(moduleDeclaration: ExistingModuleDeclarationInfo): {start: number; end: number} {
+	const {moduleDeclaration: declaration} = moduleDeclaration;
+	const factory = "factory" in declaration ? declaration.factory : declaration.callback;
+	if (!factory) {
+		throw new Error("Module declaration does not have a factory or callback defined");
+	}
+	return {
+		start: factory.getStart(),
+		end: factory.getEnd(),
+	};
+}
+
 export default async function ({
 	rootDir: _unused1,
 	namespace: _unused2,
