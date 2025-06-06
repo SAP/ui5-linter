@@ -57,14 +57,34 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/security/Security", exportNameToBeUsed: "setSecurityTokenHandlers",
 	}],
 
-	// TODO: Complex replacements: Old API returns this, but new API returns undefined.
-	// setCalendarType()
-	// setCalendarWeekNumbering()
-	// setFormatLocale()
-	// setLanguage()
-	// setRTL()
-	// setTheme()
-	// setTimezone()
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setCalendarType", {
+		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.setCalendarType($1)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setCalendarWeekNumbering", {
+		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.setCalendarWeekNumbering($1)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setFormatLocale", {
+		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.setFormatLocale($1)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setLanguage", {
+		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.setLanguage($1, $2)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setRTL", {
+		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.setRTL($1)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setTheme", {
+		moduleName: "sap/ui/core/Theming", exportCodeToBeUsed: "$moduleIdentifier.setTheme($1)",
+	}],
+	// Note: Not 1:1 compatible. Does not return "this"
+	["setTimezone", {
+		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.setTimezone($1)",
+	}],
 
 	["getLanguageTag", {
 		moduleName: "sap/base/i18n/Localization", exportCodeToBeUsed: "$moduleIdentifier.getLanguageTag().toString()",

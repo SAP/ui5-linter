@@ -249,9 +249,11 @@ export function isExpectedValueExpression(node: ts.Node): boolean {
 				node.parent.arguments.some((arg) => arg === node)) ||
 				// Chaining
 				(ts.isPropertyAccessExpression(node) &&
-					ts.isCallExpression(node.expression) &&
-					ts.isPropertyAccessExpression(node.expression.parent) &&
-					ts.isCallExpression(node.expression.parent.expression))
+					ts.isCallExpression(node.parent) && node.parent.expression === node &&
+					ts.isPropertyAccessExpression(node.parent.parent) &&
+					node.parent.parent.expression === node.parent &&
+					ts.isCallExpression(node.parent.parent.parent) &&
+					node.parent.parent.parent.expression === node.parent.parent)
 		) {
 			isExpectedValue = true;
 		}

@@ -314,6 +314,32 @@ function patchMessageFixHints(fixHints?: FixHints, apiName?: string) {
 					`$moduleIdentifier.${fnName}(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
 			}
 		}
+	} else if ([
+		"setCalendarType",
+		"setCalendarWeekNumbering",
+		"setFormatLocale",
+		"setLanguage",
+		"setRTL",
+		"setTheme",
+		"setTimezone",
+	].includes(apiName ?? "") &&
+	[
+		"sap/base/i18n/Formatting",
+		"sap/base/i18n/Localization",
+		"sap/ui/core/Theming",
+	].includes(fixHints?.moduleName ?? "")) {
+		if (fixHints?.exportCodeToBeUsed.isExpectedValue) {
+			// API not compatible
+			fixHints = undefined;
+			log.verbose(`Autofix skipped for ${apiName}.`);
+		} else {
+			const fnName = apiName ?? "";
+			if (fnName && fixHints && typeof fixHints.exportCodeToBeUsed === "object" &&
+				fixHints.exportCodeToBeUsed.args) {
+				fixHints.exportCodeToBeUsed.name =
+					`$moduleIdentifier.${fnName}(${cleanRedundantArguments(fixHints.exportCodeToBeUsed.args)})`;
+			}
+		}
 	}
 
 	return fixHints;
