@@ -3,14 +3,14 @@ import {getPropertyNameText} from "../linter/ui5Types/utils/utils.js";
 
 export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyAccess?: string):
 	ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression {
-	type Candidate = ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
+	type Candidate = ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression | ts.CallExpression;
 	let scanNode: Candidate = node;
 	let propertyAccessChain: string[] = [];
 	if (matchPropertyAccess) {
 		propertyAccessChain = matchPropertyAccess.split(".");
 		if (node.text !== "window" && node.text !== "globalThis" && node.text !== "self") {
 			const firstPropAccess = propertyAccessChain.shift();
-			if (!["$moduleIdentifier", node.text].includes(firstPropAccess ?? "")) {
+			if (node.text !== firstPropAccess) {
 				throw new Error(`Expected node to be ${firstPropAccess} but got ${node.getText()}`);
 			}
 			if (!propertyAccessChain.length) {
@@ -19,15 +19,37 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 		}
 	}
 
-	while (ts.isPropertyAccessExpression(scanNode.parent) || ts.isElementAccessExpression(scanNode.parent)) {
+	const returnType = (node: Candidate) => {
+		if (!ts.isCallExpression(node)) {
+			return node;
+		} else if (
+			ts.isPropertyAccessExpression(node.expression) ||
+			ts.isIdentifier(node.expression) ||
+			ts.isElementAccessExpression(node.expression)) {
+			return node.expression;
+		} else {
+			throw new Error("Expected node to be a property access expression or identifier");
+		}
+	};
+
+	while (ts.isPropertyAccessExpression(scanNode.parent) ||
+		ts.isElementAccessExpression(scanNode.parent) ||
+		ts.isCallExpression(scanNode.parent)) {
 		scanNode = scanNode.parent;
 		if (matchPropertyAccess) {
 			const nextPropertyAccess = propertyAccessChain.shift();
 
+			while (ts.isCallExpression(scanNode) &&
+				(ts.isPropertyAccessExpression(scanNode.parent) ||
+					ts.isElementAccessExpression(scanNode.parent) ||
+					ts.isPropertyAccessExpression(scanNode.parent))) {
+				scanNode = scanNode.parent;
+			}
+
 			let propName;
 			if (ts.isPropertyAccessExpression(scanNode)) {
 				propName = getPropertyNameText(scanNode.name);
-			} else {
+			} else if (!ts.isCallExpression(scanNode)) {
 				if (
 					ts.isStringLiteralLike(scanNode.argumentExpression) ||
 					ts.isNumericLiteral(scanNode.argumentExpression)
@@ -41,11 +63,12 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 				throw new Error(`Expected node to be ${nextPropertyAccess} but got ${propName}`);
 			}
 			if (!propertyAccessChain.length) {
-				return scanNode;
+				return returnType(scanNode);
 			}
 		}
 	}
-	return scanNode;
+
+	return returnType(scanNode);
 }
 
 export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string): boolean {

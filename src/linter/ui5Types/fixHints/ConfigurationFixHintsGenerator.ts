@@ -54,7 +54,7 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/ControlBehavior", exportNameToBeUsed: "setAnimationMode",
 	}],
 	["AnimationMode", {
-		moduleName: "sap/ui/core/AnimationMode", propertyAccess: "$moduleIdentifier.AnimationMode",
+		moduleName: "sap/ui/core/AnimationMode", propertyAccess: "AnimationMode",
 	}],
 	["setSecurityTokenHandlers", {
 		moduleName: "sap/ui/security/Security", exportNameToBeUsed: "setSecurityTokenHandlers",
@@ -115,6 +115,27 @@ export default class ConfigurationFixHintsGenerator {
 		const moduleReplacement = configurationModulesReplacements.get(methodName);
 		if (!moduleReplacement) {
 			return undefined;
+		}
+
+		if (moduleReplacement.propertyAccess) {
+			const chain: string[] = [];
+			let curNode: ts.Node | undefined = node;
+			while (curNode) {
+				if (ts.isPropertyAccessExpression(curNode)) {
+					chain.unshift(curNode.name.getText());
+					curNode = curNode.expression;
+				} else if (ts.isIdentifier(curNode)) {
+					chain.unshift(curNode.getText());
+					break;
+				} else if (ts.isCallExpression(curNode)) {
+					curNode = curNode.expression;
+				} else {
+					break;
+				}
+			}
+
+			// Get the full chained property access expression chain
+			moduleReplacement.propertyAccess = chain.join(".");
 		}
 
 		let exportCodeToBeUsed;
