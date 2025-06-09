@@ -1469,7 +1469,10 @@ export default class SourceFileLinter {
 				propertyName: deprecationInfo.symbol.escapedName as string,
 				namespace,
 				details: deprecationInfo.messageDetails,
-			}, {node, ui5TypeInfo: deprecationInfo.ui5TypeInfo});
+			}, {
+				node, ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+				fixHints: this.getConfigFixHints(node, deprecationInfo.ui5TypeInfo),
+			});
 		}
 		return true;
 	}

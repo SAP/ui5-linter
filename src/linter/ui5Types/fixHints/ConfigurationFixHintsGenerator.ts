@@ -1,7 +1,7 @@
 import ts from "typescript";
 import type {ExportCodeToBeUsed, FixHints} from "./FixHints.js";
-import {isExpectedValueExpression, Ui5TypeInfoKind} from "../utils/utils.js";
-import type {Ui5TypeInfo} from "../utils/utils.js";
+import {isExpectedValueExpression} from "../utils/utils.js";
+import {getModuleTypeInfo, Ui5TypeInfo, Ui5TypeInfoKind} from "../Ui5TypeInfo.js";
 
 const configurationModulesReplacements = new Map<string, FixHints>([
 	// https://github.com/SAP/ui5-linter/issues/620
@@ -53,6 +53,9 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 	["setAnimationMode", {
 		moduleName: "sap/ui/core/ControlBehavior", exportNameToBeUsed: "setAnimationMode",
 	}],
+	["AnimationMode", {
+		moduleName: "sap/ui/core/AnimationMode", exportNameToBeUsed: "AnimationMode",
+	}],
 	["setSecurityTokenHandlers", {
 		moduleName: "sap/ui/security/Security", exportNameToBeUsed: "setSecurityTokenHandlers",
 	}],
@@ -90,17 +93,25 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 
 export default class ConfigurationFixHintsGenerator {
 	getFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo): FixHints | undefined {
-		if (!ts.isPropertyAccessExpression(node)) {
+		if (!ts.isPropertyAccessExpression(node) || !ui5TypeInfo) {
 			return undefined;
 		}
 
-		if (!ui5TypeInfo ||
-			ui5TypeInfo.kind !== Ui5TypeInfoKind.Module ||
-			ui5TypeInfo.module !== "sap/ui/core/Configuration") {
+		const moduleTypeInfo = getModuleTypeInfo(ui5TypeInfo);
+		if (!moduleTypeInfo || moduleTypeInfo.name !== "sap/ui/core/Configuration") {
 			return undefined;
 		}
 
-		const methodName = "export" in ui5TypeInfo ? ui5TypeInfo.export ?? "" : "";
+		if (
+			(ui5TypeInfo.kind !== Ui5TypeInfoKind.Method &&
+				ui5TypeInfo.kind !== Ui5TypeInfoKind.Property) ||
+				ui5TypeInfo.parent.kind !== Ui5TypeInfoKind.Class ||
+				ui5TypeInfo.parent.name !== "Configuration"
+		) {
+			return undefined;
+		}
+
+		const methodName = ui5TypeInfo.name;
 		const moduleReplacement = configurationModulesReplacements.get(methodName);
 		if (!moduleReplacement) {
 			return undefined;
