@@ -54,7 +54,7 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 		moduleName: "sap/ui/core/ControlBehavior", exportNameToBeUsed: "setAnimationMode",
 	}],
 	["AnimationMode", {
-		moduleName: "sap/ui/core/AnimationMode", exportNameToBeUsed: "AnimationMode",
+		moduleName: "sap/ui/core/AnimationMode",
 	}],
 	["setSecurityTokenHandlers", {
 		moduleName: "sap/ui/security/Security", exportNameToBeUsed: "setSecurityTokenHandlers",

@@ -17,7 +17,12 @@ const log = getLogger("linter:autofix:NoGlobals");
 
 export default function generateSolutionNoGlobals(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, content: string,
-	messages: RawLintMessage<MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[],
+	messages: RawLintMessage<
+		MESSAGE.NO_GLOBALS |
+		MESSAGE.DEPRECATED_API_ACCESS |
+		MESSAGE.DEPRECATED_FUNCTION_CALL |
+		MESSAGE.DEPRECATED_PROPERTY
+	>[],
 	changeSet: ChangeSet[], newModuleDeclarations: NewModuleDeclarationInfo[]
 ) {
 	// Collect all global property access nodes

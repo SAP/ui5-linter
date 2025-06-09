@@ -222,6 +222,7 @@ export default async function ({
 		// This needs to stay aligned with the applyFixes function
 		if (messagesById.has(MESSAGE.NO_GLOBALS) ||
 			messagesById.has(MESSAGE.DEPRECATED_API_ACCESS) ||
+			messagesById.has(MESSAGE.DEPRECATED_PROPERTY) ||
 			messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
 			messages.set(autofixResource.resource.getPath(), messagesById);
 			resources.push(autofixResource.resource);
@@ -298,7 +299,11 @@ function applyFixes(
 	const changeSet: ChangeSet[] = [];
 	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
 	const messages: RawLintMessage<
-		MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
+		MESSAGE.NO_GLOBALS |
+		MESSAGE.DEPRECATED_API_ACCESS |
+		MESSAGE.DEPRECATED_FUNCTION_CALL |
+		MESSAGE.DEPRECATED_PROPERTY
+	>[] = [];
 
 	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
 		messages.push(
@@ -315,6 +320,12 @@ function applyFixes(
 	if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
 		messages.push(
 			...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
+		);
+	}
+
+	if (messagesById.has(MESSAGE.DEPRECATED_PROPERTY)) {
+		messages.push(
+			...messagesById.get(MESSAGE.DEPRECATED_PROPERTY) as RawLintMessage<MESSAGE.DEPRECATED_PROPERTY>[]
 		);
 	}
 
