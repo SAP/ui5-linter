@@ -10,7 +10,7 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 		propertyAccessChain = matchPropertyAccess.split(".");
 		if (node.text !== "window" && node.text !== "globalThis" && node.text !== "self") {
 			const firstPropAccess = propertyAccessChain.shift();
-			if (node.text !== firstPropAccess) {
+			if (!["$moduleIdentifier", node.text].includes(firstPropAccess ?? "")) {
 				throw new Error(`Expected node to be ${firstPropAccess} but got ${node.getText()}`);
 			}
 			if (!propertyAccessChain.length) {
