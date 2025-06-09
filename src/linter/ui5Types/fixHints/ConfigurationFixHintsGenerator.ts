@@ -78,7 +78,7 @@ const configurationModulesReplacements = new Map<string, FixHints>([
 	// getAnimation()
 
 	["getFormatLocale", {
-		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.getFormatLocale().toString()",
+		moduleName: "sap/base/i18n/Formatting", exportCodeToBeUsed: "$moduleIdentifier.getLanguageTag().toString()",
 	}],
 
 	// TODO: Complex replacement:
