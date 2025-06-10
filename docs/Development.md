@@ -37,8 +37,10 @@ Autofix solutions generally fall into two categories:
 
 * [ ] Function arguments have **exactly the same** type, order, value and count.
 ```js
-	// Should not be replaced as "startText" is more than one char and the old API behaves differently
-	var padLeft = jQuery.sap.padLeft(startsWithLetter, startText, 8);
+	// Should not be replaced as the second argument is more than one char and the old API behaves differently
+	var padLeft = jQuery.sap.padLeft("a", "Hello", 8);
+
+	var padLeft = jQuery.sap.padLeft("a", "0", 8); // Will be migrated
 ```
 * [ ] Return type of the replacement matches **exactly** the original return type.
 * [ ] If the return type is complex (e.g., object or enum):
