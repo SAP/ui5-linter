@@ -1,8 +1,8 @@
 /*global QUnit */
 sap.ui.define([
 	"sap/ui/core/Configuration",
-	"sap./ui/core/CalendarType",
-	"sap./ui/core/CalendarWeekNumbering",
+	"sap/ui/core/CalendarType",
+	"sap/ui/core/date/CalendarWeekNumbering",
 ], (Configuration, CalendarType, CalendarWeekNumbering) => {
 	"use strict";
 
