@@ -34,7 +34,10 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 
 	while (ts.isPropertyAccessExpression(scanNode.parent) ||
 		ts.isElementAccessExpression(scanNode.parent) ||
-		ts.isCallExpression(scanNode.parent)) {
+		(ts.isCallExpression(scanNode.parent) &&
+			// Do not go above the actual call if wrapped in another call
+			ts.isPropertyAccessExpression(scanNode.parent.expression) &&
+			scanNode.parent.expression.name === node)) {
 		scanNode = scanNode.parent;
 		if (matchPropertyAccess) {
 			const nextPropertyAccess = propertyAccessChain.shift();
