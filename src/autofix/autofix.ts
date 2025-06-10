@@ -6,8 +6,7 @@ import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDec
 import {getLogger} from "@ui5/logger";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {Resource} from "@ui5/fs";
-import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
-import generateChanges from "./solutions/generateChanges.js";
+import generateChanges from "./generateChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -47,7 +46,7 @@ export interface ReplaceChange extends AbstractChangeSet {
 	value: string;
 }
 
-interface DeleteChange extends AbstractChangeSet {
+export interface DeleteChange extends AbstractChangeSet {
 	action: ChangeAction.DELETE;
 	end: number;
 }
@@ -60,14 +59,6 @@ export interface Position {
 	column: number;
 	pos: number;
 }
-export interface GlobalPropertyAccessNodeInfo {
-	moduleName: string;
-	exportNameToBeUsed?: string;
-	exportCodeToBeUsed?: ExportCodeToBeUsed;
-	propertyAccess?: string;
-	position: Position;
-	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
-}
 
 export interface DeprecatedApiAccessNode {
 	apiName: string;
@@ -76,24 +67,15 @@ export interface DeprecatedApiAccessNode {
 }
 
 export type ImportRequests = Map<string, {
-	nodeInfos?: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
+	nodeInfos?: DeprecatedApiAccessNode[];
 	identifier: string;
 }>;
 
-export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
+export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo;
 
 export interface ExistingModuleDeclarationInfo {
 	moduleDeclaration: ModuleDeclaration | RequireExpression;
 	importRequests: ImportRequests;
-	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-}
-
-export interface NewModuleDeclarationInfo {
-	declareCall: ts.CallExpression;
-	requireCalls: Map<string, ts.CallExpression[]>;
-	importRequests: ImportRequests;
-	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-	endPos?: number;
 }
 
 function createCompilerHost(sourceFiles: SourceFiles): ts.CompilerHost {
@@ -172,36 +154,6 @@ function getJsErrors(code: string, resourcePath: string) {
 	return getJsErrorsForSourceFile(sourceFile, program, host);
 }
 
-function getAutofixMessages(resource: AutofixResource) {
-	// Collect modules of which at least one message has the conditional fixHint flag set
-	/*
-	const conditionalModuleAccess = new Set<string>();
-	for (const msg of resource.messages) {
-		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
-			log.verbose(`Skipping fixes that would import module '${msg.fixHints.moduleName}' ` +
-				`because of conditional global access within the current file.`);
-			conditionalModuleAccess.add(msg.fixHints.moduleName);
-		}
-	}
-	*/
-	// Group messages by id
-	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
-	for (const msg of resource.messages) {
-		/*
-		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
-			// Skip messages with conditional fixHints
-			continue;
-		}
-		*/
-		if (!messagesById.has(msg.id)) {
-			messagesById.set(msg.id, []);
-		}
-		messagesById.get(msg.id)!.push(msg);
-	}
-
-	return messagesById;
-}
-
 export function getModuleDeclarationForPosition(
 	position: number, moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>
 ): ModuleDeclarationInfo | undefined {
@@ -241,12 +193,10 @@ export default async function ({
 	resources: autofixResources,
 	context,
 }: AutofixOptions): Promise<AutofixResult> {
-	// Group messages by ID and only process files for which fixes are available
-	const messages = new Map<string, Map<MESSAGE, RawLintMessage[]>>();
+	const messages = new Map<string, RawLintMessage[]>();
 	const resources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
-		const messagesById = getAutofixMessages(autofixResource);
-		messages.set(autofixResource.resource.getPath(), messagesById);
+		messages.set(autofixResource.resource.getPath(), autofixResource.messages);
 		resources.push(autofixResource.resource);
 	}
 
@@ -287,7 +237,7 @@ export default async function ({
 			continue;
 		}
 
-		log.verbose(`Applying autofixes to ${resourcePath}`);
+		log.verbose(`Applying autofix for ${resourcePath}`);
 		let newContent;
 		try {
 			newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
@@ -337,38 +287,11 @@ export default async function ({
 
 function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
-	messagesById: Map<MESSAGE, RawLintMessage[]>
+	messages: RawLintMessage[]
 ): string | undefined {
 	const content = sourceFile.getFullText();
 
 	const changeSet: ChangeSet[] = [];
-	// let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
-	// const messages: RawLintMessage<
-	// 	MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
-
-	// if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-	// 	messages.push(
-	// 		...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
-	// 	);
-	// }
-
-	// if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
-	// 	messages.push(
-	// 		...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
-	// 	);
-	// }
-
-	// if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
-	// 	messages.push(
-	// 		...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
-	// 	);
-	// }
-
-	if (messagesById.size === 0) {
-		return undefined;
-	}
-	const messages = Array.from(messagesById.values()).flat();
-
 	const fixes = messages.filter((msg) => !!msg.fix);
 	generateChanges(resourcePath, checker, sourceFile, content, fixes, changeSet);
 

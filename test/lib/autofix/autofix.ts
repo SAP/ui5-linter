@@ -5,7 +5,7 @@ import esmock from "esmock";
 import autofix, {AutofixResource, ChangeAction, InsertChange} from "../../../src/autofix/autofix.js";
 import LinterContext from "../../../src/linter/LinterContext.js";
 import {MESSAGE} from "../../../src/linter/messages.js";
-import type {addDependencies} from "../../../src/autofix/solutions/amdImports.js";
+import type {addDependencies} from "../../../src/autofix/amdImports.js";
 import {createResource} from "@ui5/fs/resourceFactory";
 import Fix from "../../../src/linter/ui5Types/fix/Fix.js";
 
@@ -22,7 +22,7 @@ test.beforeEach(async (t) => {
 	t.context.addDependenciesStub = t.context.sinon.stub();
 
 	t.context.autofix = await esmock("../../../src/autofix/autofix.js", {
-		"../../../src/autofix/solutions/amdImports.ts": {
+		"../../../src/autofix/amdImports.ts": {
 			addDependencies: t.context.addDependenciesStub,
 		},
 	});

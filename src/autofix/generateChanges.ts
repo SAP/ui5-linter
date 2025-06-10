@@ -1,23 +1,23 @@
 import ts from "typescript";
-import type {RawLintMessage} from "../../linter/LinterContext.js";
+import type {RawLintMessage} from "../linter/LinterContext.js";
 import {
 	getFactoryPosition,
 	Position,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
-} from "../autofix.js";
-import {collectIdentifiers, matchPropertyAccessExpression} from "../utils.js";
-import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import parseRequire from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
+} from "./autofix.js";
+import {collectIdentifiers, matchPropertyAccessExpression} from "./utils.js";
+import parseModuleDeclaration from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
+import parseRequire from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
-import Fix from "../../linter/ui5Types/fix/Fix.js";
+import Fix from "../linter/ui5Types/fix/Fix.js";
 import {
 	NO_PARAM_FOR_DEPENDENCY,
 	addDependencies, Dependencies, getDependencies, removeDependencies,
 } from "./amdImports.js";
-import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
+import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
-const log = getLogger("linter:autofix:NoGlobals");
+const log = getLogger("linter:autofix:generateChanges");
 
 interface NodeSearchInfo {
 	position: Position;
@@ -106,7 +106,6 @@ export default function generateChanges(
 					moduleDeclarations.set(node, {
 						moduleDeclaration: parseModuleDeclaration(node.arguments, checker),
 						importRequests: new Map(),
-						additionalNodeInfos: [],
 					});
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
@@ -121,7 +120,6 @@ export default function generateChanges(
 						moduleDeclarations.set(node, {
 							moduleDeclaration: requireExpression,
 							importRequests: new Map(),
-							additionalNodeInfos: [],
 						});
 					}
 				} catch (err) {

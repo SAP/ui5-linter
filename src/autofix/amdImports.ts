@@ -1,9 +1,9 @@
 import ts from "typescript";
 import path from "node:path/posix";
-import {ChangeAction, ChangeSet, ExistingModuleDeclarationInfo} from "../autofix.js";
-import {getPropertyNameText} from "../../linter/ui5Types/utils/utils.js";
-import {RequireExpression} from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
-import {ModuleDeclaration} from "../../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
+import {ChangeAction, ChangeSet, ExistingModuleDeclarationInfo} from "./autofix.js";
+import {getPropertyNameText} from "../linter/ui5Types/utils/utils.js";
+import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
+import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 const LINE_LENGTH_LIMIT = 200;
 
 function resolveRelativeDependency(dependency: string, moduleName: string): string {
