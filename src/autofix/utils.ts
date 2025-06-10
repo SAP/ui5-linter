@@ -37,15 +37,13 @@ export function findGreatestAccessExpression(node: ts.Identifier, matchPropertyA
 		(ts.isCallExpression(scanNode.parent) &&
 			// Do not go above the actual call if wrapped in another call
 			ts.isPropertyAccessExpression(scanNode.parent.expression) &&
-			scanNode.parent.expression.name === node)) {
+			ts.isPropertyAccessExpression(scanNode) &&
+			scanNode.parent.expression.name === scanNode.name)) {
 		scanNode = scanNode.parent;
 		if (matchPropertyAccess) {
 			const nextPropertyAccess = propertyAccessChain.shift();
 
-			while (ts.isCallExpression(scanNode) &&
-				(ts.isPropertyAccessExpression(scanNode.parent) ||
-					ts.isElementAccessExpression(scanNode.parent) ||
-					ts.isPropertyAccessExpression(scanNode.parent))) {
+			if (ts.isCallExpression(scanNode) && ts.isPropertyAccessExpression(scanNode.parent)) {
 				scanNode = scanNode.parent;
 			}
 
