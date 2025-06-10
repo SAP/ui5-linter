@@ -35,7 +35,11 @@ Autofix solutions generally fall into two categories:
 
 ### 1:1 Replacements
 
-* [ ] Function arguments have **exactly the same** type, order, and count.
+* [ ] Function arguments have **exactly the same** type, order, value and count.
+```js
+	// Should not be replaced as "startText" is more than one char and the old API behaves differently
+	var padLeft = jQuery.sap.padLeft(startsWithLetter, startText, 8);
+```
 * [ ] Return type of the replacement matches **exactly** the original return type.
 * [ ] If the return type is complex (e.g., object or enum):
 
@@ -48,6 +52,39 @@ Autofix solutions generally fall into two categories:
 ### Complex Replacements
 
 * [ ] If the return type differs, use the `isExpectedValueExpression()` utility and the `fixHints.exportCodeToBeUsed.isExpectedValue` flag. Migrate only when the result is **not used or assigned** further (e.g., setter calls like `sap.ui.getCore().getConfig().setCalendarType(...)`).
+```js
+	// The old API always returns a logger instance. So in case the return value
+	// is accessed, the call should not be migrated:
+	jQuery.sap.log.debug().info();
+	const debug = (msg, logger) => logger ? logger(msg) : jQuery.sap.log.debug(msg);
+	debug("msg 2", jQuery.sap.log.debug("msg 1"));
+	debug("msg 2", (jQuery.sap.log.debug("msg 1")));
+	debug("msg 2", ((((jQuery.sap.log.debug("msg 1"))))));
+	var debugInfo = jQuery.sap.log.debug();
+	var info = {
+		debug: jQuery.sap.log.debug()
+	};
+	jQuery.sap.log.debug() ?? jQuery.sap.log.info();
+	jQuery.sap.log.debug() ? "a" : "b";
+	jQuery.sap.log.debug(), jQuery.sap.log.info();
+```
 * [ ] In legacy code, argument type checks or assertions are common. If the new solution doesn't handle these internally, ensure you can **statically verify** the argument types. If not, **skip** the migration.
+```js
+
+	var padLeft = jQuery.sap.padLeft("a", "0", 4); // "a".padStart(4, "0");
+	var padLeft2 = jQuery.sap.padLeft("a", "0000", 4); // Not migrated. Value differs in old and new
+	var padLeft3 = jQuery.sap.padLeft(startsWithLetter, "0", 4); // startsWithLetter might not be possible to be determined
+```
 * [ ] When arguments are **shuffled, merged, or modified**, ensure any **comments** around them are **preserved**.
+
 * [ ] Maintain **whitespaces and line breaks**. Some expressions span multiple lines or are auto-formatted with tabs/spaces.
+```js
+	// Line breaks between property access and call
+	const myLogger = jQuery.
+	sap.
+	log.
+	getLogger();
+
+	// Spaces between property access, call, and arguments
+	jQuery . sap . log . error ( "error" ) ;
+```
