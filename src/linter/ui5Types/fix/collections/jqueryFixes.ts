@@ -166,7 +166,6 @@ t.declareModule("jQuery", [
 		*/
 		t.namespace("extend", callExpressionGeneratorFix({
 			moduleName: "sap/base/util/merge",
-			// exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
 			validateArguments(ctx, _, arg1) {
 				if (arg1.kind !== ts.SyntaxKind.TrueKeyword) {
 					// If the first argument is not "true" (indicating a deep merge),
@@ -196,15 +195,10 @@ t.declareModule("jQuery", [
 			moduleName: "sap/ui/core/syncStyleClass",
 		})),
 		t.namespace("setObject", callExpressionGeneratorFix<{shortCircuit: boolean; value1: string}>({
-			// TODO: Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
 			moduleName: "sap/base/util/ObjectPath",
-			// exportCodeToBeUsed: "$moduleIdentifier.set($1, $2, $3)",
 			validateArguments(ctx, _, arg1) {
-				// If no arguments are provided, the fix should not be applied
-				if (!arg1) {
-					return false;
-				}
-				if (arg1.kind === ts.SyntaxKind.NullKeyword || (ts.isIdentifier(arg1) && arg1.text === "undefined")) {
+				if (!arg1 || arg1.kind === ts.SyntaxKind.NullKeyword ||
+					(ts.isIdentifier(arg1) && arg1.text === "undefined")) {
 					// If the first argument is null or undefined, replace it with an empty string
 					ctx.value1 = `""`;
 				} else if (!ts.isStringLiteral(arg1)) {
