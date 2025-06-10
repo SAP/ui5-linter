@@ -36,7 +36,7 @@ interface AbstractChangeSet {
 	start: number;
 }
 
-interface InsertChange extends AbstractChangeSet {
+export interface InsertChange extends AbstractChangeSet {
 	action: ChangeAction.INSERT;
 	value: string;
 }
@@ -142,10 +142,26 @@ function createSourceFile(resourcePath: string, code: string) {
 	);
 }
 
-function getJsErrorsForSourceFile(sourceFile: ts.SourceFile, program: ts.Program) {
+function getJsErrorsForSourceFile(sourceFile: ts.SourceFile, program: ts.Program, host: ts.CompilerHost) {
 	const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
 	return diagnostics.filter(function (d) {
 		return d.file === sourceFile && d.category === ts.DiagnosticCategory.Error;
+	}).map((d) => {
+		let codeSnippet;
+		let pos;
+		if (d.start !== undefined && d.length !== undefined) {
+			codeSnippet = sourceFile.text.substring(d.start, d.start + d.length);
+			pos = ts.getLineAndCharacterOfPosition(sourceFile, d.start);
+		}
+		return {
+			messageText: ts.flattenDiagnosticMessageText(d.messageText, host.getNewLine()),
+			start: d.start,
+			length: d.length,
+			line: pos?.line,
+			character: pos?.character,
+			file: d.file,
+			codeSnippet,
+		};
 	});
 }
 
@@ -153,7 +169,7 @@ function getJsErrors(code: string, resourcePath: string) {
 	const sourceFile = createSourceFile(resourcePath, code);
 	const host = createCompilerHost(new Map([[resourcePath, sourceFile]]));
 	const program = createProgram([resourcePath], host);
-	return getJsErrorsForSourceFile(sourceFile, program);
+	return getJsErrorsForSourceFile(sourceFile, program, host);
 }
 
 function getAutofixMessages(resource: AutofixResource) {
@@ -258,10 +274,16 @@ export default async function ({
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		// Checking for syntax errors in the original source file.
 		// We should not apply autofixes to files with syntax errors
-		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program);
+		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program, compilerHost);
 		if (existingJsErrors.length) {
 			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error in original source file : ` +
-				`${existingJsErrors.map((d) => d.messageText as string).join(", ")}`);
+				`${existingJsErrors.map((d) => {
+					let res = d.messageText;
+					if (d.codeSnippet) {
+						res += `(\`${d.codeSnippet}\`)`;
+					}
+					return res;
+				}).join(", ")}`);
 			continue;
 		}
 
@@ -280,10 +302,28 @@ export default async function ({
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
+				const contentWithMarkers = newContent.split("\n");
 				const message = `Syntax error after applying autofix for '${resourcePath}': ` +
-					jsErrors.map((d) => d.messageText as string).join(", ");
+					jsErrors
+						.sort((a, b) => {
+							if (a.start === undefined || b.start === undefined) {
+								return 0;
+							}
+							return a.start - b.start;
+						}).map((d) => {
+							if (d.line !== undefined && d.character !== undefined) {
+								// Insert line below the finding and mark the character
+								const line = d.line + 1;
+								contentWithMarkers.splice(line, 0, " ".repeat(d.character) + "^");
+							}
+							let res = d.messageText;
+							if (d.codeSnippet) {
+								res += `(\`${d.codeSnippet}\`)`;
+							}
+							return res;
+						}).join(", ");
 				log.verbose(message);
-				log.verbose(resourcePath + ":\n" + newContent);
+				log.verbose(resourcePath + ":\n" + contentWithMarkers.join("\n"));
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});
 			} else {
 				log.verbose(`Autofix applied to ${resourcePath}`);

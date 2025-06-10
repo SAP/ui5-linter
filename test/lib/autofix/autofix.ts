@@ -1,11 +1,13 @@
+import ts from "typescript";
 import anyTest, {TestFn} from "ava";
 import sinonGlobal from "sinon";
 import esmock from "esmock";
-import autofix, {AutofixResource, ChangeAction} from "../../../src/autofix/autofix.js";
+import autofix, {AutofixResource, ChangeAction, InsertChange} from "../../../src/autofix/autofix.js";
 import LinterContext from "../../../src/linter/LinterContext.js";
 import {MESSAGE} from "../../../src/linter/messages.js";
 import type {addDependencies} from "../../../src/autofix/solutions/amdImports.js";
 import {createResource} from "@ui5/fs/resourceFactory";
+import Fix from "../../../src/linter/ui5Types/fix/Fix.js";
 
 const test = anyTest as TestFn<{
 	sinon: sinonGlobal.SinonSandbox;
@@ -35,6 +37,54 @@ test.afterEach.always((t) => {
 	t.context.sinon.restore();
 });
 
+class TestFix extends Fix {
+	visitLinterNode() {
+		return true;
+	}
+
+	getNodeSearchParameters() {
+		return {
+			nodeTypes: [ts.SyntaxKind.PropertyAccessExpression, ts.SyntaxKind.ElementAccessExpression],
+			position: {
+				line: 1,
+				column: 1,
+			},
+		};
+	}
+
+	visitAutofixNode() {
+		return true;
+	}
+
+	getAffectedSourceCodeRange() {
+		return [];
+	}
+
+	getNewGlobalAccess() {
+		return undefined;
+	}
+
+	getNewModuleDependencies() {
+		return undefined;
+	}
+
+	generateChanges(): InsertChange {
+		return {
+			action: ChangeAction.INSERT,
+			start: 10,
+			value: "(",
+		};
+	}
+
+	setIdentifierForDependency() {
+		// noop
+	}
+
+	setIdentifierForGlobal() {
+		// noop
+	}
+}
+
 test("autofix: Parsing error after applying fixes", async (t) => {
 	const {autofix, linterContext, addDependenciesStub} = t.context;
 
@@ -54,7 +104,7 @@ test("autofix: Parsing error after applying fixes", async (t) => {
 			string: "sap.ui.define(() => new sap.m.Button())",
 		}),
 		messages: [
-			// Noter: Message details don't need to be correct in this test case
+			// Note: Message details don't need to be correct in this test case
 			// as we stub the addDependencies function
 			{
 				id: MESSAGE.NO_GLOBALS,
@@ -63,9 +113,7 @@ test("autofix: Parsing error after applying fixes", async (t) => {
 					column: 1,
 				},
 				args: {},
-				fixHints: {
-					moduleName: "sap/m/Button",
-				},
+				fix: new TestFix(),
 			},
 		],
 	});

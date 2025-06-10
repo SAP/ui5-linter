@@ -1,7 +1,7 @@
 import ts from "typescript";
 import type {RawLintMessage} from "../../linter/LinterContext.js";
 import {
-    getFactoryPosition,
+	getFactoryPosition,
 	Position,
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
@@ -11,7 +11,10 @@ import parseModuleDeclaration from "../../linter/ui5Types/amdTranspiler/parseMod
 import parseRequire from "../../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
 import Fix from "../../linter/ui5Types/fix/Fix.js";
-import {addDependencies, Dependencies, getDependencies, NO_PARAM_FOR_DEPENDENCY, removeDependencies} from "./amdImports.js";
+import {
+	NO_PARAM_FOR_DEPENDENCY,
+	addDependencies, Dependencies, getDependencies, removeDependencies,
+} from "./amdImports.js";
 import {resolveUniqueName} from "../../linter/ui5Types/utils/utils.js";
 
 const log = getLogger("linter:autofix:NoGlobals");

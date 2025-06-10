@@ -1,6 +1,9 @@
 import ts from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
-import {FixTypeInfoMatcher, accessExpressionFix, callExpressionFix, callExpressionGeneratorFix} from "../FixFactory.js";
+import {
+	FixTypeInfoMatcher,
+	accessExpressionFix, accessExpressionGeneratorFix, callExpressionFix, callExpressionGeneratorFix,
+} from "../FixFactory.js";
 import CallExpressionFix from "../CallExpressionFix.js";
 import {ChangeAction} from "../../../../autofix/autofix.js";
 import {PositionInfo} from "../../../LinterContext.js";
@@ -122,8 +125,7 @@ t.declareModule("jQuery", [
 			moduleName: "sap/base/strings/formatMessage",
 		})),
 		t.namespace("hashCode", accessExpressionFix({
-			moduleName: "sap/base/strings/hashCode",
-			preferredIdentifier: "hash",
+			moduleName: "sap/base/strings/hash",
 		})),
 		t.namespace("hyphen", accessExpressionFix({
 			moduleName: "sap/base/strings/hyphenate",
@@ -156,17 +158,27 @@ t.declareModule("jQuery", [
 			jQuery.sap.extends has an optional first argument "deep" which controls whether
 			a shallow or deep copy is performed.
 
-			In case of a shallow clone (default), Object.assign might be a suitable replacement?
+			In case of a shallow clone (default), Object.assign might be a suitable replacement
+			but not always.
 
-			Only in case of a deep clone (first argument is true; explicitly type "boolean"),
+			Therefore, only in case of a deep clone (first argument is true),
 			the merge module shall be used (omitting the first argument)
-
-			Note: migrate only if the first argument is explicitly deep clone (true)
 		*/
-		// f.namespace("extend", accessExpressionFix({
-		// 	moduleName: "sap/base/util/merge",
-		// 	exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
-		// })),
+		t.namespace("extend", callExpressionGeneratorFix({
+			moduleName: "sap/base/util/merge",
+			// exportCodeToBeUsed: "$moduleIdentifier($2, $3)",
+			validateArguments(ctx, _, arg1) {
+				if (arg1.kind !== ts.SyntaxKind.TrueKeyword) {
+					// If the first argument is not "true" (indicating a deep merge),
+					// do not apply the fix
+					return false;
+				}
+				return true;
+			},
+			generator(ctx, moduleIdentifierName, _, arg2, arg3) {
+				return `${moduleIdentifierName}(${arg2.trim()},${arg3})`;
+			},
+		})),
 		t.namespace("now", accessExpressionFix({
 			moduleName: "sap/base/util/now",
 		})),
@@ -183,10 +195,34 @@ t.declareModule("jQuery", [
 		t.namespace("syncStyleClass", accessExpressionFix({
 			moduleName: "sap/ui/core/syncStyleClass",
 		})),
-		// f.namespace("setObject", accessExpressionFix({
-		// 	// TODO: Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
-		// 	// moduleName: "sap/base/util/ObjectPath",
-		// })),
+		t.namespace("setObject", callExpressionGeneratorFix<{shortCircuit: boolean; value1: string}>({
+			// TODO: Needs to use "exportCodeToBeUsed" prop as the first argument MUST be patched to be a string
+			moduleName: "sap/base/util/ObjectPath",
+			// exportCodeToBeUsed: "$moduleIdentifier.set($1, $2, $3)",
+			validateArguments(ctx, _, arg1) {
+				// If no arguments are provided, the fix should not be applied
+				if (!arg1) {
+					return false;
+				}
+				if (arg1.kind === ts.SyntaxKind.NullKeyword || (ts.isIdentifier(arg1) && arg1.text === "undefined")) {
+					// If the first argument is null or undefined, replace it with an empty string
+					ctx.value1 = `""`;
+				} else if (!ts.isStringLiteral(arg1)) {
+					// If it is not a string, short-circuit it
+					ctx.shortCircuit = true;
+				}
+				return true;
+			},
+			generator(ctx, moduleIdentifier, ...args) {
+				if (ctx.shortCircuit) {
+					args[0] = `(${args[0]} || "")`; // Short-circuit the first argument to avoid undefined/null
+				}
+				if (ctx.value1) {
+					args[0] = ctx.value1;
+				}
+				return `${moduleIdentifier}.set(${args.join(",")})`;
+			},
+		})),
 		t.namespace("containsOrEquals", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/542
 			moduleName: "sap/ui/dom/containsOrEquals",
 		})),
@@ -490,148 +526,365 @@ t.declareModule("jQuery", [
 			moduleName: "sap/ui/util/XMLHelper",
 			propertyAccess: "serialize",
 		})),
-		t.namespace("startsWith", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "$1.startsWith($2)",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
-				return true;
-			},
+		t.namespace("startsWith", callExpressionGeneratorFix<{shortCircuit1: boolean}>({
+			validateArguments: validateStartsWithEndsWithArguments,
 			generator: (ctx, _, arg1, arg2) => {
-				return `${arg1}.startsWith(${arg2})`;
-			},
-		})),
-		t.namespace("startsWithIgnoreCase", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "$1.toUpperCase().startsWith($2.toUpperCase())",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
-				return true;
-			},
-			generator: (ctx, _, arg1, arg2) => {
-				return `${arg1}.toUpperCase().startsWith(${arg2}.toUpperCase())`;
+				arg1 = arg1.trim();
+				if (ctx.shortCircuit1) {
+					arg1 = `(${arg1} || "")`;
+				}
+				return `${arg1}.startsWith(${arg2.trim()})`;
 			},
 		})),
 		t.namespace("endsWith", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "$1.endsWith($2)",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
-				return true;
-			},
+			validateArguments: validateStartsWithEndsWithArguments,
 			generator: (ctx, _, arg1, arg2) => {
-				return `${arg1}.endsWith(${arg2})`;
+				arg1 = arg1.trim();
+				if (ctx.shortCircuit1) {
+					arg1 = `(${arg1} || "")`;
+				}
+				return `${arg1}.endsWith(${arg2.trim()})`;
+			},
+		})),
+		t.namespace("startsWithIgnoreCase", callExpressionGeneratorFix({
+			validateArguments: validateStartsWithEndsWithIgnoreCaseArguments,
+			generator: (ctx, _, arg1, arg2) => {
+				arg1 = arg1.trim();
+				if (ctx.shortCircuit1) {
+					arg1 = `(${arg1} || "")`;
+				}
+				arg2 = arg2.trim();
+				if (ctx.shortCircuit2) {
+					arg2 = `(${arg2} || "")`;
+				}
+				return `${arg1}.toUpperCase().startsWith(${arg2}.toUpperCase())`;
 			},
 		})),
 		t.namespace("endsWithIgnoreCase", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "$1.toUpperCase().endsWith($2.toUpperCase())",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
-				return true;
-			},
+			validateArguments: validateStartsWithEndsWithIgnoreCaseArguments,
 			generator: (ctx, _, arg1, arg2) => {
+				arg1 = arg1.trim();
+				if (ctx.shortCircuit1) {
+					arg1 = `(${arg1} || "")`;
+				}
+				arg2 = arg2.trim();
+				if (ctx.shortCircuit2) {
+					arg2 = `(${arg2} || "")`;
+				}
 				return `${arg1}.toUpperCase().endsWith(${arg2}.toUpperCase())`;
 			},
 		})),
-		t.namespace("padLeft", callExpressionGeneratorFix<{defaultString: boolean}>({
-			// exportCodeToBeUsed: "$1.padStart($3, $2)",
-			validateArguments: (ctx, checker, arg1, arg2) => {
-				if (arg1 && !ts.isStringLiteralLike(arg1)) {
-					ctx.defaultString = true;
-				}
-				if (!arg2 || !ts.isStringLiteralLike(arg2) ||
-					// String literals are enclosed in double quotes, so the length of an empty string is 2
-					arg2.text.length > 3) {
-					// API not compatible if the second argument is not a string or string with length <> 1
-					return false;
-				}
-				return true;
-			},
+		t.namespace("padLeft", callExpressionGeneratorFix<{shortCircuit: boolean}>({
+			validateArguments: validatePadLeftRightArguments,
 			generator: (ctx, _, arg1, arg2, arg3) => {
-				if (ctx.defaultString) {
+				arg1 = arg1.trim();
+				arg2 = arg2.trim();
+				arg3 = arg3.trim();
+				if (ctx.shortCircuit) {
 					arg1 = `(${arg1} || "")`;
 				}
 				return `${arg1}.padStart(${arg3}, ${arg2})`;
 			},
 		})),
-		t.namespace("padRight", callExpressionGeneratorFix<{defaultString: boolean}>({
-			// exportCodeToBeUsed: "$1.padEnd($3, $2)",
-			validateArguments: (ctx, checker, arg1, arg2) => {
-				if (arg1 && !ts.isStringLiteralLike(arg1)) {
-					ctx.defaultString = true;
-				}
-				if (!arg2 || !ts.isStringLiteralLike(arg2) ||
-					// String literals are enclosed in double quotes, so the length of an empty string is 2
-					arg2.text.length > 3) {
-					// API not compatible if the second argument is not a string or string with length <> 1
-					return false;
-				}
-				return true;
-			},
+		t.namespace("padRight", callExpressionGeneratorFix<{shortCircuit: boolean}>({
+			validateArguments: validatePadLeftRightArguments,
 			generator: (ctx, _, arg1, arg2, arg3) => {
-				if (ctx.defaultString) {
+				arg1 = arg1.trim();
+				arg2 = arg2.trim();
+				arg3 = arg3.trim();
+				if (ctx.shortCircuit) {
 					arg1 = `(${arg1} || "")`;
 				}
 				return `${arg1}.padEnd(${arg3}, ${arg2})`;
 			},
 		})),
-		t.namespace("domById", callExpressionGeneratorFix({
+		t.namespace("domById", callExpressionGeneratorFix<{replaceWithNull: boolean}>({
 			globalName: "document",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
+			validateArguments: (ctx, _, arg1) => {
+				if (!arg1) {
+					ctx.replaceWithNull = true;
+				}
 				return true;
 			},
-			// exportCodeToBeUsed: "window.document.getElementById($1)",
-			generator: (ctx, moduleIdentifier, arg1) => {
-				return `${moduleIdentifier}.getElementById(${arg1})`;
+			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+				if (ctx.replaceWithNull) {
+					return "null";
+				}
+				let global = moduleIdentifier;
+				if (arg2) {
+					// If the second argument is present, it is the "document" global
+					// which should be used instead of the default "window.document"
+					global = `${arg2.trim()}.document`;
+				}
+				return `${global}.getElementById(${arg1})`;
 			},
 		})),
 		t.namespace("isEqualNode", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "!!$1?.isEqualNode($2)",
 			generator: (ctx, _, arg1, arg2) => {
-				return `!!${arg1}?.isEqualNode(${arg2})`;
+				return `!!${arg1.trim()}?.isEqualNode(${arg2.trim()})`;
 			},
 		})),
-		t.namespace("newObject", callExpressionGeneratorFix({
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
+		t.namespace("newObject", callExpressionGeneratorFix<{shortCircuit: boolean}>({
+			validateArguments(ctx, checker, arg1) {
+				if (!arg1) {
+					return true;
+				}
+				if (ts.isIdentifier(arg1)) {
+					// Get the type of the first argument
+					const type = checker.getTypeAtLocation(arg1);
+					if (!type || !(type.flags & (ts.TypeFlags.Object | ts.TypeFlags.Null))) {
+						// Neither object or null, short-circuit to null to
+						// reflect the legacy behavior
+						ctx.shortCircuit = true;
+					}
+				} else if (!ts.isObjectLiteralExpression(arg1) &&
+					arg1.kind !== ts.SyntaxKind.NullKeyword) {
+					ctx.shortCircuit = true;
+				}
 				return true;
 			},
-			// exportCodeToBeUsed: "Object.create($1)",
 			generator: (ctx, _, arg1) => {
+				if (!arg1) {
+					return `Object.create(null)`;
+				} else if (ctx.shortCircuit) {
+					return `Object.create(${arg1} || null)`;
+				}
 				return `Object.create(${arg1})`;
 			},
 		})),
 		t.namespace("getter", callExpressionGeneratorFix({
-			// exportCodeToBeUsed: "((value) => () => value)($1)",
 			generator: (ctx, _, arg1) => {
 				return `((value) => () => value)(${arg1})`;
 			},
 		})),
-		t.namespace("getModulePath", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/589
+		t.namespace("getModulePath", callExpressionGeneratorFix<{argValue: string}>({ // https://github.com/SAP/ui5-linter/issues/589
 			globalName: "sap.ui.require",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
+			validateArguments: (ctx, _, arg1) => {
+				if (ts.isStringLiteral(arg1)) {
+					// If the argument is a string literal, we can modify it's value
+					ctx.argValue = `"${arg1.text.replaceAll(".", "/")}"`;
+				}
 				return true;
 			},
-			// exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
-			generator: (ctx, moduleIdentifier, arg1) => {
-				return `${moduleIdentifier}.toUrl(${arg1})`;
+			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+				if (ctx.argValue) {
+					// Use the modified value
+					arg1 = ctx.argValue;
+				} else {
+					// If it's not a string literal, apply the modification at runtime
+					arg1 = `(${arg1})?.replaceAll(".", "/")`;
+				}
+				let res = `${moduleIdentifier}.toUrl(${arg1})`;
+				if (arg2) {
+					res = `${res} +${arg2}`;
+				}
+				return res;
 			},
 		})),
 		t.namespace("getResourcePath", callExpressionGeneratorFix({
 			globalName: "sap.ui.require",
-			validateArguments: () => {
-				// TODO: Add checks, see codeReplacer.ts
-				return true;
-			},
-			// exportCodeToBeUsed: "sap.ui.require.toUrl($1)",
-			generator: (ctx, moduleIdentifier, arg1) => {
-				return `${moduleIdentifier}.toUrl(${arg1})`;
+			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+				let res = `${moduleIdentifier}.toUrl(${arg1})`;
+				if (arg2) {
+					res = `${res} +${arg2}`;
+				}
+				return res;
 			},
 		})),
+	]), // jQuery.sap
+	// jQuery
+	t.namespace("inArray", callExpressionGeneratorFix({
+		generator: (ctx, _, arg1, arg2) => {
+			return `(${arg2.trim()} ? Array.prototype.indexOf.call(${arg2.trim()}, ${arg1.trim()}) : -1)`;
+		},
+	})),
+	t.namespace("isArray", callExpressionGeneratorFix({
+		generator: (ctx, _, arg1) => {
+			return `Array.isArray(${arg1})`;
+		},
+	})),
+	t.namespace("support", [
+		t.namespace("retina", accessExpressionGeneratorFix({
+			generator: () => "window.devicePixelRatio >= 2",
+		})),
 	]),
-
-	// jQuery.*
-	// TODO
+	t.namespace("device", [
+		t.namespace("is", [
+			t.namespace("standalone", accessExpressionFix({
+				scope: FixScope.FirstChild,
+				globalName: "navigator",
+			})),
+			t.namespace("landscape", accessExpressionFix({
+				moduleName: "sap/ui/Device",
+				propertyAccess: "orientation.landscape",
+			})),
+			t.namespace("portrait", accessExpressionFix({
+				moduleName: "sap/ui/Device",
+				propertyAccess: "orientation.portrait",
+			})),
+			t.namespace("desktop", accessExpressionFix({
+				moduleName: "sap/ui/Device",
+				propertyAccess: "system.desktop",
+			})),
+			t.namespace("phone", accessExpressionFix({
+				moduleName: "sap/ui/Device",
+				propertyAccess: "system.phone",
+			})),
+			t.namespace("tablet", accessExpressionFix({
+				moduleName: "sap/ui/Device",
+				propertyAccess: "system.tablet",
+			})),
+			t.namespace("android_phone", accessExpressionGeneratorFix({
+				moduleName: "sap/ui/Device",
+				generator: (moduleIdentifier) => (
+					`${moduleIdentifier}.os.android && ` +
+					`${moduleIdentifier}.system.phone`
+				),
+			})),
+			t.namespace("android_tablet", accessExpressionGeneratorFix({
+				moduleName: "sap/ui/Device",
+				generator: (moduleIdentifier) => (
+					`${moduleIdentifier}.os.android && ` +
+					`${moduleIdentifier}.system.tablet`
+				),
+			})),
+			t.namespace("iphone", accessExpressionGeneratorFix({
+				moduleName: "sap/ui/Device",
+				generator: (moduleIdentifier) => (
+					`${moduleIdentifier}.os.ios && ` +
+					`${moduleIdentifier}.system.phone`
+				),
+			})),
+			t.namespace("ipad", accessExpressionGeneratorFix({
+				moduleName: "sap/ui/Device",
+				generator: (moduleIdentifier) => (
+					`${moduleIdentifier}.os.ios && ` +
+					`${moduleIdentifier}.system.tablet`
+				),
+			})),
+		]),
+	]),
+	t.namespace("os", [
+		t.namespace("os", accessExpressionFix({
+			moduleName: "sap/ui/Device",
+			propertyAccess: "os.name",
+		})),
+		t.namespace("fVersion", accessExpressionFix({
+			moduleName: "sap/ui/Device",
+			propertyAccess: "os.version",
+		})),
+		t.namespace("version", accessExpressionFix({
+			moduleName: "sap/ui/Device",
+			propertyAccess: "os.versionStr",
+		})),
+		t.namespace("Android", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "Android"`,
+		})),
+		t.namespace("bb", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "bb"`,
+		})),
+		t.namespace("iOS", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "iOS"`,
+		})),
+		t.namespace("winphone", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "winphone"`,
+		})),
+		t.namespace("win", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "win"`,
+		})),
+		t.namespace("linux", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "linux"`,
+		})),
+		t.namespace("mac", accessExpressionGeneratorFix({
+			moduleName: "sap/ui/Device",
+			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "mac"`,
+		})),
+	]),
 ]);
+
+function getStringValue(checker: ts.TypeChecker, stringArg: ts.Expression): string | undefined {
+	if (ts.isIdentifier(stringArg)) {
+		// If it's an identifier, we need to check whether it is a string literal type
+		const argType = checker.getTypeAtLocation(stringArg);
+		if (!argType.isStringLiteral()) {
+			return;
+		}
+		return stringArg.text;
+	} else if (ts.isStringLiteralLike(stringArg)) {
+		return stringArg.text;
+	}
+}
+
+function hasStringValue(checker: ts.TypeChecker, stringArg: ts.Expression): boolean {
+	return getStringValue(checker, stringArg) !== undefined;
+}
+
+function validateStartsWithEndsWithArguments(
+	ctx: {shortCircuit1: boolean}, checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+) {
+	if (!arg1 || !arg2) {
+		// Both arguments must be provided
+		return false;
+	}
+	// If we can't be sure the first argument is a string, default it to an empty string
+	if (!hasStringValue(checker, arg1) && arg1.kind !== ts.SyntaxKind.NullKeyword) {
+		ctx.shortCircuit1 = true;
+	}
+
+	// If there are no arguments, we cannot migrate.
+	// If the second argument is an empty string, we can't migrate as the built-in String API
+	// returns true instead of false in that case.
+	// For this reason, we can only safely replace a call when the second argument is a non-empty string.
+	const value2 = getStringValue(checker, arg2);
+	if (!value2 || value2.length === 0) {
+		return false;
+	}
+
+	return true;
+};
+
+function validateStartsWithEndsWithIgnoreCaseArguments(
+	ctx: {shortCircuit1: boolean; shortCircuit2: boolean},
+	checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+) {
+	if (!validateStartsWithEndsWithArguments(ctx, checker, arg1, arg2)) {
+		return false;
+	}
+
+	// If we can't be sure the second argument is a string, default it to an empty string
+	const value2 = getStringValue(checker, arg2);
+	if (value2 === undefined && arg1.kind !== ts.SyntaxKind.NullKeyword) {
+		ctx.shortCircuit2 = true;
+	}
+	return true;
+};
+
+function validatePadLeftRightArguments(
+	ctx: {shortCircuit: boolean},
+	checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+) {
+	if (!arg1 || !arg2) {
+		// Both arguments must be provided
+		return false;
+	}
+
+	if (!hasStringValue(checker, arg1)) {
+		ctx.shortCircuit = true;
+	}
+	const value2 = getStringValue(checker, arg2);
+	if (value2 === undefined || value2.length > 1) {
+		// API not compatible if the second argument is not a string or the string us longer than
+		// one character
+		return false;
+	}
+	return true;
+};
 
 /**
  * Fix for jQuery.sap.isStringNFC
@@ -789,7 +1042,7 @@ class CharToUpperCaseFix extends CallExpressionFix {
 			throw new Error("Start or end position or argument is not defined");
 		}
 
-		if (this.argIdentifierName === undefined && this.argStringValue === undefined) {
+		if (!this.moduleIdentifierName || (this.argIdentifierName === undefined && this.argStringValue === undefined)) {
 			// Identifier has not been set. This can happen if the relevant position is not inside a
 			// module definition or require block. Therefore the fix can not be applied.
 			return;
