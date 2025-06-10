@@ -160,7 +160,6 @@ export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
 	changeSet: ChangeSet[],
 	resourcePath: string,
-	// declaredIdentifiers: Set<string>,
 	dependenciesToRemove: Set<string>
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
@@ -338,9 +337,6 @@ export function addDependencies(
 			value: formatDependencies(value, identifiersSeparator.trailing, {pos: start, node: defineCall}),
 		});
 	}
-
-	// Patch identifiers
-	// patchIdentifiers(importRequests, changeSet);
 }
 
 export function removeDependencies(
@@ -427,39 +423,6 @@ export function removeDependencies(
 			}
 		});
 }
-
-// function patchIdentifiers(importRequests: ImportRequests, changeSet: ChangeSet[]) {
-// 	for (const {nodeInfos, identifier} of importRequests.values()) {
-// 		if (!identifier) {
-// 			throw new Error("No identifier found for import");
-// 		}
-// 		if (!nodeInfos) {
-// 			return;
-// 		}
-
-// 		for (const nodeInfo of nodeInfos) {
-// 			if (!nodeInfo.node) {
-// 				continue;
-// 			}
-// 			const node: ts.Node = nodeInfo.node;
-// 			const nodeStart = node.getStart();
-// 			const nodeEnd = node.getEnd();
-// 			let nodeReplacement = `${identifier}`;
-// 			if ("exportNameToBeUsed" in nodeInfo && nodeInfo.exportNameToBeUsed) {
-// 				nodeReplacement += `.${nodeInfo.exportNameToBeUsed}`;
-// 			}
-
-// 			if (!("exportCodeToBeUsed" in nodeInfo) || !nodeInfo.exportCodeToBeUsed) {
-// 				changeSet.push({
-// 					action: ChangeAction.REPLACE,
-// 					start: nodeStart,
-// 					end: nodeEnd,
-// 					value: nodeReplacement,
-// 				});
-// 			}
-// 		}
-// 	}
-// }
 
 function extractIdentifierSeparator(input: string) {
 	const match = /^(\s)+/.exec(input);
