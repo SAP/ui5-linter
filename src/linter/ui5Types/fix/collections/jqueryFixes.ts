@@ -809,7 +809,7 @@ function getStringValue(checker: ts.TypeChecker, stringArg: ts.Expression): stri
 		if (!argType.isStringLiteral()) {
 			return;
 		}
-		return stringArg.text;
+		return argType.value;
 	} else if (ts.isStringLiteralLike(stringArg)) {
 		return stringArg.text;
 	}
