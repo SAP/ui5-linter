@@ -29,15 +29,17 @@ sap.ui.define([
 	});
 	
 	QUnit.test("getCalendarType", function (assert) {
-		assert.ok(Configuration.getCalendarType() instanceof CalendarType, "The result from getCalendarType() is a CalendarType instance");
-		assert.ok(globalConfiguration.getCalendarType() instanceof CalendarType, "The result from getCalendarType() is a CalendarType instance");
-		assert.ok(sap.ui.getCore().getConfiguration().getCalendarType() instanceof CalendarType, "The result from getCalendarType() is a CalendarType instance");
+		var list = CalendarType;
+		assert.ok(list[Configuration.getCalendarType()], "The result from getCalendarType() is a CalendarType instance");
+		assert.ok(list[globalConfiguration.getCalendarType()], "The result from getCalendarType() is a CalendarType instance");
+		assert.ok(list[sap.ui.getCore().getConfiguration().getCalendarType()], "The result from getCalendarType() is a CalendarType instance");
 	});
 	
 	QUnit.test("getCalendarWeekNumbering", function (assert) {
-		assert.ok(Configuration.getCalendarWeekNumbering() instanceof CalendarWeekNumbering, "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
-		assert.ok(globalConfiguration.getCalendarWeekNumbering() instanceof CalendarWeekNumbering, "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
-		assert.ok(sap.ui.getCore().getConfiguration().getCalendarWeekNumbering() instanceof CalendarWeekNumbering, "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
+		var list = CalendarWeekNumbering;
+		assert.ok(list[Configuration.getCalendarWeekNumbering()], "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
+		assert.ok(list[globalConfiguration.getCalendarWeekNumbering()], "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
+		assert.ok(list[sap.ui.getCore().getConfiguration().getCalendarWeekNumbering()], "The result from getCalendarWeekNumbering() is a CalendarWeekNumbering instance");
 	});
 	
 	QUnit.test("getFrameOptions", function (assert) {
@@ -101,9 +103,10 @@ sap.ui.define([
 	});
 
 	QUnit.test("AnimationMode", function (assert) {
-		assert.ok(Configuration.getAnimationMode() instanceof Configuration.AnimationMode, "The result from getAnimationMode() is an AnimationMode instance");
-		assert.ok(globalConfiguration.getAnimationMode() instanceof Configuration.AnimationMode, "The result from getAnimationMode() is an AnimationMode instance");
-		assert.ok(sap.ui.getCore().getConfiguration().getAnimationMode() instanceof Configuration.AnimationMode, "The result from getAnimationMode() is an AnimationMode instance");
+		var list = Configuration.AnimationMode;
+		assert.ok(list[Configuration.getAnimationMode()], "The result from getAnimationMode() is an AnimationMode instance");
+		assert.ok(list[globalConfiguration.getAnimationMode()], "The result from getAnimationMode() is an AnimationMode instance");
+		assert.ok(list[sap.ui.getCore().getConfiguration().getAnimationMode()], "The result from getAnimationMode() is an AnimationMode instance");
 		
 		Configuration.setAnimationMode(Configuration.AnimationMode.minimal);
 		assert.strictEqual(globalConfiguration.getAnimationMode(), Configuration.AnimationMode.minimal, "The animation mode is set to minimal");
