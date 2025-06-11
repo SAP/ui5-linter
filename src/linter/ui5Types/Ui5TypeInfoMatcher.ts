@@ -66,12 +66,12 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		}
 	}
 
-	declareModule(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
-		this.rootModules.set(name, this.createModule(name, children, value));
+	declareModule(moduleName: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
+		this.rootModules.set(moduleName, this.createModule(moduleName, children, value));
 	}
 
-	declareModules(name: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
-		for (const entityName of name) {
+	declareModules(moduleNames: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
+		for (const entityName of moduleNames) {
 			this.rootModules.set(entityName, this.createModule(entityName, children, value));
 		}
 	}
@@ -87,12 +87,12 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		return moduleNode;
 	}
 
-	declareNamespace(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
-		this.rootNamespaces.set(name, this.namespace(name, children, value));
+	declareNamespace(namespace: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
+		this.rootNamespaces.set(namespace, this.namespace(namespace, children, value));
 	}
 
-	declareNamespaces(name: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
-		for (const moduleName of name) {
+	declareNamespaces(namespaces: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType): void {
+		for (const moduleName of namespaces) {
 			this.rootNamespaces.set(moduleName, this.namespace(moduleName, children, value));
 		}
 	}
