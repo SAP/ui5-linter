@@ -35,6 +35,9 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		const rootTypeInfo = filterStack[0];
 		let rootNode: Node<ValueType> | undefined;
 		if (rootTypeInfo.kind === Ui5TypeInfoKind.Module) {
+			if (!this.libraryName || rootTypeInfo.library !== this.libraryName) {
+				return;
+			}
 			rootNode = this.rootModules.get(rootTypeInfo.name);
 		} else if (rootTypeInfo.kind === Ui5TypeInfoKind.Namespace) {
 			rootNode = this.rootNamespaces.get(rootTypeInfo.name);
@@ -173,11 +176,11 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		});
 	}
 
-	medadataProperty(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
+	metadataProperty(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
 		return this.createNode(Ui5TypeInfoKind.MetadataProperty, name, children, value);
 	}
 
-	medadataProperties(
+	metadataProperties(
 		names: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType>[] {
 		return names.map((name) => {
@@ -185,13 +188,13 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		});
 	}
 
-	medadataAggregation(
+	metadataAggregation(
 		name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType> {
 		return this.createNode(Ui5TypeInfoKind.MetadataAggregation, name, children, value);
 	}
 
-	medadataAggregations(
+	metadataAggregations(
 		names: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType>[] {
 		return names.map((name) => {
@@ -199,13 +202,13 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		});
 	}
 
-	medadataAssociation(
+	metadataAssociation(
 		name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType> {
 		return this.createNode(Ui5TypeInfoKind.MetadataAssociation, name, children, value);
 	}
 
-	medadataAssociations(
+	metadataAssociations(
 		names: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType>[] {
 		return names.map((name) => {
