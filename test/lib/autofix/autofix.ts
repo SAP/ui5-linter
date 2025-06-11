@@ -68,12 +68,16 @@ class TestFix extends Fix {
 		return undefined;
 	}
 
-	generateChanges(): InsertChange {
-		return {
+	generateChanges(): InsertChange[] {
+		return [{
 			action: ChangeAction.INSERT,
 			start: 10,
 			value: "(",
-		};
+		}, {
+			action: ChangeAction.INSERT,
+			start: 1,
+			value: ")",
+		}];
 	}
 
 	setIdentifierForDependency() {
@@ -86,16 +90,7 @@ class TestFix extends Fix {
 }
 
 test("autofix: Parsing error after applying fixes", async (t) => {
-	const {autofix, linterContext, addDependenciesStub} = t.context;
-
-	addDependenciesStub.callsFake((defineCall, moduleDeclarationInfo, changeSet, _resourcePath) => {
-		// Pushing an invalid change set to trigger a parsing error
-		changeSet.push({
-			action: ChangeAction.INSERT,
-			start: 1,
-			value: "(",
-		});
-	});
+	const {autofix, linterContext} = t.context;
 
 	const resources = new Map<string, AutofixResource>();
 	resources.set("/resources/file.js", {
@@ -138,7 +133,10 @@ test("autofix: Parsing error after applying fixes", async (t) => {
 				{
 					column: undefined,
 					line: undefined,
-					message: "Syntax error after applying autofix for '/resources/file.js': ')' expected.",
+					message: `Syntax error after applying autofix for '/resources/file.js':
+ - Unexpected keyword or identifier. (\`s\`)
+ - Declaration or statement expected. (\`)\`)
+ - ')' expected.`,
 					ruleId: "autofix-error",
 					severity: 1,
 				},

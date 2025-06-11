@@ -54,6 +54,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var intervalCallId3 = jQuery.sap.intervalCall(1000, window, Array.isArray, ["myParam1"]);
 	jQuery.sap.clearIntervalCall(intervalCallId);
 
+	const document = globalThis.document;
 	var element = jQuery.sap.domById("popup");
 	var element2 = jQuery.sap.domById("popup", globalThis);
 	var element3 = jQuery.sap.domById();

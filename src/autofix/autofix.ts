@@ -154,27 +154,6 @@ function getJsErrors(code: string, resourcePath: string) {
 	return getJsErrorsForSourceFile(sourceFile, program, host);
 }
 
-export function getModuleDeclarationForPosition(
-	position: number, moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>
-): ModuleDeclarationInfo | undefined {
-	const potentialDeclarations: {declaration: ModuleDeclarationInfo; start: number}[] = [];
-	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
-		const {moduleDeclaration} = moduleDeclarationInfo;
-		const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
-		if (!factory || factory.getStart() > position || factory.getEnd() < position) {
-			continue;
-		}
-		potentialDeclarations.push({
-			declaration: moduleDeclarationInfo,
-			start: factory.getStart(),
-		});
-	}
-	// Sort by start position so that the declaration closest to the position is returned
-	// This is relevant in case of nested sap.ui.require calls
-	potentialDeclarations.sort((a, b) => a.start - b.start);
-	return potentialDeclarations.pop()?.declaration;
-}
-
 export function getFactoryPosition(moduleDeclaration: ExistingModuleDeclarationInfo): {start: number; end: number} {
 	const {moduleDeclaration: declaration} = moduleDeclaration;
 	const factory = "factory" in declaration ? declaration.factory : declaration.callback;
@@ -226,14 +205,14 @@ export default async function ({
 		// We should not apply autofixes to files with syntax errors
 		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program, compilerHost);
 		if (existingJsErrors.length) {
-			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error in original source file : ` +
+			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error(s) in original source file:\n - ` +
 				`${existingJsErrors.map((d) => {
 					let res = d.messageText;
 					if (d.codeSnippet) {
-						res += `(\`${d.codeSnippet}\`)`;
+						res += ` (\`${d.codeSnippet}\`)`;
 					}
 					return res;
-				}).join(", ")}`);
+				}).join("\n - ")}`);
 			continue;
 		}
 
@@ -256,7 +235,7 @@ export default async function ({
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
 				const contentWithMarkers = newContent.split("\n");
-				const message = `Syntax error after applying autofix for '${resourcePath}': ` +
+				const message = `Syntax error after applying autofix for '${resourcePath}':\n - ` +
 					jsErrors
 						.sort((a, b) => {
 							if (a.start === undefined || b.start === undefined) {
@@ -271,10 +250,10 @@ export default async function ({
 							}
 							let res = d.messageText;
 							if (d.codeSnippet) {
-								res += `(\`${d.codeSnippet}\`)`;
+								res += ` (\`${d.codeSnippet}\`)`;
 							}
 							return res;
-						}).join(", ");
+						}).join("\n - ");
 				log.verbose(message);
 				log.verbose(resourcePath + ":\n" + contentWithMarkers.join("\n"));
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});

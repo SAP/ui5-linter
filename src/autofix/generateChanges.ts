@@ -112,6 +112,9 @@ export default function generateChanges(
 					const errorMessage = err instanceof Error ? err.message : String(err);
 					log.verbose(`Failed to parse sap.ui.define ` +
 						`call in ${sourceFile.fileName}: ${errorMessage}`);
+					if (err instanceof Error) {
+						log.verbose(`Call stack: ${err.stack}`);
+					}
 				}
 			} else if (matchPropertyAccessExpression(node.expression, "sap.ui.require")) {
 				try {
@@ -127,6 +130,9 @@ export default function generateChanges(
 					const errorMessage = err instanceof Error ? err.message : String(err);
 					log.verbose(`Failed to parse sap.ui.require ` +
 						`call in ${sourceFile.fileName}: ${errorMessage}`);
+					if (err instanceof Error) {
+						log.verbose(`Call stack: ${err.stack}`);
+					}
 				}
 			}
 		}
