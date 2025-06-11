@@ -34,4 +34,7 @@ sap.ui.require([
 		sap.f.AvatarType.Icon;
 		fLib.AvatarType.Image;
 	});
+
+	// Require with no callback
+	sap.ui.require(["sap/m/Dialog"]);
 });
