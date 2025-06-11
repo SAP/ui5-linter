@@ -29,8 +29,6 @@ export interface CallExpressionFixParams extends BaseFixParams {
 }
 
 export default class CallExpressionFix extends BaseFix {
-	protected generatorArgs: string[] | undefined;
-
 	constructor(protected params: CallExpressionFixParams) {
 		super(params);
 	}

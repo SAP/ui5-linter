@@ -26,6 +26,10 @@ t.declareModule("sap/ui/core/Core", [
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
 		})),
+		t.method("getConfiguration", accessExpressionFix({
+			scope: FixScope.FullExpression,
+			moduleName: "sap/ui/Configuration",
+		})),
 		t.method("getStaticAreaRef", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/StaticArea",

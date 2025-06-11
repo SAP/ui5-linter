@@ -348,3 +348,18 @@ export function extractSapUiNamespace(symbolName: string, moduleDeclaration: ts.
 		return namespace.join(".");
 	}
 }
+
+/**
+ * Recursively count all child nodes matching the filter
+ */
+export function countChildNodesRecursive(node: ts.Node, filterKinds: ts.SyntaxKind[] = []): number {
+	let count = 0;
+	function countNodes(currentNode: ts.Node) {
+		if (filterKinds.length === 0 || filterKinds.includes(currentNode.kind)) {
+			count++;
+		}
+		currentNode.forEachChild(countNodes);
+	}
+	countNodes(node);
+	return count;
+}
