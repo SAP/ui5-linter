@@ -1,7 +1,7 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import {isExpectedValueExpression} from "../utils/utils.js";
+import {countChildNodesRecursive, isExpectedValueExpression} from "../utils/utils.js";
 import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
 
 export interface CallExpressionFixParams extends BaseFixParams {
@@ -29,6 +29,9 @@ export interface CallExpressionFixParams extends BaseFixParams {
 }
 
 export default class CallExpressionFix extends BaseFix {
+	protected nodeTypes = [ts.SyntaxKind.CallExpression];
+	protected containedCallExpressionCount = 0;
+
 	constructor(protected params: CallExpressionFixParams) {
 		super(params);
 	}
@@ -43,21 +46,19 @@ export default class CallExpressionFix extends BaseFix {
 			return false;
 		}
 		this.sourcePosition = sourcePosition;
+		this.containedCallExpressionCount = countChildNodesRecursive(node, this.nodeTypes);
 		return true;
-	}
-
-	getNodeSearchParameters() {
-		if (this.sourcePosition === undefined) {
-			throw new Error("Position for search is not defined");
-		}
-		return {
-			nodeTypes: ts.SyntaxKind.CallExpression,
-			position: this.sourcePosition,
-		};
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
 		if (!ts.isCallExpression(node)) {
+			return false;
+		}
+
+		const count = countChildNodesRecursive(node, this.nodeTypes);
+		if (count !== this.containedCallExpressionCount) {
+			// The number of access expressions does not match the expected count
+			// Reject this node and wait for it's child
 			return false;
 		}
 

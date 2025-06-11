@@ -75,7 +75,7 @@ export default function generateChanges(
 
 		nodeSearchInfo.add({
 			fix,
-			nodeTypes: Array.isArray(nodeTypes) ? nodeTypes : [nodeTypes],
+			nodeTypes,
 			position: {
 				line,
 				column,

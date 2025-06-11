@@ -1,7 +1,7 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import {isExpectedValueExpression} from "../utils/utils.js";
+import {countChildNodesRecursive, isExpectedValueExpression} from "../utils/utils.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
 
 export interface CallExpressionGeneratorFixParams<GeneratorContext extends object> extends BaseFixParams {
@@ -31,8 +31,10 @@ export interface CallExpressionGeneratorFixParams<GeneratorContext extends objec
 }
 
 export default class CallExpressionGeneratorFix<GeneratorContext extends object> extends BaseFix {
+	protected nodeTypes = [ts.SyntaxKind.CallExpression];
 	protected generatorArgs: string[] | undefined;
-	private generatorContext = {} as GeneratorContext;
+	protected generatorContext = {} as GeneratorContext;
+	protected containedCallExpressionCount = 0;
 
 	constructor(protected params: CallExpressionGeneratorFixParams<GeneratorContext>) {
 		super(params);
@@ -53,21 +55,19 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 			}
 		}
 		this.sourcePosition = sourcePosition;
+		this.containedCallExpressionCount = countChildNodesRecursive(node, this.nodeTypes);
 		return true;
-	}
-
-	getNodeSearchParameters() {
-		if (this.sourcePosition === undefined) {
-			throw new Error("Position for search is not defined");
-		}
-		return {
-			nodeTypes: ts.SyntaxKind.CallExpression,
-			position: this.sourcePosition,
-		};
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
 		if (!ts.isCallExpression(node)) {
+			return false;
+		}
+
+		const count = countChildNodesRecursive(node, this.nodeTypes);
+		if (count !== this.containedCallExpressionCount) {
+			// The number of access expressions does not match the expected count
+			// Reject this node and wait for it's child
 			return false;
 		}
 

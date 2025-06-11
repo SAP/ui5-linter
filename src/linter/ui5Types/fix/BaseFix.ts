@@ -1,3 +1,4 @@
+import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import Fix from "./Fix.js";
 
@@ -75,6 +76,7 @@ export default abstract class BaseFix extends Fix {
 	protected moduleIdentifierName: string | undefined;
 	protected globalIdentifierName: string | undefined;
 	protected sourcePosition: PositionInfo | undefined;
+	protected nodeTypes: ts.SyntaxKind[] | undefined;
 
 	constructor(protected params: BaseFixParams) {
 		super();
@@ -87,6 +89,19 @@ export default abstract class BaseFix extends Fix {
 		return {
 			start: this.startPos,
 			end: this.endPos,
+		};
+	}
+
+	getNodeSearchParameters() {
+		if (this.sourcePosition === undefined) {
+			throw new Error("Position for search is not defined");
+		}
+		if (this.nodeTypes === undefined) {
+			throw new Error("Node types for search are not defined in subclass");
+		}
+		return {
+			nodeTypes: this.nodeTypes,
+			position: this.sourcePosition,
 		};
 	}
 

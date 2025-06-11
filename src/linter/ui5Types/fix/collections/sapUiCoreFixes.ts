@@ -3,12 +3,14 @@ import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
 import {
 	FixTypeInfoMatcher,
 	accessExpressionFix,
+	callExpressionFix,
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
 
 const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("sap.ui.core");
 export default t;
+
 t.declareModule("sap/ui/core/Core", [
 	t.class("Core", [
 		...t.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
@@ -26,9 +28,9 @@ t.declareModule("sap/ui/core/Core", [
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
 		})),
-		t.method("getConfiguration", accessExpressionFix({
+		t.method("getConfiguration", callExpressionFix({
 			scope: FixScope.FullExpression,
-			moduleName: "sap/ui/Configuration",
+			moduleName: "sap/ui/core/Configuration",
 		})),
 		t.method("getStaticAreaRef", accessExpressionFix({
 			scope: FixScope.FullExpression,

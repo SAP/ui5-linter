@@ -21,9 +21,8 @@ export interface AccessExpressionBaseFixParams extends BaseFixParams {
  * replacement in cases where the arguments or other conditions of the call expression do not matter.
  */
 export default abstract class AccessExpressionBaseFix extends BaseFix {
-	private nodeTypes = [ts.SyntaxKind.PropertyAccessExpression, ts.SyntaxKind.ElementAccessExpression];
-	private accessExpressionCount = 0;
-	private childCount = 0;
+	protected nodeTypes = [ts.SyntaxKind.PropertyAccessExpression, ts.SyntaxKind.ElementAccessExpression];
+	private containedAccessExpressionCount = 0;
 
 	constructor(protected params: AccessExpressionBaseFixParams) {
 		super(params);
@@ -52,18 +51,8 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 			// the call expression itself and only count the access expressions inside it.
 			accessExpressionNode = accessExpressionNode.expression;
 		}
-		this.accessExpressionCount = countChildNodesRecursive(accessExpressionNode, this.nodeTypes);
+		this.containedAccessExpressionCount = countChildNodesRecursive(accessExpressionNode, this.nodeTypes);
 		return true;
-	}
-
-	getNodeSearchParameters() {
-		if (this.sourcePosition === undefined) {
-			throw new Error("Position for search is not defined");
-		}
-		return {
-			nodeTypes: this.nodeTypes,
-			position: this.sourcePosition,
-		};
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
@@ -72,7 +61,7 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 		}
 
 		const count = countChildNodesRecursive(node, this.nodeTypes);
-		if (count !== this.accessExpressionCount) {
+		if (count !== this.containedAccessExpressionCount) {
 			// The number of access expressions does not match the expected count
 			// Reject this node and wait for it's child
 			return false;
