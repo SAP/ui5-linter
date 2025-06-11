@@ -1,15 +1,10 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import {countChildNodesRecursive, isExpectedValueExpression} from "../utils/utils.js";
-import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
+import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
+import {FixScope} from "./BaseFix.js";
 
-export interface CallExpressionFixParams extends BaseFixParams {
-	/**
-	 * Validation: If set to true, the fix will only be applied if the return value of the code does not use the
-	 * return value of the call expression.
-	 */
-	mustNotUseReturnValue?: boolean;
+export interface CallExpressionFixParams extends CallExpressionBaseFixParams {
 	/**
 	 * Which scope, i.e. number of access expressions (counting from the call expression) should the replacement
 	 * affect.
@@ -28,40 +23,22 @@ export interface CallExpressionFixParams extends BaseFixParams {
 	newExpression?: boolean;
 }
 
-export default class CallExpressionFix extends BaseFix {
-	protected nodeTypes = [ts.SyntaxKind.CallExpression];
-	protected containedCallExpressionCount = 0;
-
+export default class CallExpressionFix extends CallExpressionBaseFix {
 	constructor(protected params: CallExpressionFixParams) {
 		super(params);
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _checker: ts.TypeChecker) {
-		if (!ts.isCallExpression(node)) {
-			return false;
-		}
-		// If requested, check whether the return value of the call expression is assigned to a variable,
-		// passed to another function or used elsewhere.
-		if (this.params.mustNotUseReturnValue && isExpectedValueExpression(node)) {
-			return false;
-		}
-		this.sourcePosition = sourcePosition;
-		this.containedCallExpressionCount = countChildNodesRecursive(node, this.nodeTypes);
-		return true;
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
+		return super.visitLinterNode(node, sourcePosition, checker);
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
+		if (!super.visitAutofixNode(node, position, sourceFile)) {
+			return false;
+		}
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
-
-		const count = countChildNodesRecursive(node, this.nodeTypes);
-		if (count !== this.containedCallExpressionCount) {
-			// The number of access expressions does not match the expected count
-			// Reject this node and wait for it's child
-			return false;
-		}
-
 		let relevantNode: ts.AccessExpression | ts.CallExpression = node;
 		for (let i = 0; i < (this.params.scope ?? 1); i++) {
 			if (!ts.isPropertyAccessExpression(relevantNode.expression) &&

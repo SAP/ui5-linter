@@ -76,7 +76,7 @@ export default abstract class BaseFix extends Fix {
 	protected moduleIdentifierName: string | undefined;
 	protected globalIdentifierName: string | undefined;
 	protected sourcePosition: PositionInfo | undefined;
-	protected nodeTypes: ts.SyntaxKind[] | undefined;
+	protected nodeTypes: ts.SyntaxKind[] = [];
 
 	constructor(protected params: BaseFixParams) {
 		super();
