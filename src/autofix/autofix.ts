@@ -1,16 +1,12 @@
 import ts from "typescript";
 import MagicString from "magic-string";
+import {getLogger} from "@ui5/logger";
+import {Resource} from "@ui5/fs";
 import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import generateSolutionNoGlobals from "./solutions/noGlobals.js";
-import {getLogger} from "@ui5/logger";
-import {addDependencies, removeDependencies} from "./solutions/amdImports.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
-import {Resource} from "@ui5/fs";
-import {collectIdentifiers} from "./utils.js";
-import {ExportCodeToBeUsed} from "../linter/ui5Types/fixHints/FixHints.js";
-import generateSolutionCodeReplacer from "./solutions/codeReplacer.js";
+import generateChanges from "./generateChanges.js";
 
 const log = getLogger("linter:autofix");
 
@@ -39,7 +35,7 @@ interface AbstractChangeSet {
 	start: number;
 }
 
-interface InsertChange extends AbstractChangeSet {
+export interface InsertChange extends AbstractChangeSet {
 	action: ChangeAction.INSERT;
 	value: string;
 }
@@ -50,7 +46,7 @@ export interface ReplaceChange extends AbstractChangeSet {
 	value: string;
 }
 
-interface DeleteChange extends AbstractChangeSet {
+export interface DeleteChange extends AbstractChangeSet {
 	action: ChangeAction.DELETE;
 	end: number;
 }
@@ -63,14 +59,6 @@ export interface Position {
 	column: number;
 	pos: number;
 }
-export interface GlobalPropertyAccessNodeInfo {
-	moduleName: string;
-	exportNameToBeUsed?: string;
-	exportCodeToBeUsed?: ExportCodeToBeUsed;
-	propertyAccess?: string;
-	position: Position;
-	node?: ts.Identifier | ts.PropertyAccessExpression | ts.ElementAccessExpression;
-}
 
 export interface DeprecatedApiAccessNode {
 	apiName: string;
@@ -79,24 +67,15 @@ export interface DeprecatedApiAccessNode {
 }
 
 export type ImportRequests = Map<string, {
-	nodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-	identifier?: string;
+	nodeInfos?: DeprecatedApiAccessNode[];
+	identifier: string;
 }>;
 
-export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo | NewModuleDeclarationInfo;
+export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo;
 
 export interface ExistingModuleDeclarationInfo {
 	moduleDeclaration: ModuleDeclaration | RequireExpression;
 	importRequests: ImportRequests;
-	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-}
-
-export interface NewModuleDeclarationInfo {
-	declareCall: ts.CallExpression;
-	requireCalls: Map<string, ts.CallExpression[]>;
-	importRequests: ImportRequests;
-	additionalNodeInfos: (DeprecatedApiAccessNode | GlobalPropertyAccessNodeInfo)[];
-	endPos?: number;
 }
 
 function createCompilerHost(sourceFiles: SourceFiles): ts.CompilerHost {
@@ -145,10 +124,26 @@ function createSourceFile(resourcePath: string, code: string) {
 	);
 }
 
-function getJsErrorsForSourceFile(sourceFile: ts.SourceFile, program: ts.Program) {
+function getJsErrorsForSourceFile(sourceFile: ts.SourceFile, program: ts.Program, host: ts.CompilerHost) {
 	const diagnostics = ts.getPreEmitDiagnostics(program, sourceFile);
 	return diagnostics.filter(function (d) {
 		return d.file === sourceFile && d.category === ts.DiagnosticCategory.Error;
+	}).map((d) => {
+		let codeSnippet;
+		let pos;
+		if (d.start !== undefined && d.length !== undefined) {
+			codeSnippet = sourceFile.text.substring(d.start, d.start + d.length);
+			pos = ts.getLineAndCharacterOfPosition(sourceFile, d.start);
+		}
+		return {
+			messageText: ts.flattenDiagnosticMessageText(d.messageText, host.getNewLine()),
+			start: d.start,
+			length: d.length,
+			line: pos?.line,
+			character: pos?.character,
+			file: d.file,
+			codeSnippet,
+		};
 	});
 }
 
@@ -156,55 +151,19 @@ function getJsErrors(code: string, resourcePath: string) {
 	const sourceFile = createSourceFile(resourcePath, code);
 	const host = createCompilerHost(new Map([[resourcePath, sourceFile]]));
 	const program = createProgram([resourcePath], host);
-	return getJsErrorsForSourceFile(sourceFile, program);
+	return getJsErrorsForSourceFile(sourceFile, program, host);
 }
 
-function getAutofixMessages(resource: AutofixResource) {
-	// Collect modules of which at least one message has the conditional fixHint flag set
-	const conditionalModuleAccess = new Set<string>();
-	for (const msg of resource.messages) {
-		if (msg.fixHints?.moduleName && msg.fixHints?.conditional) {
-			log.verbose(`Skipping fixes that would import module '${msg.fixHints.moduleName}' ` +
-				`because of conditional global access within the current file.`);
-			conditionalModuleAccess.add(msg.fixHints.moduleName);
-		}
+export function getFactoryPosition(moduleDeclaration: ExistingModuleDeclarationInfo): {start: number; end: number} {
+	const {moduleDeclaration: declaration} = moduleDeclaration;
+	const factory = "factory" in declaration ? declaration.factory : declaration.callback;
+	if (!factory) {
+		throw new Error("Module declaration does not have a factory or callback defined");
 	}
-
-	// Group messages by id
-	const messagesById = new Map<MESSAGE, RawLintMessage[]>();
-	for (const msg of resource.messages) {
-		if (msg.fixHints?.moduleName && conditionalModuleAccess.has(msg.fixHints.moduleName)) {
-			// Skip messages with conditional fixHints
-			continue;
-		}
-		if (!messagesById.has(msg.id)) {
-			messagesById.set(msg.id, []);
-		}
-		messagesById.get(msg.id)!.push(msg);
-	}
-
-	return messagesById;
-}
-
-export function getModuleDeclarationForPosition(
-	position: number, moduleDeclarations: Map<ts.CallExpression, ExistingModuleDeclarationInfo>
-): ModuleDeclarationInfo | undefined {
-	const potentialDeclarations: {declaration: ModuleDeclarationInfo; start: number}[] = [];
-	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
-		const {moduleDeclaration} = moduleDeclarationInfo;
-		const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
-		if (!factory || factory.getStart() > position || factory.getEnd() < position) {
-			continue;
-		}
-		potentialDeclarations.push({
-			declaration: moduleDeclarationInfo,
-			start: factory.getStart(),
-		});
-	}
-	// Sort by start position so that the declaration closest to the position is returned
-	// This is relevant in case of nested sap.ui.require calls
-	potentialDeclarations.sort((a, b) => a.start - b.start);
-	return potentialDeclarations.pop()?.declaration;
+	return {
+		start: factory.getStart(),
+		end: factory.getEnd(),
+	};
 }
 
 export default async function ({
@@ -213,19 +172,11 @@ export default async function ({
 	resources: autofixResources,
 	context,
 }: AutofixOptions): Promise<AutofixResult> {
-	// Group messages by ID and only process files for which fixes are available
-	const messages = new Map<string, Map<MESSAGE, RawLintMessage[]>>();
+	const messages = new Map<string, RawLintMessage[]>();
 	const resources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
-		const messagesById = getAutofixMessages(autofixResource);
-		// Currently only global access autofixes are supported
-		// This needs to stay aligned with the applyFixes function
-		if (messagesById.has(MESSAGE.NO_GLOBALS) ||
-			messagesById.has(MESSAGE.DEPRECATED_API_ACCESS) ||
-			messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
-			messages.set(autofixResource.resource.getPath(), messagesById);
-			resources.push(autofixResource.resource);
-		}
+		messages.set(autofixResource.resource.getPath(), autofixResource.messages);
+		resources.push(autofixResource.resource);
 	}
 
 	const sourceFiles: SourceFiles = new Map();
@@ -252,20 +203,29 @@ export default async function ({
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		// Checking for syntax errors in the original source file.
 		// We should not apply autofixes to files with syntax errors
-		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program);
+		const existingJsErrors = getJsErrorsForSourceFile(sourceFile, program, compilerHost);
 		if (existingJsErrors.length) {
-			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error in original source file : ` +
-				`${existingJsErrors.map((d) => d.messageText as string).join(", ")}`);
+			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error(s) in original source file:\n - ` +
+				`${existingJsErrors.map((d) => {
+					let res = d.messageText;
+					if (d.codeSnippet) {
+						res += ` (\`${d.codeSnippet}\`)`;
+					}
+					return res;
+				}).join("\n - ")}`);
 			continue;
 		}
 
-		log.verbose(`Applying autofixes to ${resourcePath}`);
+		log.verbose(`Applying autofix for ${resourcePath}`);
 		let newContent;
 		try {
 			newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
 		} catch (err) {
 			if (err instanceof Error) {
 				log.verbose(`Error while applying autofix to ${resourcePath}: ${err}`);
+				if (err instanceof Error) {
+					log.verbose(`Call stack: ${err.stack}`);
+				}
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message: err.message});
 				continue;
 			}
@@ -274,10 +234,28 @@ export default async function ({
 		if (newContent) {
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
-				const message = `Syntax error after applying autofix for '${resourcePath}': ` +
-					jsErrors.map((d) => d.messageText as string).join(", ");
+				const contentWithMarkers = newContent.split("\n");
+				const message = `Syntax error after applying autofix for '${resourcePath}':\n - ` +
+					jsErrors
+						.sort((a, b) => {
+							if (a.start === undefined || b.start === undefined) {
+								return 0;
+							}
+							return a.start - b.start;
+						}).map((d) => {
+							if (d.line !== undefined && d.character !== undefined) {
+								// Insert line below the finding and mark the character
+								const line = d.line + 1;
+								contentWithMarkers.splice(line, 0, " ".repeat(d.character) + "^");
+							}
+							let res = d.messageText;
+							if (d.codeSnippet) {
+								res += ` (\`${d.codeSnippet}\`)`;
+							}
+							return res;
+						}).join("\n - ");
 				log.verbose(message);
-				log.verbose(resourcePath + ":\n" + newContent);
+				log.verbose(resourcePath + ":\n" + contentWithMarkers.join("\n"));
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});
 			} else {
 				log.verbose(`Autofix applied to ${resourcePath}`);
@@ -291,64 +269,17 @@ export default async function ({
 
 function applyFixes(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
-	messagesById: Map<MESSAGE, RawLintMessage[]>
+	messages: RawLintMessage[]
 ): string | undefined {
 	const content = sourceFile.getFullText();
 
 	const changeSet: ChangeSet[] = [];
-	let existingModuleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
-	const messages: RawLintMessage<
-		MESSAGE.NO_GLOBALS | MESSAGE.DEPRECATED_API_ACCESS | MESSAGE.DEPRECATED_FUNCTION_CALL>[] = [];
-
-	if (messagesById.has(MESSAGE.NO_GLOBALS)) {
-		messages.push(
-			...messagesById.get(MESSAGE.NO_GLOBALS) as RawLintMessage<MESSAGE.NO_GLOBALS>[]
-		);
-	}
-
-	if (messagesById.has(MESSAGE.DEPRECATED_API_ACCESS)) {
-		messages.push(
-			...messagesById.get(MESSAGE.DEPRECATED_API_ACCESS) as RawLintMessage<MESSAGE.DEPRECATED_API_ACCESS>[]
-		);
-	}
-
-	if (messagesById.has(MESSAGE.DEPRECATED_FUNCTION_CALL)) {
-		messages.push(
-			...messagesById.get(MESSAGE.DEPRECATED_FUNCTION_CALL) as RawLintMessage<MESSAGE.DEPRECATED_FUNCTION_CALL>[]
-		);
-	}
-
-	if (messages.length === 0) {
-		return undefined;
-	}
-
-	existingModuleDeclarations = generateSolutionNoGlobals(
-		checker, sourceFile, content,
-		messages,
-		changeSet, []);
-
-	// Collect all identifiers in the source file to ensure unique names when adding imports
-	const identifiers = collectIdentifiers(sourceFile);
-
-	for (const [defineCall, moduleDeclarationInfo] of existingModuleDeclarations) {
-		// TODO: Find a better way to define modules for removal
-		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
-
-		// Remove dependencies from the existing module declaration
-		removeDependencies(moduleRemovals,
-			moduleDeclarationInfo, changeSet, resourcePath, identifiers);
-
-		// Resolve dependencies for the module declaration
-		addDependencies(defineCall, moduleDeclarationInfo, changeSet, resourcePath, identifiers, moduleRemovals);
-	}
-
-	// More complex code replacers. Mainly arguments shifting and repositioning, replacements,
-	// based on arguments' context
-	generateSolutionCodeReplacer(existingModuleDeclarations, messages, changeSet, sourceFile, identifiers);
+	const fixes = messages.filter((msg) => !!msg.fix);
+	generateChanges(resourcePath, checker, sourceFile, content, fixes, changeSet);
 
 	if (changeSet.length === 0) {
 		// No modifications needed
-		return undefined;
+		return;
 	}
 	return applyChanges(content, changeSet);
 }

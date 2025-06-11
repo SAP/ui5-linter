@@ -95,6 +95,10 @@ export default async function lintWorkspace(
 						context.addLintingMessage(
 							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args);
 					}
+					if (msg.id === MESSAGE.PARSING_ERROR) {
+						context.addLintingMessage(
+							filePath, msg.id, (msg as RawLintMessage<MESSAGE.PARSING_ERROR>).args);
+					}
 				});
 			}
 

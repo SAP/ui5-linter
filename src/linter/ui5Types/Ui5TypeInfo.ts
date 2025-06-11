@@ -24,17 +24,17 @@ export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5ClassTypeInfo | Ui5NamespaceTyp
 	Ui5MetadataTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo |
 	Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo;
 
-interface BaseUi5TypeInfo {
+export interface BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind;
 }
 
-interface Ui5ModuleTypeInfo extends BaseUi5TypeInfo {
+export interface Ui5ModuleTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.Module;
 	name: string; // module name (e.g. "sap/ui/core/Control")
 	library: string; // e.g. "sap.ui.core"
 }
 
-interface Ui5NamespaceTypeInfo extends BaseUi5TypeInfo {
+export interface Ui5NamespaceTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.Namespace;
 	name: string;
 	parent?: Ui5NamespaceTypeInfo | Ui5ModuleTypeInfo;

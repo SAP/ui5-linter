@@ -111,9 +111,9 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var textUpperCase3 = jQuery.sap.charToUpperCase("myValue", -5);
 	var textUpperCase4 = jQuery.sap.charToUpperCase("myValue", 99);
 	const xy = "myValue";
-	var textUpperCase2 = jQuery.sap.charToUpperCase(xy); // Do not migrate vars. We don't know the type of xy
-	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 0); // Do not migrate vars. We don't know the type of xy
-	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 3); // // Do not migrate vars. We don't know the type of xy
+	var textUpperCase2 = jQuery.sap.charToUpperCase(xy);
+	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 0);
+	var textUpperCase2 = jQuery.sap.charToUpperCase(xy, 3);
 	var textUpperCase2 = jQuery.sap.charToUpperCase(someFunc(), 99); // // Do not migrate vars. We don't know the type of someFunc()
 	jQuery.sap.charToUpperCase(); // Do not migrate. No arguments
 	var textEscapedRegx = jQuery.sap.escapeRegExp("ab.c");

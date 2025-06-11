@@ -1,4 +1,7 @@
 // TODO: Migrate to enum instead of Object/Map
+
+import GlobalFix from "./ui5Types/fix/GlobalFix.js";
+
 // Currently, it's done this way to avoid pollution of the test snapshots
 export const RULES = {
 	"async-component-flags": "async-component-flags",
@@ -437,7 +440,7 @@ export const MESSAGE_INFO = {
 		severity: LintMessageSeverity.Error,
 		ruleId: RULES["no-globals"],
 
-		message: ({variableName, namespace}: {variableName: string; namespace: string}) =>
+		message: ({variableName, namespace}: {variableName: string; namespace: string; fix?: GlobalFix}) =>
 			`Access of global variable '${variableName}' (${namespace})`,
 		details: () =>
 			`Do not use global variables to access UI5 modules or APIs. ` +

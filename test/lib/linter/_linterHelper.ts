@@ -8,6 +8,7 @@ import SourceFileLinter from "../../../src/linter/ui5Types/SourceFileLinter.js";
 import type {LinterOptions, LintResult} from "../../../src/linter/LinterContext.js";
 import SharedLanguageService from "../../../src/linter/ui5Types/SharedLanguageService.js";
 import autofix, {AutofixOptions, AutofixResult} from "../../../src/autofix/autofix.js";
+import {RULES} from "../../../src/linter/messages.js";
 
 // Override getDeprecationText as we do not have control over the deprecated texts and they could
 // change anytime creating false positive failing tests. That way is ensured consistent and testable behavior.
@@ -179,6 +180,8 @@ function testDefinition(
 		assertExpectedLintResults(t, res, fixturesPath,
 			filePaths.map((fileName) => namespace ? path.join("resources", namespace, fileName) : fileName));
 
+		const parsingErrors = new Map<string, string[]>();
+		const autofixErrors = new Map<string, string[]>();
 		res.forEach((result) => {
 			const resultFileName = path.basename(result.filePath);
 			if (resultFileName === fileName) {
@@ -188,7 +191,35 @@ function testDefinition(
 				// Use only the file name without the directory (which might contain modifiers)
 				result.filePath = resultFileName;
 			}
+
+			for (const msg of result.messages) {
+				if (msg.ruleId === RULES["parsing-error"]) {
+					if (parsingErrors.has(result.filePath)) {
+						parsingErrors.get(result.filePath)!.push(msg.message);
+					} else {
+						parsingErrors.set(result.filePath, [msg.message]);
+					}
+				} else if (msg.ruleId === RULES["autofix-error"]) {
+					if (autofixErrors.has(result.filePath)) {
+						autofixErrors.get(result.filePath)!.push(msg.message);
+					} else {
+						autofixErrors.set(result.filePath, [msg.message]);
+					}
+				}
+			}
 		});
+
+		if (parsingErrors.size) {
+			for (const [filePath, errors] of parsingErrors) {
+				t.snapshot(errors, `Parsing Errors: ${filePath}`);
+			}
+		}
+
+		if (autofixErrors.size) {
+			for (const [filePath, errors] of autofixErrors) {
+				t.snapshot(errors, `Autofix Errors: ${filePath}`);
+			}
+		}
 
 		if (fix) {
 			t.is(t.context.autofixSpy.callCount, 1);
