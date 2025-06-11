@@ -192,14 +192,8 @@ export default class LinterContext {
 	}
 
 	addLintingMessage<M extends MESSAGE>(
-		resourcePath: ResourcePath, id: M, args: MessageArgs[M]
-	): void;
-	addLintingMessage<M extends MESSAGE>(
-		resourcePath: ResourcePath, id: M, args: MessageArgs[M], position: PositionInfo
-	): void;
-	addLintingMessage<M extends MESSAGE>(
 		resourcePath: ResourcePath, id: M, args: MessageArgs[M], position?: PositionInfo
-	) {
+	): void {
 		this.getRawLintingMessages(resourcePath).push({id, args, position});
 	}
 

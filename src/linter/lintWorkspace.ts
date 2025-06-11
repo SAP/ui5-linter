@@ -37,6 +37,7 @@ export default async function lintWorkspace(
 		const rawLintResults = context.generateRawLintResults();
 
 		const autofixResources = new Map<string, AutofixResource>();
+		const preAutofixParsingErrors = new Map<string, RawLintMessage<MESSAGE.PARSING_ERROR>[]>();
 		for (const {filePath, rawMessages} of rawLintResults) {
 			const resource = await workspace.byPath(filePath);
 			if (!resource) {
@@ -49,6 +50,15 @@ export default async function lintWorkspace(
 				resource,
 				messages: rawMessages,
 			});
+			for (const msg of rawMessages) {
+				if (msg.id === MESSAGE.PARSING_ERROR) {
+					const parsingError = msg as RawLintMessage<MESSAGE.PARSING_ERROR>;
+					if (!preAutofixParsingErrors.has(filePath)) {
+						preAutofixParsingErrors.set(filePath, []);
+					}
+					preAutofixParsingErrors.get(filePath)?.push(parsingError);
+				}
+			}
 		}
 
 		log.verbose(`Autofixing ${autofixResources.size} files...`);
@@ -89,15 +99,25 @@ export default async function lintWorkspace(
 			);
 
 			for (const {filePath, rawMessages} of autofixContext.generateRawLintResults()) {
-				// Find autofix errors
+				// Add autofix errors to the linter context of the final linting run so they become visible to the user
 				rawMessages.forEach((msg) => {
 					if (msg.id === MESSAGE.AUTOFIX_ERROR) {
 						context.addLintingMessage(
-							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args);
+							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args, msg.position);
 					}
 					if (msg.id === MESSAGE.PARSING_ERROR) {
-						context.addLintingMessage(
-							filePath, msg.id, (msg as RawLintMessage<MESSAGE.PARSING_ERROR>).args);
+						const parsingError = msg as RawLintMessage<MESSAGE.PARSING_ERROR>;
+						const isDuplicate = preAutofixParsingErrors.get(filePath)?.find((msg) => {
+							// If the parsing error was already reported before the autofix took place,
+							// we must not report it again
+							return msg.args.message === parsingError.args.message &&
+								msg.position?.line === parsingError.position?.line &&
+								msg.position?.column === parsingError.position?.column;
+						});
+						if (!isDuplicate) {
+							context.addLintingMessage(
+								filePath, msg.id, parsingError.args, msg.position);
+						}
 					}
 				});
 			}
