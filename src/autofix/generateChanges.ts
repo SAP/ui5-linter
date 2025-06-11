@@ -14,7 +14,7 @@ import Fix from "../linter/ui5Types/fix/Fix.js";
 import {
 	NO_PARAM_FOR_DEPENDENCY,
 	addDependencies, Dependencies, getDependencies, removeDependencies,
-    hasBody,
+	hasBody,
 } from "./amdImports.js";
 import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
