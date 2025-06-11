@@ -14,6 +14,7 @@ import Fix from "../linter/ui5Types/fix/Fix.js";
 import {
 	NO_PARAM_FOR_DEPENDENCY,
 	addDependencies, Dependencies, getDependencies, removeDependencies,
+    hasBody,
 } from "./amdImports.js";
 import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
@@ -215,6 +216,10 @@ export default function generateChanges(
 	}
 	const dependencyDeclarations: DependencyDeclarations[] = [];
 	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
+		if (!hasBody(moduleDeclarationInfo.moduleDeclaration)) {
+			// Ignore module declaration without factory or callback functions
+			continue;
+		}
 		const deps = getDependencies(moduleDeclarationInfo.moduleDeclaration, resourcePath);
 		const {start, end} = getFactoryPosition(moduleDeclarationInfo);
 		dependencyDeclarations.push({

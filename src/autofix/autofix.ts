@@ -1,11 +1,11 @@
 import ts from "typescript";
 import MagicString from "magic-string";
+import {getLogger} from "@ui5/logger";
+import {Resource} from "@ui5/fs";
 import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterContext.js";
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
-import {getLogger} from "@ui5/logger";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
-import {Resource} from "@ui5/fs";
 import generateChanges from "./generateChanges.js";
 
 const log = getLogger("linter:autofix");
@@ -244,6 +244,9 @@ export default async function ({
 		} catch (err) {
 			if (err instanceof Error) {
 				log.verbose(`Error while applying autofix to ${resourcePath}: ${err}`);
+				if (err instanceof Error) {
+					log.verbose(`Call stack: ${err.stack}`);
+				}
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message: err.message});
 				continue;
 			}

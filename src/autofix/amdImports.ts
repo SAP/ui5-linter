@@ -1,9 +1,12 @@
 import ts from "typescript";
 import path from "node:path/posix";
+import {getLogger} from "@ui5/logger";
 import {ChangeAction, ChangeSet, ExistingModuleDeclarationInfo} from "./autofix.js";
 import {getPropertyNameText} from "../linter/ui5Types/utils/utils.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
+
+const log = getLogger("linter:autofix");
 const LINE_LENGTH_LIMIT = 200;
 
 function resolveRelativeDependency(dependency: string, moduleName: string): string {
@@ -23,6 +26,16 @@ type ModuleName = string;
 export type Dependencies = Map<ModuleName,
 	string | typeof NO_PARAM_FOR_DEPENDENCY | typeof UNSUPPORTED_PARAM_FOR_DEPENDENCY>;
 
+export function hasBody(moduleDeclaration: ModuleDeclaration | RequireExpression): boolean {
+	if ("factory" in moduleDeclaration) {
+		return !!moduleDeclaration.factory;
+	} else if ("callback" in moduleDeclaration) {
+		return !!moduleDeclaration.callback;
+	}
+	log.verbose(`Encountered a module declaration with no factory or callback`);
+	return false;
+}
+
 export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireExpression, resourcePath: string) {
 	const dependencies: Dependencies = new Map(); // Module name to identifier
 	if (!moduleDeclaration.dependencies) {
@@ -30,7 +43,7 @@ export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireEx
 	}
 	const factory = "factory" in moduleDeclaration ? moduleDeclaration.factory : moduleDeclaration.callback;
 	if (!factory || !ts.isFunctionLike(factory)) {
-		throw new Error("Invalid factory function");
+		throw new Error("Invalid factory function in module declaration");
 	}
 	const dependencyArray = moduleDeclaration.dependencies;
 	const moduleName =
