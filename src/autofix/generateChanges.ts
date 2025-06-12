@@ -454,8 +454,18 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 	}
 
 	// Step 4.) Merge new dependencies into existing dependency declarations
-	const rootDependencyDeclarations = createDependencyDeclarationsNode(dependencyDeclarations[0])!;
-	assignDependencyRequests(rootDependencyDeclarations);
+	// First find all the root dependency declarations and create trees under them
+	const rootDependencyDeclarations = new Set<DependencyDeclarationsNode>();
+	for (const decl of dependencyDeclarations) {
+		const node = createDependencyDeclarationsNode(decl);
+		if (node) {
+			rootDependencyDeclarations.add(node);
+		}
+	}
+	// Then assign the dependency requests accordingly
+	for (const node of rootDependencyDeclarations) {
+		assignDependencyRequests(node);
+	}
 
 	for (const [moduleName, [decl, requests]] of moduleNameToDeclToRequests) {
 		// Get preferred identifier unless it's already in use
