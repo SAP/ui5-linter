@@ -16,10 +16,14 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
 	CoreRenamed.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
-	// CoreRenamed.attachIntervalTimer(function() {console.log();});
-	// CoreRenamed.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
-	// CoreRenamed.detachIntervalTimer(function() {console.log();});
-	// CoreRenamed.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.attachIntervalTimer(function() {
+		CoreRenamed.applyTheme("themeName"); // TODO: Enable migration of internal argument's content␊
+	});
+	CoreRenamed.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	CoreRenamed.detachIntervalTimer(function() {
+		CoreRenamed.applyTheme("themeName"); // TODO: Enable migration of internal argument's content␊
+	});
+	CoreRenamed.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
 
 	CoreRenamed.getComponent("componentId");
 
