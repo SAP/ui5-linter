@@ -24,7 +24,6 @@ interface NodeSearchInfo {
 	position: Position;
 	fix: Fix;
 	nodeTypes: ts.SyntaxKind[];
-	hasMatched: boolean;
 }
 
 interface FixRange {
@@ -75,28 +74,29 @@ export default function generateChanges(
 
 		nodeSearchInfo.add({
 			fix,
-			nodeTypes: Array.isArray(nodeTypes) ? nodeTypes : [nodeTypes],
+			nodeTypes,
 			position: {
 				line,
 				column,
 				pos,
 			},
-			hasMatched: false,
 		});
 	}
 
 	const moduleDeclarations = new Map<ts.CallExpression, ExistingModuleDeclarationInfo>();
 
+	const matchedFixes = new Set<Fix>();
 	function visitNode(node: ts.Node) {
 		for (const nodeInfo of nodeSearchInfo) {
 			// For each fix, search for a match for requested position and node type until it acquires a context
 			// (meaning that it found its node in the source file)
-			if (nodeInfo.hasMatched) {
-				continue;
-			}
 			if (node.getStart() === nodeInfo.position.pos && nodeInfo.nodeTypes.includes(node.kind) &&
 				nodeInfo.fix.visitAutofixNode(node, nodeInfo.position.pos, sourceFile)) {
-				nodeInfo.hasMatched = true;
+				// A fix has found its node in the autofix AST
+				// Add it to the set of matched fixes, remove it from the search info
+				// and abort searching for further fixes for this node
+				matchedFixes.add(nodeInfo.fix);
+				nodeSearchInfo.delete(nodeInfo);
 			}
 		}
 		// Also collect all module declarations (define and require calls)
@@ -140,22 +140,15 @@ export default function generateChanges(
 	}
 	ts.forEachChild(sourceFile, visitNode);
 
-	for (const nodeInfo of nodeSearchInfo) {
-		if (!nodeInfo.hasMatched) {
-			// The fix did not match any node, so it can not be applied
-			nodeSearchInfo.delete(nodeInfo);
-		}
-	}
-
 	const fixRanges: FixRange[] = [];
-	for (const nodeInfo of nodeSearchInfo) {
-		const ranges = nodeInfo.fix.getAffectedSourceCodeRange();
+	for (const fix of matchedFixes) {
+		const ranges = fix.getAffectedSourceCodeRange();
 		if (Array.isArray(ranges)) {
 			for (const range of ranges) {
 				fixRanges.push({
 					start: range.start,
 					end: range.end,
-					fix: nodeInfo.fix,
+					fix: fix,
 				});
 			}
 		} else {
@@ -163,7 +156,7 @@ export default function generateChanges(
 			fixRanges.push({
 				start,
 				end,
-				fix: nodeInfo.fix,
+				fix: fix,
 			});
 		}
 	}
@@ -172,19 +165,19 @@ export default function generateChanges(
 	const dependencyRequests = new Set<DependencyRequest>();
 	const blockedModuleImports = new Set<string>();
 	const globalAccessRequests = new Set<GlobalAccessRequest>();
-	for (const nodeInfo of nodeSearchInfo) {
-		if (conflicts.includes(nodeInfo.fix)) {
-			nodeSearchInfo.delete(nodeInfo);
+	for (const fix of matchedFixes) {
+		if (conflicts.includes(fix)) {
+			matchedFixes.delete(fix);
 			continue;
 		}
 
 		// Collect new dependencies
-		const newDependencies = nodeInfo.fix.getNewModuleDependencies();
+		const newDependencies = fix.getNewModuleDependencies();
 		if (Array.isArray(newDependencies)) {
 			for (const depRequest of newDependencies) {
 				dependencyRequests.add({
 					...depRequest,
-					fix: nodeInfo.fix,
+					fix,
 				});
 				if (depRequest.blockNewImport) {
 					// If the request blocks new imports, add it to the blocked module imports
@@ -195,7 +188,7 @@ export default function generateChanges(
 			const depRequest = newDependencies;
 			dependencyRequests.add({
 				...depRequest,
-				fix: nodeInfo.fix,
+				fix,
 			});
 			if (depRequest.blockNewImport) {
 				// If the request blocks new imports, add it to the blocked module imports
@@ -204,19 +197,19 @@ export default function generateChanges(
 		}
 
 		// Collect new global access
-		const newGlobalAccess = nodeInfo.fix.getNewGlobalAccess();
+		const newGlobalAccess = fix.getNewGlobalAccess();
 		if (Array.isArray(newGlobalAccess)) {
 			for (const globalAccess of newGlobalAccess) {
 				globalAccessRequests.add({
 					...globalAccess,
-					fix: nodeInfo.fix,
+					fix,
 				});
 			}
 		} else if (newGlobalAccess) {
 			const globalAccess = newGlobalAccess;
 			globalAccessRequests.add({
 				...globalAccess,
-				fix: nodeInfo.fix,
+				fix,
 			});
 		}
 	}
@@ -283,8 +276,8 @@ export default function generateChanges(
 		addDependencies(defineCall, moduleDeclarationInfo, changeSets, resourcePath, moduleRemovals);
 	}
 
-	for (const nodeInfo of nodeSearchInfo) {
-		const changes = nodeInfo.fix.generateChanges();
+	for (const fix of matchedFixes) {
+		const changes = fix.generateChanges();
 		if (!changes) {
 			// No changes generated, skip this fix
 			continue;

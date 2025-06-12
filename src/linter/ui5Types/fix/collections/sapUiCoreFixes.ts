@@ -3,12 +3,23 @@ import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
 import {
 	FixTypeInfoMatcher,
 	accessExpressionFix,
+	callExpressionFix,
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
 
 const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("sap.ui.core");
 export default t;
+
+t.declareModule("sap/ui/core/Configuration", [
+	t.class("Configuration", [
+		...t.methods(["setRTL", "setLanguage"], callExpressionFix({
+			scope: FixScope.FirstChild,
+			moduleName: "sap/base/i18n/Localization",
+			mustNotUseReturnValue: true,
+		})),
+	]),
+]);
 t.declareModule("sap/ui/core/Core", [
 	t.class("Core", [
 		...t.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
@@ -25,6 +36,10 @@ t.declareModule("sap/ui/core/Core", [
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
+		})),
+		t.method("getConfiguration", callExpressionFix({
+			scope: FixScope.FullExpression,
+			moduleName: "sap/ui/core/Configuration",
 		})),
 		t.method("getStaticAreaRef", accessExpressionFix({
 			scope: FixScope.FullExpression,

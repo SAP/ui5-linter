@@ -20,7 +20,7 @@ export interface SourceCodeRange {
 }
 
 export interface NodeSearchParameters {
-	nodeTypes: ts.SyntaxKind | ts.SyntaxKind[];
+	nodeTypes: ts.SyntaxKind[];
 	position: PositionInfo;
 }
 

@@ -122,7 +122,7 @@ function getLibraryNameFromSourceFile(
  */
 export function getUi5TypeInfoFromSymbol(
 	symbol: ts.Symbol,
-	apiExtract: ApiExtract
+	apiExtract?: ApiExtract
 ): Ui5TypeInfo | undefined {
 	if (!symbol.valueDeclaration) {
 		return undefined;
@@ -181,7 +181,7 @@ export function getUi5TypeInfoFromSymbol(
 	}
 
 	let currentTypeInfo: Ui5TypeInfo | undefined;
-	if (moduleName) {
+	if (moduleName && apiExtract) {
 		currentTypeInfo ??= createMangedObjectSettingsTypeInfo(node, moduleName, leafNode, apiExtract);
 	}
 	currentTypeInfo ??= createClassTypeInfo(node, leafNode);

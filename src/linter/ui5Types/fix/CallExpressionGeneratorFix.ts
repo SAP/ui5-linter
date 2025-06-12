@@ -1,10 +1,9 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import {isExpectedValueExpression} from "../utils/utils.js";
-import BaseFix, {BaseFixParams} from "./BaseFix.js";
+import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
 
-export interface CallExpressionGeneratorFixParams<GeneratorContext extends object> extends BaseFixParams {
+export interface CallExpressionGeneratorFixParams<GeneratorContext extends object> extends CallExpressionBaseFixParams {
 	/**
 	 * Validation: If set to true, the fix will only be applied if the return value of the code does not use the
 	 * return value of the call expression.
@@ -30,21 +29,19 @@ export interface CallExpressionGeneratorFixParams<GeneratorContext extends objec
 	validateArguments?: (ctx: GeneratorContext, checker: ts.TypeChecker, ...args: ts.Expression[]) => boolean;
 }
 
-export default class CallExpressionGeneratorFix<GeneratorContext extends object> extends BaseFix {
+export default class CallExpressionGeneratorFix<GeneratorContext extends object> extends CallExpressionBaseFix {
 	protected generatorArgs: string[] | undefined;
-	private generatorContext = {} as GeneratorContext;
+	protected generatorContext = {} as GeneratorContext;
 
 	constructor(protected params: CallExpressionGeneratorFixParams<GeneratorContext>) {
 		super(params);
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
-		if (!ts.isCallExpression(node)) {
+		if (!super.visitLinterNode(node, sourcePosition, checker)) {
 			return false;
 		}
-		// If requested, check whether the return value of the call expression is assigned to a variable,
-		// passed to another function or used elsewhere.
-		if (this.params.mustNotUseReturnValue && isExpectedValueExpression(node)) {
+		if (!ts.isCallExpression(node)) {
 			return false;
 		}
 		if (this.params.validateArguments) {
@@ -52,21 +49,13 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 				return false;
 			}
 		}
-		this.sourcePosition = sourcePosition;
 		return true;
 	}
 
-	getNodeSearchParameters() {
-		if (this.sourcePosition === undefined) {
-			throw new Error("Position for search is not defined");
-		}
-		return {
-			nodeTypes: ts.SyntaxKind.CallExpression,
-			position: this.sourcePosition,
-		};
-	}
-
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
+		if (!super.visitAutofixNode(node, position, sourceFile)) {
+			return false;
+		}
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
@@ -75,8 +64,6 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 		this.generatorArgs = node.arguments.map((arg) => {
 			return arg.getFullText();
 		});
-		this.startPos = node.getStart(sourceFile);
-		this.endPos = node.getEnd();
 		return true;
 	}
 
