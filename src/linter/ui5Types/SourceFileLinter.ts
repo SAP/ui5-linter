@@ -30,9 +30,12 @@ import {createResource} from "@ui5/fs/resourceFactory";
 import {AbstractAdapter} from "@ui5/fs";
 import type {AmbientModuleCache} from "./AmbientModuleCache.js";
 import type TypeLinter from "./TypeLinter.js";
-import FixHintsGenerator from "./fixHints/FixHintsGenerator.js";
-import {FixHints} from "./fixHints/FixHints.js";
-import {resolveNamespace} from "./utils/utils.js";
+import {
+	getModuleTypeInfo, getNamespace, getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind,
+} from "./Ui5TypeInfo.js";
+import FixFactory from "./fix/FixFactory.js";
+import Fix from "./fix/Fix.js";
+import GlobalFix from "./fix/GlobalFix.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -99,9 +102,6 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
-		this.#fixHintsGenerator = this.fix ?
-			new FixHintsGenerator(this.resourcePath, this.ambientModuleCache, this.manifestContent) :
-			null;
 	}
 
 	async lint() {
@@ -944,13 +944,6 @@ export default class SourceFileLinter {
 
 		propName ??= reportNode.getText();
 
-		let fixHints: FixHints | undefined;
-		if (ts.isElementAccessExpression(exprNode) ||
-			ts.isPropertyAccessExpression(exprNode) ||
-			ts.isCallExpression(exprNode)) {
-			fixHints = this.getJquerySapFixHints(exprNode) ??
-				this.getCoreFixHints(exprNode, deprecationInfo.ui5TypeInfo);
-		}
 		this.#reporter.addMessage(MESSAGE.DEPRECATED_FUNCTION_CALL, {
 			functionName: propName,
 			additionalMessage,
@@ -1879,9 +1872,5 @@ export default class SourceFileLinter {
 				return fix;
 			}
 		}
-	}
-
-	getCoreFixHints(node: ts.CallExpression | ts.AccessExpression, ui5TypeInfo?: Ui5TypeInfo) {
-		return this.#fixHintsGenerator?.getCoreFixHints(node, ui5TypeInfo);
 	}
 }
