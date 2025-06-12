@@ -22,7 +22,7 @@
 				"he": "^1.2.0",
 				"json-source-map": "^0.6.1",
 				"magic-string": "^0.30.17",
-				"minimatch": "^10.0.1",
+				"minimatch": "^10.0.2",
 				"sax-wasm": "^3.0.6",
 				"typescript": "^5.8.3",
 				"update-notifier": "^7.3.1",
@@ -14723,17 +14723,39 @@
 			}
 		},
 		"node_modules/minimatch": {
-			"version": "10.0.1",
-			"resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.0.1.tgz",
-			"integrity": "sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==",
+			"version": "10.0.2",
+			"resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.0.2.tgz",
+			"integrity": "sha512-+9TJCIYXgZ2Dm5LxVCFsa8jOm+evMwXHFI0JM1XROmkfkpz8/iLLDh+TwSmyIBrs6C6Xu9294/fq8cBA+P6AqA==",
+			"license": "ISC",
 			"dependencies": {
-				"brace-expansion": "^2.0.1"
+				"brace-expansion": "^4.0.1"
 			},
 			"engines": {
 				"node": "20 || >=22"
 			},
 			"funding": {
 				"url": "https://github.com/sponsors/isaacs"
+			}
+		},
+		"node_modules/minimatch/node_modules/balanced-match": {
+			"version": "3.0.1",
+			"resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-3.0.1.tgz",
+			"integrity": "sha512-vjtV3hiLqYDNRoiAv0zC4QaGAMPomEoq83PRmYIofPswwZurCeWR5LByXm7SyoL0Zh5+2z0+HC7jG8gSZJUh0w==",
+			"license": "MIT",
+			"engines": {
+				"node": ">= 16"
+			}
+		},
+		"node_modules/minimatch/node_modules/brace-expansion": {
+			"version": "4.0.1",
+			"resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-4.0.1.tgz",
+			"integrity": "sha512-YClrbvTCXGe70pU2JiEiPLYXO9gQkyxYeKpJIQHVS/gOs6EWMQP2RYBwjFLNT322Ji8TOC3IMPfsYCedNpzKfA==",
+			"license": "MIT",
+			"dependencies": {
+				"balanced-match": "^3.0.0"
+			},
+			"engines": {
+				"node": ">= 18"
 			}
 		},
 		"node_modules/minimist": {
