@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, {SyntaxKind} from "typescript";
 import Ui5TypeInfoMatcher from "../../Ui5TypeInfoMatcher.js";
 import {
 	FixTypeInfoMatcher,
@@ -120,40 +120,45 @@ t.declareModule("sap/ui/core/Core", [
 		})),
 		// Individual arguments must be mapped to "options" object
 		// The new API has no sync loading option, replacement is only safe when the options contain async:true
-		// t.method("loadLibrary", accessExpressionFix({
-		// 	moduleName: "sap/ui/core/Lib",
-		// 	propertyAccess: "load",
-		// 	// validateArguments: (ctx, checker, arg1, arg2) => {
-		// 	// 	// if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
-		// 	// 	// 	const libOptionsExpression =
-		// 	// 	// 		extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[1].value)
-		// 	// 	as {async: boolean; url?: string};
-		// 	// 	// 	if (libOptionsExpression.async === true) {
-		// 	// 	// 		const newArg = {
-		// 	// 	// 			name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-		// 	// 	// 			url: libOptionsExpression.url,
-		// 	// 	// 		};
-		// 	// 	// 		fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-		// 	// 	// 		fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-		// 	// 	// 	} else {
-		// 	// 	// 		fixHints = undefined; // We cannot handle this case
-		// 	// 	// 		log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-		// 	// 	// 	}
-		// 	// 	// } else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.TrueKeyword) {
-		// 	// 	// 	const newArg = {
-		// 	// 	// 		name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-		// 	// 	// 	};
-		// 	// 	// 	fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-		// 	// 	// 	fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-		// 	// 	// } else {
-		// 	// 	// 	fixHints = undefined; // We cannot handle this case
-		// 	// 	// 	log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-		// 	// 	// }
-		// 	// },
-		// 	// generator: (ctx, moduleIdentifier, arg1) => {
-		// 	// 	return `${moduleIdentifier}.load(${arg1})`;
-		// 	// },
-		// })),
+		t.method("loadLibrary", callExpressionGeneratorFix({
+			moduleName: "sap/ui/core/Lib",
+			propertyAccess: "load",
+			validateArguments: (ctx: {json?: Record<string, string>}, checker, arg1, arg2) => {
+				ctx.json = {};
+				if (arg2?.kind === SyntaxKind.ObjectLiteralExpression) {
+					let asyncOption = false;
+					const allowlistProps = ["url", "name"];
+					ts.forEachChild(arg2, function (node: ts.Node) {
+						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name) && node.name.text === "async") {
+							if (node.initializer.kind === SyntaxKind.TrueKeyword) {
+								asyncOption = true; // Migration is possible, async loading is enabled
+							}
+						}
+
+						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
+							const name = node.name.text;
+							if (allowlistProps.includes(name) && ts.isStringLiteralLike(node.initializer)) {
+								ctx.json![name] = node.initializer.text;
+							}
+						}
+					});
+					if (ts.isStringLiteralLike(arg1)) {
+						ctx.json.name = arg1.text;
+					}
+					return asyncOption;
+				} else if (arg2?.kind === SyntaxKind.TrueKeyword) {
+					if (ts.isStringLiteralLike(arg1)) {
+						ctx.json.name = arg1.text;
+					}
+					return true; // Migration is possible, async loading is enabled
+				} else {
+					return false; // Migration is not possible
+				}
+			},
+			generator: (ctx: {json?: Record<string, string>}, moduleIdentifier) => {
+				return `${moduleIdentifier}.load(${JSON.stringify(ctx.json)})`;
+			},
+		})),
 		// // Individual arguments must be mapped to "options" object.
 		// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
 		// // Only when the first argument is an object defining async: true a migration is possible.
