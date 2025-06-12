@@ -75,7 +75,7 @@ Autofix solutions generally fall into two categories:
 
 	var padLeft = jQuery.sap.padLeft("a", "0", 4); // Becomes "a".padStart(4, "0");
 	var padLeft2 = jQuery.sap.padLeft("a", "0000", 4); // Must not be migrated. The second argument contains more than one character, which will yield different results with the new API
-	var padLeft3 = jQuery.sap.padLeft(startsWithLetter, "0", 4); // startsWithLetter might not be possible to be determined
+	var padLeft3 = jQuery.sap.padLeft(startsWithLetter, "0", 4); // It might not be possible to determine whether startsWithLetter is a string. In that case, do not migrate
 ```
 * [ ] When arguments are **shuffled, merged, or modified**, ensure any **comments** around them are **preserved**.
 
