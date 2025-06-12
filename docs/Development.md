@@ -37,7 +37,7 @@ Autofix solutions generally fall into two categories:
 
 * [ ] Function arguments have **exactly the same** type, order, value and count.
 ```js
-	// Should not be replaced as the second argument is more than one char and the old API behaves differently
+	// This case should not be migrated to "String#padStart" because the second argument is longer than one char, which will behave differently with the String API
 	var padLeft = jQuery.sap.padLeft("a", "Hello", 8);
 
 	var padLeft = jQuery.sap.padLeft("a", "0", 8); // Will be migrated
