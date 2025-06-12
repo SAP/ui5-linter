@@ -332,6 +332,16 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 				break;
 			} else if (depIdentifier === NO_PARAM_FOR_DEPENDENCY) {
 				// A dependency is declared, but the parameter is missing
+
+				// First check whether another request for this module name has already been fulfilled
+				if (decl.moduleDeclarationInfo.importRequests.has(moduleName)) {
+					// If so, use the existing identifier
+					const {identifier} = decl.moduleDeclarationInfo.importRequests.get(moduleName)!;
+					fix.setIdentifierForDependency(identifier, moduleName);
+					dependencyRequests.delete(dependencyRequest); // Request fulfilled
+					break;
+				}
+
 				// Create a unique name if the preferred identifier is already in use
 				// Use the first preferred identifier
 				const identifier = resolveUniqueName(moduleName, identifiers);
