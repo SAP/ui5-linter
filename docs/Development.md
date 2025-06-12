@@ -53,7 +53,7 @@ Autofix solutions generally fall into two categories:
 
 ### Complex Replacements
 
-* [ ] If the return type differs, use the `isExpectedValueExpression()` utility and the `fixHints.exportCodeToBeUsed.isExpectedValue` flag. Migrate only when the result is **not used or assigned** further (e.g., setter calls like `sap.ui.getCore().getConfig().setCalendarType(...)`).
+* [ ] If the return type differs, migrate only those cases where it is **not used or assigned** (e.g., setter calls like `sap.ui.getCore().getConfig().setCalendarType(...)`). Use the `isExpectedValueExpression()` utility or the `mustNotUseReturnValue` flag available on some of the standard fix classes.
 ```js
 	// The old API always returns a logger instance. So in case the return value
 	// is accessed, the call should not be migrated:
