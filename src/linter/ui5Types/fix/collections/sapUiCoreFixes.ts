@@ -159,17 +159,45 @@ t.declareModule("sap/ui/core/Core", [
 				return `${moduleIdentifier}.load(${JSON.stringify(ctx.json)})`;
 			},
 		})),
-		// // Individual arguments must be mapped to "options" object.
-		// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-		// // Only when the first argument is an object defining async: true a migration is possible.
-		// t.method("createComponent", accessExpressionFix({
-		// 	moduleName: "sap/ui/core/Component",
-		// 	propertyAccess: "create",
-		// 	// validateArguments: (ctx, checker, arg1, arg2) => {},
-		// 	// generator: (ctx, moduleIdentifier, arg1) => {
-		// 	// 	return `${moduleIdentifier}.create(${arg1})`;
-		// 	// },
-		// })),
+		// Individual arguments must be mapped to "options" object.
+		// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+		// Only when the first argument is an object defining async: true a migration is possible.
+		t.method("createComponent", callExpressionGeneratorFix({
+			moduleName: "sap/ui/core/Component",
+			validateArguments: (ctx: {json: Record<string, string>}, checker, vComponent) => {
+				ctx.json = {};
+				if (vComponent?.kind === SyntaxKind.ObjectLiteralExpression) {
+					let asyncOption = false;
+					ts.forEachChild(vComponent, function (node: ts.Node) {
+						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name) && node.name.text === "async") {
+							if (node.initializer.kind === SyntaxKind.TrueKeyword) {
+								asyncOption = true; // Migration is possible, async loading is enabled
+							}
+						}
+					});
+					if (asyncOption) {
+						const extractJson = (node: ts.Node) => {
+							ts.forEachChild(node, function (node: ts.Node) {
+								if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
+									const name = node.name.text;
+									if (ts.isStringLiteralLike(node.initializer)) {
+										ctx.json[name] = node.initializer.text;
+									}
+								}
+							});
+						};
+						extractJson(vComponent);
+					}
+
+					return asyncOption;
+				} else {
+					return false; // Migration is not possible (sync component creation)
+				}
+			},
+			generator: (ctx, moduleIdentifier) => {
+				return `${moduleIdentifier}.create(${JSON.stringify(ctx.json)})`;
+			},
+		})),
 		// Parameter bAsync has to be omitted or set to false since the new API returns
 		// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 		// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
