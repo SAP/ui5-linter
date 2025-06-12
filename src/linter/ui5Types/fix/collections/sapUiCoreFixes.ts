@@ -202,15 +202,47 @@ t.declareModule("sap/ui/core/Core", [
 		// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 		// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
 		// sLibrary must be a library.
-		// t.method("getLibraryResourceBundle", callExpressionGeneratorFix({
-		// 	moduleName: "sap/ui/core/Lib",
-		// 	validateArguments: (ctx, checker, arg1, arg2) => {
-		// 		return true;
-		// 	},
-		// 	generator: (ctx, moduleIdentifier, arg1) => {
-		// 		return `${moduleIdentifier}.getResourceBundleFor(${arg1})`;
-		// 	},
-		// })),
+		t.method("getLibraryResourceBundle", callExpressionGeneratorFix({
+			moduleName: "sap/ui/core/Lib",
+			validateArguments: (ctx: {fallback: string}, checker, arg1, arg2, arg3) => {
+				// Handling fallback in the legacy API
+				if (!arg1 ||
+					(ts.isIdentifier(arg1) && arg1.text === "undefined") ||
+					(ts.isStringLiteralLike(arg1) && arg1.text === "undefined")) {
+					ctx.fallback = "\"sap.ui.core\"";
+					return true; // No library name provided, use default "sap.ui.core"
+				}
+
+				// If any of the arguments is a boolean with value true, the return value is a promise
+				// and is not compatible with the new API
+				if ([arg1?.kind, arg2?.kind, arg3?.kind].includes(SyntaxKind.TrueKeyword)) {
+					return false; // Migration not possible. The new API is synchronous.
+				}
+
+				// Check if the library is a valid library name
+				// Extract the namespace from the virtual path
+				let libNamespace: string | undefined = undefined;
+				if (ts.isStringLiteralLike(arg1)) {
+					libNamespace = arg1.text;
+				}
+				// TODO: Import manifest.json and check if the library is valid
+
+				// TODO: Check if works
+				// const {fileName} = arg1.getSourceFile();
+				// if (libNamespace && fileName.startsWith("/resources")) {
+				// 	const libNamespace = fileName.split("/").slice(2, -1).join(".");
+				// 	if (libNamespace === libNamespace) {
+				// 		return true;
+				// 	}
+				// }
+
+				const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
+				return !!checker.getAmbientModules().find((ambientModule) => ambientModule.getName() === libName);
+			},
+			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+				return `${moduleIdentifier}.getResourceBundleFor(${ctx.fallback ?? arg1}${arg2 ? ", " + arg2 : ""})`;
+			},
+		})),
 		// Do not migrate if second argument is provided.
 		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
 		t.method("attachIntervalTimer", callExpressionGeneratorFix({
