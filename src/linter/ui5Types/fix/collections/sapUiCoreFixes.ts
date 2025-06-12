@@ -120,74 +120,85 @@ t.declareModule("sap/ui/core/Core", [
 		})),
 		// Individual arguments must be mapped to "options" object
 		// The new API has no sync loading option, replacement is only safe when the options contain async:true
-		t.method("loadLibrary", accessExpressionFix({
-			moduleName: "sap/ui/core/Lib",
-			propertyAccess: "load",
-			// validateArguments: (ctx, checker, arg1, arg2) => {
-			// 	// if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
-			// 	// 	const libOptionsExpression =
-			// 	// 		extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[1].value)
-			// 	as {async: boolean; url?: string};
-			// 	// 	if (libOptionsExpression.async === true) {
-			// 	// 		const newArg = {
-			// 	// 			name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-			// 	// 			url: libOptionsExpression.url,
-			// 	// 		};
-			// 	// 		fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-			// 	// 		fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-			// 	// 	} else {
-			// 	// 		fixHints = undefined; // We cannot handle this case
-			// 	// 		log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-			// 	// 	}
-			// 	// } else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.TrueKeyword) {
-			// 	// 	const newArg = {
-			// 	// 		name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
-			// 	// 	};
-			// 	// 	fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
-			// 	// 	fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
-			// 	// } else {
-			// 	// 	fixHints = undefined; // We cannot handle this case
-			// 	// 	log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
-			// 	// }
-			// },
-			// generator: (ctx, moduleIdentifier, arg1) => {
-			// 	return `${moduleIdentifier}.load(${arg1})`;
-			// },
-		})),
-		// Individual arguments must be mapped to "options" object.
-		// The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
-		// Only when the first argument is an object defining async: true a migration is possible.
-		t.method("createComponent", accessExpressionFix({
-			moduleName: "sap/ui/core/Component",
-			propertyAccess: "create",
-			// validateArguments: (ctx, checker, arg1, arg2) => {},
-			// generator: (ctx, moduleIdentifier, arg1) => {
-			// 	return `${moduleIdentifier}.create(${arg1})`;
-			// },
-		})),
+		// t.method("loadLibrary", accessExpressionFix({
+		// 	moduleName: "sap/ui/core/Lib",
+		// 	propertyAccess: "load",
+		// 	// validateArguments: (ctx, checker, arg1, arg2) => {
+		// 	// 	// if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.ObjectLiteralExpression) {
+		// 	// 	// 	const libOptionsExpression =
+		// 	// 	// 		extractKeyValuePairs(fixHints.exportCodeToBeUsed.args[1].value)
+		// 	// 	as {async: boolean; url?: string};
+		// 	// 	// 	if (libOptionsExpression.async === true) {
+		// 	// 	// 		const newArg = {
+		// 	// 	// 			name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
+		// 	// 	// 			url: libOptionsExpression.url,
+		// 	// 	// 		};
+		// 	// 	// 		fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
+		// 	// 	// 		fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
+		// 	// 	// 	} else {
+		// 	// 	// 		fixHints = undefined; // We cannot handle this case
+		// 	// 	// 		log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		// 	// 	// 	}
+		// 	// 	// } else if (fixHints?.exportCodeToBeUsed?.args?.[1]?.kind === SyntaxKind.TrueKeyword) {
+		// 	// 	// 	const newArg = {
+		// 	// 	// 		name: fixHints.exportCodeToBeUsed.args[0].value.replace(/^['"]+|['"]+$/g, ""),
+		// 	// 	// 	};
+		// 	// 	// 	fixHints.exportCodeToBeUsed.args[0].value = JSON.stringify(newArg);
+		// 	// 	// 	fixHints.exportCodeToBeUsed.args[0].kind = SyntaxKind.ObjectLiteralExpression;
+		// 	// 	// } else {
+		// 	// 	// 	fixHints = undefined; // We cannot handle this case
+		// 	// 	// 	log.verbose(`Autofix skipped for ${apiName}. Transpilation is too ambiguous.`);
+		// 	// 	// }
+		// 	// },
+		// 	// generator: (ctx, moduleIdentifier, arg1) => {
+		// 	// 	return `${moduleIdentifier}.load(${arg1})`;
+		// 	// },
+		// })),
+		// // Individual arguments must be mapped to "options" object.
+		// // The old API defaults to sync component creation. It then cannot be safely replaced with Component.create.
+		// // Only when the first argument is an object defining async: true a migration is possible.
+		// t.method("createComponent", accessExpressionFix({
+		// 	moduleName: "sap/ui/core/Component",
+		// 	propertyAccess: "create",
+		// 	// validateArguments: (ctx, checker, arg1, arg2) => {},
+		// 	// generator: (ctx, moduleIdentifier, arg1) => {
+		// 	// 	return `${moduleIdentifier}.create(${arg1})`;
+		// 	// },
+		// })),
 		// Parameter bAsync has to be omitted or set to false since the new API returns
 		// the resource bundle synchronously. When bAsync is true, the new API is not a replacement
 		// as it does not return a promise. In an await expression, it would be okay, but otherwise not.
 		// sLibrary must be a library.
-		t.method("getLibraryResourceBundle", accessExpressionFix({
-			moduleName: "sap/ui/core/Lib",
-			propertyAccess: "getResourceBundleFor",
-			// validateArguments: (ctx, checker, arg1, arg2) => {},
-			// generator: (ctx, moduleIdentifier, arg1) => {
-			// 	return `${moduleIdentifier}.create(${arg1})`;
-			// },
+		// t.method("getLibraryResourceBundle", callExpressionGeneratorFix({
+		// 	moduleName: "sap/ui/core/Lib",
+		// 	validateArguments: (ctx, checker, arg1, arg2) => {
+		// 		return true;
+		// 	},
+		// 	generator: (ctx, moduleIdentifier, arg1) => {
+		// 		return `${moduleIdentifier}.getResourceBundleFor(${arg1})`;
+		// 	},
+		// })),
+		// Do not migrate if second argument is provided.
+		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
+		t.method("attachIntervalTimer", callExpressionGeneratorFix({
+			moduleName: "sap/ui/core/IntervalTrigger",
+			validateArguments: (ctx, checker, arg1, arg2) => {
+				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
+			},
+			generator: (ctx, moduleIdentifier, arg1) => {
+				return `${moduleIdentifier}.addListener(${arg1})`;
+			},
 		})),
 		// Do not migrate if second argument is provided.
 		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
-		t.method("attachIntervalTimer", accessExpressionFix({
+		t.method("detachIntervalTimer", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/IntervalTrigger",
-			propertyAccess: "addListener",
-		})),
-		// Do not migrate if second argument is provided.
-		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
-		t.method("detachIntervalTimer", accessExpressionFix({
-			moduleName: "sap/ui/core/IntervalTrigger",
-			propertyAccess: "removeListener",
+			validateArguments: (ctx, checker, arg1, arg2) => {
+				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
+			},
+			generator: (ctx, moduleIdentifier, arg1) => {
+				return `${moduleIdentifier}.removeListener(${arg1})`;
+			},
 		})),
 
 		// Migration to sap/ui/core/tmpl/Template.byId(sId) not possible
