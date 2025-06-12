@@ -1,5 +1,17 @@
 import ts from "typescript";
 
+export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string): boolean {
+	const propAccessChain: string[] = [];
+	propAccessChain.push(node.expression.getText());
+
+	let scanNode: ts.Node = node;
+	while (ts.isPropertyAccessExpression(scanNode)) {
+		propAccessChain.push(scanNode.name.getText());
+		scanNode = scanNode.parent;
+	}
+	return propAccessChain.join(".") === match;
+}
+
 export function collectIdentifiers(node: ts.SourceFile) {
 	const declaredIdentifiers = new Set<string>();
 	const extractDestructIdentifiers = (name: ts.BindingName, identifiers: Set<string>) => {

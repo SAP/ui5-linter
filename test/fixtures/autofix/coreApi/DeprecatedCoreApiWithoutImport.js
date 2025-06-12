@@ -20,10 +20,14 @@ sap.ui.define([], function() {
 	globalCore.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
 	sap.ui.getCore().createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
-	// sap.ui.getCore().attachIntervalTimer(function() {console.log();});
-	// globalCore.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
-	// sap.ui.getCore().detachIntervalTimer(function() {console.log();});
-	// globalCore.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
+	sap.ui.getCore().attachIntervalTimer(function() {
+		sap.ui.getCore().applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+	});
+	globalCore.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	sap.ui.getCore().detachIntervalTimer(function() {
+		sap.ui.getCore().applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+	});
+	globalCore.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
 
 	globalCore.getComponent("componentId");
 	sap.ui.getCore().getComponent("componentId");
