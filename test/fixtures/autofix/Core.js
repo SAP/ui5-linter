@@ -7,8 +7,12 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 
 	Core.attachInitEvent(function() {console.log();});
 
-	Core.attachIntervalTimer(function() {console.log();});
-	Core.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
+	Core.attachIntervalTimer(function() {
+		Core.applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+	});
+	Core.attachIntervalTimer(function() {
+		Core.applyTheme("themeName");
+	}, {}); // Should not be autofixed if there is a 2nd argument
 
 	Core.byId("id");
 });
