@@ -73,7 +73,7 @@ Autofix solutions generally fall into two categories:
 * [ ] Check the legacy API for argument type checks or assertions. If the new solution doesn't handle these internally, ensure to **statically verify** the argument types using the TypeScript TypeChecker. If they don't match with what the new API expects, **skip** the migration or, if easily possible, attempt to convert the type at runtime.
 ```js
 
-	var padLeft = jQuery.sap.padLeft("a", "0", 4); // "a".padStart(4, "0");
+	var padLeft = jQuery.sap.padLeft("a", "0", 4); // Becomes "a".padStart(4, "0");
 	var padLeft2 = jQuery.sap.padLeft("a", "0000", 4); // Not migrated. Value differs in old and new
 	var padLeft3 = jQuery.sap.padLeft(startsWithLetter, "0", 4); // startsWithLetter might not be possible to be determined
 ```
