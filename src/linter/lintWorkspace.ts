@@ -99,24 +99,33 @@ export default async function lintWorkspace(
 			);
 
 			for (const {filePath, rawMessages} of autofixContext.generateRawLintResults()) {
-				// Add autofix errors to the linter context of the final linting run so they become visible to the user
+				// Add autofix errors and parsing-errors that occurred during the autofix to the linter context
+				// of the final linting run so they become visible to the user
+				// Do not provide their positions since those might be incorrect due to the autofix
 				rawMessages.forEach((msg) => {
 					if (msg.id === MESSAGE.AUTOFIX_ERROR) {
 						context.addLintingMessage(
-							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args, msg.position);
+							filePath, msg.id, (msg as RawLintMessage<MESSAGE.AUTOFIX_ERROR>).args);
 					}
 					if (msg.id === MESSAGE.PARSING_ERROR) {
 						const parsingError = msg as RawLintMessage<MESSAGE.PARSING_ERROR>;
 						const isDuplicate = preAutofixParsingErrors.get(filePath)?.find((msg) => {
 							// If the parsing error was already reported before the autofix took place,
 							// we must not report it again
-							return msg.args.message === parsingError.args.message &&
-								msg.position?.line === parsingError.position?.line &&
-								msg.position?.column === parsingError.position?.column;
+							let positionMatch;
+							if (msg.position && parsingError.position) {
+								// Allow a position match within 10 lines to avoid false positives from line drifts
+								// due to autofixes. Ignore columns for the same reason
+								// Note that false-positives wouldn't be too bad since they only cause duplicate
+								// parsing-errors in the final report
+								positionMatch = Math.abs(msg.position.line - parsingError.position.line) <= 10;
+							} else {
+								positionMatch = !msg.position && !parsingError.position;
+							}
+							return msg.args.message === parsingError.args.message && positionMatch;
 						});
 						if (!isDuplicate) {
-							context.addLintingMessage(
-								filePath, msg.id, parsingError.args, msg.position);
+							context.addLintingMessage(filePath, msg.id, parsingError.args); // No position
 						}
 					}
 				});
