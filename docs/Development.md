@@ -56,7 +56,7 @@ Autofix solutions generally fall into two categories:
 * [ ] If the return type differs, migrate only those cases where it is **not used or assigned** (e.g., setter calls like `sap.ui.getCore().getConfig().setCalendarType(...)`). Use the `isExpectedValueExpression()` utility or the `mustNotUseReturnValue` flag available on some of the standard fix classes.
 ```js
 	// The old API always returns a logger instance, the new one returns undefined. So in case the return value
-	// is accessed, the call should not be migrated:
+	// is accessed, the call should not be migrated (i.e. all the cases below):
 	jQuery.sap.log.debug().info();
 	const debug = (msg, logger) => logger ? logger(msg) : jQuery.sap.log.debug(msg);
 	debug("msg 2", jQuery.sap.log.debug("msg 1"));
