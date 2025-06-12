@@ -70,7 +70,7 @@ Autofix solutions generally fall into two categories:
 	jQuery.sap.log.debug() ? "a" : "b";
 	jQuery.sap.log.debug(), jQuery.sap.log.info();
 ```
-* [ ] In legacy code, argument type checks or assertions are common. If the new solution doesn't handle these internally, ensure you can **statically verify** the argument types. If not, **skip** the migration.
+* [ ] Check the legacy API for argument type checks or assertions. If the new solution doesn't handle these internally, ensure to **statically verify** the argument types using the TypeScript TypeChecker. If they don't match with what the new API expects, **skip** the migration or, if easily possible, attempt to convert the type at runtime.
 ```js
 
 	var padLeft = jQuery.sap.padLeft("a", "0", 4); // "a".padStart(4, "0");
