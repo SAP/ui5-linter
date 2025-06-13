@@ -1,7 +1,7 @@
 import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import {
-	countChildNodesRecursive, findNodeRecursive, isExpectedValueExpression, isSideEffectFree,
+	countChildNodesRecursive, findNodeRecursive, isReturnValueUsed, isSideEffectFree,
 } from "../utils/utils.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
 import {FixHelpers} from "./Fix.js";
@@ -28,7 +28,7 @@ export default abstract class CallExpressionBaseFix extends BaseFix {
 		}
 		// If requested, check whether the return value of the call expression is assigned to a variable,
 		// passed to another function or used elsewhere.
-		if (this.params.mustNotUseReturnValue && isExpectedValueExpression(node)) {
+		if (this.params.mustNotUseReturnValue && isReturnValueUsed(node)) {
 			return false;
 		}
 		const containedCallExpression = findNodeRecursive<ts.CallExpression>(node.expression, this.nodeTypes);
