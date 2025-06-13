@@ -24,6 +24,10 @@ sap.ui.define([], async function () {
 	baseLog.debug("This is a debug log message");
 	const level = jQuery.sap.log.getLevel();
 
+	if (jQuery.sap.log.debug("This is a debug log message")) {}
+	while(jQuery.sap.log.debug("This is a debug log message")) {}
+	for (let i = 0; jQuery.sap.log.debug("This is a debug log message"); i++) {}
+
 	if (level === jQuery.sap.log.LogLevel.DEBUG) {
 		jQuery.sap.log.debug(`This is a debug (${jQuery.sap.Level.DEBUG}) log message`);
 	}
