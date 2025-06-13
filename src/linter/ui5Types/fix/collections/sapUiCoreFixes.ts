@@ -28,6 +28,21 @@ t.declareModule("sap/ui/core/Configuration", [
 				return `${moduleIdentifier}.getLanguageTag().toString()`;
 			},
 		})),
+		t.method("getAnimation", callExpressionFix({
+			moduleName: "sap/ui/core/ControlBehavior",
+			propertyAccess: "getAnimationMode",
+			// Note: The new API returns an enum value instead of a boolean, therefore
+			// migration is currently not possible if the return value is used
+			// This could be optimized with an advanced migration that detects how the return
+			// value is used and e.g. migrates to something like
+			// (getAnimationMode() !== sap.ui.core.Configuration.AnimationMode.none)
+			// Right now this migration probably wont apply for most cases
+			mustNotUseReturnValue: true,
+		})),
+		t.method("getAnimationMode", accessExpressionFix({
+			scope: FixScope.FirstChild,
+			moduleName: "sap/ui/core/ControlBehavior",
+		})),
 	]),
 ]);
 t.declareModule("sap/ui/core/Core", [
