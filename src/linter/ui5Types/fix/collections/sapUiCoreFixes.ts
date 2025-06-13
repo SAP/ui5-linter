@@ -13,10 +13,20 @@ export default t;
 
 t.declareModule("sap/ui/core/Configuration", [
 	t.class("Configuration", [
+		t.method("getAccessibility", accessExpressionFix({
+			moduleName: "sap/ui/core/ControlBehavior",
+			propertyAccess: "isAccessibilityEnabled",
+		})),
 		...t.methods(["setRTL", "setLanguage"], callExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/base/i18n/Localization",
 			mustNotUseReturnValue: true,
+		})),
+		t.method("getFormatLocale", callExpressionGeneratorFix({
+			moduleName: "sap/base/i18n/Formatting",
+			generator: (ctx, moduleIdentifier) => {
+				return `${moduleIdentifier}.getLanguageTag().toString()`;
+			},
 		})),
 	]),
 ]);
