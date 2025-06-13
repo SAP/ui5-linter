@@ -8,6 +8,7 @@ import {
 	getSymbolForPropertyInConstructSignatures,
 	isClassMethod,
 	isConditionalAccess,
+	isReturnValueUsed,
 } from "../../../../src/linter/ui5Types/utils/utils.js";
 
 function createProgram(code: string) {
@@ -378,6 +379,243 @@ test("getPropertyAssignmentsInObjectLiteralExpression - unsupported elements", (
 	t.is(result.length, 2);
 	t.is(result[0], test1);
 	t.is(result[1], test2);
+});
+
+test("isReturnValueUsed (negative): Block", (t) => {
+	const program = createProgram(`
+		method();
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	t.false(isReturnValueUsed(expressionStatement));
+});
+
+test("isReturnValueUsed: CallExpression", (t) => {
+	const program = createProgram(`
+		foo(method());
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const callExpression = expressionStatement.expression as ts.CallExpression;
+	const method = callExpression.arguments[0] as ts.CallExpression;
+	t.true(isReturnValueUsed(method));
+});
+
+test("isReturnValueUsed: BinaryExpression", (t) => {
+	const program = createProgram(`
+		true && method();
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const binaryExpression = expressionStatement.expression as ts.BinaryExpression;
+	t.true(isReturnValueUsed(binaryExpression.right));
+});
+
+test("isReturnValueUsed: VariableDeclaration", (t) => {
+	const program = createProgram(`
+		const result = method();
+	`);
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	t.true(isReturnValueUsed(variableDeclaration.initializer!));
+});
+
+test("isReturnValueUsed: IfStatement", (t) => {
+	const program = createProgram(`
+		if (method()) {}
+	`);
+	const ifStatement = program.getSourceFile("test.ts")!.statements[0] as ts.IfStatement;
+	t.true(isReturnValueUsed(ifStatement.expression));
+});
+
+test("isReturnValueUsed: ConditionalExpression", (t) => {
+	const program = createProgram(`
+		method() ? 1 : undefined;
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const conditionalExpression = expressionStatement.expression as ts.ConditionalExpression;
+	t.true(isReturnValueUsed(conditionalExpression.condition));
+});
+
+test("isReturnValueUsed (negative): ConditionalExpression - whenTrue", (t) => {
+	const program = createProgram(`
+		condition ? method() : undefined;
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const conditionalExpression = expressionStatement.expression as ts.ConditionalExpression;
+	t.false(isReturnValueUsed(conditionalExpression.whenTrue));
+});
+
+test("isReturnValueUsed: ForStatement", (t) => {
+	const program = createProgram(`
+		for (let i = 0; method(); i++) {}
+	`);
+	const forStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ForStatement;
+	t.true(isReturnValueUsed(forStatement.condition!));
+});
+
+test("isReturnValueUsed: WhileStatement", (t) => {
+	const program = createProgram(`
+		while (method()) {}
+	`);
+	const whileStatement = program.getSourceFile("test.ts")!.statements[0] as ts.WhileStatement;
+	t.true(isReturnValueUsed(whileStatement.expression));
+});
+
+test("isReturnValueUsed (negative): WhileStatement statement", (t) => {
+	const program = createProgram(`
+		while (true) method()
+	`);
+	const whileStatement = program.getSourceFile("test.ts")!.statements[0] as ts.WhileStatement;
+	t.false(isReturnValueUsed(whileStatement.statement));
+});
+
+test("isReturnValueUsed: DoStatement", (t) => {
+	const program = createProgram(`
+		do {} while (method());
+	`);
+	const whileStatement = program.getSourceFile("test.ts")!.statements[0] as ts.WhileStatement;
+	t.true(isReturnValueUsed(whileStatement.expression));
+});
+
+test("isReturnValueUsed: VariableStatement - multiple declarations", (t) => {
+	const program = createProgram(`
+		const result1 = method(), result2 = method();
+	`);
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclarations = variableStatement.declarationList.declarations;
+	t.true(isReturnValueUsed(variableDeclarations[0].initializer!));
+	t.true(isReturnValueUsed(variableDeclarations[1].initializer!));
+});
+
+test("isReturnValueUsed: ParenthesizedExpression", (t) => {
+	const program = createProgram(`
+		(method());
+	`);
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const parenthesizedExpression = expressionStatement.expression as ts.ParenthesizedExpression;
+	t.true(isReturnValueUsed(parenthesizedExpression.expression));
+});
+
+test("isReturnValueUsed: ReturnStatement", (t) => {
+	const program = createProgram(`
+		function foo() {
+			return method();
+		}
+	`);
+	const functionDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.FunctionDeclaration;
+	const returnStatement = functionDeclaration.body!.statements[0] as ts.ReturnStatement;
+	t.true(isReturnValueUsed(returnStatement.expression!));
+});
+
+test("isReturnValueUsed: ThrowStatement", (t) => {
+	const program = createProgram(`
+		function foo() {
+			throw method();
+		}
+	`);
+	const functionDeclaration = program.getSourceFile("test.ts")!.statements[0] as ts.FunctionDeclaration;
+	const throwStatement = functionDeclaration.body!.statements[0] as ts.ThrowStatement;
+	t.true(isReturnValueUsed(throwStatement.expression));
+});
+
+test("isReturnValueUsed: ArrowFunction", (t) => {
+	const program = createProgram(`
+		const foo = () => method();
+	`);
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	const arrowFunction = variableDeclaration.initializer as ts.ArrowFunction;
+	t.true(isReturnValueUsed(arrowFunction.body));
+});
+
+test("isReturnValueUsed: PropertyAssignment in ObjectLiteralExpression", (t) => {
+	const program = createProgram(`
+		const obj = { method: method() };
+	`);
+
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	const objectLiteralExpression = variableDeclaration.initializer as ts.ObjectLiteralExpression;
+	const propertyAssignment = objectLiteralExpression.properties[0] as ts.PropertyAssignment;
+
+	t.true(isReturnValueUsed(propertyAssignment.initializer));
+});
+
+test("isReturnValueUsed: ComputedPropertyName in ObjectLiteralExpression", (t) => {
+	const program = createProgram(`
+		const obj = { [method()]: "value" };
+	`);
+
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	const objectLiteralExpression = variableDeclaration.initializer as ts.ObjectLiteralExpression;
+	const propertyAssignment = objectLiteralExpression.properties[0] as ts.PropertyAssignment;
+	const computedPropertyName = propertyAssignment.name as ts.ComputedPropertyName;
+
+	t.true(isReturnValueUsed(computedPropertyName.expression));
+});
+
+test("isReturnValueUsed (negative): CallExpression nested in ObjectLiteralExpression", (t) => {
+	const program = createProgram(`
+		const obj = {
+			method: () => {
+				method()
+			}
+		};
+	`);
+
+	const variableStatement = program.getSourceFile("test.ts")!.statements[0] as ts.VariableStatement;
+	const variableDeclaration = variableStatement.declarationList.declarations[0];
+	const objectLiteralExpression = variableDeclaration.initializer as ts.ObjectLiteralExpression;
+	const propertyAssignment = objectLiteralExpression.properties[0] as ts.PropertyAssignment;
+	const arrowFunc = propertyAssignment.initializer as ts.ArrowFunction;
+	const block = arrowFunc.body as ts.Block;
+
+	t.false(isReturnValueUsed(block.statements[0] as ts.ExpressionStatement));
+});
+
+test("isReturnValueUsed: Chaining in PropertyAccessExpression", (t) => {
+	const program = createProgram(`
+		sap.ui.getCore().getConfiguration().getLanguage();
+	`);
+
+	const expressionStatement = program.getSourceFile("test.ts")!.statements[0] as ts.ExpressionStatement;
+	const firstPropertyAccessExpression = expressionStatement.expression as ts.PropertyAccessExpression;
+	const secondPropertyAccessExpression = firstPropertyAccessExpression.expression as ts.PropertyAccessExpression;
+
+	t.true(isReturnValueUsed(secondPropertyAccessExpression));
+});
+
+test("isReturnValueUsed: SwitchStatement", (t) => {
+	const program = createProgram(`
+		switch (method()) {
+			case 1:
+				break;
+			case 2:
+				break;
+			default:
+				break;
+		}
+	`);
+
+	const switchStatement = program.getSourceFile("test.ts")!.statements[0] as ts.SwitchStatement;
+	t.true(isReturnValueUsed(switchStatement.expression));
+});
+
+test("isReturnValueUsed (negative): SwitchStatement", (t) => {
+	const program = createProgram(`
+		switch (foo) {
+			case 1:
+				method();
+				break;
+			case 2:
+				break;
+			default:
+				break;
+		}
+	`);
+
+	const switchStatement = program.getSourceFile("test.ts")!.statements[0] as ts.SwitchStatement;
+	const clause = switchStatement.caseBlock.clauses[0] as ts.CaseClause;
+	t.false(isReturnValueUsed(clause.statements[0]));
 });
 
 // Positive tests for isConditionalAccess

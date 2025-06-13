@@ -232,20 +232,46 @@ export function isAssignment(node: ts.AccessExpression): boolean {
 	return false;
 }
 
-export function isExpectedValueExpression(node: ts.Node): boolean {
-	let isExpectedValue = false;
-	while (node && !isExpectedValue) {
-		// Whether the function returns a value
-		if (!ts.isReturnStatement(node) && node.parent && ts.isBlock(node.parent)) {
+export function isReturnValueUsed(node: ts.Node): boolean {
+	let isReturnValueUsed = false;
+	while (node && !isReturnValueUsed) {
+		if (!ts.isReturnStatement(node) && !ts.isThrowStatement(node) && node.parent && ts.isBlock(node.parent)) {
+			// If the node is not a return statement, but is part of a block, we can assume that it is not used
+			break;
+		}
+		if (node.parent && ts.isConditionalExpression(node.parent) && node === node.parent.condition) {
+			// If the node is part of a conditional expression, and is the condition, the return value is used
+			// Other positions in the conditional expression depend on how the whole expression is used
+			// Example: `method() ? 1 : 2;`
+			isReturnValueUsed = true;
+			break;
+		}
+
+		if (node.parent && (ts.isIfStatement(node.parent) || ts.isWhileStatement(node.parent) ||
+			ts.isDoStatement(node.parent) || ts.isSwitchStatement(node.parent)) && node !== node.parent.expression) {
+			// If the node is part of an if or while statement, but not the condition we can assume
+			// that the return value is not used
+			// Example: `while(1 === 1) method();` does not use the return value of `method()`
+			break;
+		}
+		if (node.parent && ts.isForStatement(node.parent) && node === node.parent.statement) {
+			// If the node is part of a for statement but part of the statement, we can assume
+			// that the return value is not used
+			// Example: `for (let i = 0; i < 10; i++) method();` does not use the return value of `method()`
 			break;
 		}
 
 		if (ts.isVariableDeclaration(node) ||
 			ts.isBinaryExpression(node) ||
+			ts.isIfStatement(node) ||
+			ts.isWhileStatement(node) ||
+			ts.isDoStatement(node) ||
+			ts.isForStatement(node) ||
+			ts.isSwitchStatement(node) ||
 			ts.isVariableStatement(node) ||
-			ts.isConditionalExpression(node) ||
 			ts.isParenthesizedExpression(node) ||
 			ts.isReturnStatement(node) ||
+			ts.isThrowStatement(node) ||
 			// () => jQuery.sap.log.error("FOO"); Explicit return in an arrow function
 			(ts.isArrowFunction(node) && !ts.isBlock(node.body)) ||
 			// Argument of a function call
@@ -257,12 +283,12 @@ export function isExpectedValueExpression(node: ts.Node): boolean {
 					ts.isPropertyAccessExpression(node.expression.parent) &&
 					ts.isCallExpression(node.expression.parent.expression))
 		) {
-			isExpectedValue = true;
+			isReturnValueUsed = true;
 		}
 		node = node.parent;
 	}
 
-	return isExpectedValue;
+	return isReturnValueUsed;
 }
 
 export function isConditionalAccess(node: ts.Node): boolean {
