@@ -107,7 +107,7 @@
 		"@ui5/cli": "^4.0.18",
 		"ava": "^6.4.0",
 		"depcheck": "^1.4.7",
-		"eslint": "^9.28.0",
+		"eslint": "^9.29.0",
 		"eslint-plugin-ava": "^15.0.1",
 		"esmock": "^2.7.0",
 		"husky": "^9.1.7",
@@ -115,7 +115,7 @@
 		"nyc": "^17.1.0",
 		"rimraf": "^6.0.1",
 		"sinon": "^20.0.0",
-		"tsx": "^4.19.4",
+		"tsx": "^4.20.3",
 		"typescript-eslint": "^8.34.0",
 		"ui5-test-runner": "^5.7.2",
 		"yauzl-promise": "^4.0.0"
