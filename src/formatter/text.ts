@@ -44,7 +44,7 @@ export class Text {
 	constructor(private readonly cwd: string) {
 	}
 
-	format(lintResults: LintResult[], showDetails: boolean, autofix: boolean) {
+	format(lintResults: LintResult[], showDetails: boolean, autofix: boolean, quiet = false) {
 		this.#writeln(`UI5 linter report:`);
 		this.#writeln("");
 		let totalErrorCount = 0;
@@ -101,12 +101,19 @@ export class Text {
 			summaryColor = chalk.yellow;
 		}
 
+		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
+		let warningsText = "";
+		if (!quiet) {
+			warningsText = `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
+		}
+
+		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
+		const problemsText = `${totalCount} ${totalCount === 1 ? "problem" : "problems"}`;
+
 		this.#writeln(
-			summaryColor(
-				`${totalErrorCount + totalWarningCount} problems ` +
-				`(${totalErrorCount} errors, ${totalWarningCount} warnings)`
-			)
+			summaryColor(`${problemsText} (${errorsText}${warningsText})`)
 		);
+
 		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
 			this.#writeln("   Run \"ui5lint --fix\" to resolve all auto-fixable problems\n");
 		}
