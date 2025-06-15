@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.14.0](https://github.com/SAP/ui5-linter/compare/v1.13.1...v1.14.0) (2025-06-15)
+
+
+### Features
+
+* Autofix deprecated jQuery.sap APIs ([#614](https://github.com/SAP/ui5-linter/issues/614)) ([1dda012](https://github.com/SAP/ui5-linter/commit/1dda01216deb7dec8c3dd1dd83712ce5166172f3))
+* **autofix:** Fix additional deprecated Core APIs ([#639](https://github.com/SAP/ui5-linter/issues/639)) ([af2cb9b](https://github.com/SAP/ui5-linter/commit/af2cb9bfa13463037538411eedcd5281e0cab741))
+* **autofix:** Fix basic deprecated Core APIs ([#671](https://github.com/SAP/ui5-linter/issues/671)) ([857a03e](https://github.com/SAP/ui5-linter/commit/857a03ea35d698f24b2d7181e437e692abedcaac))
+
+
+### Bug Fixes
+
+* **autofix:** Prevent invalid delete expressions ([3f3c720](https://github.com/SAP/ui5-linter/commit/3f3c7207e1eefd03e417987c55224c4d817ef81d))
+* TypeScript error "Cannot find module './MessageArgs.js'" ([08ff3e5](https://github.com/SAP/ui5-linter/commit/08ff3e52f4b9080ed66c7bcfe51071da31c2d23f))
+
+
+### Dependencies
+
+* Bump globals from 16.1.0 to 16.2.0 ([22bbfe3](https://github.com/SAP/ui5-linter/commit/22bbfe34bb9d76861f07b3843c59d157e8b00ab4))
+* Bump minimatch from 10.0.1 to 10.0.2 ([6f594bb](https://github.com/SAP/ui5-linter/commit/6f594bbe719df5950d05a79cf3f0f3f4231ffa63))
+* Bump minimatch from 10.0.2 to 10.0.3 ([cf82d1e](https://github.com/SAP/ui5-linter/commit/cf82d1e188c13f47ac74f02b1e764e0548c4fe52))
+
 ## [1.13.1](https://github.com/SAP/ui5-linter/compare/v1.13.0...v1.13.1) (2025-05-12)
 
 
