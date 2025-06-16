@@ -276,4 +276,9 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var parseError = jQuery.sap.getParseError(jQuery.sap.parseXML(errorXML));
 	var validXML = "<?xml version=\"1.0\"?><teamMembers><member firstName=\"Andreas\"</member></teamMembers>";
 	var xmlDocument = jQuery.sap.serializeXML(jQuery.sap.parseXML(validXML));
+
+	const str = "test NFC string";
+	jQuery.sap.isStringNFC(`test NFC string`);
+	jQuery.sap.isStringNFC(str);
+	jQuery.sap.isStringNFC(unknownVar);
 });
