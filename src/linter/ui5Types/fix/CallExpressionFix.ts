@@ -39,10 +39,15 @@ export default class CallExpressionFix extends CallExpressionBaseFix {
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
-		let relevantNode: ts.AccessExpression | ts.CallExpression = node;
+		let relevantNode: ts.AccessExpression | ts.CallExpression | ts.Identifier = node;
 		for (let i = 0; i < (this.params.scope ?? 1); i++) {
+			if (ts.isIdentifier(relevantNode)) {
+				// If the current node is an identifier, we can not go further
+				return false;
+			}
 			if (!ts.isPropertyAccessExpression(relevantNode.expression) &&
-				!ts.isElementAccessExpression(relevantNode.expression)) {
+				!ts.isElementAccessExpression(relevantNode.expression) &&
+				!ts.isIdentifier(relevantNode.expression)) {
 				return false;
 			}
 			relevantNode = relevantNode.expression;
