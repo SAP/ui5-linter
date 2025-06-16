@@ -57,23 +57,13 @@ export default class CallExpressionFix extends CallExpressionBaseFix {
 		if (this.startPos === undefined || this.endPos === undefined) {
 			throw new Error("Start or end position is not defined");
 		}
-		if (this.params.moduleName && !this.moduleIdentifierName) {
-			// The identifier for the requested module has not been set
-			// This can happen for example if the position of the autofix is not inside
-			// a module definition or require block. Therefore the required dependency can not be added
-			// and the fix can not be applied.
-			return;
-		}
-		if (this.params.globalName && !this.globalIdentifierName) {
-			// This should not happen
-			throw new Error("Global identifier has not been provided");
-		}
 
-		let value = this.globalIdentifierName ?? this.moduleIdentifierName;
-		if (!value) {
+		const identifier = this.getIdentifiersForSingleRequest(this.params.moduleName, this.params.globalName);
+		if (!identifier) {
 			return;
 		}
 
+		let value = identifier;
 		if (this.params.propertyAccess) {
 			// If a property is defined, we need to access it on the identifier
 			value = `${value}.${this.params.propertyAccess}`;

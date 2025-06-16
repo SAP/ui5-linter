@@ -1,26 +1,24 @@
 import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
-import Fix from "./Fix.js";
+import Fix, {GlobalAccessRequest, ModuleDependencyRequest} from "./Fix.js";
 
 export interface BaseFixParams {
 	/**
 	 * Name of the module to import for use in the fix
 	 */
 	moduleName?: string;
+
 	/**
 	 * The preferred identifier to use for the module import.
 	 * If not provided, the identifier will be derived from the module name
 	 */
 	preferredIdentifier?: string;
 
-	// Not yet implemented: Requesting multiple modules
-	// modules?: Omit<ModuleDependencyRequest, "usagePosition">[];
-
 	/**
 	 * Name of a global variable to use in the fix (e.g. "document")
 	 *
 	 * The fix will be provided with the identifier name or property access to use via
-	 * the setIdentifierForDependency method.
+	 * the setIdentifierForGlobal method.
 	 *
 	 * For example, if there is already a conflicting identifier within the same file,
 	 * the fix will be provided with an alternative like "globalThis.document"
@@ -73,8 +71,8 @@ export enum FixScope {
 export default abstract class BaseFix extends Fix {
 	protected startPos: number | undefined;
 	protected endPos: number | undefined;
-	protected moduleIdentifierName: string | undefined;
-	protected globalIdentifierName: string | undefined;
+	protected moduleIdentifierNames: Map<string, string> | undefined;
+	protected globalIdentifierNames: Map<string, string> | undefined;
 	protected sourcePosition: PositionInfo | undefined;
 	protected nodeTypes: ts.SyntaxKind[] = [];
 
@@ -105,15 +103,79 @@ export default abstract class BaseFix extends Fix {
 		};
 	}
 
-	setIdentifierForDependency(identifier: string) {
-		this.moduleIdentifierName = identifier;
+	setIdentifierForDependency(identifier: string, moduleName: string) {
+		this.moduleIdentifierNames ??= new Map();
+		this.moduleIdentifierNames.set(moduleName, identifier);
 	}
 
-	setIdentifierForGlobal(identifier: string) {
-		this.globalIdentifierName = identifier;
+	setIdentifierForGlobal(identifier: string, globalName: string) {
+		this.globalIdentifierNames ??= new Map();
+		this.globalIdentifierNames.set(globalName, identifier);
 	}
 
-	getNewModuleDependencies() {
+	protected getIdentifiersForSingleRequest(
+		moduleName: string | undefined, globalName: string | undefined
+	): string | undefined {
+		if (moduleName) {
+			if (!this.moduleIdentifierNames?.has(moduleName)) {
+				// The identifier for the requested module has not been set
+				// This can happen for example if the position of the autofix is not inside
+				// a module definition or require block. Therefore the required dependency can not be added
+				// and the fix can not be applied.
+				return;
+			}
+			return this.moduleIdentifierNames.get(moduleName)!;
+		} else if (globalName) {
+			if (!this.globalIdentifierNames?.has(globalName)) {
+				// This should not happen, globals can always be provided
+				throw new Error("Global identifier has not been provided");
+			}
+			return this.globalIdentifierNames.get(globalName)!;
+		}
+	}
+
+	/**
+	 * Helper method for fix classes that feature multiple imports/globals.
+	 *
+	 * Returns undefined if any of the requested identifiers could not be set, indicating that the
+	 * fix must not be applied
+	 */
+	protected getIdentifiersForMultipleRequests(
+		moduleNames: string[] | undefined, globalNames: string[] | undefined
+	): string[] | undefined {
+		const identifiers = []; // Modules first, then globals. Both in the order they have been requested in
+		if (moduleNames?.length) {
+			if (!this.moduleIdentifierNames) {
+				// No modules have been set. Change can not be applied
+				return;
+			}
+			for (const moduleName of moduleNames) {
+				if (!this.moduleIdentifierNames.has(moduleName)) {
+					// The identifier for the requested module has not been set
+					// Change can not be applied
+					return;
+				}
+				identifiers.push(this.moduleIdentifierNames.get(moduleName)!);
+			}
+		}
+
+		if (globalNames?.length) {
+			if (!this.globalIdentifierNames) {
+				// This should not happen, globals can always be provided
+				throw new Error("Global identifier has not been provided");
+			}
+			for (const globalName of globalNames) {
+				if (!this.globalIdentifierNames.has(globalName)) {
+					// This should not happen, globals can always be provided
+					throw new Error("Global identifier has not been provided");
+				}
+				identifiers.push(this.globalIdentifierNames.get(globalName)!);
+			}
+		}
+		return identifiers;
+	}
+
+	getNewModuleDependencies(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined {
 		if (this.startPos === undefined) {
 			throw new Error("Start position is not defined");
 		}
@@ -127,7 +189,7 @@ export default abstract class BaseFix extends Fix {
 		};
 	}
 
-	getNewGlobalAccess() {
+	getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined {
 		if (this.startPos === undefined) {
 			throw new Error("Start position is not defined");
 		}
