@@ -21,14 +21,17 @@ export default t;
 
 t.declareModule("jQuery", [
 	t.namespace("sap", [
+		// jQuery.sap.assert => sap.base.assert
 		t.namespace("assert", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/520
 			moduleName: "sap/base/assert",
 		})),
 		t.namespace("log", [ // https://github.com/SAP/ui5-linter/issues/522
+			// jQuery.sap.log.Level|LogLevel => Log.Level
 			...t.namespaces(["Level", "LogLevel"], accessExpressionFix({
 				moduleName: "sap/base/Log",
 				propertyAccess: "Level",
 			})),
+			// jQuery.sap.log.debug|warn|info|error|fatal|trace() => Log.debug|warn|info|error|fatal|trace()
 			...t.namespaces(["debug", "error", "fatal", "info", "trace", "warning"],
 				callExpressionFix({
 					moduleName: "sap/base/Log",
@@ -38,10 +41,12 @@ t.declareModule("jQuery", [
 					// is only safe if the return value is not used in the code
 					mustNotUseReturnValue: true,
 				})),
+			// jQuery.sap.log.getLevel => Log.getLevel
 			t.namespace("getLevel", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				scope: FixScope.FirstChild,
 			})),
+			// jQuery.sap.log.getLog => Log.getLogEntries
 			t.namespace("getLog", accessExpressionFix({
 				moduleName: "sap/base/Log",
 				propertyAccess: "getLogEntries",
@@ -71,6 +76,7 @@ t.declareModule("jQuery", [
 				scope: FixScope.FirstChild,
 			})),
 		]),
+		// jQuery.sap.resources => ResourceBundle.create
 		t.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",

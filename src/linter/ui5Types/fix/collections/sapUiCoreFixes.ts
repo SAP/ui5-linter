@@ -30,8 +30,10 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 	]),
 ]);
+
 t.declareModule("sap/ui/core/Core", [
 	t.class("Core", [
+		// Core.attachInit|attachInitEvent => Core.ready
 		...t.methods(["attachInit", "attachInitEvent"], accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Core",
@@ -42,35 +44,42 @@ t.declareModule("sap/ui/core/Core", [
 			moduleName: "sap/ui/core/Element",
 			propertyAccess: "getElementById",
 		})),
+		// Core.getEventBus => EventBus.getInstance
 		t.method("getEventBus", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/EventBus",
 			propertyAccess: "getInstance",
 		})),
+		// Core.getConfiguration() => Configuration
 		t.method("getConfiguration", callExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Configuration",
 		})),
+		// Core.getStaticAreaRef => StaticArea.getDomRef
 		t.method("getStaticAreaRef", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/StaticArea",
 			propertyAccess: "getDomRef",
 		})),
+		// Core.initLibrary => Lib.init
 		t.method("initLibrary", accessExpressionFix({
 			scope: FixScope.FullExpression,
 			moduleName: "sap/ui/core/Lib",
 			propertyAccess: "init",
 		})),
+		// Core.isMobile() => Device.browser.mobile
 		t.method("isMobile", callExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
 			generator: (ctx, [moduleIdentifier]) => {
 				return `${moduleIdentifier}.browser.mobile`;
 			},
 		})),
+		// Core.notifyContentDensityChanged => Theming.notifyContentDensityChanged
 		t.method("notifyContentDensityChanged", accessExpressionFix({
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/core/Theming",
 		})),
+		// Core.getCurrentFocusedControlId => Element.getActiveElement()?.getId() || null
 		t.method("getCurrentFocusedControlId", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Element",
 			// The legacy API used to return null if no control was focused.
