@@ -14,7 +14,7 @@ export default t;
 t.declareModule("sap/ui/core/Configuration", [
 	t.class("Configuration", [
 		...t.methods(["setRTL", "setLanguage"], callExpressionFix({
-			scope: FixScope.FirstChild,
+			scope: FixScope.SecondChild,
 			moduleName: "sap/base/i18n/Localization",
 			mustNotUseReturnValue: true,
 		})),
