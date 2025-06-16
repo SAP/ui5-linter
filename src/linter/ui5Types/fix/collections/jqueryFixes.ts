@@ -136,7 +136,29 @@ t.declareModule("jQuery", [
 		t.namespace("hyphen", accessExpressionFix({
 			moduleName: "sap/base/strings/hyphenate",
 		})),
-		t.namespace("isStringNFC", () => new IsStringNfcFix()),
+		// jQuery.sap.isStringNFC("foo") => "foo".normalize("NFC") === "foo"
+		// Note: This API only exists in old UI5 releases
+		t.namespace("isStringNFC", callExpressionGeneratorFix({
+			validateArguments(ctx, checker, ...args) {
+				if (!args.length) {
+					return false;
+				}
+				// Ensure that the first argument is a string literal
+				const firstArg = args[0];
+				if (ts.isStringLiteralLike(firstArg)) {
+					return true;
+				} else if (ts.isIdentifier(firstArg)) {
+					const argType = checker.getTypeAtLocation(firstArg);
+					if (argType.isStringLiteral()) {
+						return true;
+					}
+				}
+				return false;
+			},
+			generator(ctx, identifierNames, ...args) {
+				return `${args[0]}.normalize("NFC") === ${args[0]}`;
+			},
+		})),
 		t.namespace("arraySymbolDiff", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/528
 			moduleName: "sap/base/util/array/diff",
 		})),
@@ -885,56 +907,6 @@ function validatePadLeftRightArguments(
 	}
 	return true;
 };
-
-/**
- * Fix for jQuery.sap.isStringNFC
- * 	Source: jQuery.sap.isStringNFC("foo")
- * 	Target: "foo".normalize("NFC") === "foo"
- */
-class IsStringNfcFix extends CallExpressionFix {
-	private arg?: string;
-
-	constructor() {
-		super({
-			scope: FixScope.FullExpression,
-		});
-	}
-
-	// visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
-	// 	// TODO: Check whether argument is identifier or string literal
-	// 	// In case of identifier, we need to check whether it's type is a string literal
-	// }
-
-	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
-		if (!super.visitAutofixNode(node, position, sourceFile)) {
-			return false;
-		}
-		if (!ts.isCallExpression(node) || !node.arguments.length) {
-			return false;
-		}
-
-		if (!ts.isStringLiteralLike(node.arguments[0])) {
-			return false;
-		}
-
-		this.arg = node.arguments[0].text;
-		return true;
-	}
-
-	generateChanges() {
-		if (this.startPos === undefined || this.endPos === undefined || this.arg === undefined) {
-			throw new Error("Start or end position or argument is not defined");
-		}
-
-		const value = `"${this.arg}".normalize("NFC") === "${this.arg}"`;
-		return {
-			action: ChangeAction.REPLACE,
-			start: this.startPos,
-			end: this.endPos,
-			value,
-		};
-	}
-}
 
 /**
  * Fix for jQuery.sap.charToUpperCase
