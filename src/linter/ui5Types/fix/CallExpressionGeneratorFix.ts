@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
+import {FixHelpers} from "./Fix.js";
 
 export interface CallExpressionGeneratorFixParams<GeneratorContext extends object> extends CallExpressionBaseFixParams {
 	/**
@@ -54,7 +55,7 @@ export interface CallExpressionGeneratorFixParams<GeneratorContext extends objec
 	 * This hook may also collect information that affects the generator. For that, it can store
 	 * information in the provided context object, which can be retrieved later in the generator function
 	 */
-	validateArguments?: (ctx: GeneratorContext, checker: ts.TypeChecker, ...args: ts.Expression[]) => boolean;
+	validateArguments?: (ctx: GeneratorContext, helpers: FixHelpers, ...args: ts.Expression[]) => boolean;
 }
 
 export default class CallExpressionGeneratorFix<GeneratorContext extends object> extends CallExpressionBaseFix {
@@ -65,15 +66,15 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 		super(params);
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
-		if (!super.visitLinterNode(node, sourcePosition, checker)) {
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {
+		if (!super.visitLinterNode(node, sourcePosition, helpers)) {
 			return false;
 		}
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
 		if (this.params.validateArguments) {
-			if (!this.params.validateArguments(this.generatorContext, checker, ...node.arguments)) {
+			if (!this.params.validateArguments(this.generatorContext, helpers, ...node.arguments)) {
 				return false;
 			}
 		}
