@@ -24,12 +24,17 @@ export interface NodeSearchParameters {
 	position: PositionInfo;
 }
 
+export interface FixHelpers {
+	checker: ts.TypeChecker;
+	manifestContent?: string;
+}
+
 export default abstract class Fix {
 	/**
 	 * Visit the node this fix has been created for in the (transpiled) linter AST
 	 * Returns true if the provided node can be used for the fix
 	 */
-	abstract visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker): boolean;
+	abstract visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers): boolean;
 
 	/**
 	 * Provide parameters for the autofix process to find the relevant node in the source AST

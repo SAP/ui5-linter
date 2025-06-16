@@ -8,6 +8,7 @@ import CallExpressionFix from "../CallExpressionFix.js";
 import {ChangeAction} from "../../../../autofix/autofix.js";
 import {PositionInfo} from "../../../LinterContext.js";
 import {FixScope} from "../BaseFix.js";
+import {FixHelpers} from "../Fix.js";
 
 /**
  * NOTE: Since jQuery.sap APIs are not fully typed, we generate a "mocked" UI5 Type Info in module "getJqueryFixInfo.ts"
@@ -139,7 +140,7 @@ t.declareModule("jQuery", [
 		// jQuery.sap.isStringNFC("foo") => "foo".normalize("NFC") === "foo"
 		// Note: This API only exists in old UI5 releases
 		t.namespace("isStringNFC", callExpressionGeneratorFix({
-			validateArguments(ctx, checker, ...args) {
+			validateArguments(ctx, {checker}, ...args) {
 				if (!args.length) {
 					return false;
 				}
@@ -647,7 +648,7 @@ t.declareModule("jQuery", [
 			},
 		})),
 		t.namespace("newObject", callExpressionGeneratorFix<{shortCircuit: boolean}>({
-			validateArguments(ctx, checker, arg1) {
+			validateArguments(ctx, {checker}, arg1) {
 				if (!arg1) {
 					return true;
 				}
@@ -848,7 +849,7 @@ function hasStringValue(checker: ts.TypeChecker, stringArg: ts.Expression): bool
 }
 
 function validateStartsWithEndsWithArguments(
-	ctx: {shortCircuit1: boolean}, checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+	ctx: {shortCircuit1: boolean}, {checker}: FixHelpers, arg1: ts.Expression, arg2: ts.Expression
 ) {
 	if (!arg1 || !arg2) {
 		// Both arguments must be provided
@@ -873,14 +874,14 @@ function validateStartsWithEndsWithArguments(
 
 function validateStartsWithEndsWithIgnoreCaseArguments(
 	ctx: {shortCircuit1: boolean; shortCircuit2: boolean},
-	checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+	helpers: FixHelpers, arg1: ts.Expression, arg2: ts.Expression
 ) {
-	if (!validateStartsWithEndsWithArguments(ctx, checker, arg1, arg2)) {
+	if (!validateStartsWithEndsWithArguments(ctx, helpers, arg1, arg2)) {
 		return false;
 	}
 
 	// If we can't be sure the second argument is a string, default it to an empty string
-	const value2 = getStringValue(checker, arg2);
+	const value2 = getStringValue(helpers.checker, arg2);
 	if (value2 === undefined && arg1.kind !== ts.SyntaxKind.NullKeyword) {
 		ctx.shortCircuit2 = true;
 	}
@@ -889,7 +890,7 @@ function validateStartsWithEndsWithIgnoreCaseArguments(
 
 function validatePadLeftRightArguments(
 	ctx: {shortCircuit: boolean},
-	checker: ts.TypeChecker, arg1: ts.Expression, arg2: ts.Expression
+	{checker}: FixHelpers, arg1: ts.Expression, arg2: ts.Expression
 ) {
 	if (!arg1 || !arg2) {
 		// Both arguments must be provided
@@ -934,8 +935,8 @@ class CharToUpperCaseFix extends CallExpressionFix {
 		});
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
-		if (!super.visitLinterNode(node, sourcePosition, checker)) {
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {
+		if (!super.visitLinterNode(node, sourcePosition, helpers)) {
 			return false;
 		}
 		if (!ts.isCallExpression(node) || node.arguments.length < 1) {
@@ -950,7 +951,7 @@ class CharToUpperCaseFix extends CallExpressionFix {
 		let stringLength;
 		if (ts.isIdentifier(stringArg)) {
 			// If it's an identifier, we need to check whether it is a string literal type
-			const argType = checker.getTypeAtLocation(stringArg);
+			const argType = helpers.checker.getTypeAtLocation(stringArg);
 			if (!argType.isStringLiteral()) {
 				return false;
 			}

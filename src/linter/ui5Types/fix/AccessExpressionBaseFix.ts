@@ -2,6 +2,7 @@ import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
 import {countChildNodesRecursive, isAssignment} from "../utils/utils.js";
+import {FixHelpers} from "./Fix.js";
 
 export interface AccessExpressionBaseFixParams extends BaseFixParams {
 	/**
@@ -28,7 +29,7 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 		super(params);
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _checker: ts.TypeChecker) {
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _helpers: FixHelpers) {
 		if (!ts.isPropertyAccessExpression(node) && !ts.isElementAccessExpression(node) && !ts.isCallExpression(node)) {
 			// CallExpression is acceptable as well since the starting position is the same as the contained
 			// access expression

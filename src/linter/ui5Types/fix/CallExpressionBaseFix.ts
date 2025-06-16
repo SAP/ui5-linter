@@ -4,6 +4,7 @@ import {
 	countChildNodesRecursive, findNodeRecursive, isExpectedValueExpression, isSideEffectFree,
 } from "../utils/utils.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
+import {FixHelpers} from "./Fix.js";
 
 export interface CallExpressionBaseFixParams extends BaseFixParams {
 	/**
@@ -21,7 +22,7 @@ export default abstract class CallExpressionBaseFix extends BaseFix {
 		super(params);
 	}
 
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {
 		if (!ts.isCallExpression(node)) {
 			return false;
 		}
@@ -34,7 +35,7 @@ export default abstract class CallExpressionBaseFix extends BaseFix {
 		if (containedCallExpression) {
 			// Call expression fixes must not affect other call expressions, unless the contained call expression
 			// is side-effect free, e.g. sap.ui.getCore().method()
-			if (isSideEffectFree(containedCallExpression, checker)) {
+			if (isSideEffectFree(containedCallExpression, helpers.checker)) {
 				this.containedCallExpressionCount = 1;
 			} else {
 				return false;

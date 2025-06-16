@@ -1,6 +1,5 @@
 import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
-import {PositionInfo} from "../../LinterContext.js";
 import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
 import {FixScope} from "./BaseFix.js";
 
@@ -26,10 +25,6 @@ export interface CallExpressionFixParams extends CallExpressionBaseFixParams {
 export default class CallExpressionFix extends CallExpressionBaseFix {
 	constructor(protected params: CallExpressionFixParams) {
 		super(params);
-	}
-
-	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, checker: ts.TypeChecker) {
-		return super.visitLinterNode(node, sourcePosition, checker);
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {
