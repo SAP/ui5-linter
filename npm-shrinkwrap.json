@@ -59,7 +59,7 @@
 				"sinon": "^20.0.0",
 				"tsx": "^4.20.3",
 				"typescript-eslint": "^8.34.0",
-				"ui5-test-runner": "^5.7.2",
+				"ui5-test-runner": "^5.7.3",
 				"yauzl-promise": "^4.0.0"
 			},
 			"engines": {
@@ -17212,10 +17212,11 @@
 			"dev": true
 		},
 		"node_modules/reserve": {
-			"version": "2.2.0",
-			"resolved": "https://registry.npmjs.org/reserve/-/reserve-2.2.0.tgz",
-			"integrity": "sha512-60rsjjXg/f1wVH5/JO6XAtqvK2GwVveGddNc/VPbexcXqUcTAx0m2rUKMoMZD7K8Z0u3ev/RAeSM5B/hcvgrgw==",
+			"version": "2.3.1",
+			"resolved": "https://registry.npmjs.org/reserve/-/reserve-2.3.1.tgz",
+			"integrity": "sha512-m+Shaa/pFofRRmmp15H2rqJNiSG9k5AHllq6+o9YIfWDZFCMA0FgKbVUMk1XKC7bgbMm7UGNcfPyNT7HlNS/Ow==",
 			"dev": true,
+			"license": "MIT",
 			"bin": {
 				"reserve": "dist/cli.js"
 			},
@@ -18344,16 +18345,17 @@
 			}
 		},
 		"node_modules/ui5-test-runner": {
-			"version": "5.7.2",
-			"resolved": "https://registry.npmjs.org/ui5-test-runner/-/ui5-test-runner-5.7.2.tgz",
-			"integrity": "sha512-Q9oblaqEpffXlTly/awB+2oK+9l/m/YrcjEeTW0l9TKS+CQr6WbIVE61j0CtEb/EpFM70nDdv29+3lDqUoXhmQ==",
+			"version": "5.7.3",
+			"resolved": "https://registry.npmjs.org/ui5-test-runner/-/ui5-test-runner-5.7.3.tgz",
+			"integrity": "sha512-Ihl/DZJQLAlDcm3T/M6yHRTX5MKvTxPSNXOeE6JS7/Ts8jGOjDwUxciEw0YbRfWZgV3G3QLKPmJ9uxlRe4UtSw==",
 			"dev": true,
+			"license": "MIT",
 			"dependencies": {
 				"commander": "^12.1.0",
 				"ps-tree": "^1.2.0",
 				"punybind": "^1.2.1",
 				"punyexpr": "1.1.1",
-				"reserve": "2.2.0"
+				"reserve": "2.3.1"
 			},
 			"bin": {
 				"ui5-test-runner": "index.js"
