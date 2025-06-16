@@ -222,12 +222,14 @@ function testDefinition(
 		}
 
 		if (fix) {
-			t.is(t.context.autofixSpy.callCount, 1);
-			const autofixResult = await t.context.autofixSpy.getCall(0).returnValue;
-			const autofixResultEntries = Array.from(autofixResult.entries());
-			autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
-			for (const [filePath, content] of autofixResultEntries) {
-				t.snapshot(content, `AutofixResult: ${filePath}`);
+			t.truthy(t.context.autofixSpy.callCount >= 1);
+			for (let i = 0; i < t.context.autofixSpy.callCount; i++) {
+				const autofixResult = await t.context.autofixSpy.getCall(i).returnValue;
+				const autofixResultEntries = Array.from(autofixResult.entries());
+				autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
+				for (const [filePath, content] of autofixResultEntries) {
+					t.snapshot(content, `AutofixResult iteration #${i}: ${filePath}`);
+				}
 			}
 		}
 
