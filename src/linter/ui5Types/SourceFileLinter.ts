@@ -1496,7 +1496,7 @@ export default class SourceFileLinter {
 				category: CoverageCategory.CallExpressionUnknownType,
 				message:
 					`Unable to analyze this method call because the type of identifier` +
-					`${identifier ? " \"" + identifier.text + "\"" : ""} in "${node.getText()}"" ` +
+					`${identifier ? " \"" + identifier.text + "\"" : ""} in "${node.getText()}" ` +
 					`could not be determined`,
 			});
 		}
