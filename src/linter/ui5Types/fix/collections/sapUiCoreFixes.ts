@@ -18,6 +18,16 @@ t.declareModule("sap/ui/core/Configuration", [
 			moduleName: "sap/base/i18n/Localization",
 			mustNotUseReturnValue: true,
 		})),
+		t.method("getLocale", callExpressionGeneratorFix({
+			moduleImports: [{
+				moduleName: "sap/ui/core/Locale",
+			}, {
+				moduleName: "sap/base/i18n/Localization",
+			}],
+			generator(ctx, identifierNames) {
+				return `new ${identifierNames[0]}(${identifierNames[1]}.getLanguageTag())`;
+			},
+		})),
 	]),
 ]);
 t.declareModule("sap/ui/core/Core", [
