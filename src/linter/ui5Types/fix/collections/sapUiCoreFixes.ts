@@ -53,7 +53,7 @@ t.declareModule("sap/ui/core/Core", [
 		})),
 		t.method("isMobile", callExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (ctx, moduleIdentifier) => {
+			generator: (ctx, [moduleIdentifier]) => {
 				return `${moduleIdentifier}.browser.mobile`;
 			},
 		})),
@@ -64,19 +64,19 @@ t.declareModule("sap/ui/core/Core", [
 		t.method("getCurrentFocusedControlId", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Element",
 			// The legacy API used to return null if no control was focused.
-			generator: (ctx, moduleIdentifier) => {
+			generator: (ctx, [moduleIdentifier]) => {
 				return `${moduleIdentifier}.getActiveElement()?.getId() || null`;
 			},
 		})),
 		t.method("byFieldGroupId", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Control",
-			generator: (ctx, moduleIdentifier, arg1) => {
+			generator: (ctx, [moduleIdentifier], arg1) => {
 				return `${moduleIdentifier}.getControlsByFieldGroupId(${arg1})`;
 			},
 		})),
 		t.method("isStaticAreaRef", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/StaticArea",
-			generator: (ctx, moduleIdentifier, arg1) => {
+			generator: (ctx, [moduleIdentifier], arg1) => {
 				return `${moduleIdentifier}.getDomRef() === ${arg1}`;
 			},
 		})),
@@ -89,7 +89,7 @@ t.declareModule("sap/ui/core/Core", [
 				}
 				return false;
 			},
-			generator: (ctx, moduleIdentifier, arg1) => {
+			generator: (ctx, [moduleIdentifier], arg1) => {
 				return `${moduleIdentifier}.setTheme(${arg1})`;
 			},
 		})),

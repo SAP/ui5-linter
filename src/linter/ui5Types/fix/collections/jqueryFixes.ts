@@ -174,7 +174,7 @@ t.declareModule("jQuery", [
 				}
 				return true;
 			},
-			generator(ctx, moduleIdentifierName, _, arg2, arg3) {
+			generator(ctx, [moduleIdentifierName], _, arg2, arg3) {
 				return `${moduleIdentifierName}(${arg2.trim()},${arg3})`;
 			},
 		})),
@@ -207,7 +207,7 @@ t.declareModule("jQuery", [
 				}
 				return true;
 			},
-			generator(ctx, moduleIdentifier, ...args) {
+			generator(ctx, [moduleIdentifier], ...args) {
 				if (ctx.shortCircuit) {
 					args[0] = `(${args[0]} || "")`; // Short-circuit the first argument to avoid undefined/null
 				}
@@ -283,7 +283,7 @@ t.declareModule("jQuery", [
 		t.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
 			t.namespace("getRequestTimings", callExpressionGeneratorFix({
 				globalName: "performance",
-				generator(ctx, moduleIdentifierName) {
+				generator(ctx, [moduleIdentifierName]) {
 					return `${moduleIdentifierName}.getEntriesByType("resource")`;
 				},
 			})),
@@ -600,7 +600,7 @@ t.declareModule("jQuery", [
 				}
 				return true;
 			},
-			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+			generator: (ctx, [moduleIdentifier], arg1, arg2) => {
 				if (ctx.replaceWithNull) {
 					return "null";
 				}
@@ -660,7 +660,7 @@ t.declareModule("jQuery", [
 				}
 				return true;
 			},
-			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+			generator: (ctx, [moduleIdentifier], arg1, arg2) => {
 				if (ctx.argValue) {
 					// Use the modified value
 					arg1 = ctx.argValue;
@@ -677,7 +677,7 @@ t.declareModule("jQuery", [
 		})),
 		t.namespace("getResourcePath", callExpressionGeneratorFix({
 			globalName: "sap.ui.require",
-			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+			generator: (ctx, [moduleIdentifier], arg1, arg2) => {
 				let res = `${moduleIdentifier}.toUrl(${arg1})`;
 				if (arg2) {
 					res = `${res} +${arg2}`;
@@ -730,28 +730,28 @@ t.declareModule("jQuery", [
 			})),
 			t.namespace("android_phone", accessExpressionGeneratorFix({
 				moduleName: "sap/ui/Device",
-				generator: (moduleIdentifier) => (
+				generator: ([moduleIdentifier]) => (
 					`${moduleIdentifier}.os.android && ` +
 					`${moduleIdentifier}.system.phone`
 				),
 			})),
 			t.namespace("android_tablet", accessExpressionGeneratorFix({
 				moduleName: "sap/ui/Device",
-				generator: (moduleIdentifier) => (
+				generator: ([moduleIdentifier]) => (
 					`${moduleIdentifier}.os.android && ` +
 					`${moduleIdentifier}.system.tablet`
 				),
 			})),
 			t.namespace("iphone", accessExpressionGeneratorFix({
 				moduleName: "sap/ui/Device",
-				generator: (moduleIdentifier) => (
+				generator: ([moduleIdentifier]) => (
 					`${moduleIdentifier}.os.ios && ` +
 					`${moduleIdentifier}.system.phone`
 				),
 			})),
 			t.namespace("ipad", accessExpressionGeneratorFix({
 				moduleName: "sap/ui/Device",
-				generator: (moduleIdentifier) => (
+				generator: ([moduleIdentifier]) => (
 					`${moduleIdentifier}.os.ios && ` +
 					`${moduleIdentifier}.system.tablet`
 				),
@@ -773,31 +773,31 @@ t.declareModule("jQuery", [
 		})),
 		t.namespace("Android", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "Android"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "Android"`,
 		})),
 		t.namespace("bb", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "bb"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "bb"`,
 		})),
 		t.namespace("iOS", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "iOS"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "iOS"`,
 		})),
 		t.namespace("winphone", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "winphone"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "winphone"`,
 		})),
 		t.namespace("win", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "win"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "win"`,
 		})),
 		t.namespace("linux", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "linux"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "linux"`,
 		})),
 		t.namespace("mac", accessExpressionGeneratorFix({
 			moduleName: "sap/ui/Device",
-			generator: (moduleIdentifier) => `${moduleIdentifier}.os.name === "mac"`,
+			generator: ([moduleIdentifier]) => `${moduleIdentifier}.os.name === "mac"`,
 		})),
 	]),
 ]);
@@ -1036,13 +1036,14 @@ class CharToUpperCaseFix extends CallExpressionFix {
 			throw new Error("Start or end position or argument is not defined");
 		}
 
-		if (!this.moduleIdentifierName || (this.argIdentifierName === undefined && this.argStringValue === undefined)) {
+		if (!this.moduleIdentifierNames?.has("sap/base/strings/capitalize") ||
+			(this.argIdentifierName === undefined && this.argStringValue === undefined)) {
 			// Identifier has not been set. This can happen if the relevant position is not inside a
 			// module definition or require block. Therefore the fix can not be applied.
 			return;
 		}
 		const arg = this.argStringValue ?? this.argIdentifierName;
-		const value = `${this.moduleIdentifierName}(${arg})`;
+		const value = `${this.moduleIdentifierNames.get("sap/base/strings/capitalize")!}(${arg})`;
 		return {
 			action: ChangeAction.REPLACE,
 			start: this.startPos,
