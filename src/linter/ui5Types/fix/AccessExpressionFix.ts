@@ -17,15 +17,21 @@ export default class AccessExpressionFix extends AccessExpressionBaseFix {
 			throw new Error("Start and end position are not defined");
 		}
 
-		const identifier = this.getIdentifiersForSingleRequest(this.params.moduleName, this.params.globalName);
-		if (!identifier) {
-			return;
-		}
+		let value;
+		if (this.requestsModuleOrGlobal) {
+			const identifier = this.getIdentifiersForSingleRequest(this.params.moduleName, this.params.globalName);
+			if (!identifier) {
+				// Requests could not be fulfilled, do not generate a change
+				return;
+			}
 
-		let value = identifier;
-		if (this.params.propertyAccess) {
-			// If a property is defined, we need to access it on the identifier
-			value = `${value}.${this.params.propertyAccess}`;
+			value = identifier;
+			if (this.params.propertyAccess) {
+				// If a property is defined, we need to access it on the identifier
+				value = `${value}.${this.params.propertyAccess}`;
+			}
+		} else {
+			value = this.params.propertyAccess ?? "";
 		}
 		return {
 			action: ChangeAction.REPLACE,

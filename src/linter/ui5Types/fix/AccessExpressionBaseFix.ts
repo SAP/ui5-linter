@@ -76,7 +76,17 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 			}
 			relevantNode = relevantNode.expression;
 		}
-		this.startPos = relevantNode.getStart(sourceFile);
+		if (!this.requestsModuleOrGlobal) {
+			// If no module or global is requested, we assume the current property access should stay.
+			// Therefore, ignore the expression of the "relevant node" and start at the name
+			if (!ts.isPropertyAccessExpression(relevantNode)) {
+				// We can't replace an element access expression like this
+				return false;
+			}
+			this.startPos = relevantNode.name.getStart(sourceFile);
+		} else {
+			this.startPos = relevantNode.getStart(sourceFile);
+		}
 		this.endPos = relevantNode.getEnd();
 		return true;
 	}
