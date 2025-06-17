@@ -51,6 +51,19 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var delayedCallId4 = jQuery.sap.delayedCall(1000, this, function () {
 		var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
 	}, ["myParam1", "myParam2"]);
+	// OPA tests use this to wait for something to be ready
+	jQuery.sap.delayedCall(1000, this, function () {
+		var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
+
+		jQuery.sap.delayedCall(1000, this, function () {
+			var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
+
+			jQuery.sap.delayedCall(1000, this, function () {
+				var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
+			});
+		});
+	});
+	
 	jQuery.sap.clearDelayedCall(delayedCallId);
 	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction");
 	var intervalCallId2 = jQuery.sap.intervalCall(1000, myObject, myObject.myFunction, ["myParam1"]);
