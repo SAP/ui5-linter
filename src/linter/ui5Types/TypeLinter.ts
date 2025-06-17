@@ -123,10 +123,9 @@ export default class TypeLinter {
 			let res;
 			if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
 				res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
+			} else if (this.#context.getApplyAutofix()) {
+				[res] = await this.#workspace.byGlob("**/manifest.json");
 			}
-			// else if (applyAutofix) {
-			// 	[res] = await this.#workspace.byGlob("**/manifest.json");
-			// }
 
 			if (res) {
 				manifestContent = await res.getString();

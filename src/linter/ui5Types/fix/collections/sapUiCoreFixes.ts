@@ -236,8 +236,9 @@ t.declareModule("sap/ui/core/Core", [
 				// 	}
 				// }
 
-				const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
-				return !!checker.getAmbientModules().find((ambientModule) => ambientModule.getName() === libName);
+				// const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
+				// return !!checker.getAmbientModules().find((ambientModule) => ambientModule.getName() === libName);
+				return false;
 			},
 			generator: (ctx, moduleIdentifier, arg1, arg2) => {
 				return `${moduleIdentifier}.getResourceBundleFor(${ctx.fallback ?? arg1}${arg2 ? ", " + arg2 : ""})`;

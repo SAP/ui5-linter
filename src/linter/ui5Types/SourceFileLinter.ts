@@ -34,7 +34,7 @@ import {
 	getModuleTypeInfo, getNamespace, getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind,
 } from "./Ui5TypeInfo.js";
 import FixFactory from "./fix/FixFactory.js";
-import Fix from "./fix/Fix.js";
+import Fix, {FixHelpers} from "./fix/Fix.js";
 import GlobalFix from "./fix/GlobalFix.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
@@ -103,6 +103,10 @@ export default class SourceFileLinter {
 		this.#hasTestStarterFindings = false;
 		this.#metadata = this.typeLinter.getContext().getMetadata(this.resourcePath);
 		this.#xmlContents = [];
+		this.fixHelpers = {
+			checker: this.checker,
+			manifestContent: this.manifestContent,
+		};
 	}
 
 	async lint() {
