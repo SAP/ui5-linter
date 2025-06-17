@@ -9,9 +9,11 @@ import {AmbientModuleCache} from "../AmbientModuleCache.js";
 import getGlobalFixInfo, {GlobalFixInfo} from "./getGlobalFixInfo.js";
 import CallExpressionGeneratorFix, {CallExpressionGeneratorFixParams} from "./CallExpressionGeneratorFix.js";
 import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
+import PropertyAssignmentFix, {PropertyAssignmentFixParams} from "./PropertyAssignmentFix.js";
 
 const AUTOFIX_COLLECTIONS = [
 	"sapUiCoreFixes",
+	"sapMFixes",
 	"jqueryFixes",
 ];
 
@@ -113,4 +115,8 @@ export function callExpressionGeneratorFix<GeneratorContext extends object = obj
 	params: CallExpressionGeneratorFixParams<GeneratorContext>
 ): () => CallExpressionGeneratorFix<GeneratorContext> {
 	return () => new CallExpressionGeneratorFix<GeneratorContext>(params);
+}
+
+export function propertyAssignmentFix(params: PropertyAssignmentFixParams): () => PropertyAssignmentFix {
+	return () => new PropertyAssignmentFix(params);
 }
