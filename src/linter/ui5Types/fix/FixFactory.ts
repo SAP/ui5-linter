@@ -13,8 +13,10 @@ import PropertyAssignmentFix, {PropertyAssignmentFixParams} from "./PropertyAssi
 
 const AUTOFIX_COLLECTIONS = [
 	"sapUiCoreFixes",
-	"sapMFixes",
 	"jqueryFixes",
+	"sapMFixes",
+	"sapUiLayoutFixes",
+	"sapUiCompFixes",
 ];
 
 interface FixCollection {

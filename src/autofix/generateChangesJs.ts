@@ -6,7 +6,7 @@ import {
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
 } from "./autofix.js";
-import {collectIdentifiers, matchPropertyAccessExpression} from "./utils.js";
+import {collectIdentifiers, matchPropertyAccessExpression, removeConflictingFixes} from "./utils.js";
 import parseModuleDeclaration from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import parseRequire from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
@@ -18,18 +18,12 @@ import {
 } from "./amdImports.js";
 import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
-const log = getLogger("linter:autofix:generateChanges");
+const log = getLogger("linter:autofix:generateChangesJs");
 
 interface NodeSearchInfo {
 	position: Position;
 	fix: Fix;
 	nodeTypes: ts.SyntaxKind[];
-}
-
-interface FixRange {
-	start: number;
-	end: number;
-	fix: Fix;
 }
 
 interface DependencyRequest {
@@ -140,37 +134,12 @@ export default function generateChanges(
 	}
 	ts.forEachChild(sourceFile, visitNode);
 
-	const fixRanges: FixRange[] = [];
-	for (const fix of matchedFixes) {
-		const ranges = fix.getAffectedSourceCodeRange();
-		if (Array.isArray(ranges)) {
-			for (const range of ranges) {
-				fixRanges.push({
-					start: range.start,
-					end: range.end,
-					fix: fix,
-				});
-			}
-		} else {
-			const {start, end} = ranges;
-			fixRanges.push({
-				start,
-				end,
-				fix: fix,
-			});
-		}
-	}
+	removeConflictingFixes(matchedFixes);
 
-	const conflicts = findRangeConflicts(fixRanges);
 	const dependencyRequests = new Set<DependencyRequest>();
 	const blockedModuleImports = new Set<string>();
 	const globalAccessRequests = new Set<GlobalAccessRequest>();
 	for (const fix of matchedFixes) {
-		if (conflicts.includes(fix)) {
-			matchedFixes.delete(fix);
-			continue;
-		}
-
 		// Collect new dependencies
 		const newDependencies = fix.getNewModuleDependencies();
 		if (Array.isArray(newDependencies)) {
@@ -290,28 +259,6 @@ export default function generateChanges(
 			changeSets.push(changes);
 		}
 	}
-}
-
-function findRangeConflicts(fixRanges: FixRange[]) {
-	if (fixRanges.length === 0) return [];
-
-	// Sort fixRanges by start position; if start is the same, sort by end position
-	fixRanges.sort((a, b) => a.start - b.start || a.end - b.end);
-
-	const overlaps = [];
-	let currentEnd = fixRanges[0].end;
-
-	for (let i = 1; i < fixRanges.length; i++) {
-		const fixRange = fixRanges[i];
-
-		if (fixRange.start < currentEnd) {
-			overlaps.push(fixRange.fix);
-		}
-
-		currentEnd = Math.max(currentEnd, fixRange.end);
-	}
-
-	return overlaps;
 }
 
 function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,

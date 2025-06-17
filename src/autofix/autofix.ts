@@ -6,7 +6,8 @@ import LinterContext, {RawLintMessage, ResourcePath} from "../linter/LinterConte
 import {MESSAGE} from "../linter/messages.js";
 import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
-import generateChanges from "./generateChanges.js";
+import generateChangesJs from "./generateChangesJs.js";
+import generateChangesXml from "./generateChangesXml.js";
 
 const log = getLogger("linter:autofix");
 
@@ -173,15 +174,25 @@ export default async function ({
 	context,
 }: AutofixOptions): Promise<AutofixResult> {
 	const messages = new Map<string, RawLintMessage[]>();
-	const resources: Resource[] = [];
+	const xmlResources: Resource[] = [];
+	const jsResources: Resource[] = [];
 	for (const [_, autofixResource] of autofixResources) {
-		messages.set(autofixResource.resource.getPath(), autofixResource.messages);
-		resources.push(autofixResource.resource);
+		const fixMessages = autofixResource.messages.filter((msg) => msg.fix);
+		if (!fixMessages.length) {
+			// No fixes available for this resource
+			continue;
+		}
+		messages.set(autofixResource.resource.getPath(), fixMessages);
+		if (autofixResource.resource.getPath().endsWith(".xml")) {
+			xmlResources.push(autofixResource.resource);
+		} else {
+			jsResources.push(autofixResource.resource);
+		}
 	}
 
 	const sourceFiles: SourceFiles = new Map();
-	const resourcePaths = [];
-	for (const resource of resources) {
+	const jsResourcePaths = [];
+	for (const resource of jsResources) {
 		const resourcePath = resource.getPath();
 		const sourceFile = ts.createSourceFile(
 			resource.getPath(),
@@ -192,11 +203,11 @@ export default async function ({
 			}
 		);
 		sourceFiles.set(resourcePath, sourceFile);
-		resourcePaths.push(resourcePath);
+		jsResourcePaths.push(resourcePath);
 	}
 
 	const compilerHost = createCompilerHost(sourceFiles);
-	const program = createProgram(resourcePaths, compilerHost);
+	const program = createProgram(jsResourcePaths, compilerHost);
 
 	const checker = program.getTypeChecker();
 	const res: AutofixResult = new Map();
@@ -219,7 +230,7 @@ export default async function ({
 		log.verbose(`Applying autofix for ${resourcePath}`);
 		let newContent;
 		try {
-			newContent = applyFixes(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
+			newContent = applyFixesJs(checker, sourceFile, resourcePath, messages.get(resourcePath)!);
 		} catch (err) {
 			if (err instanceof Error) {
 				log.verbose(`Error while applying autofix to ${resourcePath}: ${err}`);
@@ -264,22 +275,43 @@ export default async function ({
 		}
 	}
 
+	for (const resource of xmlResources) {
+		const resourcePath = resource.getPath();
+		const newContent = await applyFixesXml(resource, messages.get(resourcePath)!);
+		if (newContent) {
+			res.set(resourcePath, newContent);
+		}
+	}
+
 	return res;
 }
 
-function applyFixes(
+function applyFixesJs(
 	checker: ts.TypeChecker, sourceFile: ts.SourceFile, resourcePath: ResourcePath,
 	messages: RawLintMessage[]
 ): string | undefined {
 	const content = sourceFile.getFullText();
 
 	const changeSet: ChangeSet[] = [];
-	const fixes = messages.filter((msg) => !!msg.fix);
-	generateChanges(resourcePath, checker, sourceFile, content, fixes, changeSet);
+	generateChangesJs(resourcePath, checker, sourceFile, content, messages, changeSet);
 
 	if (changeSet.length === 0) {
 		// No modifications needed
 		return;
+	}
+	return applyChanges(content, changeSet);
+}
+
+async function applyFixesXml(
+	resource: Resource,
+	messages: RawLintMessage[]
+): Promise<string | undefined> {
+	const content = await resource.getString();
+	const changeSet: ChangeSet[] = [];
+	await generateChangesXml(messages, changeSet, content, resource);
+
+	if (changeSet.length === 0) {
+		return undefined;
 	}
 	return applyChanges(content, changeSet);
 }

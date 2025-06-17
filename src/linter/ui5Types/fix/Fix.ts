@@ -1,6 +1,7 @@
 import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import {ChangeSet} from "../../../autofix/autofix.js";
+import {SaxEventType} from "sax-wasm";
 
 export interface ModuleDependencyRequest {
 	moduleName: string;
@@ -21,6 +22,7 @@ export interface SourceCodeRange {
 
 export interface NodeSearchParameters {
 	nodeTypes: ts.SyntaxKind[];
+	xmlEventTypes?: SaxEventType[];
 	position: PositionInfo;
 }
 
