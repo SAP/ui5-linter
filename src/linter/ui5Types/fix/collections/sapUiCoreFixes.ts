@@ -7,6 +7,7 @@ import {
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
+import {SAPJSONSchemaForWebApplicationManifestFile} from "../../../../manifest.js";
 
 const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("sap.ui.core");
 export default t;
@@ -155,7 +156,7 @@ t.declareModule("sap/ui/core/Core", [
 					return false; // Migration is not possible
 				}
 			},
-			generator: (ctx: {json?: Record<string, string>}, moduleIdentifier) => {
+			generator: (ctx: {json?: Record<string, string>}, [moduleIdentifier]) => {
 				return `${moduleIdentifier}.load(${JSON.stringify(ctx.json)})`;
 			},
 		})),
@@ -194,7 +195,7 @@ t.declareModule("sap/ui/core/Core", [
 					return false; // Migration is not possible (sync component creation)
 				}
 			},
-			generator: (ctx, moduleIdentifier) => {
+			generator: (ctx, [moduleIdentifier]) => {
 				return `${moduleIdentifier}.create(${JSON.stringify(ctx.json)})`;
 			},
 		})),
@@ -204,7 +205,7 @@ t.declareModule("sap/ui/core/Core", [
 		// sLibrary must be a library.
 		t.method("getLibraryResourceBundle", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Lib",
-			validateArguments: (ctx: {fallback: string}, _fixHints, arg1, arg2, arg3) => {
+			validateArguments: (ctx: {fallback: string}, fixHints, arg1, arg2, arg3) => {
 				// Handling fallback in the legacy API
 				if (!arg1 ||
 					(ts.isIdentifier(arg1) && arg1.text === "undefined") ||
@@ -225,7 +226,16 @@ t.declareModule("sap/ui/core/Core", [
 				if (ts.isStringLiteralLike(arg1)) {
 					libNamespace = arg1.text;
 				}
-				// TODO: Import manifest.json and check if the library is valid
+
+				// Check in manifest.json if the library is defined
+				if (fixHints?.manifestContent && typeof fixHints.manifestContent === "string") {
+					const manifest = JSON.parse(fixHints?.manifestContent) as
+						SAPJSONSchemaForWebApplicationManifestFile;
+
+					if (manifest?.["sap.ui5"]?.dependencies?.libs?.[libNamespace ?? ""]) {
+						return true;
+					}
+				}
 
 				// TODO: Check if works
 				// const {fileName} = arg1.getSourceFile();
@@ -236,11 +246,11 @@ t.declareModule("sap/ui/core/Core", [
 				// 	}
 				// }
 
-				// const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
-				// return !!checker.getAmbientModules().find((ambientModule) => ambientModule.getName() === libName);
-				return false;
+				const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
+				return !!fixHints.checker.getAmbientModules()
+					.find((ambientModule) => ambientModule.getName() === libName);
 			},
-			generator: (ctx, moduleIdentifier, arg1, arg2) => {
+			generator: (ctx, [moduleIdentifier], arg1, arg2) => {
 				return `${moduleIdentifier}.getResourceBundleFor(${ctx.fallback ?? arg1}${arg2 ? ", " + arg2 : ""})`;
 			},
 		})),
@@ -251,7 +261,7 @@ t.declareModule("sap/ui/core/Core", [
 			validateArguments: (_ctx, _fixHints, _arg1, arg2) => {
 				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
 			},
-			generator: (_ctx, moduleIdentifier, arg1) => {
+			generator: (_ctx, [moduleIdentifier], arg1) => {
 				return `${moduleIdentifier}.addListener(${arg1})`;
 			},
 		})),
@@ -262,7 +272,7 @@ t.declareModule("sap/ui/core/Core", [
 			validateArguments: (_ctx, _fixHints, _arg1, arg2) => {
 				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
 			},
-			generator: (ctx, moduleIdentifier, arg1) => {
+			generator: (ctx, [moduleIdentifier], arg1) => {
 				return `${moduleIdentifier}.removeListener(${arg1})`;
 			},
 		})),
