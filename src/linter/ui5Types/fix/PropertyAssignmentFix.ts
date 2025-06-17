@@ -1,17 +1,22 @@
 import ts from "typescript";
-import {ChangeAction} from "../../../autofix/autofix.js";
+import {ChangeAction, ChangeSet} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
-import Fix from "./Fix.js";
+import {Attribute, Position, SaxEventType} from "sax-wasm";
+import XmlEnabledFix from "./XmlEnabledFix.js";
 
 export interface PropertyAssignmentFixParams {
-	property: string;
+	/**
+	 * Property name to replace the property access with.
+	 * If not defined, the complete property assignment will be removed.
+	 */
+	property?: string;
 };
 
 /**
  * Fix a global property access. Requires a module name which will be imported and replaces the defined property access.
  * The property access is in the order of the AST, e.g. ["core", "ui", "sap"]
  */
-export default class PropertyAssignmentFix extends Fix {
+export default class PropertyAssignmentFix extends XmlEnabledFix {
 	private sourcePosition: PositionInfo | undefined;
 	private startPos: number | undefined;
 	private endPos: number | undefined;
@@ -35,6 +40,7 @@ export default class PropertyAssignmentFix extends Fix {
 		}
 		return {
 			nodeTypes: [ts.SyntaxKind.PropertyAssignment],
+			xmlEventTypes: [SaxEventType.Attribute],
 			position: this.sourcePosition,
 		};
 	}
@@ -43,9 +49,24 @@ export default class PropertyAssignmentFix extends Fix {
 		if (!ts.isPropertyAssignment(node)) {
 			return false;
 		}
-		const identifier = node.name;
-		this.startPos = identifier.getStart(sourceFile);
-		this.endPos = identifier.getEnd();
+		if (this.params.property) {
+			// Only replace the property name, not the whole assignment
+			node = node.name;
+		}
+		this.startPos = node.getStart(sourceFile);
+		this.endPos = node.getEnd();
+		return true;
+	}
+
+	visitAutofixXmlNode(node: Attribute, toPosition: (pos: Position) => number) {
+		this.startPos = toPosition(node.name.start);
+		if (this.params.property) {
+			// Only replace the property name, not the whole assignment
+			this.endPos = toPosition(node.name.end);
+		} else {
+			// Replace the whole assignment
+			this.endPos = toPosition(node.value.end) + 1; // TODO: +1 might be incorrect if no quotes are used
+		}
 		return true;
 	}
 
@@ -75,15 +96,23 @@ export default class PropertyAssignmentFix extends Fix {
 		return;
 	}
 
-	generateChanges() {
+	generateChanges(): ChangeSet {
 		if (this.startPos === undefined || this.endPos === undefined) {
 			throw new Error("Start and end position are not defined");
 		}
-		return {
-			action: ChangeAction.REPLACE,
-			start: this.startPos,
-			end: this.endPos,
-			value: this.params.property,
-		};
+		if (this.params.property) {
+			return {
+				action: ChangeAction.REPLACE,
+				start: this.startPos,
+				end: this.endPos,
+				value: this.params.property,
+			};
+		} else {
+			return {
+				action: ChangeAction.DELETE,
+				start: this.startPos,
+				end: this.endPos,
+			};
+		}
 	}
 }

@@ -1,4 +1,5 @@
 import ts from "typescript";
+import Fix from "../linter/ui5Types/fix/Fix.js";
 
 export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string): boolean {
 	const propAccessChain: string[] = [];
@@ -46,4 +47,51 @@ export function collectIdentifiers(node: ts.SourceFile) {
 	ts.forEachChild(node, collectIdentifiers);
 
 	return declaredIdentifiers;
+}
+
+interface FixRange {
+	start: number;
+	end: number;
+	fix: Fix;
+}
+
+export function removeConflictingFixes(fixes: Set<Fix>) {
+	const fixRanges: FixRange[] = [];
+	for (const fix of fixes) {
+		const ranges = fix.getAffectedSourceCodeRange();
+		if (Array.isArray(ranges)) {
+			for (const range of ranges) {
+				fixRanges.push({
+					start: range.start,
+					end: range.end,
+					fix: fix,
+				});
+			}
+		} else {
+			const {start, end} = ranges;
+			fixRanges.push({
+				start,
+				end,
+				fix: fix,
+			});
+		}
+	}
+
+	if (fixRanges.length === 0) return [];
+
+	// Sort fixRanges by start position; if start is the same, sort by end position
+	fixRanges.sort((a, b) => a.start - b.start || a.end - b.end);
+
+	let currentEnd = fixRanges[0].end;
+
+	for (let i = 1; i < fixRanges.length; i++) {
+		const fixRange = fixRanges[i];
+
+		if (fixRange.start < currentEnd) {
+			// Conflict
+			fixes.delete(fixRange.fix);
+		}
+
+		currentEnd = Math.max(currentEnd, fixRange.end);
+	}
 }
