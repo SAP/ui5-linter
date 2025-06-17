@@ -21,11 +21,11 @@ sap.ui.define([], function() {
 	sap.ui.getCore().createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
 
 	sap.ui.getCore().attachIntervalTimer(function() {
-		sap.ui.getCore().applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+		sap.ui.getCore().applyTheme("themeName");
 	});
 	globalCore.attachIntervalTimer(function() {}, {}); // Should not be autofixed if there is a 2nd argument
 	sap.ui.getCore().detachIntervalTimer(function() {
-		sap.ui.getCore().applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+		sap.ui.getCore().applyTheme("themeName");
 	});
 	globalCore.detachIntervalTimer(function() {console.log();}, {}); // Should not be autofixed if there is a 2nd argument
 

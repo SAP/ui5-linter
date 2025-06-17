@@ -102,7 +102,7 @@ t.declareModule("sap/ui/core/Core", [
 		// Migrate only if second argument is omitted or undefined
 		t.method("applyTheme", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Theming",
-			validateArguments: (ctx, _, arg1, arg2) => {
+			validateArguments: (_ctx, _fixHints, _arg1, arg2) => {
 				// Migrate only if second argument is omitted or undefined
 				if (!arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined")) {
 					return true;
@@ -123,7 +123,7 @@ t.declareModule("sap/ui/core/Core", [
 		t.method("loadLibrary", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Lib",
 			propertyAccess: "load",
-			validateArguments: (ctx: {json?: Record<string, string>}, checker, arg1, arg2) => {
+			validateArguments: (ctx: {json?: Record<string, string>}, _fixHints, arg1, arg2) => {
 				ctx.json = {};
 				if (arg2?.kind === SyntaxKind.ObjectLiteralExpression) {
 					let asyncOption = false;
@@ -164,7 +164,7 @@ t.declareModule("sap/ui/core/Core", [
 		// Only when the first argument is an object defining async: true a migration is possible.
 		t.method("createComponent", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Component",
-			validateArguments: (ctx: {json: Record<string, string>}, checker, vComponent) => {
+			validateArguments: (ctx: {json: Record<string, string>}, _fixHints, vComponent) => {
 				ctx.json = {};
 				if (vComponent?.kind === SyntaxKind.ObjectLiteralExpression) {
 					let asyncOption = false;
@@ -204,7 +204,7 @@ t.declareModule("sap/ui/core/Core", [
 		// sLibrary must be a library.
 		t.method("getLibraryResourceBundle", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/Lib",
-			validateArguments: (ctx: {fallback: string}, checker, arg1, arg2, arg3) => {
+			validateArguments: (ctx: {fallback: string}, _fixHints, arg1, arg2, arg3) => {
 				// Handling fallback in the legacy API
 				if (!arg1 ||
 					(ts.isIdentifier(arg1) && arg1.text === "undefined") ||
@@ -248,10 +248,10 @@ t.declareModule("sap/ui/core/Core", [
 		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
 		t.method("attachIntervalTimer", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/IntervalTrigger",
-			validateArguments: (ctx, checker, arg1, arg2) => {
+			validateArguments: (_ctx, _fixHints, _arg1, arg2) => {
 				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
 			},
-			generator: (ctx, moduleIdentifier, arg1) => {
+			generator: (_ctx, moduleIdentifier, arg1) => {
 				return `${moduleIdentifier}.addListener(${arg1})`;
 			},
 		})),
@@ -259,7 +259,7 @@ t.declareModule("sap/ui/core/Core", [
 		// We can't generate a ".bind" call since detaching wouldn't be possible anymore
 		t.method("detachIntervalTimer", callExpressionGeneratorFix({
 			moduleName: "sap/ui/core/IntervalTrigger",
-			validateArguments: (ctx, checker, arg1, arg2) => {
+			validateArguments: (_ctx, _fixHints, _arg1, arg2) => {
 				return !arg2 || (ts.isIdentifier(arg2) && arg2.text === "undefined");
 			},
 			generator: (ctx, moduleIdentifier, arg1) => {

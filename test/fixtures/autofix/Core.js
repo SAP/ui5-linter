@@ -8,7 +8,7 @@ sap.ui.define(["sap/ui/core/Core",], function(Core) {
 	Core.attachInitEvent(function() {console.log();});
 
 	Core.attachIntervalTimer(function() {
-		Core.applyTheme("themeName"); // TODO: Enable migration of internal argument's content
+		Core.applyTheme("themeName");
 	});
 	Core.attachIntervalTimer(function() {
 		Core.applyTheme("themeName");
