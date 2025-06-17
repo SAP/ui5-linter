@@ -48,10 +48,16 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var delayedCallId = jQuery.sap.delayedCall(1000, myObject, "myFunction");
 	var delayedCallId2 = jQuery.sap.delayedCall(1000, myObject, myObject.myFunction, ["myParam1"]);
 	var delayedCallId3 = jQuery.sap.delayedCall(1000, window, Array.isArray, ["myParam1"]);
+	var delayedCallId4 = jQuery.sap.delayedCall(1000, this, function () {
+		var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
+	}, ["myParam1", "myParam2"]);
 	jQuery.sap.clearDelayedCall(delayedCallId);
 	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction");
 	var intervalCallId2 = jQuery.sap.intervalCall(1000, myObject, myObject.myFunction, ["myParam1"]);
 	var intervalCallId3 = jQuery.sap.intervalCall(1000, window, Array.isArray, ["myParam1"]);
+	var intervalCallId4 = jQuery.sap.intervalCall(1000, this, function () {
+		var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
+	}, ["myParam1", "myParam2"]);
 	jQuery.sap.clearIntervalCall(intervalCallId);
 
 	const document = globalThis.document;

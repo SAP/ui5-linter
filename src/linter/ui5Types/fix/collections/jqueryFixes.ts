@@ -714,6 +714,48 @@ t.declareModule("jQuery", [
 				return res;
 			},
 		})),
+		t.namespace("delayedCall", callExpressionGeneratorFix({
+			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
+				ctx.fnNameNode = fnName;
+				return true;
+			},
+			generator: (ctx: {fnNameNode: ts.Node}, _, timeout, objCtx, fnName, params) => {
+				let fnRepresentation;
+				if (ctx.fnNameNode && ts.isStringLiteralLike(ctx.fnNameNode)) {
+					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
+				} else {
+					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
+				}
+
+				return `setTimeout(${fnRepresentation}, ${timeout}${params ? ", ..." + params.trim() : ""})`;
+			},
+		})),
+		t.namespace("clearDelayedCall", callExpressionGeneratorFix({
+			generator: (_ctx, _, cbId) => {
+				return `clearTimeout(${cbId})`;
+			},
+		})),
+		t.namespace("intervalCall", callExpressionGeneratorFix({
+			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
+				ctx.fnNameNode = fnName;
+				return true;
+			},
+			generator: (ctx: {fnNameNode: ts.Node}, _, timeout, objCtx, fnName, params) => {
+				let fnRepresentation;
+				if (ctx.fnNameNode && ts.isStringLiteralLike(ctx.fnNameNode)) {
+					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
+				} else {
+					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
+				}
+
+				return `setInterval(${fnRepresentation}, ${timeout}${params ? ", ..." + params.trim() : ""})`;
+			},
+		})),
+		t.namespace("clearIntervalCall", callExpressionGeneratorFix({
+			generator: (_ctx, _, cbId) => {
+				return `clearInterval(${cbId})`;
+			},
+		})),
 	]), // jQuery.sap
 	// jQuery
 	t.namespace("inArray", callExpressionGeneratorFix({
