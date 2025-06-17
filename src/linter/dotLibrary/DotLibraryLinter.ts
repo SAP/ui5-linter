@@ -1,7 +1,7 @@
 import LinterContext from "../LinterContext.js";
 import {deprecatedLibraries} from "../../utils/deprecations.js";
 import {SaxEventType, Tag as SaxTag} from "sax-wasm";
-import {parseXML} from "../../utils/xmlParser.js";
+import {parseXml} from "../../utils/xmlParser.js";
 import {ReadStream} from "node:fs";
 import {MESSAGE} from "../messages.js";
 
@@ -30,7 +30,7 @@ export default class DotLibraryLinter {
 		const libs = new Set();
 		const tagsStack: string[] = [];
 		const libNamePath = ["library", "dependencies", "dependency"];
-		await parseXML(contentStream, (event, tag) => {
+		await parseXml(contentStream, (event, tag) => {
 			if (!(tag instanceof SaxTag)) {
 				return;
 			}

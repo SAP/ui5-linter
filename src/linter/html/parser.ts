@@ -1,6 +1,6 @@
 import type {ReadStream} from "node:fs";
 import {SaxEventType, Tag as SaxTag, Text as SaxText} from "sax-wasm";
-import {extractDirective, parseXML} from "../../utils/xmlParser.js";
+import {extractDirective, parseXml} from "../../utils/xmlParser.js";
 import {Directive} from "../LinterContext.js";
 
 interface ExtractedTags {
@@ -51,7 +51,7 @@ export async function extractHTMLTags(contentStream: ReadStream) {
 		stylesheetLinkTags: [],
 	};
 	const directives = new Set<Directive>();
-	await parseXML(contentStream, (event, tag) => {
+	await parseXml(contentStream, (event, tag) => {
 		if (tag instanceof SaxTag) {
 			parseTag(event, tag.toJSON() as SaxTag, extractedTags);
 		} else if (tag instanceof SaxText && event === SaxEventType.Comment) {
