@@ -237,14 +237,13 @@ t.declareModule("sap/ui/core/Core", [
 					}
 				}
 
-				// TODO: Check if works
-				// const {fileName} = arg1.getSourceFile();
-				// if (libNamespace && fileName.startsWith("/resources")) {
-				// 	const libNamespace = fileName.split("/").slice(2, -1).join(".");
-				// 	if (libNamespace === libNamespace) {
-				// 		return true;
-				// 	}
-				// }
+				const {fileName} = arg1.getSourceFile();
+				if (libNamespace && fileName.startsWith("/resources")) {
+					const namespace = fileName.split("/").slice(2, -1).join(".");
+					if (namespace.startsWith(libNamespace)) {
+						return true;
+					}
+				}
 
 				const libName = `"${libNamespace?.replaceAll(".", "/")}/library"`;
 				return !!fixHints.checker.getAmbientModules()
