@@ -48,7 +48,17 @@ export default class CallExpressionFix extends CallExpressionBaseFix {
 			relevantNode = relevantNode.expression;
 		}
 
-		this.startPos = relevantNode.getStart(sourceFile);
+		if (!this.requestsModuleOrGlobal) {
+			// If no module or global is requested, we assume the current property access should stay.
+			// Therefore, ignore the expression of the "relevant node" and start at the name
+			if (!ts.isPropertyAccessExpression(relevantNode)) {
+				// We can't replace an element access expression like this
+				return false;
+			}
+			this.startPos = relevantNode.name.getStart(sourceFile);
+		} else {
+			this.startPos = relevantNode.getStart(sourceFile);
+		}
 		this.endPos = relevantNode.getEnd();
 		return true;
 	}
@@ -57,16 +67,21 @@ export default class CallExpressionFix extends CallExpressionBaseFix {
 		if (this.startPos === undefined || this.endPos === undefined) {
 			throw new Error("Start or end position is not defined");
 		}
+		let value;
 
-		const identifier = this.getIdentifiersForSingleRequest(this.params.moduleName, this.params.globalName);
-		if (!identifier) {
-			return;
-		}
+		if (this.requestsModuleOrGlobal) {
+			const identifier = this.getIdentifiersForSingleRequest(this.params.moduleName, this.params.globalName);
+			if (!identifier) {
+				return;
+			}
 
-		let value = identifier;
-		if (this.params.propertyAccess) {
-			// If a property is defined, we need to access it on the identifier
-			value = `${value}.${this.params.propertyAccess}`;
+			value = identifier;
+			if (this.params.propertyAccess) {
+				// If a property is defined, we need to access it on the identifier
+				value = `${value}.${this.params.propertyAccess}`;
+			}
+		} else {
+			value = this.params.propertyAccess ?? "";
 		}
 		if (this.params.newExpression) {
 			// If the newExpression flag is set, we need to add a "new" keyword before the expression

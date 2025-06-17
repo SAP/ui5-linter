@@ -75,9 +75,11 @@ export default abstract class BaseFix extends Fix {
 	protected globalIdentifierNames: Map<string, string> | undefined;
 	protected sourcePosition: PositionInfo | undefined;
 	protected nodeTypes: ts.SyntaxKind[] = [];
+	protected requestsModuleOrGlobal: boolean;
 
 	constructor(protected params: BaseFixParams) {
 		super();
+		this.requestsModuleOrGlobal = !!(params.globalName ?? params.moduleName);
 	}
 
 	getAffectedSourceCodeRange() {
