@@ -117,7 +117,7 @@
 		"sinon": "^20.0.0",
 		"tsx": "^4.20.3",
 		"typescript-eslint": "^8.34.0",
-		"ui5-test-runner": "^5.7.3",
+		"ui5-test-runner": "^5.7.4",
 		"yauzl-promise": "^4.0.0"
 	}
 }
