@@ -127,7 +127,7 @@ t.declareModule("jQuery", [
 		})),
 		// Skip this case. The solution is multiline and requires a special fix. We need to
 		// introduce local variables and ensure their unique names. Then, as the solution is multiline,
-		// we need to ensure that the leading space is provided and is.
+		// we need to ensure that the leading space is provided and is correct.
 		// t.namespace("removeUrlWhitelist", callExpressionGeneratorFix<{leadingSpace: string}>({
 		// 	moduleName: "sap/base/security/URLListValidator",
 		// 	generator(_ctx, [moduleIdentifier], iIndex) {
