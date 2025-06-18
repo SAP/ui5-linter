@@ -714,14 +714,14 @@ t.declareModule("jQuery", [
 				return res;
 			},
 		})),
-		t.namespace("delayedCall", callExpressionGeneratorFix<{myProp: string}>({
-			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
-				ctx.fnNameNode = fnName;
+		t.namespace("delayedCall", callExpressionGeneratorFix<{isFnString: boolean}>({
+			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
 				return true;
 			},
-			generator: (ctx: {fnNameNode: ts.Node}, _, timeout, objCtx, fnName, params) => {
+			generator: (ctx, _, timeout, objCtx, fnName, params) => {
 				let fnRepresentation;
-				if (ctx.fnNameNode && ts.isStringLiteralLike(ctx.fnNameNode)) {
+				if (ctx.isFnString) {
 					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
 				} else {
 					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
@@ -733,15 +733,15 @@ t.declareModule("jQuery", [
 		t.namespace("clearDelayedCall", callExpressionFix({
 			globalName: "clearTimeout",
 		})),
-		t.namespace("intervalCall", callExpressionGeneratorFix({
+		t.namespace("intervalCall", callExpressionGeneratorFix<{isFnString: boolean}>({
 			globalName: "setInterval",
-			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
-				ctx.fnNameNode = fnName;
+			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
 				return true;
 			},
-			generator: (ctx: {fnNameNode: ts.Node}, _, timeout, objCtx, fnName, params) => {
+			generator: (ctx, _, timeout, objCtx, fnName, params) => {
 				let fnRepresentation;
-				if (ctx.fnNameNode && ts.isStringLiteralLike(ctx.fnNameNode)) {
+				if (ctx.isFnString) {
 					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
 				} else {
 					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
