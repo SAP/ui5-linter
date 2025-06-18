@@ -24,14 +24,6 @@ export interface BaseFixParams {
 	 * the fix will be provided with an alternative like "globalThis.document"
 	 */
 	globalName?: string;
-
-	/**
-	 * Property access on the module or global
-	 *
-	 * Example: Migrating "module.property" to "otherModule.otherProperty"
-	 * would require this to be set to "otherProperty"
-	 */
-	propertyAccess?: string;
 }
 
 export enum FixScope {

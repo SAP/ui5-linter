@@ -1,21 +1,10 @@
 import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
-import BaseFix, {BaseFixParams, FixScope} from "./BaseFix.js";
+import BaseFix, {BaseFixParams} from "./BaseFix.js";
 import {countChildNodesRecursive, isAssignment} from "../utils/utils.js";
 import {FixHelpers} from "./Fix.js";
 
-export interface AccessExpressionBaseFixParams extends BaseFixParams {
-	/**
-	 * Which scope, i.e. number of access expression counting from the root should the replacement affect.
-	 * Examples for the code "sap.module.property":
-	 * - "scope = 0" will replace the whole "sap.module.property"
-	 * - "scope = 1" will replace "sap.module.method"
-	 * - "scope = 2" will replace "sap.module"
-	 *
-	 * If not set, the default value is 0.
-	 */
-	scope?: number | FixScope;
-}
+export type AccessExpressionBaseFixParams = BaseFixParams;
 
 /**
  * Fix a property access. This could also be the property access of a call expression, allowing for a more general
@@ -67,27 +56,8 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 			// Reject this node and wait for it's child
 			return false;
 		}
-
-		let relevantNode: ts.Node = node;
-		for (let i = 0; i < (this.params.scope ?? 0); i++) {
-			if (!ts.isPropertyAccessExpression(relevantNode) &&
-				!ts.isElementAccessExpression(relevantNode)) {
-				return false;
-			}
-			relevantNode = relevantNode.expression;
-		}
-		if (!this.requestsModuleOrGlobal) {
-			// If no module or global is requested, we assume the current property access should stay.
-			// Therefore, ignore the expression of the "relevant node" and start at the name
-			if (!ts.isPropertyAccessExpression(relevantNode)) {
-				// We can't replace an element access expression like this
-				return false;
-			}
-			this.startPos = relevantNode.name.getStart(sourceFile);
-		} else {
-			this.startPos = relevantNode.getStart(sourceFile);
-		}
-		this.endPos = relevantNode.getEnd();
+		this.startPos = node.getStart(sourceFile);
+		this.endPos = node.getEnd();
 		return true;
 	}
 }
