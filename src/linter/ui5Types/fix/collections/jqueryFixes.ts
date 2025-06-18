@@ -714,7 +714,7 @@ t.declareModule("jQuery", [
 				return res;
 			},
 		})),
-		t.namespace("delayedCall", callExpressionGeneratorFix({
+		t.namespace("delayedCall", callExpressionGeneratorFix<{myProp: string}>({
 			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
 				ctx.fnNameNode = fnName;
 				return true;
