@@ -730,10 +730,8 @@ t.declareModule("jQuery", [
 				return `setTimeout(${fnRepresentation}, ${timeout}${params ? ", ..." + params.trim() : ""})`;
 			},
 		})),
-		t.namespace("clearDelayedCall", callExpressionGeneratorFix({
-			generator: (_ctx, _, cbId) => {
-				return `clearTimeout(${cbId})`;
-			},
+		t.namespace("clearDelayedCall", callExpressionFix({
+			globalName: "clearTimeout",
 		})),
 		t.namespace("intervalCall", callExpressionGeneratorFix({
 			globalName: "setInterval",
