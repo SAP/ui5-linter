@@ -223,13 +223,15 @@ function testDefinition(
 
 		if (fix) {
 			t.truthy(t.context.autofixSpy.callCount >= 1);
-			for (let i = 0; i < t.context.autofixSpy.callCount; i++) {
-				const autofixResult = await t.context.autofixSpy.getCall(i).returnValue;
-				const autofixResultEntries = Array.from(autofixResult.entries());
-				autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
-				for (const [filePath, content] of autofixResultEntries) {
-					t.snapshot(content, `AutofixResult iteration #${i}: ${filePath}`);
-				}
+			// Get the last autofix call to only compare the end result with the current snapshot.
+			// - 2 because there is always one call without any changes (no fixes applied)
+			// and we count from 0 here.
+			const lastAutofixIterationIndex = t.context.autofixSpy.callCount - 2;
+			const autofixResult = await t.context.autofixSpy.getCall(lastAutofixIterationIndex).returnValue;
+			const autofixResultEntries = Array.from(autofixResult.entries());
+			autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));
+			for (const [filePath, content] of autofixResultEntries) {
+				t.snapshot(content, `AutofixResult iteration #${lastAutofixIterationIndex}: ${filePath}`);
 			}
 		}
 
