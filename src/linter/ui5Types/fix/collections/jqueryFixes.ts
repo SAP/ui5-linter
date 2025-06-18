@@ -128,6 +128,7 @@ t.declareModule("jQuery", [
 			moduleName: "sap/base/security/URLListValidator",
 			generator(_ctx, [moduleIdentifier], iIndex) {
 				// TODO: Ensure aCurrentEntries is non conflicting with other variables
+				// TODO: As this is a multiline solution, ensure to provide the leading space
 				return `var aCurrentEntries = ${moduleIdentifier}.entries();\n` +
 					`aCurrentEntries.splice(${iIndex}, 1);\n` +
 					`${moduleIdentifier}.clear();\n` +
