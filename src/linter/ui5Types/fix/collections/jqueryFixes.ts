@@ -78,18 +78,19 @@ t.declareModule("jQuery", [
 			})),
 		]),
 		t.namespace("resources", [
-			// jQuery.sap.resources => ResourceBundle.create
-			t.namespace("", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
-				moduleName: "sap/base/i18n/ResourceBundle",
-				propertyAccess: "create",
-			})),
 			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/657
 				moduleName: "sap/base/i18n/ResourceBundle",
 				generator(_ctx, [moduleIdentifier], arg1) {
 					return `new ${moduleIdentifier}() instanceof ${arg1.trim()}`;
 				},
 			})),
-		]),
+		],
+		// jQuery.sap.resources => ResourceBundle.create
+		accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+			moduleName: "sap/base/i18n/ResourceBundle",
+			propertyAccess: "create",
+		})
+		),
 		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
 			moduleName: "sap/base/security/encodeCSS",
 		})),
