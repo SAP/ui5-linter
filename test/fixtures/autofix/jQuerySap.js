@@ -13,6 +13,9 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		});
 	});
 
+	// https://github.com/SAP/ui5-linter/issues/521
+	var isBundle = jQuery.sap.resources.isBundle(myBundle);
+	
 	// https://github.com/SAP/ui5-linter/issues/522
 	const logObject = jQuery.sap.log;
 	const myLogger = jQuery.sap.log.getLogger();

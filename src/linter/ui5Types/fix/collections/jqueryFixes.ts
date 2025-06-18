@@ -77,11 +77,19 @@ t.declareModule("jQuery", [
 				scope: FixScope.FirstChild,
 			})),
 		]),
-		// jQuery.sap.resources => ResourceBundle.create
-		t.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
-			moduleName: "sap/base/i18n/ResourceBundle",
-			propertyAccess: "create",
-		})),
+		t.namespace("resources", [
+			// jQuery.sap.resources => ResourceBundle.create
+			t.namespace("", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+				moduleName: "sap/base/i18n/ResourceBundle",
+				propertyAccess: "create",
+			})),
+			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/657
+				moduleName: "sap/base/i18n/ResourceBundle",
+				generator(_ctx, [moduleIdentifier], arg1) {
+					return `new ${moduleIdentifier}() instanceof ${arg1.trim()}`;
+				},
+			})),
+		]),
 		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
 			moduleName: "sap/base/security/encodeCSS",
 		})),
@@ -115,6 +123,18 @@ t.declareModule("jQuery", [
 		t.namespace("validateUrl", accessExpressionFix({
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "validate",
+		})),
+		t.namespace("removeUrlWhitelist", callExpressionGeneratorFix<{leadingSpace: string}>({
+			moduleName: "sap/base/security/URLListValidator",
+			generator(_ctx, [moduleIdentifier], iIndex) {
+				// TODO: Ensure aCurrentEntries is non conflicting with other variables
+				return `var aCurrentEntries = ${moduleIdentifier}.entries();\n` +
+					`aCurrentEntries.splice(${iIndex}, 1);\n` +
+					`${moduleIdentifier}.clear();\n` +
+					`aCurrentEntries.forEach(function ({protocol, host, port, path}) {\n` +
+					`\t${moduleIdentifier}.add(protocol, host, port, path);\n` +
+					`});`;
+			},
 		})),
 		t.namespace("camelCase", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/527
 			moduleName: "sap/base/strings/camelize",
