@@ -736,6 +736,7 @@ t.declareModule("jQuery", [
 			},
 		})),
 		t.namespace("intervalCall", callExpressionGeneratorFix({
+			globalName: "setInterval",
 			validateArguments: (ctx: {fnNameNode: ts.Node}, _, _timeout, _objCtx, fnName) => {
 				ctx.fnNameNode = fnName;
 				return true;
