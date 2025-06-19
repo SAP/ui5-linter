@@ -12,6 +12,10 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 
 	CoreRenamed.byId("id");
 
+	const name = "componentName";
+	const compUrl = "find/my/comp/here";
+	const compAsync = true;
+	CoreRenamed.createComponent({name, url: compUrl, id: "id", settings: {"settingsKey": "..."}, component: {}, async: compAsync}); // First argument must be an object containing async: true for autofix to be applied
 	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}, async: true}); // First argument must be an object containing async: true for autofix to be applied
 	CoreRenamed.createComponent({name: "componentName", url: "find/my/comp/here", id: "id", settings: {"settingsKey": "..."}, component: {}}); // Not autofixable
 	CoreRenamed.createComponent("componentName", "find/my/comp/here", "id", {"settingsKey": "..."}); // First argument is a string (not autofixable)
