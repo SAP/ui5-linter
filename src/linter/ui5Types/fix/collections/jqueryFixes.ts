@@ -125,22 +125,6 @@ t.declareModule("jQuery", [
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "validate",
 		})),
-		// Skip this case. The solution is multiline and requires a special fix. We need to
-		// introduce local variables and ensure their unique names. Then, as the solution is multiline,
-		// we need to ensure that the leading space is provided and is correct.
-		// t.namespace("removeUrlWhitelist", callExpressionGeneratorFix<{leadingSpace: string}>({
-		// 	moduleName: "sap/base/security/URLListValidator",
-		// 	generator(_ctx, [moduleIdentifier], iIndex) {
-		// 		// TODO: Ensure aCurrentEntries is non conflicting with other variables
-		// 		// TODO: As this is a multiline solution, ensure to provide the leading space
-		// 		return `var aCurrentEntries = ${moduleIdentifier}.entries();\n` +
-		// 			`aCurrentEntries.splice(${iIndex}, 1);\n` +
-		// 			`${moduleIdentifier}.clear();\n` +
-		// 			`aCurrentEntries.forEach(function ({protocol, host, port, path}) {\n` +
-		// 			`\t${moduleIdentifier}.add(protocol, host, port, path);\n` +
-		// 			`});`;
-		// 	},
-		// })),
 		t.namespace("camelCase", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/527
 			moduleName: "sap/base/strings/camelize",
 		})),
