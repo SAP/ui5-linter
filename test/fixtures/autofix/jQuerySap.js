@@ -11,10 +11,11 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		const bundle = jQuery.sap.resources({
 			url: "resources/i18n.properties"
 		});
+		
+		// https://github.com/SAP/ui5-linter/issues/521
+		var myBundle = innerScopeResourceBundle.create({url : "i18n/messagebundle.properties"});
+		var isBundle = jQuery.sap.resources.isBundle(myBundle);
 	});
-
-	// https://github.com/SAP/ui5-linter/issues/521
-	var isBundle = jQuery.sap.resources.isBundle(myBundle);
 	
 	// https://github.com/SAP/ui5-linter/issues/522
 	const logObject = jQuery.sap.log;

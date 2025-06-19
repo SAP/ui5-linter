@@ -81,12 +81,12 @@ t.declareModule("jQuery", [
 			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/657
 				moduleName: "sap/base/i18n/ResourceBundle",
 				generator(_ctx, [moduleIdentifier], arg1) {
-					return `new ${moduleIdentifier}() instanceof ${arg1.trim()}`;
+					return `${arg1.trim()} instanceof ${moduleIdentifier}`;
 				},
 			})),
 		],
 		// jQuery.sap.resources => ResourceBundle.create
-		callExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+		accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
 			scope: FixScope.FullExpression,
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",
