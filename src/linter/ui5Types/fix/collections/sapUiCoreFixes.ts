@@ -148,7 +148,7 @@ t.declareModule("sap/ui/core/Core", [
 					return asyncOption;
 				} else if (arg2?.kind === SyntaxKind.TrueKeyword) {
 					if (ts.isStringLiteralLike(arg1)) {
-						ctx.json.name = arg1.text;
+						ctx.json.name = arg1.getFullText();
 					}
 					return true; // Migration is possible, async loading is enabled
 				} else {
