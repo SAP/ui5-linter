@@ -1,4 +1,5 @@
 import ts from "typescript";
+import Fix from "../linter/ui5Types/fix/Fix.js";
 
 export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression, match: string): boolean {
 	const propAccessChain: string[] = [];
