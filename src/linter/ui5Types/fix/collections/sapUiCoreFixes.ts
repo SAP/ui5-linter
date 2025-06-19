@@ -138,7 +138,7 @@ t.declareModule("sap/ui/core/Core", [
 						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
 							const name = node.name.text;
 							if (allowlistProps.includes(name) && ts.isStringLiteralLike(node.initializer)) {
-								ctx.json![name] = node.initializer.text;
+								ctx.json![name] = node.initializer.getFullText();
 							}
 						}
 					});
