@@ -121,42 +121,66 @@ t.declareModule("sap/ui/core/Core", [
 		})),
 		// Individual arguments must be mapped to "options" object
 		// The new API has no sync loading option, replacement is only safe when the options contain async:true
-		t.method("loadLibrary", callExpressionGeneratorFix({
+		t.method("loadLibrary", callExpressionGeneratorFix<{json: string}>({
 			moduleName: "sap/ui/core/Lib",
-			validateArguments: (ctx: {json?: Record<string, string>}, _fixHints, arg1, arg2) => {
-				ctx.json = {};
+			validateArguments: (ctx, fixHints, arg1, arg2) => {
+				ctx.json = "";
 				if (arg2?.kind === SyntaxKind.ObjectLiteralExpression) {
 					let asyncOption = false;
+					const parts: string[] = [];
 					const allowlistProps = ["url", "name"];
 					ts.forEachChild(arg2, function (node: ts.Node) {
 						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name) && node.name.text === "async") {
 							if (node.initializer.kind === SyntaxKind.TrueKeyword) {
 								asyncOption = true; // Migration is possible, async loading is enabled
+							} else if (ts.isIdentifier(node.initializer)) {
+								const {checker} = fixHints;
+								const type = checker.getTypeAtLocation(node.initializer);
+								if ("intrinsicName" in type && type.intrinsicName === "true") {
+									asyncOption = true;
+								}
+							}
+						} else if (ts.isShorthandPropertyAssignment(node) &&
+							ts.isIdentifier(node.name) && node.name.text === "async") {
+							const {checker} = fixHints;
+							const type = checker.getTypeAtLocation(node.name);
+							if ("intrinsicName" in type && type.intrinsicName === "true") {
+								asyncOption = true;
 							}
 						}
 
 						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
 							const name = node.name.text;
-							if (allowlistProps.includes(name) && ts.isStringLiteralLike(node.initializer)) {
-								ctx.json![name] = node.initializer.getFullText();
+							if (allowlistProps.includes(name) &&
+								(ts.isStringLiteralLike(node.initializer) || ts.isIdentifier(node.initializer))) {
+								parts.push(`${name}: ${node.initializer.getFullText().trim()}`);
+							}
+						} else if (ts.isShorthandPropertyAssignment(node) && ts.isIdentifier(node.name)) {
+							const name = node.name.text;
+							if (allowlistProps.includes(name)) {
+								parts.push(`${node.getFullText().trim()}`);
 							}
 						}
 					});
 					if (ts.isStringLiteralLike(arg1)) {
-						ctx.json.name = arg1.text;
+						parts.push(`name: ${arg1.getFullText().trim()}`);
+					} else if (ts.isIdentifier(arg1)) {
+						parts.push(`name: ${arg1.getFullText().trim()}`);
 					}
+
+					ctx.json = `{${parts.join(", ")}}`;
 					return asyncOption;
 				} else if (arg2?.kind === SyntaxKind.TrueKeyword) {
-					if (ts.isStringLiteralLike(arg1)) {
-						ctx.json.name = arg1.getFullText();
+					if (ts.isStringLiteralLike(arg1) || ts.isIdentifier(arg1)) {
+						ctx.json = `{name: ${arg1.getFullText()}}`;
 					}
 					return true; // Migration is possible, async loading is enabled
 				} else {
 					return false; // Migration is not possible
 				}
 			},
-			generator: (ctx: {json?: Record<string, string>}, [moduleIdentifier]) => {
-				return `${moduleIdentifier}.load(${JSON.stringify(ctx.json)})`;
+			generator: (ctx, [moduleIdentifier]) => {
+				return `${moduleIdentifier}.load(${ctx.json})`;
 			},
 		})),
 		// Individual arguments must be mapped to "options" object.

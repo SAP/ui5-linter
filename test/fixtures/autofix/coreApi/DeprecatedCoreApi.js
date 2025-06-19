@@ -60,6 +60,15 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 
 	CoreRenamed.isStaticAreaRef(oDomRef);
 
+	const myLib = "sap.ui.core";
+	const url = "find/my/lib/here";
+	const async = true;
+	const asyncFalse = false;
+	const asyncTrue = true;
+	CoreRenamed.loadLibrary(myLib, true);
+	CoreRenamed.loadLibrary(myLib, {async, url});
+	CoreRenamed.loadLibrary(myLib, {async: asyncFalse, url}); // Don't autofix async: false
+	CoreRenamed.loadLibrary(myLib, {async: asyncTrue, url});
 	CoreRenamed.loadLibrary("sap.ui.core", true);
 	CoreRenamed.loadLibrary("sap.ui.core", {async: true, url: "find/my/lib/here"});
 	CoreRenamed.loadLibrary("sap.ui.core", {async: false, url: "find/my/lib/here"}); // async: false (not autofixable)
