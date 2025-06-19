@@ -128,7 +128,6 @@ t.declareModule("sap/ui/core/Core", [
 				if (arg2?.kind === SyntaxKind.ObjectLiteralExpression) {
 					let asyncOption = false;
 					const parts: string[] = [];
-					const allowlistProps = ["url", "name"];
 					ts.forEachChild(arg2, function (node: ts.Node) {
 						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name) && node.name.text === "async") {
 							if (node.initializer.kind === SyntaxKind.TrueKeyword) {
@@ -151,15 +150,11 @@ t.declareModule("sap/ui/core/Core", [
 
 						if (ts.isPropertyAssignment(node) && ts.isIdentifier(node.name)) {
 							const name = node.name.text;
-							if (allowlistProps.includes(name) &&
-								(ts.isStringLiteralLike(node.initializer) || ts.isIdentifier(node.initializer))) {
+							if (ts.isStringLiteralLike(node.initializer) || ts.isIdentifier(node.initializer)) {
 								parts.push(`${name}: ${node.initializer.getFullText().trim()}`);
 							}
 						} else if (ts.isShorthandPropertyAssignment(node) && ts.isIdentifier(node.name)) {
-							const name = node.name.text;
-							if (allowlistProps.includes(name)) {
-								parts.push(`${node.getFullText().trim()}`);
-							}
+							parts.push(`${node.getFullText().trim()}`);
 						}
 					});
 					if (ts.isStringLiteralLike(arg1)) {
