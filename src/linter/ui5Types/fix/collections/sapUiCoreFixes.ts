@@ -231,7 +231,7 @@ t.declareModule("sap/ui/core/Core", [
 				}
 			},
 			generator: (ctx, [moduleIdentifier]) => {
-				return `${moduleIdentifier}.create(${JSON.stringify(ctx.json)})`;
+				return `${moduleIdentifier}.create(${ctx.json})`;
 			},
 		})),
 		// Parameter bAsync has to be omitted or set to false since the new API returns
