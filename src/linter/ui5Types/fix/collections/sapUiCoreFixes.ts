@@ -122,7 +122,7 @@ t.declareModule("sap/ui/core/Core", [
 		// The new API has no sync loading option, replacement is only safe when the options contain async:true
 		t.method("loadLibrary", callExpressionGeneratorFix<{json: string}>({
 			moduleName: "sap/ui/core/Lib",
-			validateArguments: (ctx, fixHints, arg1, arg2) => {
+			validateArguments: (ctx, fixHelper, arg1, arg2) => {
 				ctx.json = "";
 				if (arg2?.kind === SyntaxKind.ObjectLiteralExpression) {
 					let asyncOption = false;
