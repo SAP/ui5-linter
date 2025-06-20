@@ -86,8 +86,8 @@ t.declareModule("jQuery", [
 			})),
 		],
 		// jQuery.sap.resources => ResourceBundle.create
-		accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
-			scope: FixScope.FullExpression,
+		callExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+			scope: FixScope.FirstChild,
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",
 		})
