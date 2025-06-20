@@ -46,6 +46,7 @@ sap.ui.define(["sap/ui/core/Core",], function(CoreRenamed) {
 
 	CoreRenamed.getLibraryResourceBundle("nonexisting.lib", "en_US"); // Not autofixable, because the library does not exist
 	CoreRenamed.getLibraryResourceBundle();
+	CoreRenamed.getLibraryResourceBundle(undefined);
 	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US");
 	CoreRenamed.getLibraryResourceBundle("sap.ui.core", "en_US", true); // bAsync is true (not autofixable)
 
