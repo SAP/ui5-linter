@@ -30,7 +30,7 @@ export interface NodeSearchParameters {
 export interface FixHelpers {
 	checker: ts.TypeChecker;
 	manifestContent?: string;
-	libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"]
+	libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"];
 }
 
 export default abstract class Fix {
