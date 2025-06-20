@@ -22,6 +22,7 @@ sap.ui.define(() => {
 			"jQuery.sap.setObject": {},
 			"jQuery.sap.startsWith": {},
 			"jQuery.sap.pad": {},
+			"jQuery.sap.resources": {},
 
 		}
 	};

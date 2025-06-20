@@ -77,11 +77,21 @@ t.declareModule("jQuery", [
 				scope: FixScope.FirstChild,
 			})),
 		]),
+		t.namespace("resources", [
+			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/657
+				moduleName: "sap/base/i18n/ResourceBundle",
+				generator(_ctx, [moduleIdentifier], arg1) {
+					return `${arg1.trim()} instanceof ${moduleIdentifier}`;
+				},
+			})),
+		],
 		// jQuery.sap.resources => ResourceBundle.create
-		t.namespace("resources", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+		callExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+			scope: FixScope.FirstChild,
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",
-		})),
+		})
+		),
 		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
 			moduleName: "sap/base/security/encodeCSS",
 		})),
@@ -712,6 +722,47 @@ t.declareModule("jQuery", [
 					res = `${res} +${arg2}`;
 				}
 				return res;
+			},
+		})),
+		t.namespace("delayedCall", callExpressionGeneratorFix<{isFnString: boolean}>({
+			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
+				return true;
+			},
+			generator: (ctx, _, timeout, objCtx, fnName, params) => {
+				let fnRepresentation;
+				if (ctx.isFnString) {
+					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
+				} else {
+					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
+				}
+
+				return `setTimeout(${fnRepresentation}, ${timeout}${params ? ", ..." + params.trim() : ""})`;
+			},
+		})),
+		t.namespace("clearDelayedCall", callExpressionFix({
+			globalName: "clearTimeout",
+		})),
+		t.namespace("intervalCall", callExpressionGeneratorFix<{isFnString: boolean}>({
+			globalName: "setInterval",
+			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
+				return true;
+			},
+			generator: (ctx, _, timeout, objCtx, fnName, params) => {
+				let fnRepresentation;
+				if (ctx.isFnString) {
+					fnRepresentation = `${objCtx.trim()}[${fnName.trim()}].bind(${objCtx.trim()})`;
+				} else {
+					fnRepresentation = `${fnName.trim()}.bind(${objCtx.trim()})`;
+				}
+
+				return `setInterval(${fnRepresentation}, ${timeout}${params ? ", ..." + params.trim() : ""})`;
+			},
+		})),
+		t.namespace("clearIntervalCall", callExpressionGeneratorFix({
+			generator: (_ctx, _, cbId) => {
+				return `clearInterval(${cbId})`;
 			},
 		})),
 	]), // jQuery.sap
