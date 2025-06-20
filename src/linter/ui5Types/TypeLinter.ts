@@ -123,8 +123,6 @@ export default class TypeLinter {
 			let res;
 			if (sourceFile.fileName.endsWith("/Component.js") || sourceFile.fileName.endsWith("/Component.ts")) {
 				res = await this.#workspace.byPath(path.dirname(sourceFile.fileName) + "/manifest.json");
-			} else if (this.#context.getApplyAutofix()) {
-				[res] = await this.#workspace.byGlob("**/manifest.json");
 			}
 
 			if (res) {
@@ -140,7 +138,7 @@ export default class TypeLinter {
 				sourceFile,
 				checker, reportCoverage, messageDetails,
 				apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache,
-				fixFactory, manifestContent
+				fixFactory, manifestContent, this.#libraryDependencies
 			);
 			await linter.lint();
 			linterDone();

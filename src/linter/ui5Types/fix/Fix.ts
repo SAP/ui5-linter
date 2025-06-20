@@ -2,6 +2,7 @@ import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import {ChangeSet} from "../../../autofix/autofix.js";
 import {SaxEventType} from "sax-wasm";
+import {JSONSchemaForSAPUI5Namespace} from "../../../manifest.js";
 
 export interface ModuleDependencyRequest {
 	moduleName: string;
@@ -29,6 +30,7 @@ export interface NodeSearchParameters {
 export interface FixHelpers {
 	checker: ts.TypeChecker;
 	manifestContent?: string;
+	libraryDependencies: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"]
 }
 
 export default abstract class Fix {

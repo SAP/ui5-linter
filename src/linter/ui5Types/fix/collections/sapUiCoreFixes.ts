@@ -7,7 +7,6 @@ import {
 	callExpressionGeneratorFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
-import {SAPJSONSchemaForWebApplicationManifestFile} from "../../../../manifest.js";
 
 const t: FixTypeInfoMatcher = new Ui5TypeInfoMatcher("sap.ui.core");
 export default t;
@@ -268,14 +267,9 @@ t.declareModule("sap/ui/core/Core", [
 					libNamespace = arg1.text;
 				}
 
-				// Check in manifest.json if the library is defined
-				if (fixHints?.manifestContent && typeof fixHints.manifestContent === "string") {
-					const manifest = JSON.parse(fixHints?.manifestContent) as
-						SAPJSONSchemaForWebApplicationManifestFile;
-
-					if (manifest?.["sap.ui5"]?.dependencies?.libs?.[libNamespace ?? ""]) {
-						return true;
-					}
+				// Check in libraries defined in manifest.json if the library is there
+				if (fixHints?.libraryDependencies?.[libNamespace ?? ""]) {
+					return true;
 				}
 
 				const {fileName} = arg1.getSourceFile();
