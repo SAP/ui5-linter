@@ -135,7 +135,7 @@ export default class TypeLinter {
 				sourceFile,
 				checker, reportCoverage, messageDetails,
 				apiExtract, this.#filePathsWorkspace, this.#workspace, ambientModuleCache,
-				fixFactory, manifestContent
+				fixFactory, manifestContent, this.#libraryDependencies
 			);
 			await linter.lint();
 			linterDone();

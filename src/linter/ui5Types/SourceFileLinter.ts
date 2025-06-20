@@ -36,6 +36,7 @@ import {
 import FixFactory from "./fix/FixFactory.js";
 import Fix, {FixHelpers} from "./fix/Fix.js";
 import GlobalFix from "./fix/GlobalFix.js";
+import {JSONSchemaForSAPUI5Namespace} from "../../manifest.js";
 
 const log = getLogger("linter:ui5Types:SourceFileLinter");
 
@@ -93,7 +94,8 @@ export default class SourceFileLinter {
 		private workspace: AbstractAdapter,
 		private ambientModuleCache: AmbientModuleCache,
 		private fixFactory?: FixFactory,
-		private manifestContent?: string
+		private manifestContent?: string,
+		private libraryDependencies?: JSONSchemaForSAPUI5Namespace["dependencies"]["libs"]
 	) {
 		this.#reporter = typeLinter.getSourceFileReporter(sourceFile);
 		this.#boundVisitNode = this.visitNode.bind(this);
@@ -106,6 +108,7 @@ export default class SourceFileLinter {
 		this.fixHelpers = {
 			checker: this.checker,
 			manifestContent: this.manifestContent,
+			libraryDependencies: this.libraryDependencies,
 		};
 	}
 
