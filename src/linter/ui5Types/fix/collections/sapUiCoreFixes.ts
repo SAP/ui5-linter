@@ -248,8 +248,7 @@ t.declareModule("sap/ui/core/Core", [
 			validateArguments: (ctx: {fallback: string}, fixHints, arg1, arg2, arg3) => {
 				// Handling fallback in the legacy API
 				if (!arg1 ||
-					(ts.isIdentifier(arg1) && arg1.text === "undefined") ||
-					(ts.isStringLiteralLike(arg1) && arg1.text === "undefined")) {
+					(ts.isIdentifier(arg1) && arg1.text === "undefined")) {
 					ctx.fallback = "\"sap.ui.core\"";
 					return true; // No library name provided, use default "sap.ui.core"
 				}
