@@ -132,7 +132,7 @@ t.declareModule("sap/ui/core/Core", [
 							if (node.initializer.kind === SyntaxKind.TrueKeyword) {
 								asyncOption = true; // Migration is possible, async loading is enabled
 							} else if (ts.isIdentifier(node.initializer)) {
-								const {checker} = fixHints;
+								const {checker} = fixHelper;
 								const type = checker.getTypeAtLocation(node.initializer);
 								if ("intrinsicName" in type && type.intrinsicName === "true") {
 									asyncOption = true;
@@ -140,7 +140,7 @@ t.declareModule("sap/ui/core/Core", [
 							}
 						} else if (ts.isShorthandPropertyAssignment(node) &&
 							ts.isIdentifier(node.name) && node.name.text === "async") {
-							const {checker} = fixHints;
+							const {checker} = fixHelper;
 							const actualSymbol = checker.getShorthandAssignmentValueSymbol(node);
 
 							if (actualSymbol?.valueDeclaration &&
