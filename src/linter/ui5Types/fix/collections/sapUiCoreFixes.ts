@@ -142,8 +142,11 @@ t.declareModule("sap/ui/core/Core", [
 						} else if (ts.isShorthandPropertyAssignment(node) &&
 							ts.isIdentifier(node.name) && node.name.text === "async") {
 							const {checker} = fixHints;
-							const type = checker.getTypeAtLocation(node.name);
-							if ("intrinsicName" in type && type.intrinsicName === "true") {
+							const actualSymbol = checker.getShorthandAssignmentValueSymbol(node);
+
+							if (actualSymbol?.valueDeclaration &&
+								ts.isVariableDeclaration(actualSymbol.valueDeclaration) &&
+								actualSymbol.valueDeclaration.initializer?.kind === SyntaxKind.TrueKeyword) {
 								asyncOption = true;
 							}
 						}
@@ -201,8 +204,11 @@ t.declareModule("sap/ui/core/Core", [
 						} else if (ts.isShorthandPropertyAssignment(node) &&
 							ts.isIdentifier(node.name) && node.name.text === "async") {
 							const {checker} = fixHints;
-							const type = checker.getTypeAtLocation(node.name);
-							if ("intrinsicName" in type && type.intrinsicName === "true") {
+							const actualSymbol = checker.getShorthandAssignmentValueSymbol(node);
+
+							if (actualSymbol?.valueDeclaration &&
+								ts.isVariableDeclaration(actualSymbol.valueDeclaration) &&
+								actualSymbol.valueDeclaration.initializer?.kind === SyntaxKind.TrueKeyword) {
 								asyncOption = true;
 							}
 						}
