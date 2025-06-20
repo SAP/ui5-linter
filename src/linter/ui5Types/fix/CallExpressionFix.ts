@@ -20,6 +20,14 @@ export interface CallExpressionFixParams extends CallExpressionBaseFixParams {
 	 * Whether to add a "new" keyword before the expression
 	 */
 	newExpression?: boolean;
+
+	/**
+	 * Property access on the module or global
+	 *
+	 * Example: Migrating "module.property" to "otherModule.otherProperty"
+	 * would require this to be set to "otherProperty"
+	 */
+	propertyAccess?: string;
 }
 
 export default class CallExpressionFix extends CallExpressionBaseFix {
