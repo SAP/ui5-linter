@@ -145,9 +145,6 @@ t.declareModule("sap/ui/core/Configuration", [
 			propertyAccess: "setTimezone",
 			mustNotUseReturnValue: true,
 		})),
-
-		// TODO: enum sap/ui/core/AnimationMode
-		// https://sdk.openui5.org/api/module:sap/ui/core/AnimationMode
 	]),
 ]);
 
