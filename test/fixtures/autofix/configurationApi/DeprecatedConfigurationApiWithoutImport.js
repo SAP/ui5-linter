@@ -1,5 +1,3 @@
-// This test artifact contains all deprecated configuration API methods which are EASILY migratable
-// without import (only use of globals)
 sap.ui.define([], () => {
 	const globalConfiguration = sap.ui.getCore().getConfiguration();
 

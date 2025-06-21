@@ -1,4 +1,3 @@
-// This test artifact contains all deprecated configuration API methods which are EASILY migratable
 sap.ui.define([
 	"sap/ui/core/Configuration",
 ], (ConfigurationRenamed) => {
