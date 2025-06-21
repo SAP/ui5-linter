@@ -2,7 +2,7 @@ import {LintResult, LintMessage} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Markdown {
-	format(lintResults: LintResult[], showDetails: boolean, version: string, autofix: boolean): string {
+	format(lintResults: LintResult[], showDetails: boolean, version: string, autofix: boolean, quiet = false): string {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
@@ -65,9 +65,17 @@ export class Markdown {
 		});
 
 		let summary = "## Summary\n\n";
-		summary +=
-			`> ${totalErrorCount + totalWarningCount} problems ` +
-			`(${totalErrorCount} errors, ${totalWarningCount} warnings)  \n`;
+		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
+		let warningsText = "";
+		if (!quiet) {
+			warningsText = `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
+		}
+
+		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
+		const problemsText = `${totalCount} ${totalCount === 1 ? "problem" : "problems"}`;
+
+		summary += `> ${problemsText} (${errorsText}${warningsText})  \n`;
+
 		if (totalFatalErrorCount) {
 			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
 		}
