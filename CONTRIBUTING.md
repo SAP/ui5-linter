@@ -9,8 +9,8 @@
 
 ### ⚡️ Quick Links for Maintainers
 
-- [All Open Pull Requests](https://github.com/SAP/ui5-linter/pulls)
-- [All Open Issues](https://github.com/SAP/ui5-linter/issues)
+- [All Open Pull Requests](https://github.com/UI5/linter/pulls)
+- [All Open Issues](https://github.com/UI5/linter/issues)
 
 ## 📝 Reporting Issues
 
@@ -24,7 +24,7 @@
         * Issues caused by dependencies.
         * Issues caused by the use of non-public/internal methods. Only the public methods listed in the API documentation may be used.
         * Something you do not get to work properly, see [Not a Bug / Questions](#not-a-bug--questions).
-2. **No duplicate**: You have searched the [issue tracker](https://github.com/SAP/ui5-linter/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) to make sure the bug has not already been reported.
+2. **No duplicate**: You have searched the [issue tracker](https://github.com/UI5/linter/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) to make sure the bug has not already been reported.
 3. **Good summary**: The summary should be specific to the issue.
 4. **Current bug**: The bug can be reproduced in the most current version of the relevant module(s).
 5. **Reproducible bug**: There are step-by-step instructions provided on how to reproduce the issue.
@@ -37,11 +37,11 @@
 
 We encourage you to follow the issue template that will be presented to you when creating a new issue.
 
-When you are ready, report your issue here: https://github.com/SAP/ui5-linter/issues/new
+When you are ready, report your issue here: https://github.com/UI5/linter/issues/new
 
 ### Reporting Security Issues
 
-If you find any bug that may be a security problem, please follow our instructions at [in our security policy](https://github.com/SAP/ui5-linter/security/policy) on how to report it. Please do not create GitHub issues for security-related doubts or problems.
+If you find any bug that may be a security problem, please follow our instructions at [in our security policy](https://github.com/UI5/linter/security/policy) on how to report it. Please do not create GitHub issues for security-related doubts or problems.
 
 ### Use of Labels
 
@@ -81,7 +81,7 @@ Bug report analysis support is always very welcome! See [Analyze Issues](#-analy
 
 ## 🤩 Feature Requests
 
-You can request most features by creating an issue in the UI5 linter repository: https://github.com/SAP/ui5-linter/issues/new
+You can request most features by creating an issue in the UI5 linter repository: https://github.com/UI5/linter/issues/new
 
 For bigger features an RFC (Request for Comment) might be necessary. You should always clarify the need for an RFC with the project contributors upfront. You could do this either by opening an issue or in our [Slack channel](#seeking-help--not-a-bug). You can use [this template](rfcs/0000-template.md) for creating an RFC.
 

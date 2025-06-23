@@ -462,7 +462,7 @@ export const MESSAGE_INFO = {
 
 		message: ({message}: {message: string}) => message,
 		details: () => `An expected autofix could not be applied. This is likely a UI5 linter internal issue. ` +
-			`Please report this using the bug report template: https://github.com/SAP/ui5-linter/issues/new?template=bug-report.md`,
+			`Please report this using the bug report template: https://github.com/UI5/linter/issues/new?template=bug-report.md`,
 	},
 
 	[MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER]: {

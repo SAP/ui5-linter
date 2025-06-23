@@ -232,7 +232,7 @@ export default function base(cli: Argv) {
 							chalk.dim(
 								`If you think this is an issue of the ui5-linter, you might report it using the ` +
 								`following URL: `) +
-								chalk.dim.bold.underline(`https://github.com/SAP/ui5-linter/issues/new/choose`) + "\n");
+								chalk.dim.bold.underline(`https://github.com/UI5/linter/issues/new/choose`) + "\n");
 					} else {
 						process.stderr.write("\n");
 						process.stderr.write(chalk.dim(`For details, execute the same command again with an` +

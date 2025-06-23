@@ -102,7 +102,7 @@ Syntax/parsing errors that appear during the linting process are reported with t
 
 ## autofix-error
 
-An expected autofix could not be applied. This is likely a UI5 linter internal issue. Please report this using the bug report template: [github.com/SAP/ui5-linter/issues/](https://github.com/SAP/ui5-linter/issues/new?template=bug-report.md)
+An expected autofix could not be applied. This is likely a UI5 linter internal issue. Please report this using the bug report template: [github.com/UI5/linter/issues/](https://github.com/UI5/linter/issues/new?template=bug-report.md)
 
 ## prefer-test-starter
 

@@ -66,7 +66,7 @@ _Reference commit: [`0efb2cd`](https://github.com/SAP/openui5/tree/0efb2cd89a893
 
 ## April 16, 2025
 
-* UI5 linter [`b280174`](https://github.com/SAP/ui5-linter/commit/b280174ef69f6f9c5047f744fe9ac124dc35b8cd)
+* UI5 linter [`b280174`](https://github.com/UI5/linter/commit/b280174ef69f6f9c5047f744fe9ac124dc35b8cd)
 * Node.js `v23.11.0`
 * MacBook Pro M1 Max
 
@@ -108,7 +108,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## April 16, 2025
 
-* UI5 linter [`aacf7c7` (v1.12.0)](https://github.com/SAP/ui5-linter/commit/aacf7c792bbea3e2a42d33aa5ad70a7bdf173c6e)
+* UI5 linter [`aacf7c7` (v1.12.0)](https://github.com/UI5/linter/commit/aacf7c792bbea3e2a42d33aa5ad70a7bdf173c6e)
 * Node.js `v23.11.0`
 * MacBook Pro M1 Max
 
@@ -150,7 +150,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## October 28, 2024
 
-* UI5 linter [`31432b0`](https://github.com/SAP/ui5-linter/commit/31432b050a5b4a1dc446923331efa11b97652ef2)
+* UI5 linter [`31432b0`](https://github.com/UI5/linter/commit/31432b050a5b4a1dc446923331efa11b97652ef2)
 * Node.js `v22.9.0`
 * MacBook Pro M1 Max
 
@@ -192,7 +192,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## September 30, 2024
 
-* UI5 linter [`v1.0.0`](https://github.com/SAP/ui5-linter/commit/db5ad3302d62b3a168f92a82d55a3fa56c753d4f)
+* UI5 linter [`v1.0.0`](https://github.com/UI5/linter/commit/db5ad3302d62b3a168f92a82d55a3fa56c753d4f)
 * Node.js `v22.5.1`
 * MacBook Pro M1 Max
 
@@ -234,7 +234,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## September 05, 2024
 
-* UI5 linter [`v0.3.5`](https://github.com/SAP/ui5-linter/commit/4cdb94b1be12595d34f56b12e3e33e8a6d383d86)
+* UI5 linter [`v0.3.5`](https://github.com/UI5/linter/commit/4cdb94b1be12595d34f56b12e3e33e8a6d383d86)
 * Node.js `v22.5.1`
 * MacBook Pro M1 Max
 
@@ -276,7 +276,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## August 21, 2024
 
-* UI5 linter [`v0.3.3`](https://github.com/SAP/ui5-linter/commit/eda26b5eb271fb3cfce711958024ee9176cbbc49)
+* UI5 linter [`v0.3.3`](https://github.com/UI5/linter/commit/eda26b5eb271fb3cfce711958024ee9176cbbc49)
 * Node.js `v22.5.1`
 * MacBook Pro M1 Max
 
@@ -318,7 +318,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## August 21, 2024
 
-* UI5 linter [`v0.3.2`](https://github.com/SAP/ui5-linter/commit/5d7de1dadc6da7f21a2ffb9d20e117b924cbe317)
+* UI5 linter [`v0.3.2`](https://github.com/UI5/linter/commit/5d7de1dadc6da7f21a2ffb9d20e117b924cbe317)
 * Node.js `v22.5.1`
 * MacBook Pro M1 Max
 
@@ -361,7 +361,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## June 27, 2024
 
-* UI5 linter [`b34d7e9`](https://github.com/SAP/ui5-linter/commit/b34d7e9)
+* UI5 linter [`b34d7e9`](https://github.com/UI5/linter/commit/b34d7e9)
 * Node.js `v22.1.0`
 * MacBook Pro M1 Max
 
@@ -403,7 +403,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## April 17, 2024
 
-* UI5 linter [`33d8cc5`](https://github.com/SAP/ui5-linter/commit/33d8cc5)
+* UI5 linter [`33d8cc5`](https://github.com/UI5/linter/commit/33d8cc5)
 * Node.js `v20.11.1`
 * MacBook Pro M1 Max
 
@@ -445,7 +445,7 @@ Mean [s] | Min [s] | Max [s] |
 
 ## March 11, 2024
 
-* UI5 linter [`5466be5`](https://github.com/SAP/ui5-linter/commit/5466be5b983c4c6e6108c0d97d5221b8ad320a88)
+* UI5 linter [`5466be5`](https://github.com/UI5/linter/commit/5466be5b983c4c6e6108c0d97d5221b8ad320a88)
 * Node.js `v20.11.1`
 * MacBook Pro M1 Max
 
