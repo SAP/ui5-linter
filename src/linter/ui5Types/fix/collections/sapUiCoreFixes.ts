@@ -48,15 +48,15 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("getCalendarType", accessExpressionFix({
 			moduleName: "sap/base/i18n/Formatting",
-			propertyAccess: "getCalendarType",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getCalendarWeekNumbering", accessExpressionFix({
 			moduleName: "sap/base/i18n/Formatting",
-			propertyAccess: "getCalendarWeekNumbering",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getFrameOptions", accessExpressionFix({
 			moduleName: "sap/ui/security/Security",
-			propertyAccess: "getFrameOptions",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getFormatLocale", callExpressionGeneratorFix({
 			moduleName: "sap/base/i18n/Formatting",
@@ -66,7 +66,7 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("getLanguage", accessExpressionFix({
 			moduleName: "sap/base/i18n/Localization",
-			propertyAccess: "getLanguage",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getLanguageTag", callExpressionGeneratorFix({
 			moduleName: "sap/base/i18n/Localization",
@@ -90,23 +90,23 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("getSAPLogonLanguage", accessExpressionFix({
 			moduleName: "sap/base/i18n/Localization",
-			propertyAccess: "getSAPLogonLanguage",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getSecurityTokenHandlers", accessExpressionFix({
 			moduleName: "sap/ui/security/Security",
-			propertyAccess: "getSecurityTokenHandlers",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getTheme", accessExpressionFix({
 			moduleName: "sap/ui/core/Theming",
-			propertyAccess: "getTheme",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getTimezone", accessExpressionFix({
 			moduleName: "sap/base/i18n/Localization",
-			propertyAccess: "getTimezone",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getUIDPrefix", accessExpressionFix({
 			moduleName: "sap/ui/base/ManagedObjectMetadata",
-			propertyAccess: "getUIDPrefix",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("getWhitelistService", accessExpressionFix({
 			moduleName: "sap/ui/security/Security",
@@ -114,7 +114,7 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("setAnimationMode", accessExpressionFix({
 			moduleName: "sap/ui/core/ControlBehavior",
-			propertyAccess: "setAnimationMode",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("setCalendarType", callExpressionFix({
 			moduleName: "sap/base/i18n/Formatting",
@@ -133,7 +133,7 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("setSecurityTokenHandlers", accessExpressionFix({
 			moduleName: "sap/ui/security/Security",
-			propertyAccess: "setSecurityTokenHandlers",
+			scope: FixScope.FirstChild,
 		})),
 		t.method("setTheme", callExpressionFix({
 			moduleName: "sap/ui/core/Theming",
