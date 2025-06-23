@@ -23,10 +23,10 @@ export default t;
 t.declareModule("jQuery", [
 	t.namespace("sap", [
 		// jQuery.sap.assert => sap.base.assert
-		t.namespace("assert", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/520
+		t.namespace("assert", accessExpressionFix({ // https://github.com/UI5/linter/issues/520
 			moduleName: "sap/base/assert",
 		})),
-		t.namespace("log", [ // https://github.com/SAP/ui5-linter/issues/522
+		t.namespace("log", [ // https://github.com/UI5/linter/issues/522
 			// jQuery.sap.log.Level|LogLevel => Log.Level
 			...t.namespaces(["Level", "LogLevel"], accessExpressionFix({
 				moduleName: "sap/base/Log",
@@ -78,7 +78,7 @@ t.declareModule("jQuery", [
 			})),
 		]),
 		t.namespace("resources", [
-			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/SAP/ui5-linter/issues/657
+			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/UI5/linter/issues/657
 				moduleName: "sap/base/i18n/ResourceBundle",
 				generator(_ctx, [moduleIdentifier], arg1) {
 					return `${arg1.trim()} instanceof ${moduleIdentifier}`;
@@ -86,13 +86,13 @@ t.declareModule("jQuery", [
 			})),
 		],
 		// jQuery.sap.resources => ResourceBundle.create
-		callExpressionFix({ // https://github.com/SAP/ui5-linter/issues/521
+		callExpressionFix({ // https://github.com/UI5/linter/issues/521
 			scope: FixScope.FirstChild,
 			moduleName: "sap/base/i18n/ResourceBundle",
 			propertyAccess: "create",
 		})
 		),
-		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/524
+		t.namespace("encodeCSS", accessExpressionFix({ // https://github.com/UI5/linter/issues/524
 			moduleName: "sap/base/security/encodeCSS",
 		})),
 		t.namespace("encodeJS", accessExpressionFix({
@@ -110,7 +110,7 @@ t.declareModule("jQuery", [
 		t.namespace("encodeXML", accessExpressionFix({
 			moduleName: "sap/base/security/encodeXML",
 		})),
-		t.namespace("addUrlWhitelist", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/525
+		t.namespace("addUrlWhitelist", accessExpressionFix({ // https://github.com/UI5/linter/issues/525
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "add",
 		})),
@@ -126,7 +126,7 @@ t.declareModule("jQuery", [
 			moduleName: "sap/base/security/URLListValidator",
 			propertyAccess: "validate",
 		})),
-		t.namespace("camelCase", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/527
+		t.namespace("camelCase", accessExpressionFix({ // https://github.com/UI5/linter/issues/527
 			moduleName: "sap/base/strings/camelize",
 		})),
 		t.namespace("charToUpperCase", () => {
@@ -170,13 +170,13 @@ t.declareModule("jQuery", [
 				return `${args[0]}.normalize("NFC") === ${args[0]}`;
 			},
 		})),
-		t.namespace("arraySymbolDiff", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/528
+		t.namespace("arraySymbolDiff", accessExpressionFix({ // https://github.com/UI5/linter/issues/528
 			moduleName: "sap/base/util/array/diff",
 		})),
 		t.namespace("unique", accessExpressionFix({
 			moduleName: "sap/base/util/array/uniqueSort",
 		})),
-		t.namespace("equal", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/529
+		t.namespace("equal", accessExpressionFix({ // https://github.com/UI5/linter/issues/529
 			moduleName: "sap/base/util/deepEqual",
 		})),
 		t.namespace("each", accessExpressionFix({
@@ -256,7 +256,7 @@ t.declareModule("jQuery", [
 				return `${moduleIdentifier}.set(${args.join(",")})`;
 			},
 		})),
-		t.namespace("containsOrEquals", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/542
+		t.namespace("containsOrEquals", accessExpressionFix({ // https://github.com/UI5/linter/issues/542
 			moduleName: "sap/ui/dom/containsOrEquals",
 		})),
 		t.namespace("denormalizeScrollBeginRTL", accessExpressionFix({
@@ -285,7 +285,7 @@ t.declareModule("jQuery", [
 			moduleName: "sap/ui/dom/units/Rem",
 			propertyAccess: "toPx",
 		})),
-		t.namespace("checkMouseEnterOrLeave", accessExpressionFix({ // https://github.com/SAP/ui5-linter/issues/543
+		t.namespace("checkMouseEnterOrLeave", accessExpressionFix({ // https://github.com/UI5/linter/issues/543
 			moduleName: "sap/ui/events/checkMouseEnterOrLeave",
 		})),
 		t.namespace("bindAnyEvent", accessExpressionFix({
@@ -319,7 +319,7 @@ t.declareModule("jQuery", [
 			scope: FixScope.FirstChild,
 			moduleName: "sap/ui/events/TouchToMouseMapping",
 		})),
-		t.namespace("measure", [ // https://github.com/SAP/ui5-linter/issues/555
+		t.namespace("measure", [ // https://github.com/UI5/linter/issues/555
 			t.namespace("getRequestTimings", callExpressionGeneratorFix({
 				globalName: "performance",
 				generator(ctx, [moduleIdentifierName]) {
@@ -423,7 +423,7 @@ t.declareModule("jQuery", [
 				propertyAccess: "getPending",
 			})),
 		]), // measure
-		t.namespace("fesr", [ // https://github.com/SAP/ui5-linter/issues/561
+		t.namespace("fesr", [ // https://github.com/UI5/linter/issues/561
 			t.namespace("setActive", accessExpressionFix({
 				scope: FixScope.FirstChild,
 				moduleName: "sap/ui/performance/trace/FESR",
@@ -690,7 +690,7 @@ t.declareModule("jQuery", [
 				return `((value) => () => value)(${arg1})`;
 			},
 		})),
-		t.namespace("getModulePath", callExpressionGeneratorFix<{argValue: string}>({ // https://github.com/SAP/ui5-linter/issues/589
+		t.namespace("getModulePath", callExpressionGeneratorFix<{argValue: string}>({ // https://github.com/UI5/linter/issues/589
 			globalName: "sap.ui.require",
 			validateArguments: (ctx, _, arg1) => {
 				if (ts.isStringLiteral(arg1)) {

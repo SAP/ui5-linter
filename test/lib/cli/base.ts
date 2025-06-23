@@ -330,7 +330,7 @@ test.serial("Exception error handling with verbose logging", async (t) => {
 		[chalk.dim(
 			`If you think this is an issue of the ui5-linter, you might report it using the ` +
 			`following URL: `) +
-			chalk.dim.bold.underline(`https://github.com/SAP/ui5-linter/issues/new/choose`) + "\n"],
+			chalk.dim.bold.underline(`https://github.com/UI5/linter/issues/new/choose`) + "\n"],
 		"Correct last log line");
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });
@@ -372,7 +372,7 @@ test.serial("Unexpected error handling", async (t) => {
 		[chalk.dim(
 			`If you think this is an issue of the ui5-linter, you might report it using the ` +
 			`following URL: `) +
-			chalk.dim.bold.underline(`https://github.com/SAP/ui5-linter/issues/new/choose`) + "\n"],
+			chalk.dim.bold.underline(`https://github.com/UI5/linter/issues/new/choose`) + "\n"],
 		"Correct last log line");
 	t.is(t.context.consoleLogStub.callCount, 0, "console.log should not be used");
 });

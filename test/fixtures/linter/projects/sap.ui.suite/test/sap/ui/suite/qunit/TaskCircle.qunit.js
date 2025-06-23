@@ -4,6 +4,6 @@ sap.ui.define([
 ], function(TaskCircle, DateTimeInput) {
 	"use strict";
 	// The linter used to only detect the DateTimeInput deprecation in this file.
-	// It has been solved via https://github.com/SAP/ui5-linter/pull/290.
+	// It has been solved via https://github.com/UI5/linter/pull/290.
 	// This test ensures that it continues to work.
 });

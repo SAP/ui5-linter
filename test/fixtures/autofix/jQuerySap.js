@@ -1,8 +1,8 @@
 sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizePolyfill) {
-	// https://github.com/SAP/ui5-linter/issues/520
+	// https://github.com/UI5/linter/issues/520
 	jQuery.sap.assert(false, "That's an assert");
 
-	// https://github.com/SAP/ui5-linter/issues/521
+	// https://github.com/UI5/linter/issues/521
 	const bundle = jQuery.sap.resources({
 		url: "resources/i18n.properties"
 	});
@@ -11,13 +11,13 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		const bundle = jQuery.sap.resources({
 			url: "resources/i18n.properties"
 		});
-		
-		// https://github.com/SAP/ui5-linter/issues/521
+
+		// https://github.com/UI5/linter/issues/521
 		var myBundle = innerScopeResourceBundle.create({url : "i18n/messagebundle.properties"});
 		var isBundle = jQuery.sap.resources.isBundle(myBundle);
 	});
-	
-	// https://github.com/SAP/ui5-linter/issues/522
+
+	// https://github.com/UI5/linter/issues/522
 	const logObject = jQuery.sap.log;
 	const myLogger = jQuery.sap.log.getLogger();
 	const myLog = jQuery.sap.log.getLog();
@@ -61,7 +61,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.log.debug() ?? jQuery.sap.log.info();
 	jQuery.sap.log.debug() ? "a" : "b";
 	jQuery.sap.log.debug(), jQuery.sap.log.info();
-	
+
 	var fnLogError = function() {
 		jQuery.sap.log.error("This is a error log message");
 	};
@@ -90,7 +90,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		return 42;
 	});
 
-	// https://github.com/SAP/ui5-linter/issues/524
+	// https://github.com/UI5/linter/issues/524
 	const myCSS = jQuery.sap.encodeCSS("+");
 	const myJS = jQuery.sap.encodeJS("\"");
 	const myURL = jQuery.sap.encodeURL("a/b?c=d&e");
@@ -98,14 +98,14 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	const myHTML = jQuery.sap.encodeHTML("<p>My Text</p>");
 	const myXML = jQuery.sap.encodeXML("<Text text=\"MyText\" />");
 
-	// https://github.com/SAP/ui5-linter/issues/525
+	// https://github.com/UI5/linter/issues/525
 	jQuery.sap.addUrlWhitelist("https", "example.com", 1337, "path");
 	jQuery.sap.clearUrlWhitelist();
 	var aEntries = jQuery.sap.getUrlWhitelist();
 	jQuery.sap.validateUrl("https://example.com");
 	jQuery.sap.removeUrlWhitelist(0);
 
-	// https://github.com/SAP/ui5-linter/issues/527
+	// https://github.com/UI5/linter/issues/527
 	var textCamelVase = jQuery.sap.camelCase(" First Name Last ");
 	var textUpperCase = jQuery.sap.charToUpperCase("myValue", 0);
 	// capitalize does not have positional parameter, therefore we cannot migrate this case
@@ -125,14 +125,14 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var hashCode = jQuery.sap.hashCode("test");
 	var textHyphenated = jQuery.sap.hyphen("fooBar");
 
-	// https://github.com/SAP/ui5-linter/issues/528
+	// https://github.com/UI5/linter/issues/528
 	var aData1 = ["orange", "apple", "banana"];
 	var aData2 = ["orange", "banana"];
 	var diff = jQuery.sap.arraySymbolDiff(aData1, aData2);
 	var aData3 = ["orange", "orange", "banana"];
 	var sortedCleanedArray = jQuery.sap.unique(aData3);
 
-	// https://github.com/SAP/ui5-linter/issues/529
+	// https://github.com/UI5/linter/issues/529
 	var areBothObjectsEqual = jQuery.sap.equal({ a: 1, b: 2 }, { a: 1, b: 2 });
 	jQuery.sap.each({ name: "me", age: 32 }, function (sKey, oValue) {
 		console.log("key: " + sKey + ", value: " + oValue);
@@ -170,7 +170,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var myFirstName3 = jQuery.sap.getObject(undefined, 0, { name: { firstname: "me" } }); // Do not migrate.
 	var myFirstName4 = jQuery.sap.getObject(null, 0, { name: { firstname: "me" } }); // Do not migrate.
 
-	// https://github.com/SAP/ui5-linter/issues/542
+	// https://github.com/UI5/linter/issues/542
 	var isBChildOfAOrEqualA = jQuery.sap.containsOrEquals(document.getElementById("controlA"), document.getElementById("controlB"));
 	var iScrollBegin = jQuery.sap.denormalizeScrollBeginRTL(100);
 	var iScrollBegin2 = $.sap.denormalizeScrollBeginRTL(100);
@@ -183,7 +183,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var rem = jQuery.sap.pxToRem("16px");
 	var px = jQuery.sap.remToPx("1rem");
 
-	// https://github.com/SAP/ui5-linter/issues/543
+	// https://github.com/UI5/linter/issues/543
 	var isMouseEventEqual = jQuery.sap.checkMouseEnterOrLeave(new jQuery.Event("mouseup", {}), document.getElementById("controlA"));
 	var myEventHandler = (event) => console.log(event.type)
 	jQuery.sap.bindAnyEvent(myEventHandler);
@@ -203,7 +203,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var sapcollapseall = jQuery.sap.PseudoEvents.sapcollapseall;
 	jQuery.sap.disableTouchToMouseHandling();
 
-	// https://github.com/SAP/ui5-linter/issues/555
+	// https://github.com/UI5/linter/issues/555
 	var entryAfterStart = jQuery.sap.measure.start("measureA", "This is measure A", "categoryX");
 	var entryAfterAdd = jQuery.sap.measure.add("measureB", "This is measure B", 1335420000000, 1335420060000, 60000, 500);
 	var entryAfterEnd = jQuery.sap.measure.end("measureA");
@@ -225,7 +225,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.measure.clearRequestTimings();
 	jQuery.sap.measure.setRequestBufferSize(100)
 
-	// https://github.com/SAP/ui5-linter/issues/561
+	// https://github.com/UI5/linter/issues/561
 	await jQuery.sap.fesr.setActive(true);
 	var isFESRActive = jQuery.sap.fesr.getActive();
 
@@ -250,10 +250,10 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	jQuery.sap.passport.setActive(true);
 	var traceLevel = jQuery.sap.passport.traceFlags("medium");
 
-	// https://github.com/SAP/ui5-linter/issues/562
+	// https://github.com/UI5/linter/issues/562
 	var frameOptions = new jQuery.sap.FrameOptions();
 
-	// https://github.com/SAP/ui5-linter/issues/563
+	// https://github.com/UI5/linter/issues/563
 	// Do not migrate this case.
 	// sap/ui/util/ActivityDetection is a private module!
 	var isActivityDetectionActive = jQuery.sap.act.isActive();

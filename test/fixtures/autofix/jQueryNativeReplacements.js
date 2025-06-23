@@ -1,5 +1,5 @@
 sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
-	// https://github.com/SAP/ui5-linter/issues/590
+	// https://github.com/UI5/linter/issues/590
 
 	var isStandAlone = jQuery.device.is.standalone;
 	var retinaDisplay = jQuery.support.retina;
@@ -63,7 +63,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 			});
 		});
 	});
-	
+
 	jQuery.sap.clearDelayedCall(delayedCallId);
 	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction");
 	var intervalCallId2 = jQuery.sap.intervalCall(1000, myObject, myObject.myFunction, ["myParam1"]);

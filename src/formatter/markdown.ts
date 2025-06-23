@@ -120,6 +120,6 @@ ${findings}`;
 
 	// Formats the rule of the lint message (ruleId and link to rules.md)
 	private formatRuleId(ruleId: string, version: string): string {
-		return `[${ruleId}](https://github.com/SAP/ui5-linter/blob/v${version}/docs/Rules.md#${ruleId})`;
+		return `[${ruleId}](https://github.com/UI5/linter/blob/v${version}/docs/Rules.md#${ruleId})`;
 	}
 }
