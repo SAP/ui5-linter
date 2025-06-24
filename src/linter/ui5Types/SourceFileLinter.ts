@@ -701,11 +701,6 @@ export default class SourceFileLinter {
 			ui5ModuleTypeInfo.name === "sap/ui/core/routing/Router"
 		) {
 			this.#analyzeNewCoreRouter(node);
-		} else if (
-			ui5ModuleTypeInfo?.kind === Ui5TypeInfoKind.Module &&
-			ui5ModuleTypeInfo.name === "sap/ui/model/odata/v4/ODataModel"
-		) {
-			this.#analyzeNewOdataModelV4(node);
 		} else if (nodeType.symbol.declarations?.some(
 			(declaration) => ts.isClassDeclaration(declaration) &&
 				this.isUi5ClassDeclaration(declaration, "sap/ui/base/ManagedObject"))
@@ -750,21 +745,35 @@ export default class SourceFileLinter {
 					return;
 				}
 				const deprecationInfo = this.getDeprecationInfo(propertySymbol);
-				if (!deprecationInfo) {
+				if (deprecationInfo) {
+					this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
+						{
+							propertyName: propertySymbol.escapedName as string,
+							className: this.checker.typeToString(nodeType),
+							details: deprecationInfo.messageDetails,
+						},
+						{
+							node: prop,
+							ui5TypeInfo: deprecationInfo.ui5TypeInfo,
+							fix: this.getFix(prop, deprecationInfo.ui5TypeInfo),
+						}
+					);
 					return;
 				}
-				this.#reporter.addMessage(MESSAGE.DEPRECATED_PROPERTY_OF_CLASS,
-					{
-						propertyName: propertySymbol.escapedName as string,
-						className: this.checker.typeToString(nodeType),
-						details: deprecationInfo.messageDetails,
-					},
-					{
-						node: prop,
-						ui5TypeInfo: deprecationInfo.ui5TypeInfo,
-						fix: this.getFix(prop, deprecationInfo.ui5TypeInfo),
-					}
-				);
+				let reportMessage;
+				if (ui5ModuleTypeInfo?.kind === Ui5TypeInfoKind.Module &&
+					ui5ModuleTypeInfo.name === "sap/ui/model/odata/v4/ODataModel" &&
+					propertyName === "synchronizationMode") {
+					reportMessage = MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE;
+				}
+				if (!reportMessage) {
+					return;
+				}
+				const ui5TypeInfo = getUi5TypeInfoFromSymbol(propertySymbol, this.apiExtract);
+				this.#reporter.addMessage(reportMessage, null, {
+					node: prop,
+					fix: this.getFix(prop, ui5TypeInfo),
+				});
 			});
 		});
 	}
@@ -1251,22 +1260,6 @@ export default class SourceFileLinter {
 
 		if (!asyncProb || asyncProb.initializer.kind !== ts.SyntaxKind.TrueKeyword) {
 			this.#reporter.addMessage(MESSAGE.PARTIALLY_DEPRECATED_CORE_ROUTER, null, {node});
-		}
-	}
-
-	#analyzeNewOdataModelV4(node: ts.NewExpression) {
-		if (!node.arguments || node.arguments.length < 1 || !ts.isObjectLiteralExpression(node.arguments[0])) {
-			return;
-		}
-
-		const synchronizationModeProb = getPropertyAssignmentInObjectLiteralExpression(
-			"synchronizationMode", node.arguments[0]
-		);
-
-		if (synchronizationModeProb) {
-			this.#reporter.addMessage(
-				MESSAGE.DEPRECATED_ODATA_MODEL_V4_SYNCHRONIZATION_MODE, null, {node: synchronizationModeProb}
-			);
 		}
 	}
 

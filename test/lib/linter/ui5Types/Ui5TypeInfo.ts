@@ -3,7 +3,10 @@ import {createVirtualLanguageServiceHost} from "../../../../src/linter/ui5Types/
 import LinterContext from "../../../../src/linter/LinterContext.js";
 import SharedLanguageService from "../../../../src/linter/ui5Types/SharedLanguageService.js";
 import ts from "typescript";
-import {getSymbolForPropertyInConstructSignatures} from "../../../../src/linter/ui5Types/utils/utils.js";
+import {
+	getSymbolForArgumentInConstructSignatures,
+	getSymbolForPropertyInConstructSignatures,
+} from "../../../../src/linter/ui5Types/utils/utils.js";
 import {getUi5TypeInfoFromSymbol, Ui5TypeInfo, Ui5TypeInfoKind} from "../../../../src/linter/ui5Types/Ui5TypeInfo.js";
 import {ApiExtract, loadApiExtract} from "../../../../src/utils/ApiExtract.js";
 
@@ -54,6 +57,13 @@ class TestContext {
 			return expression;
 		}
 		throw new Error("No PropertyAccessExpression found in the source file.");
+	}
+
+	getConstructorArgumentSymbol(
+		newExpression: ts.NewExpression, index: number
+	): ts.Symbol | undefined {
+		const classType = this.checker.getTypeAtLocation(newExpression.expression);
+		return getSymbolForArgumentInConstructSignatures(classType.getConstructSignatures(), index);
 	}
 
 	getConstructorPropertyAssignmentSymbol(
@@ -406,8 +416,8 @@ test.serial("TypeInfo: Class", async (t) => {
 		});`
 	);
 
-	const callExpression = testContext.getFirstNewExpression();
-	const symbol = testContext.checker.getTypeAtLocation(callExpression.expression).symbol;
+	const newExpression = testContext.getFirstNewExpression();
+	const symbol = testContext.checker.getTypeAtLocation(newExpression.expression).symbol;
 
 	t.deepEqual(getUi5TypeInfoFromSymbol(symbol, t.context.apiExtract), {
 		kind: Ui5TypeInfoKind.Class,
@@ -560,6 +570,77 @@ test.serial("TypeInfo: Global Namespace", async (t) => {
 			parent: {
 				kind: Ui5TypeInfoKind.Namespace,
 				name: "sap",
+			},
+		},
+	} as Ui5TypeInfo);
+});
+
+test.serial.only("TypeInfo: sap.ui.model.Binding 'sPath' constructor parameter", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/model/Binding"], function(Binding) {
+			new Binding(oModel, "/path");
+		});`
+	);
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorArgumentSymbol(newExpression, 1)!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol, t.context.apiExtract
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.ConstructorParameter,
+		name: "sPath",
+		parent: {
+			kind: Ui5TypeInfoKind.Constructor,
+			name: "constructor",
+			parent: {
+				kind: Ui5TypeInfoKind.Class,
+				name: "Binding",
+				parent: {
+					kind: Ui5TypeInfoKind.Module,
+					library: "sap.ui.core",
+					name: "sap/ui/model/Binding",
+				},
+			},
+		},
+	} as Ui5TypeInfo);
+});
+
+test.serial("TypeInfo: sap/ui/model/odata/v4/ODataModel 'synchronizationMode' constructor parameter", async (t) => {
+	const testContext = await t.context.initTestContext(`
+		sap.ui.define(["sap/ui/model/odata/v4/ODataModel"], function(ODataModel) {
+			new ODataModel({
+				serviceUrl: "/odata/v4/service",
+				synchronizationMode: "None"
+			});
+		});`
+	);
+	const newExpression = testContext.getFirstNewExpression();
+	const propertySymbol = testContext.getConstructorPropertyAssignmentSymbol(newExpression, "synchronizationMode")!;
+
+	const ui5TypeInfo = getUi5TypeInfoFromSymbol(
+		propertySymbol, t.context.apiExtract
+	);
+
+	t.deepEqual(ui5TypeInfo, {
+		kind: Ui5TypeInfoKind.Property,
+		name: "synchronizationMode",
+		parent: {
+			kind: Ui5TypeInfoKind.ConstructorParameter,
+			name: "mParameters",
+			parent: {
+				kind: Ui5TypeInfoKind.Constructor,
+				name: "constructor",
+				parent: {
+					kind: Ui5TypeInfoKind.Class,
+					name: "ODataModel",
+					parent: {
+						kind: Ui5TypeInfoKind.Module,
+						library: "sap.ui.core",
+						name: "sap/ui/model/odata/v4/ODataModel",
+					},
+				},
 			},
 		},
 	} as Ui5TypeInfo);

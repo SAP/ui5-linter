@@ -40,6 +40,29 @@ export function getPropertyNameText(node: ts.PropertyName): string | undefined {
 }
 
 /**
+ * Searches for the symbol of an argument within the given construct signatures.
+ * The first match is returned.
+ *
+ * Returns undefined if the argument is not found in any of the construct signatures.
+ *
+ * @param constructSignatures construct signatures to search in
+ * @param argumentPosition position of the argument in the signature
+ * @returns symbol of the found property or undefined
+ */
+export function getSymbolForArgumentInConstructSignatures(
+	constructSignatures: readonly ts.Signature[],
+	argumentPosition: number
+): ts.Symbol | undefined {
+	for (const constructSignature of constructSignatures) {
+		const propertySymbol = constructSignature.getParameters()[argumentPosition];
+		if (propertySymbol) {
+			return propertySymbol;
+		}
+	}
+	return undefined;
+}
+
+/**
  * Searches for the symbol of a property within the given construct signatures.
  * The first match is returned.
  *

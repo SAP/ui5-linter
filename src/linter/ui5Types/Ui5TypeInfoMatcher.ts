@@ -120,6 +120,21 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		});
 	}
 
+	constr(children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
+		return this.createNode(Ui5TypeInfoKind.Constructor, "constructor", children, value);
+	}
+
+	constuctorParameter(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
+		return this.createNode(Ui5TypeInfoKind.ConstructorParameter, name, children, value);
+	}
+
+	constructorParameters(names: string[], children?: Node<ValueType>[] | ValueType, value?: ValueType
+	): Node<ValueType>[] {
+		return names.map((name) => {
+			return this.createNode(Ui5TypeInfoKind.ConstructorParameter, name, children, value);
+		});
+	}
+
 	method(name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
 		return this.createNode(Ui5TypeInfoKind.Method, name, children, value);
 	}
