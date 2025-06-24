@@ -1,0 +1,8 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	controllerName="com.myapp.controller.Main"
+>
+	<Button id="segmented-button-inner" tap=".onButtonTap"/>
+	<Button id="segmented-button-inner" tap=".onButtonTap />
+
+</mvc:View>
