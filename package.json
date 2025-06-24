@@ -78,6 +78,7 @@
 		"@ui5/project": "^4.0.4",
 		"chalk": "^5.4.1",
 		"data-with-position": "^0.5.0",
+		"fast-xml-parser": "^5.2.5",
 		"figures": "^6.1.0",
 		"globals": "^16.2.0",
 		"he": "^1.2.0",

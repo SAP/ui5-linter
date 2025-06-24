@@ -17,6 +17,7 @@
 				"@ui5/project": "^4.0.4",
 				"chalk": "^5.4.1",
 				"data-with-position": "^0.5.0",
+				"fast-xml-parser": "^5.2.5",
 				"figures": "^6.1.0",
 				"globals": "^16.2.0",
 				"he": "^1.2.0",
@@ -12903,6 +12904,24 @@
 				}
 			]
 		},
+		"node_modules/fast-xml-parser": {
+			"version": "5.2.5",
+			"resolved": "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-5.2.5.tgz",
+			"integrity": "sha512-pfX9uG9Ki0yekDHx2SiuRIyFdyAr1kMIMitPvb0YBo8SUfKvia7w7FIyd/l6av85pFYRhZscS75MwMnbvY+hcQ==",
+			"funding": [
+				{
+					"type": "github",
+					"url": "https://github.com/sponsors/NaturalIntelligence"
+				}
+			],
+			"license": "MIT",
+			"dependencies": {
+				"strnum": "^2.1.0"
+			},
+			"bin": {
+				"fxparser": "src/cli/cli.js"
+			}
+		},
 		"node_modules/fastq": {
 			"version": "1.19.1",
 			"resolved": "https://registry.npmjs.org/fastq/-/fastq-1.19.1.tgz",
@@ -18081,6 +18100,18 @@
 			"funding": {
 				"url": "https://github.com/sponsors/sindresorhus"
 			}
+		},
+		"node_modules/strnum": {
+			"version": "2.1.1",
+			"resolved": "https://registry.npmjs.org/strnum/-/strnum-2.1.1.tgz",
+			"integrity": "sha512-7ZvoFTiCnGxBtDqJ//Cu6fWtZtc7Y3x+QOirG15wztbdngGSkht27o2pyGWrVy0b4WAy3jbKmnoK6g5VlVNUUw==",
+			"funding": [
+				{
+					"type": "github",
+					"url": "https://github.com/sponsors/NaturalIntelligence"
+				}
+			],
+			"license": "MIT"
 		},
 		"node_modules/stubborn-fs": {
 			"version": "1.2.5",

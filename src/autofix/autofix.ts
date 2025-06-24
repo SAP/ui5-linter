@@ -155,6 +155,15 @@ function getJsErrors(code: string, resourcePath: string) {
 	return getJsErrorsForSourceFile(sourceFile, program, host);
 }
 
+async function getXmlErrorForFile(content: string) {
+	const {XMLValidator} = await import("fast-xml-parser");
+	const validOrError = XMLValidator.validate(content);
+	if (validOrError === true) {
+		return; // No errors
+	}
+	return validOrError.err;
+}
+
 export function getFactoryPosition(moduleDeclaration: ExistingModuleDeclarationInfo): {start: number; end: number} {
 	const {moduleDeclaration: declaration} = moduleDeclaration;
 	const factory = "factory" in declaration ? declaration.factory : declaration.callback;
@@ -190,6 +199,23 @@ export default async function ({
 		}
 	}
 
+	const res: AutofixResult = new Map();
+	if (jsResources.length) {
+		log.verbose(`Applying autofixes for ${jsResources.length} JS resources`);
+		await autofixJs(jsResources, messages, context, res);
+	}
+	if (xmlResources.length) {
+		log.verbose(`Applying autofixes for ${xmlResources.length} XML resources`);
+		await autofixXml(xmlResources, messages, context, res);
+	}
+
+	return res;
+}
+
+async function autofixJs(
+	jsResources: Resource[], messages: Map<ResourcePath, RawLintMessage[]>, context: LinterContext,
+	res: AutofixResult
+): Promise<void> {
 	const sourceFiles: SourceFiles = new Map();
 	const jsResourcePaths = [];
 	for (const resource of jsResources) {
@@ -210,7 +236,6 @@ export default async function ({
 	const program = createProgram(jsResourcePaths, compilerHost);
 
 	const checker = program.getTypeChecker();
-	const res: AutofixResult = new Map();
 	for (const [resourcePath, sourceFile] of sourceFiles) {
 		// Checking for syntax errors in the original source file.
 		// We should not apply autofixes to files with syntax errors
@@ -246,26 +271,41 @@ export default async function ({
 			const jsErrors = getJsErrors(newContent, resourcePath);
 			if (jsErrors.length) {
 				const contentWithMarkers = newContent.split("\n");
-				const message = `Syntax error after applying autofix for '${resourcePath}':\n - ` +
-					jsErrors
-						.sort((a, b) => {
-							if (a.start === undefined || b.start === undefined) {
-								return 0;
-							}
-							return a.start - b.start;
-						}).map((d) => {
-							if (d.line !== undefined && d.character !== undefined) {
-								// Insert line below the finding and mark the character
-								const line = d.line + 1;
-								contentWithMarkers.splice(line, 0, " ".repeat(d.character) + "^");
-							}
-							let res = d.messageText;
-							if (d.codeSnippet) {
-								res += ` (\`${d.codeSnippet}\`)`;
-							}
-							return res;
-						}).join("\n - ");
+				let lineOffset = 0;
+				const message = `Syntax error after applying autofix for '${resourcePath}'. ` +
+					`This is likely a UI5 linter internal issue. Please check the verbose log. ` +
+					`Please report this using the bug report template: ` +
+					`https://github.com/UI5/linter/issues/new?template=bug-report.md`;
+				const errors = jsErrors
+					.sort((a, b) => {
+						if (a.start === undefined || b.start === undefined) {
+							return 0;
+						}
+						return a.start - b.start;
+					}).map((d) => {
+						let res = d.messageText;
+						if (d.line !== undefined && d.character !== undefined) {
+							// Prepend line and character
+							res = `${d.line + 1}:${d.character + 1} ${res}`;
+
+							// Fill contentWithMarkers array for debug logging
+							// Insert line below the finding and mark the character
+							const lineContent = contentWithMarkers[d.line + lineOffset];
+							// Count number of tabs until the character
+							const tabCount = lineContent.slice(0, d.character).split("\t").length - 1;
+							const leadingTabs = "\t".repeat(tabCount);
+							const markerLine = d.line + lineOffset + 1;
+							contentWithMarkers.splice(markerLine, 0,
+								leadingTabs + " ".repeat(d.character - tabCount) + "^");
+							lineOffset++;
+						}
+						if (d.codeSnippet) {
+							res += ` (\`${d.codeSnippet}\`)`;
+						}
+						return res;
+					}).join("\n - ");
 				log.verbose(message);
+				log.verbose(errors);
 				log.verbose(resourcePath + ":\n" + contentWithMarkers.join("\n"));
 				context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});
 			} else {
@@ -274,16 +314,51 @@ export default async function ({
 			}
 		}
 	}
+}
 
+async function autofixXml(
+	xmlResources: Resource[], messages: Map<ResourcePath, RawLintMessage[]>, context: LinterContext,
+	res: AutofixResult
+): Promise<void> {
 	for (const resource of xmlResources) {
 		const resourcePath = resource.getPath();
-		const newContent = await applyFixesXml(resource, messages.get(resourcePath)!);
-		if (newContent) {
-			res.set(resourcePath, newContent);
+		const existingXmlError = await getXmlErrorForFile(await resource.getString());
+		if (existingXmlError) {
+			log.verbose(`Skipping autofix for '${resourcePath}'. Syntax error reported in original source file:\n` +
+				`[${existingXmlError.line}:${existingXmlError.col}] ${existingXmlError.msg}`);
+			continue;
 		}
-	}
+		const newContent = await applyFixesXml(resource, messages.get(resourcePath)!);
+		if (!newContent) {
+			continue;
+		}
 
-	return res;
+		const newXmlError = await getXmlErrorForFile(newContent);
+		if (newXmlError) {
+			const message = `Syntax error after applying autofix for '${resourcePath}'. ` +
+				`This is likely a UI5 linter internal issue. Please check the verbose log. ` +
+				`Please report this using the bug report template: ` +
+				`https://github.com/UI5/linter/issues/new?template=bug-report.md`;
+			const error = `Reported error (${newXmlError.line}:${newXmlError.col}): ${newXmlError.msg}`;
+			log.verbose(message);
+			log.verbose(error);
+			const contentWithMarkers = newContent.split("\n");
+			if (newXmlError.line !== undefined && newXmlError.col !== undefined) {
+				const line = newXmlError.line - 1;
+				// Insert line below the finding and mark the character
+				const lineContent = contentWithMarkers[line];
+				// Count number of tabs until the character
+				const tabCount = lineContent.slice(0, newXmlError.col).split("\t").length - 1;
+				const leadingTabs = "\t".repeat(tabCount);
+				const markerLine = line + 1;
+				contentWithMarkers.splice(markerLine, 0, leadingTabs + " ".repeat(newXmlError.col - tabCount) + "^");
+			}
+			log.verbose(resourcePath + ":\n" + contentWithMarkers.join("\n"));
+			context.addLintingMessage(resourcePath, MESSAGE.AUTOFIX_ERROR, {message});
+			continue;
+		}
+		res.set(resourcePath, newContent);
+	}
 }
 
 function applyFixesJs(
