@@ -26,7 +26,7 @@ export default class PropertyAssignmentFix extends XmlEnabledFix {
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo) {
-		if (!ts.isPropertyAssignment(node) || !ts.isIdentifier(node.name)) {
+		if (!ts.isPropertyAssignment(node) || (!ts.isIdentifier(node.name) && !ts.isStringLiteralLike(node.name))) {
 			return false;
 		}
 

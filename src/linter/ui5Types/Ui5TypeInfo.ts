@@ -4,8 +4,10 @@ import {getPropertyNameText} from "./utils/utils.js";
 
 export enum Ui5TypeInfoKind {
 	Module,
-	Class,
 	Namespace,
+	Class,
+	Constructor,
+	ConstructorParameter,
 	ManagedObjectSettings,
 	MetadataProperty,
 	MetadataEvent,
@@ -20,9 +22,9 @@ export enum Ui5TypeInfoKind {
 	EnumMember,
 }
 
-export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5ClassTypeInfo | Ui5NamespaceTypeInfo |
-	Ui5MetadataTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo | Ui5PropertyTypeInfo |
-	Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo;
+export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo | Ui5ClassTypeInfo | Ui5ConstructorTypeInfo |
+	Ui5ConstructorParameterTypeInfo | Ui5MetadataTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo |
+	Ui5PropertyTypeInfo | Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo;
 
 export interface BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind;
@@ -74,7 +76,7 @@ interface Ui5MethodTypeInfo extends BaseUi5TypeInfo {
 interface Ui5PropertyTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.Property | Ui5TypeInfoKind.StaticProperty;
 	name: string;
-	parent: Ui5ClassTypeInfo;
+	parent: Ui5ClassTypeInfo | Ui5ConstructorTypeInfo | Ui5ConstructorParameterTypeInfo;
 }
 
 interface Ui5EnumTypeInfo extends BaseUi5TypeInfo {
@@ -87,6 +89,18 @@ interface Ui5EnumMemberTypeInfo extends BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind.EnumMember;
 	name: string; // e.g. "Forwards"
 	parent: Ui5EnumTypeInfo;
+}
+
+interface Ui5ConstructorTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Constructor;
+	name: string;
+	parent: Ui5ClassTypeInfo;
+}
+
+interface Ui5ConstructorParameterTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.ConstructorParameter;
+	name: string; // e.g. "mParameters"
+	parent: Ui5ConstructorTypeInfo;
 }
 
 function isManagedObjectSettingsInterfaceName(name: string): boolean {
@@ -257,7 +271,7 @@ function createMangedObjectSettingsTypeInfo(node: ts.Declaration, moduleName: st
 
 function createClassTypeInfo(
 	node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
-): Ui5MethodTypeInfo | Ui5PropertyTypeInfo | Ui5ClassTypeInfo | undefined {
+): Ui5MethodTypeInfo | Ui5PropertyTypeInfo | Ui5ClassTypeInfo | Ui5ConstructorParameterTypeInfo | undefined {
 	if (ts.isClassDeclaration(node) && node.name) {
 		return {
 			kind: Ui5TypeInfoKind.Class,
@@ -265,21 +279,31 @@ function createClassTypeInfo(
 			parent,
 		};
 	}
-	if (!ts.isInterfaceDeclaration(node.parent) && !ts.isClassDeclaration(node.parent)) {
-		return;
+	let classNode = node.parent;
+	const skippedNodes = [];
+	while (!ts.isInterfaceDeclaration(classNode) && !ts.isClassDeclaration(classNode)) {
+		if (!classNode.parent) {
+			return;
+		}
+		skippedNodes.unshift(classNode);
+		classNode = classNode.parent;
 	}
-	if (!node.parent.name) {
+	if (!classNode.name) {
 		// Class name can be undefined in `export default class { ... }`. But we generally don't expect
 		// to encounter this case in the UI5 types so we can safely ignore it and keeps our types greedy.
 		return;
 	}
 	const classTypeInfo: Ui5ClassTypeInfo = {
 		kind: Ui5TypeInfoKind.Class,
-		name: node.parent.name.text,
+		name: classNode.name.text,
 		parent,
 	};
 
 	if (ts.isMethodSignature(node) || ts.isMethodDeclaration(node)) {
+		if (skippedNodes.length) {
+			throw new Error(
+				`Unexpected nested method declaration: ${skippedNodes.map((n) => n.getText()).join(" -> ")}`);
+		}
 		const name = getPropertyNameText(node.name);
 		if (!name) {
 			// We need a name for methods and properties
@@ -291,16 +315,43 @@ function createClassTypeInfo(
 			parent: classTypeInfo,
 		};
 	}
-	if (ts.isPropertySignature(node) || ts.isPropertyDeclaration(node)) {
+	if (ts.isPropertySignature(node) || ts.isPropertyDeclaration(node) || ts.isParameter(node)) {
+		let parent = classTypeInfo as Ui5ClassTypeInfo | Ui5ConstructorTypeInfo | Ui5ConstructorParameterTypeInfo;
+		for (const skippedNode of skippedNodes) {
+			if (ts.isConstructorDeclaration(skippedNode)) {
+				parent = {
+					kind: Ui5TypeInfoKind.Constructor,
+					name: "constructor",
+					parent,
+				} as Ui5ConstructorTypeInfo;
+			} else if (ts.isParameter(skippedNode)) {
+				parent = {
+					kind: Ui5TypeInfoKind.ConstructorParameter,
+					name: skippedNode.name.getText(),
+					parent,
+				} as Ui5ConstructorParameterTypeInfo;
+			}
+		}
+		if (!ts.isPropertyName(node.name)) {
+			return;
+		}
 		const name = getPropertyNameText(node.name);
 		if (!name) {
 			// We need a name for methods and properties
 			return undefined;
 		}
+		if (ts.isParameter(node)) {
+			return {
+				kind: Ui5TypeInfoKind.ConstructorParameter,
+				name,
+				parent: parent as Ui5ConstructorTypeInfo,
+			};
+		}
+		// PropertySignature or PropertyDeclaration
 		return {
 			kind: hasStaticModifier(node) ? Ui5TypeInfoKind.StaticProperty : Ui5TypeInfoKind.Property,
 			name,
-			parent: classTypeInfo,
+			parent,
 		};
 	}
 }

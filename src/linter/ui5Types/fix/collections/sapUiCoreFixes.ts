@@ -5,6 +5,7 @@ import {
 	accessExpressionFix,
 	callExpressionFix,
 	callExpressionGeneratorFix,
+	propertyAssignmentFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
 
@@ -477,5 +478,15 @@ t.declareModule("sap/ui/core/Core", [
 
 		// Migration not possible
 		// ["unregisterPlugin", {}],
+	]),
+]);
+
+t.declareModule("sap/ui/model/odata/v4/ODataModel", [
+	t.class("ODataModel", [
+		t.constr([
+			t.constuctorParameter("mParameters", [
+				t.property("synchronizationMode", propertyAssignmentFix({})),
+			]),
+		]),
 	]),
 ]);
