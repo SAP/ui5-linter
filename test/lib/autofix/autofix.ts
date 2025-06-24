@@ -119,6 +119,7 @@ test("autofix (JS): Parsing error after applying fixes", async (t) => {
 					line: 1,
 					column: 1,
 				}),
+				ui5TypeInfo: undefined,
 			},
 		],
 	});
@@ -149,6 +150,7 @@ test("autofix (JS): Parsing error after applying fixes", async (t) => {
 						`https://github.com/UI5/linter/issues/new?template=bug-report.md`,
 					ruleId: "autofix-error",
 					severity: 1,
+					ui5TypeInfo: undefined,
 				},
 			],
 		},
@@ -178,6 +180,7 @@ test("autofix (XML): Parsing error after applying fixes", async (t) => {
 					line: 1,
 					column: 11,
 				}),
+				ui5TypeInfo: undefined,
 			},
 		],
 	});
@@ -207,6 +210,7 @@ test("autofix (XML): Parsing error after applying fixes", async (t) => {
 						`https://github.com/UI5/linter/issues/new?template=bug-report.md`,
 					ruleId: "autofix-error",
 					severity: 1,
+					ui5TypeInfo: undefined,
 				},
 			],
 		},

@@ -40,6 +40,7 @@ export interface LintMessage {
 	severity: LintMessageSeverity;
 	message: string;
 	messageDetails?: string;
+	ui5TypeInfo?: Ui5TypeInfo;
 	fatal?: boolean | undefined; // e.g. parsing error
 	line?: number | undefined; // 1 based to be aligned with most IDEs
 	column?: number | undefined; // 1 based to be aligned with most IDEs
@@ -238,6 +239,7 @@ export default class LinterContext {
 			line: rawMessage.position ? rawMessage.position.line : undefined,
 			column: rawMessage.position ? rawMessage.position.column : undefined,
 			message: messageFunc(rawMessage.args || {}),
+			ui5TypeInfo: rawMessage.ui5TypeInfo,
 		};
 
 		if (this.#includeMessageDetails) {
