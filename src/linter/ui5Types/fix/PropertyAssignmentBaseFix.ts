@@ -13,6 +13,7 @@ export default abstract class PropertyAssignmentBaseFix extends XmlEnabledFix {
 	protected sourcePosition: PositionInfo | undefined;
 	protected startPos: number | undefined;
 	protected endPos: number | undefined;
+	protected trailingCommaPos: number | undefined;
 
 	constructor() {
 		super();
@@ -44,6 +45,22 @@ export default abstract class PropertyAssignmentBaseFix extends XmlEnabledFix {
 		}
 		this.startPos = node.getStart();
 		this.endPos = node.getEnd();
+
+		if (ts.isObjectLiteralExpression(node.parent)) {
+			const syntaxList = node.parent.getChildren().find((child) => child.kind === ts.SyntaxKind.SyntaxList);
+			if (syntaxList?.kind === ts.SyntaxKind.SyntaxList) {
+				// Check if the last child is a comma
+				const children = syntaxList.getChildren();
+				const propAssIdx = children.findIndex((child) => child === node);
+				if (propAssIdx === -1) {
+					throw new Error("Unexpected: Property assignment not found in syntax list");
+				}
+				const commaToken = children[propAssIdx + 1];
+				if (commaToken?.kind === ts.SyntaxKind.CommaToken) {
+					this.trailingCommaPos = commaToken.getEnd();
+				}
+			}
+		}
 		return true;
 	}
 

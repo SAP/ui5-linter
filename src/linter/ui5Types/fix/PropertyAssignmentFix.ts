@@ -62,7 +62,7 @@ export default class PropertyAssignmentFix extends PropertyAssignmentBaseFix {
 			return {
 				action: ChangeAction.DELETE,
 				start: this.startPos,
-				end: this.endPos,
+				end: this.trailingCommaPos ?? this.endPos,
 			};
 		}
 	}
