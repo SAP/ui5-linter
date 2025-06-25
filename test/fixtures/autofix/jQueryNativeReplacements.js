@@ -63,7 +63,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 			});
 		});
 	});
-
+	jQuery.sap.delayedCall(50, this); // Invalid: Missing third argument must not be migrated
 	jQuery.sap.clearDelayedCall(delayedCallId);
 	var intervalCallId = jQuery.sap.intervalCall(1000, myObject, "myFunction");
 	var intervalCallId2 = jQuery.sap.intervalCall(1000, myObject, myObject.myFunction, ["myParam1"]);
@@ -71,6 +71,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var intervalCallId4 = jQuery.sap.intervalCall(1000, this, function () {
 		var padRight = jQuery.sap.padRight("a", "0", 4); // Also migrate internal content
 	}, ["myParam1", "myParam2"]);
+	jQuery.sap.intervalCall(50, this); // Invalid: Missing third argument must not be migrated
 	jQuery.sap.clearIntervalCall(intervalCallId);
 
 	const document = globalThis.document;
@@ -79,6 +80,7 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 	var element3 = jQuery.sap.domById();
 	const divList = document.getElementsByTagName("div");
 	var isEqNode = jQuery.sap.isEqualNode(divList[0], divList[0]);
+	jQuery.sap.isEqualNode(); // Invalid: Missing arguments must not be migrated
 
 	var person = {firstname: "Peter", lastname: "Miller" };
 	var newObj = jQuery.sap.newObject(person);
@@ -89,5 +91,6 @@ sap.ui.define(["sap/ui/thirdparty/jquery"], async function (jQuery) {
 
 	var myData = ["a", "b", "c"];
 	var indexOfEntity = jQuery.inArray("b", myData);
+	jQuery.inArray(); // Invalid: Missing arguments must not be migrated
 	var isValueAnArray = jQuery.isArray(myData);
 });
