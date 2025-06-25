@@ -106,7 +106,7 @@ export default class AccessExpressionGeneratorFix extends AccessExpressionBaseFi
 
 		// If a generator function is provided, use it to generate the change
 		const value = this.params.generator(identifiers);
-		if (!value) {
+		if (value === undefined) {
 			return;
 		}
 		return {
