@@ -15,6 +15,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 		// https://github.com/UI5/linter/issues/521
 		var myBundle = innerScopeResourceBundle.create({url : "i18n/messagebundle.properties"});
 		var isBundle = jQuery.sap.resources.isBundle(myBundle);
+		jQuery.sap.resources.isBundle(); // Invalid: Missing argument must not be migrated
 	});
 
 	// https://github.com/UI5/linter/issues/522
@@ -152,6 +153,7 @@ sap.ui.define(["sap/base/strings/NormalizePolyfill"], async function (NormalizeP
 	var clone7 = jQuery.sap.extend(undefined, [undefined]); // Do not migrate.
 	var clone8 = jQuery.sap.extend(var1, var2); // Do not migrate. We don't know the types of var1 and var2
 	var clone9 = jQuery.sap.extend(12, [undefined]); // Do not migrate. We don't know how to handle this
+	var clone9 = jQuery.sap.extend(true); // Invalid: Missing second argument must not be migrated
 	var timestampsnumber = jQuery.sap.now();
 	var props = jQuery.sap.properties({ url: sap.ui.require.toUrl(sap.ui.require.toUrl("testdata/test.properties")) });
 	var myUid = jQuery.sap.uid();

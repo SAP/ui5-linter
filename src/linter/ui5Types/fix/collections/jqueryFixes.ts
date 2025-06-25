@@ -80,6 +80,12 @@ t.declareModule("jQuery", [
 		t.namespace("resources", [
 			t.namespace("isBundle", callExpressionGeneratorFix({ // https://github.com/UI5/linter/issues/657
 				moduleName: "sap/base/i18n/ResourceBundle",
+				validateArguments(ctx, _, arg1) {
+					if (!arg1) {
+						return false;
+					}
+					return true;
+				},
 				generator(_ctx, [moduleIdentifier], arg1) {
 					return `${arg1.trim()} instanceof ${moduleIdentifier}`;
 				},
@@ -205,10 +211,13 @@ t.declareModule("jQuery", [
 		*/
 		t.namespace("extend", callExpressionGeneratorFix({
 			moduleName: "sap/base/util/merge",
-			validateArguments(ctx, _, arg1) {
-				if (arg1.kind !== ts.SyntaxKind.TrueKeyword) {
+			validateArguments(ctx, _, arg1, arg2) {
+				if (arg1?.kind !== ts.SyntaxKind.TrueKeyword) {
 					// If the first argument is not "true" (indicating a deep merge),
 					// do not apply the fix
+					return false;
+				}
+				if (!arg2) {
 					return false;
 				}
 				return true;
@@ -653,6 +662,13 @@ t.declareModule("jQuery", [
 			},
 		})),
 		t.namespace("isEqualNode", callExpressionGeneratorFix({
+			validateArguments(ctx, _, arg1, arg2) {
+				if (!arg1 || !arg2) {
+					// If either argument is missing, do not apply the fix
+					return false;
+				}
+				return true;
+			},
 			generator: (ctx, _, arg1, arg2) => {
 				return `!!${arg1.trim()}?.isEqualNode(${arg2.trim()})`;
 			},
@@ -725,7 +741,11 @@ t.declareModule("jQuery", [
 			},
 		})),
 		t.namespace("delayedCall", callExpressionGeneratorFix<{isFnString: boolean}>({
-			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+			validateArguments: (ctx, _, timeout, objCtx, fnName) => {
+				if (!timeout || !objCtx || !fnName) {
+					// If the function name is not provided, do not apply the fix
+					return false;
+				}
 				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
 				return true;
 			},
@@ -745,7 +765,11 @@ t.declareModule("jQuery", [
 		})),
 		t.namespace("intervalCall", callExpressionGeneratorFix<{isFnString: boolean}>({
 			globalName: "setInterval",
-			validateArguments: (ctx, _, _timeout, _objCtx, fnName) => {
+			validateArguments: (ctx, _, timeout, objCtx, fnName) => {
+				if (!timeout || !objCtx || !fnName) {
+					// If the function name is not provided, do not apply the fix
+					return false;
+				}
 				ctx.isFnString = !!fnName && ts.isStringLiteralLike(fnName);
 				return true;
 			},
@@ -768,6 +792,13 @@ t.declareModule("jQuery", [
 	]), // jQuery.sap
 	// jQuery
 	t.namespace("inArray", callExpressionGeneratorFix({
+		validateArguments(ctx, _, arg1, arg2) {
+			if (!arg1 || !arg2) {
+				// If either argument is missing, do not apply the fix
+				return false;
+			}
+			return true;
+		},
 		generator: (ctx, _, arg1, arg2) => {
 			return `(${arg2.trim()} ? Array.prototype.indexOf.call(${arg2.trim()}, ${arg1.trim()}) : -1)`;
 		},
