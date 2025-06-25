@@ -73,7 +73,6 @@ export default class PropertyAssignmentGeneratorFix<GeneratorContext extends obj
 
 		this.propertyName = node.name.getFullText();
 		this.propertyInitializer = node.initializer.getFullText();
-
 		return true;
 	}
 
@@ -97,11 +96,19 @@ export default class PropertyAssignmentGeneratorFix<GeneratorContext extends obj
 		if (value === undefined) {
 			return;
 		}
-		return {
-			action: ChangeAction.REPLACE,
-			start: this.startPos,
-			end: this.endPos,
-			value,
-		};
+		if (value !== "") {
+			return {
+				action: ChangeAction.REPLACE,
+				start: this.startPos,
+				end: this.endPos,
+				value,
+			};
+		} else {
+			return {
+				action: ChangeAction.DELETE,
+				start: this.startPos,
+				end: this.trailingCommaPos ?? this.endPos,
+			};
+		}
 	}
 }
