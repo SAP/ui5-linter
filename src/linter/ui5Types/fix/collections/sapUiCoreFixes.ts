@@ -70,8 +70,8 @@ t.declareModule("sap/ui/core/Configuration", [
 		})),
 		t.method("getLanguageTag", callExpressionGeneratorFix({
 			moduleName: "sap/base/i18n/Localization",
-			generator: (ctx, [moduleIdentifier]) => {
-				return `${moduleIdentifier}.getLanguageTag().toString()`;
+			generator: (ctx, [localizationIdentifier]) => {
+				return `${localizationIdentifier}.getLanguageTag().toString()`;
 			},
 		})),
 		t.method("getLocale", callExpressionGeneratorFix({
@@ -80,8 +80,8 @@ t.declareModule("sap/ui/core/Configuration", [
 			}, {
 				moduleName: "sap/base/i18n/Localization",
 			}],
-			generator(ctx, identifierNames) {
-				return `new ${identifierNames[0]}(${identifierNames[1]}.getLanguageTag())`;
+			generator(ctx, [localeIdentifier, localizationIdentifier]) {
+				return `new ${localeIdentifier}(${localizationIdentifier}.getLanguageTag())`;
 			},
 		})),
 		t.method("getRTL", accessExpressionFix({
