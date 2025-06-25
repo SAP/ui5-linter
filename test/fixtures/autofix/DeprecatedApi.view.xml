@@ -15,6 +15,12 @@
 	<form:SimpleForm minWidth="100px"> <!-- REMOVE: Property "minWidth" is deprecated -->
 	</form:SimpleForm>
 
+	<form:SimpleForm minWidth="100px" layout="ResponsiveLayout"> <!-- KEEP: Property "minWidth" is deprecated but ResponsiveLayout is used, preventing a safe migration -->
+	</form:SimpleForm>
+
+	<form:SimpleForm minWidth="100px" layout="{/layoutBinding}"> <!-- KEEP: Property "minWidth" is deprecated but the layout is determined dynamically, preventing a safe migration -->
+	</form:SimpleForm>
+
 	<table:Table groupBy="some-column"> <!-- Association "groupBy" is deprecated -->
 			<table:plugins> <!-- Aggregation "plugins" is deprecated -->
 					<tablePlugins:MultiSelectionPlugin id="multi-selection-plugin" />

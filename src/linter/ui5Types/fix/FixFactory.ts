@@ -10,6 +10,9 @@ import getGlobalFixInfo, {GlobalFixInfo} from "./getGlobalFixInfo.js";
 import CallExpressionGeneratorFix, {CallExpressionGeneratorFixParams} from "./CallExpressionGeneratorFix.js";
 import AccessExpressionGeneratorFix, {AccessExpressionGeneratorFixParams} from "./AccessExpressionGeneratorFix.js";
 import PropertyAssignmentFix, {PropertyAssignmentFixParams} from "./PropertyAssignmentFix.js";
+import PropertyAssignmentGeneratorFix, {
+	PropertyAssignmentGeneratorFixParams,
+} from "./PropertyAssignmentGeneratorFix.js";
 
 const AUTOFIX_COLLECTIONS = [
 	"sapUiCoreFixes",
@@ -121,4 +124,10 @@ export function callExpressionGeneratorFix<GeneratorContext extends object = obj
 
 export function propertyAssignmentFix(params: PropertyAssignmentFixParams): () => PropertyAssignmentFix {
 	return () => new PropertyAssignmentFix(params);
+}
+
+export function propertyAssignmentGeneratorFix<GeneratorContext extends object = object>(
+	params: PropertyAssignmentGeneratorFixParams<GeneratorContext>
+): () => PropertyAssignmentGeneratorFix<GeneratorContext> {
+	return () => new PropertyAssignmentGeneratorFix(params);
 }

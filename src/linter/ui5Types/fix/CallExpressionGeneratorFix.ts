@@ -161,7 +161,7 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 
 		const value = this.params.generator(
 			this.generatorContext, identifiers, ...this.generatorArgs);
-		if (!value) {
+		if (value === undefined) {
 			return;
 		}
 		return {
