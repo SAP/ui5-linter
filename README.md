@@ -197,7 +197,7 @@ In this mode, the linter will show the messages after the fixes would have been 
 
 #### `--quiet`
 
-Report errors only and hide warnings. Similar to ESLint's --quiet option.
+Report errors only, hiding warnings. Similar to ESLint's `--quiet` option.
 
 **Example:**
 ```sh
