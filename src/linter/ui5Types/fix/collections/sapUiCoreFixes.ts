@@ -19,15 +19,131 @@ t.declareModule("sap/ui/core/Configuration", [
 			moduleName: "sap/base/i18n/Localization",
 			mustNotUseReturnValue: true,
 		})),
+		t.method("getAccessibility", accessExpressionFix({
+			moduleName: "sap/ui/core/ControlBehavior",
+			propertyAccess: "isAccessibilityEnabled",
+		})),
+		t.method("getActiveTerminologies", accessExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			propertyAccess: "getActiveTerminologies",
+		})),
+		t.method("getAllowlistService", accessExpressionFix({
+			moduleName: "sap/ui/security/Security",
+			propertyAccess: "getAllowlistService",
+		})),
+		t.method("getAnimation", callExpressionFix({
+			moduleName: "sap/ui/core/ControlBehavior",
+			propertyAccess: "getAnimationMode",
+			// Note: The new API returns an enum value instead of a boolean, therefore
+			// migration is currently not possible if the return value is used
+			// This could be optimized with an advanced migration that detects how the return
+			// value is used and e.g. migrates to something like
+			// (getAnimationMode() !== sap.ui.core.Configuration.AnimationMode.none)
+			// Right now this migration probably wont apply for most cases
+			mustNotUseReturnValue: true,
+		})),
+		t.method("getAnimationMode", accessExpressionFix({
+			scope: FixScope.FirstChild,
+			moduleName: "sap/ui/core/ControlBehavior",
+		})),
+		t.method("getCalendarType", accessExpressionFix({
+			moduleName: "sap/base/i18n/Formatting",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getCalendarWeekNumbering", accessExpressionFix({
+			moduleName: "sap/base/i18n/Formatting",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getFrameOptions", accessExpressionFix({
+			moduleName: "sap/ui/security/Security",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getFormatLocale", callExpressionGeneratorFix({
+			moduleName: "sap/base/i18n/Formatting",
+			generator: (ctx, [moduleIdentifier]) => {
+				return `${moduleIdentifier}.getLanguageTag().toString()`;
+			},
+		})),
+		t.method("getLanguage", accessExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getLanguageTag", callExpressionGeneratorFix({
+			moduleName: "sap/base/i18n/Localization",
+			generator: (ctx, [localizationIdentifier]) => {
+				return `${localizationIdentifier}.getLanguageTag().toString()`;
+			},
+		})),
 		t.method("getLocale", callExpressionGeneratorFix({
 			moduleImports: [{
 				moduleName: "sap/ui/core/Locale",
 			}, {
 				moduleName: "sap/base/i18n/Localization",
 			}],
-			generator(ctx, identifierNames) {
-				return `new ${identifierNames[0]}(${identifierNames[1]}.getLanguageTag())`;
+			generator(ctx, [localeIdentifier, localizationIdentifier]) {
+				return `new ${localeIdentifier}(${localizationIdentifier}.getLanguageTag())`;
 			},
+		})),
+		t.method("getRTL", accessExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			propertyAccess: "getRTL",
+		})),
+		t.method("getSAPLogonLanguage", accessExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getSecurityTokenHandlers", accessExpressionFix({
+			moduleName: "sap/ui/security/Security",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getTheme", accessExpressionFix({
+			moduleName: "sap/ui/core/Theming",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getTimezone", accessExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getUIDPrefix", accessExpressionFix({
+			moduleName: "sap/ui/base/ManagedObjectMetadata",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("getWhitelistService", accessExpressionFix({
+			moduleName: "sap/ui/security/Security",
+			propertyAccess: "getAllowlistService",
+		})),
+		t.method("setAnimationMode", accessExpressionFix({
+			moduleName: "sap/ui/core/ControlBehavior",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("setCalendarType", callExpressionFix({
+			moduleName: "sap/base/i18n/Formatting",
+			propertyAccess: "setCalendarType",
+			mustNotUseReturnValue: true,
+		})),
+		t.method("setCalendarWeekNumbering", callExpressionFix({
+			moduleName: "sap/base/i18n/Formatting",
+			propertyAccess: "setCalendarWeekNumbering",
+			mustNotUseReturnValue: true,
+		})),
+		t.method("setFormatLocale", callExpressionFix({
+			moduleName: "sap/base/i18n/Formatting",
+			propertyAccess: "setLanguageTag",
+			mustNotUseReturnValue: true,
+		})),
+		t.method("setSecurityTokenHandlers", accessExpressionFix({
+			moduleName: "sap/ui/security/Security",
+			scope: FixScope.FirstChild,
+		})),
+		t.method("setTheme", callExpressionFix({
+			moduleName: "sap/ui/core/Theming",
+			propertyAccess: "setTheme",
+			mustNotUseReturnValue: true,
+		})),
+		t.method("setTimezone", callExpressionFix({
+			moduleName: "sap/base/i18n/Localization",
+			propertyAccess: "setTimezone",
+			mustNotUseReturnValue: true,
 		})),
 	]),
 ]);
