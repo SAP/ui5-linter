@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.30"
+    "version": "1.120.31"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -12285,7 +12285,8 @@
         "enableODataSelect",
         "requestAtLeastFields",
         "textSeparator",
-        "singleTokenMode"
+        "singleTokenMode",
+        "enableValueHelpSelectAll"
       ],
       "extends": "sap.ui.comp.smartfield.SmartField"
     },
