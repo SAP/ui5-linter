@@ -174,11 +174,11 @@ ui5lint --fix
 ```
 
 Currently, issues of the following rules are fixable:
-- no-globals: Usage of globals that are part of UI5 (e.g. `sap.m.Button`) are replaced with the corresponding module import (in JS files)
+- no-globals: Usage of globals that are part of UI5 (e.g. `sap.m.Button`) are replaced by the corresponding module import (in JS files)
 - no-deprecated-api: Usage of deprecated APIs
-  - Usages of some deprecated APIs on `sap.ui.getCore().getConfiguration()` a.k.a. "Configuration Facade" are replaced with the corresponding recommended APIs (in JS files)
-  - Usages of some deprecated APIs on `sap.ui.getCore()` a.k.a. "Core Facade" are replaced with the corresponding recommended APIs (in JS files)
-  - Usages of the deprecated `tap` event handler on `sap/m/Button` are replaced by the recommended `press` event handler (in JS and XML files). Also associated event handler methods `attachTap` and `dettachTap` are replaced with the corresponding `attachPress` and `detachPress` methods.
+  - Usages of some deprecated APIs on `sap.ui.getCore().getConfiguration()` a.k.a. "Configuration Facade" are replaced by the corresponding recommended APIs (in JS files)
+  - Usages of some deprecated APIs on `sap.ui.getCore()` a.k.a. "Core Facade" are replaced by the corresponding recommended APIs (in JS files)
+  - Usages of the deprecated `tap` event handler on `sap/m/Button` are replaced by the recommended `press` event handler (in JS and XML files). Also, the associated event handler methods `attachTap` and `dettachTap` are replaced by the corresponding `attachPress` and `detachPress` methods.
   - Usages of the deprecated `useExportToExcel` property on `sap/ui/comp/smarttable/SmartTable` are replaced by the `enableExport` property (in JS and XML files)
   - Usages of the deprecated `synchronizationMode` property on `sap/ui/model/odata/v4/ODataModel` are removed (in JS files)
   - Usages of the deprecated `minWidth` property on `sap/ui/layout/form/SimpleForm` are removed (in JS and XML files)
