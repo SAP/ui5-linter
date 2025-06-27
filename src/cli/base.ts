@@ -210,7 +210,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		process.stdout.write("\n");
 	} else if (format === "html") {
 		const htmlFormatter = new Html();
-		process.stdout.write(htmlFormatter.format(res, details, getVersion(), fix));
+		process.stdout.write(htmlFormatter.format(res, details, getVersion(), fix, quiet));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);

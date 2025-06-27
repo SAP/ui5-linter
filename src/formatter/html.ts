@@ -2,7 +2,7 @@ import {LintResult, LintMessage} from "../linter/LinterContext.js";
 import {LintMessageSeverity} from "../linter/messages.js";
 
 export class Html {
-	format(lintResults: LintResult[], showDetails: boolean, version: string, autofix: boolean): string {
+	format(lintResults: LintResult[], showDetails: boolean, version: string, autofix: boolean, quiet = false): string {
 		let totalErrorCount = 0;
 		let totalWarningCount = 0;
 		let totalFatalErrorCount = 0;
@@ -75,15 +75,19 @@ export class Html {
 			resultsHtml += `</tbody></table></div>`;
 		});
 
-		// Build summary
+				// Build summary
+		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
+		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
+		const warningsText = quiet ? "" : `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
+		const problemsText = `${totalCount} ${totalCount === 1 ? "problem" : "problems"}`;
+
 		const summary = `<div class="summary">
 			<h2>Summary</h2>
 			<p>
-				${totalErrorCount + totalWarningCount} problems 
-				(${totalErrorCount} errors, ${totalWarningCount} warnings)
+				${problemsText} (${errorsText}${warningsText})
 			</p>
 			${totalFatalErrorCount ? `<p><strong>${totalFatalErrorCount} fatal errors</strong></p>` : ""}
-			${!autofix && (totalErrorCount + totalWarningCount > 0) ?
+			${!autofix && totalCount > 0 ?
 				"<p>Run <code>ui5lint --fix</code> to resolve all auto-fixable problems</p>" :
 				""}
 		</div>`;
@@ -97,7 +101,7 @@ export class Html {
 	<title>UI5 Linter Report</title>
 	<style>
 		body {
-			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 				Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 			line-height: 1.5;
 			max-width: 1200px;
@@ -196,12 +200,12 @@ export class Html {
 <body>
 	<h1>UI5 Linter Report</h1>
 	<p>Generated on ${new Date().toLocaleString()} with UI5 Linter v${version}</p>
-	
+
 	${summary}
-	
+
 	${resultsHtml ? `<h2>Findings</h2>${resultsHtml}` : "<p>No issues found. Your code looks great!</p>"}
-	
-	${!showDetails && (totalErrorCount + totalWarningCount) > 0 ?
+
+	${!showDetails && totalCount > 0 ?
 		"<div class=\"note\"><strong>Note:</strong> Use <code>ui5lint --details</code> " +
 		"to show more information about the findings.</div>" :
 		""}
