@@ -101,7 +101,7 @@ test("Default", (t) => {
 	const {lintResults} = t.context;
 
 	const htmlFormatter = new Html();
-	const htmlResult = htmlFormatter.format(lintResults, false, "1.2.3", false);
+	const htmlResult = htmlFormatter.format(lintResults, false, "1.2.3", false, false);
 
 	t.snapshot(htmlResult);
 });
@@ -110,14 +110,14 @@ test("Details", (t) => {
 	const {lintResults} = t.context;
 
 	const htmlFormatter = new Html();
-	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false);
+	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false, false);
 
 	t.snapshot(htmlResult);
 });
 
 test("No findings", (t) => {
 	const htmlFormatter = new Html();
-	const htmlResult = htmlFormatter.format([], true, "1.2.3", false);
+	const htmlResult = htmlFormatter.format([], true, "1.2.3", false, false);
 
 	t.snapshot(htmlResult);
 });
@@ -145,7 +145,7 @@ test("Message with no details", (t) => {
 	];
 
 	const htmlFormatter = new Html();
-	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false);
+	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false, false);
 
 	t.snapshot(htmlResult);
 	t.true(htmlResult.includes("Error with no details"));
@@ -216,7 +216,7 @@ test("Formatter messageDetails with whitespace", (t) => {
 		},
 	];
 
-	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false);
+	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false, false);
 
 	// Check the HTML content directly instead of the normalized text
 	// @ts-expect-error Accessing private method
@@ -304,7 +304,7 @@ test("URL detection in message details", (t) => {
 		},
 	];
 
-	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false);
+	const htmlResult = htmlFormatter.format(lintResults, true, "1.2.3", false, false);
 
 	// Make sure both URLs were converted to links in the HTML
 	t.true(htmlResult.includes("<a href=\"https://ui5.sap.com\" target=\"_blank\">https://ui5.sap.com</a>"));
@@ -325,4 +325,104 @@ test("Formatter messageDetails with undefined", (t) => {
 	});
 
 	t.is(result, "", "Should return empty string for undefined messageDetails");
+});
+
+test("Quiet mode - errors only", (t) => {
+	const {lintResults} = t.context;
+
+	const htmlFormatter = new Html();
+	const htmlResult = htmlFormatter.format(lintResults, false, "1.2.3", false, true);
+
+	t.snapshot(htmlResult);
+
+	// Should only show error count in summary, not warning count
+	t.true(htmlResult.includes("5 problems (5 errors)"));
+	// Should not include warning count in summary
+	t.false(htmlResult.includes(", 2 warnings"));
+});
+
+test("Quiet mode disabled - shows warnings", (t) => {
+	const {lintResults} = t.context;
+
+	const htmlFormatter = new Html();
+	const htmlResult = htmlFormatter.format(lintResults, false, "1.2.3", false, false);
+
+	t.snapshot(htmlResult);
+
+	// Should show both errors and warnings in summary
+	t.true(htmlResult.includes("7 problems (5 errors, 2 warnings)"));
+});
+
+test("Quiet mode with single error/warning", (t) => {
+	const singleResultLintResults: LintResult[] = [
+		{
+			filePath: "webapp/Single.js",
+			messages: [
+				{
+					ruleId: "rule1",
+					severity: LintMessageSeverity.Error,
+					line: 1,
+					column: 1,
+					message: "Single error message",
+					messageDetails: "Message details",
+				},
+				{
+					ruleId: "rule2",
+					severity: LintMessageSeverity.Warning,
+					line: 2,
+					column: 2,
+					message: "Single warning message",
+					messageDetails: "Message details",
+				},
+			],
+			coverageInfo: [],
+			errorCount: 1,
+			fatalErrorCount: 0,
+			warningCount: 1,
+		},
+	];
+
+	const htmlFormatter = new Html();
+
+	// Test quiet mode - should show "1 problem (1 error)"
+	const quietResult = htmlFormatter.format(singleResultLintResults, false, "1.2.3", false, true);
+	t.true(quietResult.includes("1 problem (1 error)"));
+	// Should not include warning count in summary
+	t.false(quietResult.includes(", 1 warning"));
+
+	// Test normal mode - should show "2 problems (1 error, 1 warning)"
+	const normalResult = htmlFormatter.format(singleResultLintResults, false, "1.2.3", false, false);
+	t.true(normalResult.includes("2 problems (1 error, 1 warning)"));
+});
+
+test("Quiet mode with no errors", (t) => {
+	const warningOnlyResults: LintResult[] = [
+		{
+			filePath: "webapp/WarningOnly.js",
+			messages: [
+				{
+					ruleId: "rule1",
+					severity: LintMessageSeverity.Warning,
+					line: 1,
+					column: 1,
+					message: "Warning message",
+					messageDetails: "Message details",
+				},
+			],
+			coverageInfo: [],
+			errorCount: 0,
+			fatalErrorCount: 0,
+			warningCount: 1,
+		},
+	];
+
+	const htmlFormatter = new Html();
+	const htmlResult = htmlFormatter.format(warningOnlyResults, false, "1.2.3", false, true);
+
+	t.snapshot(htmlResult);
+
+	// Should show "0 problems (0 errors)" in quiet mode
+	t.true(htmlResult.includes("0 problems (0 errors)"));
+	// Should not include warning count in summary
+	t.false(htmlResult.includes(", 1 warning"));
 });

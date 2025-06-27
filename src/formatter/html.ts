@@ -75,7 +75,7 @@ export class Html {
 			resultsHtml += `</tbody></table></div>`;
 		});
 
-				// Build summary
+		// Build summary
 		const totalCount = quiet ? totalErrorCount : totalErrorCount + totalWarningCount;
 		const errorsText = `${totalErrorCount} ${totalErrorCount === 1 ? "error" : "errors"}`;
 		const warningsText = quiet ? "" : `, ${totalWarningCount} ${totalWarningCount === 1 ? "warning" : "warnings"}`;
@@ -199,7 +199,7 @@ export class Html {
 </head>
 <body>
 	<h1>UI5 Linter Report</h1>
-	<p>Generated on ${new Date().toLocaleString()} with UI5 Linter v${version}</p>
+	<p>Generated with UI5 Linter v${version}</p>
 
 	${summary}
 
