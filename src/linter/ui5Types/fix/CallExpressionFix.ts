@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
 import {FixScope} from "./BaseFix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export interface CallExpressionFixParams extends CallExpressionBaseFixParams {
 	/**
@@ -31,8 +32,8 @@ export interface CallExpressionFixParams extends CallExpressionBaseFixParams {
 }
 
 export default class CallExpressionFix extends CallExpressionBaseFix {
-	constructor(protected params: CallExpressionFixParams) {
-		super(params);
+	constructor(protected params: CallExpressionFixParams, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {

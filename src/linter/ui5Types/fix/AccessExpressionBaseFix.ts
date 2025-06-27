@@ -3,6 +3,7 @@ import {PositionInfo} from "../../LinterContext.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
 import {countChildNodesRecursive, isAssignment} from "../utils/utils.js";
 import {FixHelpers} from "./Fix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export type AccessExpressionBaseFixParams = BaseFixParams;
 
@@ -14,8 +15,8 @@ export default abstract class AccessExpressionBaseFix extends BaseFix {
 	protected nodeTypes = [ts.SyntaxKind.PropertyAccessExpression, ts.SyntaxKind.ElementAccessExpression];
 	private containedAccessExpressionCount = 0;
 
-	constructor(protected params: AccessExpressionBaseFixParams) {
-		super(params);
+	constructor(protected params: AccessExpressionBaseFixParams, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _helpers: FixHelpers) {

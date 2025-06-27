@@ -6,15 +6,17 @@ import {
 	type ChangeSet,
 	type ExistingModuleDeclarationInfo,
 } from "./autofix.js";
-import {collectIdentifiers, matchPropertyAccessExpression, removeConflictingFixes} from "./utils.js";
+import {
+	collectIdentifierDeclarations, collectIdentifiers, matchPropertyAccessExpression, removeConflictingFixes,
+} from "./utils.js";
 import parseModuleDeclaration from "../linter/ui5Types/amdTranspiler/parseModuleDeclaration.js";
 import parseRequire from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import {getLogger} from "@ui5/logger";
-import Fix from "../linter/ui5Types/fix/Fix.js";
+import Fix, {ObsoleteModuleDependency} from "../linter/ui5Types/fix/Fix.js";
 import {
 	NO_PARAM_FOR_DEPENDENCY,
 	addDependencies, Dependencies, getDependencies, removeDependencies,
-	hasBody,
+	hasBody, getFactoryBody,
 } from "./amdImports.js";
 import {resolveUniqueName} from "../linter/ui5Types/utils/utils.js";
 
@@ -33,6 +35,10 @@ interface DependencyRequest {
 	blockNewImport?: boolean;
 	fix: Fix;
 }
+type ObsoleteDependencyRequest = Map<string, {
+	identifierName: string;
+	usagePositions: number[];
+}>;
 
 interface GlobalAccessRequest {
 	globalName: string;
@@ -101,6 +107,7 @@ export default function generateChanges(
 					moduleDeclarations.set(node, {
 						moduleDeclaration: parseModuleDeclaration(node.arguments, checker),
 						importRequests: new Map(),
+						obsoleteModules: new Set(),
 					});
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
@@ -118,6 +125,7 @@ export default function generateChanges(
 						moduleDeclarations.set(node, {
 							moduleDeclaration: requireExpression,
 							importRequests: new Map(),
+							obsoleteModules: new Set(),
 						});
 					}
 				} catch (err) {
@@ -139,7 +147,7 @@ export default function generateChanges(
 	const dependencyRequests = new Set<DependencyRequest>();
 	const blockedModuleImports = new Set<string>();
 	const globalAccessRequests = new Set<GlobalAccessRequest>();
-	const obsoleteModuleImports = new Set<string>();
+	const obsoleteModuleImports = new Set<ObsoleteModuleDependency>();
 	for (const fix of matchedFixes) {
 		// Collect new dependencies
 		const newDependencies = fix.getNewModuleDependencies();
@@ -188,16 +196,17 @@ export default function generateChanges(
 		if (Array.isArray(obsoleteModules)) {
 			for (const obsoleteModule of obsoleteModules) {
 				// Add the module to the blocked module imports, so it won't be added again
-				obsoleteModuleImports.add(obsoleteModule.moduleName);
+				obsoleteModuleImports.add(obsoleteModule);
 			}
 		} else if (obsoleteModules) {
-			obsoleteModuleImports.add(obsoleteModules.moduleName);
+			obsoleteModuleImports.add(obsoleteModules);
 		}
 	}
 	const dependencyDeclarations: DependencyDeclarations[] = [];
 	for (const [_, moduleDeclarationInfo] of moduleDeclarations) {
 		if (!hasBody(moduleDeclarationInfo.moduleDeclaration)) {
 			// Ignore module declaration without factory or callback functions
+			// This is to safeguard the following methods, which all rely on a factory body
 			continue;
 		}
 		const deps = getDependencies(moduleDeclarationInfo.moduleDeclaration, resourcePath);
@@ -208,6 +217,52 @@ export default function generateChanges(
 			end,
 			dependencies: deps,
 		});
+
+		const potentiallyObsoleteDeps: ObsoleteDependencyRequest = new Map();
+		for (const obsoleteDep of obsoleteModuleImports) {
+			if (start <= obsoleteDep.usagePosition && end >= obsoleteDep.usagePosition &&
+				deps.has(obsoleteDep.moduleName)) {
+				const identifierName = deps.get(obsoleteDep.moduleName);
+				if (typeof identifierName !== "string") {
+					// If the dependency is declared, but the parameter is missing, it is likely a side-effect import
+					// that should be preserved
+					// If the parameter is "unsupported" we also need to preserve the dependency
+					continue;
+				}
+				if (!potentiallyObsoleteDeps.has(obsoleteDep.moduleName)) {
+					potentiallyObsoleteDeps.set(obsoleteDep.moduleName, {
+						identifierName,
+						usagePositions: [],
+					});
+				}
+				potentiallyObsoleteDeps.get(obsoleteDep.moduleName)!.usagePositions.push(obsoleteDep.usagePosition);
+			}
+		}
+		if (!potentiallyObsoleteDeps.size) {
+			continue;
+		}
+		const body = getFactoryBody(moduleDeclarationInfo);
+		if (!body) {
+			continue;
+		}
+		const identifiersInScope = collectIdentifiers(body);
+		// Check for unused module dependencies
+		for (const [moduleName, {identifierName, usagePositions}] of potentiallyObsoleteDeps) {
+			// Check whether there is any identifier matching the module import one that is not
+			// at the same position as one of the fixes that marked it as obsolete (ignore those)
+			let isStillUsed = false;
+			for (const identifier of identifiersInScope) {
+				if (identifier.text === identifierName && !usagePositions.includes(identifier.getStart())) {
+					// Found another identifier, indicating further usage. Do not mark the module as obsolete
+					isStillUsed = true;
+					break;
+				}
+			}
+			if (!isStillUsed) {
+				// Module can be removed
+				moduleDeclarationInfo.obsoleteModules.add(moduleName);
+			}
+		}
 	}
 	// Sort declarations by start position of the factory/callback
 	dependencyDeclarations.sort((a, b) => {
@@ -238,7 +293,7 @@ export default function generateChanges(
 	}
 
 	// Collect all identifiers in the source file to ensure unique names when adding imports
-	const identifiers = collectIdentifiers(sourceFile);
+	const identifiers = collectIdentifierDeclarations(sourceFile);
 
 	// Sort dependency requests into declarations
 	mergeDependencyRequests(dependencyRequests, dependencyDeclarations, identifiers);
@@ -246,22 +301,16 @@ export default function generateChanges(
 
 	// Create changes for new and removed dependencies
 	for (const [defineCall, moduleDeclarationInfo] of moduleDeclarations) {
-		// TODO: Find a better way to define modules for removal
-		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
-		if (obsoleteModuleImports.size) {
-			for (const depRequest of dependencyRequests) {
-				if (obsoleteModuleImports.has(depRequest.moduleName)) {
-					obsoleteModuleImports.delete(depRequest.moduleName);
-				}
-			}
-			for (const moduleName of obsoleteModuleImports) {
-				moduleRemovals.add(moduleName);
+		const moduleRemovals = new Set([
+			"sap/base/strings/NormalizePolyfill", "jquery.sap.unicode",
+			...moduleDeclarationInfo.obsoleteModules]);
+		for (const dependencyModuleName of moduleDeclarationInfo.importRequests.keys()) {
+			if (moduleRemovals.has(dependencyModuleName)) {
+				moduleRemovals.delete(dependencyModuleName);
 			}
 		}
-
 		// Remove dependencies from the existing module declaration
-		removeDependencies(moduleRemovals,
-			moduleDeclarationInfo, changeSets, resourcePath, identifiers);
+		removeDependencies(moduleRemovals, moduleDeclarationInfo, changeSets, resourcePath, identifiers);
 
 		// Resolve dependencies for the module declaration
 		addDependencies(defineCall, moduleDeclarationInfo, changeSets, resourcePath, moduleRemovals);
@@ -271,6 +320,7 @@ export default function generateChanges(
 		const changes = fix.generateChanges();
 		if (!changes) {
 			// No changes generated, skip this fix
+			matchedFixes.delete(fix);
 			continue;
 		}
 		if (Array.isArray(changes)) {
@@ -448,7 +498,7 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 
 	for (const [moduleName, [decl, requests]] of moduleNameToDeclToRequests) {
 		// Get preferred identifier unless it's already in use
-		let identifier;
+		let identifier: string | undefined;
 		for (const request of requests) {
 			if (request.preferredIdentifier && !identifiers.has(request.preferredIdentifier)) {
 				identifier = request.preferredIdentifier;

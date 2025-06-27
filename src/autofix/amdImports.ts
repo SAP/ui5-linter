@@ -36,6 +36,17 @@ export function hasBody(moduleDeclaration: ModuleDeclaration | RequireExpression
 	return false;
 }
 
+export function getFactoryBody(moduleDeclaration: ExistingModuleDeclarationInfo): ts.Node | undefined {
+	const {moduleDeclaration: declaration} = moduleDeclaration;
+	if ("factory" in declaration && declaration.factory && "body" in declaration.factory) {
+		return declaration.factory.body;
+	} else if ("callback" in declaration && declaration.callback) {
+		return declaration.callback.body;
+	}
+	log.verbose(`Encountered a module declaration with no factory or callback`);
+	return undefined;
+}
+
 export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireExpression, resourcePath: string) {
 	const dependencies: Dependencies = new Map(); // Module name to identifier
 	if (!moduleDeclaration.dependencies) {
@@ -64,7 +75,7 @@ export function getDependencies(moduleDeclaration: ModuleDeclaration | RequireEx
 			if (!param) {
 				identifier = NO_PARAM_FOR_DEPENDENCY;
 			} else if (ts.isIdentifier(param.name)) {
-				identifier = getParameterDeclarationText(param)!;
+				identifier = param.name.text;
 			} else {
 				// Some sort of binding pattern, e.g. ({foo, bar}) => { or ([foo, bar]) => {
 				identifier = UNSUPPORTED_PARAM_FOR_DEPENDENCY;
@@ -142,13 +153,6 @@ export function createDependencyInfo(dependencyArray: ts.ArrayLiteralExpression 
 	return {dependencyMap, mostUsedQuoteStyle};
 }
 
-function getParameterDeclarationText(param: ts.ParameterDeclaration): string | undefined {
-	if (!ts.isIdentifier(param.name)) {
-		return;
-	}
-	return param.name.text;
-}
-
 function getParameterSyntax(
 	node: ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression
 ): {syntaxList: ts.SyntaxList; hasParens: boolean} {
@@ -173,7 +177,7 @@ export function addDependencies(
 	defineCall: ts.CallExpression, moduleDeclarationInfo: ExistingModuleDeclarationInfo,
 	changeSet: ChangeSet[],
 	resourcePath: string,
-	dependenciesToRemove: Set<string>
+	removedDependencies: Set<string>
 ) {
 	const {moduleDeclaration, importRequests} = moduleDeclarationInfo;
 
@@ -190,15 +194,19 @@ export function addDependencies(
 	const moduleName = "moduleName" in moduleDeclaration ? moduleDeclaration.moduleName : undefined;
 
 	const dependencies = moduleDeclaration.dependencies?.elements;
+	const remainingDependencies: ts.Expression[] = [];
 	const {dependencyMap, mostUsedQuoteStyle} = createDependencyInfo(moduleDeclaration.dependencies, resourcePath);
 	const removedDepsIndices = dependencies?.reduce((acc, dep, index) => {
-		if (ts.isPropertyName(dep) && dependenciesToRemove.has(getPropertyNameText(dep) ?? "")) {
+		if (ts.isPropertyName(dep) && removedDependencies.has(getPropertyNameText(dep) ?? "")) {
 			acc.push(index);
+		} else {
+			// If the dependency is not removed, we need to keep it
+			remainingDependencies.push(dep);
 		}
 
 		return acc;
 	}, [] as number[]) ?? [];
-	let numberOfDependencies = dependencies?.filter((_dep, index) => !removedDepsIndices.includes(index)).length ?? 0;
+	let numberOfDependencies = remainingDependencies.length;
 
 	const parameters = factory.parameters.filter((_dep, index) => !removedDepsIndices.includes(index));
 	const parameterSyntax = getParameterSyntax(factory);
@@ -218,12 +226,12 @@ export function addDependencies(
 		factory.parameters[0]?.getFullText() ?? "");
 
 	// Calculate after which index we can add new dependencies / parameters
-	let insertDependenciesAfterIndex = Math.min(parameters.length, dependencies?.length ?? 0) - 1;
+	let insertDependenciesAfterIndex = Math.min(parameters.length, remainingDependencies.length) - 1;
 	const insertParametersAfterIndex = insertDependenciesAfterIndex;
 
 	// Check whether requested imports are already available in the list of dependencies
 	for (const [dependencyModuleName, importRequest] of importRequests) {
-		const existingDependency = dependenciesToRemove.has(dependencyModuleName) ?
+		const existingDependency = removedDependencies.has(dependencyModuleName) ?
 			undefined :
 				dependencyMap.get(dependencyModuleName);
 		// Add a new dependency
@@ -278,6 +286,8 @@ export function addDependencies(
 			// Update number of dependencies
 			numberOfDependencies--;
 
+			remainingDependencies.splice(existingDependency.index, 1);
+
 			// Ensure that the new dependency will be the same, e.g. in case it is a relative path
 			newDependency.moduleName = existingDependency.node.text;
 		}
@@ -290,7 +300,7 @@ export function addDependencies(
 		}).join(depsSeparator.trailing);
 
 		if (newDependencyValue) {
-			const insertAfterDependencyElement = dependencies?.[insertDependenciesAfterIndex];
+			const insertAfterDependencyElement = remainingDependencies[insertDependenciesAfterIndex];
 			if (insertAfterDependencyElement || (dependencies && insertDependenciesAfterIndex === -1)) {
 				const existingDependenciesLeft = insertDependenciesAfterIndex > -1 && numberOfDependencies > 0;
 				const existingDependenciesRight = insertDependenciesAfterIndex === -1 && numberOfDependencies > 0;
@@ -304,7 +314,10 @@ export function addDependencies(
 						value += ", ";
 					}
 				}
-				const start = insertAfterDependencyElement?.getEnd() ?? dependencies.pos;
+				const start = insertAfterDependencyElement?.getEnd() ?? dependencies?.pos;
+				if (start === undefined) {
+					throw new Error("Cannot determine start position for inserting dependencies");
+				}
 				changeSet.push({
 					action: ChangeAction.INSERT,
 					start,

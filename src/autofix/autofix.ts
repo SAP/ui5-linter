@@ -8,6 +8,7 @@ import {ModuleDeclaration} from "../linter/ui5Types/amdTranspiler/parseModuleDec
 import {RequireExpression} from "../linter/ui5Types/amdTranspiler/parseRequire.js";
 import generateChangesJs from "./generateChangesJs.js";
 import generateChangesXml from "./generateChangesXml.js";
+import {getFactoryBody} from "./amdImports.js";
 
 const log = getLogger("linter:autofix");
 
@@ -72,11 +73,10 @@ export type ImportRequests = Map<string, {
 	identifier: string;
 }>;
 
-export type ModuleDeclarationInfo = ExistingModuleDeclarationInfo;
-
 export interface ExistingModuleDeclarationInfo {
 	moduleDeclaration: ModuleDeclaration | RequireExpression;
 	importRequests: ImportRequests;
+	obsoleteModules: Set<string>;
 }
 
 function createCompilerHost(sourceFiles: SourceFiles): ts.CompilerHost {
@@ -165,8 +165,7 @@ async function getXmlErrorForFile(content: string) {
 }
 
 export function getFactoryPosition(moduleDeclaration: ExistingModuleDeclarationInfo): {start: number; end: number} {
-	const {moduleDeclaration: declaration} = moduleDeclaration;
-	const factory = "factory" in declaration ? declaration.factory : declaration.callback;
+	const factory = getFactoryBody(moduleDeclaration);
 	if (!factory) {
 		throw new Error("Module declaration does not have a factory or callback defined");
 	}

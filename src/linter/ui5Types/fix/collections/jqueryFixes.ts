@@ -9,6 +9,7 @@ import {ChangeAction} from "../../../../autofix/autofix.js";
 import {PositionInfo} from "../../../LinterContext.js";
 import {FixScope} from "../BaseFix.js";
 import {FixHelpers} from "../Fix.js";
+import {Ui5TypeInfo} from "../../Ui5TypeInfo.js";
 
 /**
  * NOTE: Since jQuery.sap APIs are not fully typed, we generate a "mocked" UI5 Type Info in module "getJqueryFixInfo.ts"
@@ -135,8 +136,8 @@ t.declareModule("jQuery", [
 		t.namespace("camelCase", accessExpressionFix({ // https://github.com/UI5/linter/issues/527
 			moduleName: "sap/base/strings/camelize",
 		})),
-		t.namespace("charToUpperCase", () => {
-			return new CharToUpperCaseFix();
+		t.namespace("charToUpperCase", (ui5TypeInfo: Ui5TypeInfo) => {
+			return new CharToUpperCaseFix(ui5TypeInfo);
 		}),
 		t.namespace("escapeRegExp", accessExpressionFix({
 			moduleName: "sap/base/strings/escapeRegExp",
@@ -1010,11 +1011,11 @@ class CharToUpperCaseFix extends CallExpressionFix {
 	private argIdentifierName?: string;
 	private argStringValue?: string;
 
-	constructor() {
+	constructor(ui5TypeInfo: Ui5TypeInfo) {
 		super({
 			moduleName: "sap/base/strings/capitalize",
 			scope: FixScope.FullExpression,
-		});
+		}, ui5TypeInfo);
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {

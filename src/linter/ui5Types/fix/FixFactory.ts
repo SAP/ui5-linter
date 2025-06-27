@@ -27,7 +27,7 @@ interface FixCollection {
 	default: FixTypeInfoMatcher;
 };
 
-export type FixCallback = () => Fix;
+export type FixCallback<T extends Fix = Fix> = (ui5TypeInfo: Ui5TypeInfo) => T;
 export type FixTypeInfoMatcher = Ui5TypeInfoMatcher<FixCallback>;
 
 export default class FixFactory {
@@ -65,7 +65,7 @@ export default class FixFactory {
 		if (!fixCallback) {
 			return;
 		}
-		return fixCallback();
+		return fixCallback(ui5TypeInfo);
 	}
 
 	getJqueryFixInfo(node: ts.Node): JqueryFixInfo | undefined {
@@ -103,36 +103,36 @@ export default class FixFactory {
 	}
 }
 
-export function accessExpressionFix(params: AccessExpressionFixParams): () => AccessExpressionFix {
-	return () => new AccessExpressionFix(params);
+export function accessExpressionFix(params: AccessExpressionFixParams): FixCallback<AccessExpressionFix> {
+	return (ui5TypeInfo: Ui5TypeInfo) => new AccessExpressionFix(params, ui5TypeInfo);
 }
 
 export function accessExpressionGeneratorFix(
 	params: AccessExpressionGeneratorFixParams
-): () => AccessExpressionGeneratorFix {
-	return () => new AccessExpressionGeneratorFix(params);
+): FixCallback<AccessExpressionGeneratorFix> {
+	return (ui5TypeInfo: Ui5TypeInfo) => new AccessExpressionGeneratorFix(params, ui5TypeInfo);
 }
 
-export function callExpressionFix(params: CallExpressionFixParams): () => CallExpressionFix {
-	return () => new CallExpressionFix(params);
+export function callExpressionFix(params: CallExpressionFixParams): FixCallback<CallExpressionFix> {
+	return (ui5TypeInfo: Ui5TypeInfo) => new CallExpressionFix(params, ui5TypeInfo);
 }
 
 export function callExpressionGeneratorFix<GeneratorContext extends object = object>(
 	params: CallExpressionGeneratorFixParams<GeneratorContext>
-): () => CallExpressionGeneratorFix<GeneratorContext> {
-	return () => new CallExpressionGeneratorFix<GeneratorContext>(params);
+): FixCallback<CallExpressionGeneratorFix<GeneratorContext>> {
+	return (ui5TypeInfo: Ui5TypeInfo) => new CallExpressionGeneratorFix<GeneratorContext>(params, ui5TypeInfo);
 }
 
-export function propertyAssignmentFix(params: PropertyAssignmentFixParams): () => PropertyAssignmentFix {
-	return () => new PropertyAssignmentFix(params);
+export function propertyAssignmentFix(params: PropertyAssignmentFixParams): FixCallback<PropertyAssignmentFix> {
+	return (_ui5TypeInfo: Ui5TypeInfo) => new PropertyAssignmentFix(params);
 }
 
 export function propertyAssignmentGeneratorFix<GeneratorContext extends object = object>(
 	params: PropertyAssignmentGeneratorFixParams<GeneratorContext>
-): () => PropertyAssignmentGeneratorFix<GeneratorContext> {
-	return () => new PropertyAssignmentGeneratorFix(params);
+): FixCallback<PropertyAssignmentGeneratorFix<GeneratorContext>> {
+	return (_ui5TypeInfo: Ui5TypeInfo) => new PropertyAssignmentGeneratorFix(params);
 }
 
-export function obsoleteImportFix(params: ObsoleteImportFixParams): () => ObsoleteImportFix {
-	return () => new ObsoleteImportFix(params);
+export function obsoleteImportFix(params: ObsoleteImportFixParams): FixCallback<ObsoleteImportFix> {
+	return (_ui5TypeInfo: Ui5TypeInfo) => new ObsoleteImportFix(params);
 }

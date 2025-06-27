@@ -13,7 +13,7 @@ export function matchPropertyAccessExpression(node: ts.PropertyAccessExpression,
 	return propAccessChain.join(".") === match;
 }
 
-export function collectIdentifiers(node: ts.SourceFile) {
+export function collectIdentifierDeclarations(node: ts.Node) {
 	const declaredIdentifiers = new Set<string>();
 	const extractDestructIdentifiers = (name: ts.BindingName, identifiers: Set<string>) => {
 		if (ts.isIdentifier(name)) {
@@ -47,6 +47,18 @@ export function collectIdentifiers(node: ts.SourceFile) {
 	ts.forEachChild(node, collectIdentifiers);
 
 	return declaredIdentifiers;
+}
+
+export function collectIdentifiers(node: ts.Node) {
+	const identifiers = new Set<ts.Identifier>();
+	const collect = (node: ts.Node) => {
+		if (ts.isIdentifier(node)) {
+			identifiers.add(node);
+		}
+		ts.forEachChild(node, collect);
+	};
+	ts.forEachChild(node, collect);
+	return identifiers;
 }
 
 interface FixRange {

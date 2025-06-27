@@ -1,4 +1,5 @@
 import {ChangeAction} from "../../../autofix/autofix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 import AccessExpressionBaseFix, {AccessExpressionBaseFixParams} from "./AccessExpressionBaseFix.js";
 
 export interface AccessExpressionGeneratorFixParams extends AccessExpressionBaseFixParams {
@@ -37,8 +38,8 @@ export interface AccessExpressionGeneratorFixParams extends AccessExpressionBase
  * replacement in cases where the arguments or other conditions of the call expression do not matter.
  */
 export default class AccessExpressionGeneratorFix extends AccessExpressionBaseFix {
-	constructor(protected params: AccessExpressionGeneratorFixParams) {
-		super(params);
+	constructor(protected params: AccessExpressionGeneratorFixParams, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	getNewModuleDependencies() {
