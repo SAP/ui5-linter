@@ -51,7 +51,7 @@
 		"unit-debug": "ava debug",
 		"unit-update-snapshots": "ava --update-snapshots",
 		"unit-watch": "ava --watch",
-		"update-sapui5-types": "tsx scripts/update-sapui5-types.ts"
+		"update-sapui5-types": "tsimp scripts/update-sapui5-types.ts"
 	},
 	"files": [
 		"CHANGELOG.md",
@@ -86,6 +86,7 @@
 		"magic-string": "^0.30.17",
 		"minimatch": "^10.0.3",
 		"sax-wasm": "^3.0.6",
+		"tsimp": "^2.0.12",
 		"typescript": "^5.8.3",
 		"update-notifier": "^7.3.1",
 		"yargs": "^17.7.2"
@@ -116,7 +117,6 @@
 		"nyc": "^17.1.0",
 		"rimraf": "^6.0.1",
 		"sinon": "^21.0.0",
-		"tsx": "^4.20.3",
 		"typescript-eslint": "^8.35.0",
 		"ui5-test-runner": "^5.8.1",
 		"yauzl-promise": "^4.0.0"

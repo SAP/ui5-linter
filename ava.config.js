@@ -1,5 +1,8 @@
+let tsimp = "tsimp/import";
+// In Node versions prior to v20.6, we must use "tsimp/loader"
+// tsimp = "tsimp/loader"" // TODO
 const nodeArguments = [
-	"--import=tsx/esm",
+	`--import=${tsimp}`,
 	"--no-warnings=ExperimentalWarning",
 ];
 
