@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "SAPUI5",
-    "version": "1.120.31"
+    "version": "1.120.32"
   },
   "metadata": {
     "sap.ca.ui.AddPicture": {
@@ -24426,7 +24426,8 @@
       "module:sap/base/util/includes": "(since 1.90) Use the <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> instead, but note that <code>Array.prototype.includes</code> or <code>String.prototype.includes</code> fail when called on null values.",
       "module:sap/base/util/mixedFetch": "(since 1.120) ",
       "module:sap/base/util/syncFetch": "(since 1.120) ",
-      "module:sap/ui/core/getCompatibilityVersion": "(since 1.119) without a replacement. All features that have been controlled by a compatibility version in UI5 1.x will abandon their legacy behavior, starting with the next major version. In other words, they will behave as if compatibility version \"edge\" was configured. Due to this, no more access to the compatibility version will be required starting with the next major version."
+      "module:sap/ui/core/getCompatibilityVersion": "(since 1.119) without a replacement. All features that have been controlled by a compatibility version in UI5 1.x will abandon their legacy behavior, starting with the next major version. In other words, they will behave as if compatibility version \"edge\" was configured. Due to this, no more access to the compatibility version will be required starting with the next major version.",
+      "module:sap/ui/events/isMouseEventDelayed": "deprecated"
     },
     "UI5Namespace": {
       "sap.apf.constants": "(since 1.23.1) Use sap.apf.core.constants instead.",
