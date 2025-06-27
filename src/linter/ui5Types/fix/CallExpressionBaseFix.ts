@@ -5,6 +5,7 @@ import {
 } from "../utils/utils.js";
 import BaseFix, {BaseFixParams} from "./BaseFix.js";
 import {FixHelpers} from "./Fix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export interface CallExpressionBaseFixParams extends BaseFixParams {
 	/**
@@ -18,8 +19,8 @@ export default abstract class CallExpressionBaseFix extends BaseFix {
 	protected nodeTypes = [ts.SyntaxKind.CallExpression];
 	protected containedCallExpressionCount = 0;
 
-	constructor(protected params: CallExpressionBaseFixParams) {
-		super(params);
+	constructor(protected params: CallExpressionBaseFixParams, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {

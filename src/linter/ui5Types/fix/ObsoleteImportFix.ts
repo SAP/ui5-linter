@@ -103,6 +103,7 @@ export default class ObsoleteImportFix extends Fix {
 	getObsoleteModuleDependencies() {
 		return {
 			moduleName: this.params.moduleName,
+			usagePosition: 0,
 		};
 	}
 }

@@ -2,6 +2,7 @@ import ts from "typescript";
 import {ChangeAction} from "../../../autofix/autofix.js";
 import AccessExpressionBaseFix, {AccessExpressionBaseFixParams} from "./AccessExpressionBaseFix.js";
 import {FixScope} from "./BaseFix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export interface AccessExpressionFixParams extends AccessExpressionBaseFixParams {
 	/**
@@ -29,8 +30,8 @@ export interface AccessExpressionFixParams extends AccessExpressionBaseFixParams
  * replacement in cases where the arguments or other conditions of the call expression do not matter.
  */
 export default class AccessExpressionFix extends AccessExpressionBaseFix {
-	constructor(protected params: AccessExpressionFixParams) {
-		super(params);
+	constructor(protected params: AccessExpressionFixParams, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {

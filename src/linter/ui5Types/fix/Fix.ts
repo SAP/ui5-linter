@@ -13,6 +13,7 @@ export interface ModuleDependencyRequest {
 
 export interface ObsoleteModuleDependency {
 	moduleName: string;
+	usagePosition: number;
 }
 
 export interface GlobalAccessRequest {
@@ -62,7 +63,7 @@ export default abstract class Fix {
 	abstract getAffectedSourceCodeRange(): SourceCodeRange | SourceCodeRange[] | undefined;
 
 	abstract getNewModuleDependencies(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined;
-	getObsoleteModuleDependencies?(): ObsoleteModuleDependency | ObsoleteModuleDependency[];
+	getObsoleteModuleDependencies?(): ObsoleteModuleDependency | ObsoleteModuleDependency[] | undefined;
 	abstract getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined;
 
 	abstract setIdentifierForDependency(identifier: string, moduleName: string): void;

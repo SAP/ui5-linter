@@ -3,6 +3,7 @@ import {ChangeAction} from "../../../autofix/autofix.js";
 import {PositionInfo} from "../../LinterContext.js";
 import CallExpressionBaseFix, {CallExpressionBaseFixParams} from "./CallExpressionBaseFix.js";
 import {FixHelpers} from "./Fix.js";
+import {Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export interface CallExpressionGeneratorFixParams<GeneratorContext extends object> extends CallExpressionBaseFixParams {
 	/**
@@ -62,8 +63,8 @@ export default class CallExpressionGeneratorFix<GeneratorContext extends object>
 	protected generatorArgs: string[] | undefined;
 	protected generatorContext = {} as GeneratorContext;
 
-	constructor(protected params: CallExpressionGeneratorFixParams<GeneratorContext>) {
-		super(params);
+	constructor(protected params: CallExpressionGeneratorFixParams<GeneratorContext>, ui5TypeInfo: Ui5TypeInfo) {
+		super(params, ui5TypeInfo);
 	}
 
 	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, helpers: FixHelpers) {

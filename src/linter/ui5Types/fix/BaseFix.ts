@@ -1,6 +1,7 @@
 import ts from "typescript";
 import {PositionInfo} from "../../LinterContext.js";
 import Fix, {GlobalAccessRequest, ModuleDependencyRequest} from "./Fix.js";
+import {getModuleTypeInfo, Ui5TypeInfo} from "../Ui5TypeInfo.js";
 
 export interface BaseFixParams {
 	/**
@@ -24,6 +25,9 @@ export interface BaseFixParams {
 	 * the fix will be provided with an alternative like "globalThis.document"
 	 */
 	globalName?: string;
+
+	obsoleteModuleName?: string;
+	inferObsoleteModuleName?: boolean;
 }
 
 export enum FixScope {
@@ -68,10 +72,21 @@ export default abstract class BaseFix extends Fix {
 	protected sourcePosition: PositionInfo | undefined;
 	protected nodeTypes: ts.SyntaxKind[] = [];
 	protected requestsModuleOrGlobal: boolean;
+	protected obsoleteModuleDependency?: string;
 
-	constructor(protected params: BaseFixParams) {
+	constructor(protected params: BaseFixParams, ui5TypeInfo: Ui5TypeInfo) {
 		super();
 		this.requestsModuleOrGlobal = !!(params.globalName ?? params.moduleName);
+
+		if (this.params.moduleName &&
+			(this.params.obsoleteModuleName || this.params.inferObsoleteModuleName !== false)) {
+			const ui5ModuleTypeInfo = getModuleTypeInfo(ui5TypeInfo);
+			if (ui5ModuleTypeInfo && ui5ModuleTypeInfo.name !== this.params.moduleName) {
+				// If a new module is imported and the flag for preserving the import of the
+				// module this fix has been created for is not set, then mark it as obsolete
+				this.obsoleteModuleDependency = ui5ModuleTypeInfo.name;
+			}
+		}
 	}
 
 	getAffectedSourceCodeRange() {
@@ -181,6 +196,18 @@ export default abstract class BaseFix extends Fix {
 			preferredIdentifier: this.params.preferredIdentifier,
 			usagePosition: this.startPos,
 		};
+	}
+
+	getObsoleteModuleDependencies() {
+		if (this.startPos === undefined) {
+			throw new Error("Start position is not defined");
+		}
+		if (this.obsoleteModuleDependency) {
+			return {
+				moduleName: this.obsoleteModuleDependency,
+				usagePosition: this.startPos,
+			};
+		}
 	}
 
 	getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined {
