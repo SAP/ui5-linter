@@ -10,6 +10,7 @@ import {isLogLevelEnabled} from "@ui5/logger";
 import ConsoleWriter from "@ui5/logger/writers/Console";
 import {getVersion} from "./version.js";
 import {ui5lint} from "../index.js";
+import {LintMessageSeverity} from "../linter/messages.js";
 
 export interface LinterArg {
 	coverage: boolean;
@@ -21,6 +22,7 @@ export interface LinterArg {
 	format: string;
 	config?: string;
 	ui5Config?: string;
+	quiet: boolean;
 }
 
 // yargs type definition is missing the "middlewares" property for the CommandModule type
@@ -106,6 +108,12 @@ const lintCommand: FixedCommandModule<object, LinterArg> = {
 				type: "string",
 				choices: ["stylish", "json", "markdown"],
 			})
+			.option("quiet", {
+				describe: "Report errors only",
+				type: "boolean",
+				default: false,
+				alias: "q",
+			})
 			.option("ui5-config", {
 				describe: "Set a custom path for the UI5 Config (default: './ui5.yaml' if that file exists)",
 				type: "string",
@@ -147,6 +155,7 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		format,
 		config,
 		ui5Config,
+		quiet,
 	} = argv;
 
 	let profile;
@@ -170,6 +179,21 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 		ui5Config,
 	});
 
+	// Apply quiet mode filtering directly to the results if needed
+	if (quiet) {
+		// Filter out warnings from all result objects
+		for (const result of res) {
+			// Keep only error messages (severity === 2)
+			result.messages = result.messages.filter((msg) => msg.severity === LintMessageSeverity.Error);
+			// Reset warning counts
+			result.warningCount = 0;
+			// Reset fixableWarningCount if it exists
+			if ("fixableWarningCount" in result) {
+				result.fixableWarningCount = 0;
+			}
+		}
+	}
+
 	if (coverage) {
 		const coverageFormatter = new Coverage();
 		await writeFile("ui5lint-report.html", await coverageFormatter.format(res, new Date()));
@@ -177,15 +201,15 @@ async function handleLint(argv: ArgumentsCamelCase<LinterArg>) {
 
 	if (format === "json") {
 		const jsonFormatter = new Json();
-		process.stdout.write(jsonFormatter.format(res, details));
+		process.stdout.write(jsonFormatter.format(res, details, quiet));
 		process.stdout.write("\n");
 	} else if (format === "markdown") {
 		const markdownFormatter = new Markdown();
-		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix));
+		process.stdout.write(markdownFormatter.format(res, details, getVersion(), fix, quiet));
 		process.stdout.write("\n");
 	} else if (format === "" || format === "stylish") {
 		const textFormatter = new Text(rootDir);
-		process.stderr.write(textFormatter.format(res, details, fix));
+		process.stderr.write(textFormatter.format(res, details, fix, quiet));
 	}
 	// Stop profiling after CLI finished execution
 	if (profile) {

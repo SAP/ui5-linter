@@ -21,6 +21,7 @@
 			- [`--details`](#--details)
 			- [`--format`](#--format)
 			- [`--fix`](#--fix)
+			- [`--quiet`](#--quiet)
 			- [`--ignore-pattern`](#--ignore-pattern)
 			- [`--config`](#--config)
 			- [`--ui5-config`](#--ui5-config)
@@ -193,6 +194,15 @@ UI5LINT_FIX_DRY_RUN=true ui5lint --fix
 ```
 
 In this mode, the linter will show the messages after the fixes would have been applied but will not actually change the files.
+
+#### `--quiet`
+
+Report errors only, hiding warnings. Similar to ESLint's `--quiet` option.
+
+**Example:**
+```sh
+ui5lint --quiet
+```
 
 #### `--ignore-pattern`
 

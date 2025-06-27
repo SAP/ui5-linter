@@ -1,7 +1,7 @@
 import {LintMessage, LintResult} from "../linter/LinterContext.js";
 
 export class Json {
-	format(lintResults: LintResult[], showDetails: boolean) {
+	format(lintResults: LintResult[], showDetails: boolean, _quiet = false) {
 		const jsonFormattedResults: Pick<
 			LintResult,
 			"filePath"
