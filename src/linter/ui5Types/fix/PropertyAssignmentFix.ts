@@ -2,6 +2,9 @@ import ts from "typescript";
 import {ChangeAction, ChangeSet} from "../../../autofix/autofix.js";
 import {Attribute, Position} from "sax-wasm";
 import PropertyAssignmentBaseFix from "./PropertyAssignmentBaseFix.js";
+import {getPropertyAssignmentInObjectLiteralExpression} from "../utils/utils.js";
+import {PositionInfo} from "../../LinterContext.js";
+import {FixHelpers} from "./Fix.js";
 
 export interface PropertyAssignmentFixParams {
 	/**
@@ -18,6 +21,24 @@ export interface PropertyAssignmentFixParams {
 export default class PropertyAssignmentFix extends PropertyAssignmentBaseFix {
 	constructor(private params: PropertyAssignmentFixParams) {
 		super();
+	}
+
+	visitLinterNode(node: ts.Node, sourcePosition: PositionInfo, _helpers: FixHelpers) {
+		if (!super.visitLinterNode(node, sourcePosition, _helpers)) {
+			return false;
+		}
+		if (!ts.isPropertyAssignment(node)) {
+			return false;
+		}
+
+		if (this.params.property) {
+			// If a property name is defined, check whether it conflicts with existing assignments
+			const conflictingNode = getPropertyAssignmentInObjectLiteralExpression(this.params.property, node.parent);
+			if (conflictingNode) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	visitAutofixNode(node: ts.Node, position: number, sourceFile: ts.SourceFile) {

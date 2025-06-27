@@ -4,4 +4,8 @@ sap.ui.define(["sap/m/Button"], function(Button) {
 	});
 	btn.attachTap(function() {}); // Deprecated method attachTap should be replaced
 	btn.detachTap(function() {});
+	const btn = new Button({
+		tap: function() {}, // Do not replace since "press" is already defined
+		press: function() {}
+	});
 });
