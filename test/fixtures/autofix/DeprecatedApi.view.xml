@@ -29,6 +29,7 @@
 
 	<SegmentedButton id="segmented-button"> <!-- Default aggregation "buttons" is deprecated -->
 		<Button id="segmented-button-inner" tap=".onButtonTap"/> <!-- REPLACE: Event "tap" is deprecated -->
+		<Button id="segmented-button-inner-2" press=".onButtonTap" tap=".onButtonTap"/> <!-- KEEP: Event "tap" is deprecated but "press" is already defined -->
 	</SegmentedButton>
 
 </mvc:View>
