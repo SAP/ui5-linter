@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.14.0](https://github.com/UI5/linter/compare/v1.13.1...v1.14.0) (2025-06-27)
+
+
+### Features
+
+* **autofix:** Fix deprecated sap/ui/core/Core APIs
+	* [#639](https://github.com/UI5/linter/issues/639) ([af2cb9b](https://github.com/UI5/linter/commit/af2cb9bfa13463037538411eedcd5281e0cab741))
+	* [#671](https://github.com/UI5/linter/issues/671) ([857a03e](https://github.com/UI5/linter/commit/857a03ea35d698f24b2d7181e437e692abedcaac))
+	* [#675](https://github.com/UI5/linter/issues/675) ([b89c980](https://github.com/UI5/linter/commit/b89c9801483d0335d70519b7b27276b5c4619b6f))
+* **autofix:** Fix deprecated sap/ui/core/Configuration APIs ([372d80b](https://github.com/UI5/linter/commit/372d80bd3e3fc21147313ee7d98fca81b8e1f6f0))
+* **autofix:** Fix deprecated jQuery.sap APIs
+	* [#614](https://github.com/UI5/linter/issues/614) ([1dda012](https://github.com/UI5/linter/commit/1dda01216deb7dec8c3dd1dd83712ce5166172f3))
+	* [#710](https://github.com/UI5/linter/issues/710) ([f1dfd8a](https://github.com/UI5/linter/commit/f1dfd8a3227380a889ddc3796b0834917bf76e01))
+* **autofix:** Fix deprecated property assignments ([#711](https://github.com/UI5/linter/pull/711))
+* **cli:** Add 'quiet' option to report errors only ([#629](https://github.com/UI5/linter/issues/629)) ([6c94b01](https://github.com/UI5/linter/commit/6c94b01bcbebbba7962256b37153d19bda1f2cfe))
+
+
+### Bug Fixes
+
+* **autofix:** Prevent invalid delete expressions ([3f3c720](https://github.com/UI5/linter/commit/3f3c7207e1eefd03e417987c55224c4d817ef81d))
+* **SourceFileLinter:** Remove double quote ([e7cabcb](https://github.com/UI5/linter/commit/e7cabcb76e2e677398f4153042f5342a8d384206))
+* TypeScript error "Cannot find module './MessageArgs.js'" ([08ff3e5](https://github.com/UI5/linter/commit/08ff3e52f4b9080ed66c7bcfe51071da31c2d23f))
+
+
+### Dependencies
+
+* Bump @sapui5/types from 1.120.31 to 1.120.32 ([#730](https://github.com/UI5/linter/issues/730)) ([3f3736d](https://github.com/UI5/linter/commit/3f3736d4551ce292c516f5a1f720791379643d43))
+* Bump globals from 16.1.0 to 16.2.0 ([22bbfe3](https://github.com/UI5/linter/commit/22bbfe34bb9d76861f07b3843c59d157e8b00ab4))
+* Bump minimatch from 10.0.2 to 10.0.3 ([cf82d1e](https://github.com/UI5/linter/commit/cf82d1e188c13f47ac74f02b1e764e0548c4fe52))
+
+
 ## [1.13.1](https://github.com/UI5/linter/compare/v1.13.0...v1.13.1) (2025-05-12)
 
 
