@@ -67,7 +67,7 @@ export function removeConflictingFixes(fixes: Set<Fix>) {
 					fix: fix,
 				});
 			}
-		} else {
+		} else if (ranges) {
 			const {start, end} = ranges;
 			fixRanges.push({
 				start,
@@ -77,7 +77,7 @@ export function removeConflictingFixes(fixes: Set<Fix>) {
 		}
 	}
 
-	if (fixRanges.length === 0) return [];
+	if (fixRanges.length === 0) return;
 
 	// Sort fixRanges by start position; if start is the same, sort by end position
 	fixRanges.sort((a, b) => a.start - b.start || a.end - b.end);

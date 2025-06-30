@@ -20,11 +20,13 @@ export enum Ui5TypeInfoKind {
 	StaticProperty,
 	Enum,
 	EnumMember,
+	Export,
 }
 
 export type Ui5TypeInfo = Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo | Ui5ClassTypeInfo | Ui5ConstructorTypeInfo |
 	Ui5ConstructorParameterTypeInfo | Ui5MetadataTypeInfo | Ui5FunctionTypeInfo | Ui5MethodTypeInfo |
-	Ui5PropertyTypeInfo | Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo;
+	Ui5PropertyTypeInfo | Ui5EnumTypeInfo | Ui5EnumMemberTypeInfo | Ui5ManagedObjectSettingsTypeInfo |
+	Ui5ExportTypeInfo;
 
 export interface BaseUi5TypeInfo {
 	kind: Ui5TypeInfoKind;
@@ -103,6 +105,12 @@ interface Ui5ConstructorParameterTypeInfo extends BaseUi5TypeInfo {
 	parent: Ui5ConstructorTypeInfo;
 }
 
+interface Ui5ExportTypeInfo extends BaseUi5TypeInfo {
+	kind: Ui5TypeInfoKind.Export;
+	name: string; // e.g. "default"
+	parent: Ui5NamespaceTypeInfo | Ui5ModuleTypeInfo;
+}
+
 function isManagedObjectSettingsInterfaceName(name: string): boolean {
 	// This check is based on the naming convention when generating the Interface for ManagedObject settings:
 	// $<ClassName>Settings
@@ -138,12 +146,25 @@ export function getUi5TypeInfoFromSymbol(
 	symbol: ts.Symbol,
 	apiExtract?: ApiExtract
 ): Ui5TypeInfo | undefined {
-	if (!symbol.valueDeclaration) {
-		return undefined;
+	if (symbol.valueDeclaration) {
+		return getUi5TypeInfoFromDeclaration(symbol.valueDeclaration, apiExtract);
+	} else if (symbol.declarations) {
+		for (const declaration of symbol.declarations) {
+			const typeInfo = getUi5TypeInfoFromDeclaration(declaration, apiExtract);
+			if (typeInfo) {
+				return typeInfo;
+			}
+		}
 	}
-	const sourceFile = symbol.valueDeclaration.getSourceFile();
-	const node = symbol.valueDeclaration;
-	let currentNode: ts.Declaration = symbol.valueDeclaration;
+}
+
+function getUi5TypeInfoFromDeclaration(
+	declaration: ts.Declaration,
+	apiExtract?: ApiExtract
+): Ui5TypeInfo | undefined {
+	const sourceFile = declaration.getSourceFile();
+	const node = declaration;
+	let currentNode: ts.Declaration = declaration;
 	let currentNamespaceTypeInfo: Ui5NamespaceTypeInfo | undefined;
 	let namespaceTypeInfo: Ui5NamespaceTypeInfo | undefined;
 
@@ -201,6 +222,7 @@ export function getUi5TypeInfoFromSymbol(
 	currentTypeInfo ??= createClassTypeInfo(node, leafNode);
 	currentTypeInfo ??= createEnumMemberTypeInfo(node, leafNode);
 	currentTypeInfo ??= createFunctionTypeInfo(node, leafNode);
+	currentTypeInfo ??= createExportTypeInfo(node, leafNode);
 	return currentTypeInfo;
 }
 
@@ -409,6 +431,32 @@ function createFunctionTypeInfo(
 		name: node.name.text,
 		parent,
 	};
+}
+
+function createExportTypeInfo(
+	node: ts.Declaration, parent: Ui5ModuleTypeInfo | Ui5NamespaceTypeInfo
+): Ui5ExportTypeInfo | undefined {
+	if (ts.isExportAssignment(node)) {
+		// Exported module
+		return {
+			kind: Ui5TypeInfoKind.Export,
+			name: node.isExportEquals ? "default" : "export", // export default foo vs. export = foo
+			parent,
+		};
+	} else if (ts.isExportSpecifier(node)) {
+		// Exported symbol
+		const name = getPropertyNameText(node.name);
+		if (!name) {
+			// We need a name for exports
+			return;
+		}
+		return {
+			kind: Ui5TypeInfoKind.Export,
+			name,
+			parent,
+		};
+	}
+	return;
 }
 
 function hasStaticModifier(node: ts.Node) {

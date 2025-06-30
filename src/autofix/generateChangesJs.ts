@@ -139,6 +139,7 @@ export default function generateChanges(
 	const dependencyRequests = new Set<DependencyRequest>();
 	const blockedModuleImports = new Set<string>();
 	const globalAccessRequests = new Set<GlobalAccessRequest>();
+	const obsoleteModuleImports = new Set<string>();
 	for (const fix of matchedFixes) {
 		// Collect new dependencies
 		const newDependencies = fix.getNewModuleDependencies();
@@ -180,6 +181,17 @@ export default function generateChanges(
 				...globalAccess,
 				fix,
 			});
+		}
+
+		// Collect obsolete modules
+		const obsoleteModules = fix.getObsoleteModuleDependencies?.();
+		if (Array.isArray(obsoleteModules)) {
+			for (const obsoleteModule of obsoleteModules) {
+				// Add the module to the blocked module imports, so it won't be added again
+				obsoleteModuleImports.add(obsoleteModule.moduleName);
+			}
+		} else if (obsoleteModules) {
+			obsoleteModuleImports.add(obsoleteModules.moduleName);
 		}
 	}
 	const dependencyDeclarations: DependencyDeclarations[] = [];
@@ -236,6 +248,16 @@ export default function generateChanges(
 	for (const [defineCall, moduleDeclarationInfo] of moduleDeclarations) {
 		// TODO: Find a better way to define modules for removal
 		const moduleRemovals = new Set(["sap/base/strings/NormalizePolyfill", "jquery.sap.unicode"]);
+		if (obsoleteModuleImports.size) {
+			for (const depRequest of dependencyRequests) {
+				if (obsoleteModuleImports.has(depRequest.moduleName)) {
+					obsoleteModuleImports.delete(depRequest.moduleName);
+				}
+			}
+			for (const moduleName of obsoleteModuleImports) {
+				moduleRemovals.add(moduleName);
+			}
+		}
 
 		// Remove dependencies from the existing module declaration
 		removeDependencies(moduleRemovals,
