@@ -21,6 +21,7 @@ const AUTOFIX_COLLECTIONS = [
 	"sapMFixes",
 	"sapUiLayoutFixes",
 	"sapUiCompFixes",
+	"globalFixes",
 ];
 
 interface FixCollection {
@@ -53,10 +54,14 @@ export default class FixFactory {
 
 	getFix(node: ts.Node, ui5TypeInfo: Ui5TypeInfo): Fix | undefined {
 		const moduleTypeInfo = getModuleTypeInfo(ui5TypeInfo);
-		if (!moduleTypeInfo) {
-			return;
+		let collection;
+		if (moduleTypeInfo) {
+			collection = moduleTypeInfo.library;
+		} else {
+			// If no module type info is available, we assume it's a global fix
+			collection = "global";
 		}
-		const filter = this.collections.get(moduleTypeInfo.library);
+		const filter = this.collections.get(collection);
 		if (!filter) {
 			return; // No collection found for the library
 		}
