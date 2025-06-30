@@ -223,7 +223,7 @@ function testDefinition(
 
 		if (fix) {
 			t.truthy(t.context.autofixSpy.callCount >= 1);
-			for (let i = 0; i < t.context.autofixSpy.callCount; i++) {
+			for (let i = t.context.autofixSpy.callCount - 1; i >= 0; i--) {
 				const autofixResult = await t.context.autofixSpy.getCall(i).returnValue;
 				const autofixResultEntries = Array.from(autofixResult.entries());
 				autofixResultEntries.sort((a, b) => a[0].localeCompare(b[0]));

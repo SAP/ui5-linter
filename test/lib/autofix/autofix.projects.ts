@@ -39,7 +39,7 @@ test.serial("lint: All files of library with sap.ui.unified namespace", async (t
 	t.snapshot(preprocessLintResultsForSnapshot(res));
 	t.truthy(t.context.autofixSpy.callCount >= 1);
 	let expectedWrites = 0;
-	for (let i = 0; i < t.context.autofixSpy.callCount; i++) {
+	for (let i = t.context.autofixSpy.callCount - 1; i >= 0; i--) {
 		const autofixResult = await t.context.autofixSpy.getCall(i).returnValue;
 		expectedWrites += autofixResult.size;
 		const autofixResultEntries = Array.from(autofixResult.entries());
