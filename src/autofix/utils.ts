@@ -79,8 +79,10 @@ export function removeConflictingFixes(fixes: Set<Fix>) {
 
 	if (fixRanges.length === 0) return [];
 
-	// Sort fixRanges by start position; if start is the same, sort by end position
-	fixRanges.sort((a, b) => a.start - b.start || a.end - b.end);
+	// Sort fixRanges by start position; if start is the same, sort by end position (larger first)
+	// This ultimately prioritizes larger fixes over smaller once
+	// Sometimes there are multiple fixes or a call expression chain which can each cover the same range
+	fixRanges.sort((a, b) => a.start - b.start || b.end - a.end);
 
 	let currentEnd = fixRanges[0].end;
 
