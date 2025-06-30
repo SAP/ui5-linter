@@ -575,7 +575,7 @@ test.serial("TypeInfo: Global Namespace", async (t) => {
 	} as Ui5TypeInfo);
 });
 
-test.serial.only("TypeInfo: sap.ui.model.Binding 'sPath' constructor parameter", async (t) => {
+test.serial("TypeInfo: sap.ui.model.Binding 'sPath' constructor parameter", async (t) => {
 	const testContext = await t.context.initTestContext(`
 		sap.ui.define(["sap/ui/model/Binding"], function(Binding) {
 			new Binding(oModel, "/path");
