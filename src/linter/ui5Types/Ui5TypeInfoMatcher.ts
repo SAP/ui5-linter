@@ -251,6 +251,10 @@ export default class Ui5TypeInfoMatcher<ValueType> {
 		});
 	}
 
+	export(children?: Node<ValueType>[] | ValueType, value?: ValueType): Node<ValueType> {
+		return this.createNode(Ui5TypeInfoKind.Export, "export", children, value);
+	}
+
 	private createNode(
 		kind: Ui5TypeInfoKind, name: string, children?: Node<ValueType>[] | ValueType, value?: ValueType
 	): Node<ValueType> {

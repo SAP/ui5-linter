@@ -13,6 +13,7 @@ import PropertyAssignmentFix, {PropertyAssignmentFixParams} from "./PropertyAssi
 import PropertyAssignmentGeneratorFix, {
 	PropertyAssignmentGeneratorFixParams,
 } from "./PropertyAssignmentGeneratorFix.js";
+import ObsoleteImportFix, {ObsoleteImportFixParams} from "./ObsoleteImportFix.js";
 
 const AUTOFIX_COLLECTIONS = [
 	"sapUiCoreFixes",
@@ -130,4 +131,8 @@ export function propertyAssignmentGeneratorFix<GeneratorContext extends object =
 	params: PropertyAssignmentGeneratorFixParams<GeneratorContext>
 ): () => PropertyAssignmentGeneratorFix<GeneratorContext> {
 	return () => new PropertyAssignmentGeneratorFix(params);
+}
+
+export function obsoleteImportFix(params: ObsoleteImportFixParams): () => ObsoleteImportFix {
+	return () => new ObsoleteImportFix(params);
 }

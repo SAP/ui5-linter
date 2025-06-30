@@ -11,6 +11,10 @@ export interface ModuleDependencyRequest {
 	blockNewImport?: boolean;
 }
 
+export interface ObsoleteModuleDependency {
+	moduleName: string;
+}
+
 export interface GlobalAccessRequest {
 	globalName: string;
 	usagePosition: number;
@@ -55,10 +59,10 @@ export default abstract class Fix {
 	 * Get the positions in the source code that will be modified by this change. This will be used for
 	 * detecting conflicts with other fixes.
 	 */
-	abstract getAffectedSourceCodeRange(): SourceCodeRange | SourceCodeRange[];
+	abstract getAffectedSourceCodeRange(): SourceCodeRange | SourceCodeRange[] | undefined;
 
 	abstract getNewModuleDependencies(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined;
-	// abstract getObsoleteModuleDependencies(): ModuleImportRequest | ModuleImportRequest[];
+	getObsoleteModuleDependencies?(): ObsoleteModuleDependency | ObsoleteModuleDependency[];
 	abstract getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined;
 
 	abstract setIdentifierForDependency(identifier: string, moduleName: string): void;

@@ -5,6 +5,7 @@ import {
 	accessExpressionFix,
 	callExpressionFix,
 	callExpressionGeneratorFix,
+	obsoleteImportFix,
 	propertyAssignmentFix,
 } from "../FixFactory.js";
 import {FixScope} from "../BaseFix.js";
@@ -146,6 +147,9 @@ t.declareModule("sap/ui/core/Configuration", [
 			mustNotUseReturnValue: true,
 		})),
 	]),
+	t.export(obsoleteImportFix({
+		moduleName: "sap/ui/core/Configuration",
+	})),
 ]);
 
 t.declareModule("sap/ui/core/Core", [
