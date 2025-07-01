@@ -42,3 +42,47 @@ test("Test Text Formatter (with '--details false')", (t) => {
 	res = res.replaceAll(path.resolve(fakePath) + path.sep, "<base path>/");
 	t.snapshot(res);
 });
+
+test("Test Text Formatter (with one fatal error)", (t) => {
+	const {fakePath} = t.context;
+	const textFormatter = new Text(fakePath);
+	let res = textFormatter.format([{
+		filePath: "Test.js",
+		messages: [{
+			ruleId: "rule3",
+			severity: 2,
+			line: 5,
+			column: 1,
+			message: "Another fatal message",
+			messageDetails: "Another message detail",
+		}],
+		coverageInfo: [],
+		errorCount: 1,
+		fatalErrorCount: 1,
+		warningCount: 0,
+	}], true, false);
+	res = res.replaceAll(path.resolve(fakePath) + path.sep, "<base path>/");
+	t.snapshot(res);
+});
+
+test("Test Text Formatter (with two fatal errors)", (t) => {
+	const {fakePath} = t.context;
+	const textFormatter = new Text(fakePath);
+	let res = textFormatter.format([{
+		filePath: "Test.js",
+		messages: [{
+			ruleId: "rule3",
+			severity: 2,
+			line: 5,
+			column: 1,
+			message: "Another fatal message",
+			messageDetails: "Another message detail",
+		}],
+		coverageInfo: [],
+		errorCount: 1,
+		fatalErrorCount: 2,
+		warningCount: 0,
+	}], true, false);
+	res = res.replaceAll(path.resolve(fakePath) + path.sep, "<base path>/");
+	t.snapshot(res);
+});

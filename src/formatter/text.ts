@@ -119,7 +119,8 @@ export class Text {
 		}
 
 		if (totalFatalErrorCount) {
-			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal errors`));
+			const fatalErrorsText = `${totalFatalErrorCount === 1 ? "error" : "errors"}`;
+			this.#writeln(summaryColor(`${totalFatalErrorCount} fatal ${fatalErrorsText}`));
 		}
 
 		if (!showDetails && (totalErrorCount + totalWarningCount + totalFatalErrorCount) > 0) {
