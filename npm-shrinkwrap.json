@@ -9,7 +9,7 @@
 			"version": "1.14.0",
 			"license": "Apache-2.0",
 			"dependencies": {
-				"@jridgewell/sourcemap-codec": "^1.5.1",
+				"@jridgewell/sourcemap-codec": "^1.5.3",
 				"@jridgewell/trace-mapping": "^0.3.26",
 				"@sapui5/types": "1.120.32",
 				"@ui5/fs": "^4.0.1",
@@ -1700,9 +1700,9 @@
 			}
 		},
 		"node_modules/@jridgewell/sourcemap-codec": {
-			"version": "1.5.1",
-			"resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.1.tgz",
-			"integrity": "sha512-mBLKRHc7Ffw/hObYb9+cunuGNjshQk+vZdwZBJoqiysK/mW3Jq0UXosq8aIhMnLevANhR9yoYfdUEOHg6M9y0g==",
+			"version": "1.5.3",
+			"resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.3.tgz",
+			"integrity": "sha512-AiR5uKpFxP3PjO4R19kQGIMwxyRyPuXmKEEy301V1C0+1rVjS94EZQXf1QKZYN8Q0YM+estSPhmx5JwNftv6nw==",
 			"license": "MIT"
 		},
 		"node_modules/@jridgewell/trace-mapping": {
