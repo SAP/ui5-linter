@@ -77,7 +77,8 @@ export class Markdown {
 		summary += `> ${problemsText} (${errorsText}${warningsText})  \n`;
 
 		if (totalFatalErrorCount) {
-			summary += `> **${totalFatalErrorCount} fatal errors**\n`;
+			const fatalErrorsText = `${totalFatalErrorCount === 1 ? "error" : "errors"}`;
+			summary += `> **${totalFatalErrorCount} fatal ${fatalErrorsText}**\n`;
 		}
 		if (!autofix && (totalErrorCount + totalWarningCount > 0)) {
 			summary += "> Run `ui5lint --fix` to resolve all auto-fixable problems\n\n";

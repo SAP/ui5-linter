@@ -112,3 +112,27 @@ test("No findings", (t) => {
 
 	t.snapshot(markdownResult);
 });
+
+test("One fatal error", (t) => {
+	const markdownFormatter = new Markdown();
+	const markdownResult = markdownFormatter.format([{
+		filePath: "webapp/Home.controller.js",
+		messages: [
+			{
+				ruleId: "rule3",
+				severity: LintMessageSeverity.Error,
+				line: 12,
+				column: 3,
+				message: "Another error message",
+				messageDetails: "Message details",
+				fatal: true,
+			},
+		],
+		coverageInfo: [],
+		errorCount: 1,
+		fatalErrorCount: 1,
+		warningCount: 0,
+	}], false, "1.2.3", false);
+
+	t.snapshot(markdownResult);
+});
