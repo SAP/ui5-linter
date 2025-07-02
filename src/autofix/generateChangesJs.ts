@@ -150,7 +150,7 @@ export default function generateChanges(
 	const obsoleteModuleImports = new Set<ObsoleteModuleDependency>();
 	for (const fix of matchedFixes) {
 		// Collect new dependencies
-		const newDependencies = fix.getNewModuleDependencies();
+		const newDependencies = fix.getNewModuleDependencies?.();
 		if (Array.isArray(newDependencies)) {
 			for (const depRequest of newDependencies) {
 				dependencyRequests.add({
@@ -175,7 +175,7 @@ export default function generateChanges(
 		}
 
 		// Collect new global access
-		const newGlobalAccess = fix.getNewGlobalAccess();
+		const newGlobalAccess = fix.getNewGlobalAccess?.();
 		if (Array.isArray(newGlobalAccess)) {
 			for (const globalAccess of newGlobalAccess) {
 				globalAccessRequests.add({
@@ -317,17 +317,12 @@ export default function generateChanges(
 	}
 
 	for (const fix of matchedFixes) {
-		const changes = fix.generateChanges();
-		if (!changes) {
-			// No changes generated, skip this fix
-			matchedFixes.delete(fix);
-			continue;
-		}
+		const changes = fix.generateChanges?.();
 		if (Array.isArray(changes)) {
 			for (const change of changes) {
 				changeSets.push(change);
 			}
-		} else {
+		} else if (changes) {
 			changeSets.push(changes);
 		}
 	}
@@ -338,6 +333,11 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 	// Step 1.) Try to fulfill dependency requests using the existing dependency declarations
 	for (const dependencyRequest of dependencyRequests) {
 		const {moduleName, usagePosition: position, fix} = dependencyRequest;
+		if (!fix.setIdentifierForDependency) {
+			throw new Error(
+				`Fix ${fix.constructor.name} requested dependencies but ` +
+				`does not implement setIdentifierForDependency method`);
+		}
 		// Dependency declarations are sorted in order of appearance in the source file
 		// Start the search from the end to visit the most specific ones first
 		for (let i = dependencyDeclarations.length - 1; i >= 0; i--) {
@@ -369,7 +369,7 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 				decl.moduleDeclarationInfo.importRequests.set(moduleName, {
 					identifier,
 				});
-				dependencyRequest.fix.setIdentifierForDependency(identifier, moduleName);
+				fix.setIdentifierForDependency(identifier, moduleName);
 				dependencyRequests.delete(dependencyRequest); // Request fulfilled
 				break;
 			}
@@ -513,6 +513,11 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 		decl.moduleDeclarationInfo.importRequests.set(moduleName, {identifier});
 
 		for (const request of requests) {
+			if (!request.fix.setIdentifierForDependency) {
+				throw new Error(
+					`Fix ${request.fix.constructor.name} requested dependencies but ` +
+					`does not implement setIdentifierForDependency method`);
+			}
 			// Set the identifier for the fix
 			request.fix.setIdentifierForDependency(identifier, moduleName);
 		}
@@ -522,7 +527,11 @@ function mergeDependencyRequests(dependencyRequests: Set<DependencyRequest>,
 function processGlobalRequests(globalAccessRequests: Set<GlobalAccessRequest>, identifiers: Set<string>) {
 	for (const globalAccessRequest of globalAccessRequests) {
 		const {globalName, fix} = globalAccessRequest;
-
+		if (!fix.setIdentifierForGlobal) {
+			throw new Error(
+				`Fix ${fix.constructor.name} requested global access but ` +
+				`does not implement setIdentifierForGlobal method`);
+		}
 		if (!identifiers.has(globalName)) {
 			// If the global name is not already in use, we can use it directly
 			fix.setIdentifierForGlobal(globalName, globalName);

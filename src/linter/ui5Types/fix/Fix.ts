@@ -60,13 +60,13 @@ export default abstract class Fix {
 	 * Get the positions in the source code that will be modified by this change. This will be used for
 	 * detecting conflicts with other fixes.
 	 */
-	abstract getAffectedSourceCodeRange(): SourceCodeRange | SourceCodeRange[] | undefined;
+	getAffectedSourceCodeRange?(): SourceCodeRange | SourceCodeRange[] | undefined;
 
-	abstract getNewModuleDependencies(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined;
+	getNewModuleDependencies?(): ModuleDependencyRequest | ModuleDependencyRequest[] | undefined;
 	getObsoleteModuleDependencies?(): ObsoleteModuleDependency | ObsoleteModuleDependency[] | undefined;
-	abstract getNewGlobalAccess(): GlobalAccessRequest | GlobalAccessRequest[] | undefined;
+	getNewGlobalAccess?(): GlobalAccessRequest | GlobalAccessRequest[] | undefined;
 
-	abstract setIdentifierForDependency(identifier: string, moduleName: string): void;
-	abstract setIdentifierForGlobal(identifier: string, globalName: string): void;
-	abstract generateChanges(): ChangeSet | ChangeSet[] | undefined;
+	setIdentifierForDependency?(identifier: string, moduleName: string): void;
+	setIdentifierForGlobal?(identifier: string, globalName: string): void;
+	generateChanges?(): ChangeSet | ChangeSet[] | undefined;
 }
