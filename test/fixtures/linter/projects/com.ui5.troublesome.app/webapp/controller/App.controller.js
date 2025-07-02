@@ -20,9 +20,9 @@ sap.ui.define(["./BaseController", "sap/m/BackgroundDesign",
 			// Detection of deprecation which is only documented as global API, not within a module.
 			// This should be detected, even when no module of sap.ushell is imported.
 			// Loading of the sap.ushell types should be triggered via the manifest.json dependency.
-			const oVariantSetAdapter = new sap.ushell.services.Personalization.VariantSetAdapter({});
-			const oVariantSetAdapter2 = new Personalization.VariantSetAdapter({});
-			const oVariantSetAdapter3 = new VariantSetAdapter({});
+			sap.ushell.bootstrap("abap", {
+				abap: "sap.ushell_abap.adapters.abap"
+			});
 		}
 	});
 });
