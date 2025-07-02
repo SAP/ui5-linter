@@ -5,6 +5,8 @@ declare module "sap/ui/vbm/ClusterInfoType" {
 
 	/**
 	 * Cluster Info Type
+	 * 
+	 * This enum is part of the 'sap/ui/vbm/library' module export and must be accessed by the property 'ClusterInfoType'.
 	 *
 	 * @public
 	*/
@@ -16,6 +18,8 @@ declare module "sap/ui/vbm/RouteType" {
 
 	/**
 	 * Route type, determining how line between start and endpoint should be drawn.
+	 * 
+	 * This enum is part of the 'sap/ui/vbm/library' module export and must be accessed by the property 'RouteType'.
 	 *
 	 * @public
 	*/
@@ -27,6 +31,8 @@ declare module "sap/ui/vbm/SemanticType" {
 
 	/**
 	 * Semantic type with pre-defined display properties, like colors, icon, pin image, and so on. Semantic types enforce to fiori guidelines.
+	 * 
+	 * This enum is part of the 'sap/ui/vbm/library' module export and must be accessed by the property 'SemanticType'.
 	 *
 	 * @public
 	*/

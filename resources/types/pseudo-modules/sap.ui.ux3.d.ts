@@ -5,6 +5,8 @@ declare module "sap/ui/ux3/ActionBarSocialActions" {
 
 	/**
 	 * Enumeration of available standard actions for 'sap.ui.ux3.ActionBar'. To be used as parameters for function 'sap.ui.ux3.ActionBar.getSocialAction'.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'ActionBarSocialActions'.
 	 *
 	 * @experimental (since 1.2) - API is not yet finished and might change completely
 	 * @deprecated (since 1.38)
@@ -18,6 +20,8 @@ declare module "sap/ui/ux3/ExactOrder" {
 
 	/**
 	 * Defines the order of the sub lists of a list in the ExactBrowser.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'ExactOrder'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -31,6 +35,8 @@ declare module "sap/ui/ux3/FeederType" {
 
 	/**
 	 * Type of a Feeder.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'FeederType'.
 	 *
 	 * @experimental (since 1.2) - The whole Feed/Feeder API is still under discussion, significant changes are likely. Especially text presentation (e.g. @-references and formatted text) is not final. Also the Feed model topic is still open.
 	 * @deprecated (since 1.38)
@@ -44,6 +50,8 @@ declare module "sap/ui/ux3/FollowActionState" {
 
 	/**
 	 * Defines the states of the follow action
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'FollowActionState'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -56,6 +64,8 @@ declare module "sap/ui/ux3/NotificationBarStatus" {
 
 	/**
 	 * This entries are used to set the visibility status of a NotificationBar
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'NotificationBarStatus'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -68,6 +78,8 @@ declare module "sap/ui/ux3/ShellDesignType" {
 
 	/**
 	 * Available shell design types.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'ShellDesignType'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -81,6 +93,8 @@ declare module "sap/ui/ux3/ShellHeaderType" {
 
 	/**
 	 * Available shell header display types.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'ShellHeaderType'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -93,6 +107,8 @@ declare module "sap/ui/ux3/ThingViewerHeaderType" {
 
 	/**
 	 * Available ThingViewer header display types.
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'ThingViewerHeaderType'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
@@ -106,6 +122,8 @@ declare module "sap/ui/ux3/VisibleItemCountMode" {
 
 	/**
 	 * VisibleItemCountMode of the FacetFilter defines if the FacetFilter takes the whole available height (Auto) in the surrounding container, or is so high as needed to show 5 Items ("Fixed " - default).
+	 * 
+	 * This enum is part of the 'sap/ui/ux3/library' module export and must be accessed by the property 'VisibleItemCountMode'.
 	 *
 	 * @deprecated (since 1.38)
 	 * @public
