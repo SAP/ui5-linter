@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.15.0](https://github.com/UI5/linter/compare/v1.14.0...v1.15.0) (2025-07-02)
+
+
+### Features
+
+* **autofix:** Fix deprecated module import for 'sap/ui/core/Configuration' ([007d42b](https://github.com/UI5/linter/commit/007d42bbd10784cb64d1ddb39b705f010c2f8244))
+* **autofix:** Fix global 'sap.ui.getCore()' ([7caa612](https://github.com/UI5/linter/commit/7caa612687a890e3422c528bc5ccc233f9515ebf))
+
+
+### Bug Fixes
+
+* Show plural form for fatal errors only in case more than 1 fatal error occurs ([a13240e](https://github.com/UI5/linter/commit/a13240e873709f0e138b1fb730f3ea54a05ca94d))
+
+
+### Dependencies
+
+* Bump @jridgewell/sourcemap-codec from 1.5.0 to 1.5.1 ([e4f0460](https://github.com/UI5/linter/commit/e4f0460f2b7adbba998e9124b9595dec85b12c0f))
+* Bump @jridgewell/sourcemap-codec from 1.5.1 to 1.5.3 ([aca80c3](https://github.com/UI5/linter/commit/aca80c30c6f28f0a6b0d35d35840dae8eb0ee5c8))
+* Bump @jridgewell/trace-mapping from 0.3.25 to 0.3.26 ([071fb17](https://github.com/UI5/linter/commit/071fb1724b10062554dc30cbb9ad672eddcdf4a3))
+* Bump @jridgewell/trace-mapping from 0.3.26 to 0.3.28 ([c115c94](https://github.com/UI5/linter/commit/c115c94a35b8931bc5386ae6d57224daa087d6bf))
+* Bump @jridgewell/trace-mapping from 0.3.28 to 0.3.29 ([4c761be](https://github.com/UI5/linter/commit/4c761be767fcd3d87c40d81a7c3ba8cb359c97b7))
+* Bump globals from 16.2.0 to 16.3.0 ([6aeeeec](https://github.com/UI5/linter/commit/6aeeeec04a54009c19810f0375087bd5afc3fb59))
+
 ## [1.14.0](https://github.com/UI5/linter/compare/v1.13.1...v1.14.0) (2025-06-27)
 
 
