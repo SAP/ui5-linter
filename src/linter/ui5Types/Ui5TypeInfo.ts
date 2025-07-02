@@ -138,12 +138,26 @@ export function getUi5TypeInfoFromSymbol(
 	symbol: ts.Symbol,
 	apiExtract?: ApiExtract
 ): Ui5TypeInfo | undefined {
-	if (!symbol.valueDeclaration) {
-		return undefined;
+	if (symbol.valueDeclaration) {
+		return getUi5TypeInfoFromDeclaration(symbol.valueDeclaration, apiExtract);
+	} else if (symbol.declarations) {
+		for (const declaration of symbol.declarations) {
+			const typeInfo = getUi5TypeInfoFromDeclaration(declaration, apiExtract);
+			if (typeInfo) {
+				// The first declaration that we can generate a type for wins
+				return typeInfo;
+			}
+		}
 	}
-	const sourceFile = symbol.valueDeclaration.getSourceFile();
-	const node = symbol.valueDeclaration;
-	let currentNode: ts.Declaration = symbol.valueDeclaration;
+}
+
+function getUi5TypeInfoFromDeclaration(
+	declaration: ts.Declaration,
+	apiExtract?: ApiExtract
+): Ui5TypeInfo | undefined {
+	const sourceFile = declaration.getSourceFile();
+	const node = declaration;
+	let currentNode: ts.Declaration = declaration;
 	let currentNamespaceTypeInfo: Ui5NamespaceTypeInfo | undefined;
 	let namespaceTypeInfo: Ui5NamespaceTypeInfo | undefined;
 
