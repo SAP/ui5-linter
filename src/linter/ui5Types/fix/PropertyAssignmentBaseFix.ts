@@ -80,22 +80,6 @@ export default abstract class PropertyAssignmentBaseFix extends XmlEnabledFix {
 		};
 	}
 
-	getNewModuleDependencies() {
-		return undefined;
-	}
-
-	setIdentifierForDependency() {
-		return;
-	}
-
-	getNewGlobalAccess() {
-		return undefined;
-	}
-
-	setIdentifierForGlobal() {
-		return;
-	}
-
 	generateChanges(): ChangeSet | ChangeSet[] | undefined {
 		throw new Error("Method 'generateChanges' must be implemented in subclasses");
 	}

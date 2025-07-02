@@ -70,6 +70,9 @@ interface FixRange {
 export function removeConflictingFixes(fixes: Set<Fix>) {
 	const fixRanges: FixRange[] = [];
 	for (const fix of fixes) {
+		if (!fix.getAffectedSourceCodeRange) {
+			continue;
+		}
 		const ranges = fix.getAffectedSourceCodeRange();
 		if (Array.isArray(ranges)) {
 			for (const range of ranges) {

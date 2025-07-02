@@ -85,16 +85,12 @@ export default async function generateChangesXml(
 	// TBD: Collect dependencies etc.
 
 	for (const fix of matchedFixes) {
-		const changes = fix.generateChanges();
-		if (!changes) {
-			// No changes generated, skip this fix
-			continue;
-		}
+		const changes = fix.generateChanges?.();
 		if (Array.isArray(changes)) {
 			for (const change of changes) {
 				changeSets.push(change);
 			}
-		} else {
+		} else if (changes) {
 			changeSets.push(changes);
 		}
 	}

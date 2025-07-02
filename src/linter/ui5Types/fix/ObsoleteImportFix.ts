@@ -76,30 +76,6 @@ export default class ObsoleteImportFix extends Fix {
 		return true;
 	}
 
-	getAffectedSourceCodeRange() {
-		return undefined;
-	}
-
-	setIdentifierForDependency() {
-		return;
-	}
-
-	getNewModuleDependencies() {
-		return undefined;
-	}
-
-	getNewGlobalAccess() {
-		return undefined;
-	}
-
-	setIdentifierForGlobal() {
-		return;
-	}
-
-	generateChanges() {
-		return undefined;
-	}
-
 	getObsoleteModuleDependencies() {
 		return {
 			moduleName: this.params.moduleName,
