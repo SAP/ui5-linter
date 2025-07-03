@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/UI5/linter/compare/v1.15.0...v1.16.0) (2025-07-03)
+
+
+### Dependencies
+
+* Bump @sapui5/types from 1.120.32 to 1.136.2 ([#751](https://github.com/UI5/linter/issues/751)) ([4b4944a](https://github.com/UI5/linter/commit/4b4944ac442b52644bc14f361f6aeddf7f2befa7))
+
 ## [1.15.0](https://github.com/UI5/linter/compare/v1.14.0...v1.15.0) (2025-07-02)
 
 
