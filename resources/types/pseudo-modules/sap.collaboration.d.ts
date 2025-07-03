@@ -5,6 +5,8 @@ declare module "sap/collaboration/AppType" {
 
 	/**
 	 * Application Type (Mode)
+	 * 
+	 * This enum is part of the 'sap/collaboration/library' module export and must be accessed by the property 'AppType'.
 	 *
 	 * @public
 	*/
@@ -16,6 +18,8 @@ declare module "sap/collaboration/DisplayFeedType" {
 
 	/**
 	 * Feed Types to be displayed by the Social Timeline
+	 * 
+	 * This enum is part of the 'sap/collaboration/library' module export and must be accessed by the property 'DisplayFeedType'.
 	 *
 	 * @public
 	*/
@@ -27,6 +31,8 @@ declare module "sap/collaboration/FeedType" {
 
 	/**
 	 * Feed Types
+	 * 
+	 * This enum is part of the 'sap/collaboration/library' module export and must be accessed by the property 'FeedType'.
 	 *
 	 * @public
 	*/

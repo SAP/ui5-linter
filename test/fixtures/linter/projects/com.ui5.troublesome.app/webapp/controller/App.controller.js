@@ -1,5 +1,6 @@
-sap.ui.define(["./BaseController", "sap/m/BackgroundDesign"],
-	function (BaseController, BackgroundDesign) {
+sap.ui.define(["./BaseController", "sap/m/BackgroundDesign", 
+	"sap/ushell/services/Personalization", "sap/ushell/services/personalization/VariantSetAdapter"],
+	function (BaseController, BackgroundDesign, Personalization, VariantSetAdapter) {
 	"use strict";
 
 	return BaseController.extend("com.ui5.troublesome.app.controller.App", {
@@ -19,7 +20,9 @@ sap.ui.define(["./BaseController", "sap/m/BackgroundDesign"],
 			// Detection of deprecation which is only documented as global API, not within a module.
 			// This should be detected, even when no module of sap.ushell is imported.
 			// Loading of the sap.ushell types should be triggered via the manifest.json dependency.
-			const oVariantSetAdapter = new sap.ushell.services.Personalization.VariantSetAdapter({});
+			sap.ushell.bootstrap("abap", {
+				abap: "sap.ushell_abap.adapters.abap"
+			});
 		}
 	});
 });

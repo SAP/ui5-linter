@@ -32,6 +32,8 @@ declare module "sap/ui/core/AccessibleLandmarkRole" {
 
 	/**
 	 * Defines the accessible landmark roles for ARIA support. This enumeration is used with the AccessibleRole control property. For more information, go to "Roles for Accessible Rich Internet Applications (WAI-ARIA Roles)" at the www.w3.org homepage.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'AccessibleLandmarkRole'.
 	 *
 	 * @public
 	*/
@@ -43,6 +45,8 @@ declare module "sap/ui/core/AccessibleRole" {
 
 	/**
 	 * Defines the accessible roles for ARIA support. This enumeration is used with the AccessibleRole control property. For more information, goto "Roles for Accessible Rich Internet Applications (WAI-ARIA Roles)" at the www.w3.org homepage.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'AccessibleRole'.
 	 *
 	 * @public
 	*/
@@ -54,6 +58,8 @@ declare module "sap/ui/core/aria/HasPopup" {
 
 	/**
 	 * Types of popups to set as aria-haspopup attribute. Most of the values (except "None") of the enumeration are taken from the ARIA specification: https://www.w3.org/TR/wai-aria/#aria-haspopup
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'aria.HasPopup'.
 	 *
 	 * @public
 	 * @since 1.84
@@ -66,6 +72,8 @@ declare module "sap/ui/core/BarColor" {
 
 	/**
 	 * Configuration options for the colors of a progress bar.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'BarColor'.
 	 *
 	 * @public
 	*/
@@ -77,6 +85,8 @@ declare module "sap/ui/core/BusyIndicatorSize" {
 
 	/**
 	 * Configuration options for the <code>BusyIndicator</code> size.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'BusyIndicatorSize'.
 	 *
 	 * @public
 	*/
@@ -103,6 +113,8 @@ declare module "sap/ui/core/ComponentLifecycle" {
 
 	/**
 	 * Enumeration for different lifecycle behaviors of components created by the <code>ComponentContainer</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'ComponentLifecycle'.
 	 *
 	 * @public
 	*/
@@ -120,6 +132,18 @@ declare module "sap/ui/core/CSSColor" {
 	 * @public
 	*/
 	export default CSSColor;
+}
+
+declare module "sap/ui/core/CSSGapShortHand" {
+	import {CSSGapShortHand} from "sap/ui/core/library";
+
+	/**
+	 * A string type that represents a short hand CSS gap.
+	 *
+	 * @public
+	 * @since 1.134
+	*/
+	export default CSSGapShortHand;
 }
 
 declare module "sap/ui/core/CSSSize" {
@@ -168,6 +192,8 @@ declare module "sap/ui/core/Design" {
 
 	/**
 	 * Font design for texts.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'Design'.
 	 *
 	 * @public
 	*/
@@ -179,6 +205,8 @@ declare module "sap/ui/core/dnd/DropEffect" {
 
 	/**
 	 * Configuration options for visual drop effects that are given during a drag and drop operation.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'dnd.DropEffect'.
 	 *
 	 * @public
 	 * @since 1.52.0
@@ -191,6 +219,8 @@ declare module "sap/ui/core/dnd/DropLayout" {
 
 	/**
 	 * Configuration options for the layout of the droppable controls.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'dnd.DropLayout'.
 	 *
 	 * @public
 	 * @since 1.52.0
@@ -203,6 +233,8 @@ declare module "sap/ui/core/dnd/DropPosition" {
 
 	/**
 	 * Configuration options for drop positions.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'dnd.DropPosition'.
 	 *
 	 * @public
 	 * @since 1.52.0
@@ -215,6 +247,8 @@ declare module "sap/ui/core/dnd/RelativeDropPosition" {
 
 	/**
 	 * Drop positions relative to a dropped element.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'dnd.RelativeDropPosition'.
 	 *
 	 * @public
 	 * @since 1.100.0
@@ -240,6 +274,8 @@ declare module "sap/ui/core/HorizontalAlign" {
 
 	/**
 	 * Configuration options for horizontal alignments of controls.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'HorizontalAlign'.
 	 *
 	 * @public
 	*/
@@ -251,23 +287,12 @@ declare module "sap/ui/core/IconColor" {
 
 	/**
 	 * Semantic Colors of an icon.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'IconColor'.
 	 *
 	 * @public
 	*/
 	export default IconColor;
-}
-
-declare module "sap/ui/core/ID" {
-	import {ID} from "sap/ui/core/library";
-
-	/**
-	 * A string type representing an ID or a name.
-	 * 
-	 * Allowed is a sequence of characters (capital/lowercase), digits, underscores, dashes, points and/or colons. It may start with a character or underscore only.
-	 *
-	 * @public
-	*/
-	export default ID;
 }
 
 declare module "sap/ui/core/ImeMode" {
@@ -277,6 +302,8 @@ declare module "sap/ui/core/ImeMode" {
 	 * State of the Input Method Editor (IME) for the control.
 	 * 
 	 * Depending on its value, it allows users to enter and edit for example Chinese characters.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'ImeMode'.
 	 *
 	 * @public
 	*/
@@ -290,6 +317,8 @@ declare module "sap/ui/core/IndicationColor" {
 	 * Colors to highlight certain UI elements.
 	 * 
 	 * In contrast to the <code>ValueState</code>, the semantic meaning must be defined by the application.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'IndicationColor'.
 	 *
 	 * @public
 	 * @since 1.62.0
@@ -302,12 +331,27 @@ declare module "sap/ui/core/InvisibleMessageMode" {
 
 	/**
 	 * Enumeration for different mode behaviors of the <code>InvisibleMessage</code>.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'InvisibleMessageMode'.
 	 *
-	 * @experimental (since 1.73)
 	 * @public
 	 * @since 1.78
 	*/
 	export default InvisibleMessageMode;
+}
+
+declare module "sap/ui/core/ItemSelectionMode" {
+	import {ItemSelectionMode} from "sap/ui/core/library";
+
+	/**
+	 * Defines the selection mode of the menu items.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'ItemSelectionMode'.
+	 *
+	 * @public
+	 * @since 1.127.0
+	*/
+	export default ItemSelectionMode;
 }
 
 declare module "sap/ui/core/MessageType" {
@@ -315,6 +359,8 @@ declare module "sap/ui/core/MessageType" {
 
 	/**
 	 * Specifies possible message types.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'MessageType'.
 	 *
 	 * @deprecated (since 1.120) - Please use {@link module:sap/ui/core/message/MessageType} instead.
 	 * @public
@@ -327,6 +373,8 @@ declare module "sap/ui/core/OpenState" {
 
 	/**
 	 * Defines the different possible states of an element that can be open or closed and does not only toggle between these states, but also spends some time in between (e.g. because of an animation).
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'OpenState'.
 	 *
 	 * @public
 	*/
@@ -338,6 +386,8 @@ declare module "sap/ui/core/Orientation" {
 
 	/**
 	 * Orientation of a UI element.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'Orientation'.
 	 *
 	 * @public
 	 * @since 1.22
@@ -361,6 +411,8 @@ declare module "sap/ui/core/Priority" {
 
 	/**
 	 * Priorities for general use.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'Priority'.
 	 *
 	 * @public
 	*/
@@ -372,6 +424,8 @@ declare module "sap/ui/core/routing/HistoryDirection" {
 
 	/**
 	 * Enumeration for different HistoryDirections.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'routing.HistoryDirection'.
 	 *
 	 * @public
 	*/
@@ -383,6 +437,8 @@ declare module "sap/ui/core/ScrollBarAction" {
 
 	/**
 	 * Actions are: Click on track, button, drag of thumb, or mouse wheel click.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'ScrollBarAction'.
 	 *
 	 * @public
 	*/
@@ -394,6 +450,8 @@ declare module "sap/ui/core/Scrolling" {
 
 	/**
 	 * Defines the possible values for horizontal and vertical scrolling behavior.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'Scrolling'.
 	 *
 	 * @public
 	*/
@@ -405,6 +463,8 @@ declare module "sap/ui/core/SortOrder" {
 
 	/**
 	 * Sort order of a column.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'SortOrder'.
 	 *
 	 * @public
 	 * @since 1.61.0
@@ -417,6 +477,8 @@ declare module "sap/ui/core/TextAlign" {
 
 	/**
 	 * Configuration options for text alignments.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'TextAlign'.
 	 *
 	 * @public
 	*/
@@ -428,6 +490,8 @@ declare module "sap/ui/core/TextDirection" {
 
 	/**
 	 * Configuration options for the direction of texts.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'TextDirection'.
 	 *
 	 * @public
 	*/
@@ -439,6 +503,8 @@ declare module "sap/ui/core/TitleLevel" {
 
 	/**
 	 * Level of a title.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'TitleLevel'.
 	 *
 	 * @public
 	 * @since 1.9.1
@@ -462,6 +528,8 @@ declare module "sap/ui/core/ValueState" {
 
 	/**
 	 * Marker for the correctness of the current value.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'ValueState'.
 	 *
 	 * @public
 	 * @since 1.0
@@ -474,6 +542,8 @@ declare module "sap/ui/core/VerticalAlign" {
 
 	/**
 	 * Configuration options for vertical alignments, for example of a layout cell content within the borders.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'VerticalAlign'.
 	 *
 	 * @public
 	*/
@@ -485,6 +555,8 @@ declare module "sap/ui/core/Wrapping" {
 
 	/**
 	 * Configuration options for text wrapping.
+	 * 
+	 * This enum is part of the 'sap/ui/core/library' module export and must be accessed by the property 'Wrapping'.
 	 *
 	 * @public
 	*/
