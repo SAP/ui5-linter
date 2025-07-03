@@ -1,5 +1,3 @@
-const { default: Button } = require("sap/m/Button");
-
 sap.ui.define([
 	"sap/ui/thirdparty/jquery",
 	"sap/m/library",
